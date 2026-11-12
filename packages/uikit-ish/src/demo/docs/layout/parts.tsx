@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Header,
@@ -10,9 +10,12 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import { layoutColumnRows, layoutRootRows } from './docs.js';
 import { LayoutColumn, useLayoutControls } from './props.js';
@@ -40,47 +43,86 @@ const RootPart: FunctionComponent = () => {
     state,
   } = useLayoutControls(id, addLog, { columns, featured: 'Root' });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': ['background'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isExpanded
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="tablet"
-      state={state}
+      state={[...state, partState]}
       title="Layout.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}
             {...propsFirst}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>Contacts</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -88,7 +130,10 @@ const RootPart: FunctionComponent = () => {
             key={keySecond}
             {...propsSecond}
           >
-            <Page.Root background="plain" />
+            <Page.Root
+              {...partProps['Page.Root']}
+              background="plain"
+            />
           </Layout.Column>
         </Layout.Root>
       </Viewport.Content>
@@ -110,47 +155,86 @@ const ColumnPart: FunctionComponent = () => {
     state,
   } = useLayoutControls(id, addLog, { columns, featured: 'Column' });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': ['background'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isExpanded
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="tablet"
-      state={state}
+      state={[...state, partState]}
       title="Layout.Column"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}
             {...propsFirst}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>Contacts</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -158,7 +242,10 @@ const ColumnPart: FunctionComponent = () => {
             key={keySecond}
             {...propsSecond}
           >
-            <Page.Root background="plain" />
+            <Page.Root
+              {...partProps['Page.Root']}
+              background="plain"
+            />
           </Layout.Column>
         </Layout.Root>
       </Viewport.Content>
@@ -171,23 +258,24 @@ export const LayoutParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A root of columns side by side, and optionally a background behind them.
+        A root holding columns side by side, optionally with a background behind
+        them.
       </li>
       <li>
-        Each column filled by its content: a{' '}
+        Each column is filled by its content: a{' '}
         <a href={publicUrl('page')}>Page</a>, a{' '}
-        <a href={publicUrl('navigation')}>Navigation</a>, a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>, or a{' '}
         <a href={publicUrl('sidebar')}>Sidebar</a>.
       </li>
       <li>
-        In a resizable column’s view, drag its divider (or focus it, the arrow
-        keys). On a phone, a column can be a{' '}
+        In the resizable column’s view, drag its divider, or focus it and use
+        the arrow keys. On a phone, a column can be a{' '}
         <a href={publicUrl('drawer')}>Drawer</a> instead.
       </li>
     </ul>
     <ul className="demo-tree">
       <li className="demo-tree-context">
-        <span>The app’s root, e.g. </span>
+        <span>The app’s root, for example </span>
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -201,7 +289,7 @@ export const LayoutParts: FunctionComponent = () => (
                 resizable one’s end)
                 <ul>
                   <li className="demo-tree-context">
-                    <span>Its content, e.g. </span>
+                    <span>Its content, for example </span>
                     <PartLink
                       component="header"
                       part="Header.Root"
@@ -228,12 +316,14 @@ export const LayoutParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its columns in a row, filling its container (<code>height: 100%</code>
-        ); clipping them (a floating column).
+        Lays its columns out in a row that fills its container (
+        <code>height: 100%</code>). It clips them, which matters for a floating
+        column.
       </li>
       <li>
-        A hairline between columns (not after a floating one); none with{' '}
-        <code>hideSeparators</code>, e.g. on a picture behind them (a{' '}
+        Draws a hairline between columns, except after a floating one.{' '}
+        <code>hideSeparators</code> removes it, for example over a picture
+        behind them (a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Background"
@@ -256,20 +346,20 @@ export const LayoutParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Sized (<code>defaultSize</code>, <code>size</code>), or flexible;
-        resizable by a divider at its end.
+        Has a size (<code>defaultSize</code>, <code>size</code>), or is
+        flexible. A divider at its end can make it resizable.
       </li>
       <li>
-        Floating over the others (<code>floating</code>), or clear of one (
-        <code>clearFloating</code>).
+        Can float above the others (<code>floating</code>), or stay clear of a
+        floating one (<code>clearFloating</code>).
       </li>
       <li>
-        The containing block of its fixed layers: a header’s bar (in a{' '}
+        It’s the containing block for its fixed layers, so a header’s bar (in a{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockStart"
         />
-        ) spans it, not the screen.
+        ) spans the column, not the screen.
       </li>
       <li>
         Renders a <code>div</code>.

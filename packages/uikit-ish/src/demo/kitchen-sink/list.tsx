@@ -12,7 +12,6 @@ import {
   Symbol,
   useCreateReorderHandle,
   useCreateSwipeActionsHandle,
-  Viewport,
 } from '../../components/index.js';
 import { contacts, planets, settings } from '../docs/list/content.js';
 import {
@@ -1035,8 +1034,8 @@ const ReorderingContent: FunctionComponent = () => {
           />
         </List.Group>
         <List.Footer>
-          Only at this group’s end: a drop target. Select several rows, then
-          drag one of them to move them all.
+          There’s a drop target only at this group’s end. Select several rows,
+          then drag one of them to move them all.
         </List.Footer>
       </List.Section>
     </List.Root>
@@ -1233,13 +1232,16 @@ const ExpandingContent: FunctionComponent = () => (
 
 const letters = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'];
 
-/** Contacts by letter, a plain list's sticky headers (its index: below). */
+/**
+ * Contacts by letter, a plain list's sticky headers; its index at its end
+ * edge, centered between the page's bars (see List.Index).
+ */
 const IndexContent: FunctionComponent = () => (
   <List.Root listStyle="plain">
     {Object.entries(contacts).map(([letter, names]) => (
       <List.Section
         key={letter}
-        data-letter={letter}
+        indexValue={letter}
       >
         <List.Header prominence="nested">
           <List.Title>{letter}</List.Title>
@@ -1261,39 +1263,12 @@ const IndexContent: FunctionComponent = () => (
         </List.Group>
       </List.Section>
     ))}
-  </List.Root>
-);
-
-/**
- * The contacts' index: at the screen's end edge (an anchor there: clear of
- * the safe areas, not scrolling), centered on it.
- */
-const IndexAnchor: FunctionComponent = () => (
-  <Viewport.Anchor
-    className="kitchen-sink-index"
-    edge="inline-end"
-  >
     <List.Index aria-label="Index">
       {letters.map((letter) => (
-        <List.IndexItem
-          key={letter}
-          onClick={(event) => {
-            // The nearest section at or after the letter (on this page).
-            const target =
-              Object.keys(contacts).find(
-                (key) => key.localeCompare(letter) >= 0,
-              ) ?? 'Z';
-            event.currentTarget
-              .closest('[data-header-part=root]')
-              ?.querySelector(`[data-letter="${CSS.escape(target)}"]`)
-              ?.scrollIntoView();
-          }}
-        >
-          {letter}
-        </List.IndexItem>
+        <List.IndexItem key={letter}>{letter}</List.IndexItem>
       ))}
     </List.Index>
-  </Viewport.Anchor>
+  </List.Root>
 );
 
 export const listPages: SinkPages = {
@@ -1305,7 +1280,6 @@ export const listPages: SinkPages = {
     title: 'Grouped',
   },
   'list/index': {
-    Anchors: IndexAnchor,
     background: 'plain',
     // (Its first header right below its bar.)
     contentMargin: 0,

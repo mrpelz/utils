@@ -23,7 +23,8 @@ export const editMenuRootRows: readonly PropRow[] = [
     'boolean',
     undefined,
     <>
-      Whether the menu is open: the app’s (e.g. while there’s a selection, from{' '}
+      Whether the menu is open: the app decides (for example while there’s a
+      selection, from{' '}
       <PartLink
         component="edit-menu"
         part="useSelectionAnchor"
@@ -36,29 +37,29 @@ export const editMenuRootRows: readonly PropRow[] = [
     '(open: boolean, eventDetails) => void',
     undefined,
     <>
-      Event handler called when the menu is opened or closed: closed (an action
-      chosen, a press outside, Escape), the app clears what opened it (e.g. the
-      selection anchor).
+      Event handler called when the menu is opened or closed. When it closes (an
+      action chosen, a press outside, Escape), the app clears what opened it
+      (for example the selection anchor).
     </>,
   ],
   [
     'modal',
     'boolean',
     code('false'),
-    'Determines if the menu enters a modal state when open; by default not: the page stays interactive, a press outside reaching it (e.g. clearing the selection) as it closes the menu.',
+    'Determines if the menu enters a modal state when open. By default, it doesn’t: the page stays interactive, and a press outside reaches it (for example clearing the selection) as it closes the menu.',
   ],
   [
     'size',
     union('compact', 'regular'),
     code(union('regular')),
     <>
-      The size class of its menus (e.g. the{' '}
+      The size class of its menus (for example the{' '}
       <PartLink
         component="edit-menu"
         part="EditMenu.More"
       />{' '}
-      button’s): <code>regular</code> (their submenus beside their trigger) or{' '}
-      <code>compact</code> (their submenus over it). The capsule is the same
+      button’s): <code>regular</code> (with submenus next to their trigger) or{' '}
+      <code>compact</code> (with submenus over it). The capsule is the same
       either way.
     </>,
   ],
@@ -66,7 +67,7 @@ export const editMenuRootRows: readonly PropRow[] = [
     'orientation',
     union('horizontal', 'vertical'),
     code(union('horizontal')),
-    'The visual orientation of the menu: its actions in a row, the arrow keys left and right moving between them.',
+    'The visual orientation of the menu: its actions in a row, with the left and right arrow keys moving between them.',
   ],
   ...menuRootRows.filter(
     ([name]) =>
@@ -87,8 +88,8 @@ export const editMenuRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its portal (the capsule), and the content its actions are about (e.g. the
-      text, a sibling inside it, or elsewhere).
+      Its portal (the capsule), and the content its actions are about (for
+      example the text, as a sibling inside it, or elsewhere).
     </>,
   ],
 ];
@@ -101,19 +102,19 @@ export const editMenuPositionerRows: readonly PropRow[] = [
     'Element | RefObject<Element> | VirtualElement | (() => …) | null',
     undefined,
     <>
-      What it shows at (required): the selection (
+      Where it shows (required): at the selection (
       <PartLink
         component="edit-menu"
         part="useSelectionAnchor"
       />
-      ’s anchor), or an element.
+      ’s anchor), or at an element.
     </>,
   ],
   [
     'side',
     union('block-start', 'block-end'),
     code(union('block-start')),
-    'Its side of its anchor (logical): above it, or below; it moves to the other side to avoid collisions.',
+    'Which side of its anchor it’s on (logical): above it, or below. It moves to the other side to avoid collisions.',
   ],
   [
     'align',
@@ -131,7 +132,7 @@ export const editMenuPositionerRows: readonly PropRow[] = [
     'collisionPadding',
     'number | { top?, right?, bottom?, left? }',
     code('5'),
-    'Additional space to maintain from the edge of the collision boundary; too narrow for its actions, they scroll in the capsule.',
+    'Additional space to maintain from the edge of the collision boundary. When that’s too narrow for its actions, they scroll in the capsule.',
   ],
   ...anchorPositioningRows.filter(([name]) => name !== 'anchor'),
   ...baseUiRows('div', 'HTMLDivElement'),
@@ -181,7 +182,12 @@ export const editMenuItemRows: readonly PropRow[] = [
     code('true'),
     'Whether to close the menu when the action is clicked.',
   ],
-  ['destructive', 'boolean', code('false'), 'A red label, e.g. Delete.'],
+  [
+    'destructive',
+    'boolean',
+    code('false'),
+    'Turns its label red, for example for Delete.',
+  ],
   [
     'cursor',
     'string (a CSS cursor)',
@@ -189,7 +195,7 @@ export const editMenuItemRows: readonly PropRow[] = [
       <code>pointer</code> with a click handler, otherwise or while disabled{' '}
       <code>not-allowed</code>
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   [
     'disabled',
@@ -207,7 +213,7 @@ export const editMenuItemRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its label (14px), a divider before it (but the first).',
+    'Its label (14px), with a divider before it (except the first).',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -221,7 +227,7 @@ export const editMenuMoreRows: readonly PropRow[] = [
     'a chevron',
     'What the 34px circle shows (a chevron, drawn as a stroke).',
   ],
-  ['aria-label', 'string', code('More'), 'Its name (it has no text).'],
+  ['aria-label', 'string', code('More'), 'Its name, since it has no text.'],
   ...menuSubmenuTriggerRows
     .filter(
       ([name]) =>
@@ -245,7 +251,7 @@ export const useSelectionAnchorParameterRows: readonly PropRow[] = [
     'container',
     'HTMLElement | null',
     undefined,
-    'The element whose text selections count (e.g. a paragraph, an article; from a callback ref or state).',
+    'The element whose text selections count (for example a paragraph or an article), from a callback ref or state.',
   ],
 ];
 
@@ -257,14 +263,14 @@ export const useSelectionAnchorRows: readonly PropRow[] = [
     undefined,
     <>
       The selection, as the positioner’s <code>anchor</code>, once it’s made
-      (the pointer released, or after a pause: keyboard, touch); null while
-      there’s none, or while selecting.
+      (when the pointer is released, or after a pause for keyboard and touch).
+      It’s null while there’s none, or while selecting.
     </>,
   ],
   [
     '[1] clear',
     '() => void',
     undefined,
-    'Forgets it (e.g. as the menu closes), the selection itself kept.',
+    'Forgets it (for example as the menu closes), while keeping the selection itself.',
   ],
 ];

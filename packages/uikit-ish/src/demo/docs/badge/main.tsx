@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Badge,
@@ -11,7 +11,10 @@ import {
   TabBar,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   sfBell,
@@ -23,6 +26,7 @@ import {
   sfPersonCropCircle,
   sfPersonCropCircleFill,
 } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import { propOptionsContent, propOptionsRoot } from './props.js';
 
 /**
@@ -52,24 +56,56 @@ export const BadgeDemo: FunctionComponent = () => {
     { external: externalContent, isOpen: true, title: '[content]' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['emphasizedIcon', 'icon'],
+          'Button.Icon': [],
+          'Button.Root': ['aria-label', 'onClick', 'shape', 'size', 'variant'],
+          'List.Content': [],
+          'List.Detail': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': ['style'],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'TabBar.Group': ['visibleWhenCollapsed'],
+          'TabBar.Icon': [],
+          'TabBar.Indicator': [],
+          'TabBar.Label': [],
+          'TabBar.List': ['collapsed'],
+          'TabBar.Root': ['onValueChange', 'value'],
+          'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
-      controls={[controlRoot, controlContent]}
+      controls={[controlRoot, controlContent, partControls]}
       id={id}
-      state={[stateRoot, stateContent]}
+      state={[stateRoot, stateContent, partState]}
       title="Badge"
     >
       <div className="badge-demo-stage">
         <Button.Root
+          {...partProps['Button.Root']}
           aria-label="Notifications"
           shape="circle"
           size="large"
           variant="glass"
           onClick={() => undefined}
         >
-          <Button.Icon>
-            <Symbol icon={sfBell}>
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfBell}
+            >
               <Badge
                 placement="symbol"
                 {...propsRoot}
@@ -80,18 +116,27 @@ export const BadgeDemo: FunctionComponent = () => {
         {/* Badges on all tabs but Recents; collapsed, the others collapse
             away with their badges. */}
         <TabBar.Root
+          {...partProps['TabBar.Root']}
           value={tab}
           onValueChange={(next: unknown) => setTab(next as string)}
         >
-          <TabBar.List collapsed={propsContent.collapsed}>
-            <TabBar.Group visibleWhenCollapsed={phone?.remains}>
-              <TabBar.Indicator />
+          <TabBar.List
+            {...partProps['TabBar.List']}
+            collapsed={propsContent.collapsed}
+          >
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed={phone?.remains}
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 value="favorites"
                 visibleWhenCollapsed={phone?.remains && phone.tab === 0}
               >
-                <TabBar.Icon>
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
                   <Symbol
+                    {...partProps.Symbol}
                     emphasizedIcon={sfHeartFill}
                     icon={sfHeart}
                   >
@@ -101,26 +146,34 @@ export const BadgeDemo: FunctionComponent = () => {
                     />
                   </Symbol>
                 </TabBar.Icon>
-                <TabBar.Label>Favorites</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Favorites
+                </TabBar.Label>
               </TabBar.Tab>
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 value="recents"
                 visibleWhenCollapsed={phone?.remains && phone.tab === 1}
               >
-                <TabBar.Icon>
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
                   <Symbol
+                    {...partProps.Symbol}
                     emphasizedIcon={sfClockFill}
                     icon={sfClock}
                   />
                 </TabBar.Icon>
-                <TabBar.Label>Recents</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Recents
+                </TabBar.Label>
               </TabBar.Tab>
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 value="contacts"
                 visibleWhenCollapsed={phone?.remains && phone.tab === 2}
               >
-                <TabBar.Icon>
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
                   <Symbol
+                    {...partProps.Symbol}
                     emphasizedIcon={sfPersonCropCircleFill}
                     icon={sfPersonCropCircle}
                   >
@@ -130,18 +183,27 @@ export const BadgeDemo: FunctionComponent = () => {
                     />
                   </Symbol>
                 </TabBar.Icon>
-                <TabBar.Label>Contacts</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Contacts
+                </TabBar.Label>
               </TabBar.Tab>
             </TabBar.Group>
-            <TabBar.Group visibleWhenCollapsed={search?.remains}>
-              <TabBar.Indicator />
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed={search?.remains}
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 aria-label="Search"
                 value="search"
                 visibleWhenCollapsed={search?.remains}
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfMagnifyingglass}>
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  >
                     <Badge
                       placement="symbol"
                       {...propsRoot}
@@ -152,15 +214,18 @@ export const BadgeDemo: FunctionComponent = () => {
             </TabBar.Group>
           </TabBar.List>
         </TabBar.Root>
-        <List.Root style={{ width: '100%' }}>
-          <List.Section>
-            <List.Group>
-              <List.Item>
-                <List.Content>
-                  <List.Title>Inbox</List.Title>
+        <List.Root
+          {...partProps['List.Root']}
+          style={{ width: '100%' }}
+        >
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>Inbox</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>
                     <Badge
                       {...propsRoot}
                       placement="inline"

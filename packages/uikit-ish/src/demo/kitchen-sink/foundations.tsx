@@ -30,7 +30,7 @@ type Choice = {
 };
 
 const notYet =
-  'Not honored by the library yet: its components follow the system’s setting, not this one.';
+  'The library doesn’t follow this one yet. Its components follow the system’s setting instead.';
 
 const onOff = [
   ['on', 'On'],
@@ -57,7 +57,7 @@ const choices: readonly Choice[] = [
   },
   {
     key: 'textSize',
-    note: 'Not honored by the library yet: Typography takes its text size as a prop of its own (textSize).',
+    note: 'The library doesn’t follow this one yet. Typography takes its text size as a prop of its own (textSize).',
     options: [
       ['small', 'Small'],
       ['xLarge', 'Extra Large'],

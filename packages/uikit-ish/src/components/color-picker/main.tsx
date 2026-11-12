@@ -1637,21 +1637,6 @@ const scrollerOf = (element: HTMLElement): Element => {
   return document.scrollingElement ?? document.documentElement;
 };
 
-/** A row at the top of its scroll container (below its scroll padding). */
-const jumpTo = (element: HTMLElement) => {
-  const scroller = scrollerOf(element);
-  const padding =
-    Number.parseFloat(getComputedStyle(scroller).scrollPaddingBlockStart) || 0;
-  const top =
-    scroller === document.scrollingElement
-      ? 0
-      : scroller.getBoundingClientRect().top;
-  scroller.scrollTo({
-    top:
-      scroller.scrollTop + element.getBoundingClientRect().top - top - padding,
-  });
-};
-
 /**
  * A row in view (between its scroll container's scroll paddings: e.g. a
  * sheet's header), at once: already, it stays; else, centered there.
@@ -1709,14 +1694,12 @@ const Named = forwardRef<HTMLDivElement, ColorPickerNamedProps>(
       return () =>
         setEntries((current) => current.filter((other) => other !== entry));
     }, []);
-    // Each letter's first row.
-    const letters = useMemo(() => {
-      const first = new Map<string, HTMLElement>();
-      for (const { element, label } of entries) {
-        if (!first.has(label)) first.set(label, element);
-      }
-      return [...first];
-    }, [entries]);
+    // Its rows' letters, in order (each row its letter's index value, the
+    // first jumped to, see List.Index).
+    const letters = useMemo(
+      () => [...new Set(entries.map(({ label }) => label))],
+      [entries],
+    );
 
     return (
       <NamedContext.Provider value={register}>
@@ -1730,24 +1713,19 @@ const Named = forwardRef<HTMLDivElement, ColorPickerNamedProps>(
             <List.Section>
               <List.Group>{children}</List.Group>
             </List.Section>
-          </List.Root>
-          {letters.length > 0 ? (
-            <div
-              className="uikit-color-picker-named-index"
-              data-color-picker-part="named-index"
-            >
-              <List.Index aria-label="Index">
-                {letters.map(([letter, element]) => (
-                  <List.IndexItem
-                    key={letter}
-                    onClick={() => jumpTo(element)}
-                  >
-                    {letter}
-                  </List.IndexItem>
+            {/* (Placed by the list, in the panel's inset, see style.css;
+                each letter jumping to its first row, see NamedColor.) */}
+            {letters.length > 0 ? (
+              <List.Index
+                aria-label="Index"
+                data-color-picker-part="named-index"
+              >
+                {letters.map((letter) => (
+                  <List.IndexItem key={letter}>{letter}</List.IndexItem>
                 ))}
               </List.Index>
-            </div>
-          ) : null}
+            ) : null}
+          </List.Root>
         </div>
       </NamedContext.Provider>
     );
@@ -1782,6 +1760,7 @@ const NamedColor = forwardRef<HTMLElement, ColorPickerNamedColorProps>(
         {...props}
         data-color-picker-part="named-color"
         data-picked={isPicked ? '' : undefined}
+        indexValue={letter}
       >
         <List.Leading>
           <Well

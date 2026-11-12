@@ -1,5 +1,5 @@
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
@@ -15,6 +15,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -22,6 +24,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 
 const rowsCode = `<List.Group>
   <List.Item onClick={forwardClick('[role=checkbox]')}>
@@ -130,35 +133,64 @@ const contacts = [
 const SelectingRows: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Checkbox': ['aria-label', 'onCheckedChange'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('checkbox-composition-rows') },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="checkbox-composition-rows"
       log={log}
+      state={[partState]}
       title="Checkboxes selecting rows"
     >
-      <List.Root>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Invite</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Invite</List.Title>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {people.map((name) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 onClick={forwardClick('[role=checkbox]')}
               >
-                <List.Leading>
+                <List.Leading {...partProps['List.Leading']}>
                   <List.Checkbox
+                    {...partProps['List.Checkbox']}
                     aria-label={name}
                     onCheckedChange={(isChecked: boolean) =>
                       addLog(`${name}: ${String(isChecked)}`)
                     }
                   />
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -173,23 +205,59 @@ const SelectingRows: FunctionComponent = () => {
 const ChoosingOneRow: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            RadioGroup: [
+              'aria-label',
+              'defaultValue',
+              'onValueChange',
+              'render',
+            ],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Radio': ['aria-label', 'value'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('checkbox-composition-one-row') },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="checkbox-composition-one-row"
       log={log}
+      state={[partState]}
       title="Radios choosing a row"
     >
-      <List.Root>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Default Account</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>
+              Default Account
+            </List.Title>
           </List.Header>
           <RadioGroup
+            {...partProps.RadioGroup}
             aria-label="Default account"
             defaultValue="icloud"
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
             onValueChange={(
               value: unknown,
               { reason }: BaseRadioGroup.ChangeEventDetails,
@@ -198,16 +266,18 @@ const ChoosingOneRow: FunctionComponent = () => {
             {accounts.map(([value, label]) => (
               <List.Item
                 key={value}
+                {...partProps['List.Item']}
                 onClick={forwardClick('[role=radio]')}
               >
-                <List.Leading>
+                <List.Leading {...partProps['List.Leading']}>
                   <List.Radio
+                    {...partProps['List.Radio']}
                     aria-label={label}
                     value={value}
                   />
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{label}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{label}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -222,51 +292,91 @@ const ChoosingOneRow: FunctionComponent = () => {
 const SelectAll: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            CheckboxGroup: [
+              'allValues',
+              'defaultValue',
+              'onValueChange',
+              'render',
+            ],
+            'List.Checkbox': ['aria-label', 'parent', 'value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('checkbox-composition-all') },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="checkbox-composition-all"
       log={log}
+      state={[partState]}
       title="Checkboxes with a parent"
     >
-      <List.Root>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Notifications</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Notifications</List.Title>
           </List.Header>
           <CheckboxGroup
+            {...partProps.CheckboxGroup}
             allValues={notifications.map(([value]) => value)}
             defaultValue={['mentions']}
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
             onValueChange={(value: string[]) =>
               addLog(`value change: ${value.join(', ')}`)
             }
           >
-            <List.Item onClick={forwardClick('[role=checkbox]')}>
-              <List.Leading>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[role=checkbox]')}
+            >
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Checkbox
+                  {...partProps['List.Checkbox']}
                   parent
                   aria-label="All"
                 />
               </List.Leading>
-              <List.Content>
-                <List.Title>All</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>All</List.Title>
               </List.Content>
             </List.Item>
             {notifications.map(([value, label]) => (
               <List.Item
                 key={value}
+                {...partProps['List.Item']}
                 onClick={forwardClick('[role=checkbox]')}
               >
-                <List.Leading>
+                <List.Leading {...partProps['List.Leading']}>
                   <List.Checkbox
+                    {...partProps['List.Checkbox']}
                     aria-label={label}
                     value={value}
                   />
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{label}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{label}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -281,22 +391,49 @@ const SelectAll: FunctionComponent = () => {
 const InAForm: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Form: ['className', 'onFormSubmit'],
+            RadioGroup: ['aria-label', 'className', 'defaultValue'],
+            'Button.Label': [],
+            'Button.Root': ['type', 'variant'],
+            'Checkbox.Root': [],
+            'Field.Root': ['name'],
+            'Radio.Root': ['value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('checkbox-composition-form') },
+  );
+
   return (
     <Component
       isCentered
       isInline
+      controls={[partControls]}
       id="checkbox-composition-form"
       log={log}
+      state={[partState]}
       title="Radios and a checkbox in a form"
     >
       <Form
+        {...partProps.Form}
         className="checkbox-demo-group"
         onFormSubmit={(values: Record<string, unknown>) =>
           addLog(`submitted: ${JSON.stringify(values)}`)
         }
       >
-        <Field.Root name="contact">
+        <Field.Root
+          {...partProps['Field.Root']}
+          name="contact"
+        >
           <RadioGroup
+            {...partProps.RadioGroup}
             aria-label="Contact by"
             className="checkbox-demo-group"
             defaultValue="email"
@@ -306,23 +443,30 @@ const InAForm: FunctionComponent = () => {
                 key={value}
                 className="checkbox-demo-option"
               >
-                <Radio.Root value={value} />
+                <Radio.Root
+                  {...partProps['Radio.Root']}
+                  value={value}
+                />
                 {label}
               </label>
             ))}
           </RadioGroup>
         </Field.Root>
-        <Field.Root name="newsletter">
+        <Field.Root
+          {...partProps['Field.Root']}
+          name="newsletter"
+        >
           <label className="checkbox-demo-option">
-            <Checkbox.Root />
+            <Checkbox.Root {...partProps['Checkbox.Root']} />
             Newsletter
           </label>
         </Field.Root>
         <Button.Root
+          {...partProps['Button.Root']}
           type="submit"
           variant="bordered-prominent"
         >
-          <Button.Label>Submit</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Submit</Button.Label>
         </Button.Root>
       </Form>
     </Component>
@@ -349,8 +493,7 @@ export const CheckboxComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Where they show: before a <a href={publicUrl('list')}>List</a>’s rows,
-        as{' '}
+        They show before a <a href={publicUrl('list')}>List</a>’s rows, as{' '}
         <PartLink
           component="list"
           part="List.Checkbox"
@@ -363,12 +506,12 @@ export const CheckboxComposition: FunctionComponent = () => (
         as the row’s leading edit control).
       </li>
       <li>
-        The row passes its clicks on to it (<code>forwardClick</code>): the
+        The row passes its clicks on to it (<code>forwardClick</code>), so the
         whole row selects.
       </li>
       <li>
-        Dragged from a checkbox along the rows, it selects them all (or
-        deselects, as the first one flips), scrolling along near the ends (
+        Dragging from a checkbox along the rows selects them all (or deselects
+        them, if the first one flipped off), and scrolls along near the ends (
         <PartLink
           component="list"
           part="List.Root"
@@ -376,16 +519,17 @@ export const CheckboxComposition: FunctionComponent = () => (
         <code>dragToSelect</code>).
       </li>
       <li>
-        The list owns the selection; actions on it go elsewhere, e.g. a toolbar.
+        The list owns the selection. Actions on it go elsewhere, for example in
+        a toolbar.
       </li>
-      <li>Name each by its row.</li>
+      <li>Name each checkbox after its row.</li>
       <li>
         <strong>Library:</strong> the row’s checkbox (
         <PartLink
           component="list"
           part="List.Checkbox"
         />
-        ) and <code>forwardClick</code>, passing the row’s clicks on to it;
+        ), <code>forwardClick</code> passing the row’s clicks on to it, and
         dragging to select (
         <PartLink
           component="list"
@@ -394,7 +538,7 @@ export const CheckboxComposition: FunctionComponent = () => (
         <code>dragToSelect</code>).
       </li>
       <li>
-        <strong>Demo:</strong> the rows and which are selected, and what
+        <strong>Demo:</strong> the rows and which ones are selected, and what
         selecting does (logged).
       </li>
     </ul>
@@ -414,14 +558,16 @@ export const CheckboxComposition: FunctionComponent = () => (
           component="checkbox"
           part="RadioGroup"
         />{' '}
-        rendering the list’s group (<code>render</code>), a{' '}
+        renders the list’s group (<code>render</code>), with a{' '}
         <PartLink
           component="list"
           part="List.Radio"
         />{' '}
         before each row.
       </li>
-      <li>One row chosen at a time; arrow keys move between them.</li>
+      <li>
+        One row is chosen at a time, and the arrow keys move between them.
+      </li>
       <li>
         <strong>Library:</strong> the radio group (
         <PartLink
@@ -436,7 +582,7 @@ export const CheckboxComposition: FunctionComponent = () => (
         ) with its arrow keys.
       </li>
       <li>
-        <strong>Demo:</strong> the rows and which is chosen (logged).
+        <strong>Demo:</strong> the rows, and which one is chosen (logged).
       </li>
     </ul>
     <CodeView code={oneRowCode} />
@@ -468,8 +614,8 @@ export const CheckboxComposition: FunctionComponent = () => (
           component="checkbox"
           part="CheckboxGroup"
         />
-        , its <code>allValues</code>) and the parent checkbox, mixed while only
-        some are selected.
+        , with its <code>allValues</code>), and the parent checkbox, mixed while
+        only some are selected.
       </li>
       <li>
         <strong>Demo:</strong> the rows, their names as the group’s values, and
@@ -487,23 +633,23 @@ export const CheckboxComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Outside lists: a <code>{'<label>'}</code> around a circle and its text;
-        the text ticks it and names it.
+        Outside lists, a <code>{'<label>'}</code> goes around a circle and its
+        text, so the text ticks it and names it.
       </li>
       <li>
-        In a <a href={publicUrl('form')}>Form</a>: Base UI’s{' '}
+        In a <a href={publicUrl('form')}>Form</a>, Base UI’s{' '}
         <PartLink
           component="form"
           part="Field"
         >
           Field.Root
         </PartLink>{' '}
-        names each value (the radio group’s chosen <code>value</code>, the
+        names each value (the radio group’s chosen <code>value</code>, and the
         checkbox’s ticked state).
       </li>
       <li>
-        Outside a field: the checkbox’s own <code>name</code> and{' '}
-        <code>value</code>, through its hidden input.
+        Outside a field, the checkbox submits its own <code>name</code> and{' '}
+        <code>value</code> through its hidden input.
       </li>
       <li>
         <strong>Library:</strong> the checkbox and radios (

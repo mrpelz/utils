@@ -42,7 +42,7 @@ const spinner = (page) =>
       opacities: spokes.map((spoke) => Number(getComputedStyle(spoke).opacity)),
       size: [spinner.offsetWidth, spinner.offsetHeight],
       spoke: [spokes[0].offsetWidth, spokes[0].offsetHeight, getComputedStyle(spokes[0]).backgroundColor],
-      spinning: spinner.getAnimations().some((animation) => animation.playState === 'running'),
+      spinning: spinner.getAnimations({ subtree: true }).some((animation) => animation.playState === 'running'),
     };
   })()`);
 
@@ -67,12 +67,12 @@ export const tests = [
         );
       }
 
-      // At least 280px long.
+      // At least 120px long.
       await page.evaluate(
-        `${page.section}.querySelector('[role=progressbar]').parentElement.style.width = '100px'`,
+        `${page.section}.querySelector('[role=progressbar]').parentElement.style.width = '50px'`,
       );
       const short = await bar(page);
-      assert.equal(short.track[0], 280, 'its minimum');
+      assert.equal(short.track[0], 120, 'its minimum');
 
       await page.setState(0, { value: 0 });
       await sleep(300);
@@ -89,15 +89,30 @@ export const tests = [
     run: async (page) => {
       await page.open('progress');
       const regular = await spinner(page);
-      assert.deepEqual(regular, {
-        gap: '8px',
-        indeterminate: true,
-        // From the top, clockwise.
-        opacities: [1, 0.15, 0.27, 0.39, 0.51, 0.63, 0.75, 0.87],
-        size: [30, 30],
-        spinning: true,
-        spoke: [4, 10, 'rgba(60, 60, 67, 0.6)'],
-      });
+      assert.deepEqual(
+        { ...regular, opacities: undefined },
+        {
+          gap: '8px',
+          indeterminate: true,
+          opacities: undefined,
+          size: [30, 30],
+          spinning: true,
+          spoke: [4, 10, 'rgba(60, 60, 67, 0.6)'],
+        },
+      );
+
+      // At rest, from the top, clockwise: the brightest, then from the
+      // faintest brighter in even steps (stepped: a spoke at a time).
+      await page.setState(2, { display: 'reset' });
+      const resting = await spinner(page);
+      assert.deepEqual(
+        resting.opacities.map(
+          (/** @type {number} */ opacity) => Math.round(opacity * 100) / 100,
+        ),
+        [1, 0.15, 0.27, 0.39, 0.51, 0.64, 0.76, 0.88],
+      );
+      assert.equal(resting.spinning, false);
+      await page.setState(2, { display: undefined });
 
       await page.setState(2, { size: 'small' });
       const small = await spinner(page);
@@ -106,22 +121,28 @@ export const tests = [
         [[22, 22], [3, 7], '4px'],
       );
 
-      // Its speed, and stopped: at rest (by default), or frozen.
+      // Its speed, and stopped: at rest, or frozen (paused by script, see
+      // main.tsx). (Stepped: its spokes fading in place.)
       const timing = () =>
         page.evaluate(`(() => {
           const [, root] = ${page.section}.querySelectorAll('[role=progressbar]');
-          const style = getComputedStyle(root.querySelector('[aria-hidden]'));
-          return [style.animationName, style.animationDuration, style.animationPlayState];
+          const spokes = root.querySelector('[aria-hidden]');
+          const style = getComputedStyle(spokes.firstElementChild);
+          return [style.animationName, style.animationDuration, [...new Set(spokes.getAnimations({ subtree: true }).map((animation) => animation.playState))]];
         })()`);
-      await page.setState(2, { animating: false, duration: 2 });
+      await page.setState(2, { display: 'reset', duration: 2 });
       const [rest] = await timing();
       assert.equal(rest, 'none');
-      await page.setState(2, { animating: false, stopBehavior: 'freeze' });
-      assert.deepEqual(await timing(), ['uikit-progress-spin', '2s', 'paused']);
+      await page.setState(2, { display: 'freeze' });
+      assert.deepEqual(await timing(), [
+        'uikit-progress-fade',
+        '2s',
+        ['paused'],
+      ]);
     },
   },
   {
-    name: 'progress: an activity indicator spins a spoke at a time, smoothly, or fades its spokes in place, in turn',
+    name: 'progress: an activity indicator steps its spokes in place, a spoke at a time, spins smoothly, or fades its spokes in place, in turn',
     run: async (page) => {
       await page.open('progress');
       const motion = () =>
@@ -132,18 +153,32 @@ export const tests = [
           return {
             spinner: spinner.getAnimations().length > 0 ? getComputedStyle(spinner).animationTimingFunction : 'none',
             spokes: spokes.filter((spoke) => spoke.getAnimations().length > 0).length,
+            timing: getComputedStyle(spokes[0]).animationTimingFunction,
           };
         })()`);
-      assert.deepEqual(await motion(), { spinner: 'steps(8)', spokes: 0 });
+      // Stepped (by default): its spokes in place, a spoke at a time.
+      assert.deepEqual(await motion(), {
+        spinner: 'none',
+        spokes: 8,
+        timing: 'steps(8, jump-none)',
+      });
 
       await page.setState(2, { movement: 'rotate' });
-      assert.deepEqual(await motion(), { spinner: 'linear', spokes: 0 });
+      assert.deepEqual(await motion(), {
+        spinner: 'linear',
+        spokes: 0,
+        timing: 'ease',
+      });
 
       await page.setState(2, { movement: 'fade' });
-      assert.deepEqual(await motion(), { spinner: 'none', spokes: 8 });
+      assert.deepEqual(await motion(), {
+        spinner: 'none',
+        spokes: 8,
+        timing: 'linear',
+      });
       // Each spoke as far into its fade as its opacity: the brightest at the
       // top, fainter counterclockwise.
-      await page.setState(2, { animating: false });
+      await page.setState(2, { display: 'reset' });
       const opacities = /** @type {number[]} */ (
         await page.evaluate(`(() => {
         const [, root] = ${page.section}.querySelectorAll('[role=progressbar]');
@@ -307,21 +342,21 @@ export const tests = [
         const spinning = await animations();
         assert.ok(spinning.length > 0, `${movement}: spinning`);
 
-        await page.setState(0, { animating: false, stopBehavior: 'reset' });
+        await page.setState(0, { display: 'reset' });
         assert.deepEqual(await animations(), [], `${movement}: reset`);
 
-        await page.setState(0, { animating: true });
+        await page.setState(0, { display: 'animate' });
         await sleep(400);
-        await page.setState(0, { animating: false, stopBehavior: 'freeze' });
+        await page.setState(0, { display: 'freeze' });
         const frozen = await animations();
         assert.ok(
           frozen.length > 0 && frozen.every((state) => state === 'paused'),
           `${movement}: freeze ${frozen.join(', ')}`,
         );
 
-        await page.setState(0, { animating: true });
+        await page.setState(0, { display: 'animate' });
         await sleep(400);
-        await page.setState(0, { animating: false, stopBehavior: 'finish' });
+        await page.setState(0, { display: 'finish' });
         const finishing = await animations();
         assert.ok(
           finishing.includes('running'),

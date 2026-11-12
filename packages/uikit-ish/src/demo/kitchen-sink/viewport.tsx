@@ -510,8 +510,9 @@ const AccessoryScreen: FunctionComponent = () => (
                 ))}
               </List.Group>
               <List.Footer>
-                Focused, the Note row below is lifted above the keyboard (its
-                place in the list kept), as far as the keyboard covers it.
+                When it has focus, the Note row below is lifted above the
+                keyboard, as far as the keyboard covers it, while its place in
+                the list is kept.
               </List.Footer>
             </List.Section>
             {/* (Its section, kept above the keyboard while focused.) */}
@@ -680,7 +681,7 @@ const PagesView: FunctionComponent<{
               ))}
             </List.Group>
             <List.Footer>
-              Pull past the top or the bottom, and let go, to turn the page.
+              Pull past the top or the bottom and let go to turn the page.
             </List.Footer>
           </List.Section>
         </List.Root>

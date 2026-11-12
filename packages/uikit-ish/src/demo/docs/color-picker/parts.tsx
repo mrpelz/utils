@@ -11,7 +11,11 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  type PartProps,
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
@@ -21,6 +25,7 @@ import {
   sfPaintpalette,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   colorPickerCodeCopyRows,
   colorPickerCodeRows,
@@ -79,16 +84,43 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'ColorPicker.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Icon': [],
+            'ColorPicker.Code': [],
+            'ColorPicker.CodeCopy': ['shape', 'size', 'variant'],
+            'ColorPicker.Grid': [],
+            'ColorPicker.Mode': ['value'],
+            'ColorPicker.Modes': [],
+            'ColorPicker.Named': [],
+            'ColorPicker.Opacity': [],
+            'ColorPicker.Panel': [],
+            'ColorPicker.Sliders': ['model', 'range'],
+            'ColorPicker.Spectrum': [],
+            'ColorPicker.Swatches': [],
+            'ColorPicker.View': ['value'],
+            Symbol: ['icon'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="ColorPicker.Root"
     >
       <ColorPicker.Root
@@ -97,7 +129,9 @@ const RootPart: FunctionComponent = () => {
         style={{ width: 'min(402px, 100%)', ...props.style }}
       >
         {/* (All modes: its mode props' values.) */}
-        <ColorPicker.Panel>{panelParts({ modes: 'all' })}</ColorPicker.Panel>
+        <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+          {panelParts({ partProps, modes: 'all' })}
+        </ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
   );
@@ -115,19 +149,44 @@ const PanelPart: FunctionComponent = () => {
     title: 'ColorPicker.Panel',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Button.Icon': [],
+          'ColorPicker.Code': [],
+          'ColorPicker.CodeCopy': ['shape', 'size', 'variant'],
+          'ColorPicker.Grid': [],
+          'ColorPicker.Mode': ['value'],
+          'ColorPicker.Modes': [],
+          'ColorPicker.Named': [],
+          'ColorPicker.Opacity': [],
+          'ColorPicker.Root': ['defaultValue', 'style'],
+          'ColorPicker.Sliders': ['model', 'range'],
+          'ColorPicker.Spectrum': [],
+          'ColorPicker.Swatches': [],
+          'ColorPicker.View': ['value'],
+          Symbol: ['icon'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="ColorPicker.Panel"
     >
       <ColorPicker.Root
+        {...partProps['ColorPicker.Root']}
         defaultValue="#AF52DE"
         style={{ width: 'min(402px, 100%)' }}
       >
@@ -135,7 +194,7 @@ const PanelPart: FunctionComponent = () => {
           key={elementKey}
           {...props}
         >
-          {panelParts({ modes: 'all' })}
+          {panelParts({ partProps, modes: 'all' })}
         </ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
@@ -150,7 +209,12 @@ const panelPartDemo = <T extends Parameters<typeof usePropControl>[0]>(
   id: string,
   title: string,
   getOptions: (addLog: AddLog) => T,
-  render: (props: ReturnType<typeof usePropControl<T>>[1]) => ReactNode,
+  render: (
+    props: ReturnType<typeof usePropControl<T>>[1],
+    partProps: PartProps,
+  ) => ReactNode,
+  // Its other parts (see `usePartControls`), by the props it sets.
+  parts: Record<string, readonly string[]> = {},
 ): FunctionComponent => {
   const PartDemo: FunctionComponent = () => {
     const [log, addLog] = useLog();
@@ -159,6 +223,17 @@ const panelPartDemo = <T extends Parameters<typeof usePropControl>[0]>(
       useMemo(() => getOptions(addLog), [addLog]),
       { external, isOpen: true, emphasize: 'outline', title },
     );
+    const [partControls, partProps, partState] = usePartControls(
+      useMemo(
+        () =>
+          partPropMaps(
+            { 'ColorPicker.Root': ['defaultValue', 'style'], ...parts },
+            addLog,
+          ),
+        [addLog],
+      ),
+      { provided: useProvidedState(id) },
+    );
 
     return (
       <Component
@@ -166,18 +241,19 @@ const panelPartDemo = <T extends Parameters<typeof usePropControl>[0]>(
         isCentered
         isInline
         isStretched
-        controls={[control]}
+        controls={[control, partControls]}
         id={id}
         log={log}
-        state={[state]}
+        state={[state, partState]}
         title={title}
       >
         <ColorPicker.Root
           key={elementKey}
+          {...partProps['ColorPicker.Root']}
           defaultValue="#AF52DE"
           style={{ width: 'min(402px, 100%)' }}
         >
-          {render(props)}
+          {render(props, partProps)}
         </ColorPicker.Root>
       </Component>
     );
@@ -191,24 +267,56 @@ const ModesPart = panelPartDemo(
   'color-picker-parts-modes',
   'ColorPicker.Modes',
   () => propOptionsPart,
-  (props) => (
-    <ColorPicker.Panel>
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
       <ColorPicker.Modes {...props}>
-        <ColorPicker.Mode value="grid">Grid</ColorPicker.Mode>
-        <ColorPicker.Mode value="spectrum">Spectrum</ColorPicker.Mode>
-        <ColorPicker.Mode value="rgb">Sliders</ColorPicker.Mode>
+        <ColorPicker.Mode
+          {...partProps['ColorPicker.Mode']}
+          value="grid"
+        >
+          Grid
+        </ColorPicker.Mode>
+        <ColorPicker.Mode
+          {...partProps['ColorPicker.Mode']}
+          value="spectrum"
+        >
+          Spectrum
+        </ColorPicker.Mode>
+        <ColorPicker.Mode
+          {...partProps['ColorPicker.Mode']}
+          value="rgb"
+        >
+          Sliders
+        </ColorPicker.Mode>
       </ColorPicker.Modes>
-      <ColorPicker.View value="grid">
-        <ColorPicker.Grid />
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="grid"
+      >
+        <ColorPicker.Grid {...partProps['ColorPicker.Grid']} />
       </ColorPicker.View>
-      <ColorPicker.View value="spectrum">
-        <ColorPicker.Spectrum />
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="spectrum"
+      >
+        <ColorPicker.Spectrum {...partProps['ColorPicker.Spectrum']} />
       </ColorPicker.View>
-      <ColorPicker.View value="rgb">
-        <ColorPicker.Sliders />
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="rgb"
+      >
+        <ColorPicker.Sliders {...partProps['ColorPicker.Sliders']} />
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Grid': [],
+    'ColorPicker.Mode': ['value'],
+    'ColorPicker.Panel': [],
+    'ColorPicker.Sliders': [],
+    'ColorPicker.Spectrum': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.Mode`: one of them (Spectrum), with its props. */
@@ -216,23 +324,36 @@ const ModePart = panelPartDemo(
   'color-picker-parts-mode',
   'ColorPicker.Mode',
   () => propOptionsMode,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.Modes>
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.Modes {...partProps['ColorPicker.Modes']}>
         <ColorPicker.Mode value="grid">Grid</ColorPicker.Mode>
         <ColorPicker.Mode
           value="spectrum"
           {...props}
         />
       </ColorPicker.Modes>
-      <ColorPicker.View value="grid">
-        <ColorPicker.Grid />
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="grid"
+      >
+        <ColorPicker.Grid {...partProps['ColorPicker.Grid']} />
       </ColorPicker.View>
-      <ColorPicker.View value="spectrum">
-        <ColorPicker.Spectrum />
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="spectrum"
+      >
+        <ColorPicker.Spectrum {...partProps['ColorPicker.Spectrum']} />
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Grid': [],
+    'ColorPicker.Modes': [],
+    'ColorPicker.Panel': [],
+    'ColorPicker.Spectrum': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.View`: the grid's, shown while its mode is chosen. */
@@ -240,23 +361,40 @@ const ViewPart = panelPartDemo(
   'color-picker-parts-view',
   'ColorPicker.View',
   () => propOptionsPart,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.Modes>
-        <ColorPicker.Mode value="grid">Grid</ColorPicker.Mode>
-        <ColorPicker.Mode value="spectrum">Spectrum</ColorPicker.Mode>
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.Modes {...partProps['ColorPicker.Modes']}>
+        <ColorPicker.Mode
+          {...partProps['ColorPicker.Mode']}
+          value="grid"
+        >
+          Grid
+        </ColorPicker.Mode>
+        <ColorPicker.Mode
+          {...partProps['ColorPicker.Mode']}
+          value="spectrum"
+        >
+          Spectrum
+        </ColorPicker.Mode>
       </ColorPicker.Modes>
       <ColorPicker.View
         value="grid"
         {...props}
       >
-        <ColorPicker.Grid />
+        <ColorPicker.Grid {...partProps['ColorPicker.Grid']} />
       </ColorPicker.View>
       <ColorPicker.View value="spectrum">
-        <ColorPicker.Spectrum />
+        <ColorPicker.Spectrum {...partProps['ColorPicker.Spectrum']} />
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Grid': [],
+    'ColorPicker.Mode': ['value'],
+    'ColorPicker.Modes': [],
+    'ColorPicker.Panel': [],
+    'ColorPicker.Spectrum': [],
+  },
 );
 
 /** `ColorPicker.Grid`: its only view (no modes' control). */
@@ -264,13 +402,20 @@ const GridPart = panelPartDemo(
   'color-picker-parts-grid',
   'ColorPicker.Grid',
   () => propOptionsPart,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.View value="grid">
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="grid"
+      >
         <ColorPicker.Grid {...props} />
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Panel': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.Spectrum`: its only view. */
@@ -278,13 +423,20 @@ const SpectrumPart = panelPartDemo(
   'color-picker-parts-spectrum',
   'ColorPicker.Spectrum',
   () => propOptionsPart,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.View value="spectrum">
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="spectrum"
+      >
         <ColorPicker.Spectrum {...props} />
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Panel': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.Sliders`: its only view, by its model. */
@@ -292,19 +444,29 @@ const SlidersPart = panelPartDemo(
   'color-picker-parts-sliders',
   'ColorPicker.Sliders',
   () => propOptionsSliders,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.View value="sliders">
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="sliders"
+      >
         <ColorPicker.Sliders {...props} />
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Panel': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 // The code's copy button's content (its symbol).
-const copySymbol = (
-  <Button.Icon>
-    <Symbol icon={sfDocumentOnDocument} />
+const copySymbol = (partProps: PartProps) => (
+  <Button.Icon {...partProps['Button.Icon']}>
+    <Symbol
+      {...partProps.Symbol}
+      icon={sfDocumentOnDocument}
+    />
   </Button.Icon>
 );
 
@@ -313,23 +475,35 @@ const CodePart = panelPartDemo(
   'color-picker-parts-code',
   'ColorPicker.Code',
   () => propOptionsCode,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.View value="sliders">
-        <ColorPicker.Sliders>
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="sliders"
+      >
+        <ColorPicker.Sliders {...partProps['ColorPicker.Sliders']}>
           <ColorPicker.Code {...props}>
             <ColorPicker.CodeCopy
+              {...partProps['ColorPicker.CodeCopy']}
               shape="circle"
               size="small"
               variant="bordered-secondary"
             >
-              {copySymbol}
+              {copySymbol(partProps)}
             </ColorPicker.CodeCopy>
           </ColorPicker.Code>
         </ColorPicker.Sliders>
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'Button.Icon': [],
+    'ColorPicker.CodeCopy': ['shape', 'size', 'variant'],
+    'ColorPicker.Panel': [],
+    'ColorPicker.Sliders': [],
+    'ColorPicker.View': ['value'],
+    Symbol: ['icon'],
+  },
 );
 
 /** `ColorPicker.CodeCopy`: in the code, under the sliders. */
@@ -337,24 +511,35 @@ const CodeCopyPart = panelPartDemo(
   'color-picker-parts-code-copy',
   'ColorPicker.CodeCopy',
   getPropOptionsCodeCopy,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.View value="sliders">
-        <ColorPicker.Sliders>
-          <ColorPicker.Code>
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="sliders"
+      >
+        <ColorPicker.Sliders {...partProps['ColorPicker.Sliders']}>
+          <ColorPicker.Code {...partProps['ColorPicker.Code']}>
             <ColorPicker.CodeCopy
               shape="circle"
               size="small"
               variant="bordered-secondary"
               {...props}
             >
-              {copySymbol}
+              {copySymbol(partProps)}
             </ColorPicker.CodeCopy>
           </ColorPicker.Code>
         </ColorPicker.Sliders>
       </ColorPicker.View>
     </ColorPicker.Panel>
   ),
+  {
+    'Button.Icon': [],
+    'ColorPicker.Code': [],
+    'ColorPicker.Panel': [],
+    'ColorPicker.Sliders': [],
+    'ColorPicker.View': ['value'],
+    Symbol: ['icon'],
+  },
 );
 
 /**
@@ -364,13 +549,18 @@ const CodeCopyPart = panelPartDemo(
 const namedColors = ({
   color = {},
   named = {},
+  partProps = {},
 }: {
   color?: Partial<ColorPickerNamedColorProps>;
   named?: ColorPickerNamedProps;
+  partProps?: PartProps;
 }) => (
   <div style={{ maxHeight: 480, overflowY: 'auto' }}>
-    <ColorPicker.Panel>
-      <ColorPicker.View value="named">
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="named"
+      >
         <ColorPicker.Named {...named}>
           <ColorPicker.NamedColor
             color="#AF52DE"
@@ -391,7 +581,11 @@ const NamedPart = panelPartDemo(
   'color-picker-parts-named',
   'ColorPicker.Named',
   () => propOptionsNamed,
-  (props) => namedColors({ named: props }),
+  (props, partProps) => namedColors({ named: props, partProps }),
+  {
+    'ColorPicker.Panel': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.NamedColor`: the app's first row. */
@@ -399,7 +593,11 @@ const NamedColorPart = panelPartDemo(
   'color-picker-parts-named-color',
   'ColorPicker.NamedColor',
   () => propOptionsNamedColor,
-  (props) => namedColors({ color: props }),
+  (props, partProps) => namedColors({ color: props, partProps }),
+  {
+    'ColorPicker.Panel': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.CssNamedColors`: after the app's rows. */
@@ -407,7 +605,11 @@ const CssNamedColorsPart = panelPartDemo(
   'color-picker-parts-css-named-colors',
   'ColorPicker.CssNamedColors',
   () => ({}),
-  () => namedColors({}),
+  (_props, partProps) => namedColors({ partProps }),
+  {
+    'ColorPicker.Panel': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.Opacity`: under the spectrum, the color translucent. */
@@ -415,14 +617,22 @@ const OpacityPart = panelPartDemo(
   'color-picker-parts-opacity',
   'ColorPicker.Opacity',
   () => propOptionsPart,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.View value="spectrum">
-        <ColorPicker.Spectrum />
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="spectrum"
+      >
+        <ColorPicker.Spectrum {...partProps['ColorPicker.Spectrum']} />
       </ColorPicker.View>
       <ColorPicker.Opacity {...props} />
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Panel': [],
+    'ColorPicker.Spectrum': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.Swatches`: under the grid, with their props. */
@@ -430,14 +640,22 @@ const SwatchesPart = panelPartDemo(
   'color-picker-parts-swatches',
   'ColorPicker.Swatches',
   getPropOptionsSwatches,
-  (props) => (
-    <ColorPicker.Panel>
-      <ColorPicker.View value="grid">
-        <ColorPicker.Grid />
+  (props, partProps) => (
+    <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+      <ColorPicker.View
+        {...partProps['ColorPicker.View']}
+        value="grid"
+      >
+        <ColorPicker.Grid {...partProps['ColorPicker.Grid']} />
       </ColorPicker.View>
       <ColorPicker.Swatches {...props} />
     </ColorPicker.Panel>
   ),
+  {
+    'ColorPicker.Grid': [],
+    'ColorPicker.Panel': [],
+    'ColorPicker.View': ['value'],
+  },
 );
 
 /** `ColorPicker.Eyedropper`, outlined, in the header's toolbar. */
@@ -451,34 +669,71 @@ const EyedropperPart: FunctionComponent = () => {
     title: 'ColorPicker.Eyedropper',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Button.Icon': [],
+          'ColorPicker.Code': [],
+          'ColorPicker.CodeCopy': ['shape', 'size', 'variant'],
+          'ColorPicker.Grid': [],
+          'ColorPicker.Mode': ['value'],
+          'ColorPicker.Modes': [],
+          'ColorPicker.Named': [],
+          'ColorPicker.Opacity': [],
+          'ColorPicker.Panel': [],
+          'ColorPicker.Root': ['defaultValue', 'style'],
+          'ColorPicker.Sliders': ['model', 'range'],
+          'ColorPicker.Spectrum': [],
+          'ColorPicker.Swatches': [],
+          'ColorPicker.View': ['value'],
+          Symbol: ['icon'],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="ColorPicker.Eyedropper"
     >
       <ColorPicker.Root
+        {...partProps['ColorPicker.Root']}
         defaultValue="#AF52DE"
         style={{ width: 'min(402px, 100%)' }}
       >
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Leading>
+        <Toolbar.Root
+          {...partProps['Toolbar.Root']}
+          placement="block-start"
+        >
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             <ColorPicker.Eyedropper {...props}>
-              <Button.Icon>
-                <Symbol icon={sfEyedropper} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfEyedropper}
+                />
               </Button.Icon>
             </ColorPicker.Eyedropper>
           </Toolbar.Leading>
-          <Toolbar.Title>
+          <Toolbar.Title {...partProps['Toolbar.Title']}>
             <span>Colors</span>
           </Toolbar.Title>
         </Toolbar.Root>
-        <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
+        <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+          {panelParts({ partProps })}
+        </ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
   );
@@ -498,39 +753,89 @@ const SystemColorsPart: FunctionComponent = () => {
     title: 'ColorPicker.SystemColors',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Button.Icon': [],
+          'ColorPicker.Code': [],
+          'ColorPicker.CodeCopy': ['shape', 'size', 'variant'],
+          'ColorPicker.Eyedropper': ['render'],
+          'ColorPicker.Grid': [],
+          'ColorPicker.Mode': ['value'],
+          'ColorPicker.Modes': [],
+          'ColorPicker.Named': [],
+          'ColorPicker.Opacity': [],
+          'ColorPicker.Panel': [],
+          'ColorPicker.Root': ['defaultValue', 'style'],
+          'ColorPicker.Sliders': ['model', 'range'],
+          'ColorPicker.Spectrum': [],
+          'ColorPicker.Swatches': [],
+          'ColorPicker.View': ['value'],
+          Symbol: ['icon'],
+          'Toolbar.Button': ['shape'],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="ColorPicker.SystemColors"
     >
       <ColorPicker.Root
+        {...partProps['ColorPicker.Root']}
         defaultValue="#AF52DE"
         style={{ width: 'min(402px, 100%)' }}
       >
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Leading>
-            <ColorPicker.Eyedropper render={<Toolbar.Button shape="circle" />}>
-              <Button.Icon>
-                <Symbol icon={sfEyedropper} />
+        <Toolbar.Root
+          {...partProps['Toolbar.Root']}
+          placement="block-start"
+        >
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+            <ColorPicker.Eyedropper
+              {...partProps['ColorPicker.Eyedropper']}
+              render={
+                <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
+                  shape="circle"
+                />
+              }
+            >
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfEyedropper}
+                />
               </Button.Icon>
             </ColorPicker.Eyedropper>
             <ColorPicker.SystemColors {...props}>
-              <Button.Icon>
-                <Symbol icon={sfPaintpalette} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfPaintpalette}
+                />
               </Button.Icon>
             </ColorPicker.SystemColors>
           </Toolbar.Leading>
-          <Toolbar.Title>
+          <Toolbar.Title {...partProps['Toolbar.Title']}>
             <span>Colors</span>
           </Toolbar.Title>
         </Toolbar.Root>
-        <ColorPicker.Panel>{panelParts()}</ColorPicker.Panel>
+        <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+          {panelParts({ partProps })}
+        </ColorPicker.Panel>
       </ColorPicker.Root>
     </Component>
   );
@@ -570,45 +875,61 @@ const WellPart: FunctionComponent = () => {
 export const ColorPickerParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: the color, for its parts.</li>
+      <li>Root: holds the color for its parts.</li>
       <li>
-        Header: the app’s, its popover’s or sheet’s (a toolbar: the eyedropper,
-        the system colors, a title, close), the panel scrolling under it.
+        Header: the app’s, in its popover’s or sheet’s header (a toolbar with
+        the eyedropper, the system colors, a title and close). The panel scrolls
+        under it.
       </li>
       <li>
-        Panel: its parts as composed: its modes (a segmented control, a view
-        each: the grid, the spectrum, sliders), the opacity, the swatches (the
-        color, the saved colors).
+        Panel: its parts, as composed. Its modes (a segmented control, and a
+        view for each: the grid, the spectrum, the sliders), the opacity, and
+        the swatches (the color and the saved colors).
       </li>
       <li>Eyedropper: picks a color off the screen.</li>
       <li>System colors: opens the system’s color picker.</li>
       <li>
-        Code: the color’s hex code, typed; copied (in other formats too) by its
-        menu.
+        Code: the color’s hex code, which can be typed. Its menu copies it, in
+        other formats too.
       </li>
       <li>
-        Named: a mode’s list of named colors (the app’s, the CSS named colors),
-        with an index.
+        Named: a mode’s list of named colors (the app’s, and the CSS named
+        colors), with an index.
       </li>
-      <li>Well: shows a color, opening the picker (outside it).</li>
+      <li>Well: shows a color and opens the picker, from outside it.</li>
     </ul>
     <ul className="demo-tree">
       <li>
         <PartLink
           component="color-picker"
           part="ColorPicker.Root"
+        />{' '}
+        (rendering a{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Popup"
+        />{' '}
+        or a{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
         />
+        )
         <ul>
-          <li>
-            The app’s header (optional): a popover’s{' '}
+          <li className="demo-tree-context">
             <PartLink
               component="popover"
               part="Popover.Header"
-            />
-            , a sheet’s{' '}
+            />{' '}
+            <span>or</span>{' '}
             <PartLink
               component="sheet"
               part="Sheet.Header"
+            />{' '}
+            <span>(optional, the app’s), with a</span>{' '}
+            <PartLink
+              component="toolbar"
+              part="Toolbar.Root"
             />
             <ul>
               <li>
@@ -677,7 +998,7 @@ export const ColorPickerParts: FunctionComponent = () => (
                           component="color-picker"
                           part="ColorPicker.Code"
                         />{' '}
-                        (optional; anywhere in the picker, e.g. here)
+                        (optional; anywhere in the picker, for example here)
                         <ul>
                           <li>
                             <PartLink
@@ -709,7 +1030,7 @@ export const ColorPickerParts: FunctionComponent = () => (
                           component="color-picker"
                           part="ColorPicker.CssNamedColors"
                         />{' '}
-                        (optional; the CSS named colors’ rows)
+                        (optional: the CSS named colors’ rows)
                       </li>
                     </ul>
                   </li>
@@ -738,30 +1059,24 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.Well"
         />{' '}
-        (optional; or any trigger)
+        (optional, outside the picker; or any trigger)
       </li>
       <li>
-        Helpers (anywhere):
-        <ul>
-          <li>
-            <PartLink
-              component="color-picker"
-              part="parseColor"
-            />
-          </li>
-          <li>
-            <PartLink
-              component="color-picker"
-              part="formatColor"
-            />
-          </li>
-          <li>
-            <PartLink
-              component="color-picker"
-              part="defaultSavedColors"
-            />
-          </li>
-        </ul>
+        Helpers, usable anywhere:{' '}
+        <PartLink
+          component="color-picker"
+          part="parseColor"
+        />
+        ,{' '}
+        <PartLink
+          component="color-picker"
+          part="formatColor"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="color-picker"
+          part="defaultSavedColors"
+        />
       </li>
     </ul>
 
@@ -773,35 +1088,36 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The color, a hex string (<code>#rrggbbaa</code> with opacity), for its
-        parts; in the app’s popover (regular) or sheet (compact).
+        Holds the color, as a hex string (<code>#rrggbbaa</code> with opacity),
+        for its parts. It goes in the app’s popover (regular) or sheet
+        (compact).
       </li>
       <li>
-        Its opacity by its panel’s parts: with an{' '}
+        Its panel’s parts decide its opacity. With an{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Opacity"
         />
-        , the color translucent; without one, always opaque.
+        , the color can be translucent. Without one, it’s always opaque.
       </li>
       <li>
-        State: <code>value</code> or <code>defaultValue</code>,{' '}
-        <code>onValueChange</code> (with why); the mode shown, <code>mode</code>{' '}
-        or <code>defaultMode</code> (by default, the first),{' '}
-        <code>onModeChange</code>.
+        Its state: <code>value</code> or <code>defaultValue</code>, and{' '}
+        <code>onValueChange</code> (with the reason). For the mode shown:{' '}
+        <code>mode</code> or <code>defaultMode</code> (the first, by default),
+        and <code>onModeChange</code>.
       </li>
       <li>
-        Renders a <code>div</code>, or (<code>render</code>) the sheet’s{' '}
+        Renders a <code>div</code>, or, through <code>render</code>, the sheet’s{' '}
         <PartLink
           component="sheet"
           part="Sheet.Popup"
         />
-        : its header and modes in the sheet’s{' '}
+        . Its header and modes then go in the sheet’s{' '}
         <PartLink
           component="sheet"
           part="Sheet.Header"
         />
-        , not scrolling, its panel in its{' '}
+        , which doesn’t scroll, and its panel in the{' '}
         <PartLink
           component="sheet"
           part="Sheet.Content"
@@ -825,29 +1141,29 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its parts, as composed (in its padding, spaced): its modes (
+        Its parts, as composed, spaced inside its padding: its modes (
         <PartLink
           component="color-picker"
           part="ColorPicker.Modes"
         />
-        , a{' '}
+        , with a{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.View"
         />{' '}
-        each, paired by their <code>value</code>s), the{' '}
+        for each, paired by their <code>value</code>s), the{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Opacity"
-        />
-        , the{' '}
+        />{' '}
+        and the{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Swatches"
         />
-        ; any of them left out, in any order. Its modes’ control may be
-        elsewhere in its picker (e.g. a sheet’s header), the mode the picker’s
-        (see{' '}
+        . Any of them can be left out, and they can go in any order. Its modes’
+        control can sit elsewhere in its picker (for example in a sheet’s
+        header), since the picker holds the mode (see{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Root"
@@ -871,9 +1187,9 @@ export const ColorPickerParts: FunctionComponent = () => (
     <ul>
       <li>
         Its modes’ control: a <a href={publicUrl('segmented')}>Segmented</a>{' '}
-        control (its highlight its own), choosing the picker’s mode; 24px above
-        the view, in the panel or anywhere in its picker (e.g. a sheet’s header,
-        inset as the panel’s content).
+        control (with its own highlight) that chooses the picker’s mode. It sits
+        24px above the view, in the panel or anywhere in its picker (for example
+        in a sheet’s header, inset like the panel’s content).
       </li>
       <li>
         Its{' '}
@@ -881,16 +1197,17 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.Mode"
         />
-        s, in their order: which modes, and how they’re labeled (e.g. “Sliders”
-        for one sliders view, “RGB”, “HSL” for several).
+        s, in their order, set which modes there are and how they’re labeled
+        (for example “Sliders” for one sliders view, or “RGB” and “HSL” for
+        several).
       </li>
       <li>
-        Optional: with one mode, leave it out (the panel’s only{' '}
+        It’s optional. With one mode, leave it out: the panel’s only{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.View"
         />{' '}
-        shown, no control to choose).
+        shows, with no control to choose.
       </li>
       <li>
         Renders a{' '}
@@ -913,7 +1230,7 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A mode: its label, choosing its{' '}
+        A mode: its label, which chooses its{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.View"
@@ -941,17 +1258,17 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A mode’s view: shown while its{' '}
+        A mode’s view, shown while its{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Mode"
         />{' '}
-        is chosen (by <code>value</code>); without{' '}
+        is chosen (by <code>value</code>). Without{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Modes"
         />
-        , the panel’s only one.
+        , it’s the panel’s only one.
       </li>
       <li>
         With a{' '}
@@ -964,13 +1281,14 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.Spectrum"
         />{' '}
-        among the views, all as high as the grid, their content centered:
-        switching doesn’t move a popover. Without (e.g.{' '}
+        among the views, they’re all as tall as the grid, with their content
+        centered, so switching doesn’t move a popover. Without them (for example
+        with{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Sliders"
         />{' '}
-        alone), as high as its content.
+        alone), a view is as tall as its content.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -988,8 +1306,8 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Swatches, 12 by 10: a gray row, then hues by lightness; the color’s
-        outlined. Each a toggle button, named by its color.
+        Swatches, 12 by 10: a gray row, then hues by lightness, with the color
+        outlined. Each is a toggle button, named by its color.
       </li>
       <li>
         Renders a <code>div</code> (a group, named “Grid”).
@@ -1007,13 +1325,13 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Hues across, white to black down; the color ringed. Dragged (it doesn’t
-        swipe a sheet away), or by arrow keys (the hue across, 5°; the lightness
-        down, 5%).
+        Hues across, and white to black down, with the color ringed. It can be
+        dragged (without swiping a sheet away), or moved by the arrow keys (5°
+        of hue across, 5% of lightness down).
       </li>
       <li>
-        Renders a <code>div</code> (a slider, named “Spectrum”, its value the
-        color).
+        Renders a <code>div</code> (a slider, named “Spectrum”, with the color
+        as its value).
       </li>
     </ul>
     <SpectrumPart />
@@ -1029,17 +1347,18 @@ export const ColorPickerParts: FunctionComponent = () => (
     <ul>
       <li>
         A color model’s channels (<code>model</code>): red, green and blue; hue,
-        saturation and lightness; cyan, magenta, yellow and black.
+        saturation and lightness; or cyan, magenta, yellow and black.
       </li>
       <li>
-        Each a row: its title (all caps), a slider mixing from the color (its
-        track the color with the channel along its range), and its value, typed
-        too: applied as it’s typed, within its range (e.g. 0–255, 0–360°,
-        0–100%; more shown as its most).
+        Each is a row: its title (in capitals), a slider that mixes from the
+        color (its track shows the color with the channel along its range), and
+        its value, which can be typed. A typed value applies as it’s typed,
+        within its range (for example 0–255, 0–360° or 0–100%; more counts as
+        the most).
       </li>
       <li>
-        Its values kept while they’re the color’s: a hue isn’t lost to a gray,
-        nor inks to black.
+        Its values are kept while they still describe the color, so a hue isn’t
+        lost to a gray, and inks aren’t lost to black.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1057,23 +1376,25 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The color’s hex code: “Hex” above (as a channel’s title), then its field
-        (<code>#</code> before it, not typed) at the row’s end, where a
-        channel’s value is. Its digits apply as soon as they make a code: 3 or
-        6, or with an alpha, 4 or 8 (without one, the color’s opacity kept).
-        Left, its code again (e.g. emptied).
+        The color’s hex code: “Hex” above (like a channel’s title), then its
+        field (with a <code>#</code> before it that isn’t typed) at the row’s
+        end, where a channel’s value sits. Its digits apply as soon as they make
+        a code: 3 or 6, or 4 or 8 with an alpha (without one, the color’s
+        opacity is kept). When the field is left (for example emptied), it shows
+        the code again.
       </li>
       <li>
-        Its place the app’s: anywhere in the picker, e.g. under the channels of{' '}
+        The app decides where it goes: anywhere in the picker, for example under
+        the channels of{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Sliders"
         />{' '}
-        (its child), as the demos have it. Kept above the keyboard as it’s typed
-        into, as a channel’s row.
+        (as its child), as in the demos. It’s kept above the keyboard while it’s
+        typed into, like a channel’s row.
       </li>
       <li>
-        Before its field, its children: e.g. its copy button (
+        Its children go before its field, for example its copy button (
         <PartLink
           component="color-picker"
           part="ColorPicker.CodeCopy"
@@ -1096,34 +1417,36 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button opening a{' '}
+        A button that opens a{' '}
         <PartLink
           component="menu"
           part="Menu.Root"
         />{' '}
         of the color’s codes: hex (without and with its alpha), then a submenu
-        each: sRGB’s <code>rgb()</code>, <code>hsl()</code>, <code>hwb()</code>;
-        the perceptual <code>oklch()</code>, <code>oklab()</code>,{' '}
-        <code>lab()</code>, <code>lch()</code>; the wide gamut’s{' '}
-        <code>color(display-p3)</code>. Each code shows its format, its values
-        below (e.g. “r: 175 / g: 82 / b: 222”).
+        for each group. sRGB’s <code>rgb()</code>, <code>hsl()</code> and{' '}
+        <code>hwb()</code>; the perceptual <code>oklch()</code>,{' '}
+        <code>oklab()</code>, <code>lab()</code> and <code>lch()</code>; and the
+        wide gamut’s <code>color(display-p3)</code>. Each code shows its format,
+        with its values below (for example “r: 175 / g: 82 / b: 222”).
       </li>
       <li>
-        One picked, it’s copied to the clipboard (<code>onCodeCopy</code>); for
-        a moment, a checkmark instead of its content (<code>data-copied</code>).
+        Once one is picked, it’s copied to the clipboard (
+        <code>onCodeCopy</code>), and a checkmark replaces the button’s content
+        for a moment (<code>data-copied</code>).
       </li>
       <li>
-        Its place the app’s: in{' '}
+        The app decides where it goes: in{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Code"
         />{' '}
-        (before its field), or anywhere in the picker, e.g. in its popover’s{' '}
+        (before its field), or anywhere in the picker, for example in the
+        toolbar of its popover’s{' '}
         <PartLink
           component="popover"
           part="Popover.Header"
         />
-        ’s toolbar.
+        .
       </li>
       <li>
         Renders a{' '}
@@ -1151,27 +1474,28 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.View"
         />
-        , e.g. “Named”): one list of their rows (
+        , for example “Named”), as one list of their rows (
         <PartLink
           component="color-picker"
           part="ColorPicker.NamedColor"
         />
-        s: the app’s, and{' '}
+        s: the app’s, and the{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.CssNamedColors"
         />
-        ’).
+        ).
       </li>
       <li>
-        As high as its rows: its container scrolls it (e.g. a sheet’s content, a
-        popover’s body; here, a box). Its view as high as the grid’s, at least,
-        among a grid’s or a spectrum’s.
+        It’s as tall as its rows, and its container scrolls it (for example a
+        sheet’s content or a popover’s body; here, a box). Among a grid’s or a
+        spectrum’s views, its view is at least as tall as the grid’s.
       </li>
       <li>
-        At its end, in the panel’s inset: an index of its rows’ first letters,
-        kept centered in view as it’s scrolled (below a sheet’s header). One
-        pressed (or scrubbed over), the first row with it at the top.
+        At its end, within the panel’s inset, an index of its rows’ first
+        letters stays centered in view as it scrolls (below a sheet’s header).
+        Pressing a letter (or scrubbing over it) scrolls the first row with it
+        to the top.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1189,17 +1513,17 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A named color’s row: its color (any CSS color) in a{' '}
+        A named color’s row: its color (any CSS color) in an inert{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Well"
-        />{' '}
-        (inert), its label (or its color), a checkmark while it’s the color (its
-        opacity aside). Its label’s first letter is in the index.
+        />
+        , its label (or its color), and a checkmark while it’s the current color
+        (ignoring opacity). Its label’s first letter goes in the index.
       </li>
       <li>
-        Pressed, it’s the color (<code>named</code>), its opacity kept, as a
-        grid swatch’s.
+        Pressing it makes it the color (<code>named</code>), keeping the
+        opacity, like a grid swatch.
       </li>
       <li>
         Renders a{' '}
@@ -1222,8 +1546,8 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The CSS named colors (148: synonyms too, e.g. <code>gray</code> and{' '}
-        <code>grey</code>; not <code>transparent</code>), as{' '}
+        The CSS named colors (148, synonyms included, such as <code>gray</code>{' '}
+        and <code>grey</code>, but not <code>transparent</code>), as{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.NamedColor"
@@ -1231,12 +1555,12 @@ export const ColorPickerParts: FunctionComponent = () => (
         s labeled by their names.
       </li>
       <li>
-        Renders a fragment (no props), in a{' '}
+        Renders a fragment (it takes no props), inside a{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Named"
         />{' '}
-        (e.g. after the app’s rows).
+        (for example after the app’s rows).
       </li>
     </ul>
     <CssNamedColorsPart />
@@ -1249,13 +1573,13 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The opacity: a slider (the color fading in over a checkerboard, its knob
-        the color, translucent) and its percentage, typed too.
+        The opacity: a slider (the color fading in over a checkerboard, with a
+        translucent knob in the color) and its percentage, which can be typed.
       </li>
       <li>
-        Rendered, the color has an opacity (<code>#rrggbbaa</code>); without
-        one, it’s opaque, a value’s alpha dropped as it changes (e.g. a
-        translucent saved color picked opaque).
+        When it’s rendered, the color has an opacity (<code>#rrggbbaa</code>).
+        Without it, the color is opaque, and a value’s alpha is dropped as it
+        changes (for example when a translucent saved color is picked).
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1273,24 +1597,24 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The color (over black and white, translucent) beside the saved colors,
-        in pages of ten (with a{' '}
-        <a href={publicUrl('page-control')}>Page control</a>).
+        The color (over black and white, when translucent) next to the saved
+        colors, in pages of ten (with a{' '}
+        <a href={publicUrl('page-control')}>Page Control</a>).
       </li>
       <li>
-        State: <code>savedColors</code> or <code>defaultSavedColors</code>,{' '}
-        <code>onSavedColorsChange</code>.
+        Its state: <code>savedColors</code> or <code>defaultSavedColors</code>,
+        and <code>onSavedColorsChange</code>.
       </li>
       <li>
-        The add button saves the color; a saved color’s menu (a secondary click:
-        right click, long press) deletes it.
+        The add button saves the color. A saved color’s menu (on a secondary
+        click: a right click or a long press) deletes it.
       </li>
       <li>
         While the color is translucent, pressing it opens an{' '}
-        <a href={publicUrl('action-sheet')}>Action sheet</a>, “Flatten Color?”:
-        Remove Transparency (opacity back to 100%), Flatten on White or Flatten
-        on Black (the color as it shows over white or black, opaque). Off with{' '}
-        <code>flattenOnPress={'{false}'}</code>.
+        <a href={publicUrl('action-sheet')}>Action Sheet</a>, “Flatten Color?”,
+        with Remove Transparency (opacity back to 100%), Flatten on White and
+        Flatten on Black (the opaque color as it shows over white or black).
+        Turn it off with <code>flattenOnPress={'{false}'}</code>.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1308,9 +1632,9 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button picking a color off the screen: the browser’s{' '}
-        <code>EyeDropper</code>; where there’s none (e.g. Safari), it renders
-        nothing.
+        A button that picks a color off the screen with the browser’s{' '}
+        <code>EyeDropper</code>. Where there’s none (for example in Safari), it
+        renders nothing.
       </li>
       <li>
         Renders a{' '}
@@ -1318,7 +1642,7 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="button"
           part="Button.Root"
         />
-        , or its <code>render</code> (e.g. a toolbar’s button).
+        , or its <code>render</code> (for example a toolbar’s button).
       </li>
     </ul>
     <EyedropperPart />
@@ -1333,20 +1657,22 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button opening the system’s color picker: a color input’s, over the
-        button, transparent, pressed itself (on iOS, nothing else opens it); on
-        a desktop, its panel; on iOS, a sheet. From the keyboard, the button
-        opens it. Its colors apply as they’re picked. With the{' '}
+        A button that opens the system’s color picker. A transparent color input
+        lies over the button and is pressed itself (on iOS, nothing else opens
+        it). On a desktop, that opens its panel; on iOS, a sheet. From the
+        keyboard, the button opens it. Its colors apply as they’re picked. With
+        the{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Opacity"
         />{' '}
-        rendered, its alpha too, where the browser’s picker has one (the input’s{' '}
-        <code>alpha</code>: e.g. Safari); otherwise its colors are opaque, the
-        color’s opacity kept. Where a browser can’t open it, it renders nothing.
+        rendered, its alpha applies too, where the browser’s picker has one (the
+        input’s <code>alpha</code>, for example in Safari). Otherwise, its
+        colors are opaque, and the color’s opacity is kept. Where a browser
+        can’t open it, it renders nothing.
       </li>
       <li>
-        In the header’s toolbar, leading, after the{' '}
+        It goes in the header’s toolbar, on the leading side, after the{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Eyedropper"
@@ -1359,7 +1685,7 @@ export const ColorPickerParts: FunctionComponent = () => (
           component="button"
           part="Button.Root"
         />
-        , or its <code>render</code> (e.g. a toolbar’s button).
+        , or its <code>render</code> (for example a toolbar’s button).
       </li>
     </ul>
     <SystemColorsPart />
@@ -1374,10 +1700,9 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A color well: a disk of hues around its color; the trigger opening the
-        picker (e.g. a{' '}
-        <code>{'<Popover.Trigger render={<ColorPicker.Well />} />'}</code>
-        ).
+        A color well: a disk of hues around its color. It’s the trigger that
+        opens the picker (for example{' '}
+        <code>{'<Popover.Trigger render={<ColorPicker.Well />} />'}</code>).
       </li>
       <li>
         Renders a <code>button</code>, named “Color”.
@@ -1395,8 +1720,8 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A hex color (the picker’s values) as its channels, e.g. to blend it or
-        to check its contrast.
+        Turns a hex color (the picker’s values) into its channels, for example
+        to blend it or to check its contrast.
       </li>
     </ul>
     <CodeView code={parseColorCode} />
@@ -1411,9 +1736,9 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Channels as a hex color, as the picker’s values are (
-        <PartLink part="parseColor" />
-        ’s reverse).
+        Turns channels into a hex color, like the picker’s values (the reverse
+        of <PartLink part="parseColor" />
+        ).
       </li>
     </ul>
     <CodeView code={formatColorCode} />
@@ -1428,8 +1753,8 @@ export const ColorPickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The default saved colors: the <PartLink part="ColorPicker.Swatches" />’
-        by default; to start from them, adding the app’s.
+        The default saved colors, which <PartLink part="ColorPicker.Swatches" />{' '}
+        uses by default. Start from them to add the app’s own.
       </li>
     </ul>
     <CodeView code={defaultSavedColorsCode} />

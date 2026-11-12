@@ -1,13 +1,18 @@
 import './style.css';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { ActivityIndicator, Progress } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   activityIndicatorRows,
   progressIndicatorRows,
@@ -33,14 +38,28 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Progress.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Progress.Indicator': [],
+          'Progress.Label': [],
+          'Progress.Track': [],
+          'Progress.Value': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="progress"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Progress.Root"
     >
       <div className="progress-demo-stage">
@@ -48,10 +67,12 @@ const RootPart: FunctionComponent = () => {
           key={elementKey}
           {...props}
         >
-          <Progress.Label>Downloading</Progress.Label>
-          <Progress.Value />
-          <Progress.Track>
-            <Progress.Indicator />
+          <Progress.Label {...partProps['Progress.Label']}>
+            Downloading
+          </Progress.Label>
+          <Progress.Value {...partProps['Progress.Value']} />
+          <Progress.Track {...partProps['Progress.Track']}>
+            <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
       </div>
@@ -70,23 +91,36 @@ const TrackPart: FunctionComponent = () => {
     title: 'Progress.Track',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Progress.Indicator': [],
+          'Progress.Root': ['aria-label', 'value'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="progress"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Progress.Track"
     >
       <div className="progress-demo-stage">
         <Progress.Root
+          {...partProps['Progress.Root']}
           aria-label="Downloading"
           value={40}
         >
           <Progress.Track {...props}>
-            <Progress.Indicator />
+            <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
       </div>
@@ -105,22 +139,35 @@ const IndicatorPart: FunctionComponent = () => {
     title: 'Progress.Indicator',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Progress.Root': ['aria-label', 'value'],
+          'Progress.Track': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="progress"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Progress.Indicator"
     >
       <div className="progress-demo-stage">
         <Progress.Root
+          {...partProps['Progress.Root']}
           aria-label="Downloading"
           value={40}
         >
-          <Progress.Track>
+          <Progress.Track {...partProps['Progress.Track']}>
             <Progress.Indicator {...props} />
           </Progress.Track>
         </Progress.Root>
@@ -140,21 +187,37 @@ const LabelPart: FunctionComponent = () => {
     title: 'Progress.Label',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Progress.Indicator': [],
+          'Progress.Root': ['value'],
+          'Progress.Track': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="progress"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Progress.Label"
     >
       <div className="progress-demo-stage">
-        <Progress.Root value={40}>
+        <Progress.Root
+          {...partProps['Progress.Root']}
+          value={40}
+        >
           <Progress.Label {...props} />
-          <Progress.Track>
-            <Progress.Indicator />
+          <Progress.Track {...partProps['Progress.Track']}>
+            <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
       </div>
@@ -173,24 +236,38 @@ const ValuePart: FunctionComponent = () => {
     title: 'Progress.Value',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Progress.Indicator': [],
+          'Progress.Root': ['aria-label', 'value'],
+          'Progress.Track': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="progress"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Progress.Value"
     >
       <div className="progress-demo-stage">
         <Progress.Root
+          {...partProps['Progress.Root']}
           aria-label="Downloading"
           value={40}
         >
           <Progress.Value {...props} />
-          <Progress.Track>
-            <Progress.Indicator />
+          <Progress.Track {...partProps['Progress.Track']}>
+            <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
       </div>
@@ -231,8 +308,11 @@ const ActivityIndicatorPart: FunctionComponent = () => {
 export const ProgressParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>A bar: Base UI’s Progress, its track and fill always needed.</li>
-      <li>Its label and value: optional, placed by their own prop.</li>
+      <li>A bar: Base UI’s Progress, which always needs its track and fill.</li>
+      <li>
+        Its label and value are optional, and each places itself with its own
+        prop.
+      </li>
       <li>An activity indicator: one element of its own.</li>
     </ul>
     <ul className="demo-tree">
@@ -267,21 +347,21 @@ export const ProgressParts: FunctionComponent = () => (
       <code>Progress.Root</code>
     </Heading>
     <ul>
-      <li>The bar, its label and value laid out around its track.</li>
+      <li>The bar, with its label and value laid out around its track.</li>
       <li>
-        State: <code>value</code> (between <code>min</code> and <code>max</code>
-        ; <code>null</code>: indeterminate).
+        Its state: <code>value</code>, between <code>min</code> and{' '}
+        <code>max</code> (<code>null</code> means indeterminate).
       </li>
       <li>
-        Formatting: <code>format</code>, <code>locale</code>,{' '}
+        Its formatting: <code>format</code>, <code>locale</code> and{' '}
         <code>getAriaValueText</code>.
       </li>
       <li>
-        Look: <code>tint</code> (the fill).
+        Its look: <code>tint</code> (for the fill).
       </li>
       <li>
         Renders a <code>div</code> with the <code>progressbar</code> role, named
-        by its label (without one: <code>aria-label</code>).
+        by its label (without one, by <code>aria-label</code>).
       </li>
     </ul>
     <RootPart />
@@ -296,10 +376,10 @@ export const ProgressParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The track: 6px high, rounded, in the system fill; at least 120px long
-        (as a slider’s), taking the line’s free space.
+        The track: 6px tall, rounded, in the system fill. It’s at least 120px
+        long (like a slider’s), and takes the line’s free space.
       </li>
-      <li>Holds the indicator.</li>
+      <li>It holds the indicator.</li>
     </ul>
     <TrackPart />
     <h3>Props</h3>
@@ -313,11 +393,11 @@ export const ProgressParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The fill, from the track’s start, in the root’s <code>tint</code>; at
-        0%, a dot.
+        The fill, from the track’s start, in the root’s <code>tint</code>. At
+        0%, it’s a dot.
       </li>
-      <li>Indeterminate, a third of the track sliding along it.</li>
-      <li>Its end is where a value’s tooltip points.</li>
+      <li>When indeterminate, it’s a third of the track, sliding along it.</li>
+      <li>A value’s tooltip points at its end.</li>
     </ul>
     <IndicatorPart />
     <h3>Props</h3>
@@ -330,13 +410,13 @@ export const ProgressParts: FunctionComponent = () => (
       <code>Progress.Label</code>
     </Heading>
     <ul>
-      <li>What’s in progress; names the bar.</li>
+      <li>What’s in progress. It names the bar.</li>
       <li>
-        Where: <code>placement</code>; above (by default) or below the track, at
-        the line’s start (before the value, whichever comes first in the
-        markup), or before or after the track.
+        Its place (<code>placement</code>): above (by default) or below the
+        track, at the line’s start (before the value, whichever comes first in
+        the markup), or before or after the track.
       </li>
-      <li>Subheadline, in the secondary label color.</li>
+      <li>In Subheadline, in the secondary label color.</li>
     </ul>
     <LabelPart />
     <h3>Props</h3>
@@ -350,15 +430,18 @@ export const ProgressParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The value, formatted (by the root’s <code>format</code>; or by its
-        children, a function).
+        The value, formatted by the root’s <code>format</code>, or by its
+        children, as a function.
       </li>
       <li>
-        Where: <code>placement</code>; above (by default) or below the track, at
-        the line’s end (also alone), before or after the track; or in a tooltip
-        at the fill’s end, always or momentary.
+        Its place (<code>placement</code>): above (by default) or below the
+        track, at the line’s end (also on its own), before or after the track,
+        or in a tooltip at the fill’s end, always or only momentarily.
       </li>
-      <li>In a tooltip, a glass capsule (see Tooltip).</li>
+      <li>
+        In a tooltip, it’s a glass capsule (see{' '}
+        <a href={publicUrl('tooltip')}>Tooltip</a>).
+      </li>
     </ul>
     <ValuePart />
     <h3>Props</h3>
@@ -372,20 +455,20 @@ export const ProgressParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Spinning spokes, for work of unknown length (an indeterminate{' '}
+        Spinning spokes, for work of unknown length. It’s an indeterminate{' '}
         <PartLink
           component="progress"
           part="Progress.Root"
         />{' '}
-        of its own: no parts).
+        of its own, without parts.
       </li>
       <li>
-        Look: <code>size</code>, <code>movement</code>, <code>duration</code>,{' '}
-        <code>color</code>; spinning, stopped or hidden, and how:{' '}
-        <code>display</code>.
+        Its look: <code>size</code>, <code>movement</code>,{' '}
+        <code>duration</code> and <code>color</code>. Whether it spins, stops or
+        hides, and how: <code>display</code>.
       </li>
       <li>
-        Its children a label after it, naming it (without: an{' '}
+        Its children are a label after it, which names it (without one, use an{' '}
         <code>aria-label</code>).
       </li>
     </ul>

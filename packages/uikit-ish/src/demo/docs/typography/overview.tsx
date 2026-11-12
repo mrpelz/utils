@@ -57,10 +57,10 @@ export const TypographyOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Text in one of the text styles: Large Title to Caption 2, each with its
-        size, line height, weight and tracking.
+        Text in one of the text styles, from Large Title to Caption 2. Each has
+        its own size, line height, weight and tracking.
       </li>
-      <li>Emphasized or italic, in a label color, at a text size.</li>
+      <li>It can be emphasized or italic, in a label color, at a text size.</li>
     </ul>
     <LiveView />
 
@@ -72,10 +72,12 @@ export const TypographyOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Text of your own (a heading, a paragraph, a caption) that should look
-        like the components’ (they use the same styles’ tokens).
+        For text of your own (a heading, a paragraph, a caption) that should
+        look like the components’ text, since they use the same styles’ tokens.
       </li>
-      <li>A text size for a part of the page, its components included.</li>
+      <li>
+        For setting a text size for a part of the page, its components included.
+      </li>
     </ul>
 
     <Heading
@@ -86,16 +88,16 @@ export const TypographyOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A list row’s texts: its own parts (<a href={publicUrl('list')}>List</a>
-        ’s title, subtitle, detail).
+        A list row’s texts: use the row’s own parts (the{' '}
+        <a href={publicUrl('list')}>List</a>’s title, subtitle and detail).
       </li>
       <li>
-        A page’s title: a <a href={publicUrl('header')}>Header</a>’s large
+        A page’s title: use a <a href={publicUrl('header')}>Header</a>’s large
         title.
       </li>
       <li>
-        A symbol in text: a <a href={publicUrl('symbol')}>Symbol</a>, inside it
-        (sized and weighted with it).
+        A symbol in text: put a <a href={publicUrl('symbol')}>Symbol</a> inside
+        it, and it’s sized and weighted with the text.
       </li>
     </ul>
 
@@ -108,7 +110,8 @@ export const TypographyOverview: FunctionComponent = () => (
     <ul>
       <li>The props most text sets.</li>
       <li>
-        All its props: <a href={publicUrl('typography/parts')}>Parts</a>.
+        All its props are on the{' '}
+        <a href={publicUrl('typography/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -134,16 +137,16 @@ export const TypographyOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A style is only a look: a heading needs its element (
-        <code>{'render={<h2 />}'}</code>), as Large Title isn’t one.
+        A style is only a look. A heading needs its element (
+        <code>{'render={<h2 />}'}</code>), because Large Title isn’t one.
       </li>
       <li>
-        Text sizes are the app’s to set (e.g. from a setting): the browser’s
+        The app sets the text sizes (for example from a setting). The browser’s
         text size doesn’t change them.
       </li>
       <li>
         The tertiary and quaternary label colors are for placeholders and
-        watermarks: too faint for text to be read.
+        watermarks. They’re too faint for text people need to read.
       </li>
     </ul>
 
@@ -155,16 +158,16 @@ export const TypographyOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its style’s tokens (<code>--font-ui-*</code>): Body by default, at Large
-        (the default text size).
+        It uses its style’s tokens (<code>--font-ui-*</code>): Body by default,
+        at Large (the default text size).
       </li>
       <li>
-        Weights are variable (the system font’s): a symbol in it follows the
-        weight (see <a href={publicUrl('symbol')}>Symbol</a>).
+        Weights are variable (the system font’s), so a symbol inside it follows
+        the weight (see <a href={publicUrl('symbol')}>Symbol</a>).
       </li>
       <li>
-        Its color inherited unless set; its text size, for its text and
-        everything in it.
+        It inherits its color unless one is set. Its text size applies to its
+        text and everything inside it.
       </li>
     </ul>
   </>

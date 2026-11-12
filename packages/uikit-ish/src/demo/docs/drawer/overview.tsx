@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
@@ -13,7 +13,9 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
   Contents,
@@ -23,6 +25,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfListBullet } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import {
   drawerPopupRows,
@@ -59,47 +62,96 @@ const LiveView: FunctionComponent = () => {
     state,
   } = useDrawerControls(id, addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'List.Block': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': ['background'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       setup={setup}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Drawer"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Drawer.Trigger
                   aria-label="Contacts"
                   handle={contactsDrawer}
                   {...propsTrigger}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfListBullet} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfListBullet}
+                    />
                   </Button.Icon>
                 </Drawer.Trigger>
               </Toolbar.Leading>
-              <Toolbar.Title>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Messages</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root background="plain">
-            <Viewport.Padding edge="block-start" />
-            <List.Root listStyle="plain">
-              <List.Block>
+          <Page.Root
+            {...partProps['Page.Root']}
+            background="plain"
+          >
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root
+              {...partProps['List.Root']}
+              listStyle="plain"
+            >
+              <List.Block {...partProps['List.Block']}>
                 Swipe the contacts in from the leading edge, or press the
                 button.
               </List.Block>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
         <Drawer.Root
@@ -110,35 +162,51 @@ const LiveView: FunctionComponent = () => {
           <Drawer.SwipeArea {...propsSwipeArea} />
           <Drawer.Popup {...propsPopup}>
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>Contacts</span>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Drawer.Close {...propsClose}>
-                      <Button.Label>Done</Button.Label>
+                      <Button.Label {...partProps['Button.Label']}>
+                        Done
+                      </Button.Label>
                     </Drawer.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.slice(0, 8).map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Drawer.Popup>
@@ -163,17 +231,18 @@ export const DrawerOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A column over the content from the inline start or end (Base UI’s{' '}
-        <code>Drawer</code>; Framework7’s panels), the content dimmed behind it.
+        A column that slides over the content from the inline start or end, with
+        the content dimmed behind it. It’s built on Base UI’s{' '}
+        <code>Drawer</code>, and modeled on Framework7’s panels.
       </li>
       <li>
-        Swiped in from its edge, or opened by a button; swiped back, the dimmed
-        content pressed, or a close to close.
+        It’s swiped in from its edge, or opened by a button. Swipe it back,
+        press the dimmed content, or use a close button to close it.
       </li>
       <li>
-        E.g. a compact layout’s sidebar or inspector: on a phone, a{' '}
-        <a href={publicUrl('layout')}>Layout</a>’s column as a drawer (the app’s
-        choice).
+        For example, a compact layout’s sidebar or inspector: on a phone, an app
+        can show a <a href={publicUrl('layout')}>Layout</a>’s column as a
+        drawer.
       </li>
     </ul>
     <LiveView />
@@ -186,12 +255,12 @@ export const DrawerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A phone’s sidebar (mailboxes, folders) or inspector, at hand from the
-        edge without leaving the page.
+        For a sidebar (mailboxes, folders) or an inspector on a phone, at hand
+        from the edge without leaving the page.
       </li>
       <li>
-        A tablet’s columns on a phone: the columns that don’t fit as drawers
-        (see <a href={publicUrl('drawer/composition')}>Composition</a>).
+        For a tablet’s columns on a phone: the columns that don’t fit become
+        drawers (see <a href={publicUrl('drawer/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -203,15 +272,16 @@ export const DrawerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Room for it: a <a href={publicUrl('layout')}>Layout</a>’s column, side
-        by side.
+        There’s room for it: use a <a href={publicUrl('layout')}>Layout</a>{' '}
+        column, side by side.
       </li>
       <li>
-        Drilling into a list: a <a href={publicUrl('navigation')}>Navigation</a>{' '}
-        (one column at a time).
+        Drilling into a list: use a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>, one column at a time.
       </li>
       <li>
-        A scoped task over the page: a <a href={publicUrl('sheet')}>Sheet</a>.
+        A self-contained task above the page: use a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a>.
       </li>
     </ul>
 
@@ -222,9 +292,10 @@ export const DrawerOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most drawers set, across their parts.</li>
+      <li>The props most drawers set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('drawer/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('drawer/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -258,16 +329,20 @@ export const DrawerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s <code>Drawer</code> (a dialog): opened, focus moves into it
-        and stays there (modal); Escape closes it, focus returning to its
-        trigger. A closed one is hidden.
+        It’s Base UI’s <code>Drawer</code>, a dialog. When it opens, focus moves
+        into it and stays there (it’s modal). Escape closes it, and focus
+        returns to its trigger. A closed drawer is hidden.
       </li>
       <li>
-        Swiping it in is a pointer gesture: a <PartLink part="Drawer.Trigger" />{' '}
-        opens it too (as here).
+        Swiping it in is a pointer gesture, so a{' '}
+        <PartLink
+          component="drawer"
+          part="Drawer.Trigger"
+        />{' '}
+        should open it too, as here.
       </li>
       <li>
-        Its and the dimming’s transitions (300ms) don’t follow{' '}
+        Its transitions and the dimming’s (300ms) don’t follow{' '}
         <code>prefers-reduced-motion</code>.
       </li>
     </ul>
@@ -280,25 +355,39 @@ export const DrawerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Over the content at its <code>side</code> (its size, 320px; at most 44px
-        short of its container’s width), hidden until opened: swiped in from its{' '}
-        <PartLink part="Drawer.SwipeArea" /> (a strip at its edge, its{' '}
-        <code>width</code> 20px; none: not swiped in) or by a{' '}
-        <PartLink part="Drawer.Trigger" />.
+        It sits above the content at its <code>side</code>, at its size (320px),
+        and at most 44px short of its container’s width. It’s hidden until
+        opened, either by a swipe from its{' '}
+        <PartLink
+          component="drawer"
+          part="Drawer.SwipeArea"
+        />{' '}
+        (a strip at its edge, 20px wide by default; without one, it can’t be
+        swiped in) or by a{' '}
+        <PartLink
+          component="drawer"
+          part="Drawer.Trigger"
+        />
+        .
       </li>
       <li>
-        Swiped back, the dimmed content pressed (unless{' '}
-        <code>disablePointerDismissal</code>) or a{' '}
-        <PartLink part="Drawer.Close" /> to close. Swiped, it follows the
-        finger; let go past half its width (or flung), it switches (Base UI’s
-        rule).
+        Swipe it back, press the dimmed content (unless{' '}
+        <code>disablePointerDismissal</code> is set), or use a{' '}
+        <PartLink
+          component="drawer"
+          part="Drawer.Close"
+        />{' '}
+        to close it. While swiped, it follows the finger. Let go past half its
+        width, or flick it, and it switches state (Base UI’s rule).
       </li>
       <li>
-        Its popup in a portal (into the provided container, else the body), over
-        the page’s layers (as overlays, z-index 100); its swipe area fixed where
-        it’s rendered, below them.
+        Its popup renders in a portal (into the provided container, else the
+        body), above the page’s layers like other overlays (z-index 100). Its
+        swipe area stays fixed where it’s rendered, below them.
       </li>
-      <li>Mirrored right to left (its sides, its swipes).</li>
+      <li>
+        It mirrors in right-to-left languages, both its sides and its swipes.
+      </li>
     </ul>
   </>
 );

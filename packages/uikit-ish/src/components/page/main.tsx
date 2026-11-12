@@ -18,7 +18,7 @@ export type { PageRootProps } from './props.js';
 // column clear of a floating one (see `Layout`), its
 // content is inset by that column's size, its background running beneath
 // it. Filling (`fill`: e.g. a map under its bars), not a scroller: its
-// content filling it, under the bars and the safe areas, on the page
+// content filling it, under the bars and the safe area insets, on the page
 // background (Framework7's `.page` without its `.page-content`).
 
 /**

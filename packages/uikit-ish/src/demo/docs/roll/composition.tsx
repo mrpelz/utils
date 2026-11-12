@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent, useRef, useState } from 'react';
+import { FunctionComponent, useMemo, useRef, useState } from 'react';
 
 import {
   Button,
@@ -13,6 +13,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -20,6 +22,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { hours, minutes } from './props.js';
 
 const months = [
@@ -124,6 +127,88 @@ const length = new Date(2026, month + 1, 0).getDate();
 <Roll.Column aria-label="Day" value={day} onValueChange={setDay}>
   {days.map((d) => <Roll.Item key={d} disabled={d > length} value={d} />)}
 </Roll.Column>`;
+const inlineCode = `const hours = Array.from({ length: 24 }, (_, index) => index);
+const [hour, setHour] = useState(7);
+const [minute, setMinute] = useState(30);
+const twoDigits = (value) => String(value).padStart(2, '0');
+
+<List.Group>
+  <List.CollapsibleRoot>
+    <List.Item>
+      <List.Content>
+        {/* The title opens it. */}
+        <List.Title render={<List.CollapsibleTrigger />}>Alarm</List.Title>
+      </List.Content>
+      <List.Trailing>
+        <List.Detail>
+          {twoDigits(hour)}:{twoDigits(minute)}
+        </List.Detail>
+      </List.Trailing>
+    </List.Item>
+    <List.CollapsiblePanel>
+      <List.Item>
+        <List.Span>
+          <Roll.Root>
+            <Roll.Column
+              loop
+              aria-label="Hours"
+              value={hour}
+              onValueChange={setHour}
+            >
+              {hours.map((value) => (
+                <Roll.Item
+                  key={value}
+                  value={value}
+                >
+                  {twoDigits(value)}
+                </Roll.Item>
+              ))}
+            </Roll.Column>
+            <Roll.Separator aria-hidden="true">:</Roll.Separator>
+            <Roll.Column
+              loop
+              aria-label="Minutes"
+              value={minute}
+              onValueChange={setMinute}
+            >
+              …
+            </Roll.Column>
+          </Roll.Root>
+        </List.Span>
+      </List.Item>
+    </List.CollapsiblePanel>
+  </List.CollapsibleRoot>
+</List.Group>`;
+
+const popoverCode = `const sizes = ['Small', 'Medium', 'Large', 'Extra Large'];
+const [size, setSize] = useState('Medium');
+
+<Popover.Root>
+  <Popover.Trigger render={<Button.Root />}>
+    <Button.Label>{size}</Button.Label>
+  </Popover.Trigger>
+  <Popover.Portal>
+    <Popover.Positioner>
+      <Popover.Popup aria-label="Text size">
+        <Roll.Root>
+          <Roll.Column
+            aria-label="Text size"
+            value={size}
+            onValueChange={setSize}
+          >
+            {/* Shown as their values: no children. */}
+            {sizes.map((name) => (
+              <Roll.Item
+                key={name}
+                value={name}
+              />
+            ))}
+          </Roll.Column>
+        </Roll.Root>
+      </Popover.Popup>
+    </Popover.Positioner>
+  </Popover.Portal>
+</Popover.Root>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** An alarm's time: hours and minutes, looping, typed. */
@@ -132,21 +217,47 @@ const ATime: FunctionComponent = () => {
   const [hour, setHour] = useState<RollValue>(7);
   const [minute, setMinute] = useState<RollValue>(30);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Roll.Column': [
+              'aria-label',
+              'editable',
+              'loop',
+              'onValueChange',
+              'value',
+            ],
+            'Roll.Item': ['value'],
+            'Roll.Root': [],
+            'Roll.Separator': ['aria-hidden'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('roll-composition-time') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="roll-composition-time"
       log={log}
+      state={[partState]}
       title="Roll as a time"
     >
       <div className="roll-demo-stack">
         <output className="roll-demo-value">
           {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </output>
-        <Roll.Root>
+        <Roll.Root {...partProps['Roll.Root']}>
           <Roll.Column
+            {...partProps['Roll.Column']}
             editable
             loop
             aria-label="Hours"
@@ -162,14 +273,21 @@ const ATime: FunctionComponent = () => {
             {hours.map((value) => (
               <Roll.Item
                 key={value}
+                {...partProps['Roll.Item']}
                 value={value}
               >
                 {String(value).padStart(2, '0')}
               </Roll.Item>
             ))}
           </Roll.Column>
-          <Roll.Separator aria-hidden="true">:</Roll.Separator>
+          <Roll.Separator
+            {...partProps['Roll.Separator']}
+            aria-hidden="true"
+          >
+            :
+          </Roll.Separator>
           <Roll.Column
+            {...partProps['Roll.Column']}
             editable
             loop
             aria-label="Minutes"
@@ -185,6 +303,7 @@ const ATime: FunctionComponent = () => {
             {minutes.map((value) => (
               <Roll.Item
                 key={value}
+                {...partProps['Roll.Item']}
                 value={value}
               >
                 {String(value).padStart(2, '0')}
@@ -205,21 +324,48 @@ const CarryingTheHour: FunctionComponent = () => {
   // The minute row last passing the center (while rolling).
   const passed = useRef(58);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Roll.Column': [
+              'aria-label',
+              'editable',
+              'loop',
+              'onHighlightChange',
+              'onValueChange',
+              'value',
+            ],
+            'Roll.Item': ['value'],
+            'Roll.Root': [],
+            'Roll.Separator': ['aria-hidden'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('roll-composition-carry') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="roll-composition-carry"
       log={log}
+      state={[partState]}
       title="Roll carrying the hour"
     >
       <div className="roll-demo-stack">
         <output className="roll-demo-value">
           {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </output>
-        <Roll.Root>
+        <Roll.Root {...partProps['Roll.Root']}>
           <Roll.Column
+            {...partProps['Roll.Column']}
             editable
             loop
             aria-label="Hours"
@@ -232,14 +378,21 @@ const CarryingTheHour: FunctionComponent = () => {
             {hours.map((value) => (
               <Roll.Item
                 key={value}
+                {...partProps['Roll.Item']}
                 value={value}
               >
                 {String(value).padStart(2, '0')}
               </Roll.Item>
             ))}
           </Roll.Column>
-          <Roll.Separator aria-hidden="true">:</Roll.Separator>
+          <Roll.Separator
+            {...partProps['Roll.Separator']}
+            aria-hidden="true"
+          >
+            :
+          </Roll.Separator>
           <Roll.Column
+            {...partProps['Roll.Column']}
             editable
             loop
             aria-label="Minutes"
@@ -269,6 +422,7 @@ const CarryingTheHour: FunctionComponent = () => {
             {minutes.map((value) => (
               <Roll.Item
                 key={value}
+                {...partProps['Roll.Item']}
                 value={value}
               >
                 {String(value).padStart(2, '0')}
@@ -287,21 +441,48 @@ const ResettingTheMinutes: FunctionComponent = () => {
   const [hour, setHour] = useState<RollValue>(7);
   const [minute, setMinute] = useState<RollValue>(30);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Roll.Column': [
+              'aria-label',
+              'editable',
+              'loop',
+              'onHighlightChange',
+              'onValueChange',
+              'value',
+            ],
+            'Roll.Item': ['value'],
+            'Roll.Root': [],
+            'Roll.Separator': ['aria-hidden'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('roll-composition-reset') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="roll-composition-reset"
       log={log}
+      state={[partState]}
       title="Roll resetting the minutes"
     >
       <div className="roll-demo-stack">
         <output className="roll-demo-value">
           {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </output>
-        <Roll.Root>
+        <Roll.Root {...partProps['Roll.Root']}>
           <Roll.Column
+            {...partProps['Roll.Column']}
             editable
             loop
             aria-label="Hours"
@@ -320,14 +501,21 @@ const ResettingTheMinutes: FunctionComponent = () => {
             {hours.map((value) => (
               <Roll.Item
                 key={value}
+                {...partProps['Roll.Item']}
                 value={value}
               >
                 {String(value).padStart(2, '0')}
               </Roll.Item>
             ))}
           </Roll.Column>
-          <Roll.Separator aria-hidden="true">:</Roll.Separator>
+          <Roll.Separator
+            {...partProps['Roll.Separator']}
+            aria-hidden="true"
+          >
+            :
+          </Roll.Separator>
           <Roll.Column
+            {...partProps['Roll.Column']}
             editable
             loop
             aria-label="Minutes"
@@ -340,6 +528,7 @@ const ResettingTheMinutes: FunctionComponent = () => {
             {minutes.map((value) => (
               <Roll.Item
                 key={value}
+                {...partProps['Roll.Item']}
                 value={value}
               >
                 {String(value).padStart(2, '0')}
@@ -359,21 +548,40 @@ const DependentColumns: FunctionComponent = () => {
   const [day, setDay] = useState<RollValue>(30);
   const length = new Date(2026, Number(month) + 1, 0).getDate();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Roll.Column': ['align', 'aria-label', 'onValueChange', 'value'],
+            'Roll.Item': ['disabled', 'value'],
+            'Roll.Root': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('roll-composition-dependent') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="roll-composition-dependent"
       log={log}
+      state={[partState]}
       title="Roll with dependent columns"
     >
       <div className="roll-demo-stack">
         <output className="roll-demo-value">
           {months[Number(month)]} {day}
         </output>
-        <Roll.Root>
+        <Roll.Root {...partProps['Roll.Root']}>
           <Roll.Column
+            {...partProps['Roll.Column']}
             align="start"
             aria-label="Month"
             value={month}
@@ -385,6 +593,7 @@ const DependentColumns: FunctionComponent = () => {
             {months.map((name, index) => (
               <Roll.Item
                 key={name}
+                {...partProps['Roll.Item']}
                 value={index}
               >
                 {name}
@@ -392,6 +601,7 @@ const DependentColumns: FunctionComponent = () => {
             ))}
           </Roll.Column>
           <Roll.Column
+            {...partProps['Roll.Column']}
             aria-label="Day"
             value={day}
             onValueChange={(next: RollValue) => {
@@ -402,6 +612,7 @@ const DependentColumns: FunctionComponent = () => {
             {days.map((value) => (
               <Roll.Item
                 key={value}
+                {...partProps['Roll.Item']}
                 disabled={value > length}
                 value={value}
               />
@@ -419,39 +630,85 @@ const InlineInAListRow: FunctionComponent = () => {
   const [hour, setHour] = useState<RollValue>(7);
   const [minute, setMinute] = useState<RollValue>(30);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleRoot': ['onOpenChange'],
+            'List.CollapsibleTrigger': [],
+            'List.Content': [],
+            'List.Detail': ['className'],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Span': [],
+            'List.Title': ['render'],
+            'List.Trailing': [],
+            'Roll.Column': ['aria-label', 'loop', 'onValueChange', 'value'],
+            'Roll.Item': ['value'],
+            'Roll.Root': [],
+            'Roll.Separator': ['aria-hidden'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('roll-composition-list') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="roll-composition-list"
       log={log}
+      state={[partState]}
       title="Roll inline in a list row"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
-        <List.Section>
-          <List.Group>
+      <List.Root
+        {...partProps['List.Root']}
+        style={{ width: 'min(402px, 100%)' }}
+      >
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <List.CollapsibleRoot
+              {...partProps['List.CollapsibleRoot']}
               onOpenChange={(isOpen: boolean) => addLog(`expanded: ${isOpen}`)}
             >
-              <List.Item>
-                <List.Content>
-                  <List.Title render={<List.CollapsibleTrigger />}>
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title
+                    {...partProps['List.Title']}
+                    render={
+                      <List.CollapsibleTrigger
+                        {...partProps['List.CollapsibleTrigger']}
+                      />
+                    }
+                  >
                     Alarm
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail className="roll-demo-value">
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail
+                    {...partProps['List.Detail']}
+                    className="roll-demo-value"
+                  >
                     {String(hour).padStart(2, '0')}:
                     {String(minute).padStart(2, '0')}
                   </List.Detail>
                 </List.Trailing>
               </List.Item>
-              <List.CollapsiblePanel>
-                <List.Item>
-                  <List.Span>
-                    <Roll.Root>
+              <List.CollapsiblePanel {...partProps['List.CollapsiblePanel']}>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Span {...partProps['List.Span']}>
+                    <Roll.Root {...partProps['Roll.Root']}>
                       <Roll.Column
+                        {...partProps['Roll.Column']}
                         loop
                         aria-label="Hours"
                         value={hour}
@@ -463,14 +720,21 @@ const InlineInAListRow: FunctionComponent = () => {
                         {hours.map((value) => (
                           <Roll.Item
                             key={value}
+                            {...partProps['Roll.Item']}
                             value={value}
                           >
                             {String(value).padStart(2, '0')}
                           </Roll.Item>
                         ))}
                       </Roll.Column>
-                      <Roll.Separator aria-hidden="true">:</Roll.Separator>
+                      <Roll.Separator
+                        {...partProps['Roll.Separator']}
+                        aria-hidden="true"
+                      >
+                        :
+                      </Roll.Separator>
                       <Roll.Column
+                        {...partProps['Roll.Column']}
                         loop
                         aria-label="Minutes"
                         value={minute}
@@ -482,6 +746,7 @@ const InlineInAListRow: FunctionComponent = () => {
                         {minutes.map((value) => (
                           <Roll.Item
                             key={value}
+                            {...partProps['Roll.Item']}
                             value={value}
                           >
                             {String(value).padStart(2, '0')}
@@ -505,31 +770,62 @@ const InAPopover: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [size, setSize] = useState<RollValue>('Medium');
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Popover.Popup': ['aria-label'],
+            'Popover.Portal': [],
+            'Popover.Positioner': [],
+            'Popover.Root': [],
+            'Popover.Trigger': ['render'],
+            'Roll.Column': ['aria-label', 'onValueChange', 'value'],
+            'Roll.Item': ['value'],
+            'Roll.Root': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('roll-composition-popover') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="roll-composition-popover"
       log={log}
+      state={[partState]}
       title="Roll in a popover"
     >
-      <Popover.Root>
+      <Popover.Root {...partProps['Popover.Root']}>
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>{size}</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>{size}</Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup aria-label="Text size">
-              <Roll.Root>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              aria-label="Text size"
+            >
+              <Roll.Root {...partProps['Roll.Root']}>
                 <Roll.Column
+                  {...partProps['Roll.Column']}
                   aria-label="Text size"
                   value={size}
                   onValueChange={(next: RollValue) => {
@@ -540,6 +836,7 @@ const InAPopover: FunctionComponent = () => {
                   {sizes.map((name) => (
                     <Roll.Item
                       key={name}
+                      {...partProps['Roll.Item']}
                       value={name}
                     />
                   ))}
@@ -575,7 +872,7 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Hours and minutes, as time wheels: two columns,{' '}
+        Hours and minutes, as on a time wheel: two columns, with a{' '}
         <PartLink
           component="roll"
           part="Roll.Separator"
@@ -585,12 +882,15 @@ export const RollComposition: FunctionComponent = () => (
         between them.
       </li>
       <li>
-        <code>loop</code>: past 23 comes 0; <code>editable</code>: pressing the
-        selected row (or typing digits) enters a number.
+        With <code>loop</code>, 0 comes after 23. With <code>editable</code>,
+        pressing the selected row (or typing digits) enters a number.
       </li>
-      <li>Rows show two digits (their children); their values stay numbers.</li>
       <li>
-        Controlled: the app holds the time, and shows it (here above the wheel).
+        Rows show two digits (their children), while their values stay numbers.
+      </li>
+      <li>
+        It’s controlled: the app holds the time, and shows it (here above the
+        wheel).
       </li>
       <li>
         <strong>Library:</strong> the columns (
@@ -603,10 +903,10 @@ export const RollComposition: FunctionComponent = () => (
           component="roll"
           part="Roll.Item"
         />
-        ) and the separator.
+        ), and the separator.
       </li>
       <li>
-        <strong>Demo:</strong> the time (the app’s state) and showing it above
+        <strong>Demo:</strong> the time (the app’s state), and showing it above
         the wheel.
       </li>
     </ul>
@@ -621,31 +921,33 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As a clock: rolling the minutes past 59 to 00 advances the hour; back
-        past 00 to 59, the hour goes back.
+        Like a clock: rolling the minutes past 59 to 00 advances the hour, and
+        rolling back past 00 to 59 takes the hour back.
       </li>
       <li>
-        At once, as the row passes the center: the minute column’s{' '}
-        <code>onHighlightChange</code> (
+        It happens at once, as the row passes the center, through the minute
+        column’s <code>onHighlightChange</code> (
         <PartLink
           component="roll"
           part="Roll.Column"
         />
         ’s, with its <code>reason</code>), not its <code>onValueChange</code>{' '}
-        (only once settled). A step of more than half the minutes is a wrap, the
-        shorter way round; a typed value (<code>input</code>) carries nothing.
+        (which only fires once settled). A step of more than half the minutes
+        counts as a wrap, the shorter way round. A typed value (
+        <code>input</code>) carries nothing.
       </li>
       <li>
-        The hour column then rolls to its new value, as any controlled column
+        The hour column then rolls to its new value, like any controlled column
         given another <code>value</code>.
       </li>
       <li>
         <strong>Library:</strong> the looping columns and their callbacks:{' '}
-        <code>onHighlightChange</code> as rows pass, <code>onValueChange</code>{' '}
-        once settled, each with its <code>reason</code>.
+        <code>onHighlightChange</code> as rows pass, and{' '}
+        <code>onValueChange</code> once settled, each with its{' '}
+        <code>reason</code>.
       </li>
       <li>
-        <strong>Demo:</strong> telling a wrap (the shorter way round) and
+        <strong>Demo:</strong> telling a wrap (the shorter way round), and
         carrying it over to the hour.
       </li>
     </ul>
@@ -660,17 +962,17 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Another hour picked, its minutes start over: the minute column rolls
-        back to 00.
+        When another hour is picked, its minutes start over, and the minute
+        column rolls back to 00.
       </li>
       <li>
-        At once, as another hour passes the center (the hour column’s{' '}
-        <code>onHighlightChange</code>), not only once it settles; the minute
-        column, controlled, rolls to its new value.
+        It happens at once, as another hour passes the center (the hour column’s{' '}
+        <code>onHighlightChange</code>), not only once it settles. The minute
+        column is controlled, so it rolls to its new value.
       </li>
       <li>
         <strong>Library:</strong> the columns’ callbacks (
-        <code>onHighlightChange</code>, <code>onValueChange</code>) and
+        <code>onHighlightChange</code>, <code>onValueChange</code>), and
         controlled columns rolling to a new <code>value</code>.
       </li>
       <li>
@@ -688,20 +990,20 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A column’s rows can depend on another’s value: a month’s days, the rest{' '}
-        <code>disabled</code> (shown, but not selectable).
+        A column’s rows can depend on another column’s value, such as a month’s
+        days, with the rest <code>disabled</code> (shown, but not selectable).
       </li>
       <li>
-        Settled on a disabled day (e.g. 31 after turning to April), the column
-        moves on to the nearest enabled one, then selects it.
+        When it settles on a disabled day (for example 31 after turning to
+        April), the column moves on to the nearest enabled one, and selects it.
       </li>
       <li>
         <strong>Library:</strong> disabled rows, shown but not selectable, and
         moving on from a disabled one when settled.
       </li>
       <li>
-        <strong>Demo:</strong> the month and day (the app’s state) and disabling
-        the days past the month’s end.
+        <strong>Demo:</strong> the month and day (the app’s state), and
+        disabling the days past the month’s end.
       </li>
     </ul>
     <CodeView code={dependentCode} />
@@ -715,7 +1017,7 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Below a <a href={publicUrl('list')}>List</a> row, in place: its title
+        In place, below a <a href={publicUrl('list')}>List</a> row: its title
         opens it (
         <PartLink
           component="list"
@@ -723,17 +1025,18 @@ export const RollComposition: FunctionComponent = () => (
         >
           {'<List.Title render={<List.CollapsibleTrigger />}>'}
         </PartLink>
-        ), the roll in{' '}
+        ), with the roll in a{' '}
         <PartLink
           component="list"
           part="List.CollapsiblePanel"
         />
         .
       </li>
-      <li>The row’s detail shows the value, as Settings does.</li>
+      <li>The row’s detail shows the value, as in a settings app.</li>
       <li>
-        A date or a time: the <a href={publicUrl('date-picker')}>Date picker</a>{' '}
-        does this itself, with a calendar.
+        For a date or a time, the{' '}
+        <a href={publicUrl('date-picker')}>Date Picker</a> does this itself,
+        with a calendar.
       </li>
       <li>
         <strong>Library:</strong> the expandable row (
@@ -741,18 +1044,19 @@ export const RollComposition: FunctionComponent = () => (
           component="list"
           part="List.CollapsibleRoot"
         />
-        , its trigger and{' '}
+        , with its trigger and{' '}
         <PartLink
           component="list"
           part="List.CollapsiblePanel"
         />
-        ) and the roll in it.
+        ), and the roll inside it.
       </li>
       <li>
-        <strong>Demo:</strong> the time (the app’s state) and showing it in the
+        <strong>Demo:</strong> the time (the app’s state), and showing it in the
         row’s detail.
       </li>
     </ul>
+    <CodeView code={inlineCode} />
     <InlineInAListRow />
 
     <Heading
@@ -763,24 +1067,25 @@ export const RollComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On demand: a button showing the value opens a{' '}
-        <a href={publicUrl('popover')}>Popover</a> with the roll (as compact
+        On demand: a button that shows the value opens a{' '}
+        <a href={publicUrl('popover')}>Popover</a> with the roll (like compact
         pickers).
       </li>
-      <li>Each change applies at once; tapping outside closes it.</li>
+      <li>Each change applies at once, and tapping outside closes it.</li>
       <li>
         <strong>Library:</strong> the{' '}
         <PartLink
           component="popover"
           part="Popover.Root"
         />{' '}
-        and the roll in it, applying each change at once.
+        and the roll inside it, applying each change at once.
       </li>
       <li>
-        <strong>Demo:</strong> the size (the app’s state) and showing it on the
+        <strong>Demo:</strong> the size (the app’s state), and showing it on the
         button.
       </li>
     </ul>
+    <CodeView code={popoverCode} />
     <InAPopover />
   </>
 );

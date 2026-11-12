@@ -252,6 +252,9 @@ export class Page {
   /** The opened demo's id (see `open`). */
   id = '';
 
+  /** Whether the opened demo is framed (its stage), not raw (see `open`). */
+  isFramed = false;
+
   /** @type {string | undefined} */
   screenshotDirectory;
 
@@ -279,18 +282,20 @@ export class Page {
     this.screenshotDirectory = screenshots;
   }
 
-  /** JavaScript expression for the opened demo's element (raw: the body). */
-
+  /**
+   * JavaScript expression for the opened demo's element (raw: the body;
+   * framed: its stage).
+   */
   get section() {
-    return 'document.body';
+    return this.isFramed
+      ? `document.querySelector(${JSON.stringify('.demo-stage')})`
+      : 'document.body';
   }
 
   /** The URL fragment for the opened demo and its state (see `open`). */
   get #fragment() {
-    const fragment = new URLSearchParams({
-      id: JSON.stringify(this.id),
-      raw: 'true',
-    });
+    const fragment = new URLSearchParams({ id: JSON.stringify(this.id) });
+    if (!this.isFramed) fragment.set('raw', 'true');
     if (this.state.length > 0) {
       fragment.set(
         'state',
@@ -407,8 +412,11 @@ export class Page {
    *   missing one keeps its own): verbatim (props left out are `undefined`),
    *   or, with `$rest: true`, over the control's own; mapped props by their
    *   label (`mapped`); changed later by `setState`
+   * @param {boolean} [options.isFramed] in its frame (its stage, e.g. a
+   *   phone's screen, a portal's container), not raw: its page, the demo
+   *   alone on it (its controls beside)
    */
-  async open(id, colorScheme = 'light', { state = [] } = {}) {
+  async open(id, colorScheme = 'light', { isFramed = false, state = [] } = {}) {
     if (!this.#logging) {
       await this.browser.send('Page.addScriptToEvaluateOnNewDocument', {
         source: COLLECT_LOG,
@@ -419,6 +427,7 @@ export class Page {
       features: [{ name: 'prefers-color-scheme', value: colorScheme }],
     });
     this.id = id;
+    this.isFramed = isFramed;
     this.state = [...state];
     // Only the hash differs between tests, so leave the page first to get a
     // fresh load instead of a same-document navigation.
@@ -430,7 +439,12 @@ export class Page {
     // (The demos mount after the page (client only); raw, the one selected
     // alone, marking the root as it's shown.)
     const raw = JSON.stringify('data-demo-raw');
-    await this.waitFor(`document.documentElement.hasAttribute(${raw})`);
+    const stage = JSON.stringify('.demo-stage');
+    await this.waitFor(
+      isFramed
+        ? `Boolean(document.querySelector(${stage}))`
+        : `document.documentElement.hasAttribute(${raw})`,
+    );
     await sleep(300);
   }
 

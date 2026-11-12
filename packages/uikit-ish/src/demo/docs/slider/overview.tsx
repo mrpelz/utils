@@ -1,10 +1,13 @@
 import { Slider as BaseSlider } from '@base-ui/react/slider';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Slider, Symbol } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -14,6 +17,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { symbolPairs } from './content.js';
 import {
   sliderLabelRows,
@@ -37,18 +41,40 @@ const LiveView: FunctionComponent = () => {
   });
   const [name, min, max] = symbolPairs[content.symbols ?? 'brightness'];
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted', 'step'],
+            'Slider.Symbol': ['edge'],
+            'Slider.Thumb': ['aria-label'],
+            'Slider.Ticks': ['count'],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={60}
         step={content.ticks ? 100 / (content.ticks - 1) : undefined}
         onValueCommitted={(
@@ -57,20 +83,40 @@ const LiveView: FunctionComponent = () => {
         ) => addLog(`value committed: ${String(value)}/${reason}`)}
       >
         {content.symbols ? (
-          <Slider.Symbol edge="min">
-            <Symbol icon={min} />
+          <Slider.Symbol
+            {...partProps['Slider.Symbol']}
+            edge="min"
+          >
+            <Symbol
+              {...partProps.Symbol}
+              icon={min}
+            />
           </Slider.Symbol>
         ) : null}
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            {content.ticks ? <Slider.Ticks count={content.ticks} /> : null}
-            <Slider.Thumb aria-label={name} />
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
+            {content.ticks ? (
+              <Slider.Ticks
+                {...partProps['Slider.Ticks']}
+                count={content.ticks}
+              />
+            ) : null}
+            <Slider.Thumb
+              {...partProps['Slider.Thumb']}
+              aria-label={name}
+            />
           </Slider.Track>
         </Slider.Control>
         {content.symbols ? (
-          <Slider.Symbol edge="max">
-            <Symbol icon={max} />
+          <Slider.Symbol
+            {...partProps['Slider.Symbol']}
+            edge="max"
+          >
+            <Symbol
+              {...partProps.Symbol}
+              icon={max}
+            />
           </Slider.Symbol>
         ) : null}
       </Slider.Root>
@@ -98,10 +144,10 @@ export const SliderOverview: FunctionComponent = () => (
       </li>
       <li>The track fills with the tint up to the knob.</li>
       <li>
-        Symbols at its ends can say what the ends mean; ticks can mark its
+        Symbols at its ends can say what the ends mean, and ticks can mark its
         steps.
       </li>
-      <li>Base UI’s slider: one knob, or two for a range.</li>
+      <li>It’s Base UI’s slider, with one knob, or two for a range.</li>
     </ul>
     <LiveView />
 
@@ -113,17 +159,17 @@ export const SliderOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        For a value on a continuous scale, where the approximate position
-        matters more than the exact number: brightness, a playback position, a
-        playback speed.
+        For a value on a continuous scale, where the rough position matters more
+        than the exact number: brightness, a playback position, a playback
+        speed.
       </li>
       <li>
-        For a range within bounds (e.g. a price from–to): two thumbs (see{' '}
-        <a href={publicUrl('slider/composition')}>Composition</a>).
+        For a range within bounds (for example a price from–to), with two knobs
+        (see <a href={publicUrl('slider/composition')}>Composition</a>).
       </li>
       <li>
         With the minimum at the leading end and the maximum at the trailing end
-        (vertically: at the bottom and top).
+        (when vertical, at the bottom and the top).
       </li>
     </ul>
 
@@ -135,16 +181,16 @@ export const SliderOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An exact number, changed a step at a time: a{' '}
+        An exact number, changed one step at a time: use a{' '}
         <a href={publicUrl('stepper')}>Stepper</a> (or pair a slider with a text
         field and a stepper when the exact value matters).
       </li>
       <li>
-        One of a few named options: a{' '}
+        One of a few named options: use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        A value that only shows progress, not one to set: a{' '}
+        A value that only shows progress, rather than one to set: use a{' '}
         <a href={publicUrl('progress')}>Progress</a> bar (a slider is an
         editable one).
       </li>
@@ -161,9 +207,10 @@ export const SliderOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most sliders set, across their parts.</li>
+      <li>The props most sliders set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('slider/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('slider/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -203,32 +250,32 @@ export const SliderOverview: FunctionComponent = () => (
       <li>
         Each knob holds a visually hidden native range input (the{' '}
         <code>slider</code> role, with its minimum, maximum, value and
-        orientation); the root is a <code>group</code>. The input’s{' '}
-        <code>aria-valuetext</code> is, with a <code>format</code>, the
-        formatted value (without one, assistive technology reads the number); a
-        range’s thumbs add “start range” and “end range” (Base UI’s, in English
-        whatever the <code>locale</code>). Set your own with{' '}
-        <code>getAriaValueText</code>, e.g. a time.
+        orientation), and the root is a <code>group</code>. With a{' '}
+        <code>format</code>, the input’s <code>aria-valuetext</code> is the
+        formatted value (without one, assistive technology reads the number). A
+        range’s knobs add “start range” and “end range” (Base UI’s wording, in
+        English whatever the <code>locale</code>). Set your own with{' '}
+        <code>getAriaValueText</code>, for example for a time.
       </li>
       <li>
-        Name every knob: a{' '}
+        Name every knob. A{' '}
         <PartLink
           component="slider"
           part="Slider.Label"
         />{' '}
         labels the inputs (<code>aria-labelledby</code>), or give each thumb an{' '}
-        <code>aria-label</code> (a range’s two need different names, e.g.
+        <code>aria-label</code> (a range’s two need different names, for example
         Minimum and Maximum). An <code>aria-label</code> on the root names only
         the group, not the inputs.
       </li>
       <li>
-        Keyboard: Tab focuses a knob, with a ring in the tint. Arrow keys move
-        it a <code>step</code>, Shift + an arrow key or Page Up/Page Down a{' '}
-        <code>largeStep</code>, Home and End to the ends.
+        Tab focuses a knob, with a ring in the tint. The arrow keys move it by a{' '}
+        <code>step</code>, Shift plus an arrow key or Page Up/Page Down by a{' '}
+        <code>largeStep</code>, and Home and End to the ends.
       </li>
       <li>
         The ticks and the value tooltips are hidden from assistive technology,
-        as are the glyphs of the ends’{' '}
+        and so are the glyphs of the ends’{' '}
         <PartLink
           component="symbol"
           part="Symbol"
@@ -238,8 +285,8 @@ export const SliderOverview: FunctionComponent = () => (
           component="slider"
           part="Slider.Symbol"
         />{' '}
-        is read). The symbols aren’t focusable: clicking them is a pointer’s
-        shortcut for Home and End.
+        is read). The symbols aren’t focusable, since clicking them is only a
+        pointer shortcut for Home and End.
       </li>
       <li>
         Its animations (the pressed knob’s lens, momentary tooltips) don’t
@@ -255,16 +302,17 @@ export const SliderOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Dragging the knob, or pressing the track, moves the value; pressed, the
-        knob turns into a glass lens with a glow in the tint.{' '}
-        <code>onValueChange</code> fires while it moves,{' '}
+        Dragging the knob, or pressing the track, moves the value. While
+        pressed, the knob turns into a glass lens with a glow in the tint.{' '}
+        <code>onValueChange</code> fires while it moves, and{' '}
         <code>onValueCommitted</code> once it’s released.
       </li>
       <li>Clicking an end’s symbol moves the knob to that end.</li>
       <li>
-        The track takes the space left by the other parts, at least 120px long.
-        The knob rests inside the track at its ends (<code>thumbAlignment</code>{' '}
-        <code>edge</code>), and the fill spans the whole track at the maximum.
+        The track takes the space the other parts leave, and is at least 120px
+        long. The knob rests inside the track at its ends (
+        <code>thumbAlignment</code> <code>edge</code>), and the fill spans the
+        whole track at the maximum.
       </li>
       <li>
         <PartLink

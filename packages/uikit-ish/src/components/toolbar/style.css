@@ -50,7 +50,7 @@
       --uikit-toolbar-gap: 12px;
       --uikit-toolbar-text-padding: 6px;
 
-      /* (The safe area kept clear by its anchor, see Viewport; 2px of its
+      /* (The safe area inset kept clear by its anchor, see Viewport; 2px of its
          own.) */
       padding: 4px 16px 2px;
     }

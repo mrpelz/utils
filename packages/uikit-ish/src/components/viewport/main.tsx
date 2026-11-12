@@ -1222,7 +1222,7 @@ const bounceAttribute = (alwaysBounce: boolean | undefined) => {
  * (as padding), or not, by what it holds (`auto`, see style.css). For
  * what's in it (e.g. a map's controls, kept clear of a bar or an island),
  * its scope's anchors' sizes at its block edges, as a padding there makes
- * room for them (beyond the safe area): `--uikit-viewport-anchor-block-start`
+ * room for them (beyond the safe area inset): `--uikit-viewport-anchor-block-start`
  * and `-end` (px).
  */
 const Content = forwardRef<HTMLDivElement, ViewportContentProps>(

@@ -170,16 +170,16 @@ export const textFieldControlRows: readonly PropRow[] = [
     'placeholder',
     'string',
     undefined,
-    'Shown while empty (in the placeholder color); in a row without a label, its only name: give it an aria-label too.',
+    'Shown while it’s empty, in the placeholder color. In a row without a label, it’s the only name, so give it an aria-label too.',
   ],
   [
     'type',
     'string',
     code(union('text')),
     <>
-      The input’s type: its keyboard (<code>email</code>, <code>tel</code>,{' '}
-      <code>url</code>, <code>number</code>), its validation, a native picker (
-      dates and times).
+      The input’s type, which sets its keyboard (<code>email</code>,{' '}
+      <code>tel</code>, <code>url</code>, <code>number</code>), its validation,
+      or a native picker (for dates and times).
     </>,
   ],
   [
@@ -187,7 +187,7 @@ export const textFieldControlRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      The id of a <code>{'<datalist>'}</code>: its options as suggestions.
+      The id of a <code>{'<datalist>'}</code>, whose options become suggestions.
     </>,
   ],
   ...baseUiRows('input', 'HTMLInputElement').map((row): PropRow =>
@@ -217,7 +217,7 @@ export const textFieldErrorRows: readonly PropRow[] = [
     undefined,
     <>
       Determines whether to show the error message according to the field’s{' '}
-      <code>ValidityState</code> (e.g. <code>valueMissing</code>,{' '}
+      <code>ValidityState</code> (for example <code>valueMissing</code>,{' '}
       <code>typeMismatch</code>, <code>customError</code>). Specifying{' '}
       <code>true</code> will always show the error message, and lets external
       libraries control the visibility. Without it: whenever the field is
@@ -233,7 +233,7 @@ export const textFieldErrorRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'The error message, below the control (and its description). Without it: the field’s message (validate’s, the browser’s, or the form’s errors).',
+    'The error message, below the control (and its description). Without it, the field’s message shows (validate’s, the browser’s, or the form’s errors).',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -243,7 +243,7 @@ export const textFieldClearRows: readonly PropRow[] = [
     'mode',
     union('always', 'unlessEditing', 'whileEditing'),
     code(union('whileEditing')),
-    'When it’s shown, only ever while the field is filled: while the field is focused, while it isn’t, or either way.',
+    'When it shows, which is only ever while the field is filled: while the field has focus, while it doesn’t, or either way.',
   ],
   [
     'children',
@@ -257,7 +257,7 @@ export const textFieldClearRows: readonly PropRow[] = [
     'MouseEventHandler<HTMLButtonElement>',
     undefined,
     <>
-      Called before it empties the control; <code>preventDefault()</code> keeps
+      Called before it empties the control. <code>preventDefault()</code> keeps
       the value.
     </>,
   ],
@@ -270,32 +270,32 @@ export const textFieldFrameRows: readonly PropRow[] = [
     union('fill', 'row', 'tab-bar', 'tab-bar-collapsed', 'toolbar'),
     code(union('fill')),
     <>
-      Its look, by where it sits: a capsule on the tertiary fill (
-      <code>fill</code>); a list row’s look, beside a list (<code>row</code>,
-      e.g. in a{' '}
+      Its look, which follows where it sits: a capsule on the tertiary fill (
+      <code>fill</code>), a list row’s look next to a list (<code>row</code>,
+      for example in a{' '}
       <PartLink
         component="header"
         part="Header.Accessory"
       />
-      ); a tab bar group’s glass capsule, beside a{' '}
+      ), a tab bar group’s glass capsule next to a{' '}
       <PartLink
         component="tab-bar"
         part="TabBar.Group"
       />{' '}
-      (<code>tab-bar</code>); on a collapsed tab bar’s glass, filling a{' '}
+      (<code>tab-bar</code>), the collapsed tab bar’s glass, filling a{' '}
       <PartLink
         component="tab-bar"
         part="TabBar.Accessory"
       />{' '}
-      (<code>tab-bar-collapsed</code>); or a toolbar’s glass capsule, between
-      its buttons (<code>toolbar</code>, in a{' '}
+      (<code>tab-bar-collapsed</code>), or a toolbar’s glass capsule between its
+      buttons (<code>toolbar</code>, in a{' '}
       <PartLink
         component="toolbar"
         part="Toolbar.Root"
       />
-      ). Only its look: its content stays the same. Changed, it morphs from one
-      look to the other (its height, insets, corners and fill; its glass fading
-      in or out).
+      ). Only its look changes, and its content stays the same. When it changes,
+      it morphs from one look to the other (its height, insets, corners and
+      fill, with its glass fading in or out).
     </>,
   ],
   [
@@ -313,7 +313,7 @@ export const textFieldFrameRows: readonly PropRow[] = [
         component="text-field"
         part="TextField.Clear"
       />{' '}
-      (and e.g. a dictation button).
+      (and for example a dictation button).
     </>,
   ],
   ...elementRows('label', 'HTMLLabelElement'),

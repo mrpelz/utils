@@ -85,6 +85,12 @@ export const propOptionsImage = {
   variant: [undefined, 'symbol', 'rounded', 'circular', 'fill'] as const,
 };
 
+// (Hidden: collapsed, see List.Below.)
+export const propOptionsBelow = {
+  ...commonPropOptions,
+  hidden: [undefined, false, true] as const,
+};
+
 export const propOptionsBlock = {
   ...commonPropOptions,
   strong: [true, false, undefined] as const,

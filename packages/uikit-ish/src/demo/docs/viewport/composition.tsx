@@ -1,5 +1,5 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { FunctionComponent, RefObject, useRef, useState } from 'react';
+import { FunctionComponent, RefObject, useMemo, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -17,9 +17,11 @@ import {
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
-import { Component } from '../../tooling/frame/component.js';
+import { CodeAroundContext, Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -29,6 +31,7 @@ import {
 import { sfArrowDown, sfArrowUp, sfHeartFill } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { messages } from '../list/content.js';
+import { partPropMaps } from '../part-options.js';
 import { phoneTabs, phoneTabValues } from '../tab-bar/tabs.js';
 import { names, planets } from './content.js';
 
@@ -406,38 +409,85 @@ useViewportScroll(({ isHeld: isHeldNow, overscroll: by }) => {
 const Shell: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Panel': ['value'],
+            'TabBar.Root': ['defaultValue', 'onValueChange'],
+            'TabBar.Tab': ['value'],
+            'Viewport.BlockEnd': ['keyboard'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('viewport-composition-shell') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="viewport-composition-shell"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Viewport with a tab bar"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         defaultValue="favorites"
         onValueChange={(
           value: unknown,
           { reason }: BaseTabs.Root.ChangeEventDetails,
         ) => addLog(`value change: ${String(value)}/${reason}`)}
       >
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
           {phoneTabs.map(([tab, label]) => (
             <TabBar.Panel
               key={tab}
+              {...partProps['TabBar.Panel']}
               value={tab}
             >
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <List.Detail>{label}</List.Detail>
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <List.Detail {...partProps['List.Detail']}>
+                            {label}
+                          </List.Detail>
                         </List.Trailing>
                       </List.Item>
                     ))}
@@ -446,21 +496,33 @@ const Shell: FunctionComponent = () => {
               </List.Root>
             </TabBar.Panel>
           ))}
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd keyboard="cover">
-          <TabBar.List>
-            <TabBar.Group>
-              <TabBar.Indicator />
+        <Viewport.BlockEnd
+          {...partProps['Viewport.BlockEnd']}
+          keyboard="cover"
+        >
+          <TabBar.List {...partProps['TabBar.List']}>
+            <TabBar.Group {...partProps['TabBar.Group']}>
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               {phoneTabs.map(([tab, label, icon]) => (
                 <TabBar.Tab
                   key={tab}
+                  {...partProps['TabBar.Tab']}
                   value={tab}
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={icon} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    />
                   </TabBar.Icon>
-                  <TabBar.Label>{label}</TabBar.Label>
+                  <TabBar.Label {...partProps['TabBar.Label']}>
+                    {label}
+                  </TabBar.Label>
                 </TabBar.Tab>
               ))}
             </TabBar.Group>
@@ -475,40 +537,93 @@ const Shell: FunctionComponent = () => {
 const Message: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Text': ['lines'],
+            'List.Title': [],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'aria-label',
+              'enterKeyHint',
+              'onKeyDown',
+              'placeholder',
+            ],
+            'TextField.Frame': [],
+            'TextField.Root': [],
+            'Toolbar.Root': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+            'Viewport.Provider': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('viewport-composition-message') },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
+      controls={[partControls]}
       id="viewport-composition-message"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Viewport with a message field"
     >
       {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
-      <Viewport.Provider>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {messages.map(({ from, preview }) => (
-                  <List.Item key={from}>
-                    <List.Content>
-                      <List.Title>{from}</List.Title>
-                      <List.Text lines={3}>{preview}</List.Text>
+                  <List.Item
+                    key={from}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {from}
+                      </List.Title>
+                      <List.Text
+                        {...partProps['List.Text']}
+                        lines={3}
+                      >
+                        {preview}
+                      </List.Text>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <Toolbar.Root>
-            <TextField.Root>
-              <TextField.Frame>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <TextField.Root {...partProps['TextField.Root']}>
+              <TextField.Frame {...partProps['TextField.Frame']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Message"
                   enterKeyHint="send"
                   placeholder="Message"
@@ -518,7 +633,7 @@ const Message: FunctionComponent = () => {
                     event.currentTarget.value = '';
                   }}
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </TextField.Frame>
             </TextField.Root>
           </Toolbar.Root>
@@ -541,28 +656,73 @@ const CollapseView: FunctionComponent<{
   // Collapsed, its selected tab remains.
   const [sections] = collapsedSelection([phoneTabValues], value);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'TabBar.Group': [],
+          'TabBar.Icon': [],
+          'TabBar.Indicator': [],
+          'TabBar.Label': [],
+          'TabBar.List': ['collapsed'],
+          'TabBar.Panel': ['value'],
+          'TabBar.Root': ['onValueChange', 'value'],
+          'TabBar.Tab': ['value', 'visibleWhenCollapsed'],
+          'Viewport.BlockEnd': ['keyboard'],
+          'Viewport.Content': ['ref'],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState('viewport-composition-collapse') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="viewport-composition-collapse"
       screenRef={screenRef}
       stage="phone"
+      state={[partState]}
       title="Viewport collapsing a tab bar"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={setValue}
       >
-        <Viewport.Content ref={contentRef}>
-          <Viewport.Padding edge="block-start" />
-          <TabBar.Panel value="contacts">
-            <List.Root>
-              <List.Section>
-                <List.Group>
+        <Viewport.Content
+          {...partProps['Viewport.Content']}
+          ref={contentRef}
+        >
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <TabBar.Panel
+            {...partProps['TabBar.Panel']}
+            value="contacts"
+          >
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
@@ -571,22 +731,40 @@ const CollapseView: FunctionComponent<{
             </List.Root>
           </TabBar.Panel>
           {/* (Following the bar as it collapses.) */}
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd keyboard="cover">
-          <TabBar.List collapsed={!atTop && direction === 'down'}>
-            <TabBar.Group visibleWhenCollapsed>
-              <TabBar.Indicator />
+        <Viewport.BlockEnd
+          {...partProps['Viewport.BlockEnd']}
+          keyboard="cover"
+        >
+          <TabBar.List
+            {...partProps['TabBar.List']}
+            collapsed={!atTop && direction === 'down'}
+          >
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               {phoneTabs.map(([tab, label, icon], index) => (
                 <TabBar.Tab
                   key={tab}
+                  {...partProps['TabBar.Tab']}
                   value={tab}
                   visibleWhenCollapsed={sections?.tab === index}
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={icon} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    />
                   </TabBar.Icon>
-                  <TabBar.Label>{label}</TabBar.Label>
+                  <TabBar.Label {...partProps['TabBar.Label']}>
+                    {label}
+                  </TabBar.Label>
                 </TabBar.Tab>
               ))}
             </TabBar.Group>
@@ -605,15 +783,23 @@ const Collapse: FunctionComponent = () => {
   );
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <CollapseView
-        contentRef={contentRef}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <CollapseView
+          contentRef={contentRef}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -658,14 +844,39 @@ const RefreshView: FunctionComponent<{
     }, 1500);
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            ActivityIndicator: ['display', 'progress'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Viewport.Content': ['ref'],
+            'Viewport.Overscroll': ['className', 'open', 'safeArea'],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('viewport-composition-refresh') },
+  );
+
   return (
     <Component
       containsOverscroll
       isInline
+      controls={[partControls]}
       id="viewport-composition-refresh"
       log={log}
       screenRef={screenRef}
       stage="phone"
+      state={[partState]}
       title="Viewport pulled to refresh"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -685,6 +896,7 @@ const RefreshView: FunctionComponent<{
             start; kept shown while refreshing, the content making room for
             it. */}
         <Viewport.Overscroll
+          {...partProps['Viewport.Overscroll']}
           className="viewport-demo-pull"
           open={isRefreshing}
           safeArea="inline"
@@ -692,26 +904,41 @@ const RefreshView: FunctionComponent<{
           {/* Pulled, turning along (a turn to the refresh distance);
               refreshing, spinning on from there. */}
           <ActivityIndicator
+            {...partProps.ActivityIndicator}
             display={isRefreshing ? 'animate' : 'reset'}
             progress={-scroll.overscroll / refreshDistance}
           />
         </Viewport.Overscroll>
-        <Viewport.Content ref={contentRef}>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content
+          {...partProps['Viewport.Content']}
+          ref={contentRef}
+        >
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {rows.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
       </>
     </Component>
@@ -726,15 +953,23 @@ const Refresh: FunctionComponent = () => {
   );
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <RefreshView
-        contentRef={contentRef}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <RefreshView
+          contentRef={contentRef}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -782,14 +1017,46 @@ const PagesView: FunctionComponent<{
     contentRef.current?.scrollTo({ top: 0 });
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['className', 'icon'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': [],
+            'List.Root': ['className', 'data-color-scheme', 'data-turned'],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'Viewport.Content': ['ref'],
+            'Viewport.Overscroll': [
+              'className',
+              'data-armed',
+              'data-released',
+              'edge',
+              'safeArea',
+            ],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('viewport-composition-pages') },
+  );
+
   return (
     <Component
       containsOverscroll
       isInline
+      controls={[partControls]}
       id="viewport-composition-pages"
       log={log}
       screenRef={screenRef}
       stage="phone"
+      state={[partState]}
       title="Viewport pulled to turn pages"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -807,12 +1074,14 @@ const PagesView: FunctionComponent<{
             ends. */}
         {previous && (
           <Viewport.Overscroll
+            {...partProps['Viewport.Overscroll']}
             className="viewport-demo-pull"
             data-armed={overscroll <= -turnDistance ? '' : undefined}
             data-released={scroll.isHeld ? undefined : ''}
             safeArea="inline"
           >
             <Symbol
+              {...partProps.Symbol}
               className="viewport-demo-pull-arrow"
               icon={sfArrowDown}
             />
@@ -821,6 +1090,7 @@ const PagesView: FunctionComponent<{
         )}
         {next && (
           <Viewport.Overscroll
+            {...partProps['Viewport.Overscroll']}
             className="viewport-demo-pull"
             data-armed={overscroll >= turnDistance ? '' : undefined}
             data-released={scroll.isHeld ? undefined : ''}
@@ -828,41 +1098,68 @@ const PagesView: FunctionComponent<{
             safeArea="inline"
           >
             <Symbol
+              {...partProps.Symbol}
               className="viewport-demo-pull-arrow"
               icon={sfArrowUp}
             />
             {next}
           </Viewport.Overscroll>
         )}
-        <Viewport.Content ref={contentRef}>
-          <Viewport.Padding edge="block-start" />
+        <Viewport.Content
+          {...partProps['Viewport.Content']}
+          ref={contentRef}
+        >
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
           {/* A page each (its key): sliding in the way it was turned.
               Pluto's, not one of the eight: a night sky, and its heart. */}
           <List.Root
             key={name}
+            {...partProps['List.Root']}
             className="viewport-demo-page"
             data-color-scheme={name === 'Pluto' ? 'dark' : undefined}
             data-turned={turned}
           >
-            <List.Section>
-              <List.Header prominence="extraProminent">
-                <List.Title render={<h2 />}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Header
+                {...partProps['List.Header']}
+                prominence="extraProminent"
+              >
+                <List.Title
+                  {...partProps['List.Title']}
+                  render={<h2 />}
+                >
                   {name}
-                  {name === 'Pluto' ? <Symbol icon={sfHeartFill} /> : null}
+                  {name === 'Pluto' ? (
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfHeartFill}
+                    />
+                  ) : null}
                 </List.Title>
               </List.Header>
-              <List.Group>
+              <List.Group {...partProps['List.Group']}>
                 {facts.map((fact) => (
-                  <List.Item key={fact}>
-                    <List.Content>
-                      <List.Title>{fact}</List.Title>
+                  <List.Item
+                    key={fact}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {fact}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
       </>
     </Component>
@@ -877,15 +1174,23 @@ const Pages: FunctionComponent = () => {
   );
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <PagesView
-        contentRef={contentRef}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <PagesView
+          contentRef={contentRef}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -896,53 +1201,101 @@ const Selection: FunctionComponent = () => {
   const [rows, setRows] = useState<readonly string[]>(names);
   const [selected, setSelected] = useState<string[]>([]);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            CheckboxGroup: ['onValueChange', 'render', 'value'],
+            'Button.Label': [],
+            'List.Checkbox': ['aria-label', 'value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': ['editing'],
+            'List.Section': [],
+            'List.Title': [],
+            'Toolbar.Button': ['destructive', 'disabled', 'onClick'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('viewport-composition-toolbar') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="viewport-composition-toolbar"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Viewport with a toolbar"
     >
       <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root editing="leading">
-            <List.Section>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root
+            {...partProps['List.Root']}
+            editing="leading"
+          >
+            <List.Section {...partProps['List.Section']}>
               <CheckboxGroup
-                render={<List.Group />}
+                {...partProps.CheckboxGroup}
+                render={<List.Group {...partProps['List.Group']} />}
                 value={selected}
                 onValueChange={(value: string[]) => setSelected(value)}
               >
                 {rows.map((name) => (
                   <List.Item
                     key={name}
+                    {...partProps['List.Item']}
                     onClick={forwardClick('[role=checkbox]')}
                   >
-                    <List.Leading>
+                    <List.Leading {...partProps['List.Leading']}>
                       <List.Checkbox
+                        {...partProps['List.Checkbox']}
                         aria-label={name}
                         value={name}
                       />
                     </List.Leading>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </CheckboxGroup>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <Toolbar.Root>
-            <Toolbar.Leading />
-            <Toolbar.Title>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>{selected.length} Selected</span>
             </Toolbar.Title>
-            <Toolbar.Trailing>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 destructive
                 disabled={selected.length === 0}
                 onClick={() => {
@@ -953,7 +1306,9 @@ const Selection: FunctionComponent = () => {
                   setSelected([]);
                 }}
               >
-                <Button.Label>Delete</Button.Label>
+                <Button.Label {...partProps['Button.Label']}>
+                  Delete
+                </Button.Label>
               </Toolbar.Button>
             </Toolbar.Trailing>
           </Toolbar.Root>
@@ -968,53 +1323,98 @@ const Tint: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [isRecording, setIsRecording] = useState(false);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Toolbar.Button': ['destructive', 'onClick'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeTint'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('viewport-composition-tint') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="viewport-composition-tint"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Viewport with a tinted edge"
     >
       <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
         <Viewport.BlockEnd
+          {...partProps['Viewport.BlockEnd']}
           edgeTint={isRecording ? 'rgb(255 59 48 / 35%)' : undefined}
         >
-          <Toolbar.Root>
-            <Toolbar.Leading />
-            <Toolbar.Title>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>
                 {isRecording
                   ? 'Recording…'
                   : `${String(names.length)} Recordings`}
               </span>
             </Toolbar.Title>
-            <Toolbar.Trailing>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 destructive={isRecording}
                 onClick={() => {
                   addLog(isRecording ? 'stop' : 'record');
                   setIsRecording((current) => !current);
                 }}
               >
-                <Button.Label>{isRecording ? 'Stop' : 'Record'}</Button.Label>
+                <Button.Label {...partProps['Button.Label']}>
+                  {isRecording ? 'Stop' : 'Record'}
+                </Button.Label>
               </Toolbar.Button>
             </Toolbar.Trailing>
           </Toolbar.Root>
@@ -1041,12 +1441,12 @@ export const ViewportComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        The views’ phone screens contain the fixed layers (a{' '}
-        <code>transform</code>); in an app, they’re the window’s.
+        On this page, each phone screen contains its fixed layers (it has a{' '}
+        <code>transform</code>). In an app, they’re fixed to the window.
       </li>
       <li>
-        The on-screen keyboard only shows on devices with one: on a phone, the
-        bars here move with it.
+        The on-screen keyboard only shows on devices that have one. On a phone,
+        the bars here move with it.
       </li>
     </ul>
 
@@ -1058,16 +1458,16 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An app’s shell: its sections’ pages in the content layer, the tab bar
-        floating over them at the bottom.
+        An app’s shell: its sections’ pages in the content layer, and the tab
+        bar floating above them at the bottom.
       </li>
       <li>
         The keyboard covers the tab bar (<code>keyboard=&quot;cover&quot;</code>
         ).
       </li>
       <li>
-        The panels as pages, with headers: see the{' '}
-        <a href={publicUrl('tab-bar/composition')}>Tab bar’s composition</a>.
+        For panels as pages with headers, see the{' '}
+        <a href={publicUrl('tab-bar/composition')}>Tab Bar’s composition</a>.
       </li>
       <li>
         <strong>Library:</strong> the content layer (
@@ -1080,7 +1480,7 @@ export const ViewportComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        ) with the tab bar, and the keyboard covering it (
+        ) holding the tab bar, and the keyboard covering it (
         <code>keyboard=&quot;cover&quot;</code>).
       </li>
       <li>
@@ -1098,29 +1498,31 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A message field at the bottom, pushed up by the keyboard (
+        A message field at the bottom that the keyboard pushes up (the default
+        for{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        ’s default).
+        ).
       </li>
       <li>
-        The content layer resized above the keyboard (its default): the last
+        The content layer shrinks above the keyboard (its default), so the last
         message stays in view.
       </li>
       <li>
-        The field in a{' '}
+        The field sits in a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Root"
         />{' '}
-        in the anchor: the toolbar spaces it and fills its width with it (a text
-        field in a toolbar takes its free space), no styles of the app’s.
+        inside the anchor. The toolbar spaces it, and the field fills the
+        toolbar’s free space, as any text field in a toolbar does. The app adds
+        no styles of its own.
       </li>
       <li>
         <strong>Library:</strong> pushing the bottom anchor up with the
-        keyboard, resizing the content layer above it, and the toolbar spacing
+        keyboard, shrinking the content layer above it, and the toolbar spacing
         the field.
       </li>
       <li>
@@ -1138,28 +1540,28 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The provider tracking the content layer (<code>scroller</code>, its
-        ref), not the document.
+        The provider tracks the content layer (its ref as <code>scroller</code>
+        ), not the document.
       </li>
       <li>
         <PartLink
           component="viewport"
           part="useScrollDirection"
         />{' '}
-        collapses the tab bar while scrolling down, past the top (the scroll
-        position driving a bar’s behavior).
+        collapses the tab bar while scrolling down, once past the top. The
+        scroll position drives the bar’s behavior.
       </li>
       <li>
-        Tracking the document’s scrolling instead: see the{' '}
-        <a href={publicUrl('tab-bar/composition')}>Tab bar’s composition</a>.
+        To track the document’s scrolling instead, see the{' '}
+        <a href={publicUrl('tab-bar/composition')}>Tab Bar’s composition</a>.
       </li>
       <li>
         <strong>Library:</strong> the provider tracking the content layer (
         <PartLink
           component="viewport"
           part="Viewport.Provider"
-        />{' '}
-        <code>scroller</code>) and the scroll direction hook (
+        />
+        ’s <code>scroller</code>) and the scroll direction hook (
         <PartLink
           component="viewport"
           part="useScrollDirection"
@@ -1167,8 +1569,8 @@ export const ViewportComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        <strong>Demo:</strong> collapsing the tab bar by it, and the selected
-        tab.
+        <strong>Demo:</strong> collapsing the tab bar by the direction, and the
+        selected tab.
       </li>
     </ul>
     <CodeView code={collapseCode} />
@@ -1182,20 +1584,20 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A toolbar at the bottom acting on the list’s selection (the list owns
-        it).
+        A toolbar at the bottom acts on the list’s selection, which the list
+        owns.
       </li>
       <li>
-        Rows scroll beneath it; a{' '}
+        Rows scroll beneath it. A{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        at the content layer’s end keeps its last rows clear of it (and a row
-        scrolled to, e.g. by focus).
+        at the content layer’s end keeps the last rows clear of it, and also a
+        row scrolled to, for example by focus.
       </li>
       <li>
-        Entering and leaving edit mode: see the{' '}
+        For entering and leaving edit mode, see the{' '}
         <a href={publicUrl('list/composition')}>List’s composition</a>.
       </li>
       <li>
@@ -1204,7 +1606,7 @@ export const ViewportComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        ) and the padding keeping the last rows clear of it (
+        ) and the padding that keeps the last rows clear of it (
         <PartLink
           component="viewport"
           part="Viewport.Padding"
@@ -1231,17 +1633,17 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A state told at the screen’s edge for a while (here: recording): the
-        bottom bar’s edge effect tinted red, shown at rest too, crossfading as
-        it comes and goes.
+        A state signalled at the screen’s edge for a while, here recording. The
+        bottom bar’s edge effect is tinted red, shown even at rest, and it
+        crossfades as it comes and goes.
       </li>
       <li>
-        Not the only sign of it (color alone isn’t seen by everyone): the bar’s
-        title says so, and its button changes.
+        It isn’t the only sign, because not everyone can see color. The bar’s
+        title says so too, and its button changes.
       </li>
       <li>
-        Scrolled, the rows blur beneath the bar as at any edge (its{' '}
-        <code>edgeEffect</code>, <code>soft</code> by default).
+        When scrolled, the rows blur beneath the bar as at any edge (its{' '}
+        <code>edgeEffect</code> is <code>soft</code> by default).
       </li>
       <li>
         <strong>Library:</strong> the bottom anchor’s <code>edgeTint</code> (
@@ -1271,51 +1673,52 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Pulled past the top and released, the list refreshes (Mail’s,
-        Contacts’), an{' '}
+        Pull the list past its top and let go, and it refreshes, as in many mail
+        and contacts apps. An{' '}
         <PartLink
           component="progress"
           part="ActivityIndicator"
         />{' '}
-        coming in with the pull, spinning while it does.
+        comes in with the pull and spins while it refreshes.
       </li>
       <li>
+        It uses{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"
         />
         ’s <code>overscroll</code> (negative past the top) and{' '}
-        <code>isHeld</code> (still pulled: a touch, or a wheel’s fingers until
-        quiet or its inertia starts: inertia never pulls); released past the
-        distance, it refreshes.
+        <code>isHeld</code>. The pull is held by a touch, or by a wheel’s
+        fingers until it goes quiet or its inertia starts; inertia never pulls.
+        Released past the refresh distance, it refreshes.
       </li>
       <li>
-        The indicator in a{' '}
+        The indicator sits in a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Overscroll"
         />
-        : beneath the content, coming out past its start with it, fading in with
-        its pull’s progress (its custom properties); the indicator turning along
-        (its <code>progress</code>: a turn to the refresh distance), then
-        spinning on from there. While refreshing, it’s <code>open</code>: kept
-        shown, the{' '}
+        , beneath the content, and comes out past its start with it. It fades in
+        with the pull’s progress (from the custom properties) and turns along
+        (its <code>progress</code>: one turn at the refresh distance), then
+        keeps spinning from there. While refreshing, the area is{' '}
+        <code>open</code>: it stays shown, the{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        making room for it, the content settling there (and back).
+        makes room for it, and the content moves there and back.
       </li>
       <li>
-        Safari bounces past the top by itself; elsewhere, the pull is the
-        touch’s (or the wheel’s), rubber-banded, the content moved along as
-        Safari’s (only while an overscroll area is shown: without one, the
-        browser’s own scrolling is left as it is).
+        Safari bounces past the top by itself. Elsewhere, the pull comes from
+        the touch or the wheel, rubber-banded, and the content moves along as in
+        Safari. That happens only while an overscroll area is shown; without
+        one, the browser’s own scrolling is left alone.
       </li>
       <li>
-        The indicator comes in from the screen’s edge, showing behind the status
-        bar (<code>safeArea=&quot;inline&quot;</code>: only the side insets kept
-        clear); refreshing, it rests clear of it.
+        The indicator comes in from the screen’s edge and shows behind the
+        status bar (<code>safeArea=&quot;inline&quot;</code> keeps only the side
+        insets clear). While refreshing, it rests clear of the status bar.
       </li>
       <li>
         <strong>Library:</strong> the scroll hook’s <code>overscroll</code> and{' '}
@@ -1329,8 +1732,8 @@ export const ViewportComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Overscroll"
         />
-        , its <code>open</code>, <code>safeArea</code> and custom properties)
-        and the{' '}
+        , with its <code>open</code>, <code>safeArea</code> and custom
+        properties) and the{' '}
         <PartLink
           component="progress"
           part="ActivityIndicator"
@@ -1354,29 +1757,32 @@ export const ViewportComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A page each (a story’s, an article’s): pulled on past the end and
-        released, the next; back past the start, the previous.
+        One page at a time, such as a story or an article. Pull on past the end
+        and let go for the next page, or back past the start for the previous
+        one.
       </li>
       <li>
-        A hint past each end (a{' '}
+        A hint shows past each end (a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Overscroll"
         />{' '}
-        at either edge), coming out with the pull, its arrow turning once far
-        enough (released then, it turns the page).
+        at either edge). It comes out with the pull, and its arrow turns once
+        the pull is far enough. Letting go then turns the page.
       </li>
       <li>
+        It uses{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"
         />
-        ’s <code>overscroll</code> at either end (positive past the end), and{' '}
-        <code>isHeld</code>. Its <code>direction</code> doesn’t change bouncing
-        back.
+        ’s <code>overscroll</code> at either end (positive past the end) and{' '}
+        <code>isHeld</code>. Its <code>direction</code> doesn’t change while
+        bouncing back.
       </li>
       <li>
-        Short pages too: the content layer bounces even when its content fits (
+        Short pages work too, because the content layer bounces even when its
+        content fits (
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -1384,7 +1790,7 @@ export const ViewportComposition: FunctionComponent = () => (
         ’s <code>alwaysBounce</code>).
       </li>
       <li>
-        The hints come in from the screen’s edges, showing behind the status bar
+        The hints come in from the screen’s edges and show behind the status bar
         and the home indicator (<code>safeArea=&quot;inline&quot;</code>).
       </li>
       <li>

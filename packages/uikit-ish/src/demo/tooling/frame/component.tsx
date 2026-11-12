@@ -1,6 +1,9 @@
 import {
+  cloneElement,
+  createContext,
   Dispatch,
   FunctionComponent,
+  ReactElement,
   ReactNode,
   RefObject,
   SetStateAction,
@@ -343,6 +346,16 @@ const Diagnostics: FunctionComponent<{
     </section>
   ) : null;
 
+/**
+ * What wraps a demo's frame in the app, outside it (e.g. a provider its
+ * view's hooks need, so it can't be inside the stage): an element, its
+ * code shown around the stage's (its children the stage's JSX). Its props
+ * as the app would write them (not the demo's frame's, e.g. a `screen`).
+ */
+export const CodeAroundContext = createContext<ReactElement | undefined>(
+  undefined,
+);
+
 /** The guards' hooks, above the code of a demo with `hasInputGuards`. */
 const inputGuardsCode = `useInputZoomPrevention();
 useFocusShiftPrevention();
@@ -458,7 +471,7 @@ const StageSettings: FunctionComponent<{
         {toggle('hasBackdrop', 'Backdrop', isFramed)}
         {toggle('isCentered', 'Center', isFramed)}
         {toggle('isStretched', 'Stretch', isFramed)}
-        {toggle('hasSafeAreas', 'Safe Areas', !isFramed)}
+        {toggle('hasSafeAreas', 'Safe Area Insets', !isFramed)}
         {toggle('isExpanded', 'Expand', !isInline || !canExpand)}
         <button
           className="demo-button"
@@ -625,14 +638,23 @@ export const Component: FunctionComponent<{
   const canExpand = useCanExpand(inlineRef);
   // (Its own: closed at first, not kept, nor shared with other views.)
   const [isCodeOpen, setIsCodeOpen] = useState(false);
+  // (Around its code: what wraps its frame in the app, see
+  // `CodeAroundContext`.)
+  const around = useContext(CodeAroundContext);
   // (After rendering: rendering to a string resets Preact's hooks state.)
   const [code, setCode] = useState('');
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setCode(
-      isCodeOpen && !isRaw ? demoCode(children, hasInputGuards, setup) : '',
+      isCodeOpen && !isRaw
+        ? demoCode(
+            around ? cloneElement(around, {}, children) : children,
+            hasInputGuards,
+            setup,
+          )
+        : '',
     );
-  }, [children, hasInputGuards, isCodeOpen, isRaw, setup]);
+  }, [around, children, hasInputGuards, isCodeOpen, isRaw, setup]);
 
   const isHidden = useMemo(() => {
     if (showId === undefined || showId === id) return false;

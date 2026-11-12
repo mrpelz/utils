@@ -24,6 +24,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
@@ -51,6 +52,7 @@ import {
   sfTrashFill,
   sfWifi,
 } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import { contacts, messages, planets } from './content.js';
 import {
   getPropOptionsAccessory,
@@ -126,129 +128,249 @@ export const ListDemo: FunctionComponent = () => {
     { external: externalTrigger, title: 'Collapsible.Trigger (List.Header)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Header': ['prominence'],
+            'List.Item': ['onClick'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['tint'],
+            'Collapsible.Panel': ['render'],
+            'Collapsible.Trigger': ['nativeButton', 'render'],
+            'List.Accessory': ['aria-label', 'onClick', 'render'],
+            'List.Action': ['onClick'],
+            'List.Block': [],
+            'List.Button': ['destructive', 'onClick'],
+            'List.Checkmark': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.DrillIn': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Image': ['style', 'variant'],
+            'List.Leading': [],
+            'List.Section': [],
+            'List.Span': [],
+            'List.Subtitle': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Portal': [],
+            'Menu.Positioner': ['align'],
+            'Menu.RadioGroup': ['onValueChange', 'value'],
+            'Menu.RadioItem': ['closeOnClick', 'value'],
+            'Menu.RadioItemIndicator': [],
+            'Menu.Root': [],
+            'Menu.Trigger': ['render'],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Segmented.Root': ['aria-label', 'defaultValue', 'onValueChange'],
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Symbol': ['edge'],
+            'Slider.Thumb': ['aria-label'],
+            'Slider.Track': [],
+            'Stepper.Decrement': [],
+            'Stepper.Group': [],
+            'Stepper.Increment': [],
+            'Stepper.Input': ['aria-label'],
+            'Stepper.Root': ['onValueChange', 'value'],
+            'Switch.Root': ['aria-label', 'onCheckedChange', 'tint'],
+            'Switch.Thumb': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isStretched
-      controls={[controlRoot, controlItem, controlCollapsible, controlTrigger]}
       id={id}
       log={log}
-      state={[stateRoot, stateItem, stateCollapsible, stateTrigger]}
+      state={[stateRoot, stateItem, stateCollapsible, stateTrigger, partState]}
       title="List"
+      controls={[
+        controlRoot,
+        controlItem,
+        controlCollapsible,
+        controlTrigger,
+        partControls,
+      ]}
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Header>
-            <List.Title render={<h3 />}>Header</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header {...partProps['List.Header']}>
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Header
+            </List.Title>
             <List.Accessory
+              {...partProps['List.Accessory']}
               aria-label="Edit"
               render={<button type="button" />}
               onClick={() => addLog('header button clicked')}
             >
-              <Symbol icon={sfSquareAndPencil} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfSquareAndPencil}
+              />
             </List.Accessory>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             <List.Item {...propsItem}>
-              <List.Leading>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfAirplane} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfAirplane}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
-                <List.Title>Airplane Mode</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Airplane Mode
+                </List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <Switch.Root
+                  {...partProps['Switch.Root']}
                   aria-label="Airplane Mode"
                   tint="var(--color-ui-system-orange)"
                   onCheckedChange={(isChecked: boolean) =>
                     addLog(`airplane mode: ${isChecked}`)
                   }
                 >
-                  <Switch.Thumb />
+                  <Switch.Thumb {...partProps['Switch.Thumb']} />
                 </Switch.Root>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfWifi} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfWifi}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Wi-Fi clicked')}
                 >
                   Wi-Fi
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>Home</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Home</List.Detail>
               </List.Trailing>
-              <List.Trailing>
-                <List.DrillIn />
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-red)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfBellFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfBellFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Notifications clicked')}
                 >
                   Notifications
                 </List.Title>
-                <List.Subtitle>Banners, Sounds</List.Subtitle>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Banners, Sounds
+                </List.Subtitle>
               </List.Content>
-              <List.Trailing>
-                <List.DrillIn />
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
               </List.Trailing>
             </List.Item>
             {/* A pop-up button (see “Menu (Pop-up Button)”): gray, in a
                 row. */}
-            <List.Item onClick={forwardClick('[aria-haspopup]')}>
-              <List.Leading>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[aria-haspopup]')}
+            >
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-gray)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfPersonFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPersonFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
-                <List.Title>Show Previews</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Show Previews
+                </List.Title>
               </List.Content>
-              <List.Trailing>
-                <Menu.Root>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <Menu.Root {...partProps['Menu.Root']}>
                   <Menu.Trigger
+                    {...partProps['Menu.Trigger']}
                     render={
-                      <Button.Root tint="var(--color-ui-secondary-label)" />
+                      <Button.Root
+                        {...partProps['Button.Root']}
+                        tint="var(--color-ui-secondary-label)"
+                      />
                     }
                   >
-                    <Button.Label>{previews}</Button.Label>
-                    <Button.Icon>
-                      <Symbol icon={sfChevronUpChevronDown} />
+                    <Button.Label {...partProps['Button.Label']}>
+                      {previews}
+                    </Button.Label>
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfChevronUpChevronDown}
+                      />
                     </Button.Icon>
                   </Menu.Trigger>
-                  <Menu.Portal>
-                    <Menu.Positioner align="end">
-                      <Menu.Popup>
+                  <Menu.Portal {...partProps['Menu.Portal']}>
+                    <Menu.Positioner
+                      {...partProps['Menu.Positioner']}
+                      align="end"
+                    >
+                      <Menu.Popup {...partProps['Menu.Popup']}>
                         <Menu.RadioGroup
+                          {...partProps['Menu.RadioGroup']}
                           value={previews}
                           onValueChange={(next: unknown) => {
                             addLog(`show previews: ${String(next)}`);
@@ -256,25 +378,40 @@ export const ListDemo: FunctionComponent = () => {
                           }}
                         >
                           <Menu.RadioItem
+                            {...partProps['Menu.RadioItem']}
                             closeOnClick
                             value="Automatic"
                           >
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>Automatic</Menu.Label>
+                            <Menu.RadioItemIndicator
+                              {...partProps['Menu.RadioItemIndicator']}
+                            />
+                            <Menu.Label {...partProps['Menu.Label']}>
+                              Automatic
+                            </Menu.Label>
                           </Menu.RadioItem>
                           <Menu.RadioItem
+                            {...partProps['Menu.RadioItem']}
                             closeOnClick
                             value="Always"
                           >
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>Always</Menu.Label>
+                            <Menu.RadioItemIndicator
+                              {...partProps['Menu.RadioItemIndicator']}
+                            />
+                            <Menu.Label {...partProps['Menu.Label']}>
+                              Always
+                            </Menu.Label>
                           </Menu.RadioItem>
                           <Menu.RadioItem
+                            {...partProps['Menu.RadioItem']}
                             closeOnClick
                             value="Never"
                           >
-                            <Menu.RadioItemIndicator />
-                            <Menu.Label>Never</Menu.Label>
+                            <Menu.RadioItemIndicator
+                              {...partProps['Menu.RadioItemIndicator']}
+                            />
+                            <Menu.Label {...partProps['Menu.Label']}>
+                              Never
+                            </Menu.Label>
                           </Menu.RadioItem>
                         </Menu.RadioGroup>
                       </Menu.Popup>
@@ -284,6 +421,7 @@ export const ListDemo: FunctionComponent = () => {
               </List.Trailing>
             </List.Item>
             <List.Item
+              {...partProps['List.Item']}
               onClick={({ target }) => {
                 if (target instanceof Element && target.closest('button')) {
                   return;
@@ -292,113 +430,170 @@ export const ListDemo: FunctionComponent = () => {
                 setIsFavorite(!isFavorite);
               }}
             >
-              <List.Leading>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-pink)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfHeartFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
-                <List.Title>Favorite</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Favorite</List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <List.Accessory
+                  {...partProps['List.Accessory']}
                   aria-label="Info"
                   render={<button type="button" />}
                   onClick={() => addLog('info clicked')}
                 >
-                  <Symbol icon={sfICircle} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfICircle}
+                  />
                 </List.Accessory>
-                {isFavorite ? <List.Checkmark /> : null}
+                {isFavorite ? (
+                  <List.Checkmark {...partProps['List.Checkmark']} />
+                ) : null}
               </List.Trailing>
             </List.Item>
-            <List.Item onClick={forwardClick('[data-list-part=action]')}>
-              <List.Content>
-                <List.Title>Button</List.Title>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[data-list-part=action]')}
+            >
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Button</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Action onClick={() => addLog('action clicked')}>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Action
+                  {...partProps['List.Action']}
+                  onClick={() => addLog('action clicked')}
+                >
                   Button
                 </List.Action>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
-                <List.Title>Text Size</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Text Size</List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <Segmented.Root
+                  {...partProps['Segmented.Root']}
                   aria-label="Text Size"
                   defaultValue="M"
                   onValueChange={(value: unknown) =>
                     addLog(`text size: ${String(value)}`)
                   }
                 >
-                  <Segmented.Item value="S">S</Segmented.Item>
-                  <Segmented.Item value="M">M</Segmented.Item>
-                  <Segmented.Item value="L">L</Segmented.Item>
-                  <Segmented.Highlight />
+                  <Segmented.Item
+                    {...partProps['Segmented.Item']}
+                    value="S"
+                  >
+                    S
+                  </Segmented.Item>
+                  <Segmented.Item
+                    {...partProps['Segmented.Item']}
+                    value="M"
+                  >
+                    M
+                  </Segmented.Item>
+                  <Segmented.Item
+                    {...partProps['Segmented.Item']}
+                    value="L"
+                  >
+                    L
+                  </Segmented.Item>
+                  <Segmented.Highlight {...partProps['Segmented.Highlight']} />
                 </Segmented.Root>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
-                <List.Title>Quantity</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Quantity</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>{quantity}</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>
+                  {quantity}
+                </List.Detail>
               </List.Trailing>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <Stepper.Root
+                  {...partProps['Stepper.Root']}
                   value={quantity}
                   onValueChange={(value: number | null) => {
                     addLog(`quantity: ${String(value)}`);
                     setQuantity(value ?? 0);
                   }}
                 >
-                  <Stepper.Group>
-                    <Stepper.Input aria-label="Quantity" />
-                    <Stepper.Decrement />
-                    <Stepper.Increment />
+                  <Stepper.Group {...partProps['Stepper.Group']}>
+                    <Stepper.Input
+                      {...partProps['Stepper.Input']}
+                      aria-label="Quantity"
+                    />
+                    <Stepper.Decrement {...partProps['Stepper.Decrement']} />
+                    <Stepper.Increment {...partProps['Stepper.Increment']} />
                   </Stepper.Group>
                 </Stepper.Root>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Span>
+            <List.Item {...partProps['List.Item']}>
+              <List.Span {...partProps['List.Span']}>
                 <Slider.Root
+                  {...partProps['Slider.Root']}
                   defaultValue={60}
                   onValueCommitted={(value: number | readonly number[]) =>
                     addLog(`brightness: ${String(value)}`)
                   }
                 >
-                  <Slider.Symbol edge="min">
-                    <Symbol icon={sfSunMin} />
+                  <Slider.Symbol
+                    {...partProps['Slider.Symbol']}
+                    edge="min"
+                  >
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSunMin}
+                    />
                   </Slider.Symbol>
-                  <Slider.Control>
-                    <Slider.Track>
-                      <Slider.Indicator />
-                      <Slider.Thumb aria-label="Brightness" />
+                  <Slider.Control {...partProps['Slider.Control']}>
+                    <Slider.Track {...partProps['Slider.Track']}>
+                      <Slider.Indicator {...partProps['Slider.Indicator']} />
+                      <Slider.Thumb
+                        {...partProps['Slider.Thumb']}
+                        aria-label="Brightness"
+                      />
                     </Slider.Track>
                   </Slider.Control>
-                  <Slider.Symbol edge="max">
-                    <Symbol icon={sfSunMax} />
+                  <Slider.Symbol
+                    {...partProps['Slider.Symbol']}
+                    edge="max"
+                  >
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSunMax}
+                    />
                   </Slider.Symbol>
                 </Slider.Root>
               </List.Span>
             </List.Item>
           </List.Group>
-          <List.Footer>Footer text, aligned with the rows’ text.</List.Footer>
+          <List.Footer {...partProps['List.Footer']}>
+            Footer text, aligned with the rows’ text.
+          </List.Footer>
         </List.Section>
 
         <Collapsible.Root
           key={keyCollapsible}
           {...propsCollapsible}
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
         >
           <Collapsible.Trigger
+            {...partProps['Collapsible.Trigger']}
             nativeButton={false}
             render={
               <List.Header
@@ -407,65 +602,81 @@ export const ListDemo: FunctionComponent = () => {
               />
             }
           >
-            <List.Title>Collapsible</List.Title>
-            <List.Detail>{previews}</List.Detail>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>Collapsible</List.Title>
+            <List.Detail {...partProps['List.Detail']}>{previews}</List.Detail>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Collapsible.Trigger>
-          <Collapsible.Panel render={<List.Group />}>
-            <List.Item>
-              <List.Content>
+          <Collapsible.Panel
+            {...partProps['Collapsible.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => setPreviews('Automatic')}
                 >
                   Automatic
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                {previews === 'Automatic' ? <List.Checkmark /> : null}
+              <List.Trailing {...partProps['List.Trailing']}>
+                {previews === 'Automatic' ? (
+                  <List.Checkmark {...partProps['List.Checkmark']} />
+                ) : null}
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => setPreviews('Always')}
                 >
                   Always
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                {previews === 'Always' ? <List.Checkmark /> : null}
+              <List.Trailing {...partProps['List.Trailing']}>
+                {previews === 'Always' ? (
+                  <List.Checkmark {...partProps['List.Checkmark']} />
+                ) : null}
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => setPreviews('Never')}
                 >
                   Never
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                {previews === 'Never' ? <List.Checkmark /> : null}
+              <List.Trailing {...partProps['List.Trailing']}>
+                {previews === 'Never' ? (
+                  <List.Checkmark {...partProps['List.Checkmark']} />
+                ) : null}
               </List.Trailing>
             </List.Item>
           </Collapsible.Panel>
         </Collapsible.Root>
 
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Content>
-                <List.Button onClick={() => addLog('action clicked')}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Button
+                  {...partProps['List.Button']}
+                  onClick={() => addLog('action clicked')}
+                >
                   Action
                 </List.Button>
               </List.Content>
             </List.Item>
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Button
+                  {...partProps['List.Button']}
                   destructive
                   onClick={() => addLog('destructive clicked')}
                 >
@@ -473,25 +684,43 @@ export const ListDemo: FunctionComponent = () => {
                 </List.Button>
               </List.Content>
             </List.Item>
-            <List.Item>
-              <List.Content>
-                <List.Button disabled>Action</List.Button>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Button
+                  {...partProps['List.Button']}
+                  disabled
+                >
+                  Action
+                </List.Button>
               </List.Content>
             </List.Item>
           </List.Group>
         </List.Section>
 
-        <List.Section>
-          <List.Header prominence="extraProminent">
-            <List.Title render={<h3 />}>Content Block</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="extraProminent"
+          >
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Content Block
+            </List.Title>
           </List.Header>
-          <List.Block strong>
+          <List.Block
+            {...partProps['List.Block']}
+            strong
+          >
             <p>
               Lists and tables present data in one or more columns of rows. A
               content block holds text between them, aligned with the rows.
             </p>
           </List.Block>
-          <List.Footer>Blocks can have headers and footers, too.</List.Footer>
+          <List.Footer {...partProps['List.Footer']}>
+            Blocks can have headers and footers, too.
+          </List.Footer>
         </List.Section>
       </List.Root>
     </Component>
@@ -648,6 +877,33 @@ export const ListPartsDemo: FunctionComponent = () => {
     { external: externalBlock, title: 'List.Block' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Accessory': ['aria-label', 'onClick', 'render'],
+            'List.Detail': [],
+            'List.Image': ['variant'],
+            'List.Item': ['onClick'],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.SwipeAction': ['label', 'onClick', 'showLabel', 'tint'],
+            'List.SwipeActions': ['overswipe', 'side'],
+            'List.Title': ['render'],
+            Symbol: ['icon'],
+            'List.Below': [],
+            'List.Content': [],
+            'List.Leading': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
@@ -680,6 +936,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         controlSwipeAction,
         controlFooter,
         controlBlock,
+        partControls,
       ]}
       state={[
         stateContent,
@@ -707,6 +964,7 @@ export const ListPartsDemo: FunctionComponent = () => {
         stateFooter,
         stateBlock,
         stateSwipeActionsTrigger,
+        partState,
       ]}
     >
       <List.Root {...propsRoot}>
@@ -715,21 +973,32 @@ export const ListPartsDemo: FunctionComponent = () => {
             {content.supertitle ? (
               <List.Supertitle {...propsSupertitle}>Supertitle</List.Supertitle>
             ) : null}
-            <List.Title render={<h3 />}>Header</List.Title>
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Header
+            </List.Title>
             {content.headerSubtitle ? (
-              <List.Subtitle>Subtitle</List.Subtitle>
+              <List.Subtitle {...partProps['List.Subtitle']}>
+                Subtitle
+              </List.Subtitle>
             ) : null}
             <List.Accessory
+              {...partProps['List.Accessory']}
               aria-label="Edit"
               render={<button type="button" />}
               onClick={() => addLog('header accessory clicked')}
             >
-              <Symbol icon={sfSquareAndPencil} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfSquareAndPencil}
+              />
             </List.Accessory>
           </List.Header>
           <List.Group {...propsGroup}>
             <List.Item {...propsItem}>
-              <List.Leading>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
                   {...propsImage}
                   variant={propsImage.variant ?? 'rounded'}
@@ -738,68 +1007,84 @@ export const ListPartsDemo: FunctionComponent = () => {
                     ...propsImage.style,
                   }}
                 >
-                  <Symbol icon={sfWifi} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfWifi}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title {...propsTitle}>Title</List.Title>
                 <List.Subtitle {...propsSubtitle}>Subtitle</List.Subtitle>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <List.Detail {...propsDetail}>Detail</List.Detail>
               </List.Trailing>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <List.DrillIn {...propsDrillIn} />
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
-                <List.Title>Accessory, checkmark</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Accessory, checkmark
+                </List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <List.Accessory
                   aria-label="Info"
                   {...propsAccessory}
                 >
-                  <Symbol icon={sfICircle} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfICircle}
+                  />
                 </List.Accessory>
                 <List.Checkmark {...propsCheckmark} />
               </List.Trailing>
             </List.Item>
             {/* Rows with a single control pass their clicks on to it. */}
-            <List.Item onClick={forwardClick('[data-list-part=action]')}>
-              <List.Content>
-                <List.Title>Action</List.Title>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[data-list-part=action]')}
+            >
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Action</List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <List.Action {...propsAction}>Action</List.Action>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Button {...propsButton}>Button</List.Button>
               </List.Content>
             </List.Item>
-            <List.Item onClick={forwardClick('[role=checkbox]')}>
-              <List.Leading>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[role=checkbox]')}
+            >
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Checkbox
                   key={keyCheckbox}
                   aria-label="Checkbox"
                   {...propsCheckbox}
                 />
               </List.Leading>
-              <List.Content>
-                <List.Title>Checkbox, grabber</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Checkbox, grabber
+                </List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <List.Grabber
                   aria-label="Reorder"
                   {...propsGrabber}
                 />
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.SwipeActionsTrigger
                   {...propsSwipeActionsTrigger}
                   render={
@@ -807,72 +1092,109 @@ export const ListPartsDemo: FunctionComponent = () => {
                       aria-label="Edit"
                       {...propsEditButton}
                     >
-                      <Symbol icon={sfMinus} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfMinus}
+                      />
                     </List.EditButton>
                   }
                 />
               </List.Leading>
-              <List.Content>
-                <List.Title>Edit button</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Edit button
+                </List.Title>
               </List.Content>
-              <List.SwipeActions>
+              <List.SwipeActions {...partProps['List.SwipeActions']}>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Delete"
                   tint="var(--color-ui-system-red)"
                   onClick={() => addLog('delete clicked')}
                 >
-                  <Symbol icon={sfTrashFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrashFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
-            <List.Item>
-              <List.Leading>
-                <List.Image variant="circular">
-                  <Symbol icon={sfPersonCropCircleFill} />
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
+                <List.Image
+                  {...partProps['List.Image']}
+                  variant="circular"
+                >
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPersonCropCircleFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
-                <List.Title>Swipe actions</List.Title>
-                <List.Subtitle>Text, swipe actions</List.Subtitle>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Swipe actions
+                </List.Title>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Text, swipe actions
+                </List.Subtitle>
+              </List.Content>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>10:00</List.Detail>
+              </List.Trailing>
+              <List.Below {...partProps['List.Below']}>
                 <List.Text {...propsText}>
                   A multi-line row: body text below the title and subtitle, at
                   most two lines by default. Swipe it either way.
                 </List.Text>
-              </List.Content>
-              <List.Trailing>
-                <List.Detail>10:00</List.Detail>
-              </List.Trailing>
+              </List.Below>
               <List.SwipeActions
+                {...partProps['List.SwipeActions']}
                 overswipe
                 side="inline-start"
               >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Unread"
                   tint="var(--color-ui-system-blue)"
                   onClick={() => addLog('unread clicked')}
                 >
-                  <Symbol icon={sfEnvelopeOpenFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeOpenFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
               <List.SwipeActions {...propsSwipeActions}>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="More"
                   onClick={() => addLog('more clicked')}
                 >
-                  <Symbol icon={sfEllipsis} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEllipsis}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Flag"
                   tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('flag clicked')}
                 >
-                  <Symbol icon={sfFlagFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfFlagFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction {...propsSwipeAction}>
-                  <Symbol icon={sfArchiveboxFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfArchiveboxFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
@@ -882,7 +1204,7 @@ export const ListPartsDemo: FunctionComponent = () => {
           </List.Footer>
         </List.Section>
 
-        <List.Section>
+        <List.Section {...partProps['List.Section']}>
           <List.Block {...propsBlock}>
             <p>A content block, with text aligned with the rows’ text.</p>
           </List.Block>
@@ -943,6 +1265,36 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
       },
     );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Disclosure': [],
+            Symbol: ['icon'],
+            'Collapsible.Trigger': ['nativeButton', 'render'],
+            'List.Checkmark': [],
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleTrigger': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Group': [],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
@@ -955,6 +1307,7 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
         controlPanel,
         controlDisclosure,
         controlListCollapsible,
+        partControls,
       ]}
       state={[
         stateCollapsible,
@@ -962,15 +1315,17 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
         statePanel,
         stateDisclosure,
         stateListCollapsible,
+        partState,
       ]}
     >
-      <List.Root>
+      <List.Root {...partProps['List.Root']}>
         <Collapsible.Root
           key={keyCollapsible}
           {...propsCollapsible}
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
         >
           <Collapsible.Trigger
+            {...partProps['Collapsible.Trigger']}
             nativeButton={false}
             render={
               <List.Header
@@ -979,88 +1334,112 @@ export const ListCollapsibleDemo: FunctionComponent = () => {
               />
             }
           >
-            <List.Title>Collapsible</List.Title>
-            <List.Detail>{selection}</List.Detail>
+            <List.Title {...partProps['List.Title']}>Collapsible</List.Title>
+            <List.Detail {...partProps['List.Detail']}>{selection}</List.Detail>
             <List.Disclosure {...propsDisclosure} />
           </Collapsible.Trigger>
           <Collapsible.Panel
             {...propsPanel}
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
           >
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => setSelection('Automatic')}
                 >
                   Automatic
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                {selection === 'Automatic' ? <List.Checkmark /> : null}
+              <List.Trailing {...partProps['List.Trailing']}>
+                {selection === 'Automatic' ? (
+                  <List.Checkmark {...partProps['List.Checkmark']} />
+                ) : null}
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => setSelection('Always')}
                 >
                   Always
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                {selection === 'Always' ? <List.Checkmark /> : null}
+              <List.Trailing {...partProps['List.Trailing']}>
+                {selection === 'Always' ? (
+                  <List.Checkmark {...partProps['List.Checkmark']} />
+                ) : null}
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => setSelection('Never')}
                 >
                   Never
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                {selection === 'Never' ? <List.Checkmark /> : null}
+              <List.Trailing {...partProps['List.Trailing']}>
+                {selection === 'Never' ? (
+                  <List.Checkmark {...partProps['List.Checkmark']} />
+                ) : null}
               </List.Trailing>
             </List.Item>
           </Collapsible.Panel>
         </Collapsible.Root>
 
-        <List.Section>
-          <List.Group>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <List.CollapsibleRoot {...propsListCollapsible}>
-              <List.Item>
-                <List.Content>
-                  <List.Title render={<List.CollapsibleTrigger />}>
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title
+                    {...partProps['List.Title']}
+                    render={
+                      <List.CollapsibleTrigger
+                        {...partProps['List.CollapsibleTrigger']}
+                      />
+                    }
+                  >
                     Collapsible row
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Disclosure />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Disclosure {...partProps['List.Disclosure']} />
                 </List.Trailing>
               </List.Item>
-              <List.CollapsiblePanel>
-                <List.Item>
-                  <List.Leading>
-                    <List.Image variant="rounded">
-                      <Symbol icon={sfWifi} />
+              <List.CollapsiblePanel {...partProps['List.CollapsiblePanel']}>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Leading {...partProps['List.Leading']}>
+                    <List.Image
+                      {...partProps['List.Image']}
+                      variant="rounded"
+                    >
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfWifi}
+                      />
                     </List.Image>
                   </List.Leading>
-                  <List.Content>
-                    <List.Title>Expanded</List.Title>
-                    <List.Subtitle>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Expanded
+                    </List.Title>
+                    <List.Subtitle {...partProps['List.Subtitle']}>
                       Shown below the row above, opening and closing in place.
                     </List.Subtitle>
                   </List.Content>
                 </List.Item>
               </List.CollapsiblePanel>
             </List.CollapsibleRoot>
-            <List.Item>
-              <List.Content>
-                <List.Title>Below</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Below</List.Title>
               </List.Content>
             </List.Item>
           </List.Group>
@@ -1102,40 +1481,86 @@ export const ListSwipeDemo: FunctionComponent = () => {
       { external: externalSwipeAction, title: 'List.SwipeAction (1st)' },
     );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.SwipeAction': [
+              'label',
+              'onClick',
+              'shape',
+              'showLabel',
+              'tint',
+            ],
+            'List.SwipeActions': ['overswipe', 'side'],
+            Symbol: ['icon'],
+            'List.Below': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.DrillIn': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Image': ['style', 'variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Text': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={[controlRoot, controlSwipeActions, controlSwipeAction]}
       id={id}
       log={log}
-      state={[stateRoot, stateSwipeActions, stateSwipeAction]}
+      state={[stateRoot, stateSwipeActions, stateSwipeAction, partState]}
       title="List (Swipe Actions)"
+      controls={[
+        controlRoot,
+        controlSwipeActions,
+        controlSwipeAction,
+        partControls,
+      ]}
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Leading>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Regular clicked')}
                 >
                   Regular
                 </List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>Detail</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Detail</List.Detail>
               </List.Trailing>
-              <List.Trailing>
-                <List.DrillIn />
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
               </List.Trailing>
               <List.SwipeActions
                 side="inline-start"
@@ -1148,401 +1573,580 @@ export const ListSwipeDemo: FunctionComponent = () => {
                     propsSwipeAction.tint ?? 'var(--color-ui-system-orange)'
                   }
                 >
-                  <Symbol icon={sfPinFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPinFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mute"
                   onClick={() => addLog('Mute clicked')}
                 >
-                  <Symbol icon={sfBellFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfBellFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Delete"
                   tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <Symbol icon={sfTrashFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrashFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
-              <List.SwipeActions overswipe>
+              <List.SwipeActions
+                {...partProps['List.SwipeActions']}
+                overswipe
+              >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Tag"
                   tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
-                  <Symbol icon={sfTagFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTagFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mail"
                   tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Done"
                   tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
-                  <Symbol icon={sfCheckmarkCircleFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfCheckmarkCircleFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Tall clicked')}
                 >
                   Tall
                 </List.Title>
-                <List.Subtitle>Swipe either way</List.Subtitle>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Swipe either way
+                </List.Subtitle>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>Detail</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Detail</List.Detail>
               </List.Trailing>
-              <List.Trailing>
-                <List.DrillIn />
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
               </List.Trailing>
               <List.SwipeActions
+                {...partProps['List.SwipeActions']}
                 overswipe
                 side="inline-start"
               >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Pin"
                   tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
-                  <Symbol icon={sfPinFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPinFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mute"
                   onClick={() => addLog('Mute clicked')}
                 >
-                  <Symbol icon={sfBellFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfBellFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Delete"
                   tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <Symbol icon={sfTrashFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrashFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
-              <List.SwipeActions overswipe>
+              <List.SwipeActions
+                {...partProps['List.SwipeActions']}
+                overswipe
+              >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Tag"
                   tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
-                  <Symbol icon={sfTagFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTagFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mail"
                   tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Done"
                   tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
-                  <Symbol icon={sfCheckmarkCircleFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfCheckmarkCircleFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Multi-line clicked')}
                 >
                   Multi-line
                 </List.Title>
-                <List.Subtitle>Swipe either way</List.Subtitle>
-                <List.Text>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Swipe either way
+                </List.Subtitle>
+              </List.Content>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
+              </List.Trailing>
+              <List.Below {...partProps['List.Below']}>
+                <List.Text {...partProps['List.Text']}>
                   Swipe on past the actions to trigger the outermost one, on
                   either side; let go before to keep them open.
                 </List.Text>
-              </List.Content>
-              <List.Trailing>
-                <List.Detail>Detail</List.Detail>
-              </List.Trailing>
-              <List.Trailing>
-                <List.DrillIn />
-              </List.Trailing>
+              </List.Below>
               <List.SwipeActions
+                {...partProps['List.SwipeActions']}
                 overswipe
                 side="inline-start"
               >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Pin"
                   tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
-                  <Symbol icon={sfPinFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPinFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Mute"
                   onClick={() => addLog('Mute clicked')}
                 >
-                  <Symbol icon={sfBellFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfBellFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Delete"
                   tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <Symbol icon={sfTrashFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrashFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
-              <List.SwipeActions overswipe>
+              <List.SwipeActions
+                {...partProps['List.SwipeActions']}
+                overswipe
+              >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Tag"
                   tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
-                  <Symbol icon={sfTagFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTagFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Mail"
                   tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Done"
                   tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
-                  <Symbol icon={sfCheckmarkCircleFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfCheckmarkCircleFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Rounded rectangles clicked')}
                 >
                   Rounded rectangles
                 </List.Title>
-                <List.Subtitle>Swipe either way</List.Subtitle>
-                <List.Text>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Swipe either way
+                </List.Subtitle>
+              </List.Content>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Detail</List.Detail>
+              </List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
+              </List.Trailing>
+              <List.Below {...partProps['List.Below']}>
+                <List.Text {...partProps['List.Text']}>
                   Swipe on past the actions to trigger the outermost one, on
                   either side; let go before to keep them open.
                 </List.Text>
-              </List.Content>
-              <List.Trailing>
-                <List.Detail>Detail</List.Detail>
-              </List.Trailing>
-              <List.Trailing>
-                <List.DrillIn />
-              </List.Trailing>
+              </List.Below>
               <List.SwipeActions
+                {...partProps['List.SwipeActions']}
                 overswipe
                 side="inline-start"
               >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Pin"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
-                  <Symbol icon={sfPinFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPinFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Mute"
                   shape="roundedRectangle"
                   onClick={() => addLog('Mute clicked')}
                 >
-                  <Symbol icon={sfBellFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfBellFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Delete"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <Symbol icon={sfTrashFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrashFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
-              <List.SwipeActions overswipe>
+              <List.SwipeActions
+                {...partProps['List.SwipeActions']}
+                overswipe
+              >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Tag"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
-                  <Symbol icon={sfTagFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTagFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Mail"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   showLabel
                   label="Done"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
-                  <Symbol icon={sfCheckmarkCircleFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfCheckmarkCircleFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
             {/* The outermost (Pin, Done) rounded rectangles, the others
                circles. */}
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Mixed clicked')}
                 >
                   Mixed
                 </List.Title>
-                <List.Subtitle>Swipe either way</List.Subtitle>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Swipe either way
+                </List.Subtitle>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>Detail</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Detail</List.Detail>
               </List.Trailing>
-              <List.Trailing>
-                <List.DrillIn />
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
               </List.Trailing>
               <List.SwipeActions
+                {...partProps['List.SwipeActions']}
                 overswipe
                 side="inline-start"
               >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Pin"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-orange)"
                   onClick={() => addLog('Pin clicked')}
                 >
-                  <Symbol icon={sfPinFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPinFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mute"
                   shape="circle"
                   onClick={() => addLog('Mute clicked')}
                 >
-                  <Symbol icon={sfBellFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfBellFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Delete"
                   shape="circle"
                   tint="var(--color-ui-system-red)"
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <Symbol icon={sfTrashFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrashFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
-              <List.SwipeActions overswipe>
+              <List.SwipeActions
+                {...partProps['List.SwipeActions']}
+                overswipe
+              >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Tag"
                   shape="circle"
                   tint="var(--color-ui-system-purple)"
                   onClick={() => addLog('Tag clicked')}
                 >
-                  <Symbol icon={sfTagFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTagFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mail"
                   shape="circle"
                   tint="var(--color-ui-system-indigo)"
                   onClick={() => addLog('Mail clicked')}
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Done"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-green)"
                   onClick={() => addLog('Done clicked')}
                 >
-                  <Symbol icon={sfCheckmarkCircleFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfCheckmarkCircleFill}
+                  />
                 </List.SwipeAction>
               </List.SwipeActions>
             </List.Item>
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-blue)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfEnvelopeFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEnvelopeFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <List.Title
+                  {...partProps['List.Title']}
                   render={<button />}
                   onClick={() => addLog('Text clicked')}
                 >
                   Text
                 </List.Title>
-                <List.Subtitle>Swipe either way</List.Subtitle>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Swipe either way
+                </List.Subtitle>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>Detail</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Detail</List.Detail>
               </List.Trailing>
-              <List.Trailing>
-                <List.DrillIn />
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.DrillIn {...partProps['List.DrillIn']} />
               </List.Trailing>
               <List.SwipeActions
+                {...partProps['List.SwipeActions']}
                 overswipe
                 side="inline-start"
               >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Pin"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-orange)"
@@ -1551,6 +2155,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   Pin
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mute"
                   shape="roundedRectangle"
                   onClick={() => addLog('Mute clicked')}
@@ -1558,6 +2163,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   Mute
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Delete"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-red)"
@@ -1566,8 +2172,12 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   Delete
                 </List.SwipeAction>
               </List.SwipeActions>
-              <List.SwipeActions overswipe>
+              <List.SwipeActions
+                {...partProps['List.SwipeActions']}
+                overswipe
+              >
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Tag"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-purple)"
@@ -1576,6 +2186,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   Tag
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Mail"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-indigo)"
@@ -1584,6 +2195,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
                   Mail
                 </List.SwipeAction>
                 <List.SwipeAction
+                  {...partProps['List.SwipeAction']}
                   label="Done"
                   shape="roundedRectangle"
                   tint="var(--color-ui-system-green)"
@@ -1594,7 +2206,7 @@ export const ListSwipeDemo: FunctionComponent = () => {
               </List.SwipeActions>
             </List.Item>
           </List.Group>
-          <List.Footer>
+          <List.Footer {...partProps['List.Footer']}>
             Swipe a row to reveal its actions; swipe on past them to trigger the
             outermost.
           </List.Footer>
@@ -1633,39 +2245,82 @@ export const ListEditDemo: FunctionComponent = () => {
     { external: externalGrabber, isOpen: true, title: 'List.Grabber (1st)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Grabber (others)': ['aria-label'],
+            'List.Action': ['onClick'],
+            'List.Content': [],
+            'List.Group': ['reorderHandle'],
+            'List.Header': ['prominence'],
+            'List.Item': ['dropName', 'reorderHandle'],
+            'List.Section': [],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.SwipeActions': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={[controlRoot, controlGrabber]}
+      controls={[controlRoot, controlGrabber, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateGrabber]}
+      state={[stateRoot, stateGrabber, partState]}
       title="List (Editing)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Planets</List.Title>
-            <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Planets</List.Title>
+            <List.Action
+              {...partProps['List.Action']}
+              onClick={() => setRows(planets)}
+            >
+              Reset
+            </List.Action>
           </List.Header>
-          <List.Group reorderHandle={reorderRows}>
+          <List.Group
+            {...partProps['List.Group']}
+            reorderHandle={reorderRows}
+          >
             {rows.map((name, index) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 dropName={name}
                 reorderHandle={reorderRows}
               >
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <List.Grabber
                     aria-label={`Reorder ${name}`}
-                    {...(index === 0 ? propsGrabber : {})}
+                    {...(index === 0
+                      ? propsGrabber
+                      : partProps['List.Grabber (others)'])}
                   />
                 </List.Trailing>
-                <List.SwipeActions overswipe>
+                <List.SwipeActions
+                  {...partProps['List.SwipeActions']}
+                  overswipe
+                >
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction']}
                     label="Delete"
                     tint="var(--color-ui-system-red)"
                     onClick={() => {
@@ -1675,7 +2330,10 @@ export const ListEditDemo: FunctionComponent = () => {
                       );
                     }}
                   >
-                    <Symbol icon={sfTrashFill} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrashFill}
+                    />
                   </List.SwipeAction>
                 </List.SwipeActions>
               </List.Item>
@@ -1712,42 +2370,89 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.EditButton (others)': ['aria-label', 'tint'],
+            'List.Action': ['onClick'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Section': [],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.SwipeActions': [],
+            'List.SwipeActionsTrigger': ['render'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={[controlRoot, controlEditButton]}
+      controls={[controlRoot, controlEditButton, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateEditButton]}
+      state={[stateRoot, stateEditButton, partState]}
       title="List (Editing: Delete)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Planets</List.Title>
-            <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Planets</List.Title>
+            <List.Action
+              {...partProps['List.Action']}
+              onClick={() => setRows(planets)}
+            >
+              Reset
+            </List.Action>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name, index) => (
-              <List.Item key={name}>
-                <List.Leading>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Leading {...partProps['List.Leading']}>
                   <List.SwipeActionsTrigger
+                    {...partProps['List.SwipeActionsTrigger']}
                     render={
                       <List.EditButton
                         aria-label={`Delete ${name}`}
                         tint="var(--color-ui-system-red)"
-                        {...(index === 0 ? propsEditButton : {})}
+                        {...(index === 0
+                          ? propsEditButton
+                          : partProps['List.EditButton (others)'])}
                       >
-                        <Symbol icon={sfMinus} />
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfMinus}
+                        />
                       </List.EditButton>
                     }
                   />
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.SwipeActions overswipe>
+                <List.SwipeActions
+                  {...partProps['List.SwipeActions']}
+                  overswipe
+                >
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction']}
                     label="Delete"
                     tint="var(--color-ui-system-red)"
                     onClick={() => {
@@ -1757,7 +2462,10 @@ export const ListEditDeleteDemo: FunctionComponent = () => {
                       );
                     }}
                   >
-                    <Symbol icon={sfTrashFill} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrashFill}
+                    />
                   </List.SwipeAction>
                 </List.SwipeActions>
               </List.Item>
@@ -1786,41 +2494,87 @@ export const ListEditInsertDemo: FunctionComponent = () => {
     title: 'List.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Action': ['onClick'],
+            'List.Content': [],
+            'List.EditButton': ['aria-label', 'onClick', 'tint'],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Section': [],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.SwipeActions': [],
+            'List.SwipeActionsTrigger': ['render'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={controlRoot}
+      controls={[controlRoot, partControls]}
       id={id}
       log={log}
-      state={[stateRoot]}
+      state={[stateRoot, partState]}
       title="List (Editing: Insert)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Planets</List.Title>
-            <List.Action onClick={() => setRows(planets)}>Reset</List.Action>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Planets</List.Title>
+            <List.Action
+              {...partProps['List.Action']}
+              onClick={() => setRows(planets)}
+            >
+              Reset
+            </List.Action>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Leading>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Leading {...partProps['List.Leading']}>
                   <List.SwipeActionsTrigger
+                    {...partProps['List.SwipeActionsTrigger']}
                     render={
                       <List.EditButton
+                        {...partProps['List.EditButton']}
                         aria-label={`Delete ${name}`}
                         tint="var(--color-ui-system-red)"
                       >
-                        <Symbol icon={sfMinus} />
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfMinus}
+                        />
                       </List.EditButton>
                     }
                   />
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.SwipeActions overswipe>
+                <List.SwipeActions
+                  {...partProps['List.SwipeActions']}
+                  overswipe
+                >
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction']}
                     label="Delete"
                     tint="var(--color-ui-system-red)"
                     onClick={() => {
@@ -1830,14 +2584,18 @@ export const ListEditInsertDemo: FunctionComponent = () => {
                       );
                     }}
                   >
-                    <Symbol icon={sfTrashFill} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrashFill}
+                    />
                   </List.SwipeAction>
                 </List.SwipeActions>
               </List.Item>
             ))}
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.EditButton
+                  {...partProps['List.EditButton']}
                   aria-label="Add Planet"
                   tint="var(--color-ui-system-green)"
                   onClick={() => {
@@ -1847,11 +2605,14 @@ export const ListEditInsertDemo: FunctionComponent = () => {
                     setRows((current) => [...current, row]);
                   }}
                 >
-                  <Symbol icon={sfPlus} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPlus}
+                  />
                 </List.EditButton>
               </List.Leading>
-              <List.Content>
-                <List.Title>Add Planet</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Add Planet</List.Title>
               </List.Content>
             </List.Item>
           </List.Group>
@@ -1882,27 +2643,52 @@ export const ListEditSelectDemo: FunctionComponent = () => {
       },
     );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Checkbox': ['aria-label'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={[controlRoot, controlCheckbox]}
+      controls={[controlRoot, controlCheckbox, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateCheckbox]}
+      state={[stateRoot, stateCheckbox, partState]}
       title="List (Editing: Select)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Planets</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Planets</List.Title>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {planets.map((name, index) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 onClick={forwardClick('[role=checkbox]')}
               >
-                <List.Leading>
+                <List.Leading {...partProps['List.Leading']}>
                   {index === 0 ? (
                     <List.Checkbox
                       key={keyCheckbox}
@@ -1910,11 +2696,14 @@ export const ListEditSelectDemo: FunctionComponent = () => {
                       {...propsCheckbox}
                     />
                   ) : (
-                    <List.Checkbox aria-label={name} />
+                    <List.Checkbox
+                      {...partProps['List.Checkbox']}
+                      aria-label={name}
+                    />
                   )}
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -1964,45 +2753,82 @@ export const ListEditSelectSingleDemo: FunctionComponent = () => {
     { external: externalRadio, title: 'List.Radio (1st)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Radio (others)': ['aria-label', 'value'],
+            'List.Content': [],
+            'List.Grabber': ['aria-label'],
+            'List.Group': ['reorderHandle'],
+            'List.Header': ['prominence'],
+            'List.Item': ['dropName', 'onClick', 'reorderHandle'],
+            'List.Leading': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={[controlRoot, controlRadioGroup, controlRadio]}
+      controls={[controlRoot, controlRadioGroup, controlRadio, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateRadioGroup, stateRadio]}
+      state={[stateRoot, stateRadioGroup, stateRadio, partState]}
       title="List (Editing: Select One)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Planets</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Planets</List.Title>
           </List.Header>
           <RadioGroup
             key={keyRadioGroup}
             aria-label="Planet"
             {...propsRadioGroup}
-            render={<List.Group reorderHandle={reorderRows} />}
+            render={
+              <List.Group
+                {...partProps['List.Group']}
+                reorderHandle={reorderRows}
+              />
+            }
           >
             {rows.map((name, index) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 dropName={name}
                 reorderHandle={reorderRows}
                 onClick={forwardClick('[role=radio]')}
               >
-                <List.Leading>
+                <List.Leading {...partProps['List.Leading']}>
                   <List.Radio
                     aria-label={name}
                     value={name}
-                    {...(index === 0 ? propsRadio : {})}
+                    {...(index === 0
+                      ? propsRadio
+                      : partProps['List.Radio (others)'])}
                   />
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Grabber aria-label={`Reorder ${name}`} />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Grabber
+                    {...partProps['List.Grabber']}
+                    aria-label={`Reorder ${name}`}
+                  />
                 </List.Trailing>
               </List.Item>
             ))}
@@ -2031,20 +2857,48 @@ export const ListSegmentedDemo: FunctionComponent = () => {
     title: 'List.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Block': ['style'],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': ['aria-label', 'hidden', 'id'],
+            'List.Item': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['aria-controls', 'value'],
+            'Segmented.Root': ['aria-label', 'onValueChange', 'value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={controlRoot}
+      controls={[controlRoot, partControls]}
       id={id}
       log={log}
-      state={[stateRoot]}
+      state={[stateRoot, partState]}
       title="List (Segmented)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
+        <List.Section {...partProps['List.Section']}>
           {/* Aligned with the groups' edges, not the rows' text. */}
-          <List.Block style={{ marginBlockEnd: 16, paddingInline: 0 }}>
+          <List.Block
+            {...partProps['List.Block']}
+            style={{ marginBlockEnd: 16, paddingInline: 0 }}
+          >
             <Segmented.Root
+              {...partProps['Segmented.Root']}
               aria-label="Events"
               value={view}
               onValueChange={(value: unknown) => {
@@ -2053,60 +2907,72 @@ export const ListSegmentedDemo: FunctionComponent = () => {
               }}
             >
               <Segmented.Item
+                {...partProps['Segmented.Item']}
                 aria-controls="list-segmented-upcoming"
                 value="upcoming"
               >
                 Upcoming
               </Segmented.Item>
               <Segmented.Item
+                {...partProps['Segmented.Item']}
                 aria-controls="list-segmented-past"
                 value="past"
               >
                 Past
               </Segmented.Item>
-              <Segmented.Highlight />
+              <Segmented.Highlight {...partProps['Segmented.Highlight']} />
             </Segmented.Root>
           </List.Block>
           <List.Group
+            {...partProps['List.Group']}
             aria-label="Upcoming"
             hidden={view !== 'upcoming'}
             id="list-segmented-upcoming"
           >
             {['Planning', 'Offsite', 'Release 1.3', 'Retrospective'].map(
               (name) => (
-                <List.Item key={name}>
-                  <List.Content>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
                     <List.Title
+                      {...partProps['List.Title']}
                       render={<button />}
                       onClick={() => addLog(`${name} clicked`)}
                     >
                       {name}
                     </List.Title>
                   </List.Content>
-                  <List.Trailing>
-                    <List.DrillIn />
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <List.DrillIn {...partProps['List.DrillIn']} />
                   </List.Trailing>
                 </List.Item>
               ),
             )}
           </List.Group>
           <List.Group
+            {...partProps['List.Group']}
             aria-label="Past"
             hidden={view !== 'past'}
             id="list-segmented-past"
           >
             {['Design Review', 'Team Lunch', 'Release 1.2'].map((name) => (
-              <List.Item key={name}>
-                <List.Content>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
                   <List.Title
+                    {...partProps['List.Title']}
                     render={<button />}
                     onClick={() => addLog(`${name} clicked`)}
                   >
                     {name}
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.DrillIn />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.DrillIn {...partProps['List.DrillIn']} />
                 </List.Trailing>
               </List.Item>
             ))}
@@ -2139,84 +3005,156 @@ export const ListFormDemo: FunctionComponent = () => {
     title: 'List.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'DatePicker.Root': [
+              'defaultValue',
+              'handle',
+              'mode',
+              'onValueChange',
+            ],
+            'List.AccordionItem': ['value'],
+            'List.AccordionRoot': [],
+            'List.Below': [],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': [],
+            'List.Section': [],
+            'List.Span': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'aria-label',
+              'autoComplete',
+              'defaultValue',
+              'onValueChange',
+              'placeholder',
+              'render',
+              'type',
+            ],
+            'TextField.Description': [],
+            'TextField.Error': ['match'],
+            'TextField.Label': [],
+            'TextField.Root': ['render', 'validationMode'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={controlRoot}
+      controls={[controlRoot, partControls]}
       id={id}
       log={log}
-      state={[stateRoot]}
+      state={[stateRoot, partState]}
       title="List (Form)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Contact</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Contact</List.Title>
           </List.Header>
-          <List.Group>
-            <TextField.Root render={<List.Item />}>
-              <List.Content>
-                <TextField.Label>Name</TextField.Label>
+          <List.Group {...partProps['List.Group']}>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Content {...partProps['List.Content']}>
+                <TextField.Label {...partProps['TextField.Label']}>
+                  Name
+                </TextField.Label>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   autoComplete="name"
                   defaultValue="Kate Brown"
                   placeholder="Required"
                   onValueChange={(value: string) => addLog(`name: ${value}`)}
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
             </TextField.Root>
             <TextField.Root
-              render={<List.Item />}
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
               validationMode="onBlur"
             >
-              <List.Content>
-                <TextField.Label>Email</TextField.Label>
+              <List.Content {...partProps['List.Content']}>
+                <TextField.Label {...partProps['TextField.Label']}>
+                  Email
+                </TextField.Label>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   placeholder="name@example.com"
                   type="email"
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
-              <List.Below>
-                <TextField.Description>
+              <List.Below {...partProps['List.Below']}>
+                <TextField.Description {...partProps['TextField.Description']}>
                   Used for receipts only.
                 </TextField.Description>
-                <TextField.Error match="typeMismatch">
+                <TextField.Error
+                  {...partProps['TextField.Error']}
+                  match="typeMismatch"
+                >
                   Not an email address.
                 </TextField.Error>
               </List.Below>
             </TextField.Root>
-            <TextField.Root render={<List.Item />}>
-              <List.Trailing>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Company"
                   placeholder="Company"
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
             </TextField.Root>
           </List.Group>
         </List.Section>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Event</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Event</List.Title>
           </List.Header>
           {/* The date's and the time's buttons open their pickers in
               expandable rows below, one at a time. */}
-          <List.Group>
-            <List.AccordionRoot>
-              <List.AccordionItem value="starts">
-                <List.Item>
-                  <List.Content>
-                    <List.Title>Starts</List.Title>
+          <List.Group {...partProps['List.Group']}>
+            <List.AccordionRoot {...partProps['List.AccordionRoot']}>
+              <List.AccordionItem
+                {...partProps['List.AccordionItem']}
+                value="starts"
+              >
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>Starts</List.Title>
                   </List.Content>
-                  <List.Trailing>
+                  <List.Trailing {...partProps['List.Trailing']}>
                     <DatePicker.Root
+                      {...partProps['DatePicker.Root']}
                       defaultValue={new Date(2025, 3, 20, 10, 0)}
                       handle={startsPicker}
                       mode="dateAndTime"
@@ -2228,13 +3166,17 @@ export const ListFormDemo: FunctionComponent = () => {
                 </List.Item>
                 <DatePicker.Expandable handle={startsPicker} />
               </List.AccordionItem>
-              <List.AccordionItem value="ends">
-                <List.Item>
-                  <List.Content>
-                    <List.Title>Ends</List.Title>
+              <List.AccordionItem
+                {...partProps['List.AccordionItem']}
+                value="ends"
+              >
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>Ends</List.Title>
                   </List.Content>
-                  <List.Trailing>
+                  <List.Trailing {...partProps['List.Trailing']}>
                     <DatePicker.Root
+                      {...partProps['DatePicker.Root']}
                       defaultValue={new Date(2025, 3, 21, 18, 0)}
                       handle={endsPicker}
                       mode="dateAndTime"
@@ -2249,14 +3191,21 @@ export const ListFormDemo: FunctionComponent = () => {
             </List.AccordionRoot>
           </List.Group>
         </List.Section>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title>Notes</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title {...partProps['List.Title']}>Notes</List.Title>
           </List.Header>
-          <List.Group>
-            <TextField.Root render={<List.Item />}>
-              <List.Span>
+          <List.Group {...partProps['List.Group']}>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Span {...partProps['List.Span']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Notes"
                   placeholder="Anything else?"
                   render={<textarea />}
@@ -2264,7 +3213,9 @@ export const ListFormDemo: FunctionComponent = () => {
               </List.Span>
             </TextField.Root>
           </List.Group>
-          <List.Footer>Fields as list rows, after Framework7.</List.Footer>
+          <List.Footer {...partProps['List.Footer']}>
+            Fields as list rows, after Framework7.
+          </List.Footer>
         </List.Section>
       </List.Root>
     </Component>
@@ -2284,8 +3235,6 @@ export const ListIndexDemo: FunctionComponent = () => {
   const [externalRoot, externalHeader, externalIndex, externalIndexItem] =
     useProvidedState(id);
 
-  const listRef = useRef<HTMLDivElement>(null);
-
   const [controlRoot, propsRoot, stateRoot] = usePropControl(
     propOptionsRootPlain,
     { external: externalRoot, isOpen: true, title: 'List.Root' },
@@ -2303,50 +3252,87 @@ export const ListIndexDemo: FunctionComponent = () => {
     { external: externalIndexItem, title: 'List.IndexItem (1st)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.IndexItem (others)': ['onClick'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Section': ['data-letter'],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.SwipeActions': [],
+            'List.Title': ['onClick', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={[controlRoot, controlHeader, controlIndex, controlIndexItem]}
       id={id}
       log={log}
-      state={[stateRoot, stateHeader, stateIndex, stateIndexItem]}
+      state={[stateRoot, stateHeader, stateIndex, stateIndexItem, partState]}
       title="List (Index)"
+      controls={[
+        controlRoot,
+        controlHeader,
+        controlIndex,
+        controlIndexItem,
+        partControls,
+      ]}
     >
       <div className="list-demo-plain">
-        <div
-          ref={listRef}
-          className="list-demo-scroll"
-        >
+        <div className="list-demo-scroll">
           <List.Root {...propsRoot}>
             {Object.entries(contacts).map(([letter, names]) => (
               <List.Section
                 key={letter}
-                data-letter={letter}
+                {...partProps['List.Section']}
+                indexValue={letter}
               >
                 <List.Header
                   prominence="nested"
                   {...propsHeader}
                 >
-                  <List.Title>{letter}</List.Title>
+                  <List.Title {...partProps['List.Title']}>{letter}</List.Title>
                 </List.Header>
-                <List.Group>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button />}
                           onClick={() => addLog(`${name} clicked`)}
                         >
                           {name}
                         </List.Title>
                       </List.Content>
-                      <List.SwipeActions overswipe>
+                      <List.SwipeActions
+                        {...partProps['List.SwipeActions']}
+                        overswipe
+                      >
                         <List.SwipeAction
+                          {...partProps['List.SwipeAction']}
                           label="Delete"
                           tint="var(--color-ui-system-red)"
                           onClick={() => addLog(`delete ${name}`)}
                         >
-                          <Symbol icon={sfTrashFill} />
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfTrashFill}
+                          />
                         </List.SwipeAction>
                       </List.SwipeActions>
                     </List.Item>
@@ -2354,42 +3340,23 @@ export const ListIndexDemo: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             ))}
+            {/* At the list's end edge, centered on what's in view of it,
+                above the sticky headers; a letter without a section jumps
+                to the next one's (see List.Index). */}
+            <List.Index {...propsIndex}>
+              {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'].map((letter, index) => (
+                <List.IndexItem
+                  key={letter}
+                  onClick={() => addLog(`index: ${letter}`)}
+                  {...(index === 0
+                    ? propsIndexItem
+                    : partProps['List.IndexItem (others)'])}
+                >
+                  {letter}
+                </List.IndexItem>
+              ))}
+            </List.Index>
           </List.Root>
-        </div>
-        {/* At the list's edge, centered on its visible height (not
-            scrolling with it), above the sticky headers. */}
-        <div className="list-demo-index">
-          <List.Index {...propsIndex}>
-            {[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ#'].map((letter, index) => (
-              <List.IndexItem
-                key={letter}
-                onClick={() => {
-                  addLog(`index: ${letter}`);
-                  // The nearest section at or after the letter.
-                  const target =
-                    Object.keys(contacts).find(
-                      (key) => key.localeCompare(letter) >= 0,
-                    ) ?? 'Z';
-                  const { current: list } = listRef;
-                  const section = list?.querySelector(
-                    `[data-letter="${CSS.escape(target)}"]`,
-                  );
-                  if (!list || !section) return;
-                  // The section at the top of the list (its own scroll
-                  // container; the page stays).
-                  list.scrollTo({
-                    top:
-                      list.scrollTop +
-                      section.getBoundingClientRect().top -
-                      list.getBoundingClientRect().top,
-                  });
-                }}
-                {...(index === 0 ? propsIndexItem : {})}
-              >
-                {letter}
-              </List.IndexItem>
-            ))}
-          </List.Index>
         </div>
       </div>
     </Component>
@@ -2420,84 +3387,146 @@ export const ListMailDemo: FunctionComponent = () => {
     title: 'List.Text',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Below': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.SwipeAction': ['label', 'onClick', 'showLabel', 'tint'],
+            'List.SwipeActions': ['onOverswipe', 'overswipe', 'side'],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
-      controls={[controlRoot, controlText]}
+      controls={[controlRoot, controlText, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateText]}
+      state={[stateRoot, stateText, partState]}
       title="List (Mail)"
     >
       <List.Root {...propsRoot}>
-        <List.Section>
-          <List.Group>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {messages
               .filter(({ from }) => !archived.includes(from))
               .map(({ date, from, preview, subject }) => (
-                <List.Item key={from}>
-                  <List.Leading>
-                    <List.Image variant="circular">
-                      <Symbol icon={sfPersonCropCircleFill} />
+                <List.Item
+                  key={from}
+                  {...partProps['List.Item']}
+                >
+                  <List.Leading {...partProps['List.Leading']}>
+                    <List.Image
+                      {...partProps['List.Image']}
+                      variant="circular"
+                    >
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfPersonCropCircleFill}
+                      />
                     </List.Image>
                   </List.Leading>
-                  <List.Content>
+                  <List.Content {...partProps['List.Content']}>
                     <List.Title
+                      {...partProps['List.Title']}
                       render={<button />}
                       onClick={() => addLog(`${from} clicked`)}
                     >
                       {from}
                     </List.Title>
-                    <List.Subtitle>{subject}</List.Subtitle>
-                    <List.Text {...propsText}>{preview}</List.Text>
+                    <List.Subtitle {...partProps['List.Subtitle']}>
+                      {subject}
+                    </List.Subtitle>
                   </List.Content>
-                  <List.Trailing>
-                    <List.Detail>{date}</List.Detail>
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <List.Detail {...partProps['List.Detail']}>
+                      {date}
+                    </List.Detail>
                   </List.Trailing>
-                  <List.Trailing>
-                    <List.DrillIn />
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <List.DrillIn {...partProps['List.DrillIn']} />
                   </List.Trailing>
+                  <List.Below {...partProps['List.Below']}>
+                    <List.Text {...propsText}>{preview}</List.Text>
+                  </List.Below>
                   <List.SwipeActions
+                    {...partProps['List.SwipeActions']}
                     overswipe
                     side="inline-start"
                   >
                     <List.SwipeAction
+                      {...partProps['List.SwipeAction']}
                       showLabel
                       label="Unread"
                       tint="var(--color-ui-system-blue)"
                       onClick={() => addLog(`unread ${from}`)}
                     >
-                      <Symbol icon={sfEnvelopeOpenFill} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfEnvelopeOpenFill}
+                      />
                     </List.SwipeAction>
                   </List.SwipeActions>
                   <List.SwipeActions
+                    {...partProps['List.SwipeActions']}
                     onOverswipe={() => {
                       addLog(`archived ${from} (overswipe)`);
                       setArchived((current) => [...current, from]);
                     }}
                   >
                     <List.SwipeAction
+                      {...partProps['List.SwipeAction']}
                       showLabel
                       label="More"
                       onClick={() => addLog(`more ${from}`)}
                     >
-                      <Symbol icon={sfEllipsis} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfEllipsis}
+                      />
                     </List.SwipeAction>
                     <List.SwipeAction
+                      {...partProps['List.SwipeAction']}
                       showLabel
                       label="Flag"
                       tint="var(--color-ui-system-orange)"
                       onClick={() => addLog(`flag ${from}`)}
                     >
-                      <Symbol icon={sfFlagFill} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfFlagFill}
+                      />
                     </List.SwipeAction>
                     <List.SwipeAction
+                      {...partProps['List.SwipeAction']}
                       showLabel
                       label="Archive"
                       tint="var(--color-ui-system-purple)"
                       onClick={() => addLog(`archived ${from}`)}
                     >
-                      <Symbol icon={sfArchiveboxFill} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfArchiveboxFill}
+                      />
                     </List.SwipeAction>
                   </List.SwipeActions>
                 </List.Item>

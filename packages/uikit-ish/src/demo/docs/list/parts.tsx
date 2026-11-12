@@ -20,6 +20,8 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  type PartProps,
+  usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
@@ -39,6 +41,7 @@ import {
   sfTrashFill,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { contacts, messages, planets, settings } from './content.js';
 import {
   forwardClickRows,
@@ -104,6 +107,7 @@ import {
   getPropOptionsSwipeActionsTrailing,
   getPropOptionsTitleFirst,
   mercuryActions,
+  propOptionsBelow,
   propOptionsBlock,
   propOptionsCursor,
   propOptionsHeader,
@@ -147,32 +151,69 @@ const RootPart: FunctionComponent = () => {
     title: 'List.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Checkbox': ['aria-label'],
+          'List.Content': [],
+          'List.Grabber': ['aria-label'],
+          'List.Group': [],
+          'List.Header': ['prominence'],
+          'List.Item': [],
+          'List.Leading': [],
+          'List.Section': [],
+          'List.Title': ['render'],
+          'List.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Root"
     >
       <List.Root {...props}>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title render={<h3 />}>Planets</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Planets
+            </List.Title>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Leading>
-                  <List.Checkbox aria-label={name} />
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Leading {...partProps['List.Leading']}>
+                  <List.Checkbox
+                    {...partProps['List.Checkbox']}
+                    aria-label={name}
+                  />
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Grabber aria-label={`Reorder ${name}`} />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Grabber
+                    {...partProps['List.Grabber']}
+                    aria-label={`Reorder ${name}`}
+                  />
                 </List.Trailing>
               </List.Item>
             ))}
@@ -195,31 +236,61 @@ const SectionPart: FunctionComponent = () => {
     title: 'List.Section',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Header': ['prominence'],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Title': ['render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Section"
     >
-      <List.Root>
+      <List.Root {...partProps['List.Root']}>
         <List.Section {...props}>
-          <List.Header prominence="nested">
-            <List.Title render={<h3 />}>Planets</List.Title>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Planets
+            </List.Title>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
           </List.Group>
-          <List.Footer>The inner planets.</List.Footer>
+          <List.Footer {...partProps['List.Footer']}>
+            The inner planets.
+          </List.Footer>
         </List.Section>
       </List.Root>
     </Component>
@@ -238,33 +309,66 @@ const HeaderPart: FunctionComponent = () => {
     title: 'List.Header',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Accessory': ['aria-label', 'onClick', 'render'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Header"
     >
-      <List.Root>
-        <List.Section>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
           <List.Header {...props}>
-            <List.Title render={<h3 />}>Planets</List.Title>
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Planets
+            </List.Title>
             <List.Accessory
+              {...partProps['List.Accessory']}
               aria-label="Edit"
               render={<button type="button" />}
               onClick={() => addLog('edit clicked')}
             >
-              <Symbol icon={sfSquareAndPencil} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfSquareAndPencil}
+              />
             </List.Accessory>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -296,30 +400,54 @@ const GroupPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.Group' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Grabber': ['aria-label'],
+            'List.Item': ['dropName', 'reorderHandle'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Group"
     >
-      <List.Root>
-        <List.Section>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
           <List.Group {...props}>
             {order.map((name) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 dropName={name}
                 reorderHandle={reorderRows}
               >
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Grabber aria-label={`Reorder ${name}`} />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Grabber
+                    {...partProps['List.Grabber']}
+                    aria-label={`Reorder ${name}`}
+                  />
                 </List.Trailing>
               </List.Item>
             ))}
@@ -340,26 +468,45 @@ const ItemPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.Item' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Item (others)': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Item"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name, index) => (
               <List.Item
                 key={name}
-                {...(index === 0 ? props : {})}
+                {...(index === 0 ? props : partProps['List.Item (others)'])}
               >
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -380,48 +527,81 @@ const CollapsibleRootPart: FunctionComponent = () => {
     { external, title: 'List.CollapsibleRoot' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleTrigger': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.CollapsibleRoot"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <List.CollapsibleRoot
               key={elementKey}
               {...props}
             >
-              <List.Item>
-                <List.Content>
-                  <List.Title render={<List.CollapsibleTrigger />}>
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title
+                    {...partProps['List.Title']}
+                    render={
+                      <List.CollapsibleTrigger
+                        {...partProps['List.CollapsibleTrigger']}
+                      />
+                    }
+                  >
                     Repeat
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail>Daily</List.Detail>
-                  <List.Disclosure />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>Daily</List.Detail>
+                  <List.Disclosure {...partProps['List.Disclosure']} />
                 </List.Trailing>
               </List.Item>
-              <List.CollapsiblePanel>
-                <List.Item>
-                  <List.Content>
-                    <List.Title>Every day at 10:00</List.Title>
+              <List.CollapsiblePanel {...partProps['List.CollapsiblePanel']}>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Every day at 10:00
+                    </List.Title>
                   </List.Content>
                 </List.Item>
               </List.CollapsiblePanel>
             </List.CollapsibleRoot>
-            <List.Item>
-              <List.Content>
-                <List.Title>Alert</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Alert</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>None</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>None</List.Detail>
               </List.Trailing>
             </List.Item>
           </List.Group>
@@ -446,35 +626,67 @@ const CollapsibleTriggerPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleRoot': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.CollapsibleTrigger"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.CollapsibleRoot defaultOpen>
-              <List.Item>
-                <List.Content>
-                  <List.Title render={<List.CollapsibleTrigger {...props} />}>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.CollapsibleRoot
+              {...partProps['List.CollapsibleRoot']}
+              defaultOpen
+            >
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title
+                    {...partProps['List.Title']}
+                    render={<List.CollapsibleTrigger {...props} />}
+                  >
                     Repeat
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail>Daily</List.Detail>
-                  <List.Disclosure />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>Daily</List.Detail>
+                  <List.Disclosure {...partProps['List.Disclosure']} />
                 </List.Trailing>
               </List.Item>
-              <List.CollapsiblePanel>
-                <List.Item>
-                  <List.Content>
-                    <List.Title>Every day at 10:00</List.Title>
+              <List.CollapsiblePanel {...partProps['List.CollapsiblePanel']}>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Every day at 10:00
+                    </List.Title>
                   </List.Content>
                 </List.Item>
               </List.CollapsiblePanel>
@@ -490,46 +702,85 @@ const CollapsibleTriggerPart: FunctionComponent = () => {
 const CollapsiblePanelPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleRoot': ['defaultOpen', 'onOpenChange'],
+            'List.CollapsibleTrigger': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('list-parts-collapsible-panel') },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="list-parts-collapsible-panel"
       log={log}
+      state={[partState]}
       title="List.CollapsiblePanel"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <List.CollapsibleRoot
+              {...partProps['List.CollapsibleRoot']}
               defaultOpen
               onOpenChange={(isOpen: boolean) =>
                 addLog(`open change: ${String(isOpen)}`)
               }
             >
-              <List.Item>
-                <List.Content>
-                  <List.Title render={<List.CollapsibleTrigger />}>
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title
+                    {...partProps['List.Title']}
+                    render={
+                      <List.CollapsibleTrigger
+                        {...partProps['List.CollapsibleTrigger']}
+                      />
+                    }
+                  >
                     Repeat
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail>Daily</List.Detail>
-                  <List.Disclosure />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>Daily</List.Detail>
+                  <List.Disclosure {...partProps['List.Disclosure']} />
                 </List.Trailing>
               </List.Item>
-              <List.CollapsiblePanel>
-                <List.Item>
-                  <List.Content>
-                    <List.Title>Every day at 10:00</List.Title>
+              <List.CollapsiblePanel {...partProps['List.CollapsiblePanel']}>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Every day at 10:00
+                    </List.Title>
                   </List.Content>
                 </List.Item>
-                <List.Item>
-                  <List.Content>
-                    <List.Title>Ends</List.Title>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>Ends</List.Title>
                   </List.Content>
-                  <List.Trailing>
-                    <List.Detail>Never</List.Detail>
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <List.Detail {...partProps['List.Detail']}>
+                      Never
+                    </List.Detail>
                   </List.Trailing>
                 </List.Item>
               </List.CollapsiblePanel>
@@ -542,40 +793,64 @@ const CollapsiblePanelPart: FunctionComponent = () => {
 };
 
 /** An alarm's settings, one open at a time: its rows (no element). */
-const accordionRows = (
+const accordionRows = (partProps: PartProps = {}) => (
   <>
-    <List.AccordionItem value="repeat">
-      <List.Item>
-        <List.Content>
-          <List.Title render={<List.AccordionTrigger />}>Repeat</List.Title>
+    <List.AccordionItem
+      {...partProps['List.AccordionItem']}
+      value="repeat"
+    >
+      <List.Item {...partProps['List.Item']}>
+        <List.Content {...partProps['List.Content']}>
+          <List.Title
+            {...partProps['List.Title']}
+            render={
+              <List.AccordionTrigger {...partProps['List.AccordionTrigger']} />
+            }
+          >
+            Repeat
+          </List.Title>
         </List.Content>
-        <List.Trailing>
-          <List.Detail>Daily</List.Detail>
-          <List.Disclosure />
+        <List.Trailing {...partProps['List.Trailing']}>
+          <List.Detail {...partProps['List.Detail']}>Daily</List.Detail>
+          <List.Disclosure {...partProps['List.Disclosure']} />
         </List.Trailing>
       </List.Item>
-      <List.AccordionPanel>
-        <List.Item>
-          <List.Content>
-            <List.Title>Every day at 10:00</List.Title>
+      <List.AccordionPanel {...partProps['List.AccordionPanel']}>
+        <List.Item {...partProps['List.Item']}>
+          <List.Content {...partProps['List.Content']}>
+            <List.Title {...partProps['List.Title']}>
+              Every day at 10:00
+            </List.Title>
           </List.Content>
         </List.Item>
       </List.AccordionPanel>
     </List.AccordionItem>
-    <List.AccordionItem value="alert">
-      <List.Item>
-        <List.Content>
-          <List.Title render={<List.AccordionTrigger />}>Alert</List.Title>
+    <List.AccordionItem
+      {...partProps['List.AccordionItem']}
+      value="alert"
+    >
+      <List.Item {...partProps['List.Item']}>
+        <List.Content {...partProps['List.Content']}>
+          <List.Title
+            {...partProps['List.Title']}
+            render={
+              <List.AccordionTrigger {...partProps['List.AccordionTrigger']} />
+            }
+          >
+            Alert
+          </List.Title>
         </List.Content>
-        <List.Trailing>
-          <List.Detail>None</List.Detail>
-          <List.Disclosure />
+        <List.Trailing {...partProps['List.Trailing']}>
+          <List.Detail {...partProps['List.Detail']}>None</List.Detail>
+          <List.Disclosure {...partProps['List.Disclosure']} />
         </List.Trailing>
       </List.Item>
-      <List.AccordionPanel>
-        <List.Item>
-          <List.Content>
-            <List.Title>5 minutes before</List.Title>
+      <List.AccordionPanel {...partProps['List.AccordionPanel']}>
+        <List.Item {...partProps['List.Item']}>
+          <List.Content {...partProps['List.Content']}>
+            <List.Title {...partProps['List.Title']}>
+              5 minutes before
+            </List.Title>
           </List.Content>
         </List.Item>
       </List.AccordionPanel>
@@ -593,24 +868,49 @@ const AccordionRootPart: FunctionComponent = () => {
     { external, title: 'List.AccordionRoot' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.AccordionItem': ['value'],
+            'List.AccordionPanel': [],
+            'List.AccordionTrigger': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.AccordionRoot"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <List.AccordionRoot
               key={elementKey}
               {...props}
             >
-              {accordionRows}
+              {accordionRows(partProps)}
             </List.AccordionRoot>
           </List.Group>
         </List.Section>
@@ -629,59 +929,113 @@ const AccordionItemPart: FunctionComponent = () => {
     { external, title: 'List.AccordionItem' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.AccordionItem (others)': ['value'],
+            'List.AccordionPanel': [],
+            'List.AccordionRoot': ['defaultValue'],
+            'List.AccordionTrigger': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.AccordionItem"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.AccordionRoot defaultValue={['repeat']}>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.AccordionRoot
+              {...partProps['List.AccordionRoot']}
+              defaultValue={['repeat']}
+            >
               <List.AccordionItem
                 value="repeat"
                 {...props}
               >
-                <List.Item>
-                  <List.Content>
-                    <List.Title render={<List.AccordionTrigger />}>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title
+                      {...partProps['List.Title']}
+                      render={
+                        <List.AccordionTrigger
+                          {...partProps['List.AccordionTrigger']}
+                        />
+                      }
+                    >
                       Repeat
                     </List.Title>
                   </List.Content>
-                  <List.Trailing>
-                    <List.Detail>Daily</List.Detail>
-                    <List.Disclosure />
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <List.Detail {...partProps['List.Detail']}>
+                      Daily
+                    </List.Detail>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </List.Trailing>
                 </List.Item>
-                <List.AccordionPanel>
-                  <List.Item>
-                    <List.Content>
-                      <List.Title>Every day at 10:00</List.Title>
+                <List.AccordionPanel {...partProps['List.AccordionPanel']}>
+                  <List.Item {...partProps['List.Item']}>
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        Every day at 10:00
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 </List.AccordionPanel>
               </List.AccordionItem>
-              <List.AccordionItem value="alert">
-                <List.Item>
-                  <List.Content>
-                    <List.Title render={<List.AccordionTrigger />}>
+              <List.AccordionItem
+                {...partProps['List.AccordionItem (others)']}
+                value="alert"
+              >
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title
+                      {...partProps['List.Title']}
+                      render={
+                        <List.AccordionTrigger
+                          {...partProps['List.AccordionTrigger']}
+                        />
+                      }
+                    >
                       Alert
                     </List.Title>
                   </List.Content>
-                  <List.Trailing>
-                    <List.Detail>None</List.Detail>
-                    <List.Disclosure />
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <List.Detail {...partProps['List.Detail']}>
+                      None
+                    </List.Detail>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </List.Trailing>
                 </List.Item>
-                <List.AccordionPanel>
-                  <List.Item>
-                    <List.Content>
-                      <List.Title>5 minutes before</List.Title>
+                <List.AccordionPanel {...partProps['List.AccordionPanel']}>
+                  <List.Item {...partProps['List.Item']}>
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        5 minutes before
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 </List.AccordionPanel>
@@ -706,23 +1060,42 @@ const FooterPart: FunctionComponent = () => {
     title: 'List.Footer',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Footer"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -748,20 +1121,43 @@ const BlockPart: FunctionComponent = () => {
     title: 'List.Block',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Footer': [],
+          'List.Header': ['prominence'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': ['render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Block"
     >
-      <List.Root>
-        <List.Section>
-          <List.Header prominence="extraProminent">
-            <List.Title render={<h3 />}>About</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="extraProminent"
+          >
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              About
+            </List.Title>
           </List.Header>
           <List.Block {...props}>
             <p>
@@ -769,7 +1165,9 @@ const BlockPart: FunctionComponent = () => {
               ice.
             </p>
           </List.Block>
-          <List.Footer>Blocks have headers and footers, too.</List.Footer>
+          <List.Footer {...partProps['List.Footer']}>
+            Blocks have headers and footers, too.
+          </List.Footer>
         </List.Section>
       </List.Root>
     </Component>
@@ -786,33 +1184,62 @@ const TitlePart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.Title' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Title (others)': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Title"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name, index) =>
               index === 0 ? (
-                <List.Item key={name}>
-                  <List.Content>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
                     <List.Title {...props}>{name}</List.Title>
                   </List.Content>
-                  <List.Trailing>
-                    <List.DrillIn />
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <List.DrillIn {...partProps['List.DrillIn']} />
                   </List.Trailing>
                 </List.Item>
               ) : (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title (others)']}>
+                      {name}
+                    </List.Title>
                   </List.Content>
                 </List.Item>
               ),
@@ -836,24 +1263,48 @@ const SubtitlePart: FunctionComponent = () => {
     title: 'List.Subtitle',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Subtitle (others)': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Subtitle"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {settings.map(({ subtitle, title }, index) => (
-              <List.Item key={title}>
-                <List.Content>
-                  <List.Title>{title}</List.Title>
-                  <List.Subtitle {...(index === 0 ? props : {})}>
+              <List.Item
+                key={title}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{title}</List.Title>
+                  <List.Subtitle
+                    {...(index === 0
+                      ? props
+                      : partProps['List.Subtitle (others)'])}
+                  >
                     {subtitle}
                   </List.Subtitle>
                 </List.Content>
@@ -878,28 +1329,56 @@ const SupertitlePart: FunctionComponent = () => {
     title: 'List.Supertitle',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Header': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Subtitle': [],
+          'List.Title': ['render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Supertitle"
     >
-      <List.Root>
-        <List.Section>
-          <List.Header>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header {...partProps['List.Header']}>
             <List.Supertitle {...props}>Solar System</List.Supertitle>
-            <List.Title render={<h3 />}>Planets</List.Title>
-            <List.Subtitle>The inner ones</List.Subtitle>
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Planets
+            </List.Title>
+            <List.Subtitle {...partProps['List.Subtitle']}>
+              The inner ones
+            </List.Subtitle>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -922,39 +1401,79 @@ const TextPart: FunctionComponent = () => {
     title: 'List.Text',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Text (others)': [],
+            'List.Below': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Text"
     >
-      <List.Root listStyle="plain">
-        <List.Section>
-          <List.Group>
+      <List.Root
+        {...partProps['List.Root']}
+        listStyle="plain"
+      >
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {messages.map(({ date, from, preview, subject }, index) => (
-              <List.Item key={from}>
-                <List.Content>
+              <List.Item
+                key={from}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
                   <List.Title
+                    {...partProps['List.Title']}
                     render={<button type="button" />}
                     onClick={() => addLog(`${from} clicked`)}
                   >
                     {from}
                   </List.Title>
-                  <List.Subtitle>{subject}</List.Subtitle>
-                  <List.Text {...(index === 0 ? props : {})}>
+                  <List.Subtitle {...partProps['List.Subtitle']}>
+                    {subject}
+                  </List.Subtitle>
+                </List.Content>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>
+                    {date}
+                  </List.Detail>
+                </List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.DrillIn {...partProps['List.DrillIn']} />
+                </List.Trailing>
+                <List.Below {...partProps['List.Below']}>
+                  <List.Text
+                    {...(index === 0 ? props : partProps['List.Text (others)'])}
+                  >
                     {preview}
                   </List.Text>
-                </List.Content>
-                <List.Trailing>
-                  <List.Detail>{date}</List.Detail>
-                </List.Trailing>
-                <List.Trailing>
-                  <List.DrillIn />
-                </List.Trailing>
+                </List.Below>
               </List.Item>
             ))}
           </List.Group>
@@ -989,28 +1508,46 @@ const LeadingPart: FunctionComponent = () => {
     propOptionsSlot,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          ActivityIndicator: ['aria-label', 'size'],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Leading"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
               <List.Leading {...props}>
                 <ActivityIndicator
+                  {...partProps.ActivityIndicator}
                   aria-label="Syncing"
                   size="small"
                 />
               </List.Leading>
-              <List.Content>
-                <List.Title>Syncing</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Syncing</List.Title>
               </List.Content>
             </List.Item>
           </List.Group>
@@ -1030,23 +1567,41 @@ const ContentPart: FunctionComponent = () => {
     commonPropOptions,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Subtitle': [],
+          'List.Title': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Content"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
               <List.Content {...props}>
-                <List.Title>Mercury</List.Title>
-                <List.Subtitle>Closest to the Sun</List.Subtitle>
+                <List.Title {...partProps['List.Title']}>Mercury</List.Title>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Closest to the Sun
+                </List.Subtitle>
               </List.Content>
             </List.Item>
           </List.Group>
@@ -1066,31 +1621,58 @@ const TrailingPart: FunctionComponent = () => {
     propOptionsSlot,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Switch.Root': ['aria-label', 'onCheckedChange'],
+            'Switch.Thumb': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Trailing"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item onClick={forwardClick('[role=switch]')}>
-              <List.Content>
-                <List.Title>Airplane Mode</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[role=switch]')}
+            >
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Airplane Mode
+                </List.Title>
               </List.Content>
               <List.Trailing {...props}>
                 <Switch.Root
+                  {...partProps['Switch.Root']}
                   aria-label="Airplane Mode"
                   onCheckedChange={(isChecked: boolean) =>
                     addLog(`airplane mode: ${String(isChecked)}`)
                   }
                 >
-                  <Switch.Thumb />
+                  <Switch.Thumb {...partProps['Switch.Thumb']} />
                 </Switch.Root>
               </List.Trailing>
             </List.Item>
@@ -1111,26 +1693,51 @@ const SpanPart: FunctionComponent = () => {
     commonPropOptions,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'Slider.Control': [],
+          'Slider.Indicator': [],
+          'Slider.Root': ['defaultValue'],
+          'Slider.Thumb': ['aria-label'],
+          'Slider.Track': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Span"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
               <List.Span {...props}>
-                <Slider.Root defaultValue={50}>
-                  <Slider.Control>
-                    <Slider.Track>
-                      <Slider.Indicator />
-                      <Slider.Thumb aria-label="Volume" />
+                <Slider.Root
+                  {...partProps['Slider.Root']}
+                  defaultValue={50}
+                >
+                  <Slider.Control {...partProps['Slider.Control']}>
+                    <Slider.Track {...partProps['Slider.Track']}>
+                      <Slider.Indicator {...partProps['Slider.Indicator']} />
+                      <Slider.Thumb
+                        {...partProps['Slider.Thumb']}
+                        aria-label="Volume"
+                      />
                     </Slider.Track>
                   </Slider.Control>
                 </Slider.Root>
@@ -1148,33 +1755,56 @@ const BelowPart: FunctionComponent = () => {
   const id = 'list-parts-below';
   const [log] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
-    { ...commonPropOptions, hidden: [undefined, false, true] as const },
-    { external, isOpen: true, emphasize: 'outline', title: 'List.Below' },
+  const [control, props, state] = usePropControl(propOptionsBelow, {
+    external,
+    isOpen: true,
+    emphasize: 'outline',
+    title: 'List.Below',
+  });
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Detail': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Subtitle': [],
+          'List.Title': [],
+          'List.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
   );
 
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Below"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Content>
-                <List.Title>Backup</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Backup</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>On</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>On</List.Detail>
               </List.Trailing>
               <List.Below {...props}>
-                <List.Subtitle>Last backup: yesterday, 21:04</List.Subtitle>
+                <List.Subtitle {...partProps['List.Subtitle']}>
+                  Last backup: yesterday, 21:04
+                </List.Subtitle>
               </List.Below>
             </List.Item>
           </List.Group>
@@ -1196,26 +1826,51 @@ const DetailPart: FunctionComponent = () => {
     title: 'List.Detail',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Detail (others)': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Detail"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {settings.map(({ detail, title }, index) => (
-              <List.Item key={title}>
-                <List.Content>
-                  <List.Title>{title}</List.Title>
+              <List.Item
+                key={title}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{title}</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail {...(index === 0 ? props : {})}>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail
+                    {...(index === 0
+                      ? props
+                      : partProps['List.Detail (others)'])}
+                  >
                     {detail}
                   </List.Detail>
                 </List.Trailing>
@@ -1240,32 +1895,59 @@ const ImagePart: FunctionComponent = () => {
     title: 'List.Image',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'List.Image (others)': ['style', 'variant'],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Leading': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Image"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {settings.map(({ color, icon, title }, index) => (
-              <List.Item key={title}>
-                <List.Leading>
+              <List.Item
+                key={title}
+                {...partProps['List.Item']}
+              >
+                <List.Leading {...partProps['List.Leading']}>
                   <List.Image
                     style={{ backgroundColor: color }}
                     variant="rounded"
-                    {...(index === 0 ? props : {})}
+                    {...(index === 0
+                      ? props
+                      : partProps['List.Image (others)'])}
                   >
-                    <Symbol icon={icon} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    />
                   </List.Image>
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{title}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{title}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -1286,37 +1968,67 @@ const AccessoryPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.Accessory' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Image': ['style', 'variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Accessory"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Leading>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-pink)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfHeartFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
-                <List.Title>Favorites</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Favorites</List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <List.Accessory
                   aria-label="Info"
                   {...props}
                 >
-                  <Symbol icon={sfICircle} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfICircle}
+                  />
                 </List.Accessory>
               </List.Trailing>
             </List.Item>
@@ -1340,23 +2052,47 @@ const CheckmarkPart: FunctionComponent = () => {
   });
   const [chosen, setChosen] = useState<string>(planets[0]);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Checkmark"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
                   <List.Title
+                    {...partProps['List.Title']}
                     render={<button type="button" />}
                     onClick={() => {
                       addLog(`chosen: ${name}`);
@@ -1366,7 +2102,7 @@ const CheckmarkPart: FunctionComponent = () => {
                     {name}
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   {chosen === name ? <List.Checkmark {...props} /> : null}
                 </List.Trailing>
               </List.Item>
@@ -1390,34 +2126,66 @@ const DrillInPart: FunctionComponent = () => {
     title: 'List.DrillIn',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.DrillIn (others)': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.DrillIn"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {settings.map(({ detail, title }, index) => (
-              <List.Item key={title}>
-                <List.Content>
+              <List.Item
+                key={title}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
                   <List.Title
+                    {...partProps['List.Title']}
                     render={<button type="button" />}
                     onClick={() => addLog(`${title} clicked`)}
                   >
                     {title}
                   </List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail>{detail}</List.Detail>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>
+                    {detail}
+                  </List.Detail>
                 </List.Trailing>
-                <List.Trailing>
-                  <List.DrillIn {...(index === 0 ? props : {})} />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.DrillIn
+                    {...(index === 0
+                      ? props
+                      : partProps['List.DrillIn (others)'])}
+                  />
                 </List.Trailing>
               </List.Item>
             ))}
@@ -1440,35 +2208,71 @@ const DisclosurePart: FunctionComponent = () => {
     title: 'List.Disclosure',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Collapsible.Panel': ['render'],
+            'Collapsible.Root': ['defaultOpen', 'onOpenChange', 'render'],
+            'Collapsible.Trigger': ['aria-label', 'nativeButton', 'render'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Disclosure"
     >
-      <List.Root>
+      <List.Root {...partProps['List.Root']}>
         <Collapsible.Root
+          {...partProps['Collapsible.Root']}
           defaultOpen
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Collapsible.Trigger
+            {...partProps['Collapsible.Trigger']}
             aria-label="Planets"
             nativeButton={false}
-            render={<List.Header prominence="nested" />}
+            render={
+              <List.Header
+                {...partProps['List.Header']}
+                prominence="nested"
+              />
+            }
           >
-            <List.Title>Planets</List.Title>
+            <List.Title {...partProps['List.Title']}>Planets</List.Title>
             <List.Disclosure {...props} />
           </Collapsible.Trigger>
-          <Collapsible.Panel render={<List.Group />}>
+          <Collapsible.Panel
+            {...partProps['Collapsible.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -1480,19 +2284,26 @@ const DisclosurePart: FunctionComponent = () => {
 };
 
 /** A row with a grabber, reordered by a handle (for the parts below). */
-const ReorderRow: FunctionComponent<{
-  readonly handle: ListReorderHandle;
-  readonly name: string;
-}> = ({ handle, name }) => (
+// (A function, not a component: the code shown has its parts, not a tag.)
+const reorderRow = (
+  handle: ListReorderHandle,
+  name: string,
+  partProps: PartProps = {},
+) => (
   <List.Item
+    key={name}
+    {...partProps['List.Item']}
     dropName={name}
     reorderHandle={handle}
   >
-    <List.Content>
-      <List.Title>{name}</List.Title>
+    <List.Content {...partProps['List.Content']}>
+      <List.Title {...partProps['List.Title']}>{name}</List.Title>
     </List.Content>
-    <List.Trailing>
-      <List.Grabber aria-label={`Reorder ${name}`} />
+    <List.Trailing {...partProps['List.Trailing']}>
+      <List.Grabber
+        {...partProps['List.Grabber']}
+        aria-label={`Reorder ${name}`}
+      />
     </List.Trailing>
   </List.Item>
 );
@@ -1521,36 +2332,57 @@ const DropGroupPart: FunctionComponent = () => {
     { external, isOpen: true, title: 'List.DropGroup' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Grabber': ['aria-label'],
+            'List.Group': [],
+            'List.Item': ['dropName', 'reorderHandle'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.DropGroup"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item dropName="Mercury">
-              <List.Content>
-                <List.Title>Mercury</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item
+              {...partProps['List.Item']}
+              dropName="Mercury"
+            >
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Mercury</List.Title>
               </List.Content>
             </List.Item>
             <List.DropGroup {...props}>
-              {order.map((name) => (
-                <ReorderRow
-                  key={name}
-                  handle={reorderRows}
-                  name={name}
-                />
-              ))}
+              {order.map((name) => reorderRow(reorderRows, name, partProps))}
             </List.DropGroup>
-            <List.Item dropName="Jupiter">
-              <List.Content>
-                <List.Title>Jupiter</List.Title>
+            <List.Item
+              {...partProps['List.Item']}
+              dropName="Jupiter"
+            >
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Jupiter</List.Title>
               </List.Content>
             </List.Item>
           </List.Group>
@@ -1581,27 +2413,42 @@ const DropTargetPart: FunctionComponent = () => {
     { external, isOpen: true, title: 'List.DropTarget' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Grabber': ['aria-label'],
+            'List.Group': [],
+            'List.Item': ['dropName', 'reorderHandle'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.DropTarget"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <List.DropTarget {...props} />
-            {order.map((name) => (
-              <ReorderRow
-                key={name}
-                handle={reorderRows}
-                name={name}
-              />
-            ))}
+            {order.map((name) => reorderRow(reorderRows, name, partProps))}
           </List.Group>
         </List.Section>
       </List.Root>
@@ -1633,55 +2480,84 @@ const CreateReorderHandlePart: FunctionComponent = () => {
     ),
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'variant'],
+            'List.Content': [],
+            'List.Grabber': ['aria-label'],
+            'List.Group': ['reorderHandle'],
+            'List.Item': ['dropName', 'reorderHandle'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('list-parts-create-reorder-handle') },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="list-parts-create-reorder-handle"
       log={log}
+      state={[partState]}
       title="List.createReorderHandle"
     >
       <>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="bordered"
           onClick={() => reorderPlanets.grab(['Venus', 'Earth'])}
         >
-          <Button.Label>Grab Venus and Earth</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Grab Venus and Earth
+          </Button.Label>
         </Button.Root>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="bordered"
           onClick={() => reorderPlanets.move('previous')}
         >
-          <Button.Label>Move Up</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Move Up</Button.Label>
         </Button.Root>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="bordered"
           onClick={() => reorderPlanets.move('next')}
         >
-          <Button.Label>Move Down</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Move Down</Button.Label>
         </Button.Root>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="bordered"
           onClick={() => reorderPlanets.drop()}
         >
-          <Button.Label>Drop</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Drop</Button.Label>
         </Button.Root>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="bordered"
           onClick={() => reorderPlanets.cancel()}
         >
-          <Button.Label>Cancel</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Cancel</Button.Label>
         </Button.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group reorderHandle={reorderPlanets}>
-              {order.map((name) => (
-                <ReorderRow
-                  key={name}
-                  handle={reorderPlanets}
-                  name={name}
-                />
-              ))}
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group
+              {...partProps['List.Group']}
+              reorderHandle={reorderPlanets}
+            >
+              {order.map((name) => reorderRow(reorderPlanets, name, partProps))}
             </List.Group>
           </List.Section>
         </List.Root>
@@ -1709,24 +2585,44 @@ const UseCreateReorderHandlePart: FunctionComponent = () => {
     'const reorderRows = useCreateReorderHandle({ onReorder: … });',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Grabber': ['aria-label'],
+            'List.Group': ['reorderHandle'],
+            'List.Item': ['dropName', 'reorderHandle'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('list-parts-use-create-reorder-handle') },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="list-parts-use-create-reorder-handle"
       log={log}
+      state={[partState]}
       title="useCreateReorderHandle"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group reorderHandle={reorderRows}>
-            {order.map((name) => (
-              <ReorderRow
-                key={name}
-                handle={reorderRows}
-                name={name}
-              />
-            ))}
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group
+            {...partProps['List.Group']}
+            reorderHandle={reorderRows}
+          >
+            {order.map((name) => reorderRow(reorderRows, name, partProps))}
           </List.Group>
         </List.Section>
       </List.Root>
@@ -1763,33 +2659,61 @@ const GrabberPart: FunctionComponent = () => {
     },
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Grabber (others)': ['aria-label'],
+            'List.Content': [],
+            'List.Group': ['reorderHandle'],
+            'List.Item': ['dropName', 'reorderHandle'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Grabber"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group reorderHandle={reorderRows}>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group
+            {...partProps['List.Group']}
+            reorderHandle={reorderRows}
+          >
             {order.map((name, index) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 dropName={name}
                 reorderHandle={reorderRows}
               >
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   {index === 0 ? (
                     <List.Grabber {...props} />
                   ) : (
-                    <List.Grabber aria-label={`Reorder ${name}`} />
+                    <List.Grabber
+                      {...partProps['List.Grabber (others)']}
+                      aria-label={`Reorder ${name}`}
+                    />
                   )}
                 </List.Trailing>
               </List.Item>
@@ -1811,27 +2735,58 @@ const ActionPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.Action' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Action"
     >
-      <List.Root>
-        <List.Section>
-          <List.Header prominence="nested">
-            <List.Title render={<h3 />}>Planets</List.Title>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Header
+            {...partProps['List.Header']}
+            prominence="nested"
+          >
+            <List.Title
+              {...partProps['List.Title']}
+              render={<h3 />}
+            >
+              Planets
+            </List.Title>
             <List.Action {...props}>See All</List.Action>
           </List.Header>
-          <List.Group>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -1852,27 +2807,47 @@ const ButtonPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.Button' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Button (others)': ['destructive', 'onClick'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Button"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Content>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Button {...props}>Add Planet</List.Button>
               </List.Content>
             </List.Item>
-            <List.Item>
-              <List.Content>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
                 <List.Button
+                  {...partProps['List.Button (others)']}
                   destructive
                   onClick={() => addLog('delete all clicked')}
                 >
@@ -1897,25 +2872,47 @@ const CheckboxPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.Checkbox' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Checkbox (others)': ['aria-label'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Checkbox"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name, index) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 onClick={forwardClick('[role=checkbox]')}
               >
-                <List.Leading>
+                <List.Leading {...partProps['List.Leading']}>
                   {index === 0 ? (
                     <List.Checkbox
                       key={elementKey}
@@ -1923,11 +2920,14 @@ const CheckboxPart: FunctionComponent = () => {
                       {...props}
                     />
                   ) : (
-                    <List.Checkbox aria-label={name} />
+                    <List.Checkbox
+                      {...partProps['List.Checkbox (others)']}
+                      aria-label={name}
+                    />
                   )}
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -1950,22 +2950,50 @@ const RadioPart: FunctionComponent = () => {
     title: 'List.Radio',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            RadioGroup: [
+              'aria-label',
+              'defaultValue',
+              'onValueChange',
+              'render',
+            ],
+            'List.Radio (others)': ['aria-label', 'value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Radio"
     >
-      <List.Root>
-        <List.Section>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
           <RadioGroup
+            {...partProps.RadioGroup}
             aria-label="Planet"
             defaultValue={rows[0]}
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
             onValueChange={(value: unknown) =>
               addLog(`value change: ${String(value)}`)
             }
@@ -1973,9 +3001,10 @@ const RadioPart: FunctionComponent = () => {
             {rows.map((name, index) => (
               <List.Item
                 key={name}
+                {...partProps['List.Item']}
                 onClick={forwardClick('[role=radio]')}
               >
-                <List.Leading>
+                <List.Leading {...partProps['List.Leading']}>
                   {index === 0 ? (
                     <List.Radio
                       aria-label={name}
@@ -1983,13 +3012,14 @@ const RadioPart: FunctionComponent = () => {
                     />
                   ) : (
                     <List.Radio
+                      {...partProps['List.Radio (others)']}
                       aria-label={name}
                       value={name}
                     />
                   )}
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
@@ -2013,48 +3043,82 @@ const EditButtonPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.EditButton' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.EditButton (others)': ['aria-label', 'onClick', 'tint'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.EditButton"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name, index) => (
-              <List.Item key={name}>
-                <List.Leading>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Leading {...partProps['List.Leading']}>
                   <List.EditButton
                     aria-label={`Delete ${name}`}
                     tint="var(--color-ui-system-red)"
                     onClick={() => addLog(`edit button: delete ${name}`)}
-                    {...(index === 0 ? props : {})}
+                    {...(index === 0
+                      ? props
+                      : partProps['List.EditButton (others)'])}
                   >
-                    <Symbol icon={sfMinus} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfMinus}
+                    />
                   </List.EditButton>
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
               </List.Item>
             ))}
-            <List.Item>
-              <List.Leading>
+            <List.Item {...partProps['List.Item']}>
+              <List.Leading {...partProps['List.Leading']}>
                 <List.EditButton
+                  {...partProps['List.EditButton (others)']}
                   aria-label="Add Planet"
                   tint="var(--color-ui-system-green)"
                   onClick={() => addLog('edit button: add planet')}
                 >
-                  <Symbol icon={sfPlus} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPlus}
+                  />
                 </List.EditButton>
               </List.Leading>
-              <List.Content>
-                <List.Title>Add Planet</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Add Planet</List.Title>
               </List.Content>
             </List.Item>
           </List.Group>
@@ -2079,37 +3143,74 @@ const SwipeActionsPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.SwipeActions (others)': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.SwipeActions"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name, index) => (
-              <List.Item key={name}>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.SwipeActions {...(index === 0 ? props : {})}>
+                <List.SwipeActions
+                  {...(index === 0
+                    ? props
+                    : partProps['List.SwipeActions (others)'])}
+                >
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction']}
                     label="Pin"
                     onClick={() => addLog(`pin ${name}`)}
                   >
-                    <Symbol icon={sfFlagFill} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfFlagFill}
+                    />
                   </List.SwipeAction>
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction']}
                     label="Delete"
                     tint="var(--color-ui-system-red)"
                     onClick={() => addLog(`delete ${name}`)}
                   >
-                    <Symbol icon={sfTrashFill} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrashFill}
+                    />
                   </List.SwipeAction>
                 </List.SwipeActions>
               </List.Item>
@@ -2139,65 +3240,113 @@ const SwipeActionsTriggerPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.SwipeActionsTrigger (others)': ['render'],
+            'List.Content': [],
+            'List.EditButton': ['aria-label', 'tint'],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.SwipeActions': ['side'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.SwipeActionsTrigger"
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {rows.map((name, index) => (
-              <List.Item key={name}>
-                <List.Leading>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Leading {...partProps['List.Leading']}>
                   {index === 0 ? (
                     <List.SwipeActionsTrigger
                       {...props}
                       render={
                         <List.EditButton
+                          {...partProps['List.EditButton']}
                           aria-label={`Delete ${name}`}
                           tint="var(--color-ui-system-red)"
                         >
-                          <Symbol icon={sfMinus} />
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfMinus}
+                          />
                         </List.EditButton>
                       }
                     />
                   ) : (
                     <List.SwipeActionsTrigger
+                      {...partProps['List.SwipeActionsTrigger (others)']}
                       render={
                         <List.EditButton
+                          {...partProps['List.EditButton']}
                           aria-label={`Delete ${name}`}
                           tint="var(--color-ui-system-red)"
                         >
-                          <Symbol icon={sfMinus} />
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfMinus}
+                          />
                         </List.EditButton>
                       }
                     />
                   )}
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{name}</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{name}</List.Title>
                 </List.Content>
-                <List.SwipeActions side="inline-start">
+                <List.SwipeActions
+                  {...partProps['List.SwipeActions']}
+                  side="inline-start"
+                >
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction']}
                     label="Pin"
                     onClick={() => addLog(`pin ${name}`)}
                   >
-                    <Symbol icon={sfFlagFill} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfFlagFill}
+                    />
                   </List.SwipeAction>
                 </List.SwipeActions>
-                <List.SwipeActions>
+                <List.SwipeActions {...partProps['List.SwipeActions']}>
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction']}
                     label="Delete"
                     tint="var(--color-ui-system-red)"
                     onClick={() => addLog(`delete ${name}`)}
                   >
-                    <Symbol icon={sfTrashFill} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrashFill}
+                    />
                   </List.SwipeAction>
                 </List.SwipeActions>
               </List.Item>
@@ -2216,44 +3365,88 @@ const SwipeActionsTriggerPart: FunctionComponent = () => {
 const CreateSwipeActionsHandlePart: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'variant'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.SwipeActions': ['handle'],
+            'List.SwipeActionsTrigger': ['handle', 'render'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('list-parts-create-swipe-actions-handle') },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="list-parts-create-swipe-actions-handle"
       log={log}
+      state={[partState]}
       title="List.createSwipeActionsHandle"
     >
       <>
         <List.SwipeActionsTrigger
+          {...partProps['List.SwipeActionsTrigger']}
           handle={mercuryActions}
-          render={<Button.Root variant="bordered" />}
+          render={
+            <Button.Root
+              {...partProps['Button.Root']}
+              variant="bordered"
+            />
+          }
         >
-          <Button.Label>Show Mercury’s Actions</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Show Mercury’s Actions
+          </Button.Label>
         </List.SwipeActionsTrigger>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="bordered"
           onClick={() => mercuryActions.close()}
         >
-          <Button.Label>Close Them</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Close Them</Button.Label>
         </Button.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group>
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               {rows.map((name, index) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>{name}</List.Title>
                   </List.Content>
                   <List.SwipeActions
+                    {...partProps['List.SwipeActions']}
                     handle={index === 0 ? mercuryActions : undefined}
                   >
                     <List.SwipeAction
+                      {...partProps['List.SwipeAction']}
                       label="Delete"
                       tint="var(--color-ui-system-red)"
                       onClick={() => addLog(`delete ${name}`)}
                     >
-                      <Symbol icon={sfTrashFill} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfTrashFill}
+                      />
                     </List.SwipeAction>
                   </List.SwipeActions>
                 </List.Item>
@@ -2278,38 +3471,83 @@ const UseCreateSwipeActionsHandlePart: FunctionComponent = () => {
     'const mercuryRowActions = useCreateSwipeActionsHandle();',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.SwipeAction': ['label', 'onClick', 'tint'],
+            'List.SwipeActions': ['handle'],
+            'List.SwipeActionsTrigger': ['handle', 'render'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    {
+      provided: useProvidedState('list-parts-use-create-swipe-actions-handle'),
+    },
+  );
+
   return (
     <Component
       isInline
       isStretched
+      controls={[partControls]}
       id="list-parts-use-create-swipe-actions-handle"
       log={log}
+      state={[partState]}
       title="useCreateSwipeActionsHandle"
     >
       <>
         <List.SwipeActionsTrigger
+          {...partProps['List.SwipeActionsTrigger']}
           handle={mercuryRowActions}
-          render={<Button.Root variant="bordered" />}
+          render={
+            <Button.Root
+              {...partProps['Button.Root']}
+              variant="bordered"
+            />
+          }
         >
-          <Button.Label>Show Mercury’s Actions</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Show Mercury’s Actions
+          </Button.Label>
         </List.SwipeActionsTrigger>
-        <List.Root>
-          <List.Section>
-            <List.Group>
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               {rows.map((name, index) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>{name}</List.Title>
                   </List.Content>
                   <List.SwipeActions
+                    {...partProps['List.SwipeActions']}
                     handle={index === 0 ? mercuryRowActions : undefined}
                   >
                     <List.SwipeAction
+                      {...partProps['List.SwipeAction']}
                       label="Delete"
                       tint="var(--color-ui-system-red)"
                       onClick={() => addLog(`delete ${name}`)}
                     >
-                      <Symbol icon={sfTrashFill} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfTrashFill}
+                      />
                     </List.SwipeAction>
                   </List.SwipeActions>
                 </List.Item>
@@ -2332,54 +3570,120 @@ const SwipeActionPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.SwipeAction' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.SwipeAction (others)': [
+              'label',
+              'onClick',
+              'showLabel',
+              'tint',
+            ],
+            'List.Below': [],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Group': [],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.SwipeActions': [],
+            'List.Text': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.SwipeAction"
     >
-      <List.Root listStyle="plain">
-        <List.Section>
-          <List.Group>
+      <List.Root
+        {...partProps['List.Root']}
+        listStyle="plain"
+      >
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             {messages.map(({ date, from, preview, subject }, index) => (
-              <List.Item key={from}>
-                <List.Leading>
-                  <List.Image variant="circular">
-                    <Symbol icon={sfPersonCropCircleFill} />
+              <List.Item
+                key={from}
+                {...partProps['List.Item']}
+              >
+                <List.Leading {...partProps['List.Leading']}>
+                  <List.Image
+                    {...partProps['List.Image']}
+                    variant="circular"
+                  >
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfPersonCropCircleFill}
+                    />
                   </List.Image>
                 </List.Leading>
-                <List.Content>
-                  <List.Title>{from}</List.Title>
-                  <List.Subtitle>{subject}</List.Subtitle>
-                  <List.Text>{preview}</List.Text>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>{from}</List.Title>
+                  <List.Subtitle {...partProps['List.Subtitle']}>
+                    {subject}
+                  </List.Subtitle>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail>{date}</List.Detail>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>
+                    {date}
+                  </List.Detail>
                 </List.Trailing>
-                <List.SwipeActions overswipe>
+                <List.Below {...partProps['List.Below']}>
+                  <List.Text {...partProps['List.Text']}>{preview}</List.Text>
+                </List.Below>
+                <List.SwipeActions
+                  {...partProps['List.SwipeActions']}
+                  overswipe
+                >
                   <List.SwipeAction
+                    {...partProps['List.SwipeAction (others)']}
                     showLabel
                     label="More"
                     onClick={() => addLog(`more ${from}`)}
                   >
-                    <Symbol icon={sfEllipsis} />
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </List.SwipeAction>
                   {index === 0 ? (
                     <List.SwipeAction {...props}>
-                      <Symbol icon={sfArchiveboxFill} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfArchiveboxFill}
+                      />
                     </List.SwipeAction>
                   ) : (
                     <List.SwipeAction
+                      {...partProps['List.SwipeAction (others)']}
                       showLabel
                       label="Archive"
                       tint="var(--color-ui-system-purple)"
                       onClick={() => addLog(`archive ${from}`)}
                     >
-                      <Symbol icon={sfArchiveboxFill} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfArchiveboxFill}
+                      />
                     </List.SwipeAction>
                   )}
                 </List.SwipeActions>
@@ -2404,69 +3708,83 @@ const IndexPart: FunctionComponent = () => {
     title: 'List.Index',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.IndexItem': ['onClick'],
+            'List.Item': [],
+            'List.Root': ['listStyle'],
+            'List.Section': ['indexValue'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.Index"
     >
       <div className="list-demo-plain">
-        <div
-          className="list-demo-scroll"
-          id="list-parts-index"
-        >
-          <List.Root listStyle="plain">
+        <div className="list-demo-scroll">
+          <List.Root
+            {...partProps['List.Root']}
+            listStyle="plain"
+          >
             {Object.entries(contacts).map(([letter, names]) => (
               <List.Section
                 key={letter}
-                id={`list-parts-index-${letter}`}
+                {...partProps['List.Section']}
+                indexValue={letter}
               >
-                <List.Header prominence="nested">
-                  <List.Title>{letter}</List.Title>
+                <List.Header
+                  {...partProps['List.Header']}
+                  prominence="nested"
+                >
+                  <List.Title {...partProps['List.Title']}>{letter}</List.Title>
                 </List.Header>
-                <List.Group>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             ))}
+            <List.Index {...props}>
+              {Object.keys(contacts).map((letter) => (
+                <List.IndexItem
+                  key={letter}
+                  {...partProps['List.IndexItem']}
+                  onClick={() => addLog(`index: ${letter}`)}
+                >
+                  {letter}
+                </List.IndexItem>
+              ))}
+            </List.Index>
           </List.Root>
-        </div>
-        <div className="list-demo-index">
-          <List.Index {...props}>
-            {Object.keys(contacts).map((letter) => (
-              <List.IndexItem
-                key={letter}
-                onClick={() => {
-                  addLog(`index: ${letter}`);
-                  const list = document.querySelector('#list-parts-index');
-                  const section = document.querySelector(
-                    `#list-parts-index-${letter}`,
-                  );
-                  if (!list || !section) return;
-                  // The section at the top of the list (its own scroll
-                  // container; the page stays).
-                  list.scrollTo({
-                    top:
-                      list.scrollTop +
-                      section.getBoundingClientRect().top -
-                      list.getBoundingClientRect().top,
-                  });
-                }}
-              >
-                {letter}
-              </List.IndexItem>
-            ))}
-          </List.Index>
         </div>
       </div>
     </Component>
@@ -2483,70 +3801,89 @@ const IndexItemPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'List.IndexItem' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.IndexItem (others)': ['onClick'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Index': ['aria-label'],
+            'List.Item': [],
+            'List.Root': ['listStyle'],
+            'List.Section': ['indexValue'],
+            'List.Title': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="List.IndexItem"
     >
       <div className="list-demo-plain">
-        <div
-          className="list-demo-scroll"
-          id="list-parts-index-item"
-        >
-          <List.Root listStyle="plain">
+        <div className="list-demo-scroll">
+          <List.Root
+            {...partProps['List.Root']}
+            listStyle="plain"
+          >
             {Object.entries(contacts).map(([letter, names]) => (
               <List.Section
                 key={letter}
-                id={`list-parts-index-item-${letter}`}
+                {...partProps['List.Section']}
+                indexValue={letter}
               >
-                <List.Header prominence="nested">
-                  <List.Title>{letter}</List.Title>
+                <List.Header
+                  {...partProps['List.Header']}
+                  prominence="nested"
+                >
+                  <List.Title {...partProps['List.Title']}>{letter}</List.Title>
                 </List.Header>
-                <List.Group>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             ))}
+            <List.Index
+              {...partProps['List.Index']}
+              aria-label="Index"
+            >
+              {Object.keys(contacts).map((letter, index) => (
+                <List.IndexItem
+                  key={letter}
+                  onClick={() => addLog(`index: ${letter}`)}
+                  {...(index === 0
+                    ? props
+                    : partProps['List.IndexItem (others)'])}
+                >
+                  {letter}
+                </List.IndexItem>
+              ))}
+            </List.Index>
           </List.Root>
-        </div>
-        <div className="list-demo-index">
-          <List.Index aria-label="Index">
-            {Object.keys(contacts).map((letter, index) => (
-              <List.IndexItem
-                key={letter}
-                onClick={() => {
-                  addLog(`index: ${letter}`);
-                  const list = document.querySelector('#list-parts-index-item');
-                  const section = document.querySelector(
-                    `#list-parts-index-item-${letter}`,
-                  );
-                  if (!list || !section) return;
-                  // The section at the top of the list (its own scroll
-                  // container; the page stays).
-                  list.scrollTo({
-                    top:
-                      list.scrollTop +
-                      section.getBoundingClientRect().top -
-                      list.getBoundingClientRect().top,
-                  });
-                }}
-                {...(index === 0 ? props : {})}
-              >
-                {letter}
-              </List.IndexItem>
-            ))}
-          </List.Index>
         </div>
       </div>
     </Component>
@@ -2574,328 +3911,399 @@ export const ListParts: FunctionComponent = () => (
           component="list"
           part="List.Root"
         />{' '}
-        of sections.
+        holds sections.
       </li>
       <li>
-        A section: a header, a group of rows (or a block of text), a footer.
+        A section has a header, a group of rows (or a block of text), and a
+        footer.
       </li>
       <li>
-        A row: a grid of parts; leading (an edit control, an image), its title
-        (and subtitle, text), trailing parts.
+        A row is a grid of parts: leading parts (an edit control, an image), its
+        title (with a subtitle and text), and trailing parts.
       </li>
-      <li>A row’s swipe actions: revealed by swiping.</li>
+      <li>A row’s swipe actions are revealed by swiping it.</li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="list"
-          part="List.Root"
+          component="page"
+          part="Page.Root"
+        />{' '}
+        <span>(or a</span>{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Content"
         />
+        <span>, a</span>{' '}
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Root"
+        />
+        <span>, …)</span>
         <ul>
           <li>
             <PartLink
               component="list"
-              part="List.Section"
-            />{' '}
-            (one or more)
+              part="List.Root"
+            />
             <ul>
               <li>
                 <PartLink
                   component="list"
-                  part="List.Header"
+                  part="List.Section"
                 />{' '}
-                (optional):{' '}
-                <PartLink
-                  component="list"
-                  part="List.Supertitle"
-                />
-                ,{' '}
-                <PartLink
-                  component="list"
-                  part="List.Title"
-                />
-                ,{' '}
-                <PartLink
-                  component="list"
-                  part="List.Subtitle"
-                />
-                ,{' '}
-                <PartLink
-                  component="list"
-                  part="List.Accessory"
-                />
-                ,{' '}
-                <PartLink
-                  component="list"
-                  part="List.Action"
-                />
-                ,{' '}
-                <PartLink
-                  component="list"
-                  part="List.Disclosure"
-                />
-              </li>
-              <li>
-                <PartLink
-                  component="list"
-                  part="List.Group"
-                />
-                , or{' '}
-                <PartLink
-                  component="list"
-                  part="List.Block"
-                />
+                (one or more)
                 <ul>
                   <li>
                     <PartLink
                       component="list"
-                      part="List.Item"
+                      part="List.Header"
                     />{' '}
-                    (or{' '}
+                    (optional):{' '}
                     <PartLink
                       component="list"
-                      part="List.CollapsiblePanel"
-                    />
-                    , in a{' '}
-                    <PartLink
-                      component="list"
-                      part="List.CollapsibleRoot"
-                    />{' '}
-                    with the row whose{' '}
-                    <PartLink
-                      component="list"
-                      part="List.CollapsibleTrigger"
-                    />{' '}
-                    toggles it; or, one open at a time, of an{' '}
-                    <PartLink
-                      component="list"
-                      part="List.AccordionItem"
-                    />{' '}
-                    (its{' '}
-                    <PartLink
-                      component="list"
-                      part="List.AccordionTrigger"
+                      part="List.Supertitle"
                     />
                     ,{' '}
                     <PartLink
                       component="list"
-                      part="List.AccordionPanel"
+                      part="List.Title"
                     />
-                    ) in an{' '}
+                    ,{' '}
                     <PartLink
                       component="list"
-                      part="List.AccordionRoot"
+                      part="List.Subtitle"
                     />
-                    ; one or more)
+                    ,{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Accessory"
+                    />
+                    ,{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Action"
+                    />
+                    ,{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Disclosure"
+                    />
+                  </li>
+                  <li>
+                    <PartLink
+                      component="list"
+                      part="List.Group"
+                    />
+                    , or{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Block"
+                    />
                     <ul>
                       <li>
                         <PartLink
                           component="list"
-                          part="List.Leading"
+                          part="List.Item"
                         />{' '}
-                        (optional, one or more: before the content)
+                        (one or more)
                         <ul>
                           <li>
                             <PartLink
                               component="list"
-                              part="List.Checkbox"
-                            />
-                            ,{' '}
+                              part="List.Leading"
+                            />{' '}
+                            (optional, one or more, before the content)
+                            <ul>
+                              <li>
+                                <PartLink
+                                  component="list"
+                                  part="List.Checkbox"
+                                />
+                                ,{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Radio"
+                                />{' '}
+                                or{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.EditButton"
+                                />
+                                , or{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Image"
+                                />
+                              </li>
+                              <li className="demo-tree-context">
+                                <span>or any element, for example an</span>{' '}
+                                <PartLink
+                                  component="progress"
+                                  part="ActivityIndicator"
+                                />
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
                             <PartLink
                               component="list"
-                              part="List.Radio"
+                              part="List.Content"
                             />{' '}
-                            or{' '}
+                            (its text, taking the rest of the line)
+                            <ul>
+                              <li>
+                                <PartLink
+                                  component="list"
+                                  part="List.Title"
+                                />{' '}
+                                (or{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Button"
+                                />
+                                ),{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Subtitle"
+                                />{' '}
+                                (optional),{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Text"
+                                />{' '}
+                                (optional)
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
+                            <PartLink
+                              component="list"
+                              part="List.Trailing"
+                            />{' '}
+                            (optional, one or more, after the content)
+                            <ul>
+                              <li>
+                                <PartLink
+                                  component="list"
+                                  part="List.Detail"
+                                />
+                                ,{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Accessory"
+                                />
+                                ,{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Action"
+                                />
+                                ,{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Checkmark"
+                                />
+                                ,{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.DrillIn"
+                                />
+                                ,{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Disclosure"
+                                />
+                                ,{' '}
+                                <PartLink
+                                  component="list"
+                                  part="List.Grabber"
+                                />
+                              </li>
+                              <li className="demo-tree-context">
+                                <span>or any element, for example a</span>{' '}
+                                <PartLink
+                                  component="switch"
+                                  part="Switch.Root"
+                                />
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
+                            Or a{' '}
+                            <PartLink
+                              component="list"
+                              part="List.Span"
+                            />{' '}
+                            (across the line, in place of the above)
+                            <ul>
+                              <li className="demo-tree-context">
+                                <span>for example a</span>{' '}
+                                <PartLink
+                                  component="slider"
+                                  part="Slider.Root"
+                                />
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
+                            <PartLink
+                              component="list"
+                              part="List.Below"
+                            />{' '}
+                            (optional: a line under it, for example a field’s
+                            messages)
+                          </li>
+                          <li>
+                            <PartLink
+                              component="list"
+                              part="List.SwipeActions"
+                            />{' '}
+                            (optional, one per side)
+                            <ul>
+                              <li>
+                                <PartLink
+                                  component="list"
+                                  part="List.SwipeAction"
+                                />{' '}
+                                (one or more)
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
+                            <PartLink
+                              component="list"
+                              part="List.SwipeActionsTrigger"
+                            />{' '}
+                            (optional: opens the row’s actions, for example
+                            rendering its{' '}
                             <PartLink
                               component="list"
                               part="List.EditButton"
                             />
-                            ;{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Image"
-                            />
-                            ; or any element (e.g. an ActivityIndicator)
+                            )
                           </li>
                         </ul>
                       </li>
                       <li>
+                        Rows that open and close: a{' '}
                         <PartLink
                           component="list"
-                          part="List.Content"
+                          part="List.CollapsibleRoot"
                         />{' '}
-                        (its text, taking the rest of the line)
-                        <ul>
-                          <li>
-                            <PartLink
-                              component="list"
-                              part="List.Title"
-                            />{' '}
-                            (or{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Button"
-                            />
-                            ),{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Subtitle"
-                            />{' '}
-                            (optional),{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Text"
-                            />{' '}
-                            (optional)
-                          </li>
-                        </ul>
-                      </li>
-                      <li>
+                        around the row whose{' '}
                         <PartLink
                           component="list"
-                          part="List.Trailing"
+                          part="List.CollapsibleTrigger"
                         />{' '}
-                        (optional, one or more: after the content)
-                        <ul>
-                          <li>
-                            <PartLink
-                              component="list"
-                              part="List.Detail"
-                            />
-                            ,{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Accessory"
-                            />
-                            ,{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Action"
-                            />
-                            ,{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Checkmark"
-                            />
-                            ,{' '}
-                            <PartLink
-                              component="list"
-                              part="List.DrillIn"
-                            />
-                            ,{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Disclosure"
-                            />
-                            ,{' '}
-                            <PartLink
-                              component="list"
-                              part="List.Grabber"
-                            />
-                            ; or any element (e.g. a Switch)
-                          </li>
-                        </ul>
-                      </li>
-                      <li>
-                        Or{' '}
+                        toggles them and its{' '}
                         <PartLink
                           component="list"
-                          part="List.Span"
+                          part="List.CollapsiblePanel"
+                        />
+                        . Or, one open at a time, an{' '}
+                        <PartLink
+                          component="list"
+                          part="List.AccordionRoot"
                         />{' '}
-                        (across the line, in place of the above: e.g. a Slider)
-                      </li>
-                      <li>
+                        around{' '}
                         <PartLink
                           component="list"
-                          part="List.Below"
+                          part="List.AccordionItem"
+                        />
+                        s (with their{' '}
+                        <PartLink
+                          component="list"
+                          part="List.AccordionTrigger"
                         />{' '}
-                        (optional: a line under it, e.g. a field’s messages)
-                      </li>
-                      <li>
+                        and{' '}
                         <PartLink
                           component="list"
-                          part="List.SwipeActions"
-                        />{' '}
-                        (optional, one per side)
-                        <ul>
-                          <li>
-                            <PartLink
-                              component="list"
-                              part="List.SwipeAction"
-                            />{' '}
-                            (one or more)
-                          </li>
-                        </ul>
-                      </li>
-                      <li>
-                        <PartLink
-                          component="list"
-                          part="List.SwipeActionsTrigger"
-                        />{' '}
-                        (optional: opening the row’s actions, e.g. rendering its{' '}
-                        <PartLink
-                          component="list"
-                          part="List.EditButton"
+                          part="List.AccordionPanel"
                         />
                         )
                       </li>
+                      <li>
+                        Drop targets for reordering (optional):{' '}
+                        <PartLink
+                          component="list"
+                          part="List.DropGroup"
+                        />
+                        ,{' '}
+                        <PartLink
+                          component="list"
+                          part="List.DropTarget"
+                        />
+                      </li>
                     </ul>
+                  </li>
+                  <li>
+                    <PartLink
+                      component="list"
+                      part="List.Footer"
+                    />{' '}
+                    (optional)
                   </li>
                 </ul>
               </li>
+            </ul>
+          </li>
+          <li>
+            <PartLink
+              component="list"
+              part="List.Index"
+            />{' '}
+            (optional, next to a plain list)
+            <ul>
               <li>
                 <PartLink
                   component="list"
-                  part="List.Footer"
+                  part="List.IndexItem"
                 />{' '}
-                (optional)
+                (one per letter)
               </li>
             </ul>
           </li>
         </ul>
       </li>
       <li>
-        <PartLink
-          component="list"
-          part="List.Index"
-        />{' '}
-        (optional, beside a plain list)
-        <ul>
-          <li>
-            <PartLink
-              component="list"
-              part="List.IndexItem"
-            />{' '}
-            (one per letter)
-          </li>
-        </ul>
-      </li>
-      <li>
+        Helpers:{' '}
         <PartLink
           component="list"
           part="forwardClick"
         />{' '}
-        (a helper: a row’s click handler)
+        (a row’s click handler) and{' '}
+        <PartLink
+          component="list"
+          part="List.reorder"
+        />{' '}
+        (applying a reorder)
       </li>
       <li>
-        Swipe actions handles (optional: a row’s actions’ <code>handle</code>,
-        its triggers’):
-        <ul>
-          <li>
-            <PartLink
-              component="list"
-              part="List.createSwipeActionsHandle"
-            />{' '}
-            (at module level), or
-          </li>
-          <li>
-            <PartLink
-              component="list"
-              part="useCreateSwipeActionsHandle"
-            />{' '}
-            (in a component)
-          </li>
-        </ul>
+        Reorder handles (optional: given to rows and their drop targets):{' '}
+        <PartLink
+          component="list"
+          part="List.createReorderHandle"
+        />{' '}
+        (at module level), or{' '}
+        <PartLink
+          component="list"
+          part="useCreateReorderHandle"
+        />{' '}
+        (in a component)
+      </li>
+      <li>
+        Swipe actions handles (optional: given to a row’s actions and their
+        triggers):{' '}
+        <PartLink
+          component="list"
+          part="List.createSwipeActionsHandle"
+        />{' '}
+        (at module level), or{' '}
+        <PartLink
+          component="list"
+          part="useCreateSwipeActionsHandle"
+        />{' '}
+        (in a component)
       </li>
     </ul>
 
@@ -2908,14 +4316,14 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>The list.</li>
       <li>
-        Style, for all its parts: <code>listStyle</code>.
+        Its style, for all its parts: <code>listStyle</code>.
       </li>
       <li>Whether its groups are outlined.</li>
       <li>
-        Edit mode: <code>editing</code>, by side (leading edit controls,
-        trailing grabbers, both, none, or not managed), the default its
-        sections, groups and rows override; their parts follow by their{' '}
-        <code>whileEditing</code>. Sections editing separately:{' '}
+        Its edit mode: <code>editing</code>, by side (leading edit controls,
+        trailing grabbers, both, none, or not managed). It’s the default that
+        its sections, groups and rows override, and their parts follow it by
+        their <code>whileEditing</code>. For sections that edit separately, see{' '}
         <a href={publicUrl('list/composition#editing-sections-separately')}>
           Editing sections separately
         </a>
@@ -2940,7 +4348,7 @@ export const ListParts: FunctionComponent = () => (
         A section (a <code>section</code>).
       </li>
       <li>
-        An optional{' '}
+        It holds an optional{' '}
         <PartLink
           component="list"
           part="List.Header"
@@ -2961,7 +4369,7 @@ export const ListParts: FunctionComponent = () => (
         >
           Block
         </PartLink>
-        ), an optional{' '}
+        ), and an optional{' '}
         <PartLink
           component="list"
           part="List.Footer"
@@ -2970,7 +4378,7 @@ export const ListParts: FunctionComponent = () => (
         </PartLink>
         .
       </li>
-      <li>35px apart.</li>
+      <li>Sections are 35px apart.</li>
     </ul>
     <SectionPart />
     <h3>Props</h3>
@@ -2985,8 +4393,8 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>A section’s header.</li>
       <li>
-        A title (a heading, by <code>render</code>); optionally a supertitle, a
-        subtitle, trailing parts (an{' '}
+        It holds a title (rendered as a heading with <code>render</code>), and
+        optionally a supertitle, a subtitle, and trailing parts (an{' '}
         <PartLink
           component="list"
           part="List.Accessory"
@@ -3004,7 +4412,7 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>
         <code>prominence</code>: prominent, nested (a plain list’s sticky
-        section title), extra prominent.
+        section title), or extra prominent.
       </li>
     </ul>
     <HeaderPart />
@@ -3028,15 +4436,16 @@ export const ListParts: FunctionComponent = () => (
           component="list"
           part="List.createReorderHandle"
         />
-        ), its rows’ gaps are targets: rows of the handle (dragged by their{' '}
+        ), the gaps between its rows become drop targets. Rows of that handle
+        (dragged by their{' '}
         <PartLink
           component="list"
           part="List.Grabber"
         >
           Grabber
         </PartLink>
-        ) can be dropped before, between and after them; the handle’s{' '}
-        <code>onReorder</code> is called, the app reorders its rows.
+        ) can be dropped before, between and after them. The handle’s{' '}
+        <code>onReorder</code> is called, and the app reorders its rows.
       </li>
     </ul>
     <GroupPart />
@@ -3051,7 +4460,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A range of rows whose gaps are targets of its reorder handles (as a{' '}
+        A range of rows whose gaps are drop targets for its reorder handles
+        (like a{' '}
         <PartLink
           component="list"
           part="List.Group"
@@ -3059,13 +4469,13 @@ export const ListParts: FunctionComponent = () => (
         given one): before, between and after its rows.
       </li>
       <li>
-        No element of its own: placed around some of a group’s rows, they stay
-        the group’s (its separators, its corners); the rows around it aren’t
-        targets. Only an empty, hidden element marks where it is: emptied, it’s
-        still a target there.
+        It has no element of its own. Placed around some of a group’s rows,
+        those rows stay the group’s (with its separators and corners), and the
+        rows around it aren’t targets. Only an empty, hidden element marks where
+        it is, so even once emptied, it’s still a target there.
       </li>
       <li>
-        Here: Mercury and Jupiter stay where they are; Venus to Mars are
+        Here, Mercury and Jupiter stay where they are, and Venus to Mars can be
         reordered between them.
       </li>
     </ul>
@@ -3081,10 +4491,13 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A gap rows of its reorder handles can be dropped into, where it’s placed
-        among a group’s rows (an empty, hidden element only marking it).
+        A gap that rows of its reorder handles can be dropped into, wherever
+        it’s placed among a group’s rows. Only an empty, hidden element marks
+        it.
       </li>
-      <li>Here: the only target, at the top: rows can only be moved there.</li>
+      <li>
+        Here, it’s the only target, at the top, so rows can only be moved there.
+      </li>
     </ul>
     <DropTargetPart />
     <h3>Props</h3>
@@ -3100,22 +4513,22 @@ export const ListParts: FunctionComponent = () => (
       <li>
         A row (an <code>li</code>): its slots in a line, with a separator.
       </li>
-      <li>At least 52px high (68px with a subtitle).</li>
+      <li>At least 52px tall (68px with a subtitle).</li>
       <li>
-        Pressable through its title (or a{' '}
+        It’s pressable through its title (or a{' '}
         <PartLink
           component="list"
           part="List.Button"
         >
           Button
         </PartLink>
-        ), or by its own <code>onClick</code> (e.g.{' '}
+        ), or through its own <code>onClick</code> (for example with{' '}
         <PartLink part="forwardClick" />
         ).
       </li>
       <li>
-        Can be <code>selected</code>, indented (<code>level</code>), swiped for
-        its{' '}
+        It can be <code>selected</code>, indented (<code>level</code>), and
+        swiped for its{' '}
         <PartLink
           component="list"
           part="List.SwipeActions"
@@ -3137,13 +4550,13 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Rows’ state, as Base UI’s <code>Collapsible.Root</code>:{' '}
-        <code>defaultOpen</code>, or <code>open</code> and{' '}
-        <code>onOpenChange</code> (with Base UI’s reasons);{' '}
-        <code>disabled</code>.
+        Holds the state of rows that open and close, like Base UI’s{' '}
+        <code>Collapsible.Root</code>: <code>defaultOpen</code>, or{' '}
+        <code>open</code> and <code>onOpenChange</code> (with Base UI’s
+        reasons), and <code>disabled</code>.
       </li>
       <li>
-        Around the row toggling it and the{' '}
+        It goes around the row that toggles it and the{' '}
         <PartLink
           component="list"
           part="List.CollapsiblePanel"
@@ -3152,14 +4565,14 @@ export const ListParts: FunctionComponent = () => (
         </PartLink>
         .
       </li>
-      <li>Renders no element: they stay its group’s children.</li>
+      <li>It renders no element, so those rows stay its group’s children.</li>
       <li>
         A{' '}
         <PartLink
           component="list"
           part="List.Disclosure"
         />{' '}
-        in it turns down while open.
+        inside it turns down while open.
       </li>
     </ul>
     <CollapsibleRootPart />
@@ -3174,12 +4587,12 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button toggling its root’s rows (Base UI’s{' '}
-        <code>Collapsible.Trigger</code>): <code>aria-expanded</code>,{' '}
-        <code>aria-controls</code> (its panel’s rows), and{' '}
+        A button that toggles its root’s rows (Base UI’s{' '}
+        <code>Collapsible.Trigger</code>), with <code>aria-expanded</code>,{' '}
+        <code>aria-controls</code> (its panel’s rows) and{' '}
         <code>data-panel-open</code>.
       </li>
-      <li>Rendered by the row’s title: makes the row pressable.</li>
+      <li>The row’s title renders it, which makes the row pressable.</li>
     </ul>
     <CollapsibleTriggerPart />
     <h3>Props</h3>
@@ -3193,22 +4606,22 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Rows shown or not (Base UI’s <code>Collapsible.Panel</code>), opening
-        and closing in place together, e.g. an inline picker below the row
-        toggling them (as a calendar app’s).
+        Rows that show or hide (Base UI’s <code>Collapsible.Panel</code>),
+        opening and closing in place together. For example an inline picker
+        below the row that toggles it, as in a calendar app.
       </li>
       <li>
-        A container of{' '}
+        It holds{' '}
         <PartLink
           component="list"
           part="List.Item"
         />
-        s placed among the group’s rows, without an element of its own: each
-        stays a row of the group (its separator, its corners as the group’s
-        first or last).
+        s placed among the group’s rows, without an element of its own. Each
+        stays a row of the group, with its separator, and its corners as the
+        group’s first or last row.
       </li>
       <li>
-        Open as its{' '}
+        It’s open while its{' '}
         <PartLink
           component="list"
           part="List.CollapsibleRoot"
@@ -3220,10 +4633,10 @@ export const ListParts: FunctionComponent = () => (
           component="list"
           part="List.AccordionItem"
         />
-        ) is; in another’s rows, closed with them.
+        ) is. Inside another panel’s rows, it closes with them.
       </li>
-      <li>Closed: its rows are inert.</li>
-      <li>Here: two rows, opened by the trigger row above them.</li>
+      <li>While closed, its rows are inert.</li>
+      <li>Here, it holds two rows, opened by the trigger row above them.</li>
     </ul>
     <CollapsiblePanelPart />
     <h3>Props</h3>
@@ -3237,8 +4650,9 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Collapsibles, one open at a time (unless <code>multiple</code>), as Base
-        UI’s <code>Accordion.Root</code>: its{' '}
+        Collapsibles of which one is open at a time (unless{' '}
+        <code>multiple</code> is set), like Base UI’s{' '}
+        <code>Accordion.Root</code>. It holds its{' '}
         <PartLink
           component="list"
           part="List.AccordionItem"
@@ -3246,29 +4660,31 @@ export const ListParts: FunctionComponent = () => (
         s, by their <code>value</code>.
       </li>
       <li>
-        State: <code>defaultValue</code>, or <code>value</code> and{' '}
-        <code>onValueChange</code> (arrays of the items open);{' '}
+        Its state: <code>defaultValue</code>, or <code>value</code> and{' '}
+        <code>onValueChange</code> (arrays of the open items), and{' '}
         <code>disabled</code>.
       </li>
-      <li>Renders no element: its items’ rows stay its group’s children.</li>
+      <li>
+        It renders no element, so its items’ rows stay its group’s children.
+      </li>
       <li>
         A{' '}
         <PartLink
           component="date-picker"
           part="DatePicker.Root"
         />{' '}
-        with a <code>handle</code> in an item opens and closes with it (its{' '}
+        with a <code>handle</code> in an item opens and closes with it (with its{' '}
         <PartLink
           component="date-picker"
           part="DatePicker.Expandable"
         />
-        ’s rows: see{' '}
+        ’s rows; see{' '}
         <a href={publicUrl('list/composition#rows-expanding-together')}>
           Rows expanding together
         </a>
         ).
       </li>
-      <li>Here: an alarm’s Repeat and Alert, each opening below its row.</li>
+      <li>Here, an alarm’s Repeat and Alert each open below their row.</li>
     </ul>
     <AccordionRootPart />
     <h3>Props</h3>
@@ -3282,8 +4698,9 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A collapsible of its root (Base UI’s <code>Accordion.Item</code>), open
-        as the root holds, by its <code>value</code>: its trigger and panel as a{' '}
+        One collapsible of its root (Base UI’s <code>Accordion.Item</code>),
+        open whenever the root says so, by its <code>value</code>. Its trigger
+        and panel work like a{' '}
         <PartLink
           component="list"
           part="List.CollapsibleRoot"
@@ -3291,7 +4708,7 @@ export const ListParts: FunctionComponent = () => (
         ’s.
       </li>
       <li>Renders no element.</li>
-      <li>Here: Repeat’s (with Alert’s after it).</li>
+      <li>Here, Repeat’s (with Alert’s after it).</li>
     </ul>
     <AccordionItemPart />
     <h3>Props</h3>
@@ -3305,12 +4722,12 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s name in an accordion for{' '}
+        Base UI’s name, in an accordion, for{' '}
         <PartLink
           component="list"
           part="List.CollapsibleTrigger"
         />
-        : the same part (its props, there), toggling its{' '}
+        . It’s the same part (its props are there), and it toggles its{' '}
         <PartLink
           component="list"
           part="List.AccordionItem"
@@ -3327,12 +4744,12 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s name in an accordion for{' '}
+        Base UI’s name, in an accordion, for{' '}
         <PartLink
           component="list"
           part="List.CollapsiblePanel"
         />
-        : the same part (its props, there), its{' '}
+        . It’s the same part (its props are there), holding its{' '}
         <PartLink
           component="list"
           part="List.AccordionItem"
@@ -3353,11 +4770,11 @@ export const ListParts: FunctionComponent = () => (
         rows’ text.
       </li>
       <li>
-        Or its actions: buttons alone in it, 16px below the group, stacked and
-        centered, as wide as the group at most (a <code>fill</code>{' '}
-        <a href={publicUrl('button')}>Button</a> spanning it). A section can
-        have both: a footer of text, then one of actions. The gap is the list’s,
-        not the buttons’ (see{' '}
+        Or its actions: buttons on their own in it, 16px below the group,
+        stacked and centered, at most as wide as the group (a <code>fill</code>{' '}
+        <a href={publicUrl('button')}>Button</a> spans it). A section can have
+        both: a footer of text, then one of actions. The gap is the list’s, not
+        the buttons’ (see{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
@@ -3381,7 +4798,7 @@ export const ListParts: FunctionComponent = () => (
         with the rows’ text.
       </li>
       <li>
-        <code>strong</code>: on the rows’ background.
+        <code>strong</code> puts it on the rows’ background.
       </li>
     </ul>
     <BlockPart />
@@ -3396,12 +4813,12 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A slot before a row’s content: what’s in it in a line (edit controls, an
-        image, any element); several per row.
+        A slot before a row’s content, with what’s in it in a line (edit
+        controls, an image, any element). A row can have several.
       </li>
       <li>
-        In edit mode, sliding in (<code>whileEditing=&quot;show&quot;</code>,
-        e.g. edit controls’) or out (<code>hide</code>), as it says; unset, it
+        In edit mode, it slides in (<code>whileEditing=&quot;show&quot;</code>,
+        as for edit controls) or out (<code>hide</code>), as it says. Unset, it
         stays, whatever it holds.
       </li>
     </ul>
@@ -3417,27 +4834,28 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row’s text: its
+        A row’s text: its{' '}
         <PartLink
           component="list"
           part="List.Title"
         />
-        ,
+        ,{' '}
         <PartLink
           component="list"
           part="List.Subtitle"
-        />
-        ,
+        />{' '}
+        and{' '}
         <PartLink
           component="list"
           part="List.Text"
-        />
-        (or a
+        />{' '}
+        (or a{' '}
         <PartLink
           component="list"
           part="List.Button"
         />
-        , a field’s label), taking the rest of the line; every row has one, or a
+        , or a field’s label), taking the rest of the line. Every row has one,
+        or a{' '}
         <PartLink
           component="list"
           part="List.Span"
@@ -3445,7 +4863,8 @@ export const ListParts: FunctionComponent = () => (
         .
       </li>
       <li>
-        Its separator starts where it does (anchored to it, moving with it).
+        The row’s separator starts where it does, anchored to it and moving with
+        it.
       </li>
     </ul>
     <ContentPart />
@@ -3460,14 +4879,14 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A slot after a row’s content: what’s in it in a line, 16px apart
-        (details, chevrons, a grabber, any element, e.g. a
-        <a href={publicUrl('switch')}>Switch</a>); several per row.
+        A slot after a row’s content, with what’s in it in a line, 16px apart
+        (details, chevrons, a grabber, or any element, for example a{' '}
+        <a href={publicUrl('switch')}>Switch</a>). A row can have several.
       </li>
       <li>
-        In edit mode, sliding in (<code>whileEditing=&quot;show&quot;</code>,
-        e.g. a grabber’s) or out (<code>hide</code>, e.g. a chevron’s), as it
-        says; unset, it stays, whatever it holds.
+        In edit mode, it slides in (<code>whileEditing=&quot;show&quot;</code>,
+        as for a grabber) or out (<code>hide</code>, as for a chevron), as it
+        says. Unset, it stays, whatever it holds.
       </li>
     </ul>
     <TrailingPart />
@@ -3482,10 +4901,10 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Content across a row’s whole line, in place of the others (e.g. a
-        <a href={publicUrl('slider')}>Slider</a>, a{' '}
-        <a href={publicUrl('segmented')}>Segmented</a>
-        control, an inline calendar).
+        Content across a row’s whole line, in place of the other slots, for
+        example a <a href={publicUrl('slider')}>Slider</a>, a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control or an inline
+        calendar.
       </li>
     </ul>
     <SpanPart />
@@ -3500,17 +4919,17 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A line under a row’s line, across it (e.g. a field’s description and
-        error, a status, a message’s preview); last in its row.
+        A line under a row’s line, across it, for example a field’s description
+        and error, a status, or a message’s preview. It comes last in its row.
       </li>
       <li>
-        It starts where the row’s content does (after its leading parts, e.g. an
-        image; measured, also as edit mode moves it), and runs to the row’s end,
-        under its trailing parts too.
+        It starts where the row’s content does (after its leading parts, such as
+        an image; it’s measured, also as edit mode moves it), and runs to the
+        row’s end, under its trailing parts too.
       </li>
       <li>
-        Hidden (<code>hidden</code>), it collapses: growing and shrinking as
-        it’s shown and hidden, kept rendered.
+        When <code>hidden</code>, it collapses. It grows and shrinks as it’s
+        shown and hidden, and stays rendered.
       </li>
     </ul>
     <BelowPart />
@@ -3524,10 +4943,10 @@ export const ListParts: FunctionComponent = () => (
       <code>List.Title</code>
     </Heading>
     <ul>
-      <li>A row’s (or header’s) title, in Body.</li>
+      <li>A row’s (or a header’s) title, in Body.</li>
       <li>
-        As a button or link (<code>render</code>): makes the row pressable; its
-        hit area covers the row, beneath the trailing controls.
+        Rendered as a button or link (<code>render</code>), it makes the row
+        pressable. Its hit area covers the row, beneath the trailing controls.
       </li>
     </ul>
     <TitlePart />
@@ -3542,7 +4961,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A second line below the title: in a row (making it tall), or a header.
+        A second line below the title, in a row (which makes it taller) or in a
+        header.
       </li>
     </ul>
     <SubtitlePart />
@@ -3569,9 +4989,18 @@ export const ListParts: FunctionComponent = () => (
       <code>List.Text</code>
     </Heading>
     <ul>
-      <li>Body text below a row’s title and subtitle: a media row (Mail).</li>
       <li>
-        Up to <code>lines</code> lines, ellipsized.
+        Body text below a row’s title and subtitle, for example a message’s
+        preview. In a{' '}
+        <PartLink
+          component="list"
+          part="List.Below"
+        />
+        , as in a mail app’s message rows, it runs under the row’s trailing
+        parts too (its time, say).
+      </li>
+      <li>
+        It shows up to <code>lines</code> lines, then truncates.
       </li>
     </ul>
     <TextPart />
@@ -3586,7 +5015,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A trailing value in the secondary color, e.g. a setting’s current value.
+        A trailing value in the secondary color, for example a setting’s current
+        value.
       </li>
     </ul>
     <DetailPart />
@@ -3600,10 +5030,10 @@ export const ListParts: FunctionComponent = () => (
       <code>List.Image</code>
     </Heading>
     <ul>
-      <li>A leading image, one line high.</li>
+      <li>A leading image, one line tall.</li>
       <li>
-        A symbol alone, or a symbol or picture in a rounded, circular or filled
-        frame (<code>variant</code>).
+        A symbol on its own, or a symbol or picture in a rounded, circular or
+        filled frame (<code>variant</code>).
       </li>
     </ul>
     <ImagePart />
@@ -3619,8 +5049,8 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>A trailing symbol in the tint color.</li>
       <li>
-        As a button (<code>render</code>): pressable on its own, e.g. an info
-        button.
+        Rendered as a button (<code>render</code>), it’s pressable on its own,
+        for example as an info button.
       </li>
     </ul>
     <AccessoryPart />
@@ -3635,8 +5065,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A trailing checkmark in the tint color: the chosen row of a list of
-        options (as a settings app’s).
+        A trailing checkmark in the label color (black, or white in dark mode),
+        marking the chosen row of a list of options, as in a settings app.
       </li>
     </ul>
     <CheckmarkPart />
@@ -3650,7 +5080,7 @@ export const ListParts: FunctionComponent = () => (
       <code>List.DrillIn</code>
     </Heading>
     <ul>
-      <li>A trailing chevron: the row opens a page (drills in).</li>
+      <li>A trailing chevron, for a row that opens a page (drills in).</li>
       <li>Hidden from assistive technology.</li>
     </ul>
     <DrillInPart />
@@ -3664,10 +5094,13 @@ export const ListParts: FunctionComponent = () => (
       <code>List.Disclosure</code>
     </Heading>
     <ul>
-      <li>A chevron in the tint color, turned down while open.</li>
       <li>
-        In a header (or row) that’s a Base UI <code>Collapsible.Trigger</code>;
-        its group the panel.
+        A chevron in the tint color (gray in a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>), turned down while open.
+      </li>
+      <li>
+        It goes in a header (or row) that’s a Base UI{' '}
+        <code>Collapsible.Trigger</code>, with its group as the panel.
       </li>
       <li>Hidden from assistive technology.</li>
     </ul>
@@ -3683,16 +5116,17 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A trailing handle dragging its row (given a reorder handle,{' '}
+        A trailing handle that drags its row to its reorder handle’s targets
+        (the row needs one:{' '}
         <PartLink
           component="list"
           part="List.Item"
         />
-        ’s <code>reorderHandle</code>) to its handle’s targets.
+        ’s <code>reorderHandle</code>).
       </li>
       <li>
-        Focused: arrow keys move the row to the previous or next target (across
-        groups too), announced.
+        With focus, the arrow keys move the row to the previous or next target
+        (across groups too), and announce it.
       </li>
     </ul>
     <GrabberPart />
@@ -3707,7 +5141,7 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A reordering: given to the rows it moves (
+        A reordering. It’s given to the rows it moves (
         <PartLink
           component="list"
           part="List.Item"
@@ -3728,26 +5162,27 @@ export const ListParts: FunctionComponent = () => (
           component="list"
           part="List.DropTarget"
         />
-        ), anywhere in the list; its <code>onReorder</code> tells the app what
-        moved and where.
+        ), anywhere in the list. Its <code>onReorder</code> tells the app what
+        moved, and where.
       </li>
       <li>
-        A row can be given several (its <code>reorderHandle</code> an array, by
-        priority), as can a target: dropped where several are targets, the row’s
-        first one there is called.
+        A row can have several (its <code>reorderHandle</code> as an array, by
+        priority), and so can a target. When a row is dropped where several are
+        targets, the row’s first one there is called.
       </li>
       <li>
-        The app grabs rows itself (<code>grab</code>, by their names: e.g.
-        several selected ones, dragged together by one of their grabbers), and
-        moves them (<code>move</code>, <code>drop</code>, <code>cancel</code>).
+        The app can grab rows itself (<code>grab</code>, by their names, for
+        example several selected rows dragged together by one of their
+        grabbers), and move them (<code>move</code>, <code>drop</code>,{' '}
+        <code>cancel</code>).
       </li>
       <li>
-        Here: made once in the component’s state (in a component, rather{' '}
+        Here, it’s made once in the component’s state (in a component,{' '}
         <PartLink
           component="list"
           part="useCreateReorderHandle"
-        />
-        ), Venus and Earth grabbed and moved by the buttons.
+        />{' '}
+        is the better choice), and the buttons grab and move Venus and Earth.
       </li>
     </ul>
     <CreateReorderHandlePart />
@@ -3766,7 +5201,8 @@ export const ListParts: FunctionComponent = () => (
           component="list"
           part="List.createReorderHandle"
         />{' '}
-        in a component: made once, for its lifetime, its options the latest.
+        in a component: made once, for the component’s lifetime, always with the
+        latest options.
       </li>
     </ul>
     <UseCreateReorderHandlePart />
@@ -3781,14 +5217,15 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Applies a reorder handle’s change to the app’s rows: a list, or lists by
-        their group’s (or drop group’s) <code>dropName</code>, e.g. one per
-        section.
+        Applies a reorder handle’s change to the app’s rows: one list, or
+        several lists by their group’s (or drop group’s) <code>dropName</code>,
+        for example one per section.
       </li>
       <li>
-        By names, not indexes: the moved rows taken out, put after the row
-        before the gap (rows the app doesn’t hold, e.g. a pinned one, taken as
-        those around), or into an empty list by its name.
+        It works by names, not indexes. The moved rows are taken out and put
+        after the row before the gap (rows the app doesn’t hold, such as a
+        pinned one, count as the rows around them), or into an empty list by its
+        name.
       </li>
     </ul>
     <CodeView code={reorderCode} />
@@ -3803,8 +5240,8 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Text in the tint color as a button: trailing in a header (e.g. See All)
-        or a row.
+        Text in the tint color, as a button, trailing in a header (for example
+        See All) or in a row.
       </li>
     </ul>
     <ActionPart />
@@ -3818,9 +5255,9 @@ export const ListParts: FunctionComponent = () => (
       <code>List.Button</code>
     </Heading>
     <ul>
-      <li>A row that’s a button: the whole row pressable.</li>
+      <li>A row that’s a button, so the whole row is pressable.</li>
       <li>
-        Its title in the tint color, or red (<code>destructive</code>).
+        Its title is in the tint color, or red (<code>destructive</code>).
       </li>
     </ul>
     <ButtonPart />
@@ -3836,7 +5273,7 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         A <a href={publicUrl('checkbox')}>Checkbox</a> as a row’s leading edit
-        control: selecting several rows.
+        control, for selecting several rows.
       </li>
       <li>
         Rows pass their clicks on to it (<PartLink part="forwardClick" />
@@ -3856,15 +5293,15 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         A <a href={publicUrl('checkbox')}>Radio</a> as a row’s leading edit
-        control: choosing one row.
+        control, for choosing one row.
       </li>
       <li>
-        Its group: a Base UI{' '}
+        Its group is a Base UI{' '}
         <PartLink
           component="checkbox"
           part="RadioGroup"
         />{' '}
-        rendering the{' '}
+        that renders the{' '}
         <PartLink
           component="list"
           part="List.Group"
@@ -3887,20 +5324,20 @@ export const ListParts: FunctionComponent = () => (
     <ul>
       <li>
         A leading button: a symbol (its child) in a circle of its{' '}
-        <code>tint</code> (editing styles: deleting in red, inserting in green),
-        doing what the app gives it (<code>onClick</code>).
+        <code>tint</code> (in editing styles, red for deleting and green for
+        inserting). It does what the app gives it (<code>onClick</code>).
       </li>
       <li>
-        Opening the row’s swipe actions instead: rendered by a{' '}
+        Or it opens the row’s swipe actions instead, when a{' '}
         <PartLink
           component="list"
           part="List.SwipeActionsTrigger"
         />{' '}
-        (its <code>render</code>).
+        renders it (through its <code>render</code>).
       </li>
       <li>
-        Here: a minus on each row, a plus on an insert row; clicks logged.
-        Deleting and inserting for real:{' '}
+        Here, there’s a minus on each row and a plus on an insert row, with the
+        clicks logged. For deleting and inserting for real, see{' '}
         <a href={publicUrl('list/composition#deleting-and-inserting-rows')}>
           Deleting and inserting rows
         </a>
@@ -3919,21 +5356,21 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row’s actions on one side, revealed by swiping it (or by focusing
+        A row’s actions on one side, revealed by swiping the row (or by focusing
         them).
       </li>
       <li>
-        <code>overswipe</code>: swiping on past them triggers the outermost.
+        <code>overswipe</code>: swiping on past them triggers the outermost one.
       </li>
       <li>
-        <code>allowSwipe</code>: what the user does to them, swiping or
-        focusing, opening and closing, only one of them, or neither (then opened
-        and closed by a{' '}
+        <code>allowSwipe</code>: what people can do to them, by swiping or
+        focusing: open and close them, only one of the two, or neither. With
+        neither, only a{' '}
         <PartLink
           component="list"
           part="List.SwipeActionsTrigger"
         />{' '}
-        or their handle only).
+        or their handle opens and closes them.
       </li>
     </ul>
     <SwipeActionsPart />
@@ -3948,22 +5385,23 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Opens swipe actions when clicked (Base UI’s triggers’ shape): in a row,
-        the row’s own on its <code>side</code>; by a <code>handle</code>, those
-        of any row, from anywhere.
+        Opens swipe actions when clicked, shaped like Base UI’s triggers. In a
+        row, it opens the row’s own actions on its <code>side</code>. With a{' '}
+        <code>handle</code>, it opens those of any row, from anywhere.
       </li>
       <li>
-        Opening them, it moves focus to the first of them (as Base UI’s triggers
-        to their popups): next for the keyboard, though they come before the row
-        in the document.
+        When it opens them, it moves focus to the first one (like Base UI’s
+        triggers do for their popups), so they come next for the keyboard, even
+        though they come before the row in the document.
       </li>
       <li>
-        Renders a button, or what it’s given (<code>render</code>): e.g. a{' '}
+        Renders a button, or what it’s given (<code>render</code>), for example
+        a{' '}
         <PartLink
           component="list"
           part="List.EditButton"
         />{' '}
-        (the delete sign), a{' '}
+        (the delete sign), or a{' '}
         <PartLink
           component="button"
           part="Button.Root"
@@ -3971,9 +5409,9 @@ export const ListParts: FunctionComponent = () => (
         outside the list.
       </li>
       <li>
-        Here: each row’s sign; Pin on the leading side, Delete on the trailing
-        (switch the first’s <code>side</code>). From outside the row, by a
-        handle: see{' '}
+        Here, it’s each row’s sign: Pin on the leading side, and Delete on the
+        trailing side (switch the first row’s <code>side</code>). To open them
+        from outside the row, through a handle, see{' '}
         <PartLink
           component="list"
           part="List.createSwipeActionsHandle"
@@ -3993,31 +5431,31 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle naming a row’s swipe actions (on one side): given to them (
+        A handle that names a row’s swipe actions on one side. Give it to them (
         <PartLink
           component="list"
           part="List.SwipeActions"
         />
-        ’s <code>handle</code>) and to the triggers opening them from outside
+        ’s <code>handle</code>) and to the triggers that open them from outside
         the row (
         <PartLink
           component="list"
           part="List.SwipeActionsTrigger"
         />
-        ’s), or used imperatively (<code>open()</code>, <code>close()</code>,{' '}
+        ’s), or use it from code (<code>open()</code>, <code>close()</code>,{' '}
         <code>isOpen</code>).
       </li>
       <li>
-        Made once, e.g. at a module’s top level (in a component:{' '}
+        Make it once, for example at a module’s top level (in a component, use{' '}
         <PartLink
           component="list"
           part="useCreateSwipeActionsHandle"
         />
-        ). Not needed for a trigger in the row.
+        ). A trigger inside the row doesn’t need one.
       </li>
       <li>
-        Here: Mercury’s actions, opened by a trigger above the list, closed by a
-        button calling <code>close()</code>.
+        Here, a trigger above the list opens Mercury’s actions, and a button
+        calling <code>close()</code> closes them.
       </li>
     </ul>
     <CreateSwipeActionsHandlePart />
@@ -4036,7 +5474,7 @@ export const ListParts: FunctionComponent = () => (
           component="list"
           part="List.createSwipeActionsHandle"
         />{' '}
-        in a component: made once, for its lifetime.
+        in a component: made once, for the component’s lifetime.
       </li>
     </ul>
     <UseCreateSwipeActionsHandlePart />
@@ -4055,7 +5493,7 @@ export const ListParts: FunctionComponent = () => (
         its <code>tint</code>.
       </li>
       <li>
-        Named by its <code>label</code>; shown below it with{' '}
+        It’s named by its <code>label</code>, which shows below it with{' '}
         <code>showLabel</code>.
       </li>
       <li>The actions close after a click.</li>
@@ -4072,11 +5510,26 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An index (a <code>nav</code>) of letters in the tint color, beside a
-        plain list.
+        An index (a <code>nav</code>) of short keys in the tint color, usually
+        letters, beside a plain list.
+      </li>
+      <li>
+        It goes in the list’s{' '}
+        <PartLink
+          component="list"
+          part="List.Root"
+        />
+        , after the sections, and the list places it. It sits at the list’s end
+        edge (in its inset, if it has one), above the sticky headers. It’s
+        centered on the list, or on the part of it in view, between the scroll
+        container’s bars.
       </li>
       <li>Pressing or scrubbing over it clicks its items.</li>
-      <li>Placing it (e.g. at the page’s edge) is the page’s.</li>
+      <li>
+        It needs a view at least as tall as itself. Taller than the view of its
+        scroll container, it’s clipped there, and the items beyond the view
+        can’t be reached.
+      </li>
     </ul>
     <IndexPart />
     <h3>Props</h3>
@@ -4090,8 +5543,24 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A letter of the index (a button): its click scrolls the app’s list to
-        the section.
+        A key of the index (a button), its <code>value</code> its text unless
+        given.
+      </li>
+      <li>
+        Chosen, it scrolls its list to the{' '}
+        <PartLink
+          component="list"
+          part="List.Section"
+        />{' '}
+        whose <code>indexValue</code> it is (or a row’s, see{' '}
+        <PartLink
+          component="list"
+          part="List.Item"
+        />
+        ), to the top of the view. Without one, it jumps to the section of the
+        next item after it that has one, in the index’s own order: so letters
+        without contacts still work, and so do groups that don’t sort as their
+        letters do.
       </li>
     </ul>
     <IndexItemPart />
@@ -4106,16 +5575,16 @@ export const ListParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row’s click handler passing the click on to the control in it, as
-        native rows do: pressing a switch’s row toggles the switch (see{' '}
+        A row’s click handler that passes the click on to the control inside it,
+        as native rows do: pressing a switch’s row toggles the switch (see{' '}
         <PartLink part="List.Checkbox" />, <PartLink part="List.Radio" />
         ).
       </li>
       <li>
-        As the click it is: a pointer’s or a keyboard’s (a control’s{' '}
-        <code>click()</code> would be a keyboard’s, so menus would open with
-        their first item highlighted); the control’s own clicks aren’t passed on
-        again.
+        It passes the click on as the kind it is, a pointer’s or a keyboard’s.
+        (A control’s <code>click()</code> would count as a keyboard’s, so menus
+        would open with their first item highlighted.) The control’s own clicks
+        aren’t passed on again.
       </li>
     </ul>
     <CodeView code={forwardClickCode} />

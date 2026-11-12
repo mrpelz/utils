@@ -3,11 +3,15 @@ import { FunctionComponent, useMemo } from 'react';
 import { Avatar } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   avatarFallbackRows,
   avatarGroupRows,
@@ -33,22 +37,35 @@ const RootPart: FunctionComponent = () => {
     title: 'Avatar.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Avatar.Fallback': [],
+          'Avatar.Image': ['alt', 'src'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="avatar"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Avatar.Root"
     >
       <Avatar.Root {...props}>
         <Avatar.Image
+          {...partProps['Avatar.Image']}
           alt="Anna Hall"
           src={photo(200)}
         />
-        <Avatar.Fallback>AH</Avatar.Fallback>
+        <Avatar.Fallback {...partProps['Avatar.Fallback']}>AH</Avatar.Fallback>
       </Avatar.Root>
     </Component>
   );
@@ -64,20 +81,38 @@ const ImagePart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Avatar.Image' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Avatar.Fallback': [],
+            'Avatar.Root': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="avatar"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Avatar.Image"
     >
-      <Avatar.Root key={elementKey}>
+      <Avatar.Root
+        key={elementKey}
+        {...partProps['Avatar.Root']}
+      >
         <Avatar.Image {...props} />
-        <Avatar.Fallback>AH</Avatar.Fallback>
+        <Avatar.Fallback {...partProps['Avatar.Fallback']}>AH</Avatar.Fallback>
       </Avatar.Root>
     </Component>
   );
@@ -92,17 +127,31 @@ const FallbackPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Avatar.Fallback' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Avatar.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="avatar"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Avatar.Fallback"
     >
-      <Avatar.Root key={elementKey}>
+      <Avatar.Root
+        key={elementKey}
+        {...partProps['Avatar.Root']}
+      >
         <Avatar.Fallback {...props}>AH</Avatar.Fallback>
       </Avatar.Root>
     </Component>
@@ -120,33 +169,54 @@ const GroupPart: FunctionComponent = () => {
     title: 'Avatar.Group',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Avatar.Fallback': [],
+          'Avatar.Image': ['alt', 'src'],
+          'Avatar.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="avatar"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Avatar.Group"
     >
       <Avatar.Group {...props}>
-        <Avatar.Root>
+        <Avatar.Root {...partProps['Avatar.Root']}>
           <Avatar.Image
+            {...partProps['Avatar.Image']}
             alt="Anna Hall"
             src={photo(200)}
           />
-          <Avatar.Fallback>AH</Avatar.Fallback>
+          <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+            AH
+          </Avatar.Fallback>
         </Avatar.Root>
-        <Avatar.Root>
+        <Avatar.Root {...partProps['Avatar.Root']}>
           <Avatar.Image
+            {...partProps['Avatar.Image']}
             alt="Kate Brown"
             src={photo(290)}
           />
-          <Avatar.Fallback>KB</Avatar.Fallback>
+          <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+            KB
+          </Avatar.Fallback>
         </Avatar.Root>
-        <Avatar.Root>
-          <Avatar.Fallback>JA</Avatar.Fallback>
+        <Avatar.Root {...partProps['Avatar.Root']}>
+          <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+            JA
+          </Avatar.Fallback>
         </Avatar.Root>
       </Avatar.Group>
     </Component>
@@ -190,6 +260,13 @@ export const AvatarParts: FunctionComponent = () => (
                   part="Avatar.Fallback"
                 />
               </li>
+              <li className="demo-tree-context">
+                <PartLink
+                  component="badge"
+                  part="Badge"
+                />{' '}
+                <span>(optional, on its corner)</span>
+              </li>
             </ul>
           </li>
         </ul>
@@ -204,11 +281,11 @@ export const AvatarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A person, in a circle: <code>size</code> (70px by default).
+        A person, in a circle, with its <code>size</code> (70px by default).
       </li>
       <li>
-        Not clipping: a <a href={publicUrl('badge')}>Badge</a> in it overhangs
-        its corner.
+        It doesn’t clip, so a <a href={publicUrl('badge')}>Badge</a> inside it
+        hangs over its corner.
       </li>
       <li>
         Renders a <code>span</code>.
@@ -225,9 +302,10 @@ export const AvatarParts: FunctionComponent = () => (
       <code>Avatar.Image</code>
     </Heading>
     <ul>
-      <li>The photo, covering the circle, once it has loaded.</li>
+      <li>The photo, covering the circle once it has loaded.</li>
       <li>
-        Renders an <code>img</code>: its <code>alt</code> the person’s name.
+        Renders an <code>img</code>, with the person’s name as its{' '}
+        <code>alt</code>.
       </li>
     </ul>
     <ImagePart />
@@ -242,11 +320,12 @@ export const AvatarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Without a photo (none, loading, broken): the initials, 40% of the
-        circle, white on gray.
+        Shows the initials when there’s no photo (none, still loading, or
+        broken), at 40% of the circle, white on gray.
       </li>
       <li>
-        Not before its <code>delay</code> (so a fast photo doesn’t flash it).
+        It waits for its <code>delay</code>, so a photo that loads fast doesn’t
+        flash it.
       </li>
     </ul>
     <FallbackPart />
@@ -261,15 +340,16 @@ export const AvatarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Several people in one circle on the system fill: the first at 53% of it,
-        the second 31%, a third 26%.
+        Several people in one circle, on the system fill. The first takes 53% of
+        it, the second 31%, and a third 26%.
       </li>
       <li>
-        It sizes its people: theirs (<code>size</code>) would override it. From
-        a fourth on, they aren’t shown.
+        It sizes its people, and a <code>size</code> of their own would override
+        that. From a fourth person on, they aren’t shown.
       </li>
       <li>
-        Renders a <code>span</code> with the <code>group</code> role: name it.
+        Renders a <code>span</code> with the <code>group</code> role. Give it a
+        name.
       </li>
     </ul>
     <GroupPart />

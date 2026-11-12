@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
@@ -10,7 +10,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -20,6 +23,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import { sheetPopupRows, sheetRootRows } from './docs.js';
 import {
@@ -56,33 +60,71 @@ const LiveView: FunctionComponent = () => {
       : content.layout === 'tablet';
   const isGlobal = content.portal === 'global';
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['onClick', 'prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isExpanded
       isInline
-      controls={[controlContent, controlRoot, controlPopup]}
+      controls={[controlContent, controlRoot, controlPopup, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage={isTablet ? 'tablet' : 'phone'}
-      state={[stateContent, stateRoot, statePopup]}
+      state={[stateContent, stateRoot, statePopup, partState]}
       title="Sheet"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
           key={keyRoot}
           {...propsRoot}
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
             compact={isGlobal ? undefined : !isTablet}
@@ -90,47 +132,77 @@ const LiveView: FunctionComponent = () => {
             container={isGlobal ? document.body : undefined}
             {...propsPopup}
           >
-            <Sheet.Header>
-              {content.grabber ? <Sheet.Grabber /> : null}
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              {content.grabber ? (
+                <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              ) : null}
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                   <Sheet.Close
+                    {...partProps['Sheet.Close']}
                     render={
                       <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
                         prominent
                         onClick={() => addLog('Done clicked')}
                       />
                     }
                   >
-                    <Button.Label>Done</Button.Label>
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 5).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -154,13 +226,13 @@ export const SheetOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A focused task over the page (Base UI’s <code>Drawer</code>): from the
-        bottom on a phone, large or medium; on a tablet, a form sheet, centered,
-        or a card at the leading edge.
+        A focused task above the page, built on Base UI’s <code>Drawer</code>.
+        On a phone, it comes from the bottom, large or medium. On a tablet, it’s
+        a form sheet in the center, or a card at the leading edge.
       </li>
       <li>
-        Modal, the page dimmed behind it; dismissed by its buttons, a press
-        outside it, Escape, or swiped down.
+        It’s modal, with the page dimmed behind it. Its buttons, a press outside
+        it, Escape or a swipe down dismiss it.
       </li>
     </ul>
     <LiveView />
@@ -173,15 +245,15 @@ export const SheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A task of its own that keeps its parent in view: composing a message,
-        adding a contact, editing details (Cancel and Done).
+        For a task of its own that keeps its parent in view, such as composing a
+        message, adding a contact or editing details (with Cancel and Done).
       </li>
       <li>
-        A few options or details for the page (medium: its content’s height),
-        e.g. a share sheet, filters.
+        For a few options or details about the page, such as a share sheet or
+        filters. A medium sheet is as tall as its content.
       </li>
       <li>
-        A task of several steps: a{' '}
+        For a task with several steps, with a{' '}
         <a href={publicUrl('navigation')}>Navigation</a> inside it (see{' '}
         <a href={publicUrl('sheet/composition')}>Composition</a>).
       </li>
@@ -195,18 +267,18 @@ export const SheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A choice of a few actions: an{' '}
-        <a href={publicUrl('action-sheet')}>Action sheet</a>; a question that
-        must be answered: an <a href={publicUrl('alert')}>Alert</a>.
+        A choice between a few actions: use an{' '}
+        <a href={publicUrl('action-sheet')}>Action Sheet</a>. A question that
+        must be answered: use an <a href={publicUrl('alert')}>Alert</a>.
       </li>
       <li>
-        Something tied to a control (a tablet’s): a{' '}
-        <a href={publicUrl('popover')}>Popover</a>, a{' '}
+        Something tied to a control, on a tablet: use a{' '}
+        <a href={publicUrl('popover')}>Popover</a> or a{' '}
         <a href={publicUrl('menu')}>Menu</a>.
       </li>
       <li>
-        Going deeper in the app’s content: a push in a{' '}
-        <a href={publicUrl('navigation')}>Navigation</a>, not a sheet.
+        Going deeper into the app’s content: push a page in a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a> instead.
       </li>
     </ul>
 
@@ -217,9 +289,10 @@ export const SheetOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most sheets set, across their parts.</li>
+      <li>The props most sheets set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('sheet/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('sheet/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -248,12 +321,13 @@ export const SheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <code>dialog</code> (modal: <code>aria-modal</code>), named by its{' '}
+        A <code>dialog</code> (modal, with <code>aria-modal</code>), named by
+        its{' '}
         <PartLink
           component="sheet"
           part="Sheet.Title"
-        />
-        , described by its{' '}
+        />{' '}
+        and described by its{' '}
         <PartLink
           component="sheet"
           part="Sheet.Description"
@@ -261,15 +335,17 @@ export const SheetOverview: FunctionComponent = () => (
         .
       </li>
       <li>
-        Opened, focus moves into it (by touch: to the sheet itself, not opening
-        the keyboard), trapped while it’s open; closed, back to its trigger.
+        When it opens, focus moves into it and stays trapped there while it’s
+        open. By touch, focus goes to the sheet itself, so the keyboard doesn’t
+        open. When it closes, focus goes back to its trigger.
       </li>
       <li>
-        With the keyboard (a field in it typed into): lifted above it, as the
-        bars it pushes up (a floating one 8px above it), as much less room above
-        (up to 64px below the screen’s top still; snapping, its stops no taller,
-        back at its stop as the keyboard hides); a form sheet centered above it.
-        Its content’s field scrolled into view (see{' '}
+        When a field inside it is typed into, the keyboard lifts it, like the
+        bars it pushes up (a floating sheet sits 8px above the keyboard). It’s
+        lifted as far as the room above allows, keeping at least 64px below the
+        screen’s top. A snapping sheet’s stops get no taller, and it goes back
+        to its stop as the keyboard hides. A form sheet stays centered above the
+        keyboard. Its content’s field is scrolled into view (see{' '}
         <PartLink
           component="viewport"
           part="useFocusScroll"
@@ -277,14 +353,14 @@ export const SheetOverview: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Escape closes it; give it a button that does too (a{' '}
+        Escape closes it. Give it a button that closes it too (a{' '}
         <PartLink
           component="sheet"
           part="Sheet.Close"
         />
-        ): swiping it is a pointer gesture only.
+        ), because swiping is a pointer gesture only.
       </li>
-      <li>The page behind it is inert and doesn’t scroll while it’s open.</li>
+      <li>The page behind it is inert, and doesn’t scroll while it’s open.</li>
       <li>
         Its slide and fade (500ms) don’t follow{' '}
         <code>prefers-reduced-motion</code>.
@@ -299,34 +375,37 @@ export const SheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Large: the whole screen but 10px at the top, opaque, its top corners
-        38px. Medium: a glass panel 8px from the sides and the bottom (the home
-        indicator over its bottom margin), its corners 42px (as iOS 26’s,
-        measured), as high as its content; dark, its glass edged as a{' '}
-        <a href={publicUrl('sidebar')}>Sidebar</a>’s (a light rim, a glow
-        outside).
+        Large: the whole screen except 10px at the top, opaque, with 38px top
+        corners. Medium: a glass panel 8px from the sides and the bottom (the
+        home indicator sits over its bottom margin), with 42px corners, as tall
+        as its content. In dark mode, its glass has an edge like a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>’s: a light rim with a glow
+        outside.
       </li>
       <li>
-        Not compact (the window from 768px, or <code>compact={'{false}'}</code>
-        ): a form sheet, centered, up to 936px by 852px; or (
-        <code>regular=&quot;card&quot;</code>) a card from the bottom at the
-        leading edge, 375px wide, its detent, swiping and snapping kept.
+        When it isn’t compact (on windows from 768px, or with{' '}
+        <code>compact={'{false}'}</code>), it’s a form sheet in the center, up
+        to 936px by 852px. With <code>regular=&quot;card&quot;</code>, it’s a
+        card from the bottom at the leading edge, 375px wide, which keeps its
+        detent, swiping and snapping.
       </li>
       <li>
-        Slides up as it opens, the page dimmed (20%; dark: 48%) behind it.
+        It slides up as it opens, and the page behind it dims (by 20%, or 48% in
+        dark mode).
       </li>
       <li>
-        Dragged down by its header (its grabber, its bar but its buttons): a
-        third of its height, or flung, and it closes; otherwise it springs back.
+        It can be dragged down by its header: the grabber, or the bar outside
+        its buttons. Dragged a third of its height, or flung, it closes.
+        Otherwise, it springs back.
       </li>
       <li>
-        With grouped lists, <code>background=&quot;grouped&quot;</code>: on the
-        grouped background, the lists’ groups on the elevated one (as a page’s;
-        the sheet doesn’t look inside for lists).
+        For grouped lists, use <code>background=&quot;grouped&quot;</code>. It
+        then sits on the grouped background, with the lists’ groups on the
+        elevated one, as on a page. The sheet doesn’t look inside for lists.
       </li>
       <li>
-        Its detent is the app’s: swiping doesn’t switch medium and large; the
-        page behind doesn’t shrink back.
+        The app owns its detent: swiping doesn’t switch between medium and
+        large, and the page behind doesn’t shrink back.
       </li>
     </ul>
   </>

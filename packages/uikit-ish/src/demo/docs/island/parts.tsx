@@ -10,12 +10,16 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfEllipsis, sfSquareAndArrowUp } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import {
   islandContentRows,
@@ -44,81 +48,149 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Island.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Grabber': [],
+            'Island.Header': [],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Island.Root"
     >
-      <Viewport.Content />
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.Content {...partProps['Viewport.Content']} />
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
           key={`${elementKey}`}
           {...props}
         >
-          <Island.Header>
-            <Island.Grabber />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+          <Island.Header {...partProps['Island.Header']}>
+            <Island.Grabber {...partProps['Island.Grabber']} />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="header"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -126,15 +198,25 @@ const RootPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -142,10 +224,13 @@ const RootPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -166,21 +251,54 @@ const HeaderPart: FunctionComponent = () => {
     title: 'Island.Header',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Grabber': [],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
-      controls={[controlRoot, control]}
+      controls={[controlRoot, control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateRoot, state]}
+      state={[stateRoot, state, partState]}
       title="Island.Header"
     >
-      <Viewport.Content />
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.Content {...partProps['Viewport.Content']} />
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
@@ -188,59 +306,93 @@ const HeaderPart: FunctionComponent = () => {
           {...rootProps}
         >
           <Island.Header {...props}>
-            <Island.Grabber />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+            <Island.Grabber {...partProps['Island.Grabber']} />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="header"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -248,15 +400,25 @@ const HeaderPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -264,10 +426,13 @@ const HeaderPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -288,81 +453,148 @@ const GrabberPart: FunctionComponent = () => {
     title: 'Island.Grabber',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Header': [],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
-      controls={[controlRoot, control]}
+      controls={[controlRoot, control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateRoot, state]}
+      state={[stateRoot, state, partState]}
       title="Island.Grabber"
     >
-      <Viewport.Content />
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.Content {...partProps['Viewport.Content']} />
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
           key={`${rootKey}`}
           {...rootProps}
         >
-          <Island.Header>
+          <Island.Header {...partProps['Island.Header']}>
             <Island.Grabber {...props} />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="header"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -370,15 +602,25 @@ const GrabberPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -386,10 +628,13 @@ const GrabberPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -410,81 +655,148 @@ const ContentPart: FunctionComponent = () => {
     title: 'Island.Content',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Grabber': [],
+            'Island.Header': [],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
-      controls={[controlRoot, control]}
+      controls={[controlRoot, control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateRoot, state]}
+      state={[stateRoot, state, partState]}
       title="Island.Content"
     >
-      <Viewport.Content />
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.Content {...partProps['Viewport.Content']} />
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
           key={`${rootKey}`}
           {...rootProps}
         >
-          <Island.Header>
-            <Island.Grabber />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+          <Island.Header {...partProps['Island.Header']}>
+            <Island.Grabber {...partProps['Island.Grabber']} />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
           <Island.Content {...props}>
-            <Viewport.Padding edge="block-start" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="header"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -492,15 +804,25 @@ const ContentPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -508,10 +830,13 @@ const ContentPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -532,82 +857,147 @@ const SnapGroupPart: FunctionComponent = () => {
     title: 'Island.SnapGroup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Island.SnapGroup (others)': ['value'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Grabber': [],
+            'Island.Header': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
-      controls={[controlRoot, control]}
+      controls={[controlRoot, control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateRoot, state]}
+      state={[stateRoot, state, partState]}
       title="Island.SnapGroup"
     >
-      <Viewport.Content />
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.Content {...partProps['Viewport.Content']} />
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
           key={`${rootKey}`}
           {...rootProps}
         >
-          <Island.Header>
-            <Island.Grabber />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+          <Island.Header {...partProps['Island.Header']}>
+            <Island.Grabber {...partProps['Island.Grabber']} />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup (others)']}
+              value="header"
+            />
             {/* (Its name, by its controls: `peek` at first.) */}
             <Island.SnapGroup {...props}>
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup (others)']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -615,15 +1005,25 @@ const SnapGroupPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup (others)']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -631,10 +1031,13 @@ const SnapGroupPart: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -644,11 +1047,11 @@ export const IslandParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A root (its stops), its header (a grabber, a bar) and its content (its
-        snap groups), in a bottom{' '}
+        A root (with its stops), its header (a grabber and a bar), and its
+        content (with its snap groups), in a{' '}
         <PartLink
           component="viewport"
-          part="Viewport.Anchor"
+          part="Viewport.BlockEnd"
         />
         .
       </li>
@@ -658,9 +1061,8 @@ export const IslandParts: FunctionComponent = () => (
       <li className="demo-tree-context">
         <PartLink
           component="viewport"
-          part="Viewport.Anchor"
-        />{' '}
-        (<code>edge=&quot;block-end&quot;</code>)
+          part="Viewport.BlockEnd"
+        />
         <ul>
           <li>
             <PartLink
@@ -725,18 +1127,19 @@ export const IslandParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The island: its capsule (glass), its stops by its snap groups’ names (
-        <code>snapPoint</code> or <code>defaultSnapPoint</code>, by default the
-        lowest; <code>onSnapPointChange</code>).
+        The island: its glass capsule, with its stops named by its snap groups (
+        <code>snapPoint</code> or <code>defaultSnapPoint</code>, the lowest by
+        default, and <code>onSnapPointChange</code>).
       </li>
       <li>
-        Its box is what it shows (its stop, or its content): its anchor’s size,
-        for the page’s paddings and the content layer’s{' '}
-        <code>--uikit-viewport-anchor-block-end</code>, as it comes to rest.
+        Its box is what it shows (its stop, or its content). That’s its anchor’s
+        size, which the page’s paddings and the content layer’s{' '}
+        <code>--uikit-viewport-anchor-block-end</code> follow as it comes to
+        rest.
       </li>
       <li>
-        Not a dialog, nor Base UI’s: no portal, backdrop, focus trap or open
-        state; never closed.
+        It’s neither a dialog nor Base UI’s. It has no portal, backdrop, focus
+        trap or open state, and never closes.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -755,7 +1158,7 @@ export const IslandParts: FunctionComponent = () => (
     <ul>
       <li>
         Its grabber above its bar (a <a href={publicUrl('toolbar')}>Toolbar</a>
-        ), staying as its content scrolls below it.
+        ). It stays put as its content scrolls below it.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -773,11 +1176,11 @@ export const IslandParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The grabber (36px by 5px, 5px from the top), first in its header:
-        showing it can be swiped up.
+        The grabber (36px by 5px, 5px from the top), first in its header. It
+        shows that the island can be swiped up.
       </li>
       <li>
-        Renders a <code>div</code>, hidden from assistive tech.
+        Renders a <code>div</code>, hidden from assistive technology.
       </li>
     </ul>
     <GrabberPart />
@@ -792,19 +1195,19 @@ export const IslandParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What’s below its header, scrolling: with stops, at its top stop only
-        (below it, dragging it drags the island; at its start, a pull down, by
-        touch or by a wheel or trackpad scroll begun there, hands back to the
-        island).
+        What’s below its header, and scrolls. With stops, it only scrolls at the
+        top stop. Below that, dragging it drags the island. At its start, a pull
+        down (by touch, or by a wheel or trackpad scroll that started there)
+        hands back to the island.
       </li>
       <li>
-        A text field typed into in it, scrolled into view above the on-screen
-        keyboard (see{' '}
+        A text field typed into inside it is scrolled into view above the
+        on-screen keyboard (see{' '}
         <PartLink
           component="viewport"
           part="useFocusScroll"
         />
-        ); with stops, at its top stop only.
+        ). With stops, that happens at its top stop only.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -822,33 +1225,36 @@ export const IslandParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A stop of the island’s: swiped up, it reveals its content group by
-        group, snapping to show everything up to a group’s end (its header too),
-        measured live as the content changes.
+        One of the island’s stops. Swiped up, the island reveals its content
+        group by group, snapping to show everything up to a group’s end (its
+        header too). It’s measured live as the content changes.
       </li>
       <li>
-        Named (<code>value</code>): the root’s stops take and give the names,
-        not heights.
+        Each stop is named (<code>value</code>). The root’s stop props take and
+        give those names, not heights.
       </li>
       <li>
-        Empty, first in the content: its header alone, its bar centered in it.
-        Empty, in the header right after the grabber: a sliver, the grabber
-        alone (see{' '}
+        An empty group first in the content makes a stop with only the header,
+        its bar centered in it. An empty group in the header, right after the
+        grabber, makes a sliver with only the grabber (see{' '}
         <a href={publicUrl('island/composition#as-a-sliver')}>Composition</a>).
       </li>
       <li>
-        The last holds the rest: reaching past the island’s height, its stop is
-        the whole island.
+        The last group holds the rest. When it reaches past the island’s height,
+        its stop is the whole island.
       </li>
       <li>
-        While its content is scrolled away from its start (only possible fully
-        extended), the groups in it aren’t stops: dragging the header down goes
-        to the header-only stop or the sliver, or nowhere without one. Back at
-        the start, they’re stops again. Asked for while scrolled away (the
-        root’s <code>snapPoint</code>), a group’s stop is gone to with the
-        content scrolled back to its start.
+        While its content is scrolled away from its start (only possible when
+        fully extended), the groups in it aren’t stops. Dragging the header down
+        then goes to the header-only stop or the sliver, or nowhere if there’s
+        neither. Back at the start, they’re stops again. When a group’s stop is
+        asked for while scrolled away (the root’s <code>snapPoint</code>), the
+        island goes there and scrolls the content back to its start.
       </li>
-      <li>Optional: without groups, a plain capsule as tall as its content.</li>
+      <li>
+        It’s optional. Without groups, the island is a plain capsule as tall as
+        its content.
+      </li>
     </ul>
     <SnapGroupPart />
     <h3>Props</h3>

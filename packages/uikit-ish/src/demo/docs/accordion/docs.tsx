@@ -17,7 +17,7 @@ export const accordionRootRows: readonly PropRow[] = [
     'Value[]',
     undefined,
     <>
-      Its items open initially (uncontrolled), by their <code>value</code>.
+      The items open at first (uncontrolled), by their <code>value</code>.
     </>,
   ],
   [
@@ -25,35 +25,35 @@ export const accordionRootRows: readonly PropRow[] = [
     'Value[]',
     undefined,
     <>
-      Its items open (controlled, with <code>onValueChange</code>).
+      The items that are open (controlled, with <code>onValueChange</code>).
     </>,
   ],
   [
     'onValueChange',
     `(value: Value[], eventDetails: ${changeDetails}) => void`,
     undefined,
-    'Called when an item opens or closes, with the items open, and why.',
+    'Called when an item opens or closes, with the open items, and why.',
   ],
   [
     'multiple',
     'boolean',
     code('false'),
-    'Several items open at once; otherwise, opening one closes the others.',
+    'Lets several items be open at once. Otherwise, opening one closes the others.',
   ],
   ['disabled', 'boolean', code('false'), 'Its items ignore presses.'],
   [
     'keepMounted',
     'boolean',
     code('false'),
-    'Its closed panels kept in the document (hidden).',
+    'Keeps its closed panels in the document, hidden.',
   ],
   [
     'hiddenUntilFound',
     'boolean',
     code('false'),
     <>
-      Its closed panels found by the browser’s page search, opening (
-      <code>hidden=&quot;until-found&quot;</code>).
+      Lets the browser’s page search find its closed panels, and opens them when
+      found (<code>hidden=&quot;until-found&quot;</code>).
     </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
@@ -64,7 +64,7 @@ export const accordionItemRows: readonly PropRow[] = [
     'value',
     'Value',
     'its own',
-    'Its value, among its root’s (`value`, `defaultValue`).',
+    'Its value, as listed in its root’s value or defaultValue.',
   ],
   [
     'onOpenChange',
@@ -87,8 +87,8 @@ export const accordionTriggerRows: readonly PropRow[] = [
     'boolean',
     code('true'),
     <>
-      Renders a <code>button</code>; <code>false</code> when it renders another
-      element (e.g. a{' '}
+      Whether it renders a <code>button</code>. Set it to <code>false</code>{' '}
+      when it renders another element (for example a{' '}
       <a href={publicUrl('list/parts#list-header')}>List.Header</a>
       ).
     </>,
@@ -101,15 +101,15 @@ export const accordionPanelRows: readonly PropRow[] = [
     'keepMounted',
     'boolean',
     code('false'),
-    'Kept in the document while closed (hidden).',
+    'Keeps it in the document while closed, hidden.',
   ],
   [
     'hiddenUntilFound',
     'boolean',
     code('false'),
     <>
-      Closed, found by the browser’s page search, opening (
-      <code>hidden=&quot;until-found&quot;</code>; overrides{' '}
+      Lets the browser’s page search find it while closed, and opens it when
+      found (<code>hidden=&quot;until-found&quot;</code>; overrides{' '}
       <code>keepMounted</code>).
     </>,
   ],

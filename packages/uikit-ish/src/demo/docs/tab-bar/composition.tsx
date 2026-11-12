@@ -1,7 +1,7 @@
 import './style.css';
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { FunctionComponent, RefObject, useRef, useState } from 'react';
+import { FunctionComponent, RefObject, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 
 import {
@@ -18,9 +18,11 @@ import {
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
-import { Component } from '../../tooling/frame/component.js';
+import { CodeAroundContext, Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -34,6 +36,7 @@ import {
   sfPlayFill,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import { phoneTabs, phoneTabValues } from './tabs.js';
 
@@ -294,71 +297,131 @@ const Panels: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [value, onValueChange] = useValue(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Header.LargeTitle': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Panel': ['keepMounted', 'render', 'value'],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['value'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('tab-bar-composition-panels') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="tab-bar-composition-panels"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Tab bar with panels"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
-        <Viewport.Content>
+        <Viewport.Content {...partProps['Viewport.Content']}>
           {phoneTabs.map(([tab, label]) => (
             <TabBar.Panel
               key={tab}
+              {...partProps['TabBar.Panel']}
               keepMounted
-              render={<Page.Root />}
+              render={<Page.Root {...partProps['Page.Root']} />}
               value={tab}
             >
               {/* (The panel is the page: its header within it, its bar
                  anchored all the same.) */}
               <Header.Root>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Title>
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{label}</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Viewport.Padding edge="block-start" />
-                <Header.LargeTitle>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                   <span>{label}</span>
                 </Header.LargeTitle>
               </Header.Root>
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {rows[tab]?.map((name, index) => (
-                      <List.Item key={index}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={index}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </TabBar.Panel>
           ))}
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <TabBar.List>
-            <TabBar.Group>
-              <TabBar.Indicator />
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <TabBar.List {...partProps['TabBar.List']}>
+            <TabBar.Group {...partProps['TabBar.Group']}>
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               {phoneTabs.map(([tab, label, icon]) => (
                 <TabBar.Tab
                   key={tab}
+                  {...partProps['TabBar.Tab']}
                   value={tab}
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={icon} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    />
                   </TabBar.Icon>
-                  <TabBar.Label>{label}</TabBar.Label>
+                  <TabBar.Label {...partProps['TabBar.Label']}>
+                    {label}
+                  </TabBar.Label>
                 </TabBar.Tab>
               ))}
             </TabBar.Group>
@@ -377,18 +440,49 @@ const Search: FunctionComponent = () => {
   const [sections] = collapsedSelection([phoneTabValues], section);
   const field = useRef<HTMLInputElement>(null);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Accessory': ['visibleIn'],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': ['collapsed'],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+            'TextField.Clear': [],
+            'TextField.Control': ['aria-label', 'placeholder', 'ref', 'type'],
+            'TextField.Frame': ['variant'],
+            'TextField.Root': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Provider': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('tab-bar-composition-search') },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
+      controls={[partControls]}
       id="tab-bar-composition-search"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Tab bar with search"
     >
       {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
-      <Viewport.Provider>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
         <TabBar.Root
+          {...partProps['TabBar.Root']}
           value={value}
           onValueChange={(
             next: unknown,
@@ -407,46 +501,72 @@ const Search: FunctionComponent = () => {
             field.current?.focus({ preventScroll: true });
           }}
         >
-          <Viewport.BlockEnd>
-            <TabBar.List collapsed={value === 'search'}>
-              <TabBar.Group visibleWhenCollapsed>
-                <TabBar.Indicator />
+          <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+            <TabBar.List
+              {...partProps['TabBar.List']}
+              collapsed={value === 'search'}
+            >
+              <TabBar.Group
+                {...partProps['TabBar.Group']}
+                visibleWhenCollapsed
+              >
+                <TabBar.Indicator {...partProps['TabBar.Indicator']} />
                 {phoneTabs.map(([tab, label, icon], index) => (
                   <TabBar.Tab
                     key={tab}
+                    {...partProps['TabBar.Tab']}
                     value={tab}
                     visibleWhenCollapsed={sections?.tab === index}
                   >
-                    <TabBar.Icon>
-                      <Symbol icon={icon} />
+                    <TabBar.Icon {...partProps['TabBar.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={icon}
+                      />
                     </TabBar.Icon>
-                    <TabBar.Label>{label}</TabBar.Label>
+                    <TabBar.Label {...partProps['TabBar.Label']}>
+                      {label}
+                    </TabBar.Label>
                   </TabBar.Tab>
                 ))}
               </TabBar.Group>
-              <TabBar.Group>
-                <TabBar.Indicator />
+              <TabBar.Group {...partProps['TabBar.Group']}>
+                <TabBar.Indicator {...partProps['TabBar.Indicator']} />
                 <TabBar.Tab
+                  {...partProps['TabBar.Tab']}
                   aria-label="Search"
                   value="search"
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={sfMagnifyingglass} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfMagnifyingglass}
+                    />
                   </TabBar.Icon>
                 </TabBar.Tab>
               </TabBar.Group>
             </TabBar.List>
-            <TabBar.Accessory visibleIn="collapsed">
-              <TextField.Root>
-                <TextField.Frame variant="tab-bar-collapsed">
-                  <Symbol icon={sfMagnifyingglass} />
+            <TabBar.Accessory
+              {...partProps['TabBar.Accessory']}
+              visibleIn="collapsed"
+            >
+              <TextField.Root {...partProps['TextField.Root']}>
+                <TextField.Frame
+                  {...partProps['TextField.Frame']}
+                  variant="tab-bar-collapsed"
+                >
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  />
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     ref={field}
                     aria-label="Search"
                     placeholder="Search"
                     type="search"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </TextField.Frame>
               </TextField.Root>
             </TabBar.Accessory>
@@ -465,66 +585,131 @@ const SearchBeside: FunctionComponent = () => {
     name.toLowerCase().includes(query.toLowerCase()),
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.List': [],
+            'TabBar.Root': ['defaultValue', 'onValueChange'],
+            'TabBar.Tab': ['aria-label', 'shape', 'value'],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'aria-label',
+              'onValueChange',
+              'placeholder',
+              'type',
+              'value',
+            ],
+            'TextField.Frame': ['variant'],
+            'TextField.Root': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+            'Viewport.Provider': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('tab-bar-composition-search-beside') },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
+      controls={[partControls]}
       id="tab-bar-composition-search-beside"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Tab bar with a search field beside it"
     >
       {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
-      <Viewport.Provider>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
         <TabBar.Root
+          {...partProps['TabBar.Root']}
           defaultValue="favorites"
           onValueChange={(
             next: unknown,
             { reason }: BaseTabs.Root.ChangeEventDetails,
           ) => addLog(`value change: ${String(next)}/${reason}`)}
         >
-          <Viewport.Content>
-            <Viewport.Padding edge="block-start" />
-            <List.Root>
-              <List.Section>
-                <List.Group>
+          <Viewport.Content {...partProps['Viewport.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {matching.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Viewport.Content>
-          <Viewport.BlockEnd>
-            <TabBar.List>
-              <TabBar.Group>
-                <TabBar.Indicator />
+          <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+            <TabBar.List {...partProps['TabBar.List']}>
+              <TabBar.Group {...partProps['TabBar.Group']}>
+                <TabBar.Indicator {...partProps['TabBar.Indicator']} />
                 <TabBar.Tab
+                  {...partProps['TabBar.Tab']}
                   aria-label="Favorites"
                   shape="circle"
                   value="favorites"
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={sfHeartFill} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfHeartFill}
+                    />
                   </TabBar.Icon>
                 </TabBar.Tab>
               </TabBar.Group>
-              <TextField.Root>
-                <TextField.Frame variant="tab-bar">
-                  <Symbol icon={sfMagnifyingglass} />
+              <TextField.Root {...partProps['TextField.Root']}>
+                <TextField.Frame
+                  {...partProps['TextField.Frame']}
+                  variant="tab-bar"
+                >
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  />
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     aria-label="Search"
                     placeholder="Search"
                     type="search"
                     value={query}
                     onValueChange={(value: string) => setQuery(value)}
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </TextField.Frame>
               </TextField.Root>
             </TabBar.List>
@@ -540,35 +725,72 @@ const Badges: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [value, onValueChange] = useValue(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Badge: ['placement'],
+            Symbol: ['icon'],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['value'],
+            'Viewport.BlockEnd': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('tab-bar-composition-badges') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="tab-bar-composition-badges"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Tab bar with badges"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
-        <Viewport.BlockEnd>
-          <TabBar.List>
-            <TabBar.Group>
-              <TabBar.Indicator />
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <TabBar.List {...partProps['TabBar.List']}>
+            <TabBar.Group {...partProps['TabBar.Group']}>
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               {phoneTabs.map(([tab, label, icon], index) => (
                 <TabBar.Tab
                   key={tab}
+                  {...partProps['TabBar.Tab']}
                   value={tab}
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={icon}>
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    >
                       {index % 2 === 1 ? (
-                        <Badge placement="symbol">{index}</Badge>
+                        <Badge
+                          {...partProps.Badge}
+                          placement="symbol"
+                        >
+                          {index}
+                        </Badge>
                       ) : null}
                     </Symbol>
                   </TabBar.Icon>
-                  <TabBar.Label>{label}</TabBar.Label>
+                  <TabBar.Label {...partProps['TabBar.Label']}>
+                    {label}
+                  </TabBar.Label>
                 </TabBar.Tab>
               ))}
             </TabBar.Group>
@@ -597,50 +819,109 @@ const OnScrollView: FunctionComponent<{
     setIsCollapsed(!atTop && direction === 'down'),
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': ['collapsed'],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['value', 'visibleWhenCollapsed'],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': ['ref'],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('tab-bar-composition-scroll') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="tab-bar-composition-scroll"
       log={log}
       screenRef={screenRef}
       stage="phone"
+      state={[partState]}
       title="Tab bar collapsing on scroll"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
-        <Viewport.Content ref={contentRef}>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content
+          {...partProps['Viewport.Content']}
+          ref={contentRef}
+        >
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <TabBar.List collapsed={isCollapsed}>
-            <TabBar.Group visibleWhenCollapsed>
-              <TabBar.Indicator />
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <TabBar.List
+            {...partProps['TabBar.List']}
+            collapsed={isCollapsed}
+          >
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               {phoneTabs.map(([tab, label, icon], index) => (
                 <TabBar.Tab
                   key={tab}
+                  {...partProps['TabBar.Tab']}
                   value={tab}
                   visibleWhenCollapsed={sections?.tab === index}
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={icon} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    />
                   </TabBar.Icon>
-                  <TabBar.Label>{label}</TabBar.Label>
+                  <TabBar.Label {...partProps['TabBar.Label']}>
+                    {label}
+                  </TabBar.Label>
                 </TabBar.Tab>
               ))}
             </TabBar.Group>
@@ -659,15 +940,23 @@ const OnScroll: FunctionComponent = () => {
   );
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <OnScrollView
-        contentRef={contentRef}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <OnScrollView
+          contentRef={contentRef}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -682,15 +971,46 @@ const MiniPlayer: FunctionComponent = () => {
     value,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Accessory': [],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': ['collapsed'],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': [
+              'aria-label',
+              'onClick',
+              'value',
+              'visibleWhenCollapsed',
+            ],
+            'Viewport.BlockEnd': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('tab-bar-composition-accessory') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="tab-bar-composition-accessory"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Tab bar with an accessory"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={(
           next: unknown,
@@ -701,26 +1021,42 @@ const MiniPlayer: FunctionComponent = () => {
           if (next !== 'search') setSection(next);
         }}
       >
-        <Viewport.BlockEnd>
-          <TabBar.List collapsed={value === 'search'}>
-            <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-              <TabBar.Indicator />
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <TabBar.List
+            {...partProps['TabBar.List']}
+            collapsed={value === 'search'}
+          >
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed={sections?.remains}
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               {phoneTabs.map(([tab, label, icon], index) => (
                 <TabBar.Tab
                   key={tab}
+                  {...partProps['TabBar.Tab']}
                   value={tab}
                   visibleWhenCollapsed={sections?.tab === index}
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={icon} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    />
                   </TabBar.Icon>
-                  <TabBar.Label>{label}</TabBar.Label>
+                  <TabBar.Label {...partProps['TabBar.Label']}>
+                    {label}
+                  </TabBar.Label>
                 </TabBar.Tab>
               ))}
             </TabBar.Group>
-            <TabBar.Group visibleWhenCollapsed={search?.remains}>
-              <TabBar.Indicator />
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed={search?.remains}
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 aria-label="Search"
                 value="search"
                 visibleWhenCollapsed={search?.remains}
@@ -730,16 +1066,25 @@ const MiniPlayer: FunctionComponent = () => {
                   setValue(section);
                 }}
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfMagnifyingglass} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  />
                 </TabBar.Icon>
               </TabBar.Tab>
             </TabBar.Group>
           </TabBar.List>
-          <TabBar.Accessory>
+          <TabBar.Accessory {...partProps['TabBar.Accessory']}>
             <span className="tab-bar-demo-accessory-title">Not Playing</span>
-            <Symbol icon={sfPlayFill} />
-            <Symbol icon={sfForwardFill} />
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfPlayFill}
+            />
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfForwardFill}
+            />
           </TabBar.Accessory>
         </Viewport.BlockEnd>
       </TabBar.Root>
@@ -769,16 +1114,17 @@ export const TabBarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s Tabs: the root holds the tabs and the sections’ panels,
-        showing the active tab’s.
+        It’s Base UI’s Tabs: the root holds the tabs and the sections’ panels,
+        and shows the active tab’s panel.
       </li>
       <li>
-        As an app’s shell: each panel a <a href={publicUrl('page')}>Page</a> (
-        <code>render</code>), scrolling on its own, in the{' '}
-        <a href={publicUrl('viewport')}>Viewport</a>’s content layer.
+        As an app’s shell, each panel renders as a{' '}
+        <a href={publicUrl('page')}>Page</a> (with <code>render</code>) that
+        scrolls on its own, in the <a href={publicUrl('viewport')}>Viewport</a>
+        ’s content layer.
       </li>
       <li>
-        The bar floats over it, anchored at the bottom (
+        The bar floats above it, anchored at the bottom (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
@@ -786,9 +1132,9 @@ export const TabBarComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Each section keeps its place: <code>keepMounted</code> keeps hidden
-        panels (otherwise unmounted), and with them their pages’ scroll
-        positions (scroll Recents, switch away and back).
+        Each section keeps its place. <code>keepMounted</code> keeps hidden
+        panels mounted (otherwise they unmount), and with them their pages’
+        scroll positions. Scroll Recents, switch away and back to see it.
       </li>
       <li>
         <strong>Library:</strong> the tab bar (
@@ -796,12 +1142,13 @@ export const TabBarComposition: FunctionComponent = () => (
           component="tab-bar"
           part="TabBar.Root"
         />
-        , its tabs, indicator and panels kept mounted) floating at the bottom (
+        , with its tabs, its indicator and its panels kept mounted) floating at
+        the bottom (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        ), each panel a{' '}
+        ), with each panel a{' '}
         <PartLink
           component="page"
           part="Page.Root"
@@ -823,13 +1170,13 @@ export const TabBarComposition: FunctionComponent = () => (
       Search
     </Heading>
     <ul>
-      <li>Search: a group of its own after the sections’.</li>
-      <li>Choosing it collapses the bar to the section last chosen.</li>
+      <li>Search gets a group of its own, after the sections’ group.</li>
+      <li>Choosing it collapses the bar to the section chosen last.</li>
       <li>
-        The search field appears beside it: an accessory shown only while
-        collapsed (<code>visibleIn</code>), holding a{' '}
-        <a href={publicUrl('text-field')}>TextField</a>’s search field, on the
-        accessory’s glass as the collapsed bar’s (
+        The search field appears next to it, in an accessory that shows only
+        while collapsed (<code>visibleIn</code>). It holds a{' '}
+        <a href={publicUrl('text-field')}>Text Field</a>’s search field, styled
+        for the accessory’s glass like the collapsed bar (
         <PartLink
           component="text-field"
           part="TextField.Frame"
@@ -837,10 +1184,10 @@ export const TabBarComposition: FunctionComponent = () => (
         <code>variant=&quot;tab-bar-collapsed&quot;</code>).
       </li>
       <li>
-        Choosing search focuses the field at once, opening the keyboard (the
-        app’s: rendering the collapsed bar synchronously, <code>flushSync</code>
-        , then focusing, still in the press, without scrolling to it:{' '}
-        <code>preventScroll</code>).
+        Choosing search focuses the field at once, which opens the keyboard. The
+        app does that: it renders the collapsed bar synchronously (
+        <code>flushSync</code>), then focuses the field while still handling the
+        press, without scrolling to it (<code>preventScroll</code>).
       </li>
       <li>Choosing the section again expands the bar.</li>
       <li>
@@ -850,8 +1197,8 @@ export const TabBarComposition: FunctionComponent = () => (
           component="tab-bar"
           part="TabBar.Accessory"
         />
-        ) shown only while collapsed, its search field in the collapsed bar’s
-        look (
+        ) that shows only while collapsed, with its search field in the
+        collapsed bar’s look (
         <PartLink
           component="text-field"
           part="TextField.Frame"
@@ -859,7 +1206,7 @@ export const TabBarComposition: FunctionComponent = () => (
         <code>variant</code>).
       </li>
       <li>
-        <strong>Demo:</strong> the value and the section last chosen (the app’s
+        <strong>Demo:</strong> the value and the section chosen last (the app’s
         state), and the search field’s query.
       </li>
     </ul>
@@ -874,15 +1221,15 @@ export const TabBarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A search field always at hand: in the bar, beside the tab’s group,
-        taking the bar’s free space.
+        A search field that’s always at hand: in the bar, next to the tabs’
+        group, taking the bar’s free space.
       </li>
       <li>
-        The bar’s only tab: a circle (<code>shape=&quot;circle&quot;</code>),
-        without a selection (nothing to choose).
+        The bar’s only tab is a circle (<code>shape=&quot;circle&quot;</code>),
+        without a selection, since there’s nothing to choose.
       </li>
       <li>
-        It looks like a group: a glass capsule as high as the tabs (
+        The field looks like a group: a glass capsule as tall as the tabs (
         <PartLink
           component="text-field"
           part="TextField.Frame"
@@ -890,12 +1237,12 @@ export const TabBarComposition: FunctionComponent = () => (
         <code>variant=&quot;tab-bar&quot;</code>).
       </li>
       <li>
-        Pushed up by the on-screen keyboard with the bar (
+        The on-screen keyboard pushes it up together with the bar (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        ; the keyboard tracked by a{' '}
+        , with the keyboard tracked by a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
@@ -908,7 +1255,7 @@ export const TabBarComposition: FunctionComponent = () => (
           component="text-field"
           part="TextField.Frame"
         />{' '}
-        <code>variant</code>) beside a{' '}
+        <code>variant</code>) next to a{' '}
         <PartLink
           component="tab-bar"
           part="TabBar.Group"
@@ -935,14 +1282,15 @@ export const TabBarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A section’s news (missed calls, new voicemail): a{' '}
+        A section’s news, such as missed calls or new voicemail: a{' '}
         <a href={publicUrl('badge')}>Badge</a> inside the tab’s{' '}
         <a href={publicUrl('symbol')}>Symbol</a>.
       </li>
       <li>
-        Placed on the glyph, solid while the symbol blends with the glass.
+        It sits on the glyph, and stays solid while the symbol blends with the
+        glass.
       </li>
-      <li>It shows activity on the tab.</li>
+      <li>It shows that there’s activity in the section.</li>
       <li>
         <strong>Library:</strong> the{' '}
         <PartLink
@@ -1006,7 +1354,7 @@ export const TabBarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        App content attached to the bar (Music’s mini player): a{' '}
+        App content attached to the bar, such as a music app’s mini player: a{' '}
         <PartLink
           component="tab-bar"
           part="TabBar.Accessory"
@@ -1014,12 +1362,13 @@ export const TabBarComposition: FunctionComponent = () => (
         after the list.
       </li>
       <li>
-        Above the groups, spanning the bar’s width; between them while the bar
-        is collapsed (here, by search).
+        It sits above the groups and spans the bar’s width. While the bar is
+        collapsed (here, by search), it sits between them.
       </li>
       <li>
-        The active tab ignores clicks (Base UI’s Tabs): the search tab, clicked
-        while searching, sets the section last chosen itself, expanding the bar.
+        The active tab ignores clicks (as in Base UI’s Tabs). So the search tab,
+        clicked while searching, sets the section chosen last itself, which
+        expands the bar.
       </li>
       <li>
         <strong>Library:</strong> the accessory after the list (
@@ -1030,8 +1379,8 @@ export const TabBarComposition: FunctionComponent = () => (
         ), placed above the groups or between them.
       </li>
       <li>
-        <strong>Demo:</strong> the player, the value and the section last
-        chosen.
+        <strong>Demo:</strong> the player, the value and the section chosen
+        last.
       </li>
     </ul>
     <CodeView code={accessoryCode} />

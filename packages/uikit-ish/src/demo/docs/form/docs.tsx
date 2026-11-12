@@ -23,8 +23,8 @@ export const formRows: readonly PropRow[] = [
       >
         Field.Root
       </PartLink>
-      ’s, or a control’s in one). <code>preventDefault()</code> is called on the
-      native submit event when used.
+      ’s, or a control’s inside one). <code>preventDefault()</code> is called on
+      the native submit event when used.
     </>,
   ],
   [
@@ -42,8 +42,9 @@ export const formRows: readonly PropRow[] = [
     'Record<string, string | string[]>',
     undefined,
     <>
-      Validation errors returned externally (e.g. by a server, after
-      submitting), by the fields’ <code>name</code>s: shown on them (e.g. a{' '}
+      Validation errors returned externally (for example by a server, after
+      submitting), by the fields’ <code>name</code>s. They show on the fields
+      (for example in a{' '}
       <PartLink
         component="text-field"
         part="TextField.Error"
@@ -127,7 +128,7 @@ export const fieldsetLegendRows: readonly PropRow[] = [
       />
     </>,
     <>
-      What it renders: e.g. another prominence (
+      What it renders, for example another prominence (
       <code>{'<List.Header prominence="nested" />'}</code>).
     </>,
   ],

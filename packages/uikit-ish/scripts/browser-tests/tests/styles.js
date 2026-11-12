@@ -13,7 +13,7 @@ const probe = (/** @type {string} */ section) => `(() => {
   // (Colors computed: the build's CSS may write them otherwise.)
   const color = (value) => { const probe = document.createElement('span'); probe.style.color = value; document.body.append(probe); const computed = getComputedStyle(probe).color; probe.remove(); return computed; };
   const group = ${section}.querySelector('[role=radiogroup]');
-  const highlight = [...group.children].find((child) => getComputedStyle(child).backgroundColor === 'rgb(255, 255, 255)' || getComputedStyle(child).backgroundColor === 'rgb(108, 108, 113)');
+  const highlight = group.querySelector('.uikit-segmented-highlight');
   return {
     colorScheme: root.colorScheme,
     glass: color(getComputedStyle(group).getPropertyValue('--uikit-glass-content')),
@@ -95,6 +95,10 @@ export const tests = [
   {
     name: 'styles: a demo’s color scheme setting forces it on its stage alone',
     run: async (page) => {
+      // (The preference light: not the one a test before left.)
+      await page.browser.send('Emulation.setEmulatedMedia', {
+        features: [{ name: 'prefers-color-scheme', value: 'light' }],
+      });
       // (Not raw: the frame, its stage, the setting from the URL.)
       await page.browser.send('Page.navigate', { url: 'about:blank' });
       await page.browser.send('Page.navigate', {

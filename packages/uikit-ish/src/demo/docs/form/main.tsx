@@ -17,8 +17,12 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsCheckboxGroup,
   getPropOptionsForm,
@@ -88,6 +92,52 @@ export const FormDemo: FunctionComponent = () => {
     { external: externalRadio, title: 'radio (first)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Fieldset.Legend': [],
+            'Fieldset.Root': [],
+            'List.Checkbox': ['aria-label', 'value'],
+            'List.Radio': ['aria-label', 'value'],
+            'Button.Label': [],
+            'Button.Root': ['fill', 'size', 'type', 'variant'],
+            'DatePicker.Root': ['handle', 'max', 'onValueChange', 'value'],
+            'Field.Root': ['name', 'render'],
+            'List.Below': [],
+            'List.Block': ['style'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'autoComplete',
+              'inputMode',
+              'max',
+              'min',
+              'minLength',
+              'placeholder',
+              'required',
+              'type',
+            ],
+            'TextField.Description': [],
+            'TextField.Error': ['match'],
+            'TextField.Label': [],
+            'TextField.Root': ['name', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
@@ -104,6 +154,7 @@ export const FormDemo: FunctionComponent = () => {
         controlCheckbox,
         controlRadioGroup,
         controlRadio,
+        partControls,
       ]}
       state={[
         stateForm,
@@ -113,148 +164,186 @@ export const FormDemo: FunctionComponent = () => {
         stateCheckbox,
         stateRadioGroup,
         stateRadio,
+        partState,
       ]}
     >
       <Form
         key={keyForm}
         {...propsForm}
       >
-        <List.Root>
+        <List.Root {...partProps['List.Root']}>
           <Fieldset.Root {...propsFieldset}>
             <Fieldset.Legend {...propsLegend}>
-              <List.Title>Contact</List.Title>
+              <List.Title {...partProps['List.Title']}>Contact</List.Title>
             </Fieldset.Legend>
-            <List.Group>
+            <List.Group {...partProps['List.Group']}>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="name"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Name</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Name
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     required
                     autoComplete="name"
                     placeholder="Name"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
-                <List.Below>
-                  <TextField.Description>
+                <List.Below {...partProps['List.Below']}>
+                  <TextField.Description
+                    {...partProps['TextField.Description']}
+                  >
                     As shown to others.
                   </TextField.Description>
-                  <TextField.Error>Please enter a name.</TextField.Error>
+                  <TextField.Error {...partProps['TextField.Error']}>
+                    Please enter a name.
+                  </TextField.Error>
                 </List.Below>
               </TextField.Root>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="email"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Email</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Email
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     autoComplete="email"
                     placeholder="Email"
                     type="email"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
-                <List.Below>
-                  <TextField.Error>
+                <List.Below {...partProps['List.Below']}>
+                  <TextField.Error {...partProps['TextField.Error']}>
                     Please enter an email address.
                   </TextField.Error>
                   {/* A server's error (see the form's `errors`). */}
-                  <TextField.Error match="customError" />
+                  <TextField.Error
+                    {...partProps['TextField.Error']}
+                    match="customError"
+                  />
                 </List.Below>
               </TextField.Root>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="phone"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Phone</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Phone
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     autoComplete="tel"
                     placeholder="Phone"
                     type="tel"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
               </TextField.Root>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="website"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Website</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Website
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     autoComplete="url"
                     placeholder="Website"
                     type="url"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
               </TextField.Root>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="age"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Age</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Age
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     inputMode="numeric"
                     max={130}
                     min={0}
                     placeholder="Age"
                     type="number"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
-                <List.Below>
-                  <TextField.Error>Between 0 and 130.</TextField.Error>
+                <List.Below {...partProps['List.Below']}>
+                  <TextField.Error {...partProps['TextField.Error']}>
+                    Between 0 and 130.
+                  </TextField.Error>
                 </List.Below>
               </TextField.Root>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="password"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Password</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Password
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     autoComplete="new-password"
                     minLength={8}
                     placeholder="Password"
                     type="password"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
-                <List.Below>
-                  <TextField.Error>At least 8 characters.</TextField.Error>
+                <List.Below {...partProps['List.Below']}>
+                  <TextField.Error {...partProps['TextField.Error']}>
+                    At least 8 characters.
+                  </TextField.Error>
                 </List.Below>
               </TextField.Root>
               {/* A date: the date picker (its value, as an ISO date, in its
                     hidden control: the field's by name), its calendar in a
                     row below (by a handle). */}
               <Field.Root
+                {...partProps['Field.Root']}
                 name="birthday"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <List.Title>Birthday</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>Birthday</List.Title>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <DatePicker.Root
+                    {...partProps['DatePicker.Root']}
                     handle={birthdayPicker}
                     max={new Date()}
                     value={birthday}
@@ -269,122 +358,162 @@ export const FormDemo: FunctionComponent = () => {
             </List.Group>
           </Fieldset.Root>
 
-          <Fieldset.Root>
-            <Fieldset.Legend>
-              <List.Title>Notifications</List.Title>
+          <Fieldset.Root {...partProps['Fieldset.Root']}>
+            <Fieldset.Legend {...partProps['Fieldset.Legend']}>
+              <List.Title {...partProps['List.Title']}>
+                Notifications
+              </List.Title>
             </Fieldset.Legend>
             {/* Fields: their values are the form's (by name). */}
 
             <Field.Root
               key={`${keyCheckboxGroup}-${keyCheckbox}`}
+              {...partProps['Field.Root']}
               name="notifications"
               render={<div className="form-demo-field-contents" />}
             >
               <CheckboxGroup
                 {...propsCheckboxGroup}
                 allValues={['messages', 'mentions', 'reminders']}
-                render={<List.Group />}
+                render={<List.Group {...partProps['List.Group']} />}
               >
-                <List.Item onClick={forwardClick('[role=checkbox]')}>
-                  <List.Leading>
+                <List.Item
+                  {...partProps['List.Item']}
+                  onClick={forwardClick('[role=checkbox]')}
+                >
+                  <List.Leading {...partProps['List.Leading']}>
                     <List.Checkbox
                       aria-label="messages"
                       value="messages"
                       {...propsCheckbox}
                     />
                   </List.Leading>
-                  <List.Content>
-                    <List.Title>Messages</List.Title>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Messages
+                    </List.Title>
                   </List.Content>
                 </List.Item>
-                <List.Item onClick={forwardClick('[role=checkbox]')}>
-                  <List.Leading>
+                <List.Item
+                  {...partProps['List.Item']}
+                  onClick={forwardClick('[role=checkbox]')}
+                >
+                  <List.Leading {...partProps['List.Leading']}>
                     <List.Checkbox
+                      {...partProps['List.Checkbox']}
                       aria-label="mentions"
                       value="mentions"
                     />
                   </List.Leading>
-                  <List.Content>
-                    <List.Title>Mentions</List.Title>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Mentions
+                    </List.Title>
                   </List.Content>
                 </List.Item>
-                <List.Item onClick={forwardClick('[role=checkbox]')}>
-                  <List.Leading>
+                <List.Item
+                  {...partProps['List.Item']}
+                  onClick={forwardClick('[role=checkbox]')}
+                >
+                  <List.Leading {...partProps['List.Leading']}>
                     <List.Checkbox
+                      {...partProps['List.Checkbox']}
                       aria-label="reminders"
                       value="reminders"
                     />
                   </List.Leading>
-                  <List.Content>
-                    <List.Title>Reminders</List.Title>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Reminders
+                    </List.Title>
                   </List.Content>
                 </List.Item>
               </CheckboxGroup>
             </Field.Root>
           </Fieldset.Root>
 
-          <Fieldset.Root>
-            <Fieldset.Legend>
-              <List.Title>Appearance</List.Title>
+          <Fieldset.Root {...partProps['Fieldset.Root']}>
+            <Fieldset.Legend {...partProps['Fieldset.Legend']}>
+              <List.Title {...partProps['List.Title']}>Appearance</List.Title>
             </Fieldset.Legend>
 
             <Field.Root
               key={`${keyRadioGroup}-${keyRadio}`}
+              {...partProps['Field.Root']}
               name="appearance"
               render={<div className="form-demo-field-contents" />}
             >
               <RadioGroup
                 {...propsRadioGroup}
-                render={<List.Group />}
+                render={<List.Group {...partProps['List.Group']} />}
               >
-                <List.Item onClick={forwardClick('[role=radio]')}>
-                  <List.Leading>
+                <List.Item
+                  {...partProps['List.Item']}
+                  onClick={forwardClick('[role=radio]')}
+                >
+                  <List.Leading {...partProps['List.Leading']}>
                     <List.Radio
                       aria-label="light"
                       value="light"
                       {...propsRadio}
                     />
                   </List.Leading>
-                  <List.Content>
-                    <List.Title>Light</List.Title>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>Light</List.Title>
                   </List.Content>
                 </List.Item>
-                <List.Item onClick={forwardClick('[role=radio]')}>
-                  <List.Leading>
+                <List.Item
+                  {...partProps['List.Item']}
+                  onClick={forwardClick('[role=radio]')}
+                >
+                  <List.Leading {...partProps['List.Leading']}>
                     <List.Radio
+                      {...partProps['List.Radio']}
                       aria-label="dark"
                       value="dark"
                     />
                   </List.Leading>
-                  <List.Content>
-                    <List.Title>Dark</List.Title>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>Dark</List.Title>
                   </List.Content>
                 </List.Item>
-                <List.Item onClick={forwardClick('[role=radio]')}>
-                  <List.Leading>
+                <List.Item
+                  {...partProps['List.Item']}
+                  onClick={forwardClick('[role=radio]')}
+                >
+                  <List.Leading {...partProps['List.Leading']}>
                     <List.Radio
+                      {...partProps['List.Radio']}
                       aria-label="automatic"
                       value="automatic"
                     />
                   </List.Leading>
-                  <List.Content>
-                    <List.Title>Automatic</List.Title>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Automatic
+                    </List.Title>
                   </List.Content>
                 </List.Item>
               </RadioGroup>
             </Field.Root>
           </Fieldset.Root>
 
-          <List.Section>
+          <List.Section {...partProps['List.Section']}>
             {/* As wide as the rows (the groups' edges, not their text). */}
-            <List.Block style={{ paddingInline: 0 }}>
+            <List.Block
+              {...partProps['List.Block']}
+              style={{ paddingInline: 0 }}
+            >
               <Button.Root
+                {...partProps['Button.Root']}
                 fill
                 size="large"
                 type="submit"
                 variant="bordered-prominent"
               >
-                <Button.Label>Submit</Button.Label>
+                <Button.Label {...partProps['Button.Label']}>
+                  Submit
+                </Button.Label>
               </Button.Root>
             </List.Block>
           </List.Section>

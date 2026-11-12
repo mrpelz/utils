@@ -8,13 +8,31 @@ import { mapped, sleep } from '../lib.js';
 /** @typedef {import('../lib.js').Page} Page */
 
 /**
+ * Waits for the calendar's month to settle: its pager done scrolling (a
+ * native, smooth scroll), the month shown live (its days the group's, the
+ * others inert) the title's.
+ *
+ * @param {Page} page
+ */
+const settle = (page) =>
+  page.waitFor(
+    `(() => {
+      const title = document.querySelector('[data-date-picker-part=calendar] h2')?.textContent ?? '';
+      const day = document.querySelector('[role=group] [aria-label]:not([data-outside])');
+      return Boolean(day) && title.split(' ').every((word) => day.getAttribute('aria-label').includes(word));
+    })()`,
+    3000,
+  );
+
+/**
  * The calendar's state: its title, the selected and focusable days.
  *
  * @param {Page} page
  * @returns {Promise<{ focusable: string | undefined, selected: string | undefined, title: string }>}
  */
-const calendar = (page) =>
-  page.evaluate(`(() => {
+const calendar = async (page) => {
+  await settle(page);
+  return page.evaluate(`(() => {
     const days = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')];
     return {
       focusable: days.find((day) => day.tabIndex === 0)?.textContent,
@@ -22,6 +40,7 @@ const calendar = (page) =>
       title: document.querySelector('[data-date-picker-part=calendar] h2').textContent,
     };
   })()`);
+};
 
 /**
  * Clicks a day of the shown month.
@@ -30,6 +49,7 @@ const calendar = (page) =>
  * @param {string} day
  */
 const clickDay = async (page, day) => {
+  await settle(page);
   const point = await page.evaluate(`(() => {
     // (The shown month's: its pager holds others, inert.)
     const day = [...document.querySelectorAll('[aria-pressed]:not([inert] *)')].find((element) => element.textContent === ${JSON.stringify(day)});
@@ -128,7 +148,7 @@ export const tests = [
       // The arrows show other months.
       const next = await page.rect('[aria-label="Next month"]');
       await page.click([next.x + next.width / 2, next.y + next.height / 2]);
-      await sleep(200);
+      await settle(page);
       const { title } = await calendar(page);
       assert.equal(title, 'May 2025');
     },
@@ -216,7 +236,8 @@ export const tests = [
       assert.equal(opened.time[0], 0);
       const insets = await page.evaluate(`(() => {
         const calendar = document.querySelector(${JSON.stringify('[data-date-picker-part=calendar]')});
-        const row = calendar.parentElement.getBoundingClientRect();
+        // (Its row's: it's in the row's span, inset itself, see List.Span.)
+        const row = calendar.closest('[data-list-part=row]').getBoundingClientRect();
         const title = calendar.querySelector('h2').getBoundingClientRect();
         return [Math.round(title.left - row.left), Math.round(calendar.getBoundingClientRect().top - row.top)];
       })()`);
@@ -503,8 +524,11 @@ export const tests = [
 
       // March 2025 has 6 weeks, April 5: the days' height transitions.
       const previous = await page.rect('[aria-label="Previous month"]');
+      // (The body's: its height transitions once the month is turned, see
+      // `CalendarPanel`.)
       const heights = page.sample(
-        `document.querySelector(${JSON.stringify('[role=group]')}).getBoundingClientRect().height`,
+        `document.querySelector(${JSON.stringify('.uikit-date-picker-body')}).getBoundingClientRect().height`,
+        1500,
       );
       await page.click([
         previous.x + previous.width / 2,
@@ -571,6 +595,16 @@ export const tests = [
         `document.querySelector(${JSON.stringify('[data-date-picker-part=calendar] h2')}).textContent`,
       );
       assert.equal(title, 'May 2025');
+      // Back over the days: turning no more (held below, on and on), the
+      // month settling.
+      await page.mouse('mouseMoved', ...from);
+      await settle(page);
+      assert.equal(
+        await page.evaluate(
+          `document.querySelector(${JSON.stringify('[data-date-picker-part=calendar] h2')}).textContent`,
+        ),
+        'May 2025',
+      );
 
       /** @type {[number, number]} */
       const to = await page.evaluate(`(() => {
@@ -617,28 +651,32 @@ export const tests = [
       await page.open('date-picker', 'light', {
         state: [{ $rest: true, locale: 'en-US', pickerStyle: 'inline' }],
       });
+      // (The months in its pager, in order: April's, May's after it.)
+      await page.evaluate(`(() => {
+        window.shownMonth = document.querySelector(${JSON.stringify('[role=group]')});
+        window.nextMonth = window.shownMonth.nextElementSibling;
+      })()`);
       const next = await page.rect('[aria-label="Next month"]');
+      // Each month's offset in the pager (its scroller).
       const sampling = page.sample(
-        `(() => { const days = document.querySelector(${JSON.stringify('[role=group]')}); return [new DOMMatrix(getComputedStyle(days).transform).e, document.querySelectorAll(${JSON.stringify('[role=group] ~ *, [inert] [aria-pressed]')}).length > 0]; })()`,
-        500,
+        `(() => { const pager = document.querySelector(${JSON.stringify('.uikit-date-picker-pages')}).getBoundingClientRect().left; return [window.nextMonth.getBoundingClientRect().left - pager, window.shownMonth.getBoundingClientRect().left - pager]; })()`,
+        1500,
       );
       await page.click([next.x + next.width / 2, next.y + next.height / 2]);
-      /** @type {[number, boolean][]} */
+      /** @type {[number, number][]} */
       const samples = await sampling;
       const shifts = samples.map(([shift]) => Math.round(shift));
       assert.ok(
         shifts.some((shift) => shift > 50),
         `in from the end: ${shifts.join(', ')}`,
       );
+      assert.ok(isDecreasing(shifts), shifts.join(', '));
       assert.ok(
-        isDecreasing(shifts.filter((shift) => shift > 0)),
-        shifts.join(', '),
-      );
-      assert.ok(
-        samples.some(([, leaving]) => leaving),
+        samples.some(([, leaving]) => leaving < -50),
         'the previous month slides out',
       );
-      assert.equal(shifts.at(-1), 0);
+      // (In place: to the pixel, its scroll position a fraction.)
+      assert.ok(Math.abs(shifts.at(-1) ?? 1) <= 1, shifts.join(', '));
     },
   },
   {
@@ -677,7 +715,7 @@ export const tests = [
       // In June, from the 29th past the 30th (onto the blank cell after it).
       const next = await page.rect('[aria-label="Next month"]');
       await page.click([next.x + next.width / 2, next.y + next.height / 2]);
-      await sleep(500);
+      await settle(page);
       const start = await center('29');
       /** @type {[number, number]} */
       const blank = await page.evaluate(`(() => {
@@ -723,7 +761,7 @@ export const tests = [
       // On to May (its last week full): from the 31st beyond the days' end.
       const next = await page.rect('[aria-label="Next month"]');
       await page.click([next.x + next.width / 2, next.y + next.height / 2]);
-      await sleep(500);
+      await settle(page);
       /** @type {[[number, number], number]} */
       const [from, right] = await page.evaluate(`(() => {
         const day = [...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed]:not([data-outside])')})].find((element) => element.textContent === '31');
@@ -804,7 +842,7 @@ export const tests = [
         return [x + width / 2, y + height / 2];
       })()`);
       await page.click(may);
-      await sleep(500);
+      await settle(page);
       assert.deepEqual(
         await page.evaluate(
           `[document.querySelector(${JSON.stringify('[data-date-picker-part=calendar] h2')}).textContent, [...document.querySelectorAll(${JSON.stringify('[role=group] [aria-pressed=true]')})].map((day) => day.textContent)]`,
@@ -960,7 +998,8 @@ export const tests = [
           return [x + width / 2, y + height / 2];
         })()`);
         await page.click(point);
-        await sleep(500);
+        await sleep(200);
+        await settle(page);
       };
       const state = () =>
         page.evaluate(
@@ -1038,7 +1077,7 @@ export const tests = [
       assert.deepEqual(await disabled(), days(1, 18));
       const next = await page.rect('[aria-label="Next month"]');
       await page.click([next.x + next.width / 2, next.y + next.height / 2]);
-      await sleep(600);
+      await settle(page);
       assert.deepEqual(await disabled(), days(1, 31));
     },
   },
@@ -1203,12 +1242,13 @@ export const tests = [
     name: 'date picker: in a form (a hidden field control), its date is submitted by name, as an ISO date',
     run: async (page) => {
       await page.open('date-picker-composition-form');
+      // (Expanding its calendar in place, below.)
       await page.evaluate(
         `${page.section}.querySelector('[data-date-picker-part=collapsed-button]').click()`,
       );
       await sleep(600);
       const iso = await page.evaluate(
-        `(() => { const day = [...document.querySelectorAll(${JSON.stringify('[data-date-picker-part=popup] button[data-date]')})].find((button) => !button.disabled); day.click(); return new Date(Number(day.dataset.date)).toLocaleDateString(${JSON.stringify('sv-SE')}); })()`,
+        `(() => { const day = [...document.querySelectorAll(${JSON.stringify('[data-date-picker-part=calendar] button[data-date]')})].find((button) => !button.disabled); day.click(); return new Date(Number(day.dataset.date)).toLocaleDateString(${JSON.stringify('sv-SE')}); })()`,
       );
       await sleep(300);
       await page.evaluate(

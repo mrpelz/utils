@@ -1,7 +1,7 @@
 import './style.css';
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   collapsedSelection,
@@ -11,7 +11,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -22,6 +25,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfMagnifyingglass } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   tabBarAccessoryRows,
   tabBarGroupRows,
@@ -55,18 +59,40 @@ const LiveView: FunctionComponent = () => {
     value,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+            'Viewport.BlockEnd': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[controlContent, controlList]}
+      controls={[controlContent, controlList, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={[stateContent, stateList]}
+      state={[stateContent, stateList, partState]}
       title="Tab bar"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={(
           next: unknown,
@@ -76,32 +102,50 @@ const LiveView: FunctionComponent = () => {
           setValue(next);
         }}
       >
-        <Viewport.BlockEnd>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
           <TabBar.List {...propsList}>
-            <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-              <TabBar.Indicator />
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed={sections?.remains}
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               {tabs.map(([tab, label, icon], index) => (
                 <TabBar.Tab
                   key={tab}
+                  {...partProps['TabBar.Tab']}
                   value={tab}
                   visibleWhenCollapsed={sections?.tab === index}
                 >
-                  <TabBar.Icon>
-                    <Symbol icon={icon} />
+                  <TabBar.Icon {...partProps['TabBar.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={icon}
+                    />
                   </TabBar.Icon>
-                  {content.labels ? <TabBar.Label>{label}</TabBar.Label> : null}
+                  {content.labels ? (
+                    <TabBar.Label {...partProps['TabBar.Label']}>
+                      {label}
+                    </TabBar.Label>
+                  ) : null}
                 </TabBar.Tab>
               ))}
             </TabBar.Group>
-            <TabBar.Group visibleWhenCollapsed={search?.remains}>
-              <TabBar.Indicator />
+            <TabBar.Group
+              {...partProps['TabBar.Group']}
+              visibleWhenCollapsed={search?.remains}
+            >
+              <TabBar.Indicator {...partProps['TabBar.Indicator']} />
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 aria-label="Search"
                 value="search"
                 visibleWhenCollapsed={search?.remains}
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfMagnifyingglass} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  />
                 </TabBar.Icon>
               </TabBar.Tab>
             </TabBar.Group>
@@ -128,12 +172,12 @@ export const TabBarOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>Switches between an app’s top-level sections.</li>
       <li>
-        A glass capsule of tabs, floating at the window’s bottom; the selection
-        slides to the tab chosen.
+        A glass capsule of tabs that floats at the window’s bottom. The
+        selection slides to the chosen tab.
       </li>
-      <li>Can collapse to its active tab.</li>
-      <li>Can carry an accessory, e.g. a mini player.</li>
-      <li>Base UI’s Tabs: controls the sections’ panels.</li>
+      <li>It can collapse to its active tab.</li>
+      <li>It can carry an accessory, for example a mini player.</li>
+      <li>It’s built on Base UI’s Tabs and controls the sections’ panels.</li>
     </ul>
     <LiveView />
 
@@ -145,10 +189,11 @@ export const TabBarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        For two to five top-level sections people switch between, each keeping
-        its own place (e.g. Phone’s Favorites, Recents, Contacts, Voicemail).
+        For two to five top-level sections that people switch between, each
+        keeping its own place (for example a phone app’s Favorites, Recents,
+        Contacts and Voicemail).
       </li>
-      <li>Search can take a group of its own, beside the tabs.</li>
+      <li>Search can get a group of its own, next to the tabs.</li>
       <li>
         Tabs stay put: don’t add, remove or hide them as the app’s state
         changes.
@@ -163,16 +208,17 @@ export const TabBarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Actions (Add, Compose, Share): a{' '}
-        <a href={publicUrl('toolbar')}>Toolbar</a>, as a tab bar navigates and
+        Actions such as Add, Compose or Share: use a{' '}
+        <a href={publicUrl('toolbar')}>Toolbar</a>. A tab bar navigates; it
         never acts.
       </li>
       <li>
-        Switching between views of the same content: a{' '}
-        <a href={publicUrl('segmented')}>Segmented</a> control, in the content.
+        Switching between views of the same content: use a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control, inside the
+        content.
       </li>
       <li>
-        Many or user-defined sections (folders, playlists): a{' '}
+        Many sections, or sections the user defines (folders, playlists): use a{' '}
         <a href={publicUrl('sidebar')}>Sidebar</a>.
       </li>
     </ul>
@@ -184,9 +230,10 @@ export const TabBarOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most tab bars set, across their parts.</li>
+      <li>The props most tab bars set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('tab-bar/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('tab-bar/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -214,37 +261,37 @@ export const TabBarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        It’s Base UI’s Tabs: the list has the <code>tablist</code> role, each
-        tab is a <code>button</code> with the <code>tab</code> role and{' '}
+        It’s Base UI’s Tabs. The list has the <code>tablist</code> role, and
+        each tab is a <code>button</code> with the <code>tab</code> role and{' '}
         <code>aria-selected</code>. Panels (
         <PartLink
           component="tab-bar"
           part="TabBar.Panel"
         />
         ) have the <code>tabpanel</code> role, are labelled by their tab (whose{' '}
-        <code>aria-controls</code> points at them), and are focusable.
+        <code>aria-controls</code> points at them), and can take focus.
       </li>
       <li>
-        A tab is named by its label; give a tab without one an{' '}
-        <code>aria-label</code> (e.g. search’s).
+        A tab is named by its label. Give a tab without one an{' '}
+        <code>aria-label</code>, for example the search tab.
       </li>
       <li>
-        Keyboard: Tab focuses the active tab (the others are skipped); arrow
-        keys move the focus between the tabs, across groups, wrapping at the
-        ends (<code>loopFocus</code>); Enter or Space chooses the focused tab
-        (or the arrow keys do, with <code>activateOnFocus</code>).
+        Keyboard: Tab focuses the active tab and skips the others. The arrow
+        keys move focus between the tabs, across groups, and wrap at the ends (
+        <code>loopFocus</code>). Enter or Space chooses the focused tab, or the
+        arrow keys do, with <code>activateOnFocus</code>.
       </li>
       <li>
-        Collapsed, the tabs that collapse away are hidden, so neither the
-        keyboard nor assistive technology reaches them; the remaining ones stay.
+        When collapsed, the tabs that collapse away are hidden, so neither the
+        keyboard nor assistive technology reaches them. The remaining ones stay.
       </li>
       <li>
         The lens and the labels’ width-reserving copies are hidden from
         assistive technology. The accessory isn’t part of the tab list: its
-        content is the app’s, to be named as such.
+        content belongs to the app, which names it.
       </li>
       <li>
-        Its animations (selection, lens, collapsing) don’t follow{' '}
+        Its animations (the selection, the lens, collapsing) don’t follow{' '}
         <code>prefers-reduced-motion</code>.
       </li>
     </ul>
@@ -257,20 +304,22 @@ export const TabBarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Pressed, a glass lens appears under the pointer and follows it across
-        the tabs, also into another group; released, the tab under it is chosen,
-        and the lens settles into the selection. The group under the lens grows
-        slightly.
+        When pressed, a glass lens appears under the pointer and follows it
+        across the tabs, even into another group. On release, the tab under it
+        is chosen, and the lens settles into the selection. The group under the
+        lens grows slightly.
       </li>
       <li>
-        The selection slides between tabs of a group, and fades between groups.
+        The selection slides between tabs of the same group, and fades between
+        groups.
       </li>
       <li>
         A group too narrow for its tabs keeps its shape and scrolls its tabs
-        within (by wheel, or by dragging the lens near its ends).
+        inside it, by wheel, or by dragging the lens near its ends.
       </li>
       <li>
-        Collapsing and expanding are the app’s: e.g. on scrolling down and up (
+        The app decides when to collapse and expand it, for example on scrolling
+        down and up (
         <PartLink
           component="viewport"
           part="useViewportScroll"

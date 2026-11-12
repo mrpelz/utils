@@ -16,7 +16,7 @@ const assetsUrl = (publicPath) => `${publicPath}assets/`;
 
 /**
  * Its meta tags (HtmlWebpackPlugin's `meta`): the page under the device's
- * safe areas (the notch, the home indicator: their insets in
+ * safe area insets (the notch, the home indicator: in
  * `env(safe-area-inset-*)`, kept clear by the library, see styles.css, and
  * the guide's layout); a Home Screen app, its status bar over the page; the
  * browser's chrome in the system background.

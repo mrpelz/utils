@@ -3,8 +3,12 @@ import { FunctionComponent, useMemo } from 'react';
 import { Collapsible, List } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsRoot,
   propOptionsPanel,
@@ -33,57 +37,87 @@ export const CollapsibleDemo: FunctionComponent = () => {
     { external: externalPanel, title: 'Collapsible.Panel' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="collapsible"
-      controls={[controlRoot, controlTrigger, controlPanel]}
+      controls={[controlRoot, controlTrigger, controlPanel, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateTrigger, statePanel]}
+      state={[stateRoot, stateTrigger, statePanel, partState]}
       title="Collapsible"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
+      <List.Root
+        {...partProps['List.Root']}
+        style={{ width: 'min(402px, 100%)' }}
+      >
         <Collapsible.Root
           key={keyRoot}
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
           {...propsRoot}
         >
           <Collapsible.Trigger
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
             {...propsTrigger}
           >
-            <List.Title>Advanced</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>Advanced</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Collapsible.Trigger>
           <Collapsible.Panel
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
             {...propsPanel}
           >
-            <List.Item>
-              <List.Content>
-                <List.Title>Proxy</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Proxy</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>Off</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>Off</List.Detail>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
-                <List.Title>DNS</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>DNS</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>Automatic</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>
+                  Automatic
+                </List.Detail>
               </List.Trailing>
             </List.Item>
           </Collapsible.Panel>
         </Collapsible.Root>
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Content>
-                <List.Title>Forget This Network</List.Title>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Forget This Network
+                </List.Title>
               </List.Content>
             </List.Item>
           </List.Group>

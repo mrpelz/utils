@@ -85,11 +85,11 @@ export const segmentedRootRows: readonly PropRow[] = [
     union('truncate', 'scroll'),
     code(union('truncate')),
     <>
-      Too narrow for its items: their labels truncated, or the items scrolled
-      sideways (<code>scroll</code>, their labels whole). Scrolled: swiped, or
-      by a wheel, snapping to an item; the lens (an item held, or a mouse’s
-      drag) drags over them, scrolling them near an end. The chosen item is
-      scrolled into view (at once, at first).
+      What happens when it’s too narrow for its items: their labels truncate, or
+      the items scroll sideways (<code>scroll</code>, with their labels whole).
+      When scrolling, they’re swiped or moved by a wheel, and snap to an item.
+      The lens (an item held, or a mouse drag) drags over them, and scrolls them
+      near an end. The chosen item is scrolled into view (at once, at first).
     </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
@@ -131,17 +131,17 @@ export const segmentedItemRows: readonly PropRow[] = [
     'MouseEventHandler<HTMLElement>',
     undefined,
     <>
-      A secondary click: a right click (or Control-click: the{' '}
+      A secondary click: a right click (or Control-click, the{' '}
       <code>contextmenu</code> event, whose menu it replaces), or a touch held
-      for 500ms (a long press), whose click then doesn’t follow. Not while
-      disabled.
+      for 500ms (a long press), which then isn’t followed by a click. It doesn’t
+      fire while disabled.
     </>,
   ],
   [
     'cursor',
     'string (a CSS cursor)',
     code('pointer'),
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   nativeButtonRow(false),
   ...baseUiRows('span', 'HTMLElement'),

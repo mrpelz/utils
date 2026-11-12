@@ -11,11 +11,15 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   datePickerCalendarButtonRows,
   datePickerCalendarMessageRows,
@@ -57,16 +61,31 @@ const RootPart: FunctionComponent = () => {
     { external, title: 'DatePicker.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['type'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="DatePicker.Root"
     >
       <DatePicker.Root
@@ -84,8 +103,11 @@ const RootPart: FunctionComponent = () => {
           );
         }}
       >
-        <Button.Root type="submit">
-          <Button.Label>Submit</Button.Label>
+        <Button.Root
+          {...partProps['Button.Root']}
+          type="submit"
+        >
+          <Button.Label {...partProps['Button.Label']}>Submit</Button.Label>
         </Button.Root>
       </form>
     </Component>
@@ -102,24 +124,58 @@ const eventStarts = DatePicker.createHandle();
 const ExpandablePart: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'DatePicker.Root': [
+              'defaultValue',
+              'handle',
+              'mode',
+              'onOpenChange',
+              'onValueChange',
+            ],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('date-picker-parts-expandable') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="date-picker-parts-expandable"
       log={log}
+      state={[partState]}
       title="DatePicker.Expandable"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
-        <List.Section>
-          <List.Group>
-            <List.Item>
-              <List.Content>
-                <List.Title>Starts</List.Title>
+      <List.Root
+        {...partProps['List.Root']}
+        style={{ width: 'min(402px, 100%)' }}
+      >
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Starts</List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <DatePicker.Root
+                  {...partProps['DatePicker.Root']}
                   defaultValue={example}
                   handle={eventStarts}
                   mode="dateAndTime"
@@ -133,12 +189,12 @@ const ExpandablePart: FunctionComponent = () => {
               </List.Trailing>
             </List.Item>
             <DatePicker.Expandable handle={eventStarts} />
-            <List.Item>
-              <List.Content>
-                <List.Title>All-day</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>All-day</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>No</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>No</List.Detail>
               </List.Trailing>
             </List.Item>
           </List.Group>
@@ -164,15 +220,30 @@ const CalendarPart: FunctionComponent = () => {
     { external, title: 'DatePicker.Calendar' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['type'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="DatePicker.Calendar"
     >
       <DatePicker.Calendar
@@ -190,8 +261,11 @@ const CalendarPart: FunctionComponent = () => {
           );
         }}
       >
-        <Button.Root type="submit">
-          <Button.Label>Submit</Button.Label>
+        <Button.Root
+          {...partProps['Button.Root']}
+          type="submit"
+        >
+          <Button.Label {...partProps['Button.Label']}>Submit</Button.Label>
         </Button.Root>
       </form>
     </Component>
@@ -243,22 +317,36 @@ const CalendarRowPart: FunctionComponent = () => {
     title: 'DatePicker.CalendarRow',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'DatePicker.Calendar': ['defaultValue', 'footer'],
+          'DatePicker.CalendarButton': ['onClick'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="DatePicker.CalendarRow"
     >
       <DatePicker.Calendar
+        {...partProps['DatePicker.Calendar']}
         defaultValue={example}
         footer={(calendar: CalendarFooter) => (
           <DatePicker.CalendarRow {...props}>
             <span aria-hidden="true">Jump to</span>
             <DatePicker.CalendarButton
+              {...partProps['DatePicker.CalendarButton']}
               onClick={() => calendar.select(new Date(), false)}
             >
               Today
@@ -282,21 +370,37 @@ const CalendarButtonPart: FunctionComponent = () => {
     title: 'DatePicker.CalendarButton',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'DatePicker.Calendar': ['defaultValue', 'footer'],
+            'DatePicker.CalendarRow': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="DatePicker.CalendarButton"
     >
       <DatePicker.Calendar
+        {...partProps['DatePicker.Calendar']}
         defaultValue={example}
         footer={(calendar: CalendarFooter) => (
-          <DatePicker.CalendarRow>
+          <DatePicker.CalendarRow {...partProps['DatePicker.CalendarRow']}>
             <span aria-hidden="true">Jump to</span>
             <DatePicker.CalendarButton
               {...props}
@@ -323,17 +427,29 @@ const CalendarTimeRowPart: FunctionComponent = () => {
     title: 'DatePicker.CalendarTimeRow',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'DatePicker.Root': ['defaultValue', 'footer', 'mode', 'pickerStyle'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="DatePicker.CalendarTimeRow"
     >
       <DatePicker.Root
+        {...partProps['DatePicker.Root']}
         defaultValue={example}
         mode="dateAndTime"
         pickerStyle="inline"
@@ -359,17 +475,29 @@ const CalendarMessagePart: FunctionComponent = () => {
     title: 'DatePicker.CalendarMessage',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'DatePicker.Calendar': ['defaultValue', 'footer', 'range'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="DatePicker.CalendarMessage"
     >
       <DatePicker.Calendar
+        {...partProps['DatePicker.Calendar']}
         range
         defaultValue={{ end: null, start: example } satisfies DateRange}
         footer={() => (
@@ -387,18 +515,18 @@ export const DatePickerParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        Root: the picker, whole: compact (buttons opening popovers) or inline.
+        Root: the whole picker, compact (buttons that open popovers) or inline.
       </li>
       <li>
-        Expandable, createHandle: its pickers in expandable list rows after its
-        row, linked to it by a handle.
+        Expandable and createHandle: its pickers in expandable list rows after
+        its row, linked to it by a handle.
       </li>
       <li>
-        Calendar, TimeRoll: its pickers on their own, for the app to show (e.g.
-        below a list row).
+        Calendar and TimeRoll: its pickers on their own, for the app to show
+        (for example below a list row).
       </li>
       <li>
-        CalendarRow, CalendarButton, CalendarTimeRow, CalendarMessage: a
+        CalendarRow, CalendarButton, CalendarTimeRow and CalendarMessage: a
         calendar’s footer (its <code>footer</code>).
       </li>
     </ul>
@@ -407,23 +535,50 @@ export const DatePickerParts: FunctionComponent = () => (
         <PartLink
           component="date-picker"
           part="DatePicker.Root"
-        />
-      </li>
-      <li>
-        <PartLink
-          component="date-picker"
-          part="DatePicker.Expandable"
         />{' '}
-        (optional: its pickers after its list row)
+        (compact or inline)
+      </li>
+      <li className="demo-tree-context">
+        <PartLink
+          component="list"
+          part="List.Group"
+        />{' '}
+        <span>(optional: in a list)</span>
+        <ul>
+          <li className="demo-tree-context">
+            <PartLink
+              component="list"
+              part="List.Item"
+            />{' '}
+            <span>with a</span>{' '}
+            <PartLink
+              component="date-picker"
+              part="DatePicker.Root"
+            />{' '}
+            <span>in its</span>{' '}
+            <PartLink
+              component="list"
+              part="List.Trailing"
+            />
+          </li>
+          <li>
+            <PartLink
+              component="date-picker"
+              part="DatePicker.Expandable"
+            />{' '}
+            (optional: its pickers in rows after the picker’s row)
+          </li>
+        </ul>
       </li>
       <li>
         <PartLink
           component="date-picker"
           part="DatePicker.Calendar"
-        />
+        />{' '}
+        (its calendar on its own)
         <ul>
           <li>
-            (its <code>footer</code>, optional)
+            Its <code>footer</code> (optional):
             <ul>
               <li>
                 <PartLink
@@ -459,7 +614,8 @@ export const DatePickerParts: FunctionComponent = () => (
         <PartLink
           component="date-picker"
           part="DatePicker.TimeRoll"
-        />
+        />{' '}
+        (its time on its own)
       </li>
       <li>
         Handles (optional: the picker’s and its{' '}
@@ -467,23 +623,17 @@ export const DatePickerParts: FunctionComponent = () => (
           component="date-picker"
           part="DatePicker.Expandable"
         />
-        ’s <code>handle</code>):
-        <ul>
-          <li>
-            <PartLink
-              component="date-picker"
-              part="DatePicker.createHandle"
-            />{' '}
-            (at module level), or
-          </li>
-          <li>
-            <PartLink
-              component="date-picker"
-              part="useCreateDatePickerHandle"
-            />{' '}
-            (in a component)
-          </li>
-        </ul>
+        ’s <code>handle</code>):{' '}
+        <PartLink
+          component="date-picker"
+          part="DatePicker.createHandle"
+        />{' '}
+        (at module level), or{' '}
+        <PartLink
+          component="date-picker"
+          part="useCreateDatePickerHandle"
+        />{' '}
+        (in a component)
       </li>
     </ul>
 
@@ -495,23 +645,24 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A date, a time or both (<code>mode</code>), or a range of dates (
+        A date, a time, or both (<code>mode</code>), or a range of dates (
         <code>range</code>).
       </li>
       <li>
-        <code>compact</code> (<code>pickerStyle</code>): buttons showing the
-        value, opening the calendar or the time in a popover (Base UI’s), or,
-        without <code>popover</code>, toggling <code>open</code>;{' '}
-        <code>inline</code>: the calendar in place.
+        <code>compact</code> (<code>pickerStyle</code>) shows the value on
+        buttons that open the calendar or the time in a popover (Base UI’s), or
+        that toggle <code>open</code> without <code>popover</code>.{' '}
+        <code>inline</code> puts the calendar in place.
       </li>
       <li>
-        State: <code>value</code> or <code>defaultValue</code>,{' '}
+        Its state: <code>value</code> or <code>defaultValue</code>, and{' '}
         <code>onValueChange</code>; <code>open</code> or{' '}
-        <code>defaultOpen</code>, <code>onOpenChange</code> (both with why).
+        <code>defaultOpen</code>, and <code>onOpenChange</code> (both with the
+        reason).
       </li>
       <li>
-        Renders its buttons, or its calendar: no element of its own (no{' '}
-        <code>className</code> or <code>style</code>).
+        Renders its buttons, or its calendar, without an element of its own (so
+        it takes no <code>className</code> or <code>style</code>).
       </li>
     </ul>
     <RootPart />
@@ -526,35 +677,39 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A picker’s calendar and time wheel in place, as a calendar app edits an
-        event: each in an expandable list row (
+        A picker’s calendar and time roll in place, as a calendar app edits an
+        event. Each sits in an expandable list row (
         <PartLink
           component="list"
           part="List.CollapsiblePanel"
         />
-        ), opened by the picker’s buttons, pushing the rows below down.
+        ), opened by the picker’s buttons, and pushes the rows below down.
       </li>
       <li>
-        Placed after the picker’s row, among its group’s rows; linked to the
-        picker by their <code>handle</code> (
+        It goes after the picker’s row, among its group’s rows, and is linked to
+        the picker by their <code>handle</code> (
         <PartLink
           component="date-picker"
           part="DatePicker.createHandle"
         />
-        ). The picker keeps its value and which picker is open: no app state.
+        ). The picker keeps its value and which picker is open, so no app state
+        is needed.
       </li>
       <li>
-        Renders the rows only (a date: the calendar’s; a time: the wheel’s).
+        It renders only the rows (the calendar’s for a date, the roll’s for a
+        time).
       </li>
       <li>
-        The calendar keeps the picker’s <code>footer</code> (e.g. shortcuts, a{' '}
+        The calendar keeps the picker’s <code>footer</code> (for example
+        shortcuts, or a{' '}
         <PartLink
           component="date-picker"
           part="DatePicker.CalendarMessage"
         />
-        ), but not the default time row: the time expands in its own row.
+        ), but not the default time row, because the time expands in its own
+        row.
       </li>
-      <li>Here: an event’s start, the row below it pushed down.</li>
+      <li>Here, it’s an event’s start, with the row below it pushed down.</li>
     </ul>
     <ExpandablePart />
     <h3>Props</h3>
@@ -568,21 +723,21 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle naming a picker’s pickers: given to it (
+        A handle that names a picker’s pickers. Give it to the picker (
         <PartLink
           component="date-picker"
           part="DatePicker.Root"
         />
-        ’s <code>handle</code>, its buttons toggling them, no popovers) and to
-        the{' '}
+        ’s <code>handle</code>, so its buttons toggle them, without popovers)
+        and to the{' '}
         <PartLink
           component="date-picker"
           part="DatePicker.Expandable"
         />{' '}
-        showing them (as Base UI’s handles link a trigger to its popup).
+        that shows them (like Base UI’s handles link a trigger to its popup).
       </li>
       <li>
-        Made once, e.g. at a module’s top level (in a component:{' '}
+        Make it once, for example at a module’s top level (in a component, use{' '}
         <PartLink
           component="date-picker"
           part="useCreateDatePickerHandle"
@@ -590,12 +745,12 @@ export const DatePickerParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Here: see{' '}
+        Here, see{' '}
         <PartLink
           component="date-picker"
           part="DatePicker.Expandable"
         />
-        ’s demo (a module-level handle).
+        ’s demo, which uses a module-level handle.
       </li>
     </ul>
     <h3>Returns</h3>
@@ -612,11 +767,11 @@ export const DatePickerParts: FunctionComponent = () => (
         <PartLink
           component="date-picker"
           part="DatePicker.createHandle"
-        />
-        , in a component: made once, the same for its lifetime.
+        />{' '}
+        in a component: made once, the same for the component’s lifetime.
       </li>
       <li>
-        Here: see{' '}
+        Here, see{' '}
         <a href={publicUrl('date-picker/composition#expanded-below-a-row')}>
           Expanded below a row
         </a>
@@ -634,22 +789,22 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The inline calendar, on its own: its month’s days, its title opening a
-        month and year roll.
+        The inline calendar on its own: its month’s days, with a title that
+        opens a month and year roll.
       </li>
       <li>
-        A date or a range (<code>range</code>), limits, disabled and highlighted
-        days, a <code>footer</code>.
+        It takes a date or a range (<code>range</code>), limits, disabled and
+        highlighted days, and a <code>footer</code>.
       </li>
       <li>
-        The days are a group (named by its title, or <code>label</code>), one of
-        them tabbable: arrow keys move by a day or week, Page Up and Page Down
-        by a month, Home and End to the week’s ends.
+        The days are a group (named by its title, or <code>label</code>), with
+        one of them in the tab order. The arrow keys move by a day or a week,
+        Page Up and Page Down by a month, and Home and End to the week’s ends.
       </li>
       <li>
-        Scrolled sideways (a finger, a trackpad), the months snap, one per
-        flick; swiped, by <code>swipe</code> (a date’s turns the month, a
-        range’s is dragged across).
+        Scrolled sideways (by finger or trackpad), the months snap, one per
+        flick. <code>swipe</code> sets what a swipe does (it turns the month for
+        a date, and drags across for a range).
       </li>
     </ul>
     <CalendarPart />
@@ -664,12 +819,12 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A time as a <a href={publicUrl('roll')}>Roll</a>: hours, minutes and (12
-        hours) the day period; the numbers editable.
+        A time as a <a href={publicUrl('roll')}>Roll</a>: hours, minutes and,
+        with 12 hours, the day period. The numbers can be typed.
       </li>
       <li>
-        Controlled only (<code>value</code>, <code>onValueChange</code>): the
-        app holds the date whose time it shows.
+        It’s controlled only (<code>value</code>, <code>onValueChange</code>),
+        because the app holds the date whose time it shows.
       </li>
     </ul>
     <TimeRollPart />
@@ -684,7 +839,7 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A footer row (a time row’s, 52px): a title, and buttons at its end.
+        A footer row (52px, like a time row): a title, and buttons at its end.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -702,9 +857,9 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A footer button, as the compact style’s (a bordered, secondary{' '}
-        <a href={publicUrl('button')}>Button</a>): e.g. jumping to a date (the
-        footer’s <code>select</code>).
+        A footer button, like the compact style’s (a bordered, secondary{' '}
+        <a href={publicUrl('button')}>Button</a>), for example to jump to a date
+        (the footer’s <code>select</code>).
       </li>
       <li>
         Renders a <code>button</code>.
@@ -722,12 +877,12 @@ export const DatePickerParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The time row: the time’s button, showing its roll over the days; a
-        picker’s default footer, with a time.
+        The time row: the time’s button, which shows its roll over the days.
+        It’s a picker’s default footer when there’s a time.
       </li>
       <li>
-        Takes the footer’s argument (<code>calendar</code>); renders nothing
-        without a time.
+        It takes the footer’s argument (<code>calendar</code>), and renders
+        nothing without a time.
       </li>
     </ul>
     <CalendarTimeRowPart />

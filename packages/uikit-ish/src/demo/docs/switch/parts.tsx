@@ -3,10 +3,14 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { Switch } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { partPropMaps } from '../part-options.js';
 import { switchRootRows, switchThumbRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsThumb } from './props.js';
 
@@ -21,14 +25,28 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Switch.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Switch.Thumb': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Switch.Root"
     >
       <Switch.Root
@@ -39,7 +57,7 @@ const RootPart: FunctionComponent = () => {
           (props.indeterminate as boolean | undefined) ?? isPending
         }
       >
-        <Switch.Thumb />
+        <Switch.Thumb {...partProps['Switch.Thumb']} />
       </Switch.Root>
     </Component>
   );
@@ -56,16 +74,28 @@ const ThumbPart: FunctionComponent = () => {
     title: 'Switch.Thumb',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Switch.Thumb"
     >
       <Switch.Root
+        {...partProps['Switch.Root']}
         defaultChecked
         aria-label="Example"
       >
@@ -81,20 +111,36 @@ export const SwitchParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>Root: the track, the control people operate.</li>
       <li>Thumb: the knob.</li>
-      <li>Both always needed.</li>
+      <li>Both are always needed.</li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="switch"
-          part="Switch.Root"
+          component="list"
+          part="List.Trailing"
+        />{' '}
+        <span>
+          (optional: at a list row’s end, the row passing its clicks on with
+        </span>{' '}
+        <PartLink
+          component="list"
+          part="forwardClick"
         />
+        <span>)</span>
         <ul>
           <li>
             <PartLink
               component="switch"
-              part="Switch.Thumb"
+              part="Switch.Root"
             />
+            <ul>
+              <li>
+                <PartLink
+                  component="switch"
+                  part="Switch.Thumb"
+                />
+              </li>
+            </ul>
           </li>
         </ul>
       </li>
@@ -107,24 +153,25 @@ export const SwitchParts: FunctionComponent = () => (
       <code>Switch.Root</code>
     </Heading>
     <ul>
-      <li>The control and its track.</li>
+      <li>The control, and its track.</li>
       <li>
-        State: <code>checked</code> or <code>defaultChecked</code>,{' '}
+        Its state: <code>checked</code> or <code>defaultChecked</code>, and{' '}
         <code>onCheckedChange</code>.
       </li>
       <li>
-        Can be <code>disabled</code> or <code>readOnly</code>.
+        It can be <code>disabled</code> or <code>readOnly</code>.
       </li>
       <li>
-        Submits with a form: <code>name</code>, <code>value</code> (through a
-        hidden input it renders).
+        It submits with a form, through a hidden input it renders:{' '}
+        <code>name</code>, <code>value</code>.
       </li>
       <li>
-        Look: <code>tint</code> (the track while on), <code>onOffLabels</code>,{' '}
-        <code>indeterminate</code>, <code>cursor</code>.
+        Its look: <code>tint</code> (the track while on),{' '}
+        <code>onOffLabels</code>, <code>indeterminate</code> and{' '}
+        <code>cursor</code>.
       </li>
       <li>
-        Renders a <code>span</code> with the <code>switch</code> role: give it
+        Renders a <code>span</code> with the <code>switch</code> role. Give it
         an accessible name.
       </li>
     </ul>
@@ -140,10 +187,10 @@ export const SwitchParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>The knob, inside the root.</li>
-      <li>Moves with the state, and with the pointer while dragged.</li>
-      <li>Pressed: a glass lens.</li>
+      <li>It moves with the state, and with the pointer while dragged.</li>
+      <li>While pressed, it’s a glass lens.</li>
       <li>
-        No props of its own beyond styling (<code>className</code>,{' '}
+        It has no props of its own beyond styling (<code>className</code>,{' '}
         <code>style</code>, <code>render</code>).
       </li>
     </ul>

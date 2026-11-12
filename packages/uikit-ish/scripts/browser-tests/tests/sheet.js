@@ -40,7 +40,7 @@ export const tests = [
       assert.deepEqual(
         [large.box, large.radius, large.width],
         [[0, 10 + large.safeTop, 0, 0], '38px 38px 0px 0px', large.screenWidth],
-        '10px below the top safe area, the screen’s width',
+        '10px below the top safe area inset, the screen’s width',
       );
 
       await page.open('sheet', 'light', {

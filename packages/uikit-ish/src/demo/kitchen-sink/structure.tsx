@@ -904,8 +904,9 @@ const AccordionContent: FunctionComponent = () => (
           <List.Title>Several Open</List.Title>
         </List.Header>
         <List.Footer>
-          Not separate collapsibles: one group, its open sections one value (a
-          list of them), the arrow keys moving between its headers.
+          These aren’t separate collapsibles. They’re one group, with its open
+          sections as one value (a list of them), and the arrow keys move
+          between its headers.
         </List.Footer>
       </List.Section>
     </List.Root>

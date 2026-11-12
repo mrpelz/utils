@@ -11,7 +11,7 @@ export const sidebarRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its content, top to bottom, scrolling inside it: a{' '}
+      Its content, from top to bottom, scrolling inside it: a{' '}
       <PartLink
         component="sidebar"
         part="Sidebar.Toolbar"
@@ -36,8 +36,8 @@ export const sidebarRootRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      The navigation landmark’s name (it’s a <code>{'<nav>'}</code>), e.g.
-      Mailboxes.
+      The name of the navigation landmark (it’s a <code>{'<nav>'}</code>), for
+      example Mailboxes.
     </>,
   ],
   ...elementRows('nav', 'HTMLElement'),
@@ -49,9 +49,9 @@ export const sidebarToolbarRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Buttons at its two ends (borderless{' '}
-      <a href={publicUrl('button')}>Button</a>s, in the glass’ content color):
-      one at each end, or a{' '}
+      Buttons at its two ends: borderless{' '}
+      <a href={publicUrl('button')}>Button</a>s in the glass’s content color.
+      Put one at each end, or a{' '}
       <PartLink
         component="sidebar"
         part="Sidebar.ToolbarGroup"

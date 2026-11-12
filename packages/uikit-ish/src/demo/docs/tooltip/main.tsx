@@ -3,9 +3,13 @@ import { FunctionComponent, useMemo } from 'react';
 import { Button, Symbol, Tooltip } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfSquareAndArrowUp } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -42,19 +46,44 @@ export const TooltipDemo: FunctionComponent = () => {
     { external: externalContent, isOpen: true, title: '[content]' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Root': ['onClick', 'shape', 'size', 'variant'],
+            'Tooltip.Popup': [],
+            'Tooltip.Portal': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="tooltip"
       id={id}
       log={log}
-      state={[stateRoot, stateTrigger, statePositioner, stateContent]}
       title="Tooltip"
       controls={[
         controlRoot,
         controlTrigger,
         controlPositioner,
         controlContent,
+        partControls,
+      ]}
+      state={[
+        stateRoot,
+        stateTrigger,
+        statePositioner,
+        stateContent,
+        partState,
       ]}
     >
       <div style={{ paddingBlock: 64 }}>
@@ -67,6 +96,7 @@ export const TooltipDemo: FunctionComponent = () => {
             {...propsTrigger}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 shape="circle"
                 size="large"
                 variant="glass"
@@ -74,13 +104,18 @@ export const TooltipDemo: FunctionComponent = () => {
               />
             }
           >
-            <Button.Icon>
-              <Symbol icon={sfSquareAndArrowUp} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfSquareAndArrowUp}
+              />
             </Button.Icon>
           </Tooltip.Trigger>
-          <Tooltip.Portal>
+          <Tooltip.Portal {...partProps['Tooltip.Portal']}>
             <Tooltip.Positioner {...propsPositioner}>
-              <Tooltip.Popup>{propsContent.text}</Tooltip.Popup>
+              <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                {propsContent.text}
+              </Tooltip.Popup>
             </Tooltip.Positioner>
           </Tooltip.Portal>
         </Tooltip.Root>

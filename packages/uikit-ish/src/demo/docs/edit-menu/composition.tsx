@@ -1,7 +1,7 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   EditMenu,
@@ -13,7 +13,9 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -30,6 +32,7 @@ import {
   sfUnderline,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const elementCode = `const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +47,31 @@ useTextActionsPrevention(photo);
       <EditMenu.Popup>
         <EditMenu.Item>Copy</EditMenu.Item>
         <EditMenu.Item>Share…</EditMenu.Item>
+      </EditMenu.Popup>
+    </EditMenu.Positioner>
+  </EditMenu.Portal>
+</EditMenu.Root>`;
+
+const manyCode = `const [isOpen, setIsOpen] = useState(false);
+const word = useRef<HTMLButtonElement>(null);
+useTextActionsPrevention(word);
+
+<EditMenu.Root open={isOpen} onOpenChange={setIsOpen}>
+  <button ref={word} type="button" onClick={() => setIsOpen(true)}>
+    Show Actions
+  </button>
+  <EditMenu.Portal>
+    <EditMenu.Positioner anchor={word}>
+      {/* More than fit: they scroll in the capsule. */}
+      <EditMenu.Popup>
+        <EditMenu.Item>Cut</EditMenu.Item>
+        <EditMenu.Item>Copy</EditMenu.Item>
+        <EditMenu.Item>Paste</EditMenu.Item>
+        <EditMenu.Item>Replace…</EditMenu.Item>
+        <EditMenu.Item>Look Up</EditMenu.Item>
+        <EditMenu.Item>Translate</EditMenu.Item>
+        <EditMenu.Item>Share…</EditMenu.Item>
+        <EditMenu.Item destructive>Delete</EditMenu.Item>
       </EditMenu.Popup>
     </EditMenu.Positioner>
   </EditMenu.Portal>
@@ -114,18 +142,41 @@ const AtAnElement: FunctionComponent = () => {
   const photo = useLabelledRef<HTMLButtonElement>('photo', 'HTMLButtonElement');
   useTextActionsPrevention(photo);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('edit-menu-composition-element') },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
+      controls={[partControls]}
       id="edit-menu-composition-element"
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="Edit menu at an element"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={isOpen}
           onOpenChange={(isNextOpen: boolean) => setIsOpen(isNextOpen)}
         >
@@ -136,15 +187,27 @@ const AtAnElement: FunctionComponent = () => {
             type="button"
             onClick={() => setIsOpen(true)}
           >
-            <Symbol icon={sfPhoto} />
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfPhoto}
+            />
           </button>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={photo}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={photo}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Share clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
                   Share…
                 </EditMenu.Item>
               </EditMenu.Popup>
@@ -163,18 +226,40 @@ const ManyActions: FunctionComponent = () => {
   const word = useLabelledRef<HTMLButtonElement>('word', 'HTMLButtonElement');
   useTextActionsPrevention(word);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item': ['destructive', 'onClick'],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('edit-menu-composition-many') },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
+      controls={[partControls]}
       id="edit-menu-composition-many"
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="Edit menu with many actions"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={isOpen}
           onOpenChange={(isNextOpen: boolean) => setIsOpen(isNextOpen)}
         >
@@ -186,31 +271,56 @@ const ManyActions: FunctionComponent = () => {
           >
             Show Actions
           </button>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={word}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={word}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Replace clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Replace clicked')}
+                >
                   Replace…
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Look Up clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Look Up clicked')}
+                >
                   Look Up
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Translate clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Translate clicked')}
+                >
                   Translate
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Share clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
                   Share…
                 </EditMenu.Item>
                 <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
@@ -232,19 +342,59 @@ const ARichMenuBehindMore: FunctionComponent = () => {
   const word = useLabelledRef<HTMLButtonElement>('word', 'HTMLButtonElement');
   useTextActionsPrevention(word);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open', 'size'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.CheckboxItem': ['onCheckedChange'],
+            'Menu.CheckboxItemIndicator': [],
+            'Menu.Group': [],
+            'Menu.GroupLabel': [],
+            'Menu.Icon': [],
+            'Menu.Item': ['destructive', 'onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Portal': [],
+            'Menu.Positioner': [],
+            'Menu.RadioGroup': ['defaultValue', 'onValueChange'],
+            'Menu.RadioItem': ['value'],
+            'Menu.Separator': [],
+            'Menu.SubmenuRoot': [],
+            'Menu.SubmenuTrigger': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('edit-menu-composition-rich') },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
+      controls={[partControls]}
       id="edit-menu-composition-rich"
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="Edit menu with a rich menu behind more"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         {/* A phone's: its menus' submenus over their trigger. */}
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={isOpen}
           size="compact"
           onOpenChange={(isNextOpen: boolean) => setIsOpen(isNextOpen)}
@@ -257,83 +407,157 @@ const ARichMenuBehindMore: FunctionComponent = () => {
           >
             Show Actions
           </button>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={word}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={word}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.SubmenuRoot>
-                          <Menu.SubmenuTrigger>
-                            <Menu.Icon>
-                              <Symbol icon={sfTextformat} />
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.SubmenuRoot {...partProps['Menu.SubmenuRoot']}>
+                          <Menu.SubmenuTrigger
+                            {...partProps['Menu.SubmenuTrigger']}
+                          >
+                            <Menu.Icon {...partProps['Menu.Icon']}>
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfTextformat}
+                              />
                             </Menu.Icon>
-                            <Menu.Label>Format</Menu.Label>
+                            <Menu.Label {...partProps['Menu.Label']}>
+                              Format
+                            </Menu.Label>
                           </Menu.SubmenuTrigger>
-                          <Menu.Portal>
-                            <Menu.Positioner>
-                              <Menu.Popup>
+                          <Menu.Portal {...partProps['Menu.Portal']}>
+                            <Menu.Positioner {...partProps['Menu.Positioner']}>
+                              <Menu.Popup {...partProps['Menu.Popup']}>
                                 <Menu.CheckboxItem
+                                  {...partProps['Menu.CheckboxItem']}
                                   onCheckedChange={(isChecked: boolean) =>
                                     addLog(`bold: ${String(isChecked)}`)
                                   }
                                 >
-                                  <Menu.CheckboxItemIndicator />
-                                  <Menu.Label>Bold</Menu.Label>
-                                  <Menu.Icon>
-                                    <Symbol icon={sfBold} />
+                                  <Menu.CheckboxItemIndicator
+                                    {...partProps['Menu.CheckboxItemIndicator']}
+                                  />
+                                  <Menu.Label {...partProps['Menu.Label']}>
+                                    Bold
+                                  </Menu.Label>
+                                  <Menu.Icon {...partProps['Menu.Icon']}>
+                                    <Symbol
+                                      {...partProps.Symbol}
+                                      icon={sfBold}
+                                    />
                                   </Menu.Icon>
                                 </Menu.CheckboxItem>
                                 <Menu.CheckboxItem
+                                  {...partProps['Menu.CheckboxItem']}
                                   onCheckedChange={(isChecked: boolean) =>
                                     addLog(`italic: ${String(isChecked)}`)
                                   }
                                 >
-                                  <Menu.CheckboxItemIndicator />
-                                  <Menu.Label>Italic</Menu.Label>
-                                  <Menu.Icon>
-                                    <Symbol icon={sfItalic} />
+                                  <Menu.CheckboxItemIndicator
+                                    {...partProps['Menu.CheckboxItemIndicator']}
+                                  />
+                                  <Menu.Label {...partProps['Menu.Label']}>
+                                    Italic
+                                  </Menu.Label>
+                                  <Menu.Icon {...partProps['Menu.Icon']}>
+                                    <Symbol
+                                      {...partProps.Symbol}
+                                      icon={sfItalic}
+                                    />
                                   </Menu.Icon>
                                 </Menu.CheckboxItem>
                                 <Menu.CheckboxItem
+                                  {...partProps['Menu.CheckboxItem']}
                                   onCheckedChange={(isChecked: boolean) =>
                                     addLog(`underline: ${String(isChecked)}`)
                                   }
                                 >
-                                  <Menu.CheckboxItemIndicator />
-                                  <Menu.Label>Underline</Menu.Label>
-                                  <Menu.Icon>
-                                    <Symbol icon={sfUnderline} />
+                                  <Menu.CheckboxItemIndicator
+                                    {...partProps['Menu.CheckboxItemIndicator']}
+                                  />
+                                  <Menu.Label {...partProps['Menu.Label']}>
+                                    Underline
+                                  </Menu.Label>
+                                  <Menu.Icon {...partProps['Menu.Icon']}>
+                                    <Symbol
+                                      {...partProps.Symbol}
+                                      icon={sfUnderline}
+                                    />
                                   </Menu.Icon>
                                 </Menu.CheckboxItem>
-                                <Menu.Separator />
-                                <Menu.Group>
-                                  <Menu.GroupLabel>Text Size</Menu.GroupLabel>
+                                <Menu.Separator
+                                  {...partProps['Menu.Separator']}
+                                />
+                                <Menu.Group {...partProps['Menu.Group']}>
+                                  <Menu.GroupLabel
+                                    {...partProps['Menu.GroupLabel']}
+                                  >
+                                    Text Size
+                                  </Menu.GroupLabel>
                                   <Menu.RadioGroup
+                                    {...partProps['Menu.RadioGroup']}
                                     defaultValue="body"
                                     onValueChange={(value: unknown) =>
                                       addLog(`text size: ${String(value)}`)
                                     }
                                   >
-                                    <Menu.RadioItem value="title">
-                                      <Menu.RadioItemIndicator />
-                                      <Menu.Label>Title</Menu.Label>
+                                    <Menu.RadioItem
+                                      {...partProps['Menu.RadioItem']}
+                                      value="title"
+                                    >
+                                      <Menu.RadioItemIndicator
+                                        {...partProps[
+                                          'Menu.RadioItemIndicator'
+                                        ]}
+                                      />
+                                      <Menu.Label {...partProps['Menu.Label']}>
+                                        Title
+                                      </Menu.Label>
                                     </Menu.RadioItem>
-                                    <Menu.RadioItem value="body">
-                                      <Menu.RadioItemIndicator />
-                                      <Menu.Label>Body</Menu.Label>
+                                    <Menu.RadioItem
+                                      {...partProps['Menu.RadioItem']}
+                                      value="body"
+                                    >
+                                      <Menu.RadioItemIndicator
+                                        {...partProps[
+                                          'Menu.RadioItemIndicator'
+                                        ]}
+                                      />
+                                      <Menu.Label {...partProps['Menu.Label']}>
+                                        Body
+                                      </Menu.Label>
                                     </Menu.RadioItem>
-                                    <Menu.RadioItem value="caption">
-                                      <Menu.RadioItemIndicator />
-                                      <Menu.Label>Caption</Menu.Label>
+                                    <Menu.RadioItem
+                                      {...partProps['Menu.RadioItem']}
+                                      value="caption"
+                                    >
+                                      <Menu.RadioItemIndicator
+                                        {...partProps[
+                                          'Menu.RadioItemIndicator'
+                                        ]}
+                                      />
+                                      <Menu.Label {...partProps['Menu.Label']}>
+                                        Caption
+                                      </Menu.Label>
                                     </Menu.RadioItem>
                                   </Menu.RadioGroup>
                                 </Menu.Group>
@@ -341,21 +565,35 @@ const ARichMenuBehindMore: FunctionComponent = () => {
                             </Menu.Positioner>
                           </Menu.Portal>
                         </Menu.SubmenuRoot>
-                        <Menu.Item onClick={() => addLog('Share clicked')}>
-                          <Menu.Icon>
-                            <Symbol icon={sfSquareAndArrowUp} />
-                          </Menu.Icon>
-                          <Menu.Label>Share…</Menu.Label>
-                        </Menu.Item>
-                        <Menu.Separator />
                         <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Share clicked')}
+                        >
+                          <Menu.Icon {...partProps['Menu.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfSquareAndArrowUp}
+                            />
+                          </Menu.Icon>
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Share…
+                          </Menu.Label>
+                        </Menu.Item>
+                        <Menu.Separator {...partProps['Menu.Separator']} />
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
                           destructive
                           onClick={() => addLog('Delete clicked')}
                         >
-                          <Menu.Icon>
-                            <Symbol icon={sfTrash} />
+                          <Menu.Icon {...partProps['Menu.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfTrash}
+                            />
                           </Menu.Icon>
-                          <Menu.Label>Delete</Menu.Label>
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Delete
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -383,7 +621,7 @@ export const EditMenuComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        At a text selection: see the{' '}
+        For an edit menu at a text selection, see the{' '}
         <a href={publicUrl('edit-menu')}>overview</a> (
         <PartLink
           component="edit-menu"
@@ -401,13 +639,13 @@ export const EditMenuComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A photo’s actions (Copy, Share): opened by the app (here on a press),
-        the photo the positioner’s <code>anchor</code> (a ref).
+        A photo’s actions (Copy, Share). The app opens it (here on a press),
+        with the photo as the positioner’s <code>anchor</code> (a ref).
       </li>
-      <li>Closed by an action, a press outside, or Escape.</li>
+      <li>An action, a press outside, or Escape closes it.</li>
       <li>
-        A held press on the button selects none of its text (no browser text
-        menu over the edit menu:{' '}
+        A held press on the button selects none of its text, so no browser text
+        menu covers the edit menu (
         <PartLink
           component="viewport"
           part="useTextActionsPrevention"
@@ -444,12 +682,12 @@ export const EditMenuComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        More actions than the screen is wide: they scroll in the capsule, faded
-        at the ends with more beyond, a peek of them showing (swipe them, drag
-        over them held, or scroll).
+        When there are more actions than the screen is wide, they scroll in the
+        capsule, faded at the ends where there are more, with a peek of them
+        showing. Swipe them, drag over them with a held press, or scroll.
       </li>
       <li>
-        Or fewer, the rest behind the “more” button (
+        Or show fewer, and put the rest behind the “more” button (
         <PartLink
           component="edit-menu"
           part="EditMenu.More"
@@ -457,8 +695,8 @@ export const EditMenuComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        A held press on the button selects none of its text (no browser text
-        menu over the edit menu:{' '}
+        A held press on the button selects none of its text, so no browser text
+        menu covers the edit menu (
         <PartLink
           component="viewport"
           part="useTextActionsPrevention"
@@ -467,12 +705,13 @@ export const EditMenuComposition: FunctionComponent = () => (
       </li>
       <li>
         <strong>Library:</strong> scrolling the actions inside the capsule,
-        faded at its ends, and the more button.
+        faded at its ends, and the “more” button.
       </li>
       <li>
-        <strong>Demo:</strong> the open state and the many actions (logged).
+        <strong>Demo:</strong> the open state, and the many actions (logged).
       </li>
     </ul>
+    <CodeView code={manyCode} />
     <ManyActions />
 
     <Heading
@@ -488,7 +727,7 @@ export const EditMenuComposition: FunctionComponent = () => (
           component="menu"
           part="Menu.Popup"
         />
-        ): icons, a submenu of its own (Format), toggles (
+        ), with icons, a submenu of its own (Format), toggles (
         <PartLink
           component="menu"
           part="Menu.CheckboxItem"
@@ -506,17 +745,17 @@ export const EditMenuComposition: FunctionComponent = () => (
           component="edit-menu"
           part="EditMenu.Root"
         />
-        ’s <code>size</code>): Format’s submenu covers its trigger’s menu, as a
-        compact one’s; regular (the default), beside it. Toggling keeps the
-        menus open, an action closes them all.
+        ’s <code>size</code>), so Format’s submenu covers the menu it opens
+        from, like any compact submenu. When regular (the default), it opens
+        next to it. Toggles keep the menus open, and an action closes them all.
       </li>
       <li>
-        Without room below their triggers, the menus grow rather than scroll:
+        Without room below their triggers, the menus grow rather than scroll,
         shifted up over them as far as they need (Format’s, over its trigger).
       </li>
       <li>
-        A held press on the button selects none of its text (no browser text
-        menu over the edit menu:{' '}
+        A held press on the button selects none of its text, so no browser text
+        menu covers the edit menu (
         <PartLink
           component="viewport"
           part="useTextActionsPrevention"
@@ -524,12 +763,12 @@ export const EditMenuComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        <strong>Library:</strong> the more button (
+        <strong>Library:</strong> the “more” button (
         <PartLink
           component="edit-menu"
           part="EditMenu.More"
         />
-        ) opening the menu, and the menu’s parts nested in it (
+        ) opening the menu, and the menu’s parts nested inside it (
         <PartLink
           component="menu"
           part="Menu.SubmenuRoot"

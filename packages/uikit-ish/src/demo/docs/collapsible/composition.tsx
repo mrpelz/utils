@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Collapsible,
@@ -10,8 +10,11 @@ import {
   Toolbar,
   Viewport,
 } from '../../../components/index.js';
+import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -19,8 +22,44 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 
-/** A sidebar's sections (Music's), each collapsing by its title. */
+/* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
+const sidebarSectionsCode = `<Sidebar.Root aria-label="Music">
+  <List.Root listStyle="sidebar">
+    <Collapsible.Root
+      defaultOpen
+      render={<List.Section />}
+    >
+      <Collapsible.Trigger
+        nativeButton={false}
+        render={<List.Header prominence="nested" />}
+      >
+        <List.Title>Library</List.Title>
+        <List.Disclosure />
+      </Collapsible.Trigger>
+      <Collapsible.Panel render={<List.Group />}>
+        <List.Item selected>
+          <List.Content>
+            <List.Title render={<button type="button" />}>
+              Recently Added
+            </List.Title>
+          </List.Content>
+        </List.Item>
+        …
+      </Collapsible.Panel>
+    </Collapsible.Root>
+    <Collapsible.Root
+      defaultOpen
+      render={<List.Section />}
+    >
+      …
+    </Collapsible.Root>
+  </List.Root>
+</Sidebar.Root>`;
+/* eslint-enable unicorn/no-incorrect-template-string-interpolation */
+
+/** A sidebar's sections (a music app's), each collapsing by its title. */
 const SidebarSections: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [selected, setSelected] = useState('Recently Added');
@@ -29,42 +68,101 @@ const SidebarSections: FunctionComponent = () => {
     setSelected(title);
   };
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Collapsible.Panel': ['render'],
+            'Collapsible.Root': ['defaultOpen', 'onOpenChange', 'render'],
+            'Collapsible.Trigger': ['nativeButton', 'render'],
+            'Header.LargeTitle': [],
+            'Layout.Column': ['aria-label', 'defaultSize', 'floating'],
+            'Layout.Root': [],
+            'List.Content': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Item': ['selected'],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'Page.Root': [],
+            'Sidebar.Root': ['aria-label'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('collapsible-composition-sidebar') },
+  );
+
   return (
     <Component
       isExpanded
       isInline
+      controls={[partControls]}
       id="collapsible-composition-sidebar"
       log={log}
       stage="tablet"
+      state={[partState]}
       title="Collapsible sidebar sections"
     >
-      <Viewport.Content>
-        <Layout.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Layout.Root {...partProps['Layout.Root']}>
           <Layout.Column
+            {...partProps['Layout.Column']}
             floating
             aria-label="Sidebar"
             defaultSize={300}
           >
-            <Sidebar.Root aria-label="Music">
-              <List.Root listStyle="sidebar">
+            <Sidebar.Root
+              {...partProps['Sidebar.Root']}
+              aria-label="Music"
+            >
+              <List.Root
+                {...partProps['List.Root']}
+                listStyle="sidebar"
+              >
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                   onOpenChange={(isOpen: boolean) =>
                     addLog(`library: ${isOpen ? 'open' : 'closed'}`)
                   }
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Library</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Library
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item selected={selected === 'Recently Added'}>
-                      <List.Content>
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Recently Added'}
+                    >
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => select('Recently Added')}
                         >
@@ -72,9 +170,13 @@ const SidebarSections: FunctionComponent = () => {
                         </List.Title>
                       </List.Content>
                     </List.Item>
-                    <List.Item selected={selected === 'Artists'}>
-                      <List.Content>
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Artists'}
+                    >
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => select('Artists')}
                         >
@@ -82,9 +184,13 @@ const SidebarSections: FunctionComponent = () => {
                         </List.Title>
                       </List.Content>
                     </List.Item>
-                    <List.Item selected={selected === 'Albums'}>
-                      <List.Content>
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Albums'}
+                    >
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => select('Albums')}
                         >
@@ -95,23 +201,39 @@ const SidebarSections: FunctionComponent = () => {
                   </Collapsible.Panel>
                 </Collapsible.Root>
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                   onOpenChange={(isOpen: boolean) =>
                     addLog(`playlists: ${isOpen ? 'open' : 'closed'}`)
                   }
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Playlists</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Playlists
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item selected={selected === 'Favorites'}>
-                      <List.Content>
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Favorites'}
+                    >
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => select('Favorites')}
                         >
@@ -119,9 +241,13 @@ const SidebarSections: FunctionComponent = () => {
                         </List.Title>
                       </List.Content>
                     </List.Item>
-                    <List.Item selected={selected === 'Road Trip'}>
-                      <List.Content>
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Road Trip'}
+                    >
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => select('Road Trip')}
                         >
@@ -134,21 +260,33 @@ const SidebarSections: FunctionComponent = () => {
               </List.Root>
             </Sidebar.Root>
           </Layout.Column>
-          <Layout.Column clearFloating>
+          <Layout.Column
+            {...partProps['Layout.Column']}
+            clearFloating
+          >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{selected}</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <Header.LargeTitle>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                   <span>{selected}</span>
                 </Header.LargeTitle>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -177,16 +315,16 @@ export const CollapsibleComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As Music’s sidebar (a{' '}
+        A music app’s sidebar (a{' '}
         <PartLink
           component="sidebar"
           part="Sidebar.Root"
         />
-        ): each section collapses by its title, its chevron turning down while
-        open, the sections below moving up.
+        ): each section collapses by its title. Its chevron turns down while
+        open, and the sections below move up.
       </li>
       <li>
-        Each section is a collapsible: its root a{' '}
+        Each section is a collapsible. Its root renders a{' '}
         <PartLink
           component="list"
           part="List.Section"
@@ -196,7 +334,7 @@ export const CollapsibleComposition: FunctionComponent = () => (
           component="list"
           part="List.Header"
         />
-        , its panel the{' '}
+        , and its panel the{' '}
         <PartLink
           component="list"
           part="List.Group"
@@ -224,8 +362,8 @@ export const CollapsibleComposition: FunctionComponent = () => (
           component="sidebar"
           part="Sidebar.Root"
         />
-        , its list <code>listStyle=&quot;sidebar&quot;</code>) and the chevrons
-        (
+        , with its list’s <code>listStyle=&quot;sidebar&quot;</code>) and the
+        chevrons (
         <PartLink
           component="list"
           part="List.Disclosure"
@@ -237,6 +375,7 @@ export const CollapsibleComposition: FunctionComponent = () => (
         page it picks.
       </li>
     </ul>
+    <CodeView code={sidebarSectionsCode} />
     <SidebarSections />
 
     <Heading
@@ -247,27 +386,27 @@ export const CollapsibleComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Rows opening among a group’s rows (e.g. a picker below its row) can’t be
-        a Collapsible: its parts render elements, a group’s rows must stay its
-        children.
+        Rows that open among a group’s rows (for example a picker below its row)
+        can’t use a Collapsible. Its parts render elements, while a group’s rows
+        must stay the group’s children.
       </li>
       <li>
-        The list’s own, without elements:{' '}
+        The list has its own version without elements:{' '}
         <PartLink
           component="list"
           part="List.CollapsibleRoot"
-        />{' '}
-        (its{' '}
+        />
+        , with its{' '}
         <PartLink
           component="list"
           part="List.CollapsibleTrigger"
-        />
-        ,{' '}
+        />{' '}
+        and{' '}
         <PartLink
           component="list"
           part="List.CollapsiblePanel"
         />
-        ), the same props; see{' '}
+        , and the same props. See{' '}
         <a href={publicUrl('list/composition#rows-expanding-together')}>
           List: Rows expanding together
         </a>

@@ -18,7 +18,7 @@ export type PageRootProps = ComponentProps<'div'> & {
   /**
    * Its content filling it, not scrolled (e.g. a map under its bars): not a
    * scroller (its provider tracks none here, no edge effects), its content
-   * running under the bars and the safe areas (their insets its own, to
+   * running under the bars and the safe area insets (their sizes its own, to
    * keep clear of where it needs to), on the page background all the same.
    * @default false
    */

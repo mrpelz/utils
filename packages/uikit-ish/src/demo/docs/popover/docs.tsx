@@ -30,10 +30,11 @@ export const popoverRootRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the popover is opened or closed (with Base UI’s
-      event details: the <code>reason</code>, e.g. <code>trigger-press</code>,{' '}
-      <code>outside-press</code>, <code>escape-key</code>,{' '}
-      <code>close-press</code>; the <code>trigger</code> element;{' '}
-      <code>eventDetails.cancel()</code> keeps it as it is).
+      event details: the <code>reason</code>, for example{' '}
+      <code>trigger-press</code>, <code>outside-press</code>,{' '}
+      <code>escape-key</code> or <code>close-press</code>, and the{' '}
+      <code>trigger</code> element. <code>eventDetails.cancel()</code> keeps it
+      as it is).
     </>,
   ],
   [
@@ -114,7 +115,7 @@ export const popoverRootRows: readonly PropRow[] = [
     'ReactNode | ((props: { payload }) => ReactNode)',
     undefined,
     <>
-      Its trigger and its portal; or a function of the active trigger’s{' '}
+      Its trigger and its portal, or a function of the active trigger’s{' '}
       <code>payload</code>.
     </>,
   ],
@@ -179,8 +180,8 @@ export const popoverTriggerRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      ID of the trigger: also the active trigger in controlled mode (the root’s{' '}
-      <code>triggerId</code>).
+      ID of the trigger. It also names the active trigger in controlled mode
+      (the root’s <code>triggerId</code>).
     </>,
   ],
   nativeButtonRow(true),
@@ -191,7 +192,7 @@ export const popoverTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
+            {row[3]} For example a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -233,7 +234,7 @@ export const popoverPositionerRows: readonly PropRow[] = [
     'side',
     union('block-start', 'block-end', 'inline-start', 'inline-end'),
     code(union('block-end')),
-    'Its side of its anchor (logical: above, below, before, after it); it moves to the other side to avoid collisions.',
+    'Which side of its anchor it’s on (logical: above, below, before or after it). It moves to the other side to avoid collisions.',
   ],
   [
     'align',
@@ -289,7 +290,7 @@ export const popoverPopupRows: readonly PropRow[] = [
         component="popover"
         part="Popover.Arrow"
       />
-      , optional) and its content: a header (e.g. a{' '}
+      , optional) and its content: a header (for example a{' '}
       <a href={publicUrl('toolbar')}>Toolbar</a>), a{' '}
       <PartLink
         component="popover"
@@ -307,11 +308,11 @@ export const popoverArrowRows: readonly PropRow[] = [
     union('hide', 'show'),
     code(union('hide')),
     <>
-      With the popover shifted so far that the arrow can’t point at the
-      trigger’s center (Base UI’s <code>data-uncentered</code>), or over the
-      trigger (too tall to fit on either side): <code>hide</code>, none drawn,
-      the popup as close to the trigger as without one; <code>show</code>, drawn
-      where Base UI places it.
+      What happens when the popover has shifted so far that the arrow can’t
+      point at the trigger’s center (Base UI’s <code>data-uncentered</code>), or
+      when it covers the trigger (too tall to fit on either side).{' '}
+      <code>hide</code> draws none, and keeps the popup as close to the trigger
+      as without one. <code>show</code> draws it where Base UI places it.
     </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
@@ -324,7 +325,7 @@ export const popoverHeaderRows: readonly PropRow[] = [
     undefined,
     <>
       Its bar: a <a href={publicUrl('toolbar')}>Toolbar</a> (
-      <code>placement=&quot;block-start&quot;</code>, a 44px row here), its
+      <code>placement=&quot;block-start&quot;</code>, a 44px row here) with its
       title (
       <PartLink
         component="popover"
@@ -335,7 +336,7 @@ export const popoverHeaderRows: readonly PropRow[] = [
         component="popover"
         part="Popover.Close"
       />
-      ). Over the body, which scrolls under it (making room with a{' '}
+      ). It sits above the body, which scrolls under it and makes room with a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Padding"
@@ -348,16 +349,16 @@ export const popoverHeaderRows: readonly PropRow[] = [
     union('soft', 'hard', 'none'),
     code(union('soft')),
     <>
-      Its scroll edge effect, as the body scrolls under it (as a{' '}
+      Its scroll edge effect, as the body scrolls under it (like a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Anchor"
       />
-      ’s): <code>soft</code>, the body fading out under it (fully hidden under a
-      share of it, <code>--uikit-viewport-edge-veil</code>, 0 to 1, a popover’s{' '}
-      <code>0.75</code>; showing past it), with no blur on the popover’s glass;{' '}
-      <code>hard</code>, a solid backing with a dividing line; <code>none</code>
-      .
+      ’s). <code>soft</code>: the body fades out under it, without a blur on the
+      popover’s glass. It’s fully hidden under a share of the header (
+      <code>--uikit-viewport-edge-veil</code>, 0 to 1; a popover’s is{' '}
+      <code>0.75</code>), and shows past it. <code>hard</code>: a solid backing
+      with a dividing line. <code>none</code>: nothing.
     </>,
   ],
   [
@@ -365,7 +366,7 @@ export const popoverHeaderRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      A color for its edge effect, shown at rest too (as a{' '}
+      A color for its edge effect, shown at rest too (like a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Anchor"
@@ -381,7 +382,7 @@ export const popoverBodyRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'What scrolls when the popup reaches its maximum height (the viewport’s room for it).',
+    'What scrolls once the popup reaches its maximum height (the room the viewport has for it).',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -391,7 +392,7 @@ export const popoverViewportRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'The content to render inside the transition container: its content changes (another trigger’s) are animated in it.',
+    'The content to render inside the transition container. Changes to it (another trigger’s content) are animated there.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -401,7 +402,7 @@ export const popoverTitleRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'The popover’s title: its accessible name.',
+    'The popover’s title, which is its accessible name.',
   ],
   ...baseUiRows('h2', 'HTMLHeadingElement').map((row): PropRow =>
     row[0] === 'render'
@@ -410,7 +411,7 @@ export const popoverTitleRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <code>{'<span />'}</code> in a{' '}
+            {row[3]} For example a <code>{'<span />'}</code> in a{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Title"
@@ -427,7 +428,7 @@ export const popoverDescriptionRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'What the popover is for: its accessible description.',
+    'What the popover is for, which is its accessible description.',
   ],
   ...baseUiRows('p', 'HTMLParagraphElement'),
 ];
@@ -441,14 +442,14 @@ export const popoverCloseRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a{' '}
+            {row[3]} For example a{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Button"
             >
               {'<Toolbar.Button />'}
             </PartLink>{' '}
-            (its close symbol, Done).
+            (with a close symbol, or Done).
           </>,
         ]
       : row,
@@ -465,8 +466,8 @@ export const popoverHandleTypeRows: readonly PropRow[] = [
     'type parameter',
     code('unknown'),
     <>
-      What its triggers pass the popover as they open it (their{' '}
-      <code>payload</code>; the root’s children as a function of it).
+      What its triggers pass to the popover as they open it (their{' '}
+      <code>payload</code>). The root’s children can be a function of it.
     </>,
   ],
 ];
@@ -478,7 +479,7 @@ export const popoverHandleRows: readonly PropRow[] = [
     'PopoverHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>Popover.Handle</code>): passed to a{' '}
+      A handle (Base UI’s <code>Popover.Handle</code>). Pass it to a{' '}
       <PartLink
         component="popover"
         part="Popover.Root"
@@ -488,8 +489,8 @@ export const popoverHandleRows: readonly PropRow[] = [
         component="popover"
         part="Popover.Trigger"
       />
-      s (their <code>handle</code>); from the hook, the same for the component’s
-      lifetime.
+      s (their <code>handle</code>). The hook returns the same one for the
+      component’s lifetime.
     </>,
   ],
   [
@@ -502,7 +503,7 @@ export const popoverHandleRows: readonly PropRow[] = [
     '.open(triggerId)',
     '(triggerId: string) => void',
     undefined,
-    'Opens the popover at the trigger with this id (a trigger with this handle; in an event handler or an effect).',
+    'Opens the popover at the trigger with this id, which must use this handle (in an event handler or an effect).',
   ],
   ['.close()', '() => void', undefined, 'Closes the popover.'],
 ];

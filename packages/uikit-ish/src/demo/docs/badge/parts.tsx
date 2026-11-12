@@ -1,15 +1,19 @@
 import './style.css';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Badge, Symbol } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfBell } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { badgeRows } from './docs.js';
 import { propOptionsPart } from './props.js';
 
@@ -24,17 +28,25 @@ const BadgePart: FunctionComponent = () => {
     title: 'Badge',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(() => partPropMaps({ Symbol: ['icon'] }), []),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Badge"
     >
       <span className="badge-demo-host">
-        <Symbol icon={sfBell}>
+        <Symbol
+          {...partProps.Symbol}
+          icon={sfBell}
+        >
           <Badge {...props} />
         </Symbol>
       </span>
@@ -49,11 +61,29 @@ export const BadgeParts: FunctionComponent = () => (
       <li>One element, placed on what it’s in (its parent).</li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="badge"
-          part="Badge"
+          component="symbol"
+          part="Symbol"
         />
+        <span>, an</span>{' '}
+        <PartLink
+          component="avatar"
+          part="Avatar.Root"
+        />
+        <span>, or a list row’s</span>{' '}
+        <PartLink
+          component="list"
+          part="List.Trailing"
+        />
+        <ul>
+          <li>
+            <PartLink
+              component="badge"
+              part="Badge"
+            />
+          </li>
+        </ul>
       </li>
     </ul>
 
@@ -65,23 +95,23 @@ export const BadgeParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its content a count or a short text; without any, a dot (by CSS{' '}
-        <code>:empty</code>: no whitespace in it).
+        Its content is a count or a short text. Without any, it’s a dot (by CSS{' '}
+        <code>:empty</code>, so no whitespace inside).
       </li>
       <li>
-        Where: <code>placement</code>, never from its parent. On a symbol (
-        <code>symbol</code>: a child of a{' '}
-        <a href={publicUrl('symbol')}>Symbol</a>, its smaller size), on its
-        parent’s top end corner (<code>corner</code>: the parent positioned, as
-        an <a href={publicUrl('avatar')}>Avatar</a> is), or in the text (
-        <code>inline</code>).
+        Its place comes from <code>placement</code>, never from its parent: on a
+        symbol (<code>symbol</code>, as a child of a{' '}
+        <a href={publicUrl('symbol')}>Symbol</a>, at its smaller size), on its
+        parent’s top end corner (<code>corner</code>, with the parent
+        positioned, as an <a href={publicUrl('avatar')}>Avatar</a> is), or in
+        the text (<code>inline</code>).
       </li>
       <li>
-        Look: <code>tint</code>, <code>textColor</code>.
+        Its look: <code>tint</code> and <code>textColor</code>.
       </li>
       <li>
-        Renders a <code>span</code>, without a role: its text read where it is
-        (see <a href={publicUrl('badge#accessibility')}>Accessibility</a>).
+        Renders a <code>span</code> without a role, so its text is read where it
+        is (see <a href={publicUrl('badge#accessibility')}>Accessibility</a>).
       </li>
     </ul>
     <BadgePart />

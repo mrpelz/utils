@@ -75,7 +75,7 @@ type Entry = {
   keyboard?: ViewportAnchorProps['keyboard'];
   /** An anchor, or an open overscroll area (adding to them, see above). */
   kind: 'anchor' | 'overscroll';
-  /** Its border box's (the safe area it keeps clear too), for its effect. */
+  /** Its border box's (the safe area inset it keeps clear too), for its effect. */
   outer?: number;
   size: number;
   tint?: string;
@@ -197,7 +197,7 @@ const createStore = (parent?: Store): Store => {
     /**
      * The tallest bottom anchor pushed up by the keyboard (`keyboard`
      * `push`, e.g. a message field's bar): its size (its content box's,
-     * its safe area aside), sitting on the keyboard while it shows.
+     * its safe area inset aside), sitting on the keyboard while it shows.
      */
     pushed: (): number => {
       let size = 0;
@@ -490,7 +490,7 @@ const scrollerOf = (element: HTMLElement, edge: ViewportEdge): HTMLElement => {
 
 /**
  * Its scroll container's scroll padding at its edge: its own padding there
- * (the safe area it keeps clear) and the padding's height, so focus moving
+ * (the safe area inset it keeps clear) and the padding's height, so focus moving
  * and `scrollIntoView` stop clear of the anchors, not behind them; while
  * mounted. The same as `--uikit-viewport-padding-<edge>` (e.g. for a mask
  * fading the content under them, see Sheet).

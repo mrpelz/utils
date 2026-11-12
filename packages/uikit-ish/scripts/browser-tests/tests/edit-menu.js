@@ -366,7 +366,7 @@ export const tests = [
   {
     name: 'edit menu: a selection opens it above the selection, inside its frame (its portal’s container)',
     run: async (page) => {
-      await page.open('edit-menu-overview');
+      await page.open('edit-menu-overview', 'light', { isFramed: true });
       await page.evaluate(
         `document.getSelection().selectAllChildren(${page.section}.querySelector(${JSON.stringify('.edit-menu-demo-text')}))`,
       );

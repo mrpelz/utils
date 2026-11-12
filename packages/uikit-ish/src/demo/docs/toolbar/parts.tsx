@@ -8,7 +8,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
@@ -21,6 +24,7 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   toolbarButtonRows,
   toolbarGroupRows,
@@ -58,13 +62,30 @@ const RootPart: FunctionComponent = () => {
     title: 'Toolbar.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Group': [],
+          'Toolbar.Leading': [],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Root"
     >
       <div className="toolbar-demo-bar">
@@ -72,35 +93,47 @@ const RootPart: FunctionComponent = () => {
           key={elementKey}
           {...props}
         >
-          <Toolbar.Leading>
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Back"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfChevronBackward} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfChevronBackward}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Leading>
-          <Toolbar.Title>
+          <Toolbar.Title {...partProps['Toolbar.Title']}>
             <span>Inbox</span>
           </Toolbar.Title>
-          <Toolbar.Trailing>
-            <Toolbar.Group>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+            <Toolbar.Group {...partProps['Toolbar.Group']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Share"
                 shape="circle"
               >
-                <Button.Icon>
-                  <Symbol icon={sfSquareAndArrowUp} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquareAndArrowUp}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="More"
                 shape="circle"
               >
-                <Button.Icon>
-                  <Symbol icon={sfEllipsis} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfEllipsis}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             </Toolbar.Group>
@@ -122,42 +155,69 @@ const LeadingPart: FunctionComponent = () => {
     title: 'Toolbar.Leading',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': [],
+          'Toolbar.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Leading"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
           <Toolbar.Leading {...props}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Folders"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfFolder} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFolder}
+                />
               </Button.Icon>
             </Toolbar.Button>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Flag"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfFlag} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFlag}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Leading>
-          <Toolbar.Trailing>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Delete"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfTrash} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfTrash}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Trailing>
@@ -178,43 +238,71 @@ const TrailingPart: FunctionComponent = () => {
     title: 'Toolbar.Trailing',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Group': [],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Trailing"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
-          <Toolbar.Leading>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Folders"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfFolder} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFolder}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Leading>
           <Toolbar.Trailing {...props}>
-            <Toolbar.Group>
+            <Toolbar.Group {...partProps['Toolbar.Group']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Flag"
                 shape="circle"
               >
-                <Button.Icon>
-                  <Symbol icon={sfFlag} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfFlag}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Delete"
                 shape="circle"
               >
-                <Button.Icon>
-                  <Symbol icon={sfTrash} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrash}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             </Toolbar.Group>
@@ -236,32 +324,54 @@ const SpacerPart: FunctionComponent = () => {
     title: 'Toolbar.Spacer',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Spacer"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Folders"
             shape="circle"
           >
-            <Button.Icon>
-              <Symbol icon={sfFolder} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfFolder}
+              />
             </Button.Icon>
           </Toolbar.Button>
           <Toolbar.Spacer {...props} />
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Delete"
             shape="circle"
           >
-            <Button.Icon>
-              <Symbol icon={sfTrash} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfTrash}
+              />
             </Button.Icon>
           </Toolbar.Button>
         </Toolbar.Root>
@@ -282,45 +392,75 @@ const GroupPart: FunctionComponent = () => {
     title: 'Toolbar.Group',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Root': [],
+            'Toolbar.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Group"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
-          <Toolbar.Trailing>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Group {...props}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Folders"
                 shape="circle"
                 onClick={() => addLog('Folders clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfFolder} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfFolder}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Flag"
                 shape="circle"
                 onClick={() => addLog('Flag clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfFlag} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfFlag}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Delete"
                 shape="circle"
                 onClick={() => addLog('Delete clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfTrash} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrash}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             </Toolbar.Group>
@@ -343,21 +483,37 @@ const ButtonPart: FunctionComponent = () => {
   // (Of its own: `prominent`, too.)
   const props = buttonProps as ToolbarButtonProps;
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Toolbar.Root': [],
+            'Toolbar.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Button"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
-          <Toolbar.Trailing>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Button {...props}>
-              <Button.Label>Edit</Button.Label>
+              <Button.Label {...partProps['Button.Label']}>Edit</Button.Label>
             </Toolbar.Button>
           </Toolbar.Trailing>
         </Toolbar.Root>
@@ -377,37 +533,64 @@ const TitlePart: FunctionComponent = () => {
     title: 'Toolbar.Title',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Title"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Leading>
+        <Toolbar.Root
+          {...partProps['Toolbar.Root']}
+          placement="block-start"
+        >
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Back"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfChevronBackward} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfChevronBackward}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Leading>
           <Toolbar.Title {...props}>
             <span>Inbox</span>
           </Toolbar.Title>
-          <Toolbar.Trailing>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="More"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfEllipsis} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfEllipsis}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Trailing>
@@ -428,38 +611,66 @@ const SubtitlePart: FunctionComponent = () => {
     title: 'Toolbar.Subtitle',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Subtitle"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Leading>
+        <Toolbar.Root
+          {...partProps['Toolbar.Root']}
+          placement="block-start"
+        >
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Back"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfChevronBackward} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfChevronBackward}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Leading>
-          <Toolbar.Title>
+          <Toolbar.Title {...partProps['Toolbar.Title']}>
             <span>Inbox</span>
             <Toolbar.Subtitle {...props}>12 unread</Toolbar.Subtitle>
           </Toolbar.Title>
-          <Toolbar.Trailing>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="More"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfEllipsis} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfEllipsis}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Trailing>
@@ -480,33 +691,56 @@ const SeparatorPart: FunctionComponent = () => {
     title: 'Toolbar.Separator',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': [],
+          'Toolbar.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Separator"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
-          <Toolbar.Trailing>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Folders"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfFolder} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFolder}
+                />
               </Button.Icon>
             </Toolbar.Button>
             <Toolbar.Separator {...props} />
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Delete"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfTrash} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfTrash}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Trailing>
@@ -527,27 +761,47 @@ const LinkPart: FunctionComponent = () => {
     title: 'Toolbar.Link',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': [],
+          'Toolbar.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Link"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
-          <Toolbar.Leading>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             <Toolbar.Link {...props}>Help</Toolbar.Link>
           </Toolbar.Leading>
-          <Toolbar.Trailing>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Share"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfSquareAndArrowUp} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfSquareAndArrowUp}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Trailing>
@@ -568,25 +822,45 @@ const InputPart: FunctionComponent = () => {
     title: 'Toolbar.Input',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': [],
+          'Toolbar.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Toolbar.Input"
     >
       <div className="toolbar-demo-bar">
-        <Toolbar.Root>
-          <Toolbar.Leading>
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Folders"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfFolder} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFolder}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Leading>
@@ -595,13 +869,17 @@ const InputPart: FunctionComponent = () => {
             placeholder="Name"
             {...props}
           />
-          <Toolbar.Trailing>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Delete"
               shape="circle"
             >
-              <Button.Icon>
-                <Symbol icon={sfTrash} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfTrash}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Trailing>
@@ -615,106 +893,129 @@ const InputPart: FunctionComponent = () => {
 export const ToolbarParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: the bar, its placement and glass context.</li>
+      <li>Root: the bar, with its placement and glass context.</li>
       <li>
-        Leading and trailing sides holding capsules: buttons of their own, or
-        groups of them; a title (or a control) between the sides.
+        Leading and trailing sides hold capsules: buttons on their own, or
+        groups of them. A title, or a control, goes between the sides.
       </li>
       <li>
-        Base UI’s separator, link and input are re-exported, unstyled here.
+        Base UI’s separator, link and input are re-exported, without styles of
+        their own here.
       </li>
-      <li>The views show each bar on a page’s background, as behind glass.</li>
+      <li>
+        The views show each bar over a page’s background, so you can see the
+        glass.
+      </li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="toolbar"
-          part="Toolbar.Root"
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />{' '}
+        <span>or</span>{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        />{' '}
+        <span>(in a</span>{' '}
+        <PartLink
+          component="header"
+          part="Header.Root"
         />
+        <span>)</span>
         <ul>
           <li>
             <PartLink
               component="toolbar"
-              part="Toolbar.Leading"
-            />{' '}
-            (optional)
+              part="Toolbar.Root"
+            />
             <ul>
               <li>
                 <PartLink
                   component="toolbar"
-                  part="Toolbar.Button"
+                  part="Toolbar.Leading"
                 />{' '}
-                (of its own), or
-              </li>
-              <li>
-                <PartLink
-                  component="toolbar"
-                  part="Toolbar.Group"
-                />
+                (optional)
                 <ul>
                   <li>
                     <PartLink
                       component="toolbar"
                       part="Toolbar.Button"
                     />{' '}
-                    (several)
+                    (on its own), or
+                  </li>
+                  <li>
+                    <PartLink
+                      component="toolbar"
+                      part="Toolbar.Group"
+                    />
+                    <ul>
+                      <li>
+                        <PartLink
+                          component="toolbar"
+                          part="Toolbar.Button"
+                        />{' '}
+                        (several)
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </li>
-            </ul>
-          </li>
-          <li>
-            <PartLink
-              component="toolbar"
-              part="Toolbar.Title"
-            />{' '}
-            (optional; or a control, e.g.{' '}
-            <PartLink
-              component="toolbar"
-              part="Toolbar.Input"
-            />
-            )
-            <ul>
               <li>
                 <PartLink
                   component="toolbar"
-                  part="Toolbar.Subtitle"
+                  part="Toolbar.Title"
                 />{' '}
-                (optional)
+                (optional; or a control, for example a{' '}
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Input"
+                />
+                )
+                <ul>
+                  <li>
+                    <PartLink
+                      component="toolbar"
+                      part="Toolbar.Subtitle"
+                    />{' '}
+                    (optional)
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Trailing"
+                />{' '}
+                (optional; like{' '}
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Leading"
+                >
+                  Leading
+                </PartLink>
+                )
+              </li>
+              <li>
+                Also:{' '}
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Spacer"
+                />
+                ,{' '}
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Separator"
+                />{' '}
+                and{' '}
+                <PartLink
+                  component="toolbar"
+                  part="Toolbar.Link"
+                />{' '}
+                (all optional)
               </li>
             </ul>
-          </li>
-          <li>
-            <PartLink
-              component="toolbar"
-              part="Toolbar.Trailing"
-            />{' '}
-            (optional; as{' '}
-            <PartLink
-              component="toolbar"
-              part="Toolbar.Leading"
-            >
-              Leading
-            </PartLink>
-            )
-          </li>
-          <li>
-            Also:{' '}
-            <PartLink
-              component="toolbar"
-              part="Toolbar.Spacer"
-            />{' '}
-            (optional) ,{' '}
-            <PartLink
-              component="toolbar"
-              part="Toolbar.Separator"
-            />{' '}
-            (optional) ,{' '}
-            <PartLink
-              component="toolbar"
-              part="Toolbar.Link"
-            />{' '}
-            (optional)
           </li>
         </ul>
       </li>
@@ -733,7 +1034,8 @@ export const ToolbarParts: FunctionComponent = () => (
           component="toolbar"
           part="Toolbar.Root"
         />
-        , a <code>toolbar</code>): a row, its parts 12px apart (top: 10px).
+        , a <code>toolbar</code>): a row with its parts 12px apart (10px at the
+        top).
       </li>
       <li>
         A{' '}
@@ -741,8 +1043,8 @@ export const ToolbarParts: FunctionComponent = () => (
           component="text-field"
           part="TextField.Root"
         />{' '}
-        in it (e.g. a search or message field) takes its free space, between its
-        buttons; other controls (e.g. a{' '}
+        inside it (for example a search or message field) takes its free space,
+        between its buttons. Other controls (for example a{' '}
         <PartLink
           component="segmented"
           part="Segmented.Root"
@@ -751,15 +1053,15 @@ export const ToolbarParts: FunctionComponent = () => (
       </li>
       <li>
         <code>placement</code>: at the bottom (48px capsules, padded for the
-        home indicator) or the top (44px capsules, a navigation bar).
+        home indicator), or at the top (44px capsules, as a navigation bar).
       </li>
       <li>
-        <code>context</code>: the brightness behind its glass, for the capsules
-        in it.
+        <code>context</code>: how bright it is behind its glass, for the
+        capsules inside.
       </li>
       <li>
-        Renders a <code>div</code>; placed by what it’s in (a viewport’s anchor,
-        a header).
+        Renders a <code>div</code>. What it’s in places it: a viewport’s anchor,
+        or a header.
       </li>
     </ul>
     <RootPart />
@@ -774,20 +1076,21 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The bar’s start: its capsules in a row, as wide as they are at least.
+        The bar’s start: its capsules in a row, at least as wide as they are.
       </li>
       <li>
-        Shares the free space equally with{' '}
+        It shares the free space equally with{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Trailing"
         >
           Trailing
         </PartLink>
-        , so what’s between them is centered in the bar.
+        , so what’s between them stays centered in the bar.
       </li>
       <li>
-        Renders a <code>div</code> (<code>render</code>).
+        Renders a <code>div</code>, or another element through{' '}
+        <code>render</code>.
       </li>
     </ul>
     <LeadingPart />
@@ -801,9 +1104,13 @@ export const ToolbarParts: FunctionComponent = () => (
       <code>Toolbar.Trailing</code>
     </Heading>
     <ul>
-      <li>The bar’s end: as Leading, its capsules aligned to the end.</li>
       <li>
-        Renders a <code>div</code> (<code>render</code>).
+        The bar’s end. It works like Leading, with its capsules aligned to the
+        end.
+      </li>
+      <li>
+        Renders a <code>div</code>, or another element through{' '}
+        <code>render</code>.
       </li>
     </ul>
     <TrailingPart />
@@ -818,8 +1125,8 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Free space between parts, e.g. a button at each end without sides (with
-        sides, they take the free space).
+        Free space between parts, for example to put a button at each end
+        without sides. With sides, the sides take the free space.
       </li>
       <li>
         Renders an empty <code>div</code>.
@@ -837,16 +1144,16 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A glass capsule of several buttons, 6px in from its ends (top: 4px), its
-        buttons 12px apart.
+        A glass capsule of several buttons, 6px in from its ends (4px at the
+        top), with its buttons 12px apart.
       </li>
       <li>
-        Pressed, a glass lens (scaled by 1.05), the pressed button on the
-        selection.
+        When pressed, it turns into a glass lens (scaled by 1.05), with the
+        pressed button on the selection.
       </li>
       <li>
         Tinted with <code>prominent</code> or <code>tint</code>, its content
-        white (or <code>textColor</code>).
+        turns white (or <code>textColor</code>).
       </li>
       <li>
         Renders a <code>div</code> (Base UI’s{' '}
@@ -869,8 +1176,8 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <a href={publicUrl('button')}>Button</a> in the toolbar’s keyboard
-        navigation, with{' '}
+        A <a href={publicUrl('button')}>Button</a> that takes part in the
+        toolbar’s keyboard navigation, with{' '}
         <PartLink
           component="button"
           part="Button.Icon"
@@ -883,8 +1190,9 @@ export const ToolbarParts: FunctionComponent = () => (
         content.
       </li>
       <li>
-        Of its own: a glass button, as high as the bar’s capsules (a circle for
-        a symbol, text 12px from its ends); <code>prominent</code>: tinted.
+        On its own, it’s a glass button as tall as the bar’s capsules: a circle
+        for a symbol, with text 12px from its ends. <code>prominent</code> tints
+        it.
       </li>
       <li>
         In a{' '}
@@ -894,8 +1202,8 @@ export const ToolbarParts: FunctionComponent = () => (
         >
           Group
         </PartLink>
-        : 36px, its content in the capsule’s color; the capsule’s glass, not its
-        own.
+        , it’s 36px, with its content in the capsule’s color, on the capsule’s
+        glass rather than its own.
       </li>
       <li>
         Renders a <code>button</code>.
@@ -913,14 +1221,16 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The bar’s title (Body Emphasized), centered in the bar; truncated as it
-        runs out of space.
+        The bar’s title (Body Emphasized), centered in the bar. It truncates
+        when it runs out of space.
       </li>
       <li>
-        <code>alignStart</code>: at the bar’s start, taking its free space.
+        <code>alignStart</code> puts it at the bar’s start, taking its free
+        space.
       </li>
       <li>
-        Renders a <code>div</code> (<code>render</code>), not a heading.
+        Renders a <code>div</code>, or another element through{' '}
+        <code>render</code>. It’s not a heading.
       </li>
     </ul>
     <TitlePart />
@@ -935,10 +1245,12 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Below the title, inside it: 12px (510), the secondary label color.
+        Sits below the title, inside it: 12px (510), in the secondary label
+        color.
       </li>
       <li>
-        Renders a <code>span</code> (<code>render</code>).
+        Renders a <code>span</code>, or another element through{' '}
+        <code>render</code>.
       </li>
     </ul>
     <SubtitlePart />
@@ -953,11 +1265,12 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s, re-exported: a <code>separator</code> between items (for
-        assistive technology), vertical in a horizontal bar.
+        Base UI’s, re-exported: a <code>separator</code> between items, for
+        assistive technology. It’s vertical in a horizontal bar.
       </li>
       <li>
-        No styles here (the bars separate by space): empty, as wide as styled.
+        It has no styles here, because the bars separate by space. It’s empty,
+        and as wide as you style it.
       </li>
     </ul>
     <SeparatorPart />
@@ -972,10 +1285,11 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s, re-exported: a link in the toolbar’s keyboard navigation.
+        Base UI’s, re-exported: a link that takes part in the toolbar’s keyboard
+        navigation.
       </li>
       <li>
-        No styles here: for a button’s look, render a{' '}
+        It has no styles here. For a button’s look, render a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Button"
@@ -996,12 +1310,12 @@ export const ToolbarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s, re-exported: a native input in the toolbar’s keyboard
-        navigation (the arrow keys move within its text first).
+        Base UI’s, re-exported: a native input that takes part in the toolbar’s
+        keyboard navigation. The arrow keys move within its text first.
       </li>
       <li>
-        No styles here: for a search field, a{' '}
-        <a href={publicUrl('text-field')}>Text field</a>’s{' '}
+        It has no styles here. For a search field, put a{' '}
+        <a href={publicUrl('text-field')}>Text Field</a>’s{' '}
         <PartLink
           component="text-field"
           part="TextField.Frame"

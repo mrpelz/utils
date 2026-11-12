@@ -8,23 +8,38 @@ import {
   type ColorPickerSwatchesProps,
   Symbol,
 } from '../../../components/index.js';
+import type { PartProps } from '../../tooling/frame/prop-control.js';
 import { sfDocumentOnDocument } from '../../tooling/icons.js';
 
 // The demos' panels, as composed (see `panelParts`): their modes (in
 // order), whether they have the opacity and the swatches.
 
+/**
+ * A mode's view: its element, or made with the demo's other parts' props
+ * (see `usePartControls`).
+ */
+type ModeView = ReactNode | ((partProps: PartProps) => ReactNode);
+
 /** A mode: its value, its label, its view. */
-export type ModeEntry = [value: string, label: string, view: ReactNode];
+export type ModeEntry = [value: string, label: string, view: ModeView];
+
+/** A view, with the demo's other parts' props. */
+const viewOf = (view: ModeView, partProps: PartProps): ReactNode =>
+  typeof view === 'function' ? view(partProps) : view;
 
 /** The code's copy button (a menu of its codes). */
-const codeCopy = (
+const codeCopy = (partProps: PartProps) => (
   <ColorPicker.CodeCopy
+    {...partProps['ColorPicker.CodeCopy']}
     shape="circle"
     size="small"
     variant="bordered-secondary"
   >
-    <Button.Icon>
-      <Symbol icon={sfDocumentOnDocument} />
+    <Button.Icon {...partProps['Button.Icon']}>
+      <Symbol
+        {...partProps.Symbol}
+        icon={sfDocumentOnDocument}
+      />
     </Button.Icon>
   </ColorPicker.CodeCopy>
 );
@@ -33,28 +48,49 @@ const codeCopy = (
  * The code's row (under the sliders, as the system's), its copy button
  * before its field (or none: `hasCopy`).
  */
-export const codeRow = (hasCopy = true): ReactNode => (
-  <ColorPicker.Code>{hasCopy ? codeCopy : null}</ColorPicker.Code>
-);
+export const codeRow =
+  (hasCopy = true) =>
+  (partProps: PartProps): ReactNode => (
+    <ColorPicker.Code {...partProps['ColorPicker.Code']}>
+      {hasCopy ? codeCopy(partProps) : null}
+    </ColorPicker.Code>
+  );
 
-const sliders = (
-  model?: ColorPickerSlidersModel,
-  range?: ColorPickerSlidersRange,
-  code: ReactNode = codeRow(),
-) => (
-  <ColorPicker.Sliders
-    model={model}
-    range={range}
-  >
-    {code}
-  </ColorPicker.Sliders>
-);
+const sliders =
+  (
+    model?: ColorPickerSlidersModel,
+    range?: ColorPickerSlidersRange,
+    code: ModeView = codeRow(),
+  ) =>
+  (partProps: PartProps) => (
+    <ColorPicker.Sliders
+      {...partProps['ColorPicker.Sliders']}
+      model={model}
+      range={range}
+    >
+      {viewOf(code, partProps)}
+    </ColorPicker.Sliders>
+  );
 
-const grid: ModeEntry = ['grid', 'Grid', <ColorPicker.Grid key="grid" />];
+const grid: ModeEntry = [
+  'grid',
+  'Grid',
+  (partProps) => (
+    <ColorPicker.Grid
+      key="grid"
+      {...partProps['ColorPicker.Grid']}
+    />
+  ),
+];
 const spectrum: ModeEntry = [
   'spectrum',
   'Spectrum',
-  <ColorPicker.Spectrum key="spectrum" />,
+  (partProps) => (
+    <ColorPicker.Spectrum
+      key="spectrum"
+      {...partProps['ColorPicker.Spectrum']}
+    />
+  ),
 ];
 const rgb: ModeEntry = ['rgb', 'RGB', sliders('rgb')];
 const hsl: ModeEntry = ['hsl', 'HSL', sliders('hsl')];
@@ -62,9 +98,14 @@ const cmyk: ModeEntry = ['cmyk', 'CMYK', sliders('cmyk')];
 const named: ModeEntry = [
   'named',
   'Named',
-  <ColorPicker.Named key="named">
-    <ColorPicker.CssNamedColors />
-  </ColorPicker.Named>,
+  (partProps) => (
+    <ColorPicker.Named
+      key="named"
+      {...partProps['ColorPicker.Named']}
+    >
+      <ColorPicker.CssNamedColors />
+    </ColorPicker.Named>
+  ),
 ];
 
 /** Mode sets: the system's (one sliders view, “Sliders”), and others (their values the same: `grid`, `spectrum`, `rgb`, `hsl`, `cmyk`, `named`). */
@@ -141,11 +182,16 @@ const entriesOf = (modes: ModeEntry[] | ModeSet) =>
 /** Its modes' control (by `modes`): in its panel, or a sheet's header. */
 export const modesControl = (
   modes: ModeEntry[] | ModeSet = 'system',
+  partProps: PartProps = {},
 ): ReactNode => (
-  <ColorPicker.Modes key="modes">
+  <ColorPicker.Modes
+    key="modes"
+    {...partProps['ColorPicker.Modes']}
+  >
     {entriesOf(modes).map(([value, label]) => (
       <ColorPicker.Mode
         key={value}
+        {...partProps['ColorPicker.Mode']}
         value={value}
       >
         {label}
@@ -163,30 +209,40 @@ export const panelParts = ({
   isModesElsewhere = false,
   modes = 'system',
   opacity = true,
+  partProps = {},
   swatches = true,
   swatchesProps,
 }: {
   isModesElsewhere?: boolean;
   modes?: ModeEntry[] | ModeSet;
   opacity?: boolean;
+  /** The demo's other parts' props (see `usePartControls`). */
+  partProps?: PartProps;
   swatches?: boolean;
   swatchesProps?: ColorPickerSwatchesProps;
 } = {}): ReactNode[] => {
   const entries = entriesOf(modes);
   return [
-    isModesElsewhere ? null : modesControl(entries),
+    isModesElsewhere ? null : modesControl(entries, partProps),
     ...entries.map(([value, , view]) => (
       <ColorPicker.View
         key={value}
+        {...partProps['ColorPicker.View']}
         value={value}
       >
-        {view}
+        {viewOf(view, partProps)}
       </ColorPicker.View>
     )),
-    opacity ? <ColorPicker.Opacity key="opacity" /> : null,
+    opacity ? (
+      <ColorPicker.Opacity
+        key="opacity"
+        {...partProps['ColorPicker.Opacity']}
+      />
+    ) : null,
     swatches ? (
       <ColorPicker.Swatches
         key="swatches"
+        {...partProps['ColorPicker.Swatches']}
         {...swatchesProps}
       />
     ) : null,

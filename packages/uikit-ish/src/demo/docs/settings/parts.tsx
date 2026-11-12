@@ -3,6 +3,7 @@ import './style.css';
 import { FunctionComponent, useState } from 'react';
 
 import { Settings, type SettingsValues } from '../../../components/index.js';
+import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
@@ -16,6 +17,28 @@ import {
 } from './docs.js';
 import { given, propOptionsProviderPart } from './props.js';
 import { SettingsReport, SettingsTable } from './report.js';
+
+const useSettingsCode = `import { useSettings } from '@mrpelz/uikit-ish';
+
+export const Spinner = () => {
+  const { reducedMotion } = useSettings();
+
+  // Moved from script: no movement with reduced motion.
+  return <div data-spinning={reducedMotion ? undefined : ''} />;
+};`;
+
+const useSettingsPortalPropsCode = `import { createPortal } from 'react-dom';
+import { useSettingsPortalProps } from '@mrpelz/uikit-ish';
+
+export const Banner = () => {
+  const portalProps = useSettingsPortalProps();
+
+  // Rendered at the end of the body, with the settings of where it opened.
+  return createPortal(
+    <div {...portalProps}>Saved</div>,
+    document.body,
+  );
+};`;
 
 /** `Settings.Provider`, outlined, with its props; its settings resolved. */
 const ProviderPart: FunctionComponent = () => {
@@ -59,8 +82,11 @@ const ProviderPart: FunctionComponent = () => {
 export const SettingsParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Provider: settings for what’s within it.</li>
-      <li>Hooks: the settings resolved (for logic), a portal’s props.</li>
+      <li>Provider: settings for everything inside it.</li>
+      <li>
+        Hooks: the resolved settings for your own logic, and the props a portal
+        needs to follow them.
+      </li>
     </ul>
     <ul className="demo-tree">
       <li>
@@ -68,7 +94,12 @@ export const SettingsParts: FunctionComponent = () => (
           component="settings"
           part="Settings.Provider"
         />{' '}
-        (optional; nested, each overriding the outer one’s)
+        (optional; nested ones override the outer one)
+        <ul>
+          <li className="demo-tree-context">
+            <span>your app, or one view of it</span>
+          </li>
+        </ul>
       </li>
       <li>
         Helpers (anywhere):
@@ -97,21 +128,24 @@ export const SettingsParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its settings, each optional: given, an override for what’s within it;
-        given <code>undefined</code>, reset (the system’s, or the default,
-        whatever an outer provider set); left out, the outer provider’s. Here,
-        each control’s <code>[inherit]</code> leaves it out.
+        Every setting is optional. A setting you give overrides it for
+        everything inside. A setting given as <code>undefined</code> is reset to
+        the system’s value or the default, whatever an outer provider set. A
+        setting you leave out comes from the outer provider. Here, a control’s{' '}
+        <code>[inherit]</code> leaves its setting out.
       </li>
       <li>
-        On its element as custom properties (<code>--uikit-settings-*</code>,
-        see <a href={publicUrl('tokens')}>Design tokens</a>), the nearest
-        provider’s inherited; and its color scheme (<code>color-scheme</code>,{' '}
-        <code>data-color-scheme</code>).
+        The settings are set on its element as custom properties (
+        <code>--uikit-settings-*</code>, see{' '}
+        <a href={publicUrl('tokens')}>Design tokens</a>), inherited from the
+        nearest provider. The color scheme is also set as{' '}
+        <code>color-scheme</code> and <code>data-color-scheme</code>.
       </li>
       <li>
-        Renders a <code>div</code> without a box (<code>display: contents</code>
-        ), or its <code>render</code>, laid out as that element is (e.g. an
-        app’s root, or a demo’s stage).
+        Renders a <code>div</code> without a box of its own (
+        <code>display: contents</code>). With <code>render</code>, it renders
+        that element instead, laid out as usual (for example an app’s root, or a
+        demo’s stage).
       </li>
     </ul>
     <ProviderPart />
@@ -126,14 +160,16 @@ export const SettingsParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The settings where it’s called: each the nearest provider’s override,
-        else the system’s (live, as it changes), else its default.
+        Returns the settings where it’s called. Each comes from the nearest
+        provider that overrides it, else from the system (updated live), else
+        from its default.
       </li>
       <li>
-        For component logic (e.g. animations in script). A component’s own props
-        win over them.
+        For component logic, such as animations run from script. A component’s
+        own props still win over these settings.
       </li>
     </ul>
+    <CodeView code={useSettingsCode} />
     <h3>Values</h3>
     <PropsTable rows={settingsValuesRows} />
 
@@ -145,11 +181,13 @@ export const SettingsParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A portal’s props, spread on it: the overrides where it’s opened, as on a
-        provider’s element (a portal is outside it, e.g. in the body).
+        Props to spread on a portal. A portal renders outside the provider’s
+        element (for example at the end of the body), so it doesn’t inherit the
+        settings. These props carry the overrides from where the portal is
+        opened.
       </li>
       <li>
-        The library’s portals spread it already (
+        The library’s portals already use it (
         <PartLink
           component="menu"
           part="Menu.Portal"
@@ -159,9 +197,10 @@ export const SettingsParts: FunctionComponent = () => (
           component="popover"
           part="Popover.Portal"
         />
-        , …): for a portal of the app’s own.
+        , and others). Use it for a portal of your own.
       </li>
     </ul>
+    <CodeView code={useSettingsPortalPropsCode} />
     <h3>Value</h3>
     <PropsTable rows={settingsPortalPropsRows} />
   </>

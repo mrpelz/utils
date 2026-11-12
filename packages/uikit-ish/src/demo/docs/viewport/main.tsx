@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent, useRef } from 'react';
+import { FunctionComponent, useMemo, useRef } from 'react';
 
 import {
   TextField,
@@ -12,8 +12,13 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
+import { hideFromCode } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   propOptionsBottom,
   propOptionsLayer,
@@ -56,6 +61,10 @@ const ViewportStatus: FunctionComponent<{
   );
 };
 
+// (A readout, logging and feeding the diagnostics: no part of the code
+// shown.)
+hideFromCode(ViewportStatus);
+
 /**
  * The viewport (`Viewport.Provider`): the visual viewport and the
  * keyboard's height, and the page's scroll direction.
@@ -65,14 +74,30 @@ export const ViewportDemo: FunctionComponent = () => {
 
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Viewport.Provider': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="Viewport"
     >
-      <Viewport.Provider>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
         <ViewportStatus onScrollLog={addLog} />
       </Viewport.Provider>
     </Component>
@@ -88,26 +113,49 @@ export const ViewportBarDemo: FunctionComponent = () => {
 
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'TextField.Clear': [],
+            'TextField.Control': ['aria-label', 'enterKeyHint', 'placeholder'],
+            'TextField.Frame': [],
+            'TextField.Root': [],
+            'Toolbar.Root': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Provider': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="Viewport (Bar)"
     >
-      <Viewport.Provider>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
         <ViewportStatus onScrollLog={addLog} />
-        <Viewport.BlockEnd>
-          <Toolbar.Root>
-            <TextField.Root>
-              <TextField.Frame>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <TextField.Root {...partProps['TextField.Root']}>
+              <TextField.Frame {...partProps['TextField.Frame']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Message"
                   enterKeyHint="send"
                   placeholder="Message"
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </TextField.Frame>
             </TextField.Root>
           </Toolbar.Root>
@@ -119,7 +167,7 @@ export const ViewportBarDemo: FunctionComponent = () => {
 
 /**
  * Anchors at each edge of the visual viewport (`Viewport.Anchor`: bars at
- * the top and bottom, sidebars at the sides), their safe areas kept clear,
+ * the top and bottom, sidebars at the sides), their safe area insets kept clear,
  * the keyboard pushing (or covering) them; and a content layer
  * (`Viewport.Content`) below them.
  */
@@ -172,12 +220,23 @@ export const ViewportAnchorsDemo: FunctionComponent = () => {
       title: 'content layer',
     });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Viewport.Padding': ['edge'],
+          'Viewport.Provider': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       id={id}
       log={log}
-      state={[stateTop, stateBottom, stateLeading, stateTrailing, stateLayer]}
       title="Viewport (Anchors)"
       controls={[
         controlTop,
@@ -185,14 +244,29 @@ export const ViewportAnchorsDemo: FunctionComponent = () => {
         controlLeading,
         controlTrailing,
         controlLayer,
+        partControls,
+      ]}
+      state={[
+        stateTop,
+        stateBottom,
+        stateLeading,
+        stateTrailing,
+        stateLayer,
+        partState,
       ]}
     >
-      <Viewport.Provider>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
         {isLayerShown ? (
           <Viewport.Content {...propsLayer}>
-            <Viewport.Padding edge="block-start" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             <div className="viewport-demo-layer">Content layer</div>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Viewport.Content>
         ) : null}
         {isTopShown ? (

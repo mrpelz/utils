@@ -1,12 +1,14 @@
 import './style.css';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import { PageControl } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -14,6 +16,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 
 // The toolbar's code (as Weather's, see the toolbar's composition).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
@@ -33,6 +36,50 @@ const [page, setPage] = useState(0);
     <Toolbar.Trailing>…</Toolbar.Trailing>
   </Toolbar.Root>
 </Viewport.BlockEnd>`;
+
+const pagedCode = `const steps = [
+  ['Welcome', 'Swipe through, or press the dots.'],
+  ['Your pages', 'A page per screen, snapping into place.'],
+  …
+];
+const [page, setPage] = useState(0);
+const pagesRef = useRef<HTMLDivElement>(null);
+
+<div
+  ref={pagesRef}
+  className="pages" // scroll-snap, a page per width
+  onScroll={({ currentTarget }) =>
+    setPage(
+      Math.round(
+        Math.abs(currentTarget.scrollLeft) / currentTarget.clientWidth,
+      ),
+    )
+  }
+>
+  {steps.map(([title, text]) => (
+    <section key={title}>…</section>
+  ))}
+</div>
+<PageControl
+  aria-label="Onboarding"
+  count={steps.length}
+  value={page}
+  variant="plain"
+  onValueChange={(next) =>
+    pagesRef.current?.children[next]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'start',
+    })
+  }
+/>`;
+
+const tooltipCode = `<PageControl
+  momentaryTooltip
+  aria-label="Photos"
+  count={24}
+  format={(page, count) => \`Photo \${page + 1} of \${count}\`}
+/>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** Onboarding steps, a page each (also the kitchen sink's). */
@@ -45,16 +92,39 @@ export const steps = [
 
 /** Onboarding screens: a page per width, the dots below them. */
 const OverPagedContent: FunctionComponent = () => {
+  const id = 'page-control-composition-paged';
   const [log, addLog] = useLog();
   const [page, setPage] = useState(0);
   const pagesRef = useLabelledRef<HTMLDivElement>('pagesRef', 'HTMLDivElement');
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            PageControl: [
+              'aria-label',
+              'count',
+              'onValueChange',
+              'value',
+              'variant',
+            ],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
 
   return (
     <Component
       isCentered
       isInline
-      id="page-control-composition-paged"
+      controls={[partControls]}
+      id={id}
       log={log}
+      state={[partState]}
       title="Page control over paged content"
     >
       <div className="page-control-demo-paged">
@@ -80,6 +150,7 @@ const OverPagedContent: FunctionComponent = () => {
           ))}
         </div>
         <PageControl
+          {...partProps.PageControl}
           aria-label="Onboarding"
           count={steps.length}
           value={page}
@@ -100,17 +171,41 @@ const OverPagedContent: FunctionComponent = () => {
 
 /** Many pages: the current one told in a tooltip while it's operated. */
 const WithATooltip: FunctionComponent = () => {
+  const id = 'page-control-composition-tooltip';
   const [log, addLog] = useLog();
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            PageControl: [
+              'aria-label',
+              'count',
+              'format',
+              'momentaryTooltip',
+              'onValueChange',
+            ],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
 
   return (
     <Component
       isCentered
       isInline
-      id="page-control-composition-tooltip"
+      controls={[partControls]}
+      id={id}
       log={log}
+      state={[partState]}
       title="Page control with a momentary tooltip"
     >
       <PageControl
+        {...partProps.PageControl}
         momentaryTooltip
         aria-label="Photos"
         count={24}
@@ -142,16 +237,16 @@ export const PageControlComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its glass variant, between a <a href={publicUrl('toolbar')}>Toolbar</a>
-        ’s capsules (Weather’s cities): it takes the bar’s glass{' '}
-        <code>context</code>.
+        Its glass variant sits between a{' '}
+        <a href={publicUrl('toolbar')}>Toolbar</a>’s capsules, as for a weather
+        app’s cities, and takes the bar’s glass <code>context</code>.
       </li>
       <li>
-        Controlled by the app’s page (<code>value</code>,{' '}
-        <code>onValueChange</code>), which the content shows.
+        The app’s page controls it (<code>value</code>,{' '}
+        <code>onValueChange</code>), and the content shows that page.
       </li>
       <li>
-        Live: the toolbar’s{' '}
+        To see it live, go to the toolbar’s{' '}
         <a
           href={publicUrl('toolbar/composition#controls-between-the-capsules')}
         >
@@ -170,27 +265,30 @@ export const PageControlComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its plain variant, below pages that swipe (a scroller snapping a page
-        per width), e.g. onboarding screens.
+        Its plain variant sits below pages that swipe, such as onboarding
+        screens: a scroller that snaps one page per width.
       </li>
       <li>
-        The scroller sets the page (<code>onScroll</code>); the dots scroll to
-        theirs (<code>onValueChange</code>): a press, a drag or a key.
+        The scroller sets the page (<code>onScroll</code>). The dots scroll to
+        their page (<code>onValueChange</code>) after a press, a drag or a key.
       </li>
-      <li>The pages swipe themselves: the dots are a small target.</li>
+      <li>
+        The pages swipe on their own, because the dots are a small target.
+      </li>
       <li>
         <strong>Library:</strong> the dots (
         <PartLink
           component="page-control"
           part="PageControl"
         />
-        ): pressed, dragged or keyed (<code>onValueChange</code>).
+        ), which can be pressed, dragged or keyed (<code>onValueChange</code>).
       </li>
       <li>
         <strong>Demo:</strong> the page (the app’s state), the snapping scroller
-        setting it, and scrolling to a page’s dots’ choice.
+        that sets it, and scrolling to the page the dots pick.
       </li>
     </ul>
+    <CodeView code={pagedCode} />
     <OverPagedContent />
 
     <Heading
@@ -201,13 +299,13 @@ export const PageControlComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Many pages (more than 7: a window of 8 dots) don’t tell which page this
-        is: <code>momentaryTooltip</code> shows it above the dots while they’re
-        hovered, pressed or focused by keyboard.
+        With many pages (more than 7, so a window of 8 dots), the dots don’t
+        tell which page this is. <code>momentaryTooltip</code> shows it above
+        the dots while they’re hovered, pressed or focused by keyboard.
       </li>
       <li>
-        <code>format</code> words it (“Photo 3 of 24”), also its accessible
-        value.
+        <code>format</code> sets the wording (“Photo 3 of 24”), which is also
+        its accessible value.
       </li>
       <li>
         <strong>Library:</strong> the momentary tooltip (
@@ -217,6 +315,7 @@ export const PageControlComposition: FunctionComponent = () => (
         <strong>Demo:</strong> the number of photos.
       </li>
     </ul>
+    <CodeView code={tooltipCode} />
     <WithATooltip />
   </>
 );

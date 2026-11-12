@@ -5,8 +5,12 @@ import { FunctionComponent, useMemo } from 'react';
 import { ActionSheet, Button, Viewport } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import { getPropOptionsRoot } from './props.js';
 
 /**
@@ -25,53 +29,94 @@ export const ActionSheetDemo: FunctionComponent = () => {
     { external: externalRoot, isOpen: true, title: 'root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'ActionSheet.Action': ['onClick', 'variant'],
+            'ActionSheet.Actions': [],
+            'ActionSheet.Description': [],
+            'ActionSheet.Header': [],
+            'ActionSheet.Popup': [],
+            'ActionSheet.Title': [],
+            'ActionSheet.Trigger': ['render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       baseUiId="popover"
-      controls={[controlRoot]}
+      controls={[controlRoot, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateRoot]}
+      state={[stateRoot, partState]}
       title="Action Sheet"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <ActionSheet.Root
           key={keyRoot}
           {...propsRoot}
         >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Show Action Sheet</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Show Action Sheet
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
-              <ActionSheet.Title>A Short Title Is Best</ActionSheet.Title>
-              <ActionSheet.Description>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                A Short Title Is Best
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 A description should be a short, complete sentence.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
               <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
                 variant="destructive"
                 onClick={() => addLog('action: Action 1')}
               >
                 Action 1
               </ActionSheet.Action>
-              <ActionSheet.Action onClick={() => addLog('action: Action 2')}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                onClick={() => addLog('action: Action 2')}
+              >
                 Action 2
               </ActionSheet.Action>
-              <ActionSheet.Action onClick={() => addLog('action: Action 3')}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                onClick={() => addLog('action: Action 3')}
+              >
                 Action 3
               </ActionSheet.Action>
-              <ActionSheet.Action onClick={() => addLog('action: Action 4')}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                onClick={() => addLog('action: Action 4')}
+              >
                 Action 4
               </ActionSheet.Action>
             </ActionSheet.Actions>

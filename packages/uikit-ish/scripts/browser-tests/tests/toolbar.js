@@ -332,11 +332,13 @@ export const tests = [
     name: 'header: the bar sticks; the large title scrolls away under it, the bar’s title fading in',
     run: async (page) => {
       await page.open('header');
-      const scroller = `[...${page.section}.querySelectorAll('div')].find((element) => getComputedStyle(element).overflowY === 'auto')`;
+      // (Its page's root: the content scrolling, see Page.Root.)
+      const scroller = `${page.section}.querySelector('[data-page-part=root]')`;
       const state = () =>
         page.evaluate(`(() => {
           const scroller = ${scroller};
-          const bar = scroller.querySelector('[role=toolbar]');
+          // (The bar outside the page, at its top: see Viewport.BlockStart.)
+          const bar = ${page.section}.querySelector('[role=toolbar]');
           const title = bar.querySelector('[data-toolbar-part=title]');
           const large = scroller.querySelector('[data-header-part=large-title]');
           return {
@@ -360,7 +362,7 @@ export const tests = [
       await sleep(200);
       assert.equal(
         await page.evaluate(
-          `+getComputedStyle(${scroller}.querySelector('[data-toolbar-part=title]')).opacity`,
+          `+getComputedStyle(${page.section}.querySelector('[data-toolbar-part=title]')).opacity`,
         ),
         1,
       );
@@ -404,12 +406,15 @@ export const tests = [
   {
     name: 'header: an accessory scrolls with the large title, then sticks below the bar',
     run: async (page) => {
-      await page.open('header-composition-control');
+      await page.open('header-composition-control', 'light', {
+        isFramed: true,
+      });
       /** The accessory's top and the bar's bottom, from the screen's top. */
       const edges = () =>
         page.evaluate(`(() => {
           const screen = ${page.section}.querySelector('.demo-phone').getBoundingClientRect();
-          const bar = ${page.section}.querySelector('[data-header-part=bar]').getBoundingClientRect();
+          // (Its bar: the page's toolbar, at the screen's top.)
+          const bar = ${page.section}.querySelector('[data-toolbar-part=root]').getBoundingClientRect();
           const accessory = ${page.section}.querySelector('[data-header-part=accessory]').getBoundingClientRect();
           return { accessory: Math.round(accessory.top - screen.top), bar: Math.round(bar.bottom - screen.top) };
         })()`);

@@ -15,9 +15,9 @@ export const pageRootRows: readonly PropRow[] = [
     union('grouped', 'plain'),
     code(union('grouped')),
     <>
-      The page background: <code>grouped</code> (the grouped background) for
-      grouped lists (<code>insetGrouped</code>, <code>grouped</code>);{' '}
-      <code>plain</code> (the system background) for plain lists and other
+      The page background. <code>grouped</code> (the grouped background) suits
+      grouped lists (<code>insetGrouped</code>, <code>grouped</code>).{' '}
+      <code>plain</code> (the system background) suits plain lists and other
       content.
     </>,
   ],
@@ -26,9 +26,9 @@ export const pageRootRows: readonly PropRow[] = [
     'boolean',
     code('true'),
     <>
-      Bouncing even when its content fits: it has at least 1px to scroll, so a
-      drag on it is its own (rubber-banding the page, the bars staying), not the
-      document’s (on iOS, moving the whole app). <code>false</code>: only
+      Bounces even when its content fits: it always has at least 1px to scroll.
+      A drag on it then rubber-bands the page while the bars stay put, instead
+      of moving the document (on iOS, the whole app). <code>false</code>: only
       content taller than it scrolls.
     </>,
   ],
@@ -37,10 +37,11 @@ export const pageRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Its content filling it, not scrolled (e.g. a map under its bars): not a
-      scroller (its provider tracks none here; no edge effects), its content
-      running under the bars and the safe areas (their insets its own, to keep
-      clear of where it needs to), on the page background all the same.
+      Lets its content fill it without scrolling, for example a map under its
+      bars. It’s then not a scroller: its provider tracks nothing here, and
+      there are no edge effects. Its content runs under the bars and the safe
+      areas, and keeps clear of their insets itself where it needs to. It still
+      sits on the page background.
     </>,
   ],
   [
@@ -48,7 +49,7 @@ export const pageRootRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      What it scrolls (or, <code>fill</code>, what fills it): e.g. a{' '}
+      What it scrolls (or, with <code>fill</code>, what fills it). For example a{' '}
       <a href={publicUrl('header')}>Header</a>’s large title at its start (below
       the header’s bar), then lists.
     </>,

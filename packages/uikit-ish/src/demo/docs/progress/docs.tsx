@@ -16,12 +16,12 @@ const formatRows: readonly PropRow[] = [
     'Intl.NumberFormatOptions',
     undefined,
     <>
-      Options to format the value (its{' '}
+      Options to format the value (for its{' '}
       <PartLink
         component="progress"
         part="Progress.Value"
       />{' '}
-      and <code>aria-valuetext</code>; by default, a percentage).
+      and <code>aria-valuetext</code>). By default, it’s a percentage.
     </>,
   ],
   [
@@ -48,12 +48,12 @@ export const progressRootRows: readonly PropRow[] = [
     undefined,
     <>
       The current value (required). The component is indeterminate when value is{' '}
-      <code>null</code>: its fill slides along the track (or prefer an{' '}
+      <code>null</code>, and its fill then slides along the track (prefer an{' '}
       <PartLink
         component="progress"
         part="ActivityIndicator"
       />
-      ).
+      instead).
     </>,
   ],
   ['min', 'number', code('0'), 'The minimum value.'],
@@ -64,7 +64,7 @@ export const progressRootRows: readonly PropRow[] = [
     'synchronized',
     'boolean',
     code('true'),
-    'Indeterminate, its fill sliding in sync with every other indeterminate bar’s on the page (wherever each is along, whenever it started), or on its own.',
+    'While indeterminate, whether its fill slides in sync with every other indeterminate bar on the page (wherever each one is, whenever it started), or on its own.',
   ],
   [
     'children',
@@ -122,7 +122,7 @@ export const progressLabelRows: readonly PropRow[] = [
     'placement',
     union(...placements),
     code(union('block-start')),
-    'Above the track (at the line’s start), below it, before or after it.',
+    'Where it sits: above the track (at the line’s start), below it, or before or after it.',
   ],
   ['children', 'ReactNode', undefined, 'What’s in progress (“Downloading”).'],
   ...baseUiRows('span', 'HTMLSpanElement'),
@@ -134,16 +134,17 @@ export const progressValueRows: readonly PropRow[] = [
     union(...placements, 'tooltip', 'momentary-tooltip'),
     code(union('block-start')),
     <>
-      Above the track (at the line’s end), below it, before or after it; or in a
-      tooltip at the fill’s end: always, or momentary (while the bar is hovered
-      or focused by keyboard: the bar is focusable then).
+      Where it sits: above the track (at the line’s end), below it, before or
+      after it, or in a tooltip at the fill’s end. The tooltip shows always, or
+      only momentarily (while the bar is hovered or focused by keyboard; the bar
+      can take focus then).
     </>,
   ],
   [
     'children',
     '(formattedValue: string | null, value: number | null) => ReactNode',
     undefined,
-    'A function of the value (formatted by the root’s format), to render it otherwise; by default, the formatted value.',
+    'A function of the value (formatted by the root’s format), to render it differently. By default, it shows the formatted value.',
   ],
   ...baseUiRows('span', 'HTMLSpanElement'),
 ];
@@ -154,10 +155,11 @@ export const activityIndicatorRows: readonly PropRow[] = [
     'number',
     code('0'),
     <>
-      How far along a turn it is (turns: 0 to 1; below 0, turned back; past 1,
-      further turns): at rest, set by hand (e.g. following a pull); spinning,
-      where it starts from (later changes not restarting it). Rotating, the
-      spinner turned that far; otherwise its brightest spoke moved on.
+      How far along a turn it is, in turns (0 to 1; below 0 turns back, past 1
+      turns further). At rest, it’s set by hand (for example following a pull).
+      While spinning, it’s where the spin starts from, and later changes don’t
+      restart it. With <code>rotate</code>, the spinner turns that far;
+      otherwise, its brightest spoke moves on.
     </>,
   ],
   [
@@ -165,11 +167,11 @@ export const activityIndicatorRows: readonly PropRow[] = [
     union('animate', 'freeze', 'reset', 'finish', 'finish-and-hide', 'none'),
     code('animate'),
     <>
-      How it shows: spinning (<code>animate</code>); stopped: at rest at once (
-      <code>reset</code>), frozen where it is (<code>freeze</code>), or
-      finishing its turn first, then resting at the top (no jump:{' '}
-      <code>finish</code>), whatever its <code>movement</code>; finishing, then
-      hidden (<code>finish-and-hide</code>), or hidden at once (
+      How it shows. <code>animate</code> spins it. When stopped, it rests at
+      once (<code>reset</code>), freezes where it is (<code>freeze</code>), or
+      finishes its turn first and then rests at the top, without a jump (
+      <code>finish</code>), whatever its <code>movement</code>. It can also
+      finish and then hide (<code>finish-and-hide</code>), or hide at once (
       <code>none</code>). Hidden, it takes no room.
     </>,
   ],
@@ -177,23 +179,29 @@ export const activityIndicatorRows: readonly PropRow[] = [
     'size',
     union('regular', 'small'),
     code(union('regular')),
-    'Its size: 30px, or 22px.',
+    'Its size: 30px or 22px.',
   ],
   [
     'movement',
     union('stepped', 'rotate', 'fade'),
     code(union('stepped')),
-    'How it spins: a spoke at a time, smoothly, or its spokes staying in place, fading in turn.',
+    'How it spins: one spoke at a time, smoothly, or with its spokes staying in place and fading in turn.',
   ],
-  ['duration', 'number', code('1'), 'Seconds a turn takes (its speed).'],
+  [
+    'duration',
+    'number',
+    code('1'),
+    'How many seconds a turn takes (its speed).',
+  ],
   [
     'synchronized',
     'boolean',
     code('true'),
     <>
-      Spinning in sync with every other activity indicator on the page (alike at
-      once, whenever each started), or on its own; with its own{' '}
-      <code>progress</code> or <code>duration</code>, always on its own.
+      Whether it spins in sync with every other activity indicator on the page
+      (all alike, whenever each one started), or on its own. With its own{' '}
+      <code>progress</code> or <code>duration</code>, it always spins on its
+      own.
     </>,
   ],
   [
@@ -206,7 +214,7 @@ export const activityIndicatorRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'A label after it, naming it (as Base UI’s Progress.Label).',
+    'A label after it, which names it (like Base UI’s Progress.Label).',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];

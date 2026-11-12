@@ -10,7 +10,7 @@
     width: 100svw;
     min-height: 100svh;
 
-    /* (Clear of the device's safe areas, e.g. a phone's notch in landscape:
+    /* (Clear of the device's safe area insets, e.g. a phone's notch in landscape:
        the page is under them, see webpack.config.js.) */
     padding: max(1rem, env(safe-area-inset-top))
       max(1rem, env(safe-area-inset-right))

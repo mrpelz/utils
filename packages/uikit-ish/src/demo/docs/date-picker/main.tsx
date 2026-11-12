@@ -5,8 +5,12 @@ import { FunctionComponent, useMemo } from 'react';
 import { CalendarFooter, DatePicker } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsDatePicker,
   getPropOptionsRangePicker,
@@ -72,15 +76,29 @@ export const DatePickerRangeDemo: FunctionComponent = () => {
     propsPicker.isRangeDisabled as Parameters<typeof rangeMessages.get>[0],
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'DatePicker.CalendarMessage': ['variant'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       baseUiId="popover"
-      controls={controlPicker}
+      controls={[controlPicker, partControls]}
       id={id}
       log={log}
-      state={[statePicker]}
+      state={[statePicker, partState]}
       title="Date Picker (Range)"
     >
       <DatePicker.Root
@@ -99,6 +117,7 @@ export const DatePickerRangeDemo: FunctionComponent = () => {
 
                 return (
                   <DatePicker.CalendarMessage
+                    {...partProps['DatePicker.CalendarMessage']}
                     variant={error ? 'error' : 'info'}
                   >
                     {error ?? message.info}
@@ -201,15 +220,31 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
   const hasJumps =
     content.footer === 'jumps' || content.footer === 'timeRowAndJumps';
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'DatePicker.CalendarButton': ['disabled', 'onClick', 'shape'],
+            'DatePicker.CalendarRow': [],
+            'DatePicker.CalendarTimeRow': ['calendar'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       baseUiId="popover"
-      controls={[controlContent, controlPicker]}
+      controls={[controlContent, controlPicker, partControls]}
       id={id}
       log={log}
-      state={[stateContent, statePicker]}
+      state={[stateContent, statePicker, partState]}
       title="Date Picker (Footer)"
     >
       <DatePicker.Root
@@ -226,13 +261,19 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                 return (
                   <>
                     {hasTimeRow ? (
-                      <DatePicker.CalendarTimeRow calendar={calendar} />
+                      <DatePicker.CalendarTimeRow
+                        {...partProps['DatePicker.CalendarTimeRow']}
+                        calendar={calendar}
+                      />
                     ) : null}
                     {hasJumps ? (
-                      <DatePicker.CalendarRow>
+                      <DatePicker.CalendarRow
+                        {...partProps['DatePicker.CalendarRow']}
+                      >
                         <span aria-hidden="true">Jump to</span>
                         <span className="date-picker-demo-jumps">
                           <DatePicker.CalendarButton
+                            {...partProps['DatePicker.CalendarButton']}
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() =>
@@ -249,6 +290,7 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                             In a week
                           </DatePicker.CalendarButton>
                           <DatePicker.CalendarButton
+                            {...partProps['DatePicker.CalendarButton']}
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() =>
@@ -265,6 +307,7 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                             Next month
                           </DatePicker.CalendarButton>
                           <DatePicker.CalendarButton
+                            {...partProps['DatePicker.CalendarButton']}
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() => calendar.select(new Date(), false)}
@@ -272,6 +315,7 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                             Today
                           </DatePicker.CalendarButton>
                           <DatePicker.CalendarButton
+                            {...partProps['DatePicker.CalendarButton']}
                             disabled={calendar.disabled}
                             shape={calendar.buttonShape}
                             onClick={() => calendar.select(new Date(), true)}

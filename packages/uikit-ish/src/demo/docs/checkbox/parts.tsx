@@ -10,11 +10,15 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfHeartFill } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   checkboxGroupRows,
   checkboxIndicatorRows,
@@ -85,23 +89,39 @@ const CheckboxIndicatorPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Checkbox.Root': ['aria-label', 'defaultChecked'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Checkbox.Indicator"
     >
       <Checkbox.Root
         key={elementKey}
+        {...partProps['Checkbox.Root']}
         defaultChecked
         aria-label="Favorite"
       >
         <Checkbox.Indicator {...props}>
-          <Symbol icon={sfHeartFill} />
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfHeartFill}
+          />
         </Checkbox.Indicator>
       </Checkbox.Root>
     </Component>
@@ -120,18 +140,36 @@ const RadioRootPart: FunctionComponent = () => {
     title: 'Radio.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          RadioGroup: [
+            'aria-label',
+            'className',
+            'defaultValue',
+            'onValueChange',
+          ],
+          'Radio.Root (others)': ['value'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Radio.Root"
     >
       <RadioGroup
         key={elementKey}
+        {...partProps.RadioGroup}
         aria-label="Contact by"
         className="checkbox-demo-group"
         defaultValue="email"
@@ -147,7 +185,7 @@ const RadioRootPart: FunctionComponent = () => {
           >
             <Radio.Root
               value={value}
-              {...(index === 0 ? props : {})}
+              {...(index === 0 ? props : partProps['Radio.Root (others)'])}
             />
             {label}
           </label>
@@ -167,18 +205,40 @@ const RadioIndicatorPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Radio.Indicator' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            RadioGroup: [
+              'aria-label',
+              'className',
+              'defaultValue',
+              'onValueChange',
+            ],
+            Symbol: ['icon'],
+            'Radio.Root': ['value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Radio.Indicator"
     >
       <RadioGroup
         key={elementKey}
+        {...partProps.RadioGroup}
         aria-label="Contact by"
         className="checkbox-demo-group"
         defaultValue="email"
@@ -192,9 +252,15 @@ const RadioIndicatorPart: FunctionComponent = () => {
             key={value}
             className="checkbox-demo-option"
           >
-            <Radio.Root value={value}>
+            <Radio.Root
+              {...partProps['Radio.Root']}
+              value={value}
+            >
               <Radio.Indicator {...props}>
-                <Symbol icon={sfHeartFill} />
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </Radio.Indicator>
             </Radio.Root>
             {label}
@@ -215,14 +281,28 @@ const CheckboxGroupPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'CheckboxGroup' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Checkbox.Root': ['parent', 'value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="CheckboxGroup"
     >
       <CheckboxGroup
@@ -232,7 +312,10 @@ const CheckboxGroupPart: FunctionComponent = () => {
       >
         <div className="checkbox-demo-group">
           <label className="checkbox-demo-option">
-            <Checkbox.Root parent />
+            <Checkbox.Root
+              {...partProps['Checkbox.Root']}
+              parent
+            />
             All
           </label>
           {contacts.map(([value, label]) => (
@@ -240,7 +323,10 @@ const CheckboxGroupPart: FunctionComponent = () => {
               key={value}
               className="checkbox-demo-option"
             >
-              <Checkbox.Root value={value} />
+              <Checkbox.Root
+                {...partProps['Checkbox.Root']}
+                value={value}
+              />
               {label}
             </label>
           ))}
@@ -260,14 +346,28 @@ const RadioGroupPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'RadioGroup' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Radio.Root': ['value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="RadioGroup"
     >
       <RadioGroup
@@ -281,7 +381,10 @@ const RadioGroupPart: FunctionComponent = () => {
               key={value}
               className="checkbox-demo-option"
             >
-              <Radio.Root value={value} />
+              <Radio.Root
+                {...partProps['Radio.Root']}
+                value={value}
+              />
               {label}
             </label>
           ))}
@@ -306,7 +409,7 @@ export const CheckboxParts: FunctionComponent = () => (
           component="checkbox"
           part="Radio.Root"
         />
-        , showing its indicator (a checkmark, or a dash while mixed) while
+        , which shows its indicator (a checkmark, or a dash while mixed) while
         ticked.
       </li>
       <li>
@@ -323,7 +426,7 @@ export const CheckboxParts: FunctionComponent = () => (
           component="checkbox"
           part="CheckboxGroup"
         />
-        , with a parent checkbox for all.
+        , with a parent checkbox for all of them.
       </li>
     </ul>
     <ul className="demo-tree">
@@ -393,17 +496,17 @@ export const CheckboxParts: FunctionComponent = () => (
     <ul>
       <li>Base UI’s checkbox, as a selection circle.</li>
       <li>
-        Ticked or not: <code>checked</code> or <code>defaultChecked</code>,{' '}
-        <code>onCheckedChange</code>.
+        Whether it’s ticked: <code>checked</code> or <code>defaultChecked</code>
+        , and <code>onCheckedChange</code>.
       </li>
       <li>
         Mixed: <code>indeterminate</code> (a dash).
       </li>
       <li>
-        Can be <code>disabled</code> or <code>readOnly</code>.
+        It can be <code>disabled</code> or <code>readOnly</code>.
       </li>
       <li>
-        Submits with a form through a hidden input: <code>name</code>,{' '}
+        It submits with a form, through a hidden input: <code>name</code>,{' '}
         <code>value</code>.
       </li>
       <li>
@@ -422,8 +525,8 @@ export const CheckboxParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>What the circle shows while ticked or mixed.</li>
-      <li>Default (no children): the checkmark and the dash.</li>
-      <li>As the root’s child: its own content instead (here, a heart).</li>
+      <li>By default (without children), the checkmark and the dash.</li>
+      <li>With children, it shows its own content instead (here, a heart).</li>
     </ul>
     <CheckboxIndicatorPart />
     <h3>Props</h3>
@@ -444,9 +547,9 @@ export const CheckboxParts: FunctionComponent = () => (
         />
         .
       </li>
-      <li>Chosen while the group’s value is its own.</li>
+      <li>It’s chosen while the group’s value is its own.</li>
       <li>
-        Can be <code>disabled</code> or <code>readOnly</code>.
+        It can be <code>disabled</code> or <code>readOnly</code>.
       </li>
     </ul>
     <RadioRootPart />
@@ -460,8 +563,8 @@ export const CheckboxParts: FunctionComponent = () => (
       <code>Radio.Indicator</code>
     </Heading>
     <ul>
-      <li>What the radio shows while chosen.</li>
-      <li>Default: the checkmark. As the root’s child: its own content.</li>
+      <li>What the radio shows while it’s chosen.</li>
+      <li>By default, the checkmark. With children, its own content.</li>
     </ul>
     <RadioIndicatorPart />
     <h3>Props</h3>
@@ -474,14 +577,14 @@ export const CheckboxParts: FunctionComponent = () => (
       <code>CheckboxGroup</code>
     </Heading>
     <ul>
-      <li>Base UI’s, as is.</li>
+      <li>Base UI’s, as it is.</li>
       <li>
-        Checkboxes sharing one value: the names (<code>value</code>s) of those
-        ticked.
+        Checkboxes that share one value: the names (<code>value</code>s) of
+        those that are ticked.
       </li>
       <li>
-        With <code>allValues</code>: a <code>parent</code> checkbox ticks or
-        unticks all, mixed while only some are ticked.
+        With <code>allValues</code>, a <code>parent</code> checkbox ticks or
+        unticks all of them, and is mixed while only some are ticked.
       </li>
     </ul>
     <CheckboxGroupPart />
@@ -495,14 +598,14 @@ export const CheckboxParts: FunctionComponent = () => (
       <code>RadioGroup</code>
     </Heading>
     <ul>
-      <li>Base UI’s, as is.</li>
-      <li>Radios sharing one value: the chosen radio’s.</li>
+      <li>Base UI’s, as it is.</li>
+      <li>Radios that share one value: the chosen radio’s.</li>
       <li>
-        Submits with a form by its <code>name</code>.
+        It submits with a form under its <code>name</code>.
       </li>
       <li>
-        Renders a <code>div</code> (or, by <code>render</code>, e.g. a list’s
-        group).
+        Renders a <code>div</code>, or another element through{' '}
+        <code>render</code> (for example a list’s group).
       </li>
     </ul>
     <RadioGroupPart />

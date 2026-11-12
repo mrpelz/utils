@@ -11,11 +11,15 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   editMenuItemRows,
   editMenuMoreRows,
@@ -51,19 +55,43 @@ const RootPart: FunctionComponent = () => {
     title: 'EditMenu.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="EditMenu.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
           {...props}
           open={selection !== null}
@@ -78,28 +106,50 @@ const RootPart: FunctionComponent = () => {
             Select some of this text: the edit menu shows above the selection,
             with its actions, more of them behind the chevron.
           </p>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={selection ?? text}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={selection ?? text}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -128,20 +178,46 @@ const PortalPart: FunctionComponent = () => {
     title: 'EditMenu.Portal',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Portal (others)': [],
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Popup': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="EditMenu.Portal"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={selection !== null}
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) clearSelection();
@@ -155,27 +231,49 @@ const PortalPart: FunctionComponent = () => {
             with its actions, more of them behind the chevron.
           </p>
           <EditMenu.Portal {...props}>
-            <EditMenu.Positioner anchor={selection ?? text}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={selection ?? text}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal (others)']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -204,20 +302,45 @@ const PositionerPart: FunctionComponent = () => {
     title: 'EditMenu.Positioner',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="EditMenu.Positioner"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={selection !== null}
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) clearSelection();
@@ -230,31 +353,50 @@ const PositionerPart: FunctionComponent = () => {
             Select some of this text: the edit menu shows above the selection,
             with its actions, more of them behind the chevron.
           </p>
-          <EditMenu.Portal>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
             <EditMenu.Positioner
               anchor={selection ?? text}
               {...props}
             >
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -283,20 +425,45 @@ const PopupPart: FunctionComponent = () => {
     title: 'EditMenu.Popup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="EditMenu.Popup"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={selection !== null}
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) clearSelection();
@@ -309,28 +476,50 @@ const PopupPart: FunctionComponent = () => {
             Select some of this text: the edit menu shows above the selection,
             with its actions, more of them behind the chevron.
           </p>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={selection ?? text}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={selection ?? text}
+            >
               <EditMenu.Popup {...props}>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -357,20 +546,46 @@ const ItemPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'EditMenu.Item' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item (others)': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="EditMenu.Item"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={selection !== null}
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) clearSelection();
@@ -383,26 +598,45 @@ const ItemPart: FunctionComponent = () => {
             Select some of this text: the edit menu shows above the selection,
             with its actions, more of them behind the chevron.
           </p>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={selection ?? text}>
-              <EditMenu.Popup>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={selection ?? text}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
                 <EditMenu.Item {...props}>Cut</EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item (others)']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item (others)']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -434,20 +668,45 @@ const SubmenuRootPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="EditMenu.SubmenuRoot"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={selection !== null}
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) clearSelection();
@@ -460,28 +719,50 @@ const SubmenuRootPart: FunctionComponent = () => {
             Select some of this text: the edit menu shows above the selection,
             with its actions, more of them behind the chevron.
           </p>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={selection ?? text}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={selection ?? text}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
                 <EditMenu.SubmenuRoot {...props}>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -510,20 +791,45 @@ const MorePart: FunctionComponent = () => {
     title: 'EditMenu.More',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="EditMenu.More"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={selection !== null}
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) clearSelection();
@@ -536,28 +842,50 @@ const MorePart: FunctionComponent = () => {
             Select some of this text: the edit menu shows above the selection,
             with its actions, more of them behind the chevron.
           </p>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={selection ?? text}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={selection ?? text}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
                   <EditMenu.More {...props} />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -579,18 +907,46 @@ const UseSelectionAnchorPart: FunctionComponent = () => {
   const [text, setText] = useState<HTMLElement | null>(null);
   const [selection, clearSelection] = useSelectionAnchor(text);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'EditMenu.Item': ['onClick'],
+            'EditMenu.More': [],
+            'EditMenu.Popup': [],
+            'EditMenu.Portal': [],
+            'EditMenu.Positioner': ['anchor'],
+            'EditMenu.Root': ['onOpenChange', 'open'],
+            'EditMenu.SubmenuRoot': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Positioner': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="menu"
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="useSelectionAnchor"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <EditMenu.Root
+          {...partProps['EditMenu.Root']}
           open={selection !== null}
           onOpenChange={(isOpen: boolean) => {
             if (!isOpen) clearSelection();
@@ -603,28 +959,50 @@ const UseSelectionAnchorPart: FunctionComponent = () => {
             Select some of this text: the edit menu shows above the selection,
             with its actions, more of them behind the chevron.
           </p>
-          <EditMenu.Portal>
-            <EditMenu.Positioner anchor={selection ?? text}>
-              <EditMenu.Popup>
-                <EditMenu.Item onClick={() => addLog('Cut clicked')}>
+          <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+            <EditMenu.Positioner
+              {...partProps['EditMenu.Positioner']}
+              anchor={selection ?? text}
+            >
+              <EditMenu.Popup {...partProps['EditMenu.Popup']}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Cut clicked')}
+                >
                   Cut
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Copy clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
                   Copy
                 </EditMenu.Item>
-                <EditMenu.Item onClick={() => addLog('Paste clicked')}>
+                <EditMenu.Item
+                  {...partProps['EditMenu.Item']}
+                  onClick={() => addLog('Paste clicked')}
+                >
                   Paste
                 </EditMenu.Item>
-                <EditMenu.SubmenuRoot>
-                  <EditMenu.More />
-                  <EditMenu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Look Up clicked')}>
-                          <Menu.Label>Look Up</Menu.Label>
+                <EditMenu.SubmenuRoot {...partProps['EditMenu.SubmenuRoot']}>
+                  <EditMenu.More {...partProps['EditMenu.More']} />
+                  <EditMenu.Portal {...partProps['EditMenu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Look Up clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Look Up
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Translate clicked')}>
-                          <Menu.Label>Translate</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Translate clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Translate
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
@@ -645,56 +1023,88 @@ export const EditMenuParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A <a href={publicUrl('menu')}>Menu</a> in a horizontal glass capsule,
-        opened by the app at an anchor (a selection): no trigger.
+        opened by the app at an anchor (a selection), without a trigger.
       </li>
       <li>
-        Its own parts: the root, the positioner, the capsule, its actions and
-        the “more” button; the “more” submenu is a Menu’s positioner and popup.
+        Its own parts are the root, the positioner, the capsule, its actions and
+        the “more” button. The “more” submenu is a Menu’s positioner and popup.
       </li>
       <li>
-        No handles: there’s no trigger to open it at (the app opens it,
-        <code>open</code>).
+        There are no handles, because there’s no trigger to open it at (the app
+        opens it with <code>open</code>).
       </li>
     </ul>
     <ul className="demo-tree">
       <li>
-        <PartLink part="EditMenu.Root" />
+        <PartLink
+          component="edit-menu"
+          part="EditMenu.Root"
+        />
         <ul>
-          <li>the content its actions are about (e.g. text)</li>
+          <li className="demo-tree-context">
+            <span>the content its actions are about (for example text)</span>
+          </li>
           <li>
-            <PartLink part="EditMenu.Portal" />
+            <PartLink
+              component="edit-menu"
+              part="EditMenu.Portal"
+            />
             <ul>
               <li>
-                <PartLink part="EditMenu.Positioner" />
+                <PartLink
+                  component="edit-menu"
+                  part="EditMenu.Positioner"
+                />
                 <ul>
                   <li>
-                    <PartLink part="EditMenu.Popup" />
+                    <PartLink
+                      component="edit-menu"
+                      part="EditMenu.Popup"
+                    />
                     <ul>
                       <li>
-                        <PartLink part="EditMenu.Item" />
+                        <PartLink
+                          component="edit-menu"
+                          part="EditMenu.Item"
+                        />
                       </li>
                       <li>
-                        <PartLink part="EditMenu.SubmenuRoot" /> (optional)
+                        <PartLink
+                          component="edit-menu"
+                          part="EditMenu.SubmenuRoot"
+                        />{' '}
+                        (optional)
                         <ul>
                           <li>
-                            <PartLink part="EditMenu.More" />
+                            <PartLink
+                              component="edit-menu"
+                              part="EditMenu.More"
+                            />
                           </li>
                           <li>
-                            <PartLink part="EditMenu.Portal" />:
                             <PartLink
-                              component="menu"
-                              part="Menu.Positioner"
+                              component="edit-menu"
+                              part="EditMenu.Portal"
                             />
-                            ,
-                            <PartLink
-                              component="menu"
-                              part="Menu.Popup"
-                            />
-                            ,
-                            <PartLink
-                              component="menu"
-                              part="Menu.Item"
-                            />
+                            <ul>
+                              <li className="demo-tree-context">
+                                <PartLink
+                                  component="menu"
+                                  part="Menu.Positioner"
+                                />{' '}
+                                <span>→</span>{' '}
+                                <PartLink
+                                  component="menu"
+                                  part="Menu.Popup"
+                                />{' '}
+                                <span>→</span>{' '}
+                                <PartLink
+                                  component="menu"
+                                  part="Menu.Item"
+                                />
+                                <span>s</span>
+                              </li>
+                            </ul>
                           </li>
                         </ul>
                       </li>
@@ -707,7 +1117,11 @@ export const EditMenuParts: FunctionComponent = () => (
         </ul>
       </li>
       <li>
-        <PartLink part="useSelectionAnchor" />
+        <PartLink
+          component="edit-menu"
+          part="useSelectionAnchor"
+        />{' '}
+        (a hook: the selection as an anchor)
       </li>
     </ul>
 
@@ -719,21 +1133,21 @@ export const EditMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The menu’s state: opened by the app (<code>open</code>), e.g. while
-        there’s a selection; closed by an action, a press outside or Escape (
-        <code>onOpenChange</code>).
+        Holds the menu’s state. The app opens it (<code>open</code>), for
+        example while there’s a selection. An action, a press outside or Escape
+        closes it (<code>onOpenChange</code>).
       </li>
       <li>
-        Not modal by default: the page stays interactive, a press outside
-        reaching it (e.g. clearing the selection).
+        It isn’t modal by default. The page stays interactive, and a press
+        outside reaches it (for example clearing the selection).
       </li>
       <li>
-        Its actions in a row (<code>orientation</code>): the arrow keys left and
-        right move between them.
+        Its actions sit in a row (<code>orientation</code>), and the left and
+        right arrow keys move between them.
       </li>
       <li>
-        Renders no element (Base UI’s positioning needs a trigger: it renders a
-        hidden, inert one).
+        Renders no element. Base UI’s positioning needs a trigger, so it renders
+        a hidden, inert one.
       </li>
     </ul>
     <RootPart />
@@ -756,7 +1170,7 @@ export const EditMenuParts: FunctionComponent = () => (
         ): into <code>document.body</code>, or its <code>container</code>,
         without a box of its own.
       </li>
-      <li>Also around the “more” submenu.</li>
+      <li>It also goes around the “more” submenu.</li>
     </ul>
     <PortalPart />
     <h3>Props</h3>
@@ -771,13 +1185,13 @@ export const EditMenuParts: FunctionComponent = () => (
     <ul>
       <li>
         Places the capsule above its <code>anchor</code> (the selection), 8px
-        away; below it if there’s no room.
+        away, or below it without room.
       </li>
       <li>
-        Never wider than its collision boundary: too narrow for its actions,
-        they scroll in the capsule.
+        It’s never wider than its collision boundary. When that’s too narrow for
+        its actions, they scroll in the capsule.
       </li>
-      <li>Closes the menu once its anchor scrolls out of view.</li>
+      <li>It closes the menu once its anchor scrolls out of view.</li>
     </ul>
     <PositionerPart />
     <h3>Props</h3>
@@ -791,16 +1205,19 @@ export const EditMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The capsule: glass, 42px high, its actions from 20px, the “more” button
-        at its end.
+        The capsule: glass, 42px tall, with its actions starting 20px in and the
+        “more” button at its end.
       </li>
       <li>
-        Too many actions: they scroll (a swipe pans them, flung on release;
-        held, then dragged, a touch highlights the one under the finger, held
-        near an end scrolling on), faded at the ends with more beyond. They rest
-        on an action, a peek of those beyond each end showing.
+        When there are too many actions, they scroll. A swipe pans them, and
+        they keep going when flung. A held touch, then dragged, highlights the
+        one under the finger, and holding it near an end keeps scrolling.
+        They’re faded at the ends where there are more, and come to rest on an
+        action, with a peek of those beyond each end.
       </li>
-      <li>Keeps the selection while it has focus (WebKit would clear it).</li>
+      <li>
+        It keeps the selection while it has focus (WebKit would clear it).
+      </li>
     </ul>
     <PopupPart />
     <h3>Props</h3>
@@ -814,11 +1231,11 @@ export const EditMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An action: its label (14px), a divider before it (but the first), the
-        dividers next to the highlighted action hidden.
+        An action: its label (14px), with a divider before it (except the
+        first). The dividers next to the highlighted action are hidden.
       </li>
       <li>
-        Look: <code>destructive</code>, <code>disabled</code>.
+        Its look: <code>destructive</code> and <code>disabled</code>.
       </li>
     </ul>
     <ItemPart />
@@ -838,7 +1255,7 @@ export const EditMenuParts: FunctionComponent = () => (
           component="menu"
           part="Menu.SubmenuRoot"
         />
-        , its submenu a regular menu below the capsule.
+        , whose submenu is a regular menu below the capsule.
       </li>
     </ul>
     <SubmenuRootPart />
@@ -853,8 +1270,8 @@ export const EditMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The “more” button: a 34px circle with a chevron, named “More”, opening
-        the submenu (also on hover).
+        The “more” button: a 34px circle with a chevron, named “More”. It opens
+        the submenu, on hover too.
       </li>
     </ul>
     <MorePart />
@@ -870,16 +1287,17 @@ export const EditMenuParts: FunctionComponent = () => (
     <ul>
       <li>
         The text selection in an element, as the positioner’s{' '}
-        <code>anchor</code>, once it’s made: the pointer released, or after a
-        pause (keyboard, touch).
+        <code>anchor</code>, once it’s made: when the pointer is released, or
+        after a pause (keyboard, touch).
       </li>
       <li>
-        Changes keeping the range (e.g. restored after the menu took focus) are
-        ignored; presses not changing it (e.g. outside the text) only clear it.
+        Changes that keep the range (for example when it’s restored after the
+        menu took focus) are ignored. Presses that don’t change it (for example
+        outside the text) only clear it.
       </li>
       <li>
-        Returns the anchor (null while there’s none) and a function clearing it
-        (e.g. as the menu closes).
+        Returns the anchor (null while there’s none) and a function that clears
+        it (for example as the menu closes).
       </li>
     </ul>
     <UseSelectionAnchorPart />

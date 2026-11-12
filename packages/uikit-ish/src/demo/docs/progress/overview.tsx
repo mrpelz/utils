@@ -1,10 +1,13 @@
 import './style.css';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { ActivityIndicator, Progress } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -14,6 +17,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   activityIndicatorRows,
   progressLabelRows,
@@ -35,25 +39,43 @@ const LiveView: FunctionComponent = () => {
     { external: externalValue, title: 'Progress.Value' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          ActivityIndicator: [],
+          'Progress.Indicator': [],
+          'Progress.Label': [],
+          'Progress.Track': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="progress"
-      controls={[controlRoot, controlValue]}
+      controls={[controlRoot, controlValue, partControls]}
       id={id}
-      state={[stateRoot, stateValue]}
+      state={[stateRoot, stateValue, partState]}
       title="Progress"
     >
       <div className="progress-demo-stage">
         <Progress.Root {...propsRoot}>
-          <Progress.Label>Downloading</Progress.Label>
+          <Progress.Label {...partProps['Progress.Label']}>
+            Downloading
+          </Progress.Label>
           <Progress.Value {...propsValue} />
-          <Progress.Track>
-            <Progress.Indicator />
+          <Progress.Track {...partProps['Progress.Track']}>
+            <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
-        <ActivityIndicator>Loading</ActivityIndicator>
+        <ActivityIndicator {...partProps.ActivityIndicator}>
+          Loading
+        </ActivityIndicator>
       </div>
     </Component>
   );
@@ -74,15 +96,19 @@ export const ProgressOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Work going on: a bar filling as it advances (Base UI’s{' '}
-        <code>Progress</code>), or, of unknown length, spinning spokes (
+        Work going on: a bar that fills as it advances (Base UI’s{' '}
+        <code>Progress</code>), or, for work of unknown length, spinning spokes
+        (
         <PartLink
           component="progress"
           part="ActivityIndicator"
         />
         ).
       </li>
-      <li>Progress indicators: a progress bar, an activity indicator.</li>
+      <li>
+        So there are two progress indicators: a progress bar and an activity
+        indicator.
+      </li>
     </ul>
     <LiveView />
 
@@ -94,14 +120,17 @@ export const ProgressOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A bar: work whose share done is known (a download, an import), so the
-        person can tell how long is left.
+        A bar: for work whose share done is known (a download, an import), so
+        people can tell how long is left.
       </li>
       <li>
-        An activity indicator: work of unknown length (loading, connecting),
+        An activity indicator: for work of unknown length (loading, connecting),
         where it happens (a row, a page’s content).
       </li>
-      <li>Only while the work runs: gone (or the bar full) once it’s done.</li>
+      <li>
+        Show them only while the work runs. Once it’s done, remove them (or show
+        the bar full).
+      </li>
     </ul>
 
     <Heading
@@ -112,16 +141,16 @@ export const ProgressOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A value to set: a <a href={publicUrl('slider')}>Slider</a> (an editable
-        bar).
+        A value to set: use a <a href={publicUrl('slider')}>Slider</a> (an
+        editable bar).
       </li>
       <li>
-        Something new waiting, counted: a <a href={publicUrl('badge')}>Badge</a>
-        .
+        A count of something new waiting: use a{' '}
+        <a href={publicUrl('badge')}>Badge</a>.
       </li>
       <li>
-        A bar of unknown length (Base UI’s indeterminate): prefer an activity
-        indicator.
+        A bar of unknown length (Base UI’s indeterminate one): prefer an
+        activity indicator.
       </li>
     </ul>
 
@@ -134,7 +163,8 @@ export const ProgressOverview: FunctionComponent = () => (
     <ul>
       <li>The props most progress indicators set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('progress/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('progress/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -157,18 +187,18 @@ export const ProgressOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Both have the <code>progressbar</code> role, the bar with its value (
+        Both have the <code>progressbar</code> role. The bar has its value (
         <code>aria-valuenow</code>, read as its formatted value:{' '}
-        <code>format</code>, <code>getAriaValueText</code>); an activity
-        indicator without one (indeterminate).
+        <code>format</code>, <code>getAriaValueText</code>). An activity
+        indicator has none, since it’s indeterminate.
       </li>
       <li>
-        Named by its label (
+        Its label names it (
         <PartLink
           component="progress"
           part="Progress.Label"
         />
-        , an activity indicator’s children); without one, give it an{' '}
+        , or an activity indicator’s children). Without one, give it an{' '}
         <code>aria-label</code>.
       </li>
       <li>
@@ -176,8 +206,8 @@ export const ProgressOverview: FunctionComponent = () => (
         it too.
       </li>
       <li>
-        The spinner doesn’t follow <code>prefers-reduced-motion</code>; it can
-        be stopped (<code>display</code>).
+        The spinner doesn’t follow <code>prefers-reduced-motion</code>, but it
+        can be stopped (<code>display</code>).
       </li>
     </ul>
 
@@ -189,19 +219,21 @@ export const ProgressOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The bar fills its container (at least 120px, as a slider’s: a label or
-        value before or after it on its line), 6px high; at 0%, a dot. Its fill
-        grows to a new value over 200ms (at once with{' '}
+        The bar fills its container (at least 120px, like a slider’s, with a
+        label or value before or after it on its line), and is 6px tall. At 0%,
+        it’s a dot. Its fill grows to a new value over 200ms (at once with{' '}
         <code>prefers-reduced-motion</code>).
       </li>
       <li>
-        Its label and value above it by default, the label at the line’s start,
-        the value at its end (whichever comes first in the markup).
+        Its label and value sit above it by default, with the label at the
+        line’s start and the value at its end (whichever comes first in the
+        markup).
       </li>
       <li>
-        The activity indicator turns once a second, a spoke at a time. Stopped,
-        it rests at once, freezes where it is, or finishes its turn first; or it
-        hides, once finished or at once (<code>display</code>), taking no room.
+        The activity indicator turns once a second, one spoke at a time. When
+        stopped, it rests at once, freezes where it is, or finishes its turn
+        first. Or it hides, at once or once finished (<code>display</code>),
+        taking no room.
       </li>
     </ul>
   </>

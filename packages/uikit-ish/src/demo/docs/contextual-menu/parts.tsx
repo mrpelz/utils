@@ -13,7 +13,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { codeLabel, useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
@@ -25,6 +28,7 @@ import {
   getPropOptionsGuideTrigger,
   propOptionsPopup,
 } from '../menu/props.js';
+import { partPropMaps } from '../part-options.js';
 import {
   contextualMenuBackdropRows,
   contextualMenuHandleRows,
@@ -72,62 +76,122 @@ const RootPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['destructive', 'onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Preview': [],
+            'ContextualMenu.Separator': [],
+            'ContextualMenu.Trigger': ['ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ContextualMenu.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <ContextualMenu.Root
           key={elementKey}
           {...props}
         >
           <ContextualMenu.Trigger
+            {...partProps['ContextualMenu.Trigger']}
             ref={trigger}
-            render={<Button.Root variant="bordered" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
-          <ContextualMenu.Preview>
+          <ContextualMenu.Preview {...partProps['ContextualMenu.Preview']}>
             <div
               aria-label="Photo"
               className="contextual-menu-demo-photo"
               role="img"
             >
-              <Symbol icon={sfPhoto} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </div>
           </ContextualMenu.Preview>
-          <ContextualMenu.Portal>
-            <ContextualMenu.Backdrop />
-            <ContextualMenu.Positioner>
-              <ContextualMenu.Popup>
-                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+          <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+            <ContextualMenu.Backdrop
+              {...partProps['ContextualMenu.Backdrop']}
+            />
+            <ContextualMenu.Positioner
+              {...partProps['ContextualMenu.Positioner']}
+            >
+              <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
                 <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>
             </ContextualMenu.Positioner>
@@ -155,59 +219,112 @@ const TriggerPart: FunctionComponent = () => {
   const isHeld = props.openOn !== 'click';
   const trigger = useHeldTrigger(isHeld);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['destructive', 'onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Preview': [],
+            'ContextualMenu.Root': [],
+            'ContextualMenu.Separator': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={isHeld ? heldSetup : undefined}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ContextualMenu.Trigger"
     >
-      <Viewport.Content>
-        <ContextualMenu.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ContextualMenu.Root {...partProps['ContextualMenu.Root']}>
           <ContextualMenu.Trigger
             ref={trigger}
             {...props}
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
-          <ContextualMenu.Preview>
+          <ContextualMenu.Preview {...partProps['ContextualMenu.Preview']}>
             <div
               aria-label="Photo"
               className="contextual-menu-demo-photo"
               role="img"
             >
-              <Symbol icon={sfPhoto} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </div>
           </ContextualMenu.Preview>
-          <ContextualMenu.Portal>
-            <ContextualMenu.Backdrop />
-            <ContextualMenu.Positioner>
-              <ContextualMenu.Popup>
-                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+          <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+            <ContextualMenu.Backdrop
+              {...partProps['ContextualMenu.Backdrop']}
+            />
+            <ContextualMenu.Positioner
+              {...partProps['ContextualMenu.Positioner']}
+            >
+              <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
                 <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>
             </ContextualMenu.Positioner>
@@ -231,30 +348,67 @@ const PreviewPart: FunctionComponent = () => {
     title: 'ContextualMenu.Preview',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['destructive', 'onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Root': [],
+            'ContextualMenu.Separator': [],
+            'ContextualMenu.Trigger': ['ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ContextualMenu.Preview"
     >
-      <Viewport.Content>
-        <ContextualMenu.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ContextualMenu.Root {...partProps['ContextualMenu.Root']}>
           <ContextualMenu.Trigger
+            {...partProps['ContextualMenu.Trigger']}
             ref={trigger}
-            render={<Button.Root variant="bordered" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
           <ContextualMenu.Preview {...props}>
             <div
@@ -262,28 +416,51 @@ const PreviewPart: FunctionComponent = () => {
               className="contextual-menu-demo-photo"
               role="img"
             >
-              <Symbol icon={sfPhoto} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </div>
           </ContextualMenu.Preview>
-          <ContextualMenu.Portal>
-            <ContextualMenu.Backdrop />
-            <ContextualMenu.Positioner>
-              <ContextualMenu.Popup>
-                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+          <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+            <ContextualMenu.Backdrop
+              {...partProps['ContextualMenu.Backdrop']}
+            />
+            <ContextualMenu.Positioner
+              {...partProps['ContextualMenu.Positioner']}
+            >
+              <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
                 <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>
             </ContextualMenu.Positioner>
@@ -307,59 +484,119 @@ const PortalPart: FunctionComponent = () => {
     title: 'ContextualMenu.Portal',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['destructive', 'onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Preview': [],
+            'ContextualMenu.Root': [],
+            'ContextualMenu.Separator': [],
+            'ContextualMenu.Trigger': ['ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ContextualMenu.Portal"
     >
-      <Viewport.Content>
-        <ContextualMenu.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ContextualMenu.Root {...partProps['ContextualMenu.Root']}>
           <ContextualMenu.Trigger
+            {...partProps['ContextualMenu.Trigger']}
             ref={trigger}
-            render={<Button.Root variant="bordered" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
-          <ContextualMenu.Preview>
+          <ContextualMenu.Preview {...partProps['ContextualMenu.Preview']}>
             <div
               aria-label="Photo"
               className="contextual-menu-demo-photo"
               role="img"
             >
-              <Symbol icon={sfPhoto} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </div>
           </ContextualMenu.Preview>
           <ContextualMenu.Portal {...props}>
-            <ContextualMenu.Backdrop />
-            <ContextualMenu.Positioner>
-              <ContextualMenu.Popup>
-                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+            <ContextualMenu.Backdrop
+              {...partProps['ContextualMenu.Backdrop']}
+            />
+            <ContextualMenu.Positioner
+              {...partProps['ContextualMenu.Positioner']}
+            >
+              <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
                 <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>
             </ContextualMenu.Positioner>
@@ -383,59 +620,117 @@ const BackdropPart: FunctionComponent = () => {
     title: 'ContextualMenu.Backdrop',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['destructive', 'onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Preview': [],
+            'ContextualMenu.Root': [],
+            'ContextualMenu.Separator': [],
+            'ContextualMenu.Trigger': ['ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ContextualMenu.Backdrop"
     >
-      <Viewport.Content>
-        <ContextualMenu.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ContextualMenu.Root {...partProps['ContextualMenu.Root']}>
           <ContextualMenu.Trigger
+            {...partProps['ContextualMenu.Trigger']}
             ref={trigger}
-            render={<Button.Root variant="bordered" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
-          <ContextualMenu.Preview>
+          <ContextualMenu.Preview {...partProps['ContextualMenu.Preview']}>
             <div
               aria-label="Photo"
               className="contextual-menu-demo-photo"
               role="img"
             >
-              <Symbol icon={sfPhoto} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </div>
           </ContextualMenu.Preview>
-          <ContextualMenu.Portal>
+          <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
             <ContextualMenu.Backdrop {...props} />
-            <ContextualMenu.Positioner>
-              <ContextualMenu.Popup>
-                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+            <ContextualMenu.Positioner
+              {...partProps['ContextualMenu.Positioner']}
+            >
+              <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
                 <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>
             </ContextualMenu.Positioner>
@@ -459,59 +754,117 @@ const PositionerPart: FunctionComponent = () => {
     title: 'ContextualMenu.Positioner',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['destructive', 'onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Preview': [],
+            'ContextualMenu.Root': [],
+            'ContextualMenu.Separator': [],
+            'ContextualMenu.Trigger': ['ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ContextualMenu.Positioner"
     >
-      <Viewport.Content>
-        <ContextualMenu.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ContextualMenu.Root {...partProps['ContextualMenu.Root']}>
           <ContextualMenu.Trigger
+            {...partProps['ContextualMenu.Trigger']}
             ref={trigger}
-            render={<Button.Root variant="bordered" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
-          <ContextualMenu.Preview>
+          <ContextualMenu.Preview {...partProps['ContextualMenu.Preview']}>
             <div
               aria-label="Photo"
               className="contextual-menu-demo-photo"
               role="img"
             >
-              <Symbol icon={sfPhoto} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </div>
           </ContextualMenu.Preview>
-          <ContextualMenu.Portal>
-            <ContextualMenu.Backdrop />
+          <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+            <ContextualMenu.Backdrop
+              {...partProps['ContextualMenu.Backdrop']}
+            />
             <ContextualMenu.Positioner {...props}>
-              <ContextualMenu.Popup>
-                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+              <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
                 <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>
             </ContextualMenu.Positioner>
@@ -535,59 +888,119 @@ const PopupPart: FunctionComponent = () => {
     title: 'ContextualMenu.Popup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['destructive', 'onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Preview': [],
+            'ContextualMenu.Root': [],
+            'ContextualMenu.Separator': [],
+            'ContextualMenu.Trigger': ['ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ContextualMenu.Popup"
     >
-      <Viewport.Content>
-        <ContextualMenu.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ContextualMenu.Root {...partProps['ContextualMenu.Root']}>
           <ContextualMenu.Trigger
+            {...partProps['ContextualMenu.Trigger']}
             ref={trigger}
-            render={<Button.Root variant="bordered" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
-          <ContextualMenu.Preview>
+          <ContextualMenu.Preview {...partProps['ContextualMenu.Preview']}>
             <div
               aria-label="Photo"
               className="contextual-menu-demo-photo"
               role="img"
             >
-              <Symbol icon={sfPhoto} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </div>
           </ContextualMenu.Preview>
-          <ContextualMenu.Portal>
-            <ContextualMenu.Backdrop />
-            <ContextualMenu.Positioner>
+          <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+            <ContextualMenu.Backdrop
+              {...partProps['ContextualMenu.Backdrop']}
+            />
+            <ContextualMenu.Positioner
+              {...partProps['ContextualMenu.Positioner']}
+            >
               <ContextualMenu.Popup {...props}>
-                <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
-                  </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                </ContextualMenu.Item>
-                <ContextualMenu.Separator />
                 <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Share clicked')}
+                >
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
+                  </ContextualMenu.Icon>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                </ContextualMenu.Item>
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>
             </ContextualMenu.Positioner>
@@ -611,53 +1024,111 @@ const CreateHandlePart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const trigger = useHeldTrigger();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Root': ['handle'],
+            'ContextualMenu.Trigger': ['handle', 'id', 'ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
+      state={[partState]}
       title="ContextualMenu.createHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="contextual-menu-demo-triggers">
-          <ContextualMenu.Root handle={photoMenu}>
+          <ContextualMenu.Root
+            {...partProps['ContextualMenu.Root']}
+            handle={photoMenu}
+          >
             <ContextualMenu.Trigger
+              {...partProps['ContextualMenu.Trigger']}
               ref={trigger}
               handle={photoMenu}
               id="contextual-menu-parts-create-handle-trigger"
-              render={<Button.Root variant="bordered" />}
+              render={
+                <Button.Root
+                  {...partProps['Button.Root']}
+                  variant="bordered"
+                />
+              }
             >
-              <Button.Icon>
-                <Symbol icon={sfPhoto} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfPhoto}
+                />
               </Button.Icon>
-              <Button.Label>Photo</Button.Label>
+              <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
             </ContextualMenu.Trigger>
-            <ContextualMenu.Portal>
-              <ContextualMenu.Backdrop />
-              <ContextualMenu.Positioner>
-                <ContextualMenu.Popup>
-                  <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                    <ContextualMenu.Icon>
-                      <Symbol icon={sfSquareAndArrowUp} />
+            <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+              <ContextualMenu.Backdrop
+                {...partProps['ContextualMenu.Backdrop']}
+              />
+              <ContextualMenu.Positioner
+                {...partProps['ContextualMenu.Positioner']}
+              >
+                <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
+                  <ContextualMenu.Item
+                    {...partProps['ContextualMenu.Item']}
+                    onClick={() => addLog('Share clicked')}
+                  >
+                    <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndArrowUp}
+                      />
                     </ContextualMenu.Icon>
-                    <ContextualMenu.Label>Share</ContextualMenu.Label>
+                    <ContextualMenu.Label
+                      {...partProps['ContextualMenu.Label']}
+                    >
+                      Share
+                    </ContextualMenu.Label>
                   </ContextualMenu.Item>
                 </ContextualMenu.Popup>
               </ContextualMenu.Positioner>
             </ContextualMenu.Portal>
           </ContextualMenu.Root>
           <Button.Root
+            {...partProps['Button.Root']}
             variant="borderless"
             onClick={() =>
               photoMenu.open('contextual-menu-parts-create-handle-trigger')
             }
           >
-            <Button.Label>Open Imperatively</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Open Imperatively
+            </Button.Label>
           </Button.Root>
         </div>
       </Viewport.Content>
@@ -676,47 +1147,103 @@ const UseCreateContextualMenuHandlePart: FunctionComponent = () => {
     'const imageMenu = useCreateContextualMenuHandle();',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Item': ['onClick'],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Popup': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Positioner': [],
+            'ContextualMenu.Root': ['handle'],
+            'ContextualMenu.Trigger': ['handle', 'id', 'ref', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isInline
       baseUiId="menu"
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       setup={heldSetup}
       stage="phone"
+      state={[partState]}
       title="useCreateContextualMenuHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="contextual-menu-demo-triggers">
-          <ContextualMenu.Root handle={imageMenu}>
+          <ContextualMenu.Root
+            {...partProps['ContextualMenu.Root']}
+            handle={imageMenu}
+          >
             <ContextualMenu.Trigger
+              {...partProps['ContextualMenu.Trigger']}
               ref={trigger}
               handle={imageMenu}
               id="contextual-menu-parts-use-create-contextual-menu-handle-trigger"
-              render={<Button.Root variant="bordered" />}
+              render={
+                <Button.Root
+                  {...partProps['Button.Root']}
+                  variant="bordered"
+                />
+              }
             >
-              <Button.Icon>
-                <Symbol icon={sfPhoto} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfPhoto}
+                />
               </Button.Icon>
-              <Button.Label>Photo</Button.Label>
+              <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
             </ContextualMenu.Trigger>
-            <ContextualMenu.Portal>
-              <ContextualMenu.Backdrop />
-              <ContextualMenu.Positioner>
-                <ContextualMenu.Popup>
-                  <ContextualMenu.Item onClick={() => addLog('Share clicked')}>
-                    <ContextualMenu.Icon>
-                      <Symbol icon={sfSquareAndArrowUp} />
+            <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+              <ContextualMenu.Backdrop
+                {...partProps['ContextualMenu.Backdrop']}
+              />
+              <ContextualMenu.Positioner
+                {...partProps['ContextualMenu.Positioner']}
+              >
+                <ContextualMenu.Popup {...partProps['ContextualMenu.Popup']}>
+                  <ContextualMenu.Item
+                    {...partProps['ContextualMenu.Item']}
+                    onClick={() => addLog('Share clicked')}
+                  >
+                    <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndArrowUp}
+                      />
                     </ContextualMenu.Icon>
-                    <ContextualMenu.Label>Share</ContextualMenu.Label>
+                    <ContextualMenu.Label
+                      {...partProps['ContextualMenu.Label']}
+                    >
+                      Share
+                    </ContextualMenu.Label>
                   </ContextualMenu.Item>
                 </ContextualMenu.Popup>
               </ContextualMenu.Positioner>
             </ContextualMenu.Portal>
           </ContextualMenu.Root>
           <Button.Root
+            {...partProps['Button.Root']}
             variant="borderless"
             onClick={() =>
               imageMenu.open(
@@ -724,7 +1251,9 @@ const UseCreateContextualMenuHandlePart: FunctionComponent = () => {
               )
             }
           >
-            <Button.Label>Open Imperatively</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Open Imperatively
+            </Button.Label>
           </Button.Root>
         </div>
       </Viewport.Content>
@@ -738,46 +1267,73 @@ export const ContextualMenuParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A <a href={publicUrl('menu')}>Menu</a> whose trigger lifts above the
-        page as it opens (or turns into a preview), the menu below it.
+        page as it opens (or turns into a preview), with the menu below it.
       </li>
       <li>
-        Its own parts: the root, the trigger, the preview, the backdrop, the
-        positioner and the popup; everything in the popup is the Menu’s (the
+        Its own parts are the root, the trigger, the preview, the backdrop, the
+        positioner and the popup. Everything in the popup is the Menu’s (the
         same parts, under <code>ContextualMenu</code>).
       </li>
     </ul>
     <ul className="demo-tree">
       <li>
-        <PartLink part="ContextualMenu.Root" />
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.Root"
+        />
         <ul>
           <li>
-            <PartLink part="ContextualMenu.Trigger" />
+            <PartLink
+              component="contextual-menu"
+              part="ContextualMenu.Trigger"
+            />
           </li>
           <li>
-            <PartLink part="ContextualMenu.Preview" /> (optional)
+            <PartLink
+              component="contextual-menu"
+              part="ContextualMenu.Preview"
+            />{' '}
+            (optional)
           </li>
           <li>
-            <PartLink part="ContextualMenu.Portal" />
+            <PartLink
+              component="contextual-menu"
+              part="ContextualMenu.Portal"
+            />
             <ul>
               <li>
-                <PartLink part="ContextualMenu.Backdrop" /> (optional)
+                <PartLink
+                  component="contextual-menu"
+                  part="ContextualMenu.Backdrop"
+                />{' '}
+                (optional)
               </li>
               <li>
-                <PartLink part="ContextualMenu.Positioner" />
+                <PartLink
+                  component="contextual-menu"
+                  part="ContextualMenu.Positioner"
+                />
                 <ul>
                   <li>
-                    <PartLink part="ContextualMenu.Popup" />
+                    <PartLink
+                      component="contextual-menu"
+                      part="ContextualMenu.Popup"
+                    />
                     <ul>
-                      <li>
-                        a <a href={publicUrl('menu/parts')}>Menu</a>’s items,
-                        groups, separators, quick actions (e.g.
+                      <li className="demo-tree-context">
+                        <span>a</span>{' '}
+                        <a href={publicUrl('menu/parts')}>Menu</a>
+                        <span>
+                          ’s items, groups, separators and quick actions (for
+                          example
+                        </span>{' '}
                         <PartLink
                           component="menu"
                           part="Menu.Item"
                         >
                           ContextualMenu.Item
                         </PartLink>
-                        )
+                        <span>)</span>
                       </li>
                     </ul>
                   </li>
@@ -788,10 +1344,20 @@ export const ContextualMenuParts: FunctionComponent = () => (
         </ul>
       </li>
       <li>
-        <PartLink part="ContextualMenu.createHandle" />
-      </li>
-      <li>
-        <PartLink part="useCreateContextualMenuHandle" />
+        <PartLink
+          component="contextual-menu"
+          part="ContextualMenu.createHandle"
+        />{' '}
+        (a handle, for opening it from code)
+        <ul>
+          <li>
+            <PartLink
+              component="contextual-menu"
+              part="useCreateContextualMenuHandle"
+            />{' '}
+            (the same, in a component)
+          </li>
+        </ul>
       </li>
     </ul>
 
@@ -803,8 +1369,8 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The menu’s state, and whether a preview is given (else the trigger lifts
-        itself).
+        Holds the menu’s state, and whether a preview is given (otherwise, the
+        trigger lifts itself).
       </li>
       <li>
         Its props are a <a href={publicUrl('menu')}>Menu</a>’s root’s (
@@ -812,11 +1378,12 @@ export const ContextualMenuParts: FunctionComponent = () => (
           component="menu"
           part="Menu.Root"
         />
-        ): <code>size</code>, <code>open</code>, <code>onOpenChange</code>, …
+        ): <code>size</code>, <code>open</code>, <code>onOpenChange</code>, and
+        so on.
       </li>
       <li>
-        Released off the trigger (it lifted away under the finger), the menu
-        stays open.
+        When the press is released off the trigger (because the trigger lifted
+        away under the finger), the menu stays open.
       </li>
       <li>Renders no element.</li>
     </ul>
@@ -831,17 +1398,17 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What the menu is about (a photo’s thumbnail, a message): a right click
-        or a held press opens it, lifting it above the blurred page; a press is
-        the trigger’s own (opening the photo).
+        What the menu is about, such as a photo’s thumbnail or a message. A
+        right click or a held press opens the menu, lifting the trigger above
+        the blurred page. A press stays the trigger’s own (opening the photo).
       </li>
       <li>
-        <code>openOn=&quot;click&quot;</code>: a press opens it too (on touch,
-        at touch down).
+        With <code>openOn=&quot;click&quot;</code>, a press opens it too (on
+        touch, at touch down).
       </li>
       <li>
-        Renders a <code>button</code> (in a wrapper that keeps its place while
-        it lifts); usually a <a href={publicUrl('button')}>Button</a> (
+        Renders a <code>button</code>, in a wrapper that keeps its place while
+        it lifts. Usually a <a href={publicUrl('button')}>Button</a> (
         <code>render</code>).
       </li>
     </ul>
@@ -856,24 +1423,26 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What the trigger turns into while the menu is open (the photo, larger):
-        above the menu in the same popup (the positioner’s stack), from the
-        trigger’s place, aligned as the menu.
+        What the trigger turns into while the menu is open (the photo, larger).
+        It sits above the menu in the same popup (the positioner’s stack),
+        starting from the trigger’s place, aligned like the menu.
       </li>
       <li>
-        Rendered as itself, live (not a copy of the trigger). At most the room
-        the menu leaves (or, the menu taller, half of it), clipped.
+        It renders as itself, live, not as a copy of the trigger. It takes at
+        most the room the menu leaves (or, when the menu is taller, half of it),
+        and is clipped.
       </li>
       <li>
-        Without one, the trigger itself lifts into its place: in stacking
-        contexts of its ancestors (e.g. a{' '}
-        <a href={publicUrl('viewport')}>Viewport</a>’s layers), it can’t rise
-        above the backdrop; give it a preview there.
+        Without one, the trigger itself lifts into its place. Inside its
+        ancestors’ stacking contexts (for example a{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>’s layers), its{' '}
+        <code>z-index</code> can’t lift it above the backdrop, so the backdrop
+        is cut out where it is, and it shows through.
       </li>
-      <li>Takes no pointer events (pressing it would commit).</li>
+      <li>It takes no pointer events, because pressing it would choose.</li>
       <li>
-        Here: open the menu (a long press on its trigger, or its secondary
-        click) to see it (one menu opens at a time).
+        Here: open the menu (with a long press on its trigger, or a secondary
+        click) to see it. One menu opens at a time.
       </li>
     </ul>
     <PreviewPart />
@@ -888,19 +1457,21 @@ export const ContextualMenuParts: FunctionComponent = () => (
     <ul>
       <li>
         Renders the backdrop and the menu into <code>document.body</code>, or
-        its <code>container</code>.
+        into its <code>container</code>.
       </li>
       <li>
-        Its container is also the screen the menu fits in (as a device’s: e.g.
-        these views’ frames), clear of its safe area. Without one, the viewport.
+        Its container is also the screen the menu fits in (like a device’s, for
+        example these views’ frames), clear of its safe area insets. Without
+        one, that’s the viewport.
       </li>
       <li>
-        No box of its own (<code>display: contents</code>): rendered into a
-        screen laid out as a flex column, it doesn’t shift its content.
+        It has no box of its own (<code>display: contents</code>), so rendering
+        it into a screen laid out as a flex column doesn’t shift that screen’s
+        content.
       </li>
       <li>
-        Here: open the menu (a long press on its trigger, or its secondary
-        click) to see it (one menu opens at a time).
+        Here: open the menu (with a long press on its trigger, or a secondary
+        click) to see it. One menu opens at a time.
       </li>
     </ul>
     <PortalPart />
@@ -915,12 +1486,12 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The page blurred and dimmed behind the lifted trigger and the menu
+        The page, blurred and dimmed behind the lifted trigger and the menu
         (optional).
       </li>
       <li>
-        Here: open the menu (a long press on its trigger, or its secondary
-        click) to see it (one menu opens at a time).
+        Here: open the menu (with a long press on its trigger, or a secondary
+        click) to see it. One menu opens at a time.
       </li>
     </ul>
     <BackdropPart />
@@ -934,16 +1505,17 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The preview’s slot and the menu below it, 8px apart, from the trigger’s
-        place: one stack, shifted as far as it needs to fit in its screen (never
-        flipped above the trigger).
+        The preview’s slot and the menu below it, 8px apart, starting from the
+        trigger’s place. They’re one stack, shifted as far as it needs to fit on
+        its screen (and never flipped above the trigger).
       </li>
       <li>
-        Aligned with the trigger (<code>align</code>, the preview aligning too).
+        It’s aligned with the trigger (<code>align</code>), and the preview
+        aligns too.
       </li>
       <li>
-        Here: open the menu (a long press on its trigger, or its secondary
-        click) to see it (one menu opens at a time).
+        Here: open the menu (with a long press on its trigger, or a secondary
+        click) to see it. One menu opens at a time.
       </li>
     </ul>
     <PositionerPart />
@@ -962,11 +1534,11 @@ export const ContextualMenuParts: FunctionComponent = () => (
           component="menu"
           part="Menu.Popup"
         />
-        ), below the preview; taller than the room left, it scrolls.
+        ), below the preview. When it’s taller than the room left, it scrolls.
       </li>
       <li>
-        Here: open the menu (a long press on its trigger, or its secondary
-        click) to see it (one menu opens at a time).
+        Here: open the menu (with a long press on its trigger, or a secondary
+        click) to see it. One menu opens at a time.
       </li>
     </ul>
     <PopupPart />
@@ -980,14 +1552,15 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle opening or closing the menu imperatively (Base UI’s{' '}
+        A handle that opens or closes the menu from code (Base UI’s{' '}
         <code>Menu.createHandle</code>): <code>handle.open(triggerId)</code>.
       </li>
       <li>
-        Its trigger stays inside the root: a trigger outside it couldn’t lift.
+        Its trigger stays inside the root, because a trigger outside it couldn’t
+        lift.
       </li>
       <li>
-        Made once, outside a component (in one:{' '}
+        Make it once, outside a component (inside one, use{' '}
         <PartLink part="useCreateContextualMenuHandle" />
         ).
       </li>
@@ -1006,7 +1579,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="ContextualMenu.createHandle" /> in a component: made
-        once, the same for its lifetime.
+        once, the same for the component’s lifetime.
       </li>
     </ul>
     <UseCreateContextualMenuHandlePart />

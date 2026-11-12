@@ -10,7 +10,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
@@ -21,6 +24,7 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   tooltipHandleRows,
   tooltipHandleTypeRows,
@@ -53,15 +57,35 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Tooltip.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Root': ['shape', 'size', 'variant'],
+            'Tooltip.Popup': [],
+            'Tooltip.Portal': [],
+            'Tooltip.Positioner': [],
+            'Tooltip.Trigger': ['aria-label', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Tooltip.Root"
     >
       <Tooltip.Root
@@ -69,22 +93,27 @@ const RootPart: FunctionComponent = () => {
         {...props}
       >
         <Tooltip.Trigger
+          {...partProps['Tooltip.Trigger']}
           aria-label="Share"
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               shape="circle"
               size="large"
               variant="glass"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfSquareAndArrowUp} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfSquareAndArrowUp}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Positioner>
-            <Tooltip.Popup>Share</Tooltip.Popup>
+        <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+          <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+            <Tooltip.Popup {...partProps['Tooltip.Popup']}>Share</Tooltip.Popup>
           </Tooltip.Positioner>
         </Tooltip.Portal>
       </Tooltip.Root>
@@ -103,28 +132,47 @@ const TriggerPart: FunctionComponent = () => {
     title: 'Tooltip.Trigger',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Tooltip.Popup': [],
+          'Tooltip.Portal': [],
+          'Tooltip.Positioner': [],
+          'Tooltip.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Tooltip.Trigger"
     >
-      <Tooltip.Root>
+      <Tooltip.Root {...partProps['Tooltip.Root']}>
         <Tooltip.Trigger
           aria-label="Share"
           {...props}
         >
-          <Button.Icon>
-            <Symbol icon={sfSquareAndArrowUp} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfSquareAndArrowUp}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Positioner>
-            <Tooltip.Popup>Share</Tooltip.Popup>
+        <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+          <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+            <Tooltip.Popup {...partProps['Tooltip.Popup']}>Share</Tooltip.Popup>
           </Tooltip.Positioner>
         </Tooltip.Portal>
       </Tooltip.Root>
@@ -143,34 +191,59 @@ const PortalPart: FunctionComponent = () => {
     title: 'Tooltip.Portal',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Root': ['shape', 'size', 'variant'],
+          'Tooltip.Popup': [],
+          'Tooltip.Positioner': [],
+          'Tooltip.Root': [],
+          'Tooltip.Trigger': ['aria-label', 'render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Tooltip.Portal"
     >
-      <Tooltip.Root defaultOpen>
+      <Tooltip.Root
+        {...partProps['Tooltip.Root']}
+        defaultOpen
+      >
         <Tooltip.Trigger
+          {...partProps['Tooltip.Trigger']}
           aria-label="Share"
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               shape="circle"
               size="large"
               variant="glass"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfSquareAndArrowUp} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfSquareAndArrowUp}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
         <Tooltip.Portal {...props}>
-          <Tooltip.Positioner>
-            <Tooltip.Popup>Share</Tooltip.Popup>
+          <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+            <Tooltip.Popup {...partProps['Tooltip.Popup']}>Share</Tooltip.Popup>
           </Tooltip.Positioner>
         </Tooltip.Portal>
       </Tooltip.Root>
@@ -189,34 +262,59 @@ const PositionerPart: FunctionComponent = () => {
     title: 'Tooltip.Positioner',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Root': ['shape', 'size', 'variant'],
+          'Tooltip.Popup': [],
+          'Tooltip.Portal': [],
+          'Tooltip.Root': [],
+          'Tooltip.Trigger': ['aria-label', 'render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Tooltip.Positioner"
     >
-      <Tooltip.Root defaultOpen>
+      <Tooltip.Root
+        {...partProps['Tooltip.Root']}
+        defaultOpen
+      >
         <Tooltip.Trigger
+          {...partProps['Tooltip.Trigger']}
           aria-label="Share"
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               shape="circle"
               size="large"
               variant="glass"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfSquareAndArrowUp} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfSquareAndArrowUp}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
-        <Tooltip.Portal>
+        <Tooltip.Portal {...partProps['Tooltip.Portal']}>
           <Tooltip.Positioner {...props}>
-            <Tooltip.Popup>Share</Tooltip.Popup>
+            <Tooltip.Popup {...partProps['Tooltip.Popup']}>Share</Tooltip.Popup>
           </Tooltip.Positioner>
         </Tooltip.Portal>
       </Tooltip.Root>
@@ -235,33 +333,58 @@ const PopupPart: FunctionComponent = () => {
     title: 'Tooltip.Popup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Root': ['shape', 'size', 'variant'],
+          'Tooltip.Portal': [],
+          'Tooltip.Positioner': [],
+          'Tooltip.Root': [],
+          'Tooltip.Trigger': ['aria-label', 'render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Tooltip.Popup"
     >
-      <Tooltip.Root defaultOpen>
+      <Tooltip.Root
+        {...partProps['Tooltip.Root']}
+        defaultOpen
+      >
         <Tooltip.Trigger
+          {...partProps['Tooltip.Trigger']}
           aria-label="Share"
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               shape="circle"
               size="large"
               variant="glass"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfSquareAndArrowUp} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfSquareAndArrowUp}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Positioner>
+        <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+          <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
             <Tooltip.Popup {...props}>Share</Tooltip.Popup>
           </Tooltip.Positioner>
         </Tooltip.Portal>
@@ -279,78 +402,117 @@ const ProviderPart: FunctionComponent = () => {
     title: 'Tooltip.Provider',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Root': ['shape', 'size', 'variant'],
+          'Tooltip.Popup': [],
+          'Tooltip.Portal': [],
+          'Tooltip.Positioner': [],
+          'Tooltip.Root': [],
+          'Tooltip.Trigger': ['aria-label', 'render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Tooltip.Provider"
     >
       <Tooltip.Provider {...props}>
         <div className="tooltip-demo-buttons">
-          <Tooltip.Root>
+          <Tooltip.Root {...partProps['Tooltip.Root']}>
             <Tooltip.Trigger
+              {...partProps['Tooltip.Trigger']}
               aria-label="Share"
               render={
                 <Button.Root
+                  {...partProps['Button.Root']}
                   shape="circle"
                   size="large"
                   variant="glass"
                 />
               }
             >
-              <Button.Icon>
-                <Symbol icon={sfSquareAndArrowUp} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfSquareAndArrowUp}
+                />
               </Button.Icon>
             </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Positioner>
-                <Tooltip.Popup>Share</Tooltip.Popup>
+            <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+              <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+                <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                  Share
+                </Tooltip.Popup>
               </Tooltip.Positioner>
             </Tooltip.Portal>
           </Tooltip.Root>
-          <Tooltip.Root>
+          <Tooltip.Root {...partProps['Tooltip.Root']}>
             <Tooltip.Trigger
+              {...partProps['Tooltip.Trigger']}
               aria-label="Duplicate"
               render={
                 <Button.Root
+                  {...partProps['Button.Root']}
                   shape="circle"
                   size="large"
                   variant="glass"
                 />
               }
             >
-              <Button.Icon>
-                <Symbol icon={sfPlusSquareOnSquare} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfPlusSquareOnSquare}
+                />
               </Button.Icon>
             </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Positioner>
-                <Tooltip.Popup>Duplicate</Tooltip.Popup>
+            <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+              <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+                <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                  Duplicate
+                </Tooltip.Popup>
               </Tooltip.Positioner>
             </Tooltip.Portal>
           </Tooltip.Root>
-          <Tooltip.Root>
+          <Tooltip.Root {...partProps['Tooltip.Root']}>
             <Tooltip.Trigger
+              {...partProps['Tooltip.Trigger']}
               aria-label="Delete"
               render={
                 <Button.Root
+                  {...partProps['Button.Root']}
                   shape="circle"
                   size="large"
                   variant="glass"
                 />
               }
             >
-              <Button.Icon>
-                <Symbol icon={sfTrash} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfTrash}
+                />
               </Button.Icon>
             </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Positioner>
-                <Tooltip.Popup>Delete</Tooltip.Popup>
+            <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+              <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+                <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                  Delete
+                </Tooltip.Popup>
               </Tooltip.Positioner>
             </Tooltip.Portal>
           </Tooltip.Root>
@@ -371,48 +533,81 @@ const CreateHandlePart: FunctionComponent = () => {
   const id = 'tooltip-parts-create-handle';
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'shape', 'size', 'variant'],
+            'Tooltip.Popup': [],
+            'Tooltip.Portal': [],
+            'Tooltip.Positioner': [],
+            'Tooltip.Root': ['handle', 'onOpenChange'],
+            'Tooltip.Trigger': ['aria-label', 'handle', 'id', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="Tooltip.createHandle"
     >
       <div className="tooltip-demo-buttons">
         <Tooltip.Trigger
+          {...partProps['Tooltip.Trigger']}
           aria-label="Share"
           handle={shareTooltip}
           id="tooltip-parts-share-trigger"
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               shape="circle"
               size="large"
               variant="glass"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfSquareAndArrowUp} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfSquareAndArrowUp}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="borderless"
           onClick={() => shareTooltip.open('tooltip-parts-share-trigger')}
         >
-          <Button.Label>Open Imperatively</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Open Imperatively
+          </Button.Label>
         </Button.Root>
       </div>
       <Tooltip.Root
+        {...partProps['Tooltip.Root']}
         handle={shareTooltip}
         onOpenChange={(isOpen: boolean, { reason }) =>
           addLog(`open change: ${String(isOpen)} (${reason})`)
         }
       >
-        <Tooltip.Portal>
-          <Tooltip.Positioner>
-            <Tooltip.Popup>Share</Tooltip.Popup>
+        <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+          <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+            <Tooltip.Popup {...partProps['Tooltip.Popup']}>Share</Tooltip.Popup>
           </Tooltip.Positioner>
         </Tooltip.Portal>
       </Tooltip.Root>
@@ -430,53 +625,88 @@ const UseCreateTooltipHandlePart: FunctionComponent = () => {
     'const toolbarTooltip = useCreateTooltipHandle<{ text: string }>();',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Root': ['shape', 'size', 'variant'],
+          'Tooltip.Popup': [],
+          'Tooltip.Portal': [],
+          'Tooltip.Positioner': [],
+          'Tooltip.Root': ['handle'],
+          'Tooltip.Trigger': ['aria-label', 'handle', 'payload', 'render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
+      controls={[partControls]}
       id={id}
+      state={[partState]}
       title="useCreateTooltipHandle"
     >
       <div className="tooltip-demo-buttons">
         <Tooltip.Trigger
+          {...partProps['Tooltip.Trigger']}
           aria-label="Duplicate"
           handle={toolbarTooltip}
           payload={{ text: 'Duplicate' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               shape="circle"
               size="large"
               variant="glass"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfPlusSquareOnSquare} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfPlusSquareOnSquare}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
         <Tooltip.Trigger
+          {...partProps['Tooltip.Trigger']}
           aria-label="Delete"
           handle={toolbarTooltip}
           payload={{ text: 'Delete' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               shape="circle"
               size="large"
               variant="glass"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfTrash} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfTrash}
+            />
           </Button.Icon>
         </Tooltip.Trigger>
       </div>
-      <Tooltip.Root handle={toolbarTooltip}>
+      <Tooltip.Root
+        {...partProps['Tooltip.Root']}
+        handle={toolbarTooltip}
+      >
         {({ payload }) => (
-          <Tooltip.Portal>
-            <Tooltip.Positioner>
-              <Tooltip.Popup>{payload?.text}</Tooltip.Popup>
+          <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+            <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+              <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                {payload?.text}
+              </Tooltip.Popup>
             </Tooltip.Positioner>
           </Tooltip.Portal>
         )}
@@ -490,12 +720,13 @@ export const TooltipParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>Provider: shared delays for several tooltips (optional).</li>
-      <li>Root: its state (open), for its parts.</li>
+      <li>Root: holds its state (open) for its parts.</li>
       <li>Trigger: the control it labels.</li>
       <li>
-        Portal, Positioner, Popup: where it renders, its place, the capsule.
+        Portal, Positioner and Popup: where it renders, where it’s placed, and
+        the capsule itself.
       </li>
-      <li>Handles: triggers outside the root, opening it imperatively.</li>
+      <li>Handles: triggers outside the root, and opening it from code.</li>
       <li>Hover (or focus) each view’s button to show its tooltip.</li>
     </ul>
     <ul className="demo-tree">
@@ -517,8 +748,8 @@ export const TooltipParts: FunctionComponent = () => (
                   component="tooltip"
                   part="Tooltip.Trigger"
                 />{' '}
-                (optional; or outside it, by a handle; or an <code>anchor</code>
-                , held open)
+                (optional; or outside the root, through a handle; or an{' '}
+                <code>anchor</code>, held open)
               </li>
               <li>
                 <PartLink
@@ -546,8 +777,6 @@ export const TooltipParts: FunctionComponent = () => (
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
       <li>
         <PartLink
           component="tooltip"
@@ -574,12 +803,12 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional, around several tooltips (e.g. a toolbar’s): once one has
-        shown, the next shows at once (within its <code>timeout</code>).
+        Optional, around several tooltips (for example a toolbar’s). Once one
+        has shown, the next one shows at once (within its <code>timeout</code>).
       </li>
       <li>
-        Its <code>delay</code> applies to its triggers (unless they set their
-        own); without a provider, a trigger’s is 300ms.
+        Its <code>delay</code> applies to its triggers, unless they set their
+        own. Without a provider, a trigger’s delay is 300ms.
       </li>
       <li>Renders no element of its own.</li>
     </ul>
@@ -595,8 +824,9 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its state: shown on hover, keyboard focus and a long press on touch,{' '}
-        <code>onOpenChange</code> (with why); held open by <code>open</code>.
+        Holds its state. It shows on hover, on keyboard focus and on a long
+        press by touch, and calls <code>onOpenChange</code> with the reason.{' '}
+        <code>open</code> holds it open.
       </li>
       <li>Renders no element of its own.</li>
     </ul>
@@ -612,19 +842,21 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The control it labels (e.g. a symbol{' '}
-        <a href={publicUrl('button')}>Button</a>:{' '}
-        <code>{'render={<Button.Root />}'}</code>): hovered for its{' '}
-        <code>delay</code> (300ms, or its provider’s), or focused by keyboard.
+        The control it labels (for example a symbol{' '}
+        <a href={publicUrl('button')}>Button</a>,{' '}
+        <code>{'render={<Button.Root />}'}</code>). It shows when the control is
+        hovered for its <code>delay</code> (300ms, or its provider’s), or
+        focused by keyboard.
       </li>
       <li>
-        On touch, long-pressed (held 500ms without moving): shown until the
-        finger lifts, as iPadOS’ toolbar labels; that press doesn’t activate the
-        trigger. A shorter tap is the trigger’s as before.
+        On touch, a long press (held 500ms without moving) shows it until the
+        finger lifts, like the labels on a tablet’s toolbar buttons. That press
+        doesn’t activate the trigger. A shorter tap works on the trigger as
+        before.
       </li>
       <li>
-        Its own action unchanged (a click closes the tooltip:{' '}
-        <code>closeOnClick</code>).
+        The control’s own action stays the same, and a click closes the tooltip
+        (<code>closeOnClick</code>).
       </li>
       <li>
         Renders a <code>button</code>.
@@ -642,13 +874,14 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        No box of its own (<code>display: contents</code>): rendered into a
-        container laid out as a flex column (e.g. a screen), it doesn’t shift
-        its content.
+        It has no box of its own (<code>display: contents</code>), so rendering
+        it into a container laid out as a flex column (such as a screen) doesn’t
+        shift that container’s content.
       </li>
       <li>
-        Where it renders: the document’s body (<code>container</code>); while
-        closed, nothing (<code>keepMounted</code>: hidden).
+        It renders into the document’s body (<code>container</code>). While
+        closed, it renders nothing (or, with <code>keepMounted</code>, stays
+        hidden).
       </li>
       <li>
         Renders a <code>div</code> in its container.
@@ -666,12 +899,12 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Places it: above its trigger (<code>side</code>, logical), centered (
-        <code>align</code>), 8px from it and from the screen’s edges; below it
-        if there’s no room.
+        Places it above its trigger (<code>side</code>, logical), centered (
+        <code>align</code>), 8px from the trigger and from the screen’s edges.
+        Without room, it goes below.
       </li>
       <li>
-        Renders a <code>div</code> (above the page’s layers).
+        Renders a <code>div</code>, above the page’s layers.
       </li>
     </ul>
     <PositionerPart />
@@ -686,11 +919,13 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The capsule: the menus’ glass, its text Subheadline, 6px by 12px in (one
-        line: 32px high; more: 16px corners); scaling in from its trigger.
+        The capsule: the menus’ glass, with Subheadline text, 6px by 12px in.
+        One line is 32px tall; more lines get 16px corners. It scales in from
+        its trigger.
       </li>
       <li>
-        Not hoverable itself (no pointer events): a label, nothing to press.
+        It can’t be hovered itself (it has no pointer events), since it’s a
+        label with nothing to press.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -708,12 +943,12 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle linking a tooltip to its triggers outside its root, and opening
-        or closing it imperatively (Base UI’s <code>Tooltip.createHandle</code>
-        ).
+        A handle that links a tooltip to its triggers outside its root, and
+        opens or closes it from code (Base UI’s{' '}
+        <code>Tooltip.createHandle</code>).
       </li>
       <li>
-        Made once, e.g. at a module’s top level (in a component:{' '}
+        Make it once, for example at a module’s top level (in a component, use{' '}
         <PartLink
           component="tooltip"
           part="useCreateTooltipHandle"
@@ -721,8 +956,8 @@ export const TooltipParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Here: a trigger before the root, and a button opening it at that trigger
-        (its <code>open(triggerId)</code>).
+        Here, there’s a trigger before the root, and a button that opens it at
+        that trigger (its <code>open(triggerId)</code>).
       </li>
     </ul>
     <CreateHandlePart />
@@ -746,8 +981,8 @@ export const TooltipParts: FunctionComponent = () => (
         in a component: the same handle for the component’s lifetime.
       </li>
       <li>
-        Here: two triggers, one tooltip; each passes its text (its{' '}
-        <code>payload</code>), the root’s children a function of it.
+        Here, two triggers share one tooltip. Each passes its text as its{' '}
+        <code>payload</code>, and the root’s children are a function of it.
       </li>
     </ul>
     <UseCreateTooltipHandlePart />
@@ -764,7 +999,7 @@ export const TooltipParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Re-exported as they are (unstyled; see{' '}
+        These are re-exported as they are, without styles (see{' '}
         <a
           href="https://base-ui.com/react/components/tooltip"
           rel="noreferrer"
@@ -775,11 +1010,12 @@ export const TooltipParts: FunctionComponent = () => (
         ):
       </li>
       <li>
-        <code>Tooltip.Arrow</code>: not used (these glass capsules have none).
+        <code>Tooltip.Arrow</code>: not used, since these glass capsules have no
+        arrow.
       </li>
       <li>
-        <code>Tooltip.Viewport</code>: around content that changes between
-        triggers, for the app to animate.
+        <code>Tooltip.Viewport</code>: goes around content that changes between
+        triggers, so the app can animate it.
       </li>
     </ul>
   </>

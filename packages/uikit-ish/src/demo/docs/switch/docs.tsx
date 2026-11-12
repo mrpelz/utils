@@ -33,7 +33,7 @@ export const switchRootRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the switch is activated or deactivated (with
-      Base UI’s event details, e.g. the <code>reason</code>).
+      Base UI’s event details, for example the <code>reason</code>).
     </>,
   ],
   [
@@ -41,8 +41,8 @@ export const switchRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Whether the component should ignore user interaction. Dimmed (55%
-      opacity), its cursor <code>not-allowed</code>.
+      Whether the component should ignore user interaction. It’s dimmed (55%
+      opacity), with the <code>not-allowed</code> cursor.
     </>,
   ],
   [
@@ -62,18 +62,18 @@ export const switchRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Neither on nor off: the knob in the middle, the track off; checked, its
-      start half tinted, fading out under the knob (so it shows which way it’s
-      going), faded as it changes. Its hidden input is indeterminate too.
-      Toggling still flips <code>checked</code>. E.g. while a change is being
-      saved.
+      Neither on nor off: the knob sits in the middle, with the track off. When
+      checked, the track’s start half is tinted, fading out under the knob, so
+      it shows which way it’s going. It fades as it changes, and its hidden
+      input is indeterminate too. Toggling still flips <code>checked</code>. For
+      example while a change is being saved.
     </>,
   ],
   [
     'onOffLabels',
     'boolean',
     code('false'),
-    'Shows “I” and “O” on the track, beside the knob (an accessibility setting).',
+    'Shows “I” and “O” on the track, next to the knob (as an accessibility setting would).',
   ],
   [
     'tint',
@@ -87,7 +87,7 @@ export const switchRootRows: readonly PropRow[] = [
     <>
       <code>pointer</code> (disabled: <code>not-allowed</code>)
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   [
     'name',

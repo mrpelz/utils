@@ -27,16 +27,16 @@ const settingRows: readonly PropRow[] = [
       the system’s (<code>prefers-contrast: more</code>,{' '}
       <code>forced-colors: active</code>)
     </>,
-    'Contrast: the standard one, or increased.',
+    'The contrast: standard, or increased.',
   ],
   [
     'differentiateWithoutColor',
     'boolean',
     code('false'),
     <>
-      State told without color alone: shapes, symbols, labels (e.g. a{' '}
-      <a href={publicUrl('switch')}>Switch</a>’s on/off labels). No system
-      signal on the web.
+      Shows state with more than color alone: shapes, symbols or labels (for
+      example a <a href={publicUrl('switch')}>Switch</a>’s on/off labels). The
+      web has no system signal for it.
     </>,
   ],
   [
@@ -45,7 +45,7 @@ const settingRows: readonly PropRow[] = [
     <>
       the system’s (<code>prefers-reduced-motion: reduce</code>)
     </>,
-    'Motion reduced: no slides, zooms or movement; fades kept.',
+    'Reduces motion: no slides, zooms or movement. Fades stay.',
   ],
   [
     'reducedTransparency',
@@ -53,7 +53,7 @@ const settingRows: readonly PropRow[] = [
     <>
       the system’s (<code>prefers-reduced-transparency: reduce</code>)
     </>,
-    'Transparency reduced: materials opaque.',
+    'Reduces transparency: materials become opaque.',
   ],
   [
     'textSize',
@@ -65,7 +65,7 @@ const settingRows: readonly PropRow[] = [
         component="typography"
         part="Typography"
       />
-      ’s <code>textSize</code>). No system signal on the web.
+      ’s <code>textSize</code>). The web has no system signal for it.
     </>,
   ],
 ];
@@ -76,16 +76,16 @@ export const settingsProviderRows: readonly PropRow[] = [
     type,
     'inherited',
     <>
-      {description} Given <code>undefined</code>: reset (the system’s, or the
-      default).
+      {description} Given as <code>undefined</code>, it’s reset to the system’s
+      value, or the default.
     </>,
   ]),
-  ['children', 'ReactNode', undefined, 'What the settings are for.'],
+  ['children', 'ReactNode', undefined, 'What the settings apply to.'],
   [
     'render',
     'ReactElement | (props, state) => ReactElement',
     undefined,
-    'Its element replaced (e.g. a page’s own), its settings on it.',
+    'Replaces its element (for example with a page’s own). The settings are set on that element.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -98,14 +98,14 @@ export const settingsPortalPropsRows: readonly PropRow[] = [
     'data-color-scheme',
     union('light', 'dark'),
     undefined,
-    'The color scheme, where a provider sets one.',
+    'The color scheme, if a provider sets one.',
   ],
   [
     'style',
     'Record<string, string>',
     undefined,
     <>
-      The overridden settings as custom properties (
+      The overridden settings, as custom properties (
       <code>--uikit-settings-*</code>) and <code>color-scheme</code>.
     </>,
   ],

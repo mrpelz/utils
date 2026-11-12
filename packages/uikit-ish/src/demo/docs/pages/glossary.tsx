@@ -171,9 +171,9 @@ export const GlossaryPage: FunctionComponent = () => (
       <Term term="Stage">
         The area a demo renders in. It comes in three types. <em>Phone</em>{' '}
         (402px wide) and <em>tablet</em> (820px wide) draw a device frame, with
-        a status bar and <See term="Safe area">safe areas</See>. <em>Simple</em>{' '}
-        is a plain box, for components that don’t need a screen. The type is
-        labelled in the stage’s top left corner.
+        a status bar and <See term="Safe area inset">safe area insets</See>.{' '}
+        <em>Simple</em> is a plain box, for components that don’t need a screen.
+        The type is labelled in the stage’s top left corner.
       </Term>
       <Term term="Config column">
         The column beside a demo’s stage. It holds the{' '}
@@ -201,8 +201,9 @@ export const GlossaryPage: FunctionComponent = () => (
             centering it, or stretching it to the stage’s width.
           </li>
           <li>
-            <em>Safe Areas</em> applies to a device stage. It hatches the areas
-            of the screen the system covers.
+            <em>Safe Area Insets</em> applies to a device stage. It hatches the
+            <See term="Safe area inset">safe area insets</See>: the parts of the
+            screen the system covers.
           </li>
           <li>
             <em>Expand</em> lets an inline demo grow wider than the text column,
@@ -371,8 +372,14 @@ export const GlossaryPage: FunctionComponent = () => (
         The part of the screen that isn’t covered by hardware or by the system:
         not under the rounded corners, the camera cutout, the status bar or the
         home indicator. Browsers report the covered edges as{' '}
-        <code>env(safe-area-inset-*)</code>. The library keeps content clear of
-        them, and its bars extend into them so they reach the screen’s edge.
+        <code>env(safe-area-inset-*)</code>, the{' '}
+        <See term="Safe area inset">safe area insets</See>.
+      </Term>
+      <Term term="Safe area inset">
+        How far the system covers the screen at one edge, from that edge to the{' '}
+        <See term="Safe area" />: <code>env(safe-area-inset-top)</code> and so
+        on. The library keeps content clear of the insets, and its bars extend
+        into them so they reach the screen’s edge.
       </Term>
       <Term term="Status bar">
         The strip at the top of the screen with the time, signal and battery. In
@@ -399,8 +406,9 @@ export const GlossaryPage: FunctionComponent = () => (
       </Term>
       <Term term="Home indicator">
         The thin bar at the bottom of a phone or tablet without a home button.
-        The bottom safe area keeps content clear of it. Floating surfaces such
-        as an island or a medium sheet let it sit over their 8px margin.
+        Content keeps clear of it by the bottom safe area inset. Floating
+        surfaces such as an island or a medium sheet let it sit over their 8px
+        margin.
       </Term>
       <Term term="Dynamic Island">
         The pill-shaped camera cutout at the top of some recent phones. It has

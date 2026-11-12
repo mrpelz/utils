@@ -3,8 +3,12 @@ import { FunctionComponent, useMemo } from 'react';
 import { Accordion, List } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsItem,
   getPropOptionsRoot,
@@ -39,76 +43,118 @@ export const AccordionDemo: FunctionComponent = () => {
     { external: externalPanel, title: 'Accordion.Panel (iCloud)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Accordion.Item': ['render', 'value'],
+            'Accordion.Panel': ['render'],
+            'Accordion.Trigger': ['nativeButton', 'render'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="accordion"
-      controls={[controlRoot, controlItem, controlTrigger, controlPanel]}
       id={id}
       log={log}
-      state={[stateRoot, stateItem, stateTrigger, statePanel]}
+      state={[stateRoot, stateItem, stateTrigger, statePanel, partState]}
       title="Accordion"
+      controls={[
+        controlRoot,
+        controlItem,
+        controlTrigger,
+        controlPanel,
+        partControls,
+      ]}
     >
       <Accordion.Root
         key={keyRoot}
-        render={<List.Root style={{ width: 'min(402px, 100%)' }} />}
+        render={
+          <List.Root
+            {...partProps['List.Root']}
+            style={{ width: 'min(402px, 100%)' }}
+          />
+        }
         {...propsRoot}
       >
         <Accordion.Item
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
           value="icloud"
           {...propsItem}
         >
           <Accordion.Trigger
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
             {...propsTrigger}
           >
-            <List.Title>iCloud</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>iCloud</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Accordion.Trigger>
           <Accordion.Panel
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
             {...propsPanel}
           >
-            <List.Item>
-              <List.Content>
-                <List.Title>Inbox</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Inbox</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>12</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>12</List.Detail>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
-                <List.Title>Sent</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Sent</List.Title>
               </List.Content>
             </List.Item>
           </Accordion.Panel>
         </Accordion.Item>
         <Accordion.Item
-          render={<List.Section />}
+          {...partProps['Accordion.Item']}
+          render={<List.Section {...partProps['List.Section']} />}
           value="work"
         >
           <Accordion.Trigger
+            {...partProps['Accordion.Trigger']}
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
           >
-            <List.Title>Work</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>Work</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Accordion.Trigger>
-          <Accordion.Panel render={<List.Group />}>
-            <List.Item>
-              <List.Content>
-                <List.Title>Inbox</List.Title>
+          <Accordion.Panel
+            {...partProps['Accordion.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Inbox</List.Title>
               </List.Content>
-              <List.Trailing>
-                <List.Detail>3</List.Detail>
+              <List.Trailing {...partProps['List.Trailing']}>
+                <List.Detail {...partProps['List.Detail']}>3</List.Detail>
               </List.Trailing>
             </List.Item>
-            <List.Item>
-              <List.Content>
-                <List.Title>Archive</List.Title>
+            <List.Item {...partProps['List.Item']}>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>Archive</List.Title>
               </List.Content>
             </List.Item>
           </Accordion.Panel>

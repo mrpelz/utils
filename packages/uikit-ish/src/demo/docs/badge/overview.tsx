@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Avatar,
@@ -11,7 +11,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -22,6 +25,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfBell } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { badgeRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -36,19 +40,52 @@ const LiveView: FunctionComponent = () => {
     title: 'Badge',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Avatar.Fallback': [],
+            'Avatar.Root': [],
+            'Button.Icon': [],
+            'Button.Root': [
+              'aria-label',
+              'onClick',
+              'shape',
+              'size',
+              'variant',
+            ],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['className'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Badge"
     >
       <div className="badge-demo-stage">
         <div className="badge-demo-row">
           <Button.Root
+            {...partProps['Button.Root']}
             shape="circle"
             size="large"
             variant="glass"
@@ -59,8 +96,11 @@ const LiveView: FunctionComponent = () => {
             }
             onClick={() => addLog('notifications clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfBell}>
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfBell}
+              >
                 <Badge
                   placement="symbol"
                   {...props}
@@ -68,20 +108,25 @@ const LiveView: FunctionComponent = () => {
               </Symbol>
             </Button.Icon>
           </Button.Root>
-          <Avatar.Root>
-            <Avatar.Fallback>JA</Avatar.Fallback>
+          <Avatar.Root {...partProps['Avatar.Root']}>
+            <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+              JA
+            </Avatar.Fallback>
             <Badge {...props} />
           </Avatar.Root>
         </div>
-        <List.Root className="badge-demo-list">
-          <List.Section>
-            <List.Group>
-              <List.Item>
-                <List.Content>
-                  <List.Title>Inbox</List.Title>
+        <List.Root
+          {...partProps['List.Root']}
+          className="badge-demo-list"
+        >
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>Inbox</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail {...partProps['List.Detail']}>
                     <Badge
                       placement="inline"
                       {...props}
@@ -112,12 +157,12 @@ export const BadgeOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A count (or a word) in a red capsule, or a dot: something new to look
-        at.
+        A count (or a word) in a red capsule, or a dot, for something new to
+        look at.
       </li>
       <li>
-        On a symbol (a tab’s, a button’s), on an element’s corner (an avatar’s),
-        or inline (a list row’s).
+        It sits on a symbol (a tab’s, a button’s), on an element’s corner (an
+        avatar’s), or inline (in a list row).
       </li>
     </ul>
     <LiveView />
@@ -130,11 +175,12 @@ export const BadgeOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Things waiting for the person, counted: unread messages, pending
+        For things waiting for people, counted: unread messages, pending
         updates, notifications.
       </li>
       <li>
-        Without a count, a dot: there’s something new, how much doesn’t matter.
+        Without a count, as a dot: there’s something new, and how much doesn’t
+        matter.
       </li>
     </ul>
 
@@ -146,19 +192,19 @@ export const BadgeOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A count that isn’t waiting for anyone (a folder’s items): a list row’s
-        plain{' '}
+        A count that isn’t waiting for anyone (a folder’s items): use a list
+        row’s plain{' '}
         <PartLink
           component="list"
           part="List.Detail"
         />{' '}
-        text, as Mail’s mailboxes.
+        text, as for a mail app’s mailboxes.
       </li>
       <li>
-        Work going on: <a href={publicUrl('progress')}>Progress</a>.
+        Work going on: use <a href={publicUrl('progress')}>Progress</a>.
       </li>
       <li>
-        Something the person must answer now: an{' '}
+        Something people must answer now: use an{' '}
         <a href={publicUrl('alert')}>Alert</a>.
       </li>
     </ul>
@@ -172,7 +218,8 @@ export const BadgeOverview: FunctionComponent = () => (
     <ul>
       <li>The props most badges set.</li>
       <li>
-        All its props: <a href={publicUrl('badge/parts')}>Parts</a>.
+        All its props are on the <a href={publicUrl('badge/parts')}>Parts</a>{' '}
+        page.
       </li>
     </ul>
     <KeyPropsTable
@@ -189,15 +236,15 @@ export const BadgeOverview: FunctionComponent = () => (
       <li>
         Its text is read where it is: in a row, after the row’s title. In a
         control named by <code>aria-label</code> (a symbol-only button), it
-        isn’t: say it in the name (“Notifications, 3 new”).
+        isn’t, so say it in the name (“Notifications, 3 new”).
       </li>
       <li>
-        A dot has no text: say what it means in its control’s name or its row’s
+        A dot has no text. Say what it means in its control’s name or its row’s
         text (“Unread”).
       </li>
       <li>
-        It ignores the pointer (<code>pointer-events: none</code>): presses go
-        to what it’s on.
+        It ignores the pointer (<code>pointer-events: none</code>), so presses
+        go to what it’s on.
       </li>
     </ul>
 
@@ -209,21 +256,21 @@ export const BadgeOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A digit in a circle; more, a capsule growing towards the end (24px high;
-        on a symbol, 16px).
+        A single digit sits in a circle. More grow it into a capsule toward the
+        end (24px tall, or 16px on a symbol).
       </li>
       <li>
-        Without content, a 10px dot: on a symbol, centered on its corner;
-        inline, centered on the text.
+        Without content, it’s a 10px dot: centered on the corner on a symbol,
+        and centered on the text when inline.
       </li>
       <li>
         On a symbol, it’s neither blended nor scaled with it (see{' '}
-        <a href={publicUrl('symbol')}>Symbol</a>): in a glass button, it stays
-        red.
+        <a href={publicUrl('symbol')}>Symbol</a>), so in a glass button, it
+        stays red.
       </li>
       <li>
-        On a tab collapsing away, it fades with its tab (see{' '}
-        <a href={publicUrl('tab-bar/composition#badges-on-tabs')}>Tab bar</a>).
+        On a tab that collapses away, it fades with its tab (see{' '}
+        <a href={publicUrl('tab-bar/composition#badges-on-tabs')}>Tab Bar</a>).
       </li>
     </ul>
   </>

@@ -240,7 +240,7 @@
   }
 
   /* Its content clipped to its corners; with less room than its height
-     (its positioner keeping it clear of the safe areas), scrolling. */
+     (its positioner keeping it clear of the safe area insets), scrolling. */
   .uikit-date-picker-popup {
     & > div {
       overflow: hidden auto;

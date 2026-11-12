@@ -1,4 +1,4 @@
-import { FunctionComponent, RefObject, useRef } from 'react';
+import { FunctionComponent, RefObject, useMemo, useRef } from 'react';
 
 import {
   List,
@@ -7,8 +7,11 @@ import {
   useVisualViewport,
   Viewport,
 } from '../../../components/index.js';
-import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import { CodeAroundContext, Component } from '../../tooling/frame/component.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
@@ -19,6 +22,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from './content.js';
 import {
   viewportAnchorRows,
@@ -59,14 +63,33 @@ const LiveViewFrame: FunctionComponent<{
   const { atBottom, atTop, direction = '–' } = useScrollDirection();
   const edge = atBottom ? 'bottom' : '–';
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[controlContent, controlStart, controlEnd]}
+      controls={[controlContent, controlStart, controlEnd, partControls]}
       id={id}
       screenRef={screenRef}
       stage="phone"
-      state={[stateContent, stateStart, stateEnd]}
+      state={[stateContent, stateStart, stateEnd, partState]}
       title="Viewport"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -88,26 +111,40 @@ const LiveViewFrame: FunctionComponent<{
           ref={contentRef}
           {...propsContent}
         >
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
         {isStartShown ? (
           <Viewport.BlockStart {...propsStart}>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Title>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
               </Toolbar.Title>
             </Toolbar.Root>
@@ -115,8 +152,8 @@ const LiveViewFrame: FunctionComponent<{
         ) : null}
         {isEndShown ? (
           <Viewport.BlockEnd {...propsEnd}>
-            <Toolbar.Root>
-              <Toolbar.Title>
+            <Toolbar.Root {...partProps['Toolbar.Root']}>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>{names.length} Contacts</span>
               </Toolbar.Title>
             </Toolbar.Root>
@@ -135,15 +172,23 @@ const LiveView: FunctionComponent = () => {
   );
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <LiveViewFrame
-        contentRef={contentRef}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <LiveViewFrame
+          contentRef={contentRef}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -163,25 +208,27 @@ export const ViewportOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        The app’s window, as layers: a content layer scrolling beneath bars
-        floating at its edges (anchors).
+        The app’s window as layers: a content layer that scrolls, with bars
+        floating above it at the screen’s edges (anchors).
       </li>
       <li>
-        Kept clear of the safe area insets (the notch, the home indicator) and
-        of the on-screen keyboard: bars move up with it, the content shrinks.
+        Keeps clear of the safe area insets (the camera cutout, the home
+        indicator) and of the on-screen keyboard. Bars move up with the
+        keyboard, and the content shrinks above it.
       </li>
       <li>
         Hooks for the visual viewport (its size, the keyboard’s height) and for
-        scrolling (its direction, its edges), e.g. to collapse a tab bar while
-        scrolling down.
+        scrolling (its direction, whether an end is reached). For example, to
+        collapse a tab bar while scrolling down.
       </li>
       <li>
-        Hooks for an element in the visible area (the viewport, or a scroll
-        container): whether it’s visible, and where (its edges’ distances, how
-        much of it shows); see{' '}
-        <a href={publicUrl('viewport/parts#useelementvisibility')}>Parts</a>.
+        Hooks for an element in the visible area, either the window or a scroll
+        container: whether it’s visible, how far it is from the edges, and how
+        much of it shows (see{' '}
+        <a href={publicUrl('viewport/parts#useelementvisibility')}>Parts</a>
+        ).
       </li>
-      <li>This library’s own; no Base UI component.</li>
+      <li>The library’s own component. It isn’t built on Base UI.</li>
     </ul>
     <LiveView />
 
@@ -193,12 +240,12 @@ export const ViewportOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An app’s shell: its pages in{' '}
+        For an app’s shell. Its pages go in{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
         />
-        , its bars (a tab bar, a toolbar) in{' '}
+        . Its bars, such as a tab bar or a toolbar, go in{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
@@ -211,20 +258,22 @@ export const ViewportOverview: FunctionComponent = () => (
         (see <a href={publicUrl('viewport/composition')}>Composition</a>).
       </li>
       <li>
-        A field that stays above the on-screen keyboard (a message field):{' '}
+        For a field that stays above the on-screen keyboard, such as a message
+        field. Put it in{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        , pushed up by it.
+        , and the keyboard pushes it up.
       </li>
       <li>
-        Reacting to scrolling (collapsing a tab bar, hiding a toolbar):{' '}
+        For reacting to scrolling, such as collapsing a tab bar or hiding a
+        toolbar. Use{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
-        />
-        , with{' '}
+        />{' '}
+        with{' '}
         <PartLink
           component="viewport"
           part="useScrollDirection"
@@ -246,22 +295,22 @@ export const ViewportOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A page’s own bars, scrolling with it (a navigation bar with a large
-        title): a <a href={publicUrl('header')}>Header</a> in a{' '}
+        A page’s own bars that scroll with it, such as a navigation bar with a
+        large title: use a <a href={publicUrl('header')}>Header</a> in a{' '}
         <a href={publicUrl('page')}>Page</a>.
       </li>
       <li>
-        Columns side by side (a sidebar beside the content, on a tablet): a{' '}
-        <a href={publicUrl('layout')}>Layout</a> (in{' '}
+        Columns side by side, such as a sidebar beside the content on a tablet:
+        use a <a href={publicUrl('layout')}>Layout</a> inside{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
         />
-        ).
+        .
       </li>
       <li>
-        Something over the content, for a moment (a sheet, a menu): an overlay (
-        <a href={publicUrl('sheet')}>Sheet</a>,{' '}
+        Something above the content for a moment, such as a sheet or a menu: use
+        an overlay (<a href={publicUrl('sheet')}>Sheet</a>,{' '}
         <a href={publicUrl('popover')}>Popover</a>,{' '}
         <a href={publicUrl('menu')}>Menu</a>), not an anchor.
       </li>
@@ -274,10 +323,10 @@ export const ViewportOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most viewports set, across their parts.</li>
+      <li>The props most apps set, across the parts.</li>
       <li>
-        All parts’ props, and the hooks:{' '}
-        <a href={publicUrl('viewport/parts')}>Parts</a>.
+        All props of all parts, and the hooks, are on the{' '}
+        <a href={publicUrl('viewport/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -302,25 +351,25 @@ export const ViewportOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its parts are <code>div</code>s without roles: what’s in them brings its
-        own (a <a href={publicUrl('toolbar')}>Toolbar</a> is a{' '}
-        <code>toolbar</code>, a tab bar’s list a <code>tablist</code>). A
-        landmark, if wanted, by the anchor’s attributes (e.g.{' '}
+        Its parts are <code>div</code>s without roles. What you put in them
+        brings its own: a <a href={publicUrl('toolbar')}>Toolbar</a> is a{' '}
+        <code>toolbar</code>, a tab bar’s list is a <code>tablist</code>. For a
+        landmark, add the attributes to the anchor (for example{' '}
         <code>role=&quot;navigation&quot;</code>).
       </li>
       <li>
-        The content layer is a scroll container: in Chrome, keyboard focusable
-        while nothing in it is (arrow keys, Page Up/Down scroll it).
+        The content layer is a scroll container. In Chrome, it can take keyboard
+        focus while nothing inside it can, so arrow keys and Page Up/Down scroll
+        it.
       </li>
       <li>
-        Anchors cover the content beneath them: keep it clear with{' '}
+        Anchors cover the content beneath them. Keep content clear of them with{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />
-        s, which also set their scroll container’s scroll padding, so focus
-        moving and <code>scrollIntoView</code> stop clear of a bar, not behind
-        it.
+        . It also sets its scroll container’s scroll padding, so moving focus
+        and <code>scrollIntoView</code> stop clear of a bar, not behind it.
       </li>
       <li>It has no animations of its own.</li>
     </ul>
@@ -342,96 +391,102 @@ export const ViewportOverview: FunctionComponent = () => (
           component="viewport"
           part="useElementGeometry"
         />{' '}
-        (measured once a frame while it scrolls or resizes, only while visible)
-        need no provider: their area is the layout viewport, or their{' '}
-        <code>scroller</code>’s box.
+        need no provider. Their area is the layout viewport, or the box of their{' '}
+        <code>scroller</code>. Geometry is measured once per frame while things
+        scroll or resize, and only while the element is visible.
       </li>
       <li>
         <PartLink
           component="viewport"
           part="Viewport.Provider"
         />{' '}
-        tracks the visual viewport (once per frame, as it resizes or scrolls):
-        as custom properties on the root element, or on the app’s screen when it
-        isn’t the window (its <code>screen</code>: e.g. these views’ device
-        frames, each tracking its own) (<code>--uikit-viewport-width</code>,{' '}
+        tracks the visual viewport once per frame as it resizes or scrolls. It
+        publishes it as custom properties (<code>--uikit-viewport-width</code>,{' '}
         <code>-height</code>, <code>-top</code>, <code>-left</code>,{' '}
         <code>-keyboard-inset</code>), which the anchors and the content layer
-        follow, and for{' '}
+        follow, and through{' '}
         <PartLink
           component="viewport"
           part="useVisualViewport"
         />
-        . Without a provider, they stay at the layout viewport’s edges, ignoring
-        the keyboard.
+        . They’re set on the root element, or on the app’s screen when that
+        isn’t the window (its <code>screen</code> prop; this page’s device
+        frames each track their own). Without a provider, the layers stay at the
+        layout viewport’s edges and ignore the keyboard.
       </li>
       <li>
-        The keyboard’s height: what the visual viewport doesn’t show of the
-        layout viewport’s bottom (of a screen’s: what it covers of the
-        screen’s).
+        The keyboard’s height is the part of the fixed layers’ box that the
+        visual viewport doesn’t show at the bottom. With a <code>screen</code>,
+        it’s the part of that screen the keyboard covers.
       </li>
       <li>
         A bar pushed up by the keyboard, and a content layer resized by it,
-        follow it in a transition (250ms, none with reduced motion); their
-        safe-area padding at the bottom shrinks by what the keyboard covers (
-        none left while it shows).
+        follow it with a transition (250ms, none with reduced motion). Their
+        bottom safe area inset padding shrinks by what the keyboard covers, to
+        none while it shows.
       </li>
       <li>
-        An app under the device’s safe areas needs{' '}
-        <code>viewport-fit=cover</code> in its viewport meta tag: otherwise the
-        browser keeps them clear, and their insets (
+        An app that reaches under the device’s safe area insets needs{' '}
+        <code>viewport-fit=cover</code> in its viewport meta tag. Without it,
+        the browser keeps them clear itself, and their insets (
         <code>env(safe-area-inset-*)</code>) are 0.
       </li>
       <li>
-        An app’s document doesn’t scroll (its content does, in the content layer
-        or its pages), so it shouldn’t bounce either:{' '}
-        <code>overscroll-behavior: none</code> on <code>html</code> and{' '}
-        <code>body</code>. Otherwise, on iOS (as a web app, especially), a drag
-        no scroll container takes (e.g. on a bar, or on content too short to
-        scroll) rubber-bands the document, moving the whole app, its bars too.
-        Only on iOS (e.g. in{' '}
-        <code>@supports (-webkit-touch-callout: none)</code>): elsewhere, e.g.
-        Chrome on macOS, it also ends a trackpad’s inertia in the scroll
-        containers within.
+        An app’s document doesn’t scroll (its content layer or its pages do), so
+        it shouldn’t bounce either: set <code>overscroll-behavior: none</code>{' '}
+        on <code>html</code> and <code>body</code>. Otherwise, on iOS, a drag
+        that no scroll container takes rubber-bands the document and moves the
+        whole app, bars included. That happens on a bar, for example, or on
+        content too short to scroll, and especially in a Home Screen app. Set it
+        only on iOS (for example in{' '}
+        <code>@supports (-webkit-touch-callout: none)</code>). Elsewhere, such
+        as Chrome on macOS, it also ends a trackpad’s inertia in the scroll
+        containers inside.
       </li>
       <li>
-        Anchors and the content layer are <code>position: fixed</code>: to the
-        window, or to an ancestor with a <code>transform</code> (as this page’s
-        phone screens). Anchors (<code>z-index</code> 10) float above the
-        content layer; they don’t inset it: room for them is made in the
-        content, by{' '}
+        Anchors and the content layer are <code>position: fixed</code>, relative
+        to the window, or to an ancestor with a <code>transform</code> (like
+        this page’s phone screens). Anchors (<code>z-index</code> 10) float
+        above the content layer without insetting it. The room for them is made
+        inside the content, by{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
-        />
-        s (at its start, its end; as high as the anchors, live, plus the
-        library’s content margin; its scroll padding following them). Anchors
-        are layers of their own (<code>transform</code>, so Safari paints them
-        above the scrolling content layer): within one, fixed elements are
-        placed relative to it (overlays are portaled out).
+        />{' '}
+        at its start and end. A padding is as tall as the anchors at its edge,
+        updated live, plus the library’s content margin, and its scroll padding
+        follows.
       </li>
       <li>
-        At the bottom, an anchor moves up with the keyboard (
-        <code>keyboard=&quot;push&quot;</code>), its safe area padding shrinking
-        by the keyboard’s height; or stays, covered (
-        <code>&quot;cover&quot;</code>). Side anchors span from the visual
-        viewport’s top to the keyboard’s.
+        Each anchor is a layer of its own (it has a <code>transform</code>, so
+        Safari paints it above the scrolling content layer). Fixed elements
+        inside an anchor are placed relative to it, so overlays are portaled out
+        of it.
       </li>
       <li>
-        The content layer fills the visual viewport down to the keyboard (
-        <code>keyboard=&quot;resize&quot;</code>), or the layout viewport,
-        beneath it (<code>&quot;overlay&quot;</code>).
+        At the bottom, an anchor either moves up with the keyboard (
+        <code>keyboard=&quot;push&quot;</code>), its safe area inset padding
+        shrinking by the keyboard’s height, or stays put and gets covered (
+        <code>&quot;cover&quot;</code>). Side anchors span from the top of the
+        visual viewport down to the keyboard.
       </li>
       <li>
-        Scroll tracking (the document’s, or <code>scroller</code>’s): the
-        direction changes once scrolled a hook’s <code>threshold</code> px (8)
-        from where it last turned, never by bouncing past an end; at the top
-        within 0px, at the bottom within 1px. Before the first scroll: at the
-        top, no direction. Pulled past an end: its <code>overscroll</code>.
+        The content layer either fills the visual viewport down to the keyboard
+        (<code>keyboard=&quot;resize&quot;</code>), or fills the layout viewport
+        and lies beneath the keyboard (<code>&quot;overlay&quot;</code>
+        ).
       </li>
       <li>
-        Inline anchors mirror right to left (<code>inline-start</code>: the
-        right).
+        Scroll tracking follows the document, or the <code>scroller</code>. The
+        direction changes once it has scrolled a hook’s <code>threshold</code>{' '}
+        (8px) away from where it last turned, and never from bouncing past an
+        end. It counts as at the top within 0px, and at the bottom within 1px.
+        Before the first scroll, it’s at the top with no direction. Pulled past
+        an end, it reports its <code>overscroll</code>.
+      </li>
+      <li>
+        Inline anchors mirror in right-to-left languages (
+        <code>inline-start</code> is the right).
       </li>
     </ul>
   </>

@@ -13,7 +13,10 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
@@ -22,6 +25,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfEllipsis, sfSquareAndArrowUp } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import { MapView } from './map.js';
 import {
@@ -33,7 +37,7 @@ const overAMapCode = `<Viewport.Content safeArea="none">
   {/* The map (MapLibre's), filling the content layer. */}
   <MapView />
 </Viewport.Content>
-<Viewport.Anchor edge="block-end" edgeEffect="none">
+<Viewport.BlockEnd edgeEffect="none">
   <Island.Root defaultSnapPoint="peek">
     <Island.Header>
       <Island.Grabber />
@@ -48,7 +52,7 @@ const overAMapCode = `<Viewport.Content safeArea="none">
       <Viewport.Padding edge="block-end" />
     </Island.Content>
   </Island.Root>
-</Viewport.Anchor>`;
+</Viewport.BlockEnd>`;
 
 const asASliverCode = `// In MapView (isFollowing): its camera clear of the island, as it settles.
 const bottom = useAnchorSize('block-end');
@@ -59,7 +63,7 @@ useEffect(() => {
 <Viewport.Content safeArea="none">
   <MapView isFollowing />
 </Viewport.Content>
-<Viewport.Anchor edge="block-end" edgeEffect="none">
+<Viewport.BlockEnd edgeEffect="none">
   <Island.Root defaultSnapPoint="sliver">
     <Island.Header>
       <Island.Grabber />
@@ -69,7 +73,7 @@ useEffect(() => {
     </Island.Header>
     <Island.Content>…</Island.Content>
   </Island.Root>
-</Viewport.Anchor>`;
+</Viewport.BlockEnd>`;
 
 const withoutAHeaderStopCode = `<Island.Root defaultSnapPoint="peek">
   <Island.Header>
@@ -89,7 +93,7 @@ const withoutAHeaderStopCode = `<Island.Root defaultSnapPoint="peek">
 const withoutStopsCode = `<Viewport.Content safeArea="none">
   <MapView />
 </Viewport.Content>
-<Viewport.Anchor edge="block-end" edgeEffect="none">
+<Viewport.BlockEnd edgeEffect="none">
   <Island.Root>
     {/* Not swiped: no grabber. */}
     <Island.Header>
@@ -101,7 +105,7 @@ const withoutStopsCode = `<Viewport.Content safeArea="none">
       <Viewport.Padding edge="block-end" />
     </Island.Content>
   </Island.Root>
-</Viewport.Anchor>`;
+</Viewport.BlockEnd>`;
 
 /** Over a map: a place's island, its stops (a peek at first). */
 const OverAMap: FunctionComponent = () => {
@@ -113,82 +117,153 @@ const OverAMap: FunctionComponent = () => {
     { external, isOpen: true, title: 'Island.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Grabber': [],
+            'Island.Header': [],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': ['safeArea'],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Over a map"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content
+        {...partProps['Viewport.Content']}
+        safeArea="none"
+      >
         <MapView />
       </Viewport.Content>
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
           key={`${key}`}
           {...props}
         >
-          <Island.Header>
-            <Island.Grabber />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+          <Island.Header {...partProps['Island.Header']}>
+            <Island.Grabber {...partProps['Island.Grabber']} />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="header"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -196,15 +271,25 @@ const OverAMap: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -212,10 +297,13 @@ const OverAMap: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -230,84 +318,158 @@ const AsASliver: FunctionComponent = () => {
     { external, isOpen: true, title: 'Island.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Grabber': [],
+            'Island.Header': [],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': ['safeArea'],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="As a sliver"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content
+        {...partProps['Viewport.Content']}
+        safeArea="none"
+      >
         <MapView isFollowing />
       </Viewport.Content>
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
           key={`${key}`}
           {...props}
         >
-          <Island.Header>
-            <Island.Grabber />
+          <Island.Header {...partProps['Island.Header']}>
+            <Island.Grabber {...partProps['Island.Grabber']} />
             {/* Its lowest stop: a sliver, its grabber alone. */}
-            <Island.SnapGroup value="sliver" />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="sliver"
+            />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="header"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -315,15 +477,25 @@ const AsASliver: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -331,10 +503,13 @@ const AsASliver: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -347,75 +522,149 @@ const WithoutAHeaderStop: FunctionComponent = () => {
   const id = 'island-composition-without-a-header-stop';
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Grabber': [],
+            'Island.Header': [],
+            'Island.Root': ['defaultSnapPoint'],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': ['safeArea'],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="Without a header stop"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content
+        {...partProps['Viewport.Content']}
+        safeArea="none"
+      >
         <MapView />
       </Viewport.Content>
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
-        <Island.Root defaultSnapPoint="peek">
-          <Island.Header>
-            <Island.Grabber />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+        <Island.Root
+          {...partProps['Island.Root']}
+          defaultSnapPoint="peek"
+        >
+          <Island.Header {...partProps['Island.Header']}>
+            <Island.Grabber {...partProps['Island.Grabber']} />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -423,15 +672,25 @@ const WithoutAHeaderStop: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -439,10 +698,13 @@ const WithoutAHeaderStop: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -452,68 +714,129 @@ const WithoutStops: FunctionComponent = () => {
   const id = 'island-composition-without-stops';
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Header': [],
+            'Island.Root': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': ['safeArea'],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="Without stops"
     >
-      <Viewport.Content safeArea="none">
+      <Viewport.Content
+        {...partProps['Viewport.Content']}
+        safeArea="none"
+      >
         <MapView />
       </Viewport.Content>
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
-        <Island.Root>
-          <Island.Header>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+        <Island.Root {...partProps['Island.Root']}>
+          <Island.Header {...partProps['Island.Header']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
-            <List.Root>
-              <List.Section>
-                <List.Group>
-                  <List.Item>
-                    <List.Content>
-                      <List.Title>Open until 6 PM</List.Title>
-                      <List.Subtitle>Café · 300 m</List.Subtitle>
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
+                  <List.Item {...partProps['List.Item']}>
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        Open until 6 PM
+                      </List.Title>
+                      <List.Subtitle {...partProps['List.Subtitle']}>
+                        Café · 300 m
+                      </List.Subtitle>
                     </List.Content>
                   </List.Item>
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -539,32 +862,34 @@ export const IslandComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The map is the page: it fills the{' '}
+        The map is the page. It fills the{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
         />{' '}
-        (<code>safeArea=&quot;none&quot;</code>: under the bars and the safe
-        areas), and fits, so nothing scrolls. No anchor of its own.
+        (<code>safeArea=&quot;none&quot;</code>, so it runs under the bars and
+        the safe area insets) and fits, so nothing scrolls. It has no anchor of
+        its own.
       </li>
       <li>
-        The island floats over it, in a bottom{' '}
+        The island floats above it in a{' '}
         <PartLink
           component="viewport"
-          part="Viewport.Anchor"
+          part="Viewport.BlockEnd"
         />{' '}
-        (<code>edgeEffect=&quot;none&quot;</code>: nothing scrolls under it);
-        touches beside it and above it reach the map.
+        (<code>edgeEffect=&quot;none&quot;</code>, since nothing scrolls under
+        it). Touches next to it and above it reach the map.
       </li>
       <li>
-        The map stays where it is as the island moves: its camera isn’t moved
-        (unexpected, that would irritate; see the sliver below for the
-        opposite). Its credits stay above the island and clear of the safe areas
-        (the content layer’s <code>--uikit-viewport-anchor-block-end</code>).
+        The map stays put as the island moves, and its camera doesn’t move. A
+        camera moving unexpectedly would irritate (the sliver below shows the
+        opposite). The map’s credits stay above the island and clear of the safe
+        areas (using the content layer’s{' '}
+        <code>--uikit-viewport-anchor-block-end</code>).
       </li>
       <li>
-        The map: MapLibre, OpenStreetMap’s tiles (credited), loaded as it’s
-        shown.
+        The map is MapLibre with OpenStreetMap’s tiles (credited), loaded when
+        it’s shown.
       </li>
     </ul>
     <CodeView code={overAMapCode} />
@@ -578,11 +903,11 @@ export const IslandComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its lowest stop its grabber alone: the most room for the map, still
-        clearly something to grab and swipe up.
+        Its lowest stop shows only its grabber. That leaves the most room for
+        the map, while still clearly being something to grab and swipe up.
       </li>
       <li>
-        An empty{' '}
+        It takes an empty{' '}
         <PartLink
           component="island"
           part="Island.SnapGroup"
@@ -592,17 +917,18 @@ export const IslandComposition: FunctionComponent = () => (
           component="island"
           part="Island.Grabber"
         />
-        ; its other stops as before.
+        . Its other stops stay as before.
       </li>
       <li>
-        Here the map follows the island: as it settles at a stop, the map’s
-        camera eases so its center stays in view above it (its padding, from{' '}
+        Here, the map follows the island. As the island settles at a stop, the
+        map’s camera eases so its center stays in view above it (with padding
+        from{' '}
         <PartLink
           component="viewport"
           part="useAnchorSize"
         />
-        ). Useful with a sliver, the island covering more of the map as it’s
-        swiped up; done where the user expects it.
+        ). That helps with a sliver, since the island covers more of the map as
+        it’s swiped up. Do it only where people expect it.
       </li>
     </ul>
     <CodeView code={asASliverCode} />
@@ -616,7 +942,7 @@ export const IslandComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its groups alone: no empty{' '}
+        Only its groups, without an empty{' '}
         <PartLink
           component="island"
           part="Island.SnapGroup"
@@ -624,10 +950,10 @@ export const IslandComposition: FunctionComponent = () => (
         first, so its lowest stop is its peek.
       </li>
       <li>
-        Fully extended, with its reviews scrolled, no stop below the top one
-        counts (the groups scrolled away aren’t stops): dragging its header
-        down, it stays put, as an island without stops does. Scrolled back to
-        the start, its stops count again.
+        Once it’s fully extended with its reviews scrolled, no stop below the
+        top one counts, because the groups scrolled away aren’t stops. Dragging
+        its header down then leaves it where it is, like an island without
+        stops. Scrolled back to the start, its stops count again.
       </li>
     </ul>
     <CodeView code={withoutAHeaderStopCode} />
@@ -641,8 +967,9 @@ export const IslandComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        No snap groups: a plain capsule as tall as its content (up to as tall as
-        it may be, its content scrolling), not swiped: no grabber.
+        Without snap groups, it’s a plain capsule as tall as its content (up to
+        the most it may be, with its content scrolling). It can’t be swiped, so
+        it has no grabber.
       </li>
     </ul>
     <CodeView code={withoutStopsCode} />

@@ -12,9 +12,13 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfICircle, sfXmark } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -46,14 +50,56 @@ export const PopoverDemo: FunctionComponent = () => {
     { external: externalContent, isOpen: true, title: '[content]' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Popover.Positioner': ['align'],
+            'Popover.Root': [],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Accessory': ['render'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'Popover.Arrow': [],
+            'Popover.Body': [],
+            'Popover.Close': ['render'],
+            'Popover.Description': [],
+            'Popover.Header': [],
+            'Popover.Popup': ['className'],
+            'Popover.Portal': [],
+            'Popover.Title': ['render'],
+            'Popover.Trigger': ['aria-label', 'render'],
+            'Toolbar.Button': ['aria-label', 'shape'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="popover"
-      controls={[controlRoot, controlPositioner, controlContent]}
+      controls={[controlRoot, controlPositioner, controlContent, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, statePositioner, stateContent]}
+      state={[stateRoot, statePositioner, stateContent, partState]}
       title="Popover"
     >
       <div
@@ -71,46 +117,73 @@ export const PopoverDemo: FunctionComponent = () => {
           {...propsRoot}
         >
           <Popover.Trigger
+            {...partProps['Popover.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Show Popover</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Show Popover
+            </Button.Label>
           </Popover.Trigger>
-          <Popover.Portal>
+          <Popover.Portal {...partProps['Popover.Portal']}>
             <Popover.Positioner {...propsPositioner}>
-              <Popover.Popup className="popover-demo-popup">
-                {propsContent.arrow ? <Popover.Arrow /> : null}
-                <Popover.Header>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Title>
-                      <Popover.Title render={<span />}>Popover</Popover.Title>
+              <Popover.Popup
+                {...partProps['Popover.Popup']}
+                className="popover-demo-popup"
+              >
+                {propsContent.arrow ? (
+                  <Popover.Arrow {...partProps['Popover.Arrow']} />
+                ) : null}
+                <Popover.Header {...partProps['Popover.Header']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
+                      <Popover.Title
+                        {...partProps['Popover.Title']}
+                        render={<span />}
+                      >
+                        Popover
+                      </Popover.Title>
                     </Toolbar.Title>
-                    <Toolbar.Trailing>
+                    <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                       <Popover.Close
+                        {...partProps['Popover.Close']}
                         render={
                           <Toolbar.Button
+                            {...partProps['Toolbar.Button']}
                             aria-label="Close"
                             shape="circle"
                           />
                         }
                       >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfXmark}
+                          />
                         </Button.Icon>
                       </Popover.Close>
                     </Toolbar.Trailing>
                   </Toolbar.Root>
                 </Popover.Header>
-                <Popover.Body>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Footer>
-                        <Popover.Description>
+                <Popover.Body {...partProps['Popover.Body']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Footer {...partProps['List.Footer']}>
+                        <Popover.Description
+                          {...partProps['Popover.Description']}
+                        >
                           A transient view above other content, at the control
                           that showed it.
                         </Popover.Description>
@@ -122,42 +195,71 @@ export const PopoverDemo: FunctionComponent = () => {
             </Popover.Positioner>
           </Popover.Portal>
         </Popover.Root>
-        <List.Root style={{ width: '100%' }}>
-          <List.Section>
-            <List.Group>
-              <List.Item>
-                <List.Content>
-                  <List.Title>In a row</List.Title>
+        <List.Root
+          {...partProps['List.Root']}
+          style={{ width: '100%' }}
+        >
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
+              <List.Item {...partProps['List.Item']}>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>In a row</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <Popover.Root>
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <Popover.Root {...partProps['Popover.Root']}>
                     <Popover.Trigger
+                      {...partProps['Popover.Trigger']}
                       aria-label="Info"
                       render={
-                        <List.Accessory render={<button type="button" />} />
+                        <List.Accessory
+                          {...partProps['List.Accessory']}
+                          render={<button type="button" />}
+                        />
                       }
                     >
-                      <Symbol icon={sfICircle} />
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfICircle}
+                      />
                     </Popover.Trigger>
-                    <Popover.Portal>
-                      <Popover.Positioner align="end">
-                        <Popover.Popup className="popover-demo-popup">
-                          {propsContent.arrow ? <Popover.Arrow /> : null}
-                          <Popover.Header>
-                            <Toolbar.Root placement="block-start">
-                              <Toolbar.Title>
-                                <Popover.Title render={<span />}>
+                    <Popover.Portal {...partProps['Popover.Portal']}>
+                      <Popover.Positioner
+                        {...partProps['Popover.Positioner']}
+                        align="end"
+                      >
+                        <Popover.Popup
+                          {...partProps['Popover.Popup']}
+                          className="popover-demo-popup"
+                        >
+                          {propsContent.arrow ? (
+                            <Popover.Arrow {...partProps['Popover.Arrow']} />
+                          ) : null}
+                          <Popover.Header {...partProps['Popover.Header']}>
+                            <Toolbar.Root
+                              {...partProps['Toolbar.Root']}
+                              placement="block-start"
+                            >
+                              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                                <Popover.Title
+                                  {...partProps['Popover.Title']}
+                                  render={<span />}
+                                >
                                   In a Row
                                 </Popover.Title>
                               </Toolbar.Title>
                             </Toolbar.Root>
                           </Popover.Header>
-                          <Popover.Body>
-                            <Viewport.Padding edge="block-start" />
-                            <List.Root>
-                              <List.Section>
-                                <List.Footer>
-                                  <Popover.Description>
+                          <Popover.Body {...partProps['Popover.Body']}>
+                            <Viewport.Padding
+                              {...partProps['Viewport.Padding']}
+                              edge="block-start"
+                            />
+                            <List.Root {...partProps['List.Root']}>
+                              <List.Section {...partProps['List.Section']}>
+                                <List.Footer {...partProps['List.Footer']}>
+                                  <Popover.Description
+                                    {...partProps['Popover.Description']}
+                                  >
                                     Aligned with the row’s end.
                                   </Popover.Description>
                                 </List.Footer>

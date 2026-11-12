@@ -1,6 +1,7 @@
 import { FunctionComponent, useLayoutEffect } from 'react';
 
 import { type SettingsValues, useSettings } from '../../../components/index.js';
+import { hideFromCode } from '../../tooling/frame/render-code.js';
 
 /** Reports the settings where it's rendered (for a demo's diagnostics). */
 export const SettingsReport: FunctionComponent<{
@@ -11,6 +12,9 @@ export const SettingsReport: FunctionComponent<{
 
   return null;
 };
+
+// (A readout, for the diagnostics: no part of the code shown.)
+hideFromCode(SettingsReport);
 
 /** Settings, resolved, side by side (a column each, by its title). */
 export const SettingsTable: FunctionComponent<{

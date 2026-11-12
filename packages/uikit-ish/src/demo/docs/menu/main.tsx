@@ -5,7 +5,10 @@ import { FunctionComponent, useMemo, useState } from 'react';
 import { Button, Menu, Symbol } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
@@ -15,6 +18,7 @@ import {
   sfSquare,
   sfSquareAndArrowUp,
 } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsCheckboxItems,
   getPropOptionsItem,
@@ -120,6 +124,33 @@ export const MenuDemo: FunctionComponent = () => {
       title: 'submenu popup',
     });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Menu.Item': ['onClick'],
+            'Menu.QuickAction': ['destructive'],
+            Symbol: ['icon'],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'Menu.Group': [],
+            'Menu.GroupLabel': [],
+            'Menu.Icon': [],
+            'Menu.Label': [],
+            'Menu.Portal': [],
+            'Menu.QuickActions': [],
+            'Menu.Separator': [],
+            'Menu.Shortcut': [],
+            'Menu.Subtitle': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
@@ -140,6 +171,7 @@ export const MenuDemo: FunctionComponent = () => {
         controlSubmenuTrigger,
         controlSubmenuPositioner,
         controlSubmenuPopup,
+        partControls,
       ]}
       state={[
         stateRoot,
@@ -154,6 +186,7 @@ export const MenuDemo: FunctionComponent = () => {
         stateSubmenuTrigger,
         stateSubmenuPositioner,
         stateSubmenuPopup,
+        partState,
       ]}
     >
       <Menu.Root
@@ -163,115 +196,192 @@ export const MenuDemo: FunctionComponent = () => {
         <div className="menu-demo-trigger-space">
           <Menu.Trigger
             {...propsTrigger}
-            render={<Button.Root variant="glass" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="glass"
+              />
+            }
           >
-            <Button.Label>Open Menu</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Open Menu
+            </Button.Label>
           </Menu.Trigger>
         </div>
-        <Menu.Portal>
+        <Menu.Portal {...partProps['Menu.Portal']}>
           <Menu.Positioner {...propsPositioner}>
             <Menu.Popup {...propsPopup}>
-              <Menu.QuickActions>
+              <Menu.QuickActions {...partProps['Menu.QuickActions']}>
                 <Menu.QuickAction {...propsQuickAction}>
-                  <Menu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Share</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Share</Menu.Label>
                 </Menu.QuickAction>
-                <Menu.QuickAction>
-                  <Menu.Icon>
-                    <Symbol icon={sfPinFill} />
+                <Menu.QuickAction {...partProps['Menu.QuickAction']}>
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfPinFill}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Pin</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Pin</Menu.Label>
                 </Menu.QuickAction>
-                <Menu.QuickAction destructive>
-                  <Menu.Icon>
-                    <Symbol icon={sfLockFill} />
+                <Menu.QuickAction
+                  {...partProps['Menu.QuickAction']}
+                  destructive
+                >
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfLockFill}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Lock</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Lock</Menu.Label>
                 </Menu.QuickAction>
               </Menu.QuickActions>
-              <Menu.Separator />
+              <Menu.Separator {...partProps['Menu.Separator']} />
 
               <Menu.Item {...propsItem}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Action</Menu.Label>
-                <Menu.Shortcut>⌘A</Menu.Shortcut>
+                <Menu.Label {...partProps['Menu.Label']}>Action</Menu.Label>
+                <Menu.Shortcut {...partProps['Menu.Shortcut']}>
+                  ⌘A
+                </Menu.Shortcut>
               </Menu.Item>
               <Menu.Item {...propsDisabledItem}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Disabled Action</Menu.Label>
-                <Menu.Shortcut>⇧⌘A</Menu.Shortcut>
+                <Menu.Label {...partProps['Menu.Label']}>
+                  Disabled Action
+                </Menu.Label>
+                <Menu.Shortcut {...partProps['Menu.Shortcut']}>
+                  ⇧⌘A
+                </Menu.Shortcut>
               </Menu.Item>
               <Menu.Item {...propsDestructiveItem}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Delete</Menu.Label>
+                <Menu.Label {...partProps['Menu.Label']}>Delete</Menu.Label>
               </Menu.Item>
 
-              <Menu.Separator />
+              <Menu.Separator {...partProps['Menu.Separator']} />
 
-              <Menu.Item onClick={() => addLog('subtitled item clicked')}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+              <Menu.Item
+                {...partProps['Menu.Item']}
+                onClick={() => addLog('subtitled item clicked')}
+              >
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Action</Menu.Label>
-                <Menu.Subtitle>Subtitle</Menu.Subtitle>
+                <Menu.Label {...partProps['Menu.Label']}>Action</Menu.Label>
+                <Menu.Subtitle {...partProps['Menu.Subtitle']}>
+                  Subtitle
+                </Menu.Subtitle>
               </Menu.Item>
 
-              <Menu.Separator />
-              <Menu.Group>
-                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
+              <Menu.Separator {...partProps['Menu.Separator']} />
+              <Menu.Group {...partProps['Menu.Group']}>
+                <Menu.GroupLabel {...partProps['Menu.GroupLabel']}>
+                  Section Title
+                </Menu.GroupLabel>
                 <Menu.SubmenuRoot {...propsSubmenuRoot}>
                   <Menu.SubmenuTrigger {...propsSubmenuTrigger}>
-                    <Menu.Icon>
-                      <Symbol icon={sfSquare} />
+                    <Menu.Icon {...partProps['Menu.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquare}
+                      />
                     </Menu.Icon>
-                    <Menu.Label>Submenu</Menu.Label>
+                    <Menu.Label {...partProps['Menu.Label']}>
+                      Submenu
+                    </Menu.Label>
                   </Menu.SubmenuTrigger>
-                  <Menu.Portal>
+                  <Menu.Portal {...partProps['Menu.Portal']}>
                     <Menu.Positioner {...propsSubmenuPositioner}>
                       <Menu.Popup {...propsSubmenuPopup}>
                         <Menu.Item
+                          {...partProps['Menu.Item']}
                           onClick={() => addLog('submenu item clicked')}
                         >
-                          <Menu.Icon>
-                            <Symbol icon={sfSquare} />
+                          <Menu.Icon {...partProps['Menu.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfSquare}
+                            />
                           </Menu.Icon>
-                          <Menu.Label>Submenu Action</Menu.Label>
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Submenu Action
+                          </Menu.Label>
                         </Menu.Item>
                         <Menu.Item
+                          {...partProps['Menu.Item']}
                           onClick={() => addLog('submenu item clicked')}
                         >
-                          <Menu.Icon>
-                            <Symbol icon={sfSquare} />
+                          <Menu.Icon {...partProps['Menu.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfSquare}
+                            />
                           </Menu.Icon>
-                          <Menu.Label>Another Action</Menu.Label>
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Another Action
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
                   </Menu.Portal>
                 </Menu.SubmenuRoot>
-                <Menu.Item onClick={() => addLog('item clicked')}>
-                  <Menu.Icon>
-                    <Symbol icon={sfSquare} />
+                <Menu.Item
+                  {...partProps['Menu.Item']}
+                  onClick={() => addLog('item clicked')}
+                >
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquare}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Action with a long label</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>
+                    Action with a long label
+                  </Menu.Label>
                 </Menu.Item>
               </Menu.Group>
-              <Menu.Separator />
-              <Menu.Group>
-                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
-                <Menu.Item onClick={() => addLog('item clicked')}>
-                  <Menu.Icon>
-                    <Symbol icon={sfSquare} />
+              <Menu.Separator {...partProps['Menu.Separator']} />
+              <Menu.Group {...partProps['Menu.Group']}>
+                <Menu.GroupLabel {...partProps['Menu.GroupLabel']}>
+                  Section Title
+                </Menu.GroupLabel>
+                <Menu.Item
+                  {...partProps['Menu.Item']}
+                  onClick={() => addLog('item clicked')}
+                >
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquare}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Action</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Action</Menu.Label>
                 </Menu.Item>
               </Menu.Group>
             </Menu.Popup>
@@ -365,6 +475,33 @@ export const MenuRegularDemo: FunctionComponent = () => {
       title: 'submenu popup',
     });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Menu.Item': ['onClick'],
+            'Menu.QuickAction': ['destructive'],
+            Symbol: ['icon'],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'Menu.Group': [],
+            'Menu.GroupLabel': [],
+            'Menu.Icon': [],
+            'Menu.Label': [],
+            'Menu.Portal': [],
+            'Menu.QuickActions': [],
+            'Menu.Separator': [],
+            'Menu.Shortcut': [],
+            'Menu.Subtitle': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
@@ -385,6 +522,7 @@ export const MenuRegularDemo: FunctionComponent = () => {
         controlSubmenuTrigger,
         controlSubmenuPositioner,
         controlSubmenuPopup,
+        partControls,
       ]}
       state={[
         stateRoot,
@@ -399,6 +537,7 @@ export const MenuRegularDemo: FunctionComponent = () => {
         stateSubmenuTrigger,
         stateSubmenuPositioner,
         stateSubmenuPopup,
+        partState,
       ]}
     >
       <Menu.Root
@@ -409,115 +548,192 @@ export const MenuRegularDemo: FunctionComponent = () => {
         <div className="menu-demo-trigger-space">
           <Menu.Trigger
             {...propsTrigger}
-            render={<Button.Root variant="glass" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="glass"
+              />
+            }
           >
-            <Button.Label>Open Menu</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Open Menu
+            </Button.Label>
           </Menu.Trigger>
         </div>
-        <Menu.Portal>
+        <Menu.Portal {...partProps['Menu.Portal']}>
           <Menu.Positioner {...propsPositioner}>
             <Menu.Popup {...propsPopup}>
-              <Menu.QuickActions>
+              <Menu.QuickActions {...partProps['Menu.QuickActions']}>
                 <Menu.QuickAction {...propsQuickAction}>
-                  <Menu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Share</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Share</Menu.Label>
                 </Menu.QuickAction>
-                <Menu.QuickAction>
-                  <Menu.Icon>
-                    <Symbol icon={sfPinFill} />
+                <Menu.QuickAction {...partProps['Menu.QuickAction']}>
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfPinFill}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Pin</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Pin</Menu.Label>
                 </Menu.QuickAction>
-                <Menu.QuickAction destructive>
-                  <Menu.Icon>
-                    <Symbol icon={sfLockFill} />
+                <Menu.QuickAction
+                  {...partProps['Menu.QuickAction']}
+                  destructive
+                >
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfLockFill}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Lock</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Lock</Menu.Label>
                 </Menu.QuickAction>
               </Menu.QuickActions>
-              <Menu.Separator />
+              <Menu.Separator {...partProps['Menu.Separator']} />
 
               <Menu.Item {...propsItem}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Action</Menu.Label>
-                <Menu.Shortcut>⌘A</Menu.Shortcut>
+                <Menu.Label {...partProps['Menu.Label']}>Action</Menu.Label>
+                <Menu.Shortcut {...partProps['Menu.Shortcut']}>
+                  ⌘A
+                </Menu.Shortcut>
               </Menu.Item>
               <Menu.Item {...propsDisabledItem}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Disabled Action</Menu.Label>
-                <Menu.Shortcut>⇧⌘A</Menu.Shortcut>
+                <Menu.Label {...partProps['Menu.Label']}>
+                  Disabled Action
+                </Menu.Label>
+                <Menu.Shortcut {...partProps['Menu.Shortcut']}>
+                  ⇧⌘A
+                </Menu.Shortcut>
               </Menu.Item>
               <Menu.Item {...propsDestructiveItem}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Delete</Menu.Label>
+                <Menu.Label {...partProps['Menu.Label']}>Delete</Menu.Label>
               </Menu.Item>
 
-              <Menu.Separator />
+              <Menu.Separator {...partProps['Menu.Separator']} />
 
-              <Menu.Item onClick={() => addLog('subtitled item clicked')}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+              <Menu.Item
+                {...partProps['Menu.Item']}
+                onClick={() => addLog('subtitled item clicked')}
+              >
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Action</Menu.Label>
-                <Menu.Subtitle>Subtitle</Menu.Subtitle>
+                <Menu.Label {...partProps['Menu.Label']}>Action</Menu.Label>
+                <Menu.Subtitle {...partProps['Menu.Subtitle']}>
+                  Subtitle
+                </Menu.Subtitle>
               </Menu.Item>
 
-              <Menu.Separator />
-              <Menu.Group>
-                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
+              <Menu.Separator {...partProps['Menu.Separator']} />
+              <Menu.Group {...partProps['Menu.Group']}>
+                <Menu.GroupLabel {...partProps['Menu.GroupLabel']}>
+                  Section Title
+                </Menu.GroupLabel>
                 <Menu.SubmenuRoot {...propsSubmenuRoot}>
                   <Menu.SubmenuTrigger {...propsSubmenuTrigger}>
-                    <Menu.Icon>
-                      <Symbol icon={sfSquare} />
+                    <Menu.Icon {...partProps['Menu.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquare}
+                      />
                     </Menu.Icon>
-                    <Menu.Label>Submenu</Menu.Label>
+                    <Menu.Label {...partProps['Menu.Label']}>
+                      Submenu
+                    </Menu.Label>
                   </Menu.SubmenuTrigger>
-                  <Menu.Portal>
+                  <Menu.Portal {...partProps['Menu.Portal']}>
                     <Menu.Positioner {...propsSubmenuPositioner}>
                       <Menu.Popup {...propsSubmenuPopup}>
                         <Menu.Item
+                          {...partProps['Menu.Item']}
                           onClick={() => addLog('submenu item clicked')}
                         >
-                          <Menu.Icon>
-                            <Symbol icon={sfSquare} />
+                          <Menu.Icon {...partProps['Menu.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfSquare}
+                            />
                           </Menu.Icon>
-                          <Menu.Label>Submenu Action</Menu.Label>
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Submenu Action
+                          </Menu.Label>
                         </Menu.Item>
                         <Menu.Item
+                          {...partProps['Menu.Item']}
                           onClick={() => addLog('submenu item clicked')}
                         >
-                          <Menu.Icon>
-                            <Symbol icon={sfSquare} />
+                          <Menu.Icon {...partProps['Menu.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfSquare}
+                            />
                           </Menu.Icon>
-                          <Menu.Label>Another Action</Menu.Label>
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Another Action
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
                   </Menu.Portal>
                 </Menu.SubmenuRoot>
-                <Menu.Item onClick={() => addLog('item clicked')}>
-                  <Menu.Icon>
-                    <Symbol icon={sfSquare} />
+                <Menu.Item
+                  {...partProps['Menu.Item']}
+                  onClick={() => addLog('item clicked')}
+                >
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquare}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Action with a long label</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>
+                    Action with a long label
+                  </Menu.Label>
                 </Menu.Item>
               </Menu.Group>
-              <Menu.Separator />
-              <Menu.Group>
-                <Menu.GroupLabel>Section Title</Menu.GroupLabel>
-                <Menu.Item onClick={() => addLog('item clicked')}>
-                  <Menu.Icon>
-                    <Symbol icon={sfSquare} />
+              <Menu.Separator {...partProps['Menu.Separator']} />
+              <Menu.Group {...partProps['Menu.Group']}>
+                <Menu.GroupLabel {...partProps['Menu.GroupLabel']}>
+                  Section Title
+                </Menu.GroupLabel>
+                <Menu.Item
+                  {...partProps['Menu.Item']}
+                  onClick={() => addLog('item clicked')}
+                >
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquare}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Action</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Action</Menu.Label>
                 </Menu.Item>
               </Menu.Group>
             </Menu.Popup>
@@ -568,6 +784,34 @@ export const MenuTogglesDemo: FunctionComponent = () => {
     { external: externalIndicator, title: 'indicator (1st)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Menu.CheckboxItem': ['defaultChecked'],
+            'Menu.CheckboxItemIndicator': [],
+            'Menu.RadioItem': ['value'],
+            Symbol: ['icon'],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'Menu.Icon': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Portal': [],
+            'Menu.Positioner': [],
+            'Menu.RadioItemIndicator': [],
+            'Menu.Separator': [],
+            'Menu.Trigger': ['render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
@@ -581,6 +825,7 @@ export const MenuTogglesDemo: FunctionComponent = () => {
         controlRadioGroup,
         controlRadioItem,
         controlIndicator,
+        partControls,
       ]}
       state={[
         stateRoot,
@@ -588,6 +833,7 @@ export const MenuTogglesDemo: FunctionComponent = () => {
         stateRadioGroup,
         stateRadioItem,
         stateIndicator,
+        partState,
       ]}
     >
       <Menu.Root
@@ -595,61 +841,117 @@ export const MenuTogglesDemo: FunctionComponent = () => {
         {...propsRoot}
       >
         <div className="menu-demo-trigger-space">
-          <Menu.Trigger render={<Button.Root variant="glass" />}>
-            <Button.Label>Open Menu</Button.Label>
+          <Menu.Trigger
+            {...partProps['Menu.Trigger']}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="glass"
+              />
+            }
+          >
+            <Button.Label {...partProps['Button.Label']}>
+              Open Menu
+            </Button.Label>
           </Menu.Trigger>
         </div>
-        <Menu.Portal>
-          <Menu.Positioner>
-            <Menu.Popup>
-              <Menu.Item onClick={() => addLog('item clicked')}>
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+        <Menu.Portal {...partProps['Menu.Portal']}>
+          <Menu.Positioner {...partProps['Menu.Positioner']}>
+            <Menu.Popup {...partProps['Menu.Popup']}>
+              <Menu.Item
+                {...partProps['Menu.Item']}
+                onClick={() => addLog('item clicked')}
+              >
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Action</Menu.Label>
+                <Menu.Label {...partProps['Menu.Label']}>Action</Menu.Label>
               </Menu.Item>
 
-              <Menu.Separator />
+              <Menu.Separator {...partProps['Menu.Separator']} />
               <Menu.CheckboxItem {...propsCheckboxItem}>
                 <Menu.CheckboxItemIndicator {...propsIndicator} />
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Checkbox</Menu.Label>
+                <Menu.Label {...partProps['Menu.Label']}>Checkbox</Menu.Label>
               </Menu.CheckboxItem>
-              <Menu.CheckboxItem defaultChecked={false}>
-                <Menu.CheckboxItemIndicator />
-                <Menu.Icon>
-                  <Symbol icon={sfSquare} />
+              <Menu.CheckboxItem
+                {...partProps['Menu.CheckboxItem']}
+                defaultChecked={false}
+              >
+                <Menu.CheckboxItemIndicator
+                  {...partProps['Menu.CheckboxItemIndicator']}
+                />
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquare}
+                  />
                 </Menu.Icon>
-                <Menu.Label>Another Checkbox</Menu.Label>
+                <Menu.Label {...partProps['Menu.Label']}>
+                  Another Checkbox
+                </Menu.Label>
               </Menu.CheckboxItem>
 
-              <Menu.Separator />
+              <Menu.Separator {...partProps['Menu.Separator']} />
               <Menu.RadioGroup {...propsRadioGroup}>
                 <Menu.RadioItem
                   value="first"
                   {...propsRadioItem}
                 >
-                  <Menu.RadioItemIndicator />
-                  <Menu.Icon>
-                    <Symbol icon={sfSquare} />
+                  <Menu.RadioItemIndicator
+                    {...partProps['Menu.RadioItemIndicator']}
+                  />
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquare}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Option first</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>
+                    Option first
+                  </Menu.Label>
                 </Menu.RadioItem>
-                <Menu.RadioItem value="second">
-                  <Menu.RadioItemIndicator />
-                  <Menu.Icon>
-                    <Symbol icon={sfSquare} />
+                <Menu.RadioItem
+                  {...partProps['Menu.RadioItem']}
+                  value="second"
+                >
+                  <Menu.RadioItemIndicator
+                    {...partProps['Menu.RadioItemIndicator']}
+                  />
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquare}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Option second</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>
+                    Option second
+                  </Menu.Label>
                 </Menu.RadioItem>
-                <Menu.RadioItem value="third">
-                  <Menu.RadioItemIndicator />
-                  <Menu.Icon>
-                    <Symbol icon={sfSquare} />
+                <Menu.RadioItem
+                  {...partProps['Menu.RadioItem']}
+                  value="third"
+                >
+                  <Menu.RadioItemIndicator
+                    {...partProps['Menu.RadioItemIndicator']}
+                  />
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquare}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Option third</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>
+                    Option third
+                  </Menu.Label>
                 </Menu.RadioItem>
               </Menu.RadioGroup>
             </Menu.Popup>
@@ -672,26 +974,69 @@ export const MenuPopUpDemo: FunctionComponent = () => {
 
   const [value, setValue] = useState('Daily');
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Portal': [],
+            'Menu.Positioner': ['align'],
+            'Menu.RadioGroup': ['onValueChange', 'value'],
+            'Menu.RadioItem': ['closeOnClick', 'value'],
+            'Menu.RadioItemIndicator': [],
+            'Menu.Root': [],
+            'Menu.Trigger': ['render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="menu"
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="Menu (Pop-up Button)"
     >
       <div className="menu-demo-trigger-space">
-        <Menu.Root>
-          <Menu.Trigger render={<Button.Root variant="bordered" />}>
-            <Button.Label>{value}</Button.Label>
-            <Button.Icon>
-              <Symbol icon={sfChevronUpChevronDown} />
+        <Menu.Root {...partProps['Menu.Root']}>
+          <Menu.Trigger
+            {...partProps['Menu.Trigger']}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
+          >
+            <Button.Label {...partProps['Button.Label']}>{value}</Button.Label>
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfChevronUpChevronDown}
+              />
             </Button.Icon>
           </Menu.Trigger>
-          <Menu.Portal>
-            <Menu.Positioner align="end">
-              <Menu.Popup>
+          <Menu.Portal {...partProps['Menu.Portal']}>
+            <Menu.Positioner
+              {...partProps['Menu.Positioner']}
+              align="end"
+            >
+              <Menu.Popup {...partProps['Menu.Popup']}>
                 <Menu.RadioGroup
+                  {...partProps['Menu.RadioGroup']}
                   value={value}
                   onValueChange={(next: unknown) => {
                     addLog(`value change: ${String(next)}`);
@@ -700,25 +1045,36 @@ export const MenuPopUpDemo: FunctionComponent = () => {
                 >
                   {/* A pop-up closes on choosing. */}
                   <Menu.RadioItem
+                    {...partProps['Menu.RadioItem']}
                     closeOnClick
                     value="Daily"
                   >
-                    <Menu.RadioItemIndicator />
-                    <Menu.Label>Daily</Menu.Label>
+                    <Menu.RadioItemIndicator
+                      {...partProps['Menu.RadioItemIndicator']}
+                    />
+                    <Menu.Label {...partProps['Menu.Label']}>Daily</Menu.Label>
                   </Menu.RadioItem>
                   <Menu.RadioItem
+                    {...partProps['Menu.RadioItem']}
                     closeOnClick
                     value="Weekly"
                   >
-                    <Menu.RadioItemIndicator />
-                    <Menu.Label>Weekly</Menu.Label>
+                    <Menu.RadioItemIndicator
+                      {...partProps['Menu.RadioItemIndicator']}
+                    />
+                    <Menu.Label {...partProps['Menu.Label']}>Weekly</Menu.Label>
                   </Menu.RadioItem>
                   <Menu.RadioItem
+                    {...partProps['Menu.RadioItem']}
                     closeOnClick
                     value="Monthly"
                   >
-                    <Menu.RadioItemIndicator />
-                    <Menu.Label>Monthly</Menu.Label>
+                    <Menu.RadioItemIndicator
+                      {...partProps['Menu.RadioItemIndicator']}
+                    />
+                    <Menu.Label {...partProps['Menu.Label']}>
+                      Monthly
+                    </Menu.Label>
                   </Menu.RadioItem>
                 </Menu.RadioGroup>
               </Menu.Popup>
@@ -755,14 +1111,34 @@ export const MenuOpenDemo: FunctionComponent = () => {
     { external: externalPopup, title: 'popup' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Menu.Icon': [],
+            'Menu.Item': ['destructive', 'onClick'],
+            'Menu.Label': [],
+            'Menu.Portal': [],
+            'Menu.Positioner': ['anchor', 'side'],
+            'Menu.Separator': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="menu"
-      controls={[controlRoot, controlPopup]}
+      controls={[controlRoot, controlPopup, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, statePopup]}
+      state={[stateRoot, statePopup, partState]}
       title="Menu (Open)"
     >
       <span
@@ -775,27 +1151,38 @@ export const MenuOpenDemo: FunctionComponent = () => {
         open
         modal={false}
       >
-        <Menu.Portal>
+        <Menu.Portal {...partProps['Menu.Portal']}>
           <Menu.Positioner
+            {...partProps['Menu.Positioner']}
             anchor={anchorRef}
             side="block-end"
           >
             <Menu.Popup {...propsPopup}>
-              <Menu.Item onClick={() => addLog('Copy clicked')}>
-                <Menu.Label>Copy</Menu.Label>
+              <Menu.Item
+                {...partProps['Menu.Item']}
+                onClick={() => addLog('Copy clicked')}
+              >
+                <Menu.Label {...partProps['Menu.Label']}>Copy</Menu.Label>
               </Menu.Item>
-              <Menu.Item onClick={() => addLog('Share clicked')}>
-                <Menu.Label>Share</Menu.Label>
-                <Menu.Icon>
-                  <Symbol icon={sfSquareAndArrowUp} />
+              <Menu.Item
+                {...partProps['Menu.Item']}
+                onClick={() => addLog('Share clicked')}
+              >
+                <Menu.Label {...partProps['Menu.Label']}>Share</Menu.Label>
+                <Menu.Icon {...partProps['Menu.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquareAndArrowUp}
+                  />
                 </Menu.Icon>
               </Menu.Item>
-              <Menu.Separator />
+              <Menu.Separator {...partProps['Menu.Separator']} />
               <Menu.Item
+                {...partProps['Menu.Item']}
                 destructive
                 onClick={() => addLog('Delete clicked')}
               >
-                <Menu.Label>Delete</Menu.Label>
+                <Menu.Label {...partProps['Menu.Label']}>Delete</Menu.Label>
               </Menu.Item>
             </Menu.Popup>
           </Menu.Positioner>

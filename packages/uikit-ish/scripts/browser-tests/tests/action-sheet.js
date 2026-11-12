@@ -86,7 +86,7 @@ export const tests = [
     },
   },
   {
-    name: 'action sheet: opened without a trigger, at its container’s bottom, above its safe area',
+    name: 'action sheet: opened without a trigger, at its container’s bottom, above its safe area inset',
     run: async (page) => {
       await page.open('action-sheet-composition-app');
       await page.evaluate(`${page.section}.querySelector('button').click()`);

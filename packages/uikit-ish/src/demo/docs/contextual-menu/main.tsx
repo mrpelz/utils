@@ -12,7 +12,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfPhoto, sfSquareAndArrowUp, sfTrash } from '../../tooling/icons.js';
@@ -21,6 +24,7 @@ import {
   propOptionsItemDestructive as propOptionsMenuItemDestructive,
   propOptionsPopup as propOptionsMenuPopup,
 } from '../menu/props.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -90,6 +94,30 @@ export const ContextualMenuDemo: FunctionComponent = () => {
   const isHeld = propsTrigger.openOn !== 'click';
   useTextActionsPrevention(trigger, isHeld);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'ContextualMenu.Item': ['onClick'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['variant'],
+            'ContextualMenu.Backdrop': [],
+            'ContextualMenu.Icon': [],
+            'ContextualMenu.Label': [],
+            'ContextualMenu.Portal': [],
+            'ContextualMenu.Separator': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
@@ -109,6 +137,7 @@ export const ContextualMenuDemo: FunctionComponent = () => {
         controlPopup,
         controlItem,
         controlDestructiveItem,
+        partControls,
       ]}
       state={[
         stateContent,
@@ -119,9 +148,10 @@ export const ContextualMenuDemo: FunctionComponent = () => {
         statePopup,
         stateItem,
         stateDestructiveItem,
+        partState,
       ]}
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <ContextualMenu.Root
           key={elementKey}
           {...propsRoot}
@@ -129,12 +159,20 @@ export const ContextualMenuDemo: FunctionComponent = () => {
           <ContextualMenu.Trigger
             ref={trigger}
             {...propsTrigger}
-            render={<Button.Root variant="bordered" />}
+            render={
+              <Button.Root
+                {...partProps['Button.Root']}
+                variant="bordered"
+              />
+            }
           >
-            <Button.Icon>
-              <Symbol icon={sfPhoto} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPhoto}
+              />
             </Button.Icon>
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ContextualMenu.Trigger>
           {content.preview ? (
             <ContextualMenu.Preview {...propsPreview}>
@@ -142,31 +180,55 @@ export const ContextualMenuDemo: FunctionComponent = () => {
                 aria-label="Photo"
                 className="contextual-menu-demo-photo"
               >
-                <Symbol icon={sfPhoto} />
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfPhoto}
+                />
               </div>
             </ContextualMenu.Preview>
           ) : null}
-          <ContextualMenu.Portal>
-            {content.backdrop ? <ContextualMenu.Backdrop /> : null}
+          <ContextualMenu.Portal {...partProps['ContextualMenu.Portal']}>
+            {content.backdrop ? (
+              <ContextualMenu.Backdrop
+                {...partProps['ContextualMenu.Backdrop']}
+              />
+            ) : null}
             <ContextualMenu.Positioner {...propsPositioner}>
               <ContextualMenu.Popup {...propsPopup}>
                 <ContextualMenu.Item {...propsItem}>
-                  <ContextualMenu.Label>Share</ContextualMenu.Label>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Share
+                  </ContextualMenu.Label>
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </ContextualMenu.Icon>
                 </ContextualMenu.Item>
-                <ContextualMenu.Item onClick={() => addLog('Copy clicked')}>
-                  <ContextualMenu.Label>Copy</ContextualMenu.Label>
+                <ContextualMenu.Item
+                  {...partProps['ContextualMenu.Item']}
+                  onClick={() => addLog('Copy clicked')}
+                >
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Copy
+                  </ContextualMenu.Label>
                 </ContextualMenu.Item>
-                <ContextualMenu.Separator />
+                <ContextualMenu.Separator
+                  {...partProps['ContextualMenu.Separator']}
+                />
                 <ContextualMenu.Item
                   {...propsDestructiveItem}
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <ContextualMenu.Label>Delete</ContextualMenu.Label>
-                  <ContextualMenu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <ContextualMenu.Label {...partProps['ContextualMenu.Label']}>
+                    Delete
+                  </ContextualMenu.Label>
+                  <ContextualMenu.Icon {...partProps['ContextualMenu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </ContextualMenu.Icon>
                 </ContextualMenu.Item>
               </ContextualMenu.Popup>

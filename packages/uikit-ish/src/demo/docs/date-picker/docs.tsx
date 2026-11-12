@@ -15,10 +15,10 @@ const valueRows: readonly PropRow[] = [
     'Date | DateRange | null',
     undefined,
     <>
-      The selected date (with <code>range</code>:{' '}
-      <code>{'{ start, end }'}</code>, its <code>end</code> <code>null</code>{' '}
-      while it’s picked; controlled). To render an uncontrolled picker, use the{' '}
-      <code>defaultValue</code> prop instead.
+      The selected date (controlled). With <code>range</code>, it’s{' '}
+      <code>{'{ start, end }'}</code>, with <code>end</code> as{' '}
+      <code>null</code> while it’s being picked. To render an uncontrolled
+      picker, use the <code>defaultValue</code> prop instead.
     </>,
   ],
   [
@@ -35,26 +35,26 @@ const valueRows: readonly PropRow[] = [
     '(value: Date | DateRange, eventDetails) => void',
     undefined,
     <>
-      Called with the newly selected date (a range: its start, then the range),
-      and why (<code>reason</code>): <code>day-press</code> (also by keyboard),{' '}
-      <code>drag</code> (a range), <code>time</code> (the time’s roll), or{' '}
-      <code>footer</code> (its <code>select</code>).
+      Called with the newly selected date (for a range, its start, then the
+      range), and why (<code>reason</code>): <code>day-press</code> (also by
+      keyboard), <code>drag</code> (a range), <code>time</code> (the time’s
+      roll), or <code>footer</code> (its <code>select</code>).
     </>,
   ],
   [
     'range',
     'boolean',
     code('false'),
-    'Picks a range of days: a start, then an end (pressed, or dragged across). Dates only.',
+    'Picks a range of days: a start, then an end (pressed, or dragged across). Only for dates.',
   ],
   [
     'isRangeDisabled',
     '(start: Date, end: Date) => boolean',
     undefined,
     <>
-      With <code>range</code>: ranges that can’t be selected (besides those over
-      disabled days, which never can). While an end is picked, the days it’s{' '}
-      <code>true</code> for are disabled.
+      With <code>range</code>, the ranges that can’t be selected (besides those
+      over disabled days, which never can be). While an end is being picked, the
+      days it returns <code>true</code> for are disabled.
     </>,
   ],
 ];
@@ -64,21 +64,21 @@ const calendarRows: readonly PropRow[] = [
     'min',
     'Date',
     undefined,
-    'The earliest selectable day; earlier ones grayed out.',
+    'The earliest selectable day. Earlier ones are grayed out.',
   ],
   [
     'max',
     'Date',
     undefined,
-    'The latest selectable day; later ones grayed out.',
+    'The latest selectable day. Later ones are grayed out.',
   ],
   [
     'isDateDisabled',
     '(date: Date) => boolean',
     undefined,
     <>
-      Days that can’t be selected (e.g. booked ones; besides <code>min</code>{' '}
-      and <code>max</code>), grayed out as those.
+      Days that can’t be selected (for example booked ones), besides{' '}
+      <code>min</code> and <code>max</code>, and grayed out like them.
     </>,
   ],
   [
@@ -86,28 +86,30 @@ const calendarRows: readonly PropRow[] = [
     '(date: Date) => DayHighlights',
     undefined,
     <>
-      Days highlighted (e.g. with events): <code>true</code> (a dot below), how
-      (<code>{`{ style: ${union('dot', 'text', 'circle')}, tint }`}</code>), or
-      several (dots side by side). Not the adjacent months’ days.
+      Highlighted days (for example with events): <code>true</code> (a dot
+      below), how (
+      <code>{`{ style: ${union('dot', 'text', 'circle')}, tint }`}</code>
+      ), or several (dots side by side). The adjacent months’ days aren’t
+      highlighted.
     </>,
   ],
   [
     'highlightedWeekdays',
     'readonly number[]',
     undefined,
-    'Days of the week in the secondary label color (0: Sunday … 6: Saturday; e.g. the weekend: [0, 6]).',
+    'Days of the week in the secondary label color (0 for Sunday to 6 for Saturday; for example [0, 6] for the weekend).',
   ],
   [
     'firstDayOfWeek',
     'number',
     'the locale’s',
-    'The week’s first day (0: Sunday … 6: Saturday).',
+    'The week’s first day (0 for Sunday to 6 for Saturday).',
   ],
   [
     'showAdjacentMonths',
     'boolean',
     code('false'),
-    'Shows the adjacent months’ days filling the first and last weeks, grayed out; pressed, they show their month.',
+    'Shows the adjacent months’ days in the first and last weeks, grayed out. Pressing one shows its month.',
   ],
   [
     'swipe',
@@ -116,29 +118,29 @@ const calendarRows: readonly PropRow[] = [
       <code>date-range</code> picking a range, otherwise <code>month</code>
     </>,
     <>
-      What swiping the days sideways does: <code>month</code> turns the month
-      (following the finger); <code>date-range</code> drags a range (picking a
-      range; otherwise as <code>ignore</code>); <code>ignore</code>: neither.
-      Scrolling sideways (e.g. a trackpad’s) turns the month, but with{' '}
-      <code>ignore</code>.
+      What swiping the days sideways does. <code>month</code> turns the month,
+      following the finger. <code>date-range</code> drags a range (when picking
+      a range; otherwise, it acts like <code>ignore</code>). <code>ignore</code>{' '}
+      does neither. Scrolling sideways (for example on a trackpad) turns the
+      month, except with <code>ignore</code>.
     </>,
   ],
   [
     'locale',
     'string',
     'the user’s',
-    'Locale of names, numerals, the hour cycle and the week’s first day.',
+    'The locale for names, numerals, the hour cycle and the week’s first day.',
   ],
   [
     'name',
     'string',
     undefined,
     <>
-      Its value’s name in a form, submitted by a hidden control as an input’s (a
-      date <code>YYYY-MM-DD</code>, a time <code>HH:MM</code>, both{' '}
-      <code>YYYY-MM-DDTHH:MM</code>, a range <code>start/end</code>, empty until
-      its end is picked). In Base UI’s <code>Field</code>, the field’s name
-      applies.{' '}
+      Its value’s name in a form. A hidden control submits it like an input’s (a
+      date as <code>YYYY-MM-DD</code>, a time as <code>HH:MM</code>, both as{' '}
+      <code>YYYY-MM-DDTHH:MM</code>, and a range as <code>start/end</code>,
+      empty until its end is picked). In Base UI’s <code>Field</code>, the
+      field’s name applies.{' '}
       <PartLink
         component="date-picker"
         part="DatePicker.Root"
@@ -148,9 +150,9 @@ const calendarRows: readonly PropRow[] = [
         component="date-picker"
         part="DatePicker.Calendar"
       />{' '}
-      are alternatives, never nested (the picker renders its own calendar): name
-      the one that holds the value (with <code>{'popover={false}'}</code>, the
-      picker, not the calendar the app shows below it).
+      are alternatives, never nested (the picker renders its own calendar). Name
+      the one that holds the value (with <code>{'popover={false}'}</code>,
+      that’s the picker, not the calendar the app shows below it).
     </>,
   ],
   [
@@ -170,10 +172,10 @@ const calendarRows: readonly PropRow[] = [
       />
     </>,
     <>
-      Rows below the calendar, after a separator, from its state and actions (
-      <code>value</code>, <code>select</code>, <code>show</code>,{' '}
-      <code>time</code>): e.g. rows of buttons jumping to dates. None:{' '}
-      <code>{'() => null'}</code>.
+      Rows below the calendar, after a separator, built from its state and
+      actions (<code>value</code>, <code>select</code>, <code>show</code>,{' '}
+      <code>time</code>), for example rows of buttons that jump to dates. For
+      none, pass <code>{'() => null'}</code>.
     </>,
   ],
 ];
@@ -190,8 +192,8 @@ export const datePickerRootRows: readonly PropRow[] = [
     union('compact', 'inline'),
     code('compact'),
     <>
-      <code>compact</code>: buttons showing the value, opening the calendar (or
-      the time) in a popover; <code>inline</code>: the calendar in place.
+      <code>compact</code>: buttons that show the value and open the calendar
+      (or the time) in a popover. <code>inline</code>: the calendar in place.
     </>,
   ],
   ...valueRows,
@@ -216,8 +218,8 @@ export const datePickerRootRows: readonly PropRow[] = [
     undefined,
     <>
       Called when the compact style’s picker opens or closes, and why (Base UI’s
-      popover’s <code>reason</code>, e.g. <code>trigger-press</code>,{' '}
-      <code>outside-press</code>, <code>escape-key</code>).
+      popover’s <code>reason</code>, for example <code>trigger-press</code>,{' '}
+      <code>outside-press</code> or <code>escape-key</code>).
     </>,
   ],
   [
@@ -225,8 +227,9 @@ export const datePickerRootRows: readonly PropRow[] = [
     'boolean',
     code('true'),
     <>
-      The compact style’s buttons open popovers; without, they only toggle{' '}
-      <code>open</code>, for the app to show the pickers (e.g. below a list row:{' '}
+      Whether the compact style’s buttons open popovers. Without them, they only
+      toggle <code>open</code>, and the app shows the pickers (for example below
+      a list row, with{' '}
       <PartLink
         component="date-picker"
         part="DatePicker.Calendar"
@@ -249,26 +252,26 @@ export const datePickerRootRows: readonly PropRow[] = [
         component="date-picker"
         part="DatePicker.createHandle"
       />
-      ): the compact style’s buttons toggle them (no popovers), shown in place
-      by a{' '}
+      ). The compact style’s buttons then toggle them (without popovers), and a{' '}
       <PartLink
         component="date-picker"
         part="DatePicker.Expandable"
       />{' '}
-      given it (e.g. after the picker’s list row).
+      given the same handle shows them in place (for example after the picker’s
+      list row).
     </>,
   ],
   [
     'popoverAlign',
     union('start', 'center', 'end'),
     code(union('center')),
-    'How the compact style’s popover aligns to its buttons (in a list row, which they end, aligned with their end: end).',
+    'How the compact style’s popover aligns with its buttons. In a list row, which they end, use end.',
   ],
   [
     'buttonShape',
     union('capsule', 'roundedRectangle'),
     code('capsule'),
-    'The compact style’s buttons’ shape (roundedRectangle: 6px corners).',
+    'The shape of the compact style’s buttons (roundedRectangle has 6px corners).',
   ],
   [
     'hourCycle',
@@ -276,7 +279,7 @@ export const datePickerRootRows: readonly PropRow[] = [
     'the locale’s',
     '12 hours (with AM/PM) or 24.',
   ],
-  ['disabled', 'boolean', code('false'), 'Disables all of it.'],
+  ['disabled', 'boolean', code('false'), 'Disables the whole picker.'],
   ...calendarRows,
 ];
 
@@ -287,7 +290,7 @@ export const datePickerCalendarRows: readonly PropRow[] = [
     'label',
     'string',
     'its month’s title',
-    'The days’ accessible name (a group).',
+    'The accessible name of the days (a group).',
   ],
 ];
 
@@ -297,12 +300,12 @@ export const datePickerExpandableRows: readonly PropRow[] = [
     'DatePickerHandle',
     undefined,
     <>
-      The pickers’ handle (required), given to their{' '}
+      The pickers’ handle (required), which their{' '}
       <PartLink
         component="date-picker"
         part="DatePicker.Root"
       />{' '}
-      too.
+      gets too.
     </>,
   ],
 ];
@@ -317,7 +320,7 @@ export const datePickerHandleRows: readonly PropRow[] = [
     'DatePickerHandle',
     undefined,
     <>
-      A handle: passed to a{' '}
+      A handle. Pass it to a{' '}
       <PartLink
         component="date-picker"
         part="DatePicker.Root"
@@ -327,15 +330,15 @@ export const datePickerHandleRows: readonly PropRow[] = [
         component="date-picker"
         part="DatePicker.Expandable"
       />{' '}
-      showing its pickers (their <code>handle</code>); from the hook, the same
-      for the component’s lifetime.
+      that shows its pickers (their <code>handle</code>). The hook returns the
+      same one for the component’s lifetime.
     </>,
   ],
   [
     '.open',
     `${union('date', 'time')} | null`,
     undefined,
-    'The open picker (null while none is, or no picker is given the handle).',
+    'The open picker (null while none is open, or while no picker has the handle).',
   ],
 ];
 
@@ -344,15 +347,15 @@ export const datePickerTimeRollRows: readonly PropRow[] = [
     'value',
     'Date | null',
     undefined,
-    'The date whose time is shown (controlled; null: now; required).',
+    'The date whose time is shown (required, controlled; null means now).',
   ],
   [
     'onValueChange',
     '(date: Date, eventDetails) => void',
     undefined,
     <>
-      Called with the date at the newly selected time (<code>reason</code>:{' '}
-      <code>time</code>; required).
+      Called with the date at the newly selected time (required; the{' '}
+      <code>reason</code> is <code>time</code>).
     </>,
   ],
   [
@@ -365,7 +368,7 @@ export const datePickerTimeRollRows: readonly PropRow[] = [
     'locale',
     'string',
     'the user’s',
-    'Locale of numerals, the hour cycle and the day period.',
+    'The locale for numerals, the hour cycle and the day period.',
   ],
 ];
 
@@ -374,7 +377,7 @@ export const datePickerCalendarRowRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its content: a title and buttons (e.g. a time row).',
+    'Its content: a title and buttons (for example a time row).',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -385,7 +388,7 @@ export const datePickerCalendarButtonRows: readonly PropRow[] = [
     union('capsule', 'roundedRectangle'),
     code('capsule'),
     <>
-      Its shape (as the picker’s <code>buttonShape</code>).
+      Its shape (like the picker’s <code>buttonShape</code>).
     </>,
   ],
   [
@@ -398,7 +401,7 @@ export const datePickerCalendarButtonRows: readonly PropRow[] = [
         component="button"
         part="Button.Root"
       />{' '}
-      (bordered, secondary): its props.
+      (bordered, secondary), with its props.
     </>,
   ],
 ];
@@ -409,8 +412,8 @@ export const datePickerCalendarTimeRowRows: readonly PropRow[] = [
     'CalendarFooter',
     undefined,
     <>
-      The calendar’s state and actions (the <code>footer</code>’s argument;
-      required).
+      The calendar’s state and actions (required; the <code>footer</code>’s
+      argument).
     </>,
   ],
   ['label', 'ReactNode', code('Time'), 'The row’s title.'],
@@ -422,8 +425,9 @@ export const datePickerCalendarMessageRows: readonly PropRow[] = [
     union('info', 'error'),
     code('info'),
     <>
-      <code>info</code> (e.g. what can be picked), in the secondary label color;{' '}
-      <code>error</code> (e.g. what’s still missing), in red, announced.
+      <code>info</code> (for example what can be picked), in the secondary label
+      color, or <code>error</code> (for example what’s still missing), in red
+      and announced.
     </>,
   ],
   ...elementRows('p', 'HTMLParagraphElement'),

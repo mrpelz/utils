@@ -1280,12 +1280,18 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
           ))}
         </div>
         {/* The month's days between its neighbours', scrolled sideways (see
-           pager.ts). */}
+           pager.ts). Ranges dragged here, not on the month: a drag turning
+           the month goes on (the month's element a neighbour's then, inert,
+           without its pointer, see `turnPage`). */}
         <div
           ref={pagesRef}
           className="uikit-date-picker-pages"
           data-date-picker-part="pages"
           data-swipe={swipes}
+          onPointerCancel={onPointerEnd}
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerEnd}
         >
           {pager.months.map((shown) =>
             shown.getTime() === month.getTime() ? (
@@ -1299,10 +1305,6 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
                 data-swipe={swipes}
                 role="group"
                 onKeyDown={onKeyDown}
-                onPointerCancel={onPointerEnd}
-                onPointerDown={onPointerDown}
-                onPointerMove={onPointerMove}
-                onPointerUp={onPointerEnd}
                 onClickCapture={(event: MouseEvent<HTMLDivElement>) => {
                   if (!suppressClick.current) return;
                   suppressClick.current = false;

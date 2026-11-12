@@ -17,9 +17,9 @@ export const colorPickerRootRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      The color, a hex string (<code>#rrggbb</code>, or <code>#rrggbbaa</code>{' '}
-      with opacity; controlled). To render an uncontrolled picker, use the{' '}
-      <code>defaultValue</code> prop instead.
+      The color, as a hex string (<code>#rrggbb</code>, or{' '}
+      <code>#rrggbbaa</code> with opacity; controlled). To render an
+      uncontrolled picker, use the <code>defaultValue</code> prop instead.
     </>,
   ],
   [
@@ -36,13 +36,13 @@ export const colorPickerRootRows: readonly PropRow[] = [
     '(value: string, eventDetails) => void',
     undefined,
     <>
-      Called with the picked color (uppercase hex), and why (<code>reason</code>
-      ): <code>grid</code>, <code>spectrum</code>, <code>sliders</code>,{' '}
-      <code>opacity</code>, <code>saved</code> (a saved color pressed),{' '}
-      <code>eyedropper</code>, <code>system-colors</code> (the system’s color
-      picker), <code>code</code> (its hex code typed), <code>named</code> (a
-      named color picked), or <code>flatten</code> (made opaque by the swatches’
-      color, see <code>flattenOnPress</code>).
+      Called with the picked color (in uppercase hex), and why (
+      <code>reason</code>): <code>grid</code>, <code>spectrum</code>,{' '}
+      <code>sliders</code>, <code>opacity</code>, <code>saved</code> (a saved
+      color pressed), <code>eyedropper</code>, <code>system-colors</code> (the
+      system’s color picker), <code>code</code> (its hex code typed),{' '}
+      <code>named</code> (a named color picked), or <code>flatten</code> (made
+      opaque through the swatches’ color, see <code>flattenOnPress</code>).
     </>,
   ],
   [
@@ -74,7 +74,7 @@ export const colorPickerRootRows: readonly PropRow[] = [
     'onModeChange',
     '(mode: string, eventDetails) => void',
     undefined,
-    'Called with the mode chosen (its segmented control’s details).',
+    'Called with the chosen mode (with its segmented control’s details).',
   ],
   [
     'children',
@@ -96,18 +96,19 @@ export const colorPickerRootRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.Panel"
       />{' '}
-      (the eyedropper in the header; the modes’{' '}
+      (the eyedropper goes in the header, and the modes’{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.Modes"
       />{' '}
-      in the panel, or anywhere in the picker, e.g. a sheet’s header). With an{' '}
+      in the panel, or anywhere in the picker, for example a sheet’s header).
+      With an{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.Opacity"
       />{' '}
-      in it, the color has an opacity; without one, it’s always opaque (
-      <code>#rrggbb</code>, a value’s alpha dropped as it changes).
+      inside, the color has an opacity. Without one, it’s always opaque (
+      <code>#rrggbb</code>), and a value’s alpha is dropped as it changes.
     </>,
   ],
   ...renderRows('div', 'HTMLDivElement'),
@@ -124,12 +125,12 @@ export const colorPickerPanelRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.Modes"
       />
-      , unless elsewhere in its picker; a{' '}
+      , unless it sits elsewhere in its picker, with a{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.View"
       />{' '}
-      each), the{' '}
+      for each), the{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.Opacity"
@@ -139,7 +140,7 @@ export const colorPickerPanelRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.Swatches"
       />
-      ; any of them left out.
+      . Any of them can be left out.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -156,7 +157,7 @@ export const colorPickerModesRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.Mode"
       />
-      s, in their order (its highlight after them, its own).
+      s, in their order (with its own highlight after them).
     </>,
   ],
   [
@@ -169,8 +170,8 @@ export const colorPickerModesRows: readonly PropRow[] = [
         component="segmented"
         part="Segmented.Root"
       />
-      ’s props, but its value (the panel’s <code>mode</code>); named “Mode” by
-      default (<code>aria-label</code>).
+      ’s props, except its value (which is the panel’s <code>mode</code>). It’s
+      named “Mode” by default (<code>aria-label</code>).
     </>,
   ],
 ];
@@ -186,11 +187,16 @@ export const colorPickerModeRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.View"
       />
-      ’s <code>value</code>, and the panel’s <code>mode</code> while it’s
+      ’s <code>value</code>, which is the panel’s <code>mode</code> while it’s
       chosen.
     </>,
   ],
-  ['children', 'ReactNode', undefined, 'Its label: e.g. “Grid”, “RGB”.'],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its label, for example “Grid” or “RGB”.',
+  ],
   [
     '…',
     'SegmentedItemProps',
@@ -201,7 +207,7 @@ export const colorPickerModeRows: readonly PropRow[] = [
         component="segmented"
         part="Segmented.Item"
       />
-      ’s props (e.g. <code>disabled</code>).
+      ’s props (for example <code>disabled</code>).
     </>,
   ],
 ];
@@ -217,7 +223,7 @@ export const colorPickerViewRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.Mode"
       />
-      ’s <code>value</code>; shown while it’s chosen.
+      ’s <code>value</code>. It shows while that mode is chosen.
     </>,
   ],
   [
@@ -265,10 +271,10 @@ export const colorPickerSlidersRows: readonly PropRow[] = [
     union('rgb', 'hsl', 'cmyk'),
     code('rgb'),
     <>
-      Its color model, its channels’ sliders: red, green and blue (0–255, or
-      0–100%: its <code>range</code>); hue (0–360°), saturation and lightness
-      (0–100%); cyan, magenta, yellow and black (0–100%; naive, from sRGB, no
-      ink’s profile).
+      Its color model, which sets its channels’ sliders: red, green and blue
+      (0–255, or 0–100% with <code>range</code>); hue (0–360°), saturation and
+      lightness (0–100%); or cyan, magenta, yellow and black (0–100%, a naive
+      conversion from sRGB, without an ink profile).
     </>,
   ],
   [
@@ -276,10 +282,10 @@ export const colorPickerSlidersRows: readonly PropRow[] = [
     union('byte', 'percentage'),
     code('byte'),
     <>
-      Red, green and blue’s range (<code>model</code> <code>rgb</code>; the
-      others’ are fixed): in bytes (0–255), or in percent (0–100%). Percent is
-      coarser: a channel set is rounded to it, the others (and a color picked
-      elsewhere, e.g. a swatch) kept exact.
+      The range of red, green and blue (for <code>model</code> <code>rgb</code>;
+      the others’ ranges are fixed): in bytes (0–255), or in percent (0–100%).
+      Percent is coarser: a channel that’s set is rounded to it, while the
+      others (and a color picked elsewhere, such as a swatch) stay exact.
     </>,
   ],
   [
@@ -287,7 +293,7 @@ export const colorPickerSlidersRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      After its channels, spaced as they are: e.g. the code (
+      What goes after its channels, spaced like them, for example the code (
       <PartLink
         component="color-picker"
         part="ColorPicker.Code"
@@ -323,10 +329,10 @@ export const colorPickerSwatchesRows: readonly PropRow[] = [
     'boolean',
     'true',
     <>
-      Whether pressing the color, while it’s translucent, offers to make it
-      opaque: an <a href={publicUrl('action-sheet')}>Action sheet</a>, “Flatten
+      Whether pressing the color while it’s translucent offers to make it
+      opaque: an <a href={publicUrl('action-sheet')}>Action Sheet</a>, “Flatten
       Color?”, with Remove Transparency, Flatten on White and Flatten on Black
-      (the change’s reason: <code>flatten</code>).
+      (the change’s reason is <code>flatten</code>).
     </>,
   ],
   [
@@ -334,8 +340,8 @@ export const colorPickerSwatchesRows: readonly PropRow[] = [
     '(colors: string[], eventDetails) => void',
     undefined,
     <>
-      Called with the saved colors as one is added (the add button) or deleted
-      (its menu), and why (<code>add</code>, <code>delete</code>).
+      Called with the saved colors when one is added (with the add button) or
+      deleted (from its menu), and why (<code>add</code>, <code>delete</code>).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -353,25 +359,25 @@ export const colorPickerEyedropperRows: readonly PropRow[] = [
       />
     </>,
     <>
-      What it renders: e.g. a{' '}
+      What it renders, for example a{' '}
       <PartLink
         component="toolbar"
         part="Toolbar.Button"
       />{' '}
-      in a toolbar, sized as its other buttons.
+      in a toolbar, sized like its other buttons.
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'Its content: e.g. an eyedropper symbol.',
+    'Its content, for example an eyedropper symbol.',
   ],
   [
     '…',
     'ButtonRootProps',
     undefined,
-    'A button’s props (not onClick: it picks a color off the screen).',
+    'A button’s props, except onClick (it picks a color off the screen).',
   ],
 ];
 
@@ -381,7 +387,7 @@ export const colorPickerCodeRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Before its field: e.g. its copy button (
+      What goes before its field, for example its copy button (
       <PartLink
         component="color-picker"
         part="ColorPicker.CodeCopy"
@@ -403,25 +409,25 @@ export const colorPickerCodeCopyRows: readonly PropRow[] = [
         part="Button.Root"
       />
     </>,
-    'What it renders: e.g. a button sized as the code’s field.',
+    'What it renders, for example a button sized like the code’s field.',
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'Its content: e.g. a copy symbol (copied, a checkmark for a moment).',
+    'Its content, for example a copy symbol (replaced by a checkmark for a moment after copying).',
   ],
   [
     'onCodeCopy',
     '(code: string, event: Event) => void',
     undefined,
-    'Called with a code copied (to the clipboard), and the event.',
+    'Called with the code copied to the clipboard, and the event.',
   ],
   [
     '…',
     'ButtonRootProps',
     undefined,
-    'A button’s props (not onClick: it opens the menu of codes).',
+    'A button’s props, except onClick (it opens the menu of codes).',
   ],
 ];
 
@@ -437,20 +443,25 @@ export const colorPickerSystemColorsRows: readonly PropRow[] = [
       />
     </>,
     <>
-      What it renders: e.g. a{' '}
+      What it renders, for example a{' '}
       <PartLink
         component="toolbar"
         part="Toolbar.Button"
       />{' '}
-      in a toolbar, sized as its other buttons.
+      in a toolbar, sized like its other buttons.
     </>,
   ],
-  ['children', 'ReactNode', undefined, 'Its content: e.g. a palette symbol.'],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its content, for example a palette symbol.',
+  ],
   [
     '…',
     'ButtonRootProps',
     undefined,
-    'A button’s props (not onClick: it opens the system’s color picker).',
+    'A button’s props, except onClick (it opens the system’s color picker).',
   ],
 ];
 
@@ -459,9 +470,9 @@ export const colorPickerWellRows: readonly PropRow[] = [
     'color',
     'string',
     undefined,
-    'Its color (a hex string); without one, the hues only.',
+    'Its color (a hex string). Without one, it shows only the hues.',
   ],
-  ['size', union('small', 'large'), code('small'), 'Its sizes: 28px, or 36px.'],
+  ['size', union('small', 'large'), code('small'), 'Its size: 28px or 36px.'],
   ...elementRows('button', 'HTMLButtonElement'),
 ];
 
@@ -473,8 +484,8 @@ export const parseColorRows: readonly PropRow[] = [
     'Rgba',
     undefined,
     <>
-      Its channels: <code>r</code>, <code>g</code>, <code>b</code> (0–255),{' '}
-      <code>a</code> (0–1; 1 without alpha).
+      Its channels: <code>r</code>, <code>g</code> and <code>b</code> (0–255),
+      and <code>a</code> (0–1, or 1 without alpha).
     </>,
   ],
 ];
@@ -486,15 +497,15 @@ export const formatColorRows: readonly PropRow[] = [
     'Rgba',
     undefined,
     <>
-      Channels: <code>r</code>, <code>g</code>, <code>b</code> (0–255, rounded
-      and clamped), <code>a</code> (0–1).
+      Channels: <code>r</code>, <code>g</code> and <code>b</code> (0–255,
+      rounded and clamped), and <code>a</code> (0–1).
     </>,
   ],
   [
     '(return)',
     'string',
     undefined,
-    'A hex color in capitals: #RRGGBB, or #RRGGBBAA if not opaque.',
+    'A hex color in capitals: #RRGGBB, or #RRGGBBAA if it isn’t opaque.',
   ],
 ];
 
@@ -505,7 +516,7 @@ export const defaultSavedColorsRows: readonly PropRow[] = [
     'string[]',
     undefined,
     <>
-      The default saved colors (hex strings), the swatches’{' '}
+      The default saved colors (hex strings), used as the swatches’{' '}
       <code>defaultSavedColors</code> by default.
     </>,
   ],
@@ -522,7 +533,7 @@ export const colorPickerNamedRows: readonly PropRow[] = [
         component="color-picker"
         part="ColorPicker.NamedColor"
       />
-      s (e.g. the app’s), and{' '}
+      s (for example the app’s), and{' '}
       <PartLink
         component="color-picker"
         part="ColorPicker.CssNamedColors"
@@ -539,7 +550,7 @@ export const colorPickerNamedColorRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      Its color (required): any CSS color (e.g. a name, a hex code,{' '}
+      Its color (required): any CSS color (for example a name, a hex code or{' '}
       <code>oklch()</code>).
     </>,
   ],
@@ -549,7 +560,7 @@ export const colorPickerNamedColorRows: readonly PropRow[] = [
     <>
       its <code>color</code>
     </>,
-    'Its label (e.g. its name).',
+    'Its label (for example its name).',
   ],
   ...elementRows('li', 'HTMLLIElement'),
 ];

@@ -1,9 +1,11 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Alert, Button, Symbol } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -20,6 +22,7 @@ import {
   sfXmark,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
@@ -118,38 +121,71 @@ const glassCode = `<div className="cover">
 const SymbolAndLabel: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['aria-label', 'onClick', 'shape', 'variant'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('button-composition-symbol') },
+  );
+
   return (
     <Component
       isCentered
       isInline
+      controls={[partControls]}
       id="button-composition-symbol"
       log={log}
+      state={[partState]}
       title="Symbols and labels"
     >
       <div className="button-demo-row">
         <Button.Root
+          {...partProps['Button.Root']}
           variant="bordered"
           onClick={() => addLog('Add clicked')}
         >
-          <Button.Icon>
-            <Symbol icon={sfPlus} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfPlus}
+            />
           </Button.Icon>
-          <Button.Label>Add</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Add</Button.Label>
         </Button.Root>
-        <Button.Root onClick={() => addLog('Sort clicked')}>
-          <Button.Label>Sort</Button.Label>
-          <Button.Icon>
-            <Symbol icon={sfChevronUpChevronDown} />
+        <Button.Root
+          {...partProps['Button.Root']}
+          onClick={() => addLog('Sort clicked')}
+        >
+          <Button.Label {...partProps['Button.Label']}>Sort</Button.Label>
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfChevronUpChevronDown}
+            />
           </Button.Icon>
         </Button.Root>
         <Button.Root
+          {...partProps['Button.Root']}
           aria-label="More"
           shape="circle"
           variant="bordered"
           onClick={() => addLog('More clicked')}
         >
-          <Button.Icon>
-            <Symbol icon={sfEllipsis} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfEllipsis}
+            />
           </Button.Icon>
         </Button.Root>
       </div>
@@ -161,48 +197,69 @@ const SymbolAndLabel: FunctionComponent = () => {
 const Pairs: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['fill', 'onClick', 'size', 'variant'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('button-composition-pairs') },
+  );
+
   return (
     <Component
       isCentered
       isInline
+      controls={[partControls]}
       id="button-composition-pairs"
       log={log}
+      state={[partState]}
       title="A primary and a secondary action"
     >
       <div className="button-demo-panel">
         <div className="button-demo-stack">
           <Button.Root
+            {...partProps['Button.Root']}
             fill
             size="large"
             variant="bordered-prominent"
             onClick={() => addLog('Continue clicked')}
           >
-            <Button.Label>Continue</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Continue</Button.Label>
           </Button.Root>
           <Button.Root
+            {...partProps['Button.Root']}
             fill
             size="large"
             onClick={() => addLog('Not Now clicked')}
           >
-            <Button.Label>Not Now</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Not Now</Button.Label>
           </Button.Root>
         </div>
         <div className="button-demo-row">
           <Button.Root
+            {...partProps['Button.Root']}
             fill
             size="large"
             variant="bordered-secondary"
             onClick={() => addLog('Cancel clicked')}
           >
-            <Button.Label>Cancel</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Cancel</Button.Label>
           </Button.Root>
           <Button.Root
+            {...partProps['Button.Root']}
             fill
             size="large"
             variant="bordered-prominent"
             onClick={() => addLog('Save clicked')}
           >
-            <Button.Label>Save</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Save</Button.Label>
           </Button.Root>
         </div>
       </div>
@@ -214,41 +271,81 @@ const Pairs: FunctionComponent = () => {
 const DestructiveConfirm: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Alert.Action': ['onClick', 'variant'],
+            'Alert.Actions': [],
+            'Alert.Description': [],
+            'Alert.Header': [],
+            'Alert.Popup': [],
+            'Alert.Root': [],
+            'Alert.Title': [],
+            'Alert.Trigger': ['render'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['destructive', 'size', 'variant'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('button-composition-destructive') },
+  );
+
   return (
     <Component
       isCentered
       isInline
+      controls={[partControls]}
       id="button-composition-destructive"
       log={log}
+      state={[partState]}
       title="A destructive action, confirmed"
     >
-      <Alert.Root>
+      <Alert.Root {...partProps['Alert.Root']}>
         <Alert.Trigger
+          {...partProps['Alert.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               destructive
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Icon>
-            <Symbol icon={sfTrash} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfTrash}
+            />
           </Button.Icon>
-          <Button.Label>Delete Album</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Delete Album
+          </Button.Label>
         </Alert.Trigger>
-        <Alert.Popup>
-          <Alert.Header>
-            <Alert.Title>Delete “Summer”?</Alert.Title>
-            <Alert.Description>
+        <Alert.Popup {...partProps['Alert.Popup']}>
+          <Alert.Header {...partProps['Alert.Header']}>
+            <Alert.Title {...partProps['Alert.Title']}>
+              Delete “Summer”?
+            </Alert.Title>
+            <Alert.Description {...partProps['Alert.Description']}>
               Its 42 photos stay in your library.
             </Alert.Description>
           </Alert.Header>
-          <Alert.Actions>
-            <Alert.Action onClick={() => addLog('Cancel clicked')}>
+          <Alert.Actions {...partProps['Alert.Actions']}>
+            <Alert.Action
+              {...partProps['Alert.Action']}
+              onClick={() => addLog('Cancel clicked')}
+            >
               Cancel
             </Alert.Action>
             <Alert.Action
+              {...partProps['Alert.Action']}
               variant="destructive"
               onClick={() => addLog('Delete clicked')}
             >
@@ -265,16 +362,43 @@ const DestructiveConfirm: FunctionComponent = () => {
 const GlassOverContent: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'aria-label',
+              'className',
+              'context',
+              'onClick',
+              'shape',
+              'variant',
+            ],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('button-composition-glass') },
+  );
+
   return (
     <Component
       isCentered
       isInline
+      controls={[partControls]}
       id="button-composition-glass"
       log={log}
+      state={[partState]}
       title="Glass buttons over a picture"
     >
       <div className="button-demo-cover">
         <Button.Root
+          {...partProps['Button.Root']}
           aria-label="Close"
           className="button-demo-close"
           context="adaptive"
@@ -282,30 +406,41 @@ const GlassOverContent: FunctionComponent = () => {
           variant="glass"
           onClick={() => addLog('Close clicked')}
         >
-          <Button.Icon>
-            <Symbol icon={sfXmark} />
+          <Button.Icon {...partProps['Button.Icon']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfXmark}
+            />
           </Button.Icon>
         </Button.Root>
         <div className="button-demo-controls">
           <Button.Root
+            {...partProps['Button.Root']}
             context="adaptive"
             variant="glass-prominent"
             onClick={() => addLog('Play clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfPlayFill} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfPlayFill}
+              />
             </Button.Icon>
-            <Button.Label>Play</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Play</Button.Label>
           </Button.Root>
           <Button.Root
+            {...partProps['Button.Root']}
             context="adaptive"
             variant="glass"
             onClick={() => addLog('Shuffle clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfShuffle} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfShuffle}
+              />
             </Button.Icon>
-            <Button.Label>Shuffle</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Shuffle</Button.Label>
           </Button.Root>
         </div>
       </div>
@@ -334,12 +469,12 @@ export const ButtonComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A symbol before its label (Add); a label before its symbol, a pop-up
-        button’s (Sort, its chevrons saying a menu opens).
+        A symbol before its label (Add), or a label before its symbol, as on a
+        pop-up button (Sort, whose chevrons say that a menu opens).
       </li>
       <li>
-        A symbol alone: <code>shape=&quot;circle&quot;</code>, and an{' '}
-        <code>aria-label</code>, its only name.
+        A symbol on its own: <code>shape=&quot;circle&quot;</code>, with an{' '}
+        <code>aria-label</code> as its only name.
       </li>
       <li>
         <strong>Library:</strong> the button (
@@ -361,7 +496,7 @@ export const ButtonComposition: FunctionComponent = () => (
       </li>
       <li>
         <strong>Demo:</strong> the labels, the symbols and the{' '}
-        <code>aria-label</code>s; what each does (logged).
+        <code>aria-label</code>s, and what each does (logged).
       </li>
     </ul>
     <CodeView code={symbolCode} />
@@ -375,17 +510,15 @@ export const ButtonComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        One prominent button per view, the likely action (
-        <code>bordered-prominent</code>); the other less so.
+        There’s one prominent button per view, for the likely action (
+        <code>bordered-prominent</code>). The other is less prominent.
       </li>
       <li>
-        Stacked (onboarding, a sheet’s bottom): the primary on top, the other
-        borderless below; side by side: <code>fill</code> sharing the row, the
-        primary at the end.
+        Stacked (in onboarding, or at a sheet’s bottom), the primary goes on top
+        and the other below it, borderless. Side by side, both use{' '}
+        <code>fill</code> to share the row, with the primary at the end.
       </li>
-      <li>
-        Large (50px) buttons at a screen’s bottom, filling its width (HIG).
-      </li>
+      <li>Large (50px) buttons sit at a screen’s bottom, filling its width.</li>
       <li>
         <strong>Library:</strong> the variants (<code>bordered-prominent</code>,
         borderless), the large size and <code>fill</code>.
@@ -406,21 +539,21 @@ export const ButtonComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <code>destructive</code>: red, named by what it destroys (Delete Album,
-        not OK).
+        <code>destructive</code> turns it red. Name it by what it destroys
+        (Delete Album, not OK).
       </li>
       <li>
-        Confirmed by an <a href={publicUrl('alert')}>Alert</a> (the button its
-        trigger’s <code>render</code>), its own destructive action repeated;
-        Cancel to keep it.
+        An <a href={publicUrl('alert')}>Alert</a> confirms it (the button is its
+        trigger’s <code>render</code>), repeating the destructive action, with
+        Cancel to keep things as they are.
       </li>
       <li>
-        An alert is a last resort: for what can be undone, undo instead; for
-        several choices, an <a href={publicUrl('action-sheet')}>Action sheet</a>
-        .
+        An alert is a last resort. For what can be undone, offer undo instead.
+        For several choices, use an{' '}
+        <a href={publicUrl('action-sheet')}>Action Sheet</a>.
       </li>
       <li>
-        <strong>Library:</strong> the destructive button and the{' '}
+        <strong>Library:</strong> the destructive button, and the{' '}
         <PartLink
           component="alert"
           part="Alert.Root"
@@ -447,26 +580,26 @@ export const ButtonComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Glass buttons float over content, as a player’s or a map’s controls
-        (glass, 48px high).
+        Glass buttons float above content, like a player’s or a map’s controls
+        (48px tall).
       </li>
       <li>
-        <code>context=&quot;adaptive&quot;</code>: the glass by the brightness
-        behind it, sampled (as it scrolls, or resizes); otherwise set its{' '}
-        <code>context</code> by the picture’s.
+        With <code>context=&quot;adaptive&quot;</code>, the glass follows the
+        brightness behind it, sampled as it scrolls or resizes. Otherwise, set
+        its <code>context</code> to match the picture.
       </li>
       <li>
-        <code>glass-prominent</code>: the tint’s glass, for the likely action
-        (Play).
+        <code>glass-prominent</code> gives the tint’s glass, for the likely
+        action (Play).
       </li>
       <li>
         <strong>Library:</strong> the glass variants (<code>glass</code>,{' '}
         <code>glass-prominent</code>) and{' '}
-        <code>context=&quot;adaptive&quot;</code>, sampling the brightness
+        <code>context=&quot;adaptive&quot;</code>, which samples the brightness
         behind.
       </li>
       <li>
-        <strong>Demo:</strong> the picture behind and the player’s actions
+        <strong>Demo:</strong> the picture behind, and the player’s actions
         (logged).
       </li>
     </ul>

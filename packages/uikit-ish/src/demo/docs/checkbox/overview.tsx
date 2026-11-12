@@ -70,8 +70,8 @@ export const CheckboxOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        No classic checkboxes or radio buttons: items are selected with
-        selection circles, e.g. rows while editing a list.
+        There are no classic checkboxes or radio buttons. Items are selected
+        with selection circles, for example rows while editing a list.
       </li>
       <li>
         <PartLink
@@ -86,12 +86,12 @@ export const CheckboxOverview: FunctionComponent = () => (
           part="Radio.Root"
         >
           Radio
-        </PartLink>
-        : those circles, Base UI’s checkbox and radio.
+        </PartLink>{' '}
+        are those circles, built on Base UI’s checkbox and radio.
       </li>
       <li>
-        Unticked: a gray ring. Ticked: the tint, with a checkmark. Mixed: a
-        dash.
+        Unticked, it’s a gray ring. Ticked, it’s the tint with a checkmark.
+        Mixed, it shows a dash.
       </li>
     </ul>
     <LiveView />
@@ -104,8 +104,8 @@ export const CheckboxOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Selecting items to act on together (rows to delete or move, people to
-        invite): a{' '}
+        For selecting items to act on together (rows to delete or move, people
+        to invite): a{' '}
         <PartLink
           component="checkbox"
           part="Checkbox.Root"
@@ -115,7 +115,7 @@ export const CheckboxOverview: FunctionComponent = () => (
         per item, several at once.
       </li>
       <li>
-        Choosing one item of a list (e.g. a default account):{' '}
+        For choosing one item of a list (for example a default account):{' '}
         <PartLink
           component="checkbox"
           part="Radio.Root"
@@ -130,7 +130,7 @@ export const CheckboxOverview: FunctionComponent = () => (
         .
       </li>
       <li>
-        Selecting all of them at once: a parent checkbox in a{' '}
+        For selecting all of them at once: a parent checkbox in a{' '}
         <PartLink
           component="checkbox"
           part="CheckboxGroup"
@@ -147,15 +147,16 @@ export const CheckboxOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A setting that takes effect at once: a{' '}
+        A setting that takes effect at once: use a{' '}
         <a href={publicUrl('switch')}>Switch</a>.
       </li>
       <li>
-        Choosing one of a few short options shown side by side: a{' '}
+        One of a few short options shown side by side: use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        A checkmark after the chosen row (settings lists, e.g. a language):{' '}
+        A checkmark after the chosen row (in settings lists, for example for a
+        language): use a{' '}
         <PartLink
           component="list"
           part="List.Checkmark"
@@ -173,7 +174,8 @@ export const CheckboxOverview: FunctionComponent = () => (
     <ul>
       <li>The props most selection circles set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('checkbox/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('checkbox/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -225,15 +227,16 @@ export const CheckboxOverview: FunctionComponent = () => (
     <ul>
       <li>
         A checkbox is a <code>span</code> with the <code>checkbox</code> role
-        and <code>aria-checked</code> (<code>mixed</code> while indeterminate);
-        a radio has the <code>radio</code> role, its group the{' '}
-        <code>radiogroup</code> role. Hidden inputs beside them carry the values
-        for forms, hidden from assistive technology.
+        and <code>aria-checked</code> (<code>mixed</code> while indeterminate).
+        A radio has the <code>radio</code> role, and its group the{' '}
+        <code>radiogroup</code> role. Hidden inputs next to them carry the
+        values for forms, hidden from assistive technology.
       </li>
       <li>
-        Name each circle: wrap it and its text in a <code>{'<label>'}</code>{' '}
-        (clicking the text then ticks it, and it’s labelled by it), or give it
-        an <code>aria-label</code> (e.g. the row’s title, as in lists). Name a{' '}
+        Name each circle. Wrap it and its text in a <code>{'<label>'}</code>{' '}
+        (clicking the text then ticks it, and the text labels it), or give it an{' '}
+        <code>aria-label</code> (for example the row’s title, as in lists). Name
+        a{' '}
         <PartLink
           component="checkbox"
           part="RadioGroup"
@@ -241,9 +244,9 @@ export const CheckboxOverview: FunctionComponent = () => (
         too.
       </li>
       <li>
-        Keyboard: Tab focuses a checkbox, Space ticks or unticks it (Enter
-        doesn’t, as with native checkboxes). In a radio group, Tab focuses the
-        chosen radio, and arrow keys move to the next one and choose it.
+        Tab focuses a checkbox, and Space ticks or unticks it (Enter doesn’t, as
+        with native checkboxes). In a radio group, Tab focuses the chosen radio,
+        and the arrow keys move to the next one and choose it.
       </li>
       <li>
         Ticked and unticked differ in more than color: a filled circle with a
@@ -259,14 +262,14 @@ export const CheckboxOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A click or tap ticks or unticks a checkbox, and chooses a radio; the hit
-        area is 44px (HIG), around the 22px circle.
+        A click or tap ticks or unticks a checkbox, and chooses a radio. The hit
+        area is 44px, around the 22px circle.
       </li>
       <li>
         In a list, a row passes its clicks on to its circle (
         <code>forwardClick</code>), so the whole row selects (see{' '}
-        <a href={publicUrl('checkbox/composition')}>Composition</a>: the list
-        owns the selection).
+        <a href={publicUrl('checkbox/composition')}>Composition</a>, where the
+        list owns the selection).
       </li>
     </ul>
   </>

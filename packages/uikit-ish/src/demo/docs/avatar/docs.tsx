@@ -17,12 +17,12 @@ export const avatarRootRows: readonly PropRow[] = [
     'number',
     code('70'),
     <>
-      Its diameter in pixels (a contact’s: 70). In a{' '}
+      Its diameter in pixels (a contact’s is 70). In an{' '}
       <PartLink
         component="avatar"
         part="Avatar.Group"
       />
-      , set none: the group sizes its people.
+      , set none, because the group sizes its people.
     </>,
   ],
   [
@@ -40,8 +40,8 @@ export const avatarRootRows: readonly PropRow[] = [
         component="avatar"
         part="Avatar.Fallback"
       />{' '}
-      (one shows at a time), and e.g. a <a href={publicUrl('badge')}>Badge</a>{' '}
-      on its corner.
+      (one shows at a time), and for example a{' '}
+      <a href={publicUrl('badge')}>Badge</a> on its corner.
     </>,
   ],
   ...baseUiRows('span', 'HTMLSpanElement'),
@@ -53,7 +53,7 @@ export const avatarImageRows: readonly PropRow[] = [
     'alt',
     'string',
     undefined,
-    'The person’s name (or empty, when the avatar is named otherwise, e.g. in a row with the name).',
+    'The person’s name, or empty when something else names the avatar (for example a row with the name).',
   ],
   [
     'onLoadingStatusChange',
@@ -78,13 +78,13 @@ export const avatarFallbackRows: readonly PropRow[] = [
     'delay',
     'number',
     code('0'),
-    'How long to wait before showing the fallback, in milliseconds (e.g. to not flash it while a fast image loads).',
+    'How long to wait before showing the fallback, in milliseconds (for example so it doesn’t flash while a fast image loads).',
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'What shows without the photo (or until it loads): the person’s initials (the app’s), in white on gray.',
+    'What shows without the photo (or until it loads): the person’s initials, which the app provides, in white on gray.',
   ],
   ...baseUiRows('span', 'HTMLSpanElement'),
 ];
@@ -101,7 +101,7 @@ export const avatarGroupRows: readonly PropRow[] = [
         component="avatar"
         part="Avatar.Root"
       />
-      s (the first three shown, sized and placed by the group), and e.g. a{' '}
+      s (the first three show, sized and placed by the group), and for example a{' '}
       <a href={publicUrl('badge')}>Badge</a> on its corner.
     </>,
   ],
@@ -109,7 +109,7 @@ export const avatarGroupRows: readonly PropRow[] = [
     'aria-label',
     'string',
     undefined,
-    'Its name (it has the group role): e.g. the conversation’s.',
+    'Its name (it has the group role), for example the conversation’s.',
   ],
   ...elementRows('span', 'HTMLSpanElement'),
 ];

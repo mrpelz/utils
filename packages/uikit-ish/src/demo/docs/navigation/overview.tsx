@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useState } from 'react';
+import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -13,6 +13,8 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
   Contents,
@@ -22,6 +24,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { pages } from './content.js';
 import { navigationRootRows, navigationStackRows } from './docs.js';
 import { useNavigationControls } from './props.js';
@@ -49,69 +52,116 @@ const LiveView: FunctionComponent = () => {
   const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Header.LargeTitle': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
             {keys.map((key, index) => (
               <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
                     {index > 0 ? (
-                      <Toolbar.Leading>
+                      <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                         <Navigation.Back
                           aria-label={pages[keys[index - 1] ?? '']?.title}
                           {...propsBack}
                         >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
+                          <Button.Icon {...partProps['Button.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfChevronBackward}
+                            />
                           </Button.Icon>
                         </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <Header.LargeTitle>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                     <span>{pages[key]?.title}</span>
                   </Header.LargeTitle>
 
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {pages[key]?.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Content>
+                          <List.Item
+                            key={child}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => push(child)}
                               >
                                 {pages[child]?.title}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              <List.DrillIn />
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              <List.DrillIn {...partProps['List.DrillIn']} />
                             </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -140,24 +190,25 @@ export const NavigationOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A stack of pages: drilling in pushes a page over the one before, going
-        back pops it.
+        A stack of pages. Drilling in pushes a page on top of the one before,
+        and going back pops it.
       </li>
       <li>
-        The app’s stack, rendered as its{' '}
+        The app owns the stack and renders it as the{' '}
         <PartLink
           component="navigation"
           part="Navigation.Stack"
         />
-        ’s keyed children: the navigation transitions between them (no router of
-        its own).
+        ’s keyed children. The navigation animates between them; it has no
+        router of its own.
       </li>
       <li>
-        Swiping from the leading edge goes back; pages under the top one stay
-        mounted, their state and scroll positions kept.
+        Swiping from the leading edge goes back. Pages under the top one stay
+        mounted, keeping their state and scroll positions.
       </li>
       <li>
-        This library’s own, after Framework7’s views; no Base UI component.
+        It’s the library’s own component, modeled on Framework7’s views, and not
+        built on Base UI.
       </li>
     </ul>
     <LiveView />
@@ -170,19 +221,18 @@ export const NavigationOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Hierarchical content, one level after another (Settings, Mail’s
-        mailboxes): rows drill in (
+        For hierarchical content, one level after another, as in a settings app
+        or a mail app’s mailboxes. Rows drill in (
         <PartLink
           component="list"
           part="List.DrillIn"
         />
-        ), a back button returns.
+        ), and a back button returns.
       </li>
       <li>
-        One stack per section of an app: per tab (a{' '}
-        <a href={publicUrl('tab-bar')}>Tab bar</a>
-        ), or per sidebar row in a <a href={publicUrl('layout')}>Layout</a>’s
-        content column (see{' '}
+        For one stack per section of an app: per tab (a{' '}
+        <a href={publicUrl('tab-bar')}>Tab Bar</a>), or per sidebar row in a{' '}
+        <a href={publicUrl('layout')}>Layout</a>’s content column (see{' '}
         <a href={publicUrl('navigation/composition')}>Composition</a>).
       </li>
     </ul>
@@ -195,16 +245,16 @@ export const NavigationOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Switching between an app’s sections (flat, not deeper): a{' '}
-        <a href={publicUrl('tab-bar')}>Tab bar</a>, or a{' '}
+        Switching between an app’s sections, flat rather than deeper: use a{' '}
+        <a href={publicUrl('tab-bar')}>Tab Bar</a> or a{' '}
         <a href={publicUrl('sidebar')}>Sidebar</a>.
       </li>
       <li>
-        A self-contained task (compose, edit, add): a modal{' '}
+        A self-contained task (compose, edit, add): use a modal{' '}
         <a href={publicUrl('sheet')}>Sheet</a>, not a pushed page.
       </li>
       <li>
-        Switching a view’s content in place (Day, Week, Month): a{' '}
+        Switching a view’s content in place (Day, Week, Month): use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
     </ul>
@@ -217,8 +267,8 @@ export const NavigationOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its root’s and its stack’s props (all of them, every part’s:{' '}
-        <a href={publicUrl('navigation/parts')}>Parts</a>).
+        The root’s and the stack’s props. All props of all parts are on the{' '}
+        <a href={publicUrl('navigation/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -236,19 +286,19 @@ export const NavigationOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Only the top page is exposed: the pages under it (and, while moving,
-        both) are <code>inert</code>, which also hides them from assistive
-        technology. (Not <code>aria-hidden</code> as well: set while the pressed
-        button still has focus, browsers refuse it.)
+        Only the top page is exposed. The pages under it (and both pages while
+        one moves) are <code>inert</code>, which also hides them from assistive
+        technology. They aren’t <code>aria-hidden</code> as well, because
+        browsers refuse that while the pressed button still has focus.
       </li>
       <li>
-        Swiping back is a pointer gesture only: a page that can be popped needs
-        a back button (named for the page it returns to, as here).
+        Swiping back is a pointer gesture only, so a page that can be popped
+        needs a back button, named for the page it returns to, as here.
       </li>
       <li>
-        Focus isn’t moved: after a push, the page it was on turns inert and it
-        falls back to the document; the app moves it (e.g. to the new page’s
-        first control, or its heading).
+        Focus isn’t moved. After a push, the page that had focus turns inert,
+        and focus falls back to the document. The app moves it, for example to
+        the new page’s first control or its heading.
       </li>
       <li>
         Its transitions (350ms) don’t follow <code>prefers-reduced-motion</code>
@@ -264,10 +314,11 @@ export const NavigationOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        By the children’s keys: extended, the new page slides in from the
-        trailing edge over the one under it, which moves back 30% of its width
-        and dims; cut back (by one or more pages), the reverse; anything else
-        (another stack), shown at once.
+        It goes by the children’s keys. When the stack is extended, the new page
+        slides in from the trailing edge, above the one under it, which moves
+        back by 30% of its width and dims. When the stack is cut back, by one
+        page or more, the reverse happens. Anything else (a different stack)
+        shows at once.
       </li>
       <li>
         An instant page (in a{' '}
@@ -275,42 +326,45 @@ export const NavigationOverview: FunctionComponent = () => (
           component="navigation"
           part="Navigation.Page"
         />{' '}
-        of <code>instant</code>), pushed or popped, is shown at once, and isn’t
-        swiped back while it’s on top.
+        with <code>instant</code>) shows at once when pushed or popped, and
+        can’t be swiped back while it’s on top.
       </li>
       <li>
-        A page gone (popped, or replaced) stays mounted, unpainted and inert,
-        until the browser is idle and the stack at rest (Safari: shortly after):
-        a large page’s unmounting doesn’t stall the stack as it comes to rest.
-        Pushed again meanwhile, it’s mounted afresh.
+        A page that’s gone (popped or replaced) stays mounted, unpainted and
+        inert, until the browser is idle and the stack is at rest (in Safari,
+        shortly after). That way, unmounting a large page doesn’t stall the
+        stack as it comes to rest. If it’s pushed again meanwhile, it’s mounted
+        afresh.
       </li>
       <li>
         A page’s <a href={publicUrl('header')}>Header</a> moves with its page,
-        its bar and title too; the back button, in each pushed page’s bar, stays
-        put between pushed pages (a persistent item, see{' '}
+        bar and title included. The back button sits in each pushed page’s bar,
+        but stays put between pushed pages (it’s a persistent item, see{' '}
         <PartLink
           component="navigation"
           part="Navigation.Persistent"
         />
-        ), sliding in and out with the first.
+        ). It slides in and out with the first pushed page.
       </li>
       <li>
-        Swiping back starts within 20px of the leading edge (touch or mouse):
-        released past half the width, or flung (0.3px/ms), it pops (calling{' '}
-        <code>onBack</code> as it’s let go, the pop on from there); otherwise it
-        settles back.
+        A swipe back starts within 20px of the leading edge, by touch or mouse.
+        Released past half the width, or flung (0.3px/ms), it pops:{' '}
+        <code>onBack</code> is called as it’s let go, and the pop continues from
+        there. Otherwise, it settles back.
       </li>
       <li>
-        Going back quickly, each pop runs its own transition: pressed or swiped
-        again while a page still leaves, that page leaves on its own and the
-        next one follows (a cascade). Not swiped while pushing.
+        When going back quickly, each pop runs its own transition. Pressed or
+        swiped again while a page is still leaving, that page leaves on its own
+        and the next one follows, as a cascade. It can’t be swiped while
+        pushing.
       </li>
       <li>
-        The leading edge mirrors right to left (pushed pages from the left).
+        The leading edge mirrors in right-to-left languages, so pushed pages
+        come from the left.
       </li>
       <li>
-        It fills its container (its pages each as high as it): put it in a
-        screen, a <a href={publicUrl('viewport')}>Viewport</a>’s content layer,
+        It fills its container, and each page is as tall as it. Put it in a
+        screen: a <a href={publicUrl('viewport')}>Viewport</a>’s content layer,
         or a <a href={publicUrl('layout')}>Layout</a> column.
       </li>
     </ul>

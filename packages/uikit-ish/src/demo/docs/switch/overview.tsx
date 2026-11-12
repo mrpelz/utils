@@ -1,8 +1,11 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Switch } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -11,6 +14,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { switchRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -23,13 +27,24 @@ const LiveView: FunctionComponent = () => {
     { external, isOpen: true, title: 'Switch.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Switch.Thumb': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Switch"
     >
       <Switch.Root
@@ -37,7 +52,7 @@ const LiveView: FunctionComponent = () => {
         aria-label="Example"
         {...props}
       >
-        <Switch.Thumb />
+        <Switch.Thumb {...partProps['Switch.Thumb']} />
       </Switch.Root>
     </Component>
   );
@@ -58,7 +73,7 @@ export const SwitchOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>Turns one setting on or off.</li>
-      <li>Takes effect at once: nothing to save or confirm.</li>
+      <li>It takes effect at once, with nothing to save or confirm.</li>
     </ul>
     <LiveView />
 
@@ -70,12 +85,12 @@ export const SwitchOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        For a setting with two states that applies immediately, e.g. Airplane
+        For a setting with two states that applies right away, such as Airplane
         Mode or a notification category.
       </li>
       <li>
-        Labeled by what it turns on (a row’s title, or <code>aria-label</code>),
-        never by “on” or “off”: its position says that.
+        Label it by what it turns on (a row’s title, or <code>aria-label</code>
+        ), never by “on” or “off”, since its position says that.
       </li>
     </ul>
 
@@ -87,17 +102,17 @@ export const SwitchOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Selecting items (rows to delete, people to invite): a{' '}
+        Selecting items (rows to delete, people to invite): use a{' '}
         <a href={publicUrl('checkbox')}>Checkbox</a>, a selection circle.
       </li>
       <li>
-        Two named options, or more than two: a{' '}
+        Two named options, or more than two: use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        Starting something (Connect, Sign Out): a{' '}
-        <a href={publicUrl('button')}>Button</a>, as a switch states a setting,
-        it doesn’t perform an action.
+        Starting something (Connect, Sign Out): use a{' '}
+        <a href={publicUrl('button')}>Button</a>, because a switch states a
+        setting rather than performing an action.
       </li>
     </ul>
 
@@ -110,7 +125,8 @@ export const SwitchOverview: FunctionComponent = () => (
     <ul>
       <li>The props most switches set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('switch/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('switch/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -139,25 +155,25 @@ export const SwitchOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The root has the <code>switch</code> role and <code>aria-checked</code>;
-        a hidden checkbox input beside it carries its value for forms.
+        The root has the <code>switch</code> role and <code>aria-checked</code>.
+        A hidden checkbox input next to it carries its value for forms.
       </li>
       <li>
         Give it an accessible name: <code>aria-label</code>, or{' '}
-        <code>aria-labelledby</code> pointing at the visible label (e.g. its
-        list row’s title). Name it by what it turns on, never “on” or “off”.
+        <code>aria-labelledby</code> pointing at the visible label (for example
+        its list row’s title). Name it by what it turns on, never “on” or “off”.
       </li>
       <li>
-        Keyboard: Tab focuses it (the browser’s focus ring shows), Space or
-        Enter toggles it.
+        Tab focuses it (with the browser’s focus ring), and Space or Enter
+        toggles it.
       </li>
       <li>
-        Its state isn’t told by color alone if you set <code>onOffLabels</code>{' '}
-        (“I” and “O” on the track, as an accessibility setting would); the
-        library doesn’t read such a setting itself.
+        With <code>onOffLabels</code> (“I” and “O” on the track, as an
+        accessibility setting would show), color alone doesn’t tell its state.
+        The library doesn’t read such a setting itself.
       </li>
       <li>
-        Its animations (knob, lens) don’t follow{' '}
+        Its animations (the knob, the lens) don’t follow{' '}
         <code>prefers-reduced-motion</code>.
       </li>
     </ul>
@@ -171,10 +187,10 @@ export const SwitchOverview: FunctionComponent = () => (
     <ul>
       <li>
         A click or tap toggles it. The knob can also be dragged: the state flips
-        as it crosses the middle; a quick release that didn’t get there still
-        toggles, as a tap.
+        as it crosses the middle, and a quick release that didn’t get there
+        still toggles, like a tap.
       </li>
-      <li>Pressed, the knob turns into a glass lens.</li>
+      <li>While pressed, the knob turns into a glass lens.</li>
     </ul>
   </>
 );

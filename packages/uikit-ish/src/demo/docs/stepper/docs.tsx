@@ -34,10 +34,10 @@ export const stepperRootRows: readonly PropRow[] = [
     '(value: number | null, eventDetails) => void',
     undefined,
     <>
-      Callback fired when the number value changes; its{' '}
-      <code>eventDetails.reason</code> what triggered it, e.g.{' '}
-      <code>increment-press</code>, <code>decrement-press</code> (a half),{' '}
-      <code>keyboard</code> (arrow keys, Home, End), <code>wheel</code>.
+      Callback fired when the number value changes. Its{' '}
+      <code>eventDetails.reason</code> says what triggered it, for example{' '}
+      <code>increment-press</code> or <code>decrement-press</code> (a half),{' '}
+      <code>keyboard</code> (arrow keys, Home, End) or <code>wheel</code>.
     </>,
   ],
   [
@@ -47,20 +47,20 @@ export const stepperRootRows: readonly PropRow[] = [
     <>
       Callback fired when the value is committed: after{' '}
       <code>onValueChange</code>, when the pointer is released after pressing a
-      half (with keys or the wheel, at the same time).
+      half (or at the same time, for keys and the wheel).
     </>,
   ],
   [
     'min',
     'number',
     undefined,
-    'The minimum value: its decrement half disables there.',
+    'The minimum value. Its decrement half is disabled there.',
   ],
   [
     'max',
     'number',
     undefined,
-    'The maximum value: its increment half disables there.',
+    'The maximum value. Its increment half is disabled there.',
   ],
   [
     'step',
@@ -75,13 +75,13 @@ export const stepperRootRows: readonly PropRow[] = [
     'smallStep',
     'number',
     code('0.1'),
-    'The step while the alt key is held (arrow keys).',
+    'The step for the arrow keys while Alt is held.',
   ],
   [
     'largeStep',
     'number',
     code('10'),
-    'The step while the shift key is held (arrow keys).',
+    'The step for the arrow keys while Shift is held.',
   ],
   [
     'snapOnStep',
@@ -94,9 +94,9 @@ export const stepperRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Whether a value set otherwise than by stepping (e.g. by the app) may be
-      outside <code>min</code> and <code>max</code> without clamping; stepping
-      still clamps.
+      Whether a value set otherwise than by stepping (for example by the app)
+      may be outside <code>min</code> and <code>max</code> without clamping;
+      stepping still clamps.
     </>,
   ],
   [
@@ -109,7 +109,7 @@ export const stepperRootRows: readonly PropRow[] = [
     'format',
     'Intl.NumberFormatOptions',
     undefined,
-    'Options to format the value: the input’s text, which assistive tech reads (e.g. a percentage).',
+    'Options to format the value, for the input’s text, which assistive technology reads (for example a percentage).',
   ],
   [
     'locale',
@@ -189,15 +189,16 @@ export const stepperInputRows: readonly PropRow[] = [
     'aria-label',
     'string',
     undefined,
-    'Its accessible name (it has no visible label): what it counts, e.g. “Quantity”.',
+    'Its accessible name, since it has no visible label: what it counts, for example “Quantity”.',
   ],
   [
     'aria-roledescription',
     'string',
     code('Number field'),
     <>
-      A user-friendly description of the input’s role for assistive tech: a role
-      description, not an accessible name (use <code>aria-label</code>).
+      A user-friendly description of the input’s role for assistive technology.
+      It’s a role description, not an accessible name (use{' '}
+      <code>aria-label</code> for that).
     </>,
   ],
   ...baseUiRows('input', 'HTMLInputElement'),
@@ -211,7 +212,7 @@ export const stepperHalfRows = (sign: '−' | '+'): readonly PropRow[] => [
     'boolean',
     code('false'),
     <>
-      Whether the half ignores presses (dimmed); it also disables at{' '}
+      Whether the half ignores presses (dimmed). It’s also disabled at{' '}
       <code>{sign === '−' ? 'min' : 'max'}</code>.
     </>,
   ],
@@ -221,7 +222,7 @@ export const stepperHalfRows = (sign: '−' | '+'): readonly PropRow[] => [
     <>
       <code>pointer</code> (disabled: <code>not-allowed</code>)
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   nativeButtonRow(true),
   ...baseUiRows('button', 'HTMLButtonElement'),

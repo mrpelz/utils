@@ -1,12 +1,15 @@
 import './style.css';
 
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Segmented, Viewport } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -15,6 +18,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { morePeriods, periods } from './content.js';
 import { segmentedItemRows, segmentedRootRows } from './docs.js';
 import { propOptionsOverviewRoot, propOptionsPeriodsContent } from './props.js';
@@ -38,18 +42,34 @@ const LiveView: FunctionComponent = () => {
       ? morePeriods
       : periods.slice(0, content.count);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[controlContent, controlRoot]}
+      controls={[controlContent, controlRoot, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateContent, stateRoot]}
+      state={[stateContent, stateRoot, partState]}
       title="Segmented"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="segmented-demo-content">
           <Segmented.Root
             key={elementKey}
@@ -63,12 +83,13 @@ const LiveView: FunctionComponent = () => {
             {shown.map(([value, label]) => (
               <Segmented.Item
                 key={value}
+                {...partProps['Segmented.Item']}
                 value={value}
               >
                 {label}
               </Segmented.Item>
             ))}
-            <Segmented.Highlight />
+            <Segmented.Highlight {...partProps['Segmented.Highlight']} />
           </Segmented.Root>
         </div>
       </Viewport.Content>
@@ -91,9 +112,9 @@ export const SegmentedOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>Chooses one of a few options, side by side on a track.</li>
-      <li>E.g. a chart’s period, or which of a list’s items to show.</li>
-      <li>The chosen one highlighted.</li>
-      <li>Base UI’s radio group.</li>
+      <li>For example a chart’s period, or which of a list’s items to show.</li>
+      <li>The chosen one is highlighted.</li>
+      <li>It’s Base UI’s radio group.</li>
     </ul>
     <LiveView />
 
@@ -106,11 +127,11 @@ export const SegmentedOverview: FunctionComponent = () => (
     <ul>
       <li>
         For two to five options of the same kind, short enough to show at once
-        (one or two words each), e.g. Day, Week, Month, Year.
+        (one or two words each), such as Day, Week, Month and Year.
       </li>
       <li>
-        To switch between views of the same content (e.g. All and Missed calls),
-        in a navigation bar or a toolbar (see{' '}
+        For switching between views of the same content (for example All and
+        Missed calls), in a navigation bar or a toolbar (see{' '}
         <a href={publicUrl('segmented/composition')}>Composition</a>).
       </li>
     </ul>
@@ -123,20 +144,21 @@ export const SegmentedOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A setting that’s on or off: a <a href={publicUrl('switch')}>Switch</a>.
+        A setting that’s on or off: use a{' '}
+        <a href={publicUrl('switch')}>Switch</a>.
       </li>
       <li>
-        More options, or long ones: a <a href={publicUrl('menu')}>Menu</a> (a
-        pop-up button) or a <a href={publicUrl('roll')}>Roll</a> picker,
+        More options, or long ones: use a <a href={publicUrl('menu')}>Menu</a>{' '}
+        (a pop-up button) or a <a href={publicUrl('roll')}>Roll</a> picker,
         collapsed until needed.
       </li>
       <li>
-        Switching an app’s top-level sections: a{' '}
-        <a href={publicUrl('tab-bar')}>Tab bar</a>.
+        Switching an app’s top-level sections: use a{' '}
+        <a href={publicUrl('tab-bar')}>Tab Bar</a>.
       </li>
       <li>
-        Starting something: a <a href={publicUrl('button')}>Button</a>, as
-        choosing an option doesn’t perform an action.
+        Starting something: use a <a href={publicUrl('button')}>Button</a>,
+        because choosing an option doesn’t perform an action.
       </li>
     </ul>
 
@@ -147,9 +169,10 @@ export const SegmentedOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most segmented controls set, across their parts.</li>
+      <li>The props most segmented controls set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('segmented/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('segmented/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -180,25 +203,26 @@ export const SegmentedOverview: FunctionComponent = () => (
     <ul>
       <li>
         It’s Base UI’s radio group: the root has the <code>radiogroup</code>{' '}
-        role, each item the <code>radio</code> role and{' '}
-        <code>aria-checked</code>; hidden radio inputs beside them carry the
+        role, and each item the <code>radio</code> role and{' '}
+        <code>aria-checked</code>. Hidden radio inputs next to them carry the
         value for forms, hidden from assistive technology.
       </li>
       <li>
         Give the root an accessible name (<code>aria-label</code>, or{' '}
-        <code>aria-labelledby</code> pointing at a visible label): it says what
-        the options choose (e.g. “Period”). Items are named by their labels.
+        <code>aria-labelledby</code> pointing at a visible label) that says what
+        the options choose (for example “Period”). Items are named by their
+        labels.
       </li>
       <li>
-        Keyboard: Tab focuses the chosen item (the others are skipped); arrow
-        keys move to the next or previous item and choose it.
+        Tab focuses the chosen item (the others are skipped). The arrow keys
+        move to the next or previous item and choose it.
       </li>
       <li>
-        The lens and the labels’ width-reserving copies are hidden from
-        assistive technology.
+        The lens, and the copies of the labels that reserve their width, are
+        hidden from assistive technology.
       </li>
       <li>
-        Its animations (highlight, lens) don’t follow{' '}
+        Its animations (the highlight, the lens) don’t follow{' '}
         <code>prefers-reduced-motion</code>.
       </li>
     </ul>
@@ -211,22 +235,22 @@ export const SegmentedOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A click or tap chooses an item. Pressed, the selection turns into a
-        glass lens that follows the pointer across the items; released, the item
-        under it is chosen, and the lens settles on it.
+        A click or tap chooses an item. While pressed, the selection turns into
+        a glass lens that follows the pointer across the items. On release, the
+        item under it is chosen, and the lens settles on it.
       </li>
       <li>
-        Items share the width equally, each as wide as the widest label; the
+        Items share the width equally, each as wide as the widest label, so the
         chosen label’s bolder weight doesn’t change the control’s width.
       </li>
       <li>
-        Separators show between unchosen items only (or none:{' '}
+        Separators show only between unchosen items (or not at all, with{' '}
         <code>hideSeparators</code>).
       </li>
       <li>
-        Too narrow for its items: their labels truncated, or (
-        <code>overflow=&quot;scroll&quot;</code>) the items scrolled sideways,
-        snapping to an item; the chosen item scrolled into view.
+        When it’s too narrow for its items, their labels truncate. Or, with{' '}
+        <code>overflow=&quot;scroll&quot;</code>, the items scroll sideways,
+        snapping to an item, with the chosen one scrolled into view.
       </li>
     </ul>
   </>

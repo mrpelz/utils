@@ -50,7 +50,7 @@ export type {
 // preview's slot first, placed from the trigger's place (its top, aligned
 // to it as the menu is), shifted as far as the stack needs to fit (as
 // menus grow, see `useGrowAvoidance`), within its portal's container (a
-// device's screen, e.g. the views' frames), clear of its safe area. Taller
+// device's screen, e.g. the views' frames), clear of its safe area insets. Taller
 // than that, the menu scrolls; the preview takes at most what's left of
 // the room beside the menu (or, the menu taller, half of it).
 //
@@ -380,6 +380,11 @@ const Positioner = forwardRef<HTMLDivElement, ContextualMenuPositionerProps>(
     return (
       <Menu.Positioner
         ref={ref}
+        // (Shifted as far as it needs, also down: Base UI's limit otherwise
+        // keeps it attached to its trigger, which, at its trigger's top, it
+        // can't leave downwards at all. Closed once its trigger's out of
+        // view anyway, see Menu's positioner.)
+        sticky
         align={align}
         anchor={triggerRef}
         // (Shifted: its stack covers the trigger's place by design.)

@@ -166,7 +166,7 @@ export const secondaryClickRow: PropRow = [
   'onSecondaryClick',
   'MouseEventHandler<HTMLElement>',
   undefined,
-  'A secondary click: a right click (or Control-click: the contextmenu event, whose menu it replaces), or a touch held for 500ms (iOS: a long press), whose click then doesn’t follow. Not while disabled.',
+  'A secondary click: a right click (or Control-click, the contextmenu event, whose menu it replaces), or a touch held for 500ms (a long press), which then isn’t followed by a click. It doesn’t fire while disabled.',
 ];
 
 /** Base UI's `nativeButton`, by whether the part renders a button. */

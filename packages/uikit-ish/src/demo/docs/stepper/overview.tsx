@@ -1,11 +1,14 @@
 import './style.css';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import { Stepper } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -15,6 +18,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { stepperRootRows } from './docs.js';
 import { propOptionsOverview } from './props.js';
 
@@ -30,15 +34,32 @@ const LiveView: FunctionComponent = () => {
     title: 'Stepper.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Stepper.Decrement': [],
+            'Stepper.Group': [],
+            'Stepper.Increment': [],
+            'Stepper.Input': ['aria-label'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Stepper"
     >
       <div className="stepper-demo-row">
@@ -51,10 +72,13 @@ const LiveView: FunctionComponent = () => {
             setValue(next);
           }}
         >
-          <Stepper.Group>
-            <Stepper.Input aria-label="Quantity" />
-            <Stepper.Decrement />
-            <Stepper.Increment />
+          <Stepper.Group {...partProps['Stepper.Group']}>
+            <Stepper.Input
+              {...partProps['Stepper.Input']}
+              aria-label="Quantity"
+            />
+            <Stepper.Decrement {...partProps['Stepper.Decrement']} />
+            <Stepper.Increment {...partProps['Stepper.Increment']} />
           </Stepper.Group>
         </Stepper.Root>
       </div>
@@ -76,8 +100,8 @@ export const StepperOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>Steps a number up or down: “−” and “+” in a capsule.</li>
-      <li>It shows no value: the app shows it, e.g. in its row.</li>
+      <li>Steps a number up or down, with “−” and “+” in a capsule.</li>
+      <li>It shows no value. The app shows it, for example in its row.</li>
     </ul>
     <LiveView />
 
@@ -89,12 +113,12 @@ export const StepperOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        For small changes to a count or a quantity, a step at a time: guests,
+        For small changes to a count or a quantity, one step at a time: guests,
         copies, a font size.
       </li>
       <li>
-        Ordered, step-wise: each press one step, where the value’s near what it
-        should be.
+        For ordered, step-by-step values, where the value is already close to
+        what it should be.
       </li>
     </ul>
 
@@ -106,21 +130,22 @@ export const StepperOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A value along a range, roughly: a{' '}
+        A rough value along a range: use a{' '}
         <a href={publicUrl('slider')}>Slider</a>.
       </li>
       <li>
-        Large or exact numbers, typed: a{' '}
-        <a href={publicUrl('text-field')}>Text field</a> (numeric input mode).
+        Large or exact numbers, typed: use a{' '}
+        <a href={publicUrl('text-field')}>Text Field</a> (with a numeric input
+        mode).
       </li>
       <li>
-        One of a few named options: a{' '}
+        One of a few named options: use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        A value from a long ordered set (a time, a date): a{' '}
-        <a href={publicUrl('roll')}>Roll</a>, or a{' '}
-        <a href={publicUrl('date-picker')}>Date picker</a>.
+        A value from a long ordered set (a time, a date): use a{' '}
+        <a href={publicUrl('roll')}>Roll</a> or a{' '}
+        <a href={publicUrl('date-picker')}>Date Picker</a>.
       </li>
     </ul>
 
@@ -133,7 +158,8 @@ export const StepperOverview: FunctionComponent = () => (
     <ul>
       <li>The props most steppers set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('stepper/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('stepper/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -163,8 +189,8 @@ export const StepperOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its value is held by an input, visually hidden: assistive tech reads it
-        as a spin button (Base UI’s number field), its text formatted by{' '}
+        A visually hidden input holds its value, and assistive technology reads
+        it as a spin button (Base UI’s number field), with its text formatted by{' '}
         <code>format</code>.
       </li>
       <li>
@@ -173,13 +199,13 @@ export const StepperOverview: FunctionComponent = () => (
           component="stepper"
           part="Stepper.Input"
         />
-        ’s <code>aria-label</code>) by what it counts: the stepper has no
-        visible label.
+        ’s <code>aria-label</code>) after what it counts, because the stepper
+        has no visible label.
       </li>
       <li>
-        Keyboard: Tab focuses it (a ring around the capsule); the up and down
-        arrow keys step, with shift by <code>largeStep</code> and with alt by{' '}
-        <code>smallStep</code>; Home and End go to <code>min</code> and{' '}
+        Tab focuses it, with a ring around the capsule. The up and down arrow
+        keys step it, by <code>largeStep</code> with Shift and by{' '}
+        <code>smallStep</code> with Alt. Home and End go to <code>min</code> and{' '}
         <code>max</code>.
       </li>
       <li>
@@ -195,13 +221,13 @@ export const StepperOverview: FunctionComponent = () => (
       Behavior
     </Heading>
     <ul>
-      <li>A press steps once; held, a half repeats.</li>
+      <li>A press steps once. Held, a half keeps stepping.</li>
       <li>
-        At <code>min</code> or <code>max</code>, its half disables (dimmed).
+        At <code>min</code> or <code>max</code>, that half is disabled (dimmed).
       </li>
       <li>
-        Pressed, a half darkens (in dark mode, lightens); no focus ring shows
-        for presses, only for the keyboard.
+        A pressed half darkens (or lightens, in dark mode). Presses don’t show a
+        focus ring, only the keyboard does.
       </li>
     </ul>
   </>

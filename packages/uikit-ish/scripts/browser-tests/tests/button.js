@@ -99,7 +99,10 @@ export const tests = [
         page.evaluate(`(() => {
           const button = ${page.section}.querySelector('button');
           const box = button.getBoundingClientRect();
-          const parent = button.parentElement.getBoundingClientRect();
+          // (Its parent with a box: not a wrapper of display: contents.)
+          let container = button.parentElement;
+          while (getComputedStyle(container).display === 'contents') container = container.parentElement;
+          const parent = container.getBoundingClientRect();
           const label = button.lastElementChild.getBoundingClientRect();
           return [Math.round(box.width), Math.round(parent.width - box.width), Math.round(label.left + label.width / 2 - (box.left + box.width / 2))];
         })()`);

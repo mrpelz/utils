@@ -474,7 +474,7 @@
        keyboard's own bar: the glass extends 4px beyond), collapsed too. */
     --uikit-tab-bar-side: 32px;
 
-    /* (None below: the safe area, kept clear by its anchor, see Viewport.) */
+    /* (None below: the safe area inset, kept clear by its anchor, see Viewport.) */
     padding: 16px var(--uikit-tab-bar-side) 0;
     gap: var(--uikit-tab-bar-group-gap, 16px);
     interpolate-size: allow-keywords;

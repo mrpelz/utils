@@ -26,27 +26,27 @@ export const AccordionComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Rows opening among a group’s rows, one at a time (e.g. an event’s Starts
-        and Ends pickers) can’t be an Accordion: its parts render elements, a
-        group’s rows must stay its children.
+        Rows that open among a group’s rows, one at a time (for example an
+        event’s Starts and Ends pickers), can’t use an Accordion. Its parts
+        render elements, while a group’s rows must stay the group’s children.
       </li>
       <li>
-        The list’s own, without elements:{' '}
+        The list has its own version without elements:{' '}
         <PartLink
           component="list"
           part="List.AccordionRoot"
-        />{' '}
-        (its{' '}
+        />
+        , with its{' '}
         <PartLink
           component="list"
           part="List.AccordionItem"
         />
-        s), the same props; a{' '}
+        s, and the same props. A{' '}
         <PartLink
           component="date-picker"
           part="DatePicker.Root"
         />{' '}
-        with a handle in an item opening and closing with it. See{' '}
+        with a handle in an item opens and closes with it. See{' '}
         <a href={publicUrl('list/composition#rows-expanding-together')}>
           List: Rows expanding together
         </a>

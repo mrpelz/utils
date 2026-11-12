@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -14,6 +14,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -27,6 +29,7 @@ import {
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -147,57 +150,113 @@ const controlCode = `const [filter, setFilter] = useState('all');
 const LargeTitle: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Header.LargeTitle': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Subtitle': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('header-composition-large-title') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="header-composition-large-title"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Header with a large title"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading />
-              <Toolbar.Title>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
-                <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
+                <Toolbar.Subtitle {...partProps['Toolbar.Subtitle']}>
+                  {names.length} people
+                </Toolbar.Subtitle>
               </Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="New contact"
                   shape="circle"
                   onClick={() => addLog('New contact clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndPencil} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndPencil}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
-            <Header.LargeTitle>
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <Header.LargeTitle {...partProps['Header.LargeTitle']}>
               <span>Contacts</span>
-              <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
+              <Toolbar.Subtitle {...partProps['Toolbar.Subtitle']}>
+                {names.length} people
+              </Toolbar.Subtitle>
             </Header.LargeTitle>
 
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -212,60 +271,120 @@ const Search: FunctionComponent = () => {
     name.toLowerCase().includes(query.toLowerCase()),
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Header.Accessory': [],
+          'Header.LargeTitle': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Page.Root': [],
+          'TextField.Clear': [],
+          'TextField.Control': [
+            'aria-label',
+            'onValueChange',
+            'placeholder',
+            'type',
+            'value',
+          ],
+          'TextField.Frame': ['variant'],
+          'TextField.Root': [],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState('header-composition-search') },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
+      controls={[partControls]}
       id="header-composition-search"
       stage="phone"
+      state={[partState]}
       title="Header with a search field"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading />
-              <Toolbar.Title>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
-            <Header.LargeTitle>
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <Header.LargeTitle {...partProps['Header.LargeTitle']}>
               <span>Contacts</span>
             </Header.LargeTitle>
-            <Header.Accessory>
-              <TextField.Root>
-                <TextField.Frame variant="row">
-                  <Symbol icon={sfMagnifyingglass} />
+            <Header.Accessory {...partProps['Header.Accessory']}>
+              <TextField.Root {...partProps['TextField.Root']}>
+                <TextField.Frame
+                  {...partProps['TextField.Frame']}
+                  variant="row"
+                >
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  />
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     aria-label="Search"
                     placeholder="Search"
                     type="search"
                     value={query}
                     onValueChange={(value: string) => setQuery(value)}
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </TextField.Frame>
               </TextField.Root>
             </Header.Accessory>
 
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {matching.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -277,67 +396,122 @@ const Search: FunctionComponent = () => {
 const OverPicture: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': ['background'],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['context', 'placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('header-composition-picture') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="header-composition-picture"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Header over a picture"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
             <Toolbar.Root
+              {...partProps['Toolbar.Root']}
               context="adaptive"
               placement="block-start"
             >
-              <Toolbar.Leading>
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Library"
                   shape="circle"
                   onClick={() => addLog('Back clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfChevronBackward}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Album</span>
               </Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root background="plain">
+          <Page.Root
+            {...partProps['Page.Root']}
+            background="plain"
+          >
             <div
               aria-hidden="true"
               className="header-demo-picture"
             />
-            <List.Root listStyle="plain">
-              <List.Section>
-                <List.Group>
+            <List.Root
+              {...partProps['List.Root']}
+              listStyle="plain"
+            >
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.slice(0, 16).map((name, index) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{`${String(index + 1)}. ${name}`}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title
+                          {...partProps['List.Title']}
+                        >{`${String(index + 1)}. ${name}`}</List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -353,32 +527,73 @@ const ControlBelow: FunctionComponent = () => {
   const shown =
     filter === 'all' ? names : names.filter((_, index) => index % 3 === 0);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Header.Accessory': [],
+            'Header.LargeTitle': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Segmented.Root': ['aria-label', 'onValueChange', 'value'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('header-composition-control') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="header-composition-control"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Header with a control"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading />
-              <Toolbar.Title>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Inbox</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
-            <Header.LargeTitle>
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <Header.LargeTitle {...partProps['Header.LargeTitle']}>
               <span>Inbox</span>
             </Header.LargeTitle>
-            <Header.Accessory>
+            <Header.Accessory {...partProps['Header.Accessory']}>
               <Segmented.Root
+                {...partProps['Segmented.Root']}
                 aria-label="Show"
                 value={filter}
                 onValueChange={(value) => {
@@ -386,26 +601,44 @@ const ControlBelow: FunctionComponent = () => {
                   setFilter(String(value));
                 }}
               >
-                <Segmented.Item value="all">All</Segmented.Item>
-                <Segmented.Item value="unread">Unread</Segmented.Item>
-                <Segmented.Highlight />
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="all"
+                >
+                  All
+                </Segmented.Item>
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="unread"
+                >
+                  Unread
+                </Segmented.Item>
+                <Segmented.Highlight {...partProps['Segmented.Highlight']} />
               </Segmented.Root>
             </Header.Accessory>
 
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {shown.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -427,15 +660,15 @@ export const HeaderComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A header sits at the start of a <a href={publicUrl('page')}>Page</a>;
-        its bar holds a <a href={publicUrl('toolbar')}>Toolbar</a>’s parts.
+        A header sits at the start of a <a href={publicUrl('page')}>Page</a>.
+        Its bar holds a <a href={publicUrl('toolbar')}>Toolbar</a>’s parts.
       </li>
       <li>
-        What stays with the bar follows the large title, in an accessory: a
-        search field, a control.
+        What should stay with the bar, such as a search field or a control,
+        follows the large title, in an accessory.
       </li>
       <li>
-        In a stack: see{' '}
+        For headers in a stack, see{' '}
         <a href={publicUrl('navigation/composition#large-titles')}>
           Navigation
         </a>
@@ -451,15 +684,15 @@ export const HeaderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The page’s title, large, with a subtitle; as it scrolls under the bar,
+        The page’s large title, with a subtitle. As it scrolls under the bar,
         the bar’s own title fades in.
       </li>
       <li>
-        The bar’s title with its subtitle too (Title and Subtitle, two lines):
-        both fade in together.
+        The bar’s title has its subtitle too (Title and Subtitle, on two lines),
+        and both fade in together.
       </li>
       <li>
-        Its title centered, with or without sides (here an empty{' '}
+        The bar’s title is centered, with or without sides (here with an empty{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Leading"
@@ -495,8 +728,8 @@ export const HeaderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Mail’s and Contacts’: a <a href={publicUrl('text-field')}>Text field</a>
-        ’s{' '}
+        As in a mail or contacts app: a{' '}
+        <a href={publicUrl('text-field')}>Text Field</a>’s{' '}
         <PartLink
           component="text-field"
           part="TextField.Frame"
@@ -505,16 +738,17 @@ export const HeaderComposition: FunctionComponent = () => (
         <PartLink
           component="header"
           part="Header.Accessory"
-        />
-        , filtering the page: below the large title, scrolling with it, then
-        staying below the bar.
+        />{' '}
+        filters the page. It sits below the large title, scrolls with it, then
+        stays below the bar.
       </li>
       <li>
-        It looks like the list’s rows below it: their background, height and
-        corners (<code>variant=&quot;row&quot;</code>), still a search field.
+        It looks like the list’s rows below it, with their background, height
+        and corners (<code>variant=&quot;row&quot;</code>), while still being a
+        search field.
       </li>
       <li>
-        Search sits with the page’s bar; also at the bottom (see{' '}
+        Search can sit with the page’s bar, or at the bottom (see{' '}
         <a href={publicUrl('toolbar/composition#a-search-field')}>Toolbar</a>).
       </li>
       <li>
@@ -523,8 +757,8 @@ export const HeaderComposition: FunctionComponent = () => (
           component="header"
           part="Header.Accessory"
         />
-        ) scrolling, then staying below the bar, and the search field in a row’s
-        look (
+        ), which scrolls and then stays below the bar, and the search field in a
+        row’s look (
         <PartLink
           component="text-field"
           part="TextField.Frame"
@@ -537,7 +771,7 @@ export const HeaderComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        <strong>Demo:</strong> the query (the app’s state) and filtering the
+        <strong>Demo:</strong> the query (the app’s state), and filtering the
         rows by it.
       </li>
     </ul>
@@ -552,24 +786,25 @@ export const HeaderComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Music’s and Photos’: a picture at the page’s top, under the bar (no{' '}
+        As in a music or photos app: a picture at the page’s top goes under the
+        bar (there’s no{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        for it), no large title.
+        for it), without a large title.
       </li>
       <li>
-        The bar’s glass by what’s behind it (
-        <code>context=&quot;adaptive&quot;</code>
-        ): a dark picture, then the page as it scrolls.
+        The bar’s glass adapts to what’s behind it (
+        <code>context=&quot;adaptive&quot;</code>): first a dark picture, then
+        the page as it scrolls.
       </li>
       <li>
         <strong>Library:</strong> the bar’s adaptive glass (
         <code>context=&quot;adaptive&quot;</code>) over what’s behind it.
       </li>
       <li>
-        <strong>Demo:</strong> the picture at the page’s top and the page’s
+        <strong>Demo:</strong> the picture at the page’s top, and the page’s
         rows.
       </li>
     </ul>
@@ -588,12 +823,12 @@ export const HeaderComposition: FunctionComponent = () => (
         <PartLink
           component="header"
           part="Header.Accessory"
-        />
-        , switching what the page lists (All, Unread): scrolling with the large
-        title, then staying below the bar.
+        />{' '}
+        switches what the page lists (All, Unread). It scrolls with the large
+        title, then stays below the bar.
       </li>
       <li>
-        In the bar instead, in place of its title: see{' '}
+        To put it in the bar instead, in place of the title, see{' '}
         <a href={publicUrl('segmented/composition#in-a-navigation-bar')}>
           Segmented
         </a>
@@ -605,10 +840,10 @@ export const HeaderComposition: FunctionComponent = () => (
           component="segmented"
           part="Segmented.Root"
         />{' '}
-        in it.
+        inside it.
       </li>
       <li>
-        <strong>Demo:</strong> the filter (the app’s state) and the rows it
+        <strong>Demo:</strong> the filter (the app’s state), and the rows it
         shows.
       </li>
     </ul>

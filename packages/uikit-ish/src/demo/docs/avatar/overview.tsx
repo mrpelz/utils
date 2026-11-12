@@ -1,10 +1,13 @@
 import './style.css';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Avatar } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -14,6 +17,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   avatarFallbackRows,
   avatarGroupRows,
@@ -32,49 +36,77 @@ const LiveView: FunctionComponent = () => {
     title: '[content]',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Avatar.Fallback': [],
+          'Avatar.Group': ['aria-label'],
+          'Avatar.Image': ['alt', 'src'],
+          'Avatar.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="avatar"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Avatar"
     >
       {content.people === 1 ? (
-        <Avatar.Root>
+        <Avatar.Root {...partProps['Avatar.Root']}>
           {content.image ? (
             <Avatar.Image
+              {...partProps['Avatar.Image']}
               alt="Anna Hall"
               src={photo(200)}
             />
           ) : null}
-          <Avatar.Fallback>AH</Avatar.Fallback>
+          <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+            AH
+          </Avatar.Fallback>
         </Avatar.Root>
       ) : (
-        <Avatar.Group aria-label="Weekend Trip">
-          <Avatar.Root>
+        <Avatar.Group
+          {...partProps['Avatar.Group']}
+          aria-label="Weekend Trip"
+        >
+          <Avatar.Root {...partProps['Avatar.Root']}>
             {content.image ? (
               <Avatar.Image
+                {...partProps['Avatar.Image']}
                 alt="Anna Hall"
                 src={photo(200)}
               />
             ) : null}
-            <Avatar.Fallback>AH</Avatar.Fallback>
+            <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+              AH
+            </Avatar.Fallback>
           </Avatar.Root>
-          <Avatar.Root>
+          <Avatar.Root {...partProps['Avatar.Root']}>
             {content.image ? (
               <Avatar.Image
+                {...partProps['Avatar.Image']}
                 alt="Kate Brown"
                 src={photo(290)}
               />
             ) : null}
-            <Avatar.Fallback>KB</Avatar.Fallback>
+            <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+              KB
+            </Avatar.Fallback>
           </Avatar.Root>
           {content.people === 3 ? (
-            <Avatar.Root>
-              <Avatar.Fallback>JA</Avatar.Fallback>
+            <Avatar.Root {...partProps['Avatar.Root']}>
+              <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                JA
+              </Avatar.Fallback>
             </Avatar.Root>
           ) : null}
         </Avatar.Group>
@@ -98,10 +130,10 @@ export const AvatarOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A person: their photo in a circle, or, without one, their initials (Base
-        UI’s <code>Avatar</code>).
+        A person: their photo in a circle, or their initials when there’s no
+        photo. It’s Base UI’s <code>Avatar</code>.
       </li>
-      <li>Several people in one circle: a conversation’s.</li>
+      <li>Several people can share one circle, as for a conversation.</li>
     </ul>
     <LiveView />
 
@@ -113,8 +145,8 @@ export const AvatarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Showing who: a contact, a message’s sender, a conversation’s people, an
-        account.
+        For showing who: a contact, a message’s sender, a conversation’s people,
+        or an account.
       </li>
     </ul>
 
@@ -126,10 +158,10 @@ export const AvatarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A thing, not a person (an app, a setting): a{' '}
+        A thing, not a person (an app, a setting): use a{' '}
         <a href={publicUrl('symbol')}>Symbol</a> in a row’s image.
       </li>
-      <li>A picture of the content: an image.</li>
+      <li>A picture of the content: use an image.</li>
     </ul>
 
     <Heading
@@ -141,7 +173,8 @@ export const AvatarOverview: FunctionComponent = () => (
     <ul>
       <li>The props most avatars set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('avatar/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('avatar/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -161,16 +194,16 @@ export const AvatarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The photo’s <code>alt</code>: the person’s name, or empty beside their
-        name (a row’s title).
+        The photo’s <code>alt</code> is the person’s name, or empty when their
+        name is right next to it (in a row’s title).
       </li>
       <li>
-        The initials are text, read as such: name the avatar (
-        <code>aria-label</code>) where its initials stand alone.
+        The initials are text, and are read as such. Where they stand alone,
+        name the avatar with <code>aria-label</code>.
       </li>
       <li>
-        A group has the <code>group</code> role: name it (
-        <code>aria-label</code>, e.g. the conversation).
+        A group has the <code>group</code> role. Name it with{' '}
+        <code>aria-label</code>, for example after the conversation.
       </li>
     </ul>
 
@@ -182,16 +215,17 @@ export const AvatarOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The photo once it has loaded; until then, or if it fails, the fallback
-        (Base UI’s).
+        It shows the photo once it has loaded. Until then, or if it fails, it
+        shows the fallback (Base UI’s).
       </li>
       <li>
-        70px by default (<code>size</code>), the initials 40% of it, semibold,
-        white on a gray gradient.
+        It’s 70px by default (<code>size</code>), with the initials at 40% of
+        that, semibold, white on a gray gradient.
       </li>
       <li>
-        In a group: the first person large at the top start, the second smaller
-        at the bottom end, a third at the top end; more aren’t shown (see{' '}
+        In a group, the first person is large at the top start, the second
+        smaller at the bottom end, and a third at the top end. More aren’t shown
+        (see{' '}
         <PartLink
           component="avatar"
           part="Avatar.Group"

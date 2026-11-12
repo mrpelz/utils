@@ -139,6 +139,9 @@ export const tests = [
 
       const { width } = await page.rect('[role=tab]', 1);
       await page.mouse('mousePressed', ...second);
+      // (Held: the lens shows after its delay, a tap only selecting, see
+      // `delayLens`.)
+      await sleep(150);
       const widths = await page.sample(
         `parseFloat(getComputedStyle(${page.section}.querySelector('[role=tablist]').lastElementChild).width)`,
         100,

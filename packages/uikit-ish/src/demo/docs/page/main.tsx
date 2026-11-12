@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Header,
@@ -9,8 +9,12 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import { propOptionsContent, propOptionsRoot } from './props.js';
 
 /**
@@ -34,21 +38,46 @@ export const PageDemo: FunctionComponent = () => {
     title: 'root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Header.LargeTitle': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': ['listStyle'],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
-      controls={[controlContent, controlRoot]}
+      controls={[controlContent, controlRoot, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={[stateContent, stateRoot]}
+      state={[stateContent, stateRoot, partState]}
       title="Page"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
           {content.header ? (
-            <Viewport.BlockStart>
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Title>
+            <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
                   <span>Page</span>
                 </Toolbar.Title>
               </Toolbar.Root>
@@ -62,26 +91,40 @@ export const PageDemo: FunctionComponent = () => {
             }
           >
             {/* (Without the bar: none.) */}
-            <Viewport.Padding edge="block-start" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {content.header ? (
-              <Header.LargeTitle>
+              <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                 <span>Page</span>
               </Header.LargeTitle>
             ) : null}
-            <List.Root listStyle={content.listStyle}>
-              <List.Section>
-                <List.Group>
+            <List.Root
+              {...partProps['List.Root']}
+              listStyle={content.listStyle}
+            >
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {Array.from({ length: 30 }, (_, index) => (
-                    <List.Item key={index}>
-                      <List.Content>
-                        <List.Title>Row {index + 1}</List.Title>
+                    <List.Item
+                      key={index}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Row {index + 1}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>

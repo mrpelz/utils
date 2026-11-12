@@ -13,13 +13,17 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfFolderFill, sfListBullet } from '../../tooling/icons.js';
 import {
   getPropOptionsGuideColumn,
   propOptionsGuideRoot,
 } from '../layout/props.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsRootControlled,
   propOptionsPopup,
@@ -81,6 +85,41 @@ export const DrawerControlledDemo: FunctionComponent = () => {
     { external: externalDetail, title: 'Layout.Column (detail)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Block': [],
+            'List.Checkmark': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': ['background'],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       id={id}
@@ -95,6 +134,7 @@ export const DrawerControlledDemo: FunctionComponent = () => {
         controlRoot,
         controlList,
         controlDetail,
+        partControls,
       ]}
       state={[
         stateDrawer,
@@ -103,9 +143,10 @@ export const DrawerControlledDemo: FunctionComponent = () => {
         stateRoot,
         stateList,
         stateDetail,
+        partState,
       ]}
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root {...propsRoot}>
           <Drawer.Root
             key={keyDrawer}
@@ -119,26 +160,39 @@ export const DrawerControlledDemo: FunctionComponent = () => {
             <Drawer.SwipeArea {...propsSwipeArea} />
             <Drawer.Popup {...propsPopup}>
               <Header.Root>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Title>
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>Mailboxes</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
-                        <List.Item>
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={sfFolderFill} />
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
+                        <List.Item {...partProps['List.Item']}>
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfFolderFill}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog('folder: Inbox');
@@ -150,18 +204,29 @@ export const DrawerControlledDemo: FunctionComponent = () => {
                               Inbox
                             </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            {folder === 'Inbox' ? <List.Checkmark /> : null}
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            {folder === 'Inbox' ? (
+                              <List.Checkmark
+                                {...partProps['List.Checkmark']}
+                              />
+                            ) : null}
                           </List.Trailing>
                         </List.Item>
-                        <List.Item>
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={sfFolderFill} />
+                        <List.Item {...partProps['List.Item']}>
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfFolderFill}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog('folder: Drafts');
@@ -173,18 +238,29 @@ export const DrawerControlledDemo: FunctionComponent = () => {
                               Drafts
                             </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            {folder === 'Drafts' ? <List.Checkmark /> : null}
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            {folder === 'Drafts' ? (
+                              <List.Checkmark
+                                {...partProps['List.Checkmark']}
+                              />
+                            ) : null}
                           </List.Trailing>
                         </List.Item>
-                        <List.Item>
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={sfFolderFill} />
+                        <List.Item {...partProps['List.Item']}>
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfFolderFill}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog('folder: Sent');
@@ -196,18 +272,29 @@ export const DrawerControlledDemo: FunctionComponent = () => {
                               Sent
                             </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            {folder === 'Sent' ? <List.Checkmark /> : null}
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            {folder === 'Sent' ? (
+                              <List.Checkmark
+                                {...partProps['List.Checkmark']}
+                              />
+                            ) : null}
                           </List.Trailing>
                         </List.Item>
-                        <List.Item>
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={sfFolderFill} />
+                        <List.Item {...partProps['List.Item']}>
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfFolderFill}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog('folder: Archive');
@@ -219,14 +306,21 @@ export const DrawerControlledDemo: FunctionComponent = () => {
                               Archive
                             </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            {folder === 'Archive' ? <List.Checkmark /> : null}
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            {folder === 'Archive' ? (
+                              <List.Checkmark
+                                {...partProps['List.Checkmark']}
+                              />
+                            ) : null}
                           </List.Trailing>
                         </List.Item>
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             </Drawer.Popup>
@@ -236,10 +330,14 @@ export const DrawerControlledDemo: FunctionComponent = () => {
             {...propsList}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                     <Toolbar.Button
+                      {...partProps['Toolbar.Button']}
                       aria-label="Show Sidebar"
                       shape="circle"
                       onClick={() => {
@@ -247,30 +345,46 @@ export const DrawerControlledDemo: FunctionComponent = () => {
                         setIsOpen(true);
                       }}
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfListBullet} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfListBullet}
+                        />
                       </Button.Icon>
                     </Toolbar.Button>
                   </Toolbar.Leading>
-                  <Toolbar.Title>
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{folder}</span>
                   </Toolbar.Title>
                   {/* (Balancing it: the title centered.) */}
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root background="plain">
-                <Viewport.Padding edge="block-start" />
-                <List.Root listStyle="plain">
-                  <List.Section>
-                    <List.Group>
+              <Page.Root
+                {...partProps['Page.Root']}
+                background="plain"
+              >
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root
+                  {...partProps['List.Root']}
+                  listStyle="plain"
+                >
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {Array.from(
                         { length: 20 },
                         (_, index) => `Message ${index + 1}`,
                       ).map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog(`message: ${name}`);
@@ -280,15 +394,22 @@ export const DrawerControlledDemo: FunctionComponent = () => {
                               {name}
                             </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            {name === message ? <List.Checkmark /> : null}
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            {name === message ? (
+                              <List.Checkmark
+                                {...partProps['List.Checkmark']}
+                              />
+                            ) : null}
                           </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -297,22 +418,37 @@ export const DrawerControlledDemo: FunctionComponent = () => {
             {...propsDetail}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{message}</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root background="plain">
-                <Viewport.Padding edge="block-start" />
-                <List.Root listStyle="plain">
-                  <List.Block>
+              <Page.Root
+                {...partProps['Page.Root']}
+                background="plain"
+              >
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root
+                  {...partProps['List.Root']}
+                  listStyle="plain"
+                >
+                  <List.Block {...partProps['List.Block']}>
                     The detail of {message}, in {folder}: as wide as the columns
                     before it leave.
                   </List.Block>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

@@ -779,7 +779,7 @@ const Trigger = forwardRef<HTMLButtonElement, SheetTriggerProps>(
 /**
  * A stop of the sheet's (see `Root`): swiped up, the sheet reveals its
  * content group by group, snapping to show everything up to a group's end
- * (its header too, and clear of the bottom safe area), measured live.
+ * (its header too, and clear of the bottom safe area inset), measured live.
  * Groups follow one another in its content; the last holds the rest (its
  * end beyond the sheet's height: the whole sheet).
  */

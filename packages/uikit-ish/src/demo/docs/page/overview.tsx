@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Header,
@@ -8,7 +8,10 @@ import {
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -18,6 +21,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import { pageRootRows } from './docs.js';
 import { propOptionsGuideRoot, propOptionsOverviewContent } from './props.js';
@@ -35,46 +39,87 @@ const LiveView: FunctionComponent = () => {
     title: 'Page.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Header.LargeTitle': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': ['listStyle'],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[controlContent, controlRoot]}
+      controls={[controlContent, controlRoot, partControls]}
       id={id}
       stage="phone"
-      state={[stateContent, stateRoot]}
+      state={[stateContent, stateRoot, partState]}
       title="Page"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading />
-              <Toolbar.Title>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root {...props}>
-            <Viewport.Padding edge="block-start" />
-            <Header.LargeTitle>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <Header.LargeTitle {...partProps['Header.LargeTitle']}>
               <span>Contacts</span>
             </Header.LargeTitle>
 
-            <List.Root listStyle={content.listStyle}>
-              <List.Section>
-                <List.Group>
+            <List.Root
+              {...partProps['List.Root']}
+              listStyle={content.listStyle}
+            >
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -97,16 +142,16 @@ export const PageOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        What a screen shows: its content’s scroll container, filling its place,
-        on the page background.
+        What a screen shows: the scroll container for its content. It fills its
+        place, on the page background.
       </li>
       <li>
-        Under a <a href={publicUrl('header')}>Header</a>’s bar (its large title
-        at its start), then lists or other content; <code>grouped</code> (the
-        grouped background) for grouped lists, <code>plain</code> for plain
-        ones.
+        It usually sits under a <a href={publicUrl('header')}>Header</a>’s bar,
+        with the large title at its start, followed by lists or other content.
+        Use <code>grouped</code> (the grouped background) for grouped lists, and{' '}
+        <code>plain</code> for plain ones.
       </li>
-      <li>After Framework7’s pages; no Base UI component.</li>
+      <li>It’s modeled on Framework7’s pages, and not built on Base UI.</li>
     </ul>
     <LiveView />
 
@@ -118,20 +163,21 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Every screen’s content: in a{' '}
+        For every screen’s content: in a{' '}
         <a href={publicUrl('navigation')}>Navigation</a> (one per pushed page),
-        a <a href={publicUrl('layout')}>Layout</a> column, a tab bar’s panel, a{' '}
-        <a href={publicUrl('viewport')}>Viewport</a>’s content layer.
+        a <a href={publicUrl('layout')}>Layout</a> column, a tab bar’s panel, or
+        a <a href={publicUrl('viewport')}>Viewport</a>’s content layer.
       </li>
       <li>
-        Under a <a href={publicUrl('header')}>Header</a>’s bar: the page’s
-        content starts below it (a{' '}
+        Under a <a href={publicUrl('header')}>Header</a>’s bar, the page’s
+        content starts below the bar. That takes a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        at its start; one at its end, above a bottom bar or the screen’s edge),
-        its scroll followed by the bar’s edge effect (a scroller, see{' '}
+        at its start, and another at its end, above a bottom bar or the screen’s
+        edge. The page is a scroller, so the bar’s edge effect follows its
+        scrolling (see{' '}
         <PartLink
           component="viewport"
           part="Viewport.Anchor"
@@ -139,8 +185,8 @@ export const PageOverview: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Its content’s ends spaced by those paddings (the library’s content
-        margin, 16px), not by the page: it keeps only the safe area clear.
+        Those paddings space its content’s ends (with the library’s content
+        margin, 16px). The page itself only keeps the safe area insets clear.
       </li>
     </ul>
 
@@ -152,12 +198,12 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Content over a page, for a moment: a{' '}
-        <a href={publicUrl('sheet')}>Sheet</a>, a{' '}
+        Content above a page for a moment: use a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a> or a{' '}
         <a href={publicUrl('popover')}>Popover</a>.
       </li>
       <li>
-        Columns side by side, each a page: a{' '}
+        Columns side by side, each a page: put a{' '}
         <a href={publicUrl('layout')}>Layout</a> around them.
       </li>
     </ul>
@@ -170,8 +216,8 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its one part’s props (all of them:{' '}
-        <a href={publicUrl('page/parts')}>Parts</a>).
+        The props of its one part. All of them are on the{' '}
+        <a href={publicUrl('page/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -186,13 +232,13 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <code>div</code> without a role: its header’s large title is the
-        page’s heading; a landmark, if wanted, by its attributes (e.g.{' '}
+        A <code>div</code> without a role. Its header’s large title is the
+        page’s heading. For a landmark, add the attributes yourself (for example{' '}
         <code>role=&quot;main&quot;</code> and a name).
       </li>
       <li>
-        A scroll container: in Chrome, keyboard focusable while nothing in it is
-        (the arrow keys, Page Up and Down scroll it).
+        It’s a scroll container. In Chrome, it can take keyboard focus while
+        nothing inside it can, so the arrow keys and Page Up/Down scroll it.
       </li>
       <li>It has no animations of its own.</li>
     </ul>
@@ -205,22 +251,22 @@ export const PageOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        As high as its container (<code>height: 100%</code>), scrolling its
-        content; its overscroll contained (not scrolling what’s around it), a
-        thin scrollbar.
+        It’s as tall as its container (<code>height: 100%</code>) and scrolls
+        its content. Its overscroll is contained, so it doesn’t scroll what’s
+        around it. It has a thin scrollbar.
       </li>
       <li>
-        In a column clear of a floating one (<code>clearFloating</code>, see{' '}
-        <a href={publicUrl('layout')}>Layout</a>): its content inset by that
-        column’s size, its background running beneath it.
+        In a column next to a floating one (<code>clearFloating</code>, see{' '}
+        <a href={publicUrl('layout')}>Layout</a>), its content is inset by that
+        column’s size, while its background runs beneath it.
       </li>
       <li>
-        Its scrolling, tracked: a{' '}
+        To track its scrolling, pass its ref as a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
         />
-        ’s <code>scroller</code> (its ref; see{' '}
+        ’s <code>scroller</code> (see{' '}
         <a href={publicUrl('viewport')}>Viewport</a>).
       </li>
     </ul>

@@ -106,10 +106,12 @@ export const tests = [
         const popup = document.querySelector('[role=dialog]');
         const header = popup.querySelector('[data-popover-part=header]');
         const toolbar = header.querySelector('[data-toolbar-part=root]');
-        const body = popup.querySelector('[data-popover-part=body]');
+        // (Its body under the header, scrolling: its content after its
+        // padding, see Viewport.Padding.)
+        const body = popup.querySelector('[data-popover-part=body] > [data-viewport-part=padding][data-edge=block-start]');
         const [p, h, t, b] = [popup, header, toolbar, body].map((element) => element.getBoundingClientRect());
         return {
-          body: Math.round(b.top - t.bottom),
+          body: Math.round(b.bottom - t.bottom),
           name: document.getElementById(popup.getAttribute('aria-labelledby'))?.textContent,
           toolbar: [Math.round(t.top - p.top), Math.round(t.height)],
         };

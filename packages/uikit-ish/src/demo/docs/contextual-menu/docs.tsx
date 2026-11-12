@@ -22,7 +22,7 @@ export const contextualMenuRootRows: readonly PropRow[] = menuRootRows.map(
           'ContextualMenuHandle<Payload>',
           row[2],
           <>
-            A handle opening or closing the menu imperatively, made by{' '}
+            A handle that opens or closes the menu from code, made by{' '}
             <PartLink
               component="contextual-menu"
               part="ContextualMenu.createHandle"
@@ -73,11 +73,12 @@ export const contextualMenuTriggerRows: readonly PropRow[] = [
     union('click', 'secondaryClick'),
     code(union('secondaryClick')),
     <>
-      What opens the menu: a secondary click (a right click, a touch held; drag
-      on to an item to choose it), a click being the trigger’s own (e.g. opening
-      the photo), or a press too (on touch, as the finger goes down). On touch,
-      a held press also selects the trigger’s text (and shows the browser’s text
-      menu): unless it should stay selectable, turn that off on the trigger (
+      What opens the menu. A secondary click (a right click, or a held touch;
+      drag on to an item to choose it), while a click stays the trigger’s own
+      (for example opening the photo). Or a press too (on touch, as the finger
+      goes down). On touch, a held press also selects the trigger’s text and
+      shows the browser’s text menu. Unless the text should stay selectable,
+      turn that off on the trigger (
       <PartLink
         component="viewport"
         part="useTextActionsPrevention"
@@ -93,7 +94,7 @@ export const contextualMenuPreviewRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'What the menu acts on (e.g. the photo, larger than its thumbnail), shown in the trigger’s place while the menu is open.',
+    'What the menu acts on (for example the photo, larger than its thumbnail), shown in the trigger’s place while the menu is open.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -105,7 +106,7 @@ export const contextualMenuPortalRows: readonly PropRow[] = [
     <>
       <code>document.body</code>
     </>,
-    'A parent element to render the portal element into; also the screen the menu fits in (else the viewport).',
+    'A parent element to render the portal element into. It’s also the screen the menu fits in (otherwise, the viewport is).',
   ],
   [
     'keepMounted',
@@ -126,7 +127,7 @@ export const contextualMenuPositionerRows: readonly PropRow[] = [
     'align',
     union('start', 'center', 'end'),
     code(union('center')),
-    'How to align the menu with the trigger, the preview (or the lifted trigger) aligning with it; shifted to stay in its screen.',
+    'How to align the menu with the trigger. The preview (or the lifted trigger) aligns with it, and both shift to stay on the screen.',
   ],
   [
     'collisionPadding',
@@ -170,7 +171,7 @@ export const contextualMenuHandleRows: readonly PropRow[] = [
     'ContextualMenuHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>Menu.Handle</code>): passed to a{' '}
+      A handle (Base UI’s <code>Menu.Handle</code>). Pass it to a{' '}
       <PartLink
         component="contextual-menu"
         part="ContextualMenu.Root"
@@ -180,8 +181,8 @@ export const contextualMenuHandleRows: readonly PropRow[] = [
         component="contextual-menu"
         part="ContextualMenu.Trigger"
       />{' '}
-      (inside it: a trigger outside it couldn’t lift); from the hook, the same
-      for the component’s lifetime.
+      , which stays inside it, because a trigger outside it couldn’t lift. The
+      hook returns the same one for the component’s lifetime.
     </>,
   ],
   ['.isOpen', 'boolean', undefined, 'Whether the menu is currently open.'],

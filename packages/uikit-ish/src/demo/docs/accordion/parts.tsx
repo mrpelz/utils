@@ -3,11 +3,16 @@ import { FunctionComponent, useMemo } from 'react';
 import { Accordion, List } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  type PartProps,
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   accordionHeaderRows,
   accordionItemRows,
@@ -23,44 +28,49 @@ import {
 } from './props.js';
 
 /** iCloud's mailboxes (its panel's rows). */
-const icloudRows = (
+const icloudRows = (partProps: PartProps = {}) => (
   <>
-    <List.Item>
-      <List.Content>
-        <List.Title>Inbox</List.Title>
+    <List.Item {...partProps['List.Item']}>
+      <List.Content {...partProps['List.Content']}>
+        <List.Title {...partProps['List.Title']}>Inbox</List.Title>
       </List.Content>
-      <List.Trailing>
-        <List.Detail>12</List.Detail>
+      <List.Trailing {...partProps['List.Trailing']}>
+        <List.Detail {...partProps['List.Detail']}>12</List.Detail>
       </List.Trailing>
     </List.Item>
-    <List.Item>
-      <List.Content>
-        <List.Title>Sent</List.Title>
+    <List.Item {...partProps['List.Item']}>
+      <List.Content {...partProps['List.Content']}>
+        <List.Title {...partProps['List.Title']}>Sent</List.Title>
       </List.Content>
     </List.Item>
   </>
 );
 
 /** The Work account's section (an item as is). */
-const work = (
+const work = (partProps: PartProps = {}) => (
   <Accordion.Item
-    render={<List.Section />}
+    {...partProps['Accordion.Item']}
+    render={<List.Section {...partProps['List.Section']} />}
     value="work"
   >
     <Accordion.Trigger
+      {...partProps['Accordion.Trigger']}
       nativeButton={false}
-      render={<List.Header />}
+      render={<List.Header {...partProps['List.Header']} />}
     >
-      <List.Title>Work</List.Title>
-      <List.Disclosure />
+      <List.Title {...partProps['List.Title']}>Work</List.Title>
+      <List.Disclosure {...partProps['List.Disclosure']} />
     </Accordion.Trigger>
-    <Accordion.Panel render={<List.Group />}>
-      <List.Item>
-        <List.Content>
-          <List.Title>Inbox</List.Title>
+    <Accordion.Panel
+      {...partProps['Accordion.Panel']}
+      render={<List.Group {...partProps['List.Group']} />}
+    >
+      <List.Item {...partProps['List.Item']}>
+        <List.Content {...partProps['List.Content']}>
+          <List.Title {...partProps['List.Title']}>Inbox</List.Title>
         </List.Content>
-        <List.Trailing>
-          <List.Detail>3</List.Detail>
+        <List.Trailing {...partProps['List.Trailing']}>
+          <List.Detail {...partProps['List.Detail']}>3</List.Detail>
         </List.Trailing>
       </List.Item>
     </Accordion.Panel>
@@ -77,37 +87,73 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Accordion.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Accordion.Item': ['render', 'value'],
+            'Accordion.Panel': ['render'],
+            'Accordion.Trigger': ['nativeButton', 'render'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Accordion.Root"
     >
       <Accordion.Root
         key={elementKey}
-        render={<List.Root style={{ width: 'min(402px, 100%)' }} />}
+        render={
+          <List.Root
+            {...partProps['List.Root']}
+            style={{ width: 'min(402px, 100%)' }}
+          />
+        }
         {...props}
       >
         <Accordion.Item
-          render={<List.Section />}
+          {...partProps['Accordion.Item']}
+          render={<List.Section {...partProps['List.Section']} />}
           value="icloud"
         >
           <Accordion.Trigger
+            {...partProps['Accordion.Trigger']}
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
           >
-            <List.Title>iCloud</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>iCloud</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Accordion.Trigger>
-          <Accordion.Panel render={<List.Group />}>
-            {icloudRows}
+          <Accordion.Panel
+            {...partProps['Accordion.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
+            {icloudRows(partProps)}
           </Accordion.Panel>
         </Accordion.Item>
-        {work}
+        {work(partProps)}
       </Accordion.Root>
     </Component>
   );
@@ -123,37 +169,74 @@ const ItemPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Accordion.Item' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Accordion.Item': ['render', 'value'],
+            'Accordion.Panel': ['render'],
+            'Accordion.Root': ['defaultValue', 'render'],
+            'Accordion.Trigger': ['nativeButton', 'render'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Accordion.Item"
     >
       <Accordion.Root
+        {...partProps['Accordion.Root']}
         defaultValue={['icloud']}
-        render={<List.Root style={{ width: 'min(402px, 100%)' }} />}
+        render={
+          <List.Root
+            {...partProps['List.Root']}
+            style={{ width: 'min(402px, 100%)' }}
+          />
+        }
       >
         <Accordion.Item
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
           value="icloud"
           {...props}
         >
           <Accordion.Trigger
+            {...partProps['Accordion.Trigger']}
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
           >
-            <List.Title>iCloud</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>iCloud</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Accordion.Trigger>
-          <Accordion.Panel render={<List.Group />}>
-            {icloudRows}
+          <Accordion.Panel
+            {...partProps['Accordion.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
+            {icloudRows(partProps)}
           </Accordion.Panel>
         </Accordion.Item>
-        {work}
+        {work(partProps)}
       </Accordion.Root>
     </Component>
   );
@@ -170,36 +253,70 @@ const TriggerPart: FunctionComponent = () => {
     title: 'Accordion.Trigger',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Accordion.Item': ['render', 'value'],
+          'Accordion.Panel': ['render'],
+          'Accordion.Root': ['defaultValue', 'render'],
+          'Accordion.Trigger': ['nativeButton', 'render'],
+          'List.Content': [],
+          'List.Detail': [],
+          'List.Disclosure': [],
+          'List.Group': [],
+          'List.Header': [],
+          'List.Item': [],
+          'List.Root': ['style'],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Accordion.Trigger"
     >
       <Accordion.Root
+        {...partProps['Accordion.Root']}
         defaultValue={['icloud']}
-        render={<List.Root style={{ width: 'min(402px, 100%)' }} />}
+        render={
+          <List.Root
+            {...partProps['List.Root']}
+            style={{ width: 'min(402px, 100%)' }}
+          />
+        }
       >
         <Accordion.Item
-          render={<List.Section />}
+          {...partProps['Accordion.Item']}
+          render={<List.Section {...partProps['List.Section']} />}
           value="icloud"
         >
           <Accordion.Trigger
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
             {...props}
           >
-            <List.Title>iCloud</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>iCloud</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Accordion.Trigger>
-          <Accordion.Panel render={<List.Group />}>
-            {icloudRows}
+          <Accordion.Panel
+            {...partProps['Accordion.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
+            {icloudRows(partProps)}
           </Accordion.Panel>
         </Accordion.Item>
-        {work}
+        {work(partProps)}
       </Accordion.Root>
     </Component>
   );
@@ -216,39 +333,71 @@ const PanelPart: FunctionComponent = () => {
     title: 'Accordion.Panel',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Accordion.Item': ['render', 'value'],
+          'Accordion.Panel': ['render'],
+          'Accordion.Root': ['defaultValue', 'render'],
+          'Accordion.Trigger': ['nativeButton', 'render'],
+          'List.Content': [],
+          'List.Detail': [],
+          'List.Disclosure': [],
+          'List.Group': [],
+          'List.Header': [],
+          'List.Item': [],
+          'List.Root': ['style'],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Accordion.Panel"
     >
       <Accordion.Root
+        {...partProps['Accordion.Root']}
         defaultValue={['icloud']}
-        render={<List.Root style={{ width: 'min(402px, 100%)' }} />}
+        render={
+          <List.Root
+            {...partProps['List.Root']}
+            style={{ width: 'min(402px, 100%)' }}
+          />
+        }
       >
         <Accordion.Item
-          render={<List.Section />}
+          {...partProps['Accordion.Item']}
+          render={<List.Section {...partProps['List.Section']} />}
           value="icloud"
         >
           <Accordion.Trigger
+            {...partProps['Accordion.Trigger']}
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
           >
-            <List.Title>iCloud</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>iCloud</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Accordion.Trigger>
           <Accordion.Panel
             key={elementKey}
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
             {...props}
           >
-            {icloudRows}
+            {icloudRows(partProps)}
           </Accordion.Panel>
         </Accordion.Item>
-        {work}
+        {work(partProps)}
       </Accordion.Root>
     </Component>
   );
@@ -259,8 +408,9 @@ export const AccordionParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        Base UI’s parts: its root, its items, each a trigger (in a header) and a
-        panel; each rendering what it collapses (<code>render</code>).
+        Base UI’s parts: the root, and its items, each with a trigger (in a
+        header) and a panel. Each part renders what it collapses (
+        <code>render</code>).
       </li>
     </ul>
     <ul className="demo-tree">
@@ -268,27 +418,57 @@ export const AccordionParts: FunctionComponent = () => (
         <PartLink
           component="accordion"
           part="Accordion.Root"
+        />{' '}
+        (here rendering a{' '}
+        <PartLink
+          component="list"
+          part="List.Root"
         />
+        )
         <ul>
           <li>
             <PartLink
               component="accordion"
               part="Accordion.Item"
             />{' '}
-            (one or more)
+            (one or more; here each rendering a{' '}
+            <PartLink
+              component="list"
+              part="List.Section"
+            />
+            )
             <ul>
               <li>
                 <PartLink
                   component="accordion"
                   part="Accordion.Header"
                 />{' '}
-                (optional, a heading around the trigger)
+                (optional: a heading around the trigger; not in a list)
                 <ul>
                   <li>
                     <PartLink
                       component="accordion"
                       part="Accordion.Trigger"
+                    />{' '}
+                    (here rendering a{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Header"
                     />
+                    )
+                    <ul>
+                      <li className="demo-tree-context">
+                        <PartLink
+                          component="list"
+                          part="List.Title"
+                        />{' '}
+                        <span>and</span>{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Disclosure"
+                        />
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </li>
@@ -296,7 +476,23 @@ export const AccordionParts: FunctionComponent = () => (
                 <PartLink
                   component="accordion"
                   part="Accordion.Panel"
+                />{' '}
+                (here rendering a{' '}
+                <PartLink
+                  component="list"
+                  part="List.Group"
                 />
+                )
+                <ul>
+                  <li className="demo-tree-context">
+                    <span>its rows (</span>
+                    <PartLink
+                      component="list"
+                      part="List.Item"
+                    />
+                    <span>s)</span>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
@@ -312,12 +508,13 @@ export const AccordionParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Which items are open: <code>defaultValue</code>, or <code>value</code>{' '}
-        and <code>onValueChange</code> (arrays of their <code>value</code>s);
-        one at a time unless <code>multiple</code>.
+        Holds which items are open: <code>defaultValue</code>, or{' '}
+        <code>value</code> and <code>onValueChange</code> (arrays of the items’{' '}
+        <code>value</code>s). One is open at a time, unless{' '}
+        <code>multiple</code> is set.
       </li>
       <li>
-        Renders a <code>div</code>, or what it’s given: here the{' '}
+        Renders a <code>div</code>, or what it’s given. Here, the{' '}
         <a href={publicUrl('list')}>List</a> (
         <PartLink
           component="list"
@@ -338,12 +535,12 @@ export const AccordionParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        One collapsible, named by its <code>value</code>: here a{' '}
+        One collapsible, named by its <code>value</code>. Here, a{' '}
         <PartLink
           component="list"
           part="List.Section"
         />{' '}
-        (iCloud’s).
+        for one account.
       </li>
     </ul>
     <ItemPart />
@@ -358,8 +555,8 @@ export const AccordionParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A heading (<code>h3</code>) around its item’s trigger, for pages read by
-        their headings.
+        A heading (<code>h3</code>) around its item’s trigger, for people who
+        navigate a page by its headings.
       </li>
       <li>
         In a list, the trigger is the section’s{' '}
@@ -367,7 +564,7 @@ export const AccordionParts: FunctionComponent = () => (
           component="list"
           part="List.Header"
         />{' '}
-        itself: no header part (as in these demos).
+        itself, without a header part, as in these demos.
       </li>
     </ul>
     <h3>Props</h3>
@@ -381,16 +578,17 @@ export const AccordionParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button toggling its item: <code>aria-expanded</code>,{' '}
-        <code>aria-controls</code>, <code>data-panel-open</code> (a{' '}
+        A button that toggles its item. It sets <code>aria-expanded</code>,{' '}
+        <code>aria-controls</code> and <code>data-panel-open</code> (which turns
+        a{' '}
         <PartLink
           component="list"
           part="List.Disclosure"
         />{' '}
-        in it turning down).
+        inside it down).
       </li>
       <li>
-        Here a{' '}
+        Here, it renders a{' '}
         <PartLink
           component="list"
           part="List.Header"
@@ -410,12 +608,12 @@ export const AccordionParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What its item collapses, its height and opacity transitioning (300ms;
-        Base UI’s <code>--accordion-panel-height</code>, starting and ending
-        styles).
+        What its item collapses. Its height and opacity transition (300ms),
+        using Base UI’s <code>--accordion-panel-height</code> and its starting
+        and ending styles.
       </li>
       <li>
-        Here a{' '}
+        Here, it renders a{' '}
         <PartLink
           component="list"
           part="List.Group"

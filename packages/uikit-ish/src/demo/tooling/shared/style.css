@@ -14,7 +14,7 @@
     color: light-dark(black, #fafafa);
     color-scheme: light dark;
 
-    /* What's shown hatched (the safe areas, a part overlaid, see
+    /* What's shown hatched (the safe area insets, a part overlaid, see
        frame/overlay.ts). */
 
     /* A picture (of gradients) behind what's shown: e.g. a screen's
@@ -151,7 +151,7 @@
   /*
    * Their chrome, over their content: the status bar's time in
    * the top inset, the home indicator in the bottom one (so covered content
-   * shows). With the frame's Safe Areas setting, the insets hatched, too
+   * shows). With the frame's Safe Area Insets setting, the insets hatched, too
    * (`data-safe-areas` on the stage).
    */
   :is(.demo-phone, .demo-tablet) {
@@ -215,7 +215,7 @@
       height: auto;
     }
 
-    /* The frame's Safe Areas setting: the insets hatched (under the
+    /* The frame's Safe Area Insets setting: the insets hatched (under the
        home indicator). */
     .demo-stage[data-safe-areas] &::before {
       background: var(--demo-hatch);

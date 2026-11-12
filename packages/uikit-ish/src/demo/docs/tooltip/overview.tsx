@@ -5,7 +5,10 @@ import { FunctionComponent, useMemo } from 'react';
 import { Button, Symbol, Tooltip } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -16,6 +19,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfSquareAndArrowUp } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   tooltipPositionerRows,
   tooltipProviderRows,
@@ -47,15 +51,34 @@ const LiveView: FunctionComponent = () => {
     { external: externalPositioner, title: 'Tooltip.Positioner' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Root': ['onClick', 'shape', 'size', 'variant'],
+            'Tooltip.Popup': [],
+            'Tooltip.Portal': [],
+            'Tooltip.Trigger': ['aria-label', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
-      controls={[controlContent, controlRoot, controlPositioner]}
+      controls={[controlContent, controlRoot, controlPositioner, partControls]}
       id={id}
       log={log}
-      state={[stateContent, stateRoot, statePositioner]}
+      state={[stateContent, stateRoot, statePositioner, partState]}
       title="Tooltip"
     >
       <div className="tooltip-demo-buttons">
@@ -64,9 +87,11 @@ const LiveView: FunctionComponent = () => {
           {...propsRoot}
         >
           <Tooltip.Trigger
+            {...partProps['Tooltip.Trigger']}
             aria-label="Share"
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 shape="circle"
                 size="large"
                 variant="glass"
@@ -74,13 +99,18 @@ const LiveView: FunctionComponent = () => {
               />
             }
           >
-            <Button.Icon>
-              <Symbol icon={sfSquareAndArrowUp} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfSquareAndArrowUp}
+              />
             </Button.Icon>
           </Tooltip.Trigger>
-          <Tooltip.Portal>
+          <Tooltip.Portal {...partProps['Tooltip.Portal']}>
             <Tooltip.Positioner {...propsPositioner}>
-              <Tooltip.Popup>{content.text}</Tooltip.Popup>
+              <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                {content.text}
+              </Tooltip.Popup>
             </Tooltip.Positioner>
           </Tooltip.Portal>
         </Tooltip.Root>
@@ -104,8 +134,8 @@ export const TooltipOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A short label at a control, on hover and keyboard focus (Base UI’s{' '}
-        <code>Tooltip</code>; for pointers and keyboards).
+        A short label at a control, shown on hover and keyboard focus. It’s Base
+        UI’s <code>Tooltip</code>, made for pointers and keyboards.
       </li>
       <li>A capsule of the menus’ glass, above its control.</li>
     </ul>
@@ -119,12 +149,12 @@ export const TooltipOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Naming a symbol-only button for a pointer (Share, Delete): what its
-        accessible name says, shown.
+        For naming a symbol-only button for pointer users (Share, Delete): it
+        shows what the button’s accessible name says.
       </li>
       <li>
-        Held open, labeling something for good, on touch too (a value at a
-        slider’s thumb: see <a href={publicUrl('slider')}>Slider</a>,{' '}
+        Held open, as a lasting label that works on touch too, such as a value
+        at a slider’s thumb (see <a href={publicUrl('slider')}>Slider</a> and{' '}
         <a href={publicUrl('progress')}>Progress</a>).
       </li>
     </ul>
@@ -137,15 +167,16 @@ export const TooltipOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Anything needed on touch (no hover there; a long press shows the
-        tooltip, but nobody finds that): a label on the control, or a{' '}
-        <a href={publicUrl('popover')}>Popover</a> it opens.
+        Anything people need on touch: put a label on the control, or use a{' '}
+        <a href={publicUrl('popover')}>Popover</a> that it opens. There’s no
+        hover on touch, and while a long press shows the tooltip, nobody finds
+        that.
       </li>
       <li>
-        Anything to press or select: a{' '}
+        Anything to press or select: use a{' '}
         <a href={publicUrl('popover')}>Popover</a> or a{' '}
-        <a href={publicUrl('menu')}>Menu</a> (a tooltip can’t be hovered or
-        pressed).
+        <a href={publicUrl('menu')}>Menu</a>, because a tooltip can’t be hovered
+        or pressed.
       </li>
     </ul>
 
@@ -158,7 +189,8 @@ export const TooltipOverview: FunctionComponent = () => (
     <ul>
       <li>The props most tooltips set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('tooltip/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('tooltip/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -181,12 +213,13 @@ export const TooltipOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        It isn’t the control’s name: give the control its own (
-        <code>aria-label</code>); the tooltip shows it for a pointer.
+        It isn’t the control’s name. Give the control its own (
+        <code>aria-label</code>); the tooltip shows it to pointer users.
       </li>
       <li>
-        Shown on keyboard focus too; Escape hides it. On touch only by a long
-        press, so nothing only it says can be needed.
+        It also shows on keyboard focus, and Escape hides it. On touch, only a
+        long press shows it, so nothing should depend on what only the tooltip
+        says.
       </li>
       <li>
         Its scale-in doesn’t follow <code>prefers-reduced-motion</code>.
@@ -201,16 +234,18 @@ export const TooltipOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        After 300ms of hovering (Base UI: 600ms); in a{' '}
+        It shows after 300ms of hovering (Base UI’s default is 600ms). In a{' '}
         <PartLink
           component="tooltip"
           part="Tooltip.Provider"
         />
-        , its delay, and the next at once once one has shown.
+        , the provider’s delay applies, and once one tooltip has shown, the next
+        one shows at once.
       </li>
       <li>
-        Above its control, 8px away (below if there’s no room), scaling in from
-        it; one line 32px high, longer text wrapping past 320px.
+        It sits above its control, 8px away (or below it, without room), and
+        scales in from it. One line is 32px tall, and longer text wraps past
+        320px.
       </li>
       <li>A click on its control hides it.</li>
     </ul>

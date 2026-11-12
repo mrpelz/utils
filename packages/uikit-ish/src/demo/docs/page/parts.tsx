@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Header,
@@ -8,11 +8,15 @@ import {
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import { pageRootRows } from './docs.js';
 import { propOptionsGuideRoot } from './props.js';
@@ -28,42 +32,79 @@ const RootPart: FunctionComponent = () => {
     title: 'Page.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Page.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading />
-              <Toolbar.Title>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
           <Page.Root {...props}>
-            <Viewport.Padding edge="block-start" />
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -76,8 +117,8 @@ export const PageParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        One part: the page, its content’s scroll container (or, filled by it,
-        not scrolling).
+        One part: the page. It’s the scroll container for its content, or, with{' '}
+        <code>fill</code>, filled by it without scrolling.
       </li>
     </ul>
     <ul className="demo-tree">
@@ -113,7 +154,7 @@ export const PageParts: FunctionComponent = () => (
                 <span> (optional)</span>
               </li>
               <li className="demo-tree-context">
-                <span>its content (e.g. lists)</span>
+                <span>its content (for example lists)</span>
               </li>
             </ul>
           </li>
@@ -129,39 +170,39 @@ export const PageParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Fills its container, scrolling its content, on the page background (
+        Fills its container and scrolls its content, on the page background (
         <code>background</code>).
       </li>
       <li>
-        Keeps the safe area insets clear (as padding); the gap to its content,
-        and room for bars, are its{' '}
+        Keeps the safe area insets clear, as padding. The gap to its content,
+        and the room for bars, come from its{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />
-        s’.
+        s.
       </li>
       <li>
-        Inset at its start beside a floating column (
+        Next to a floating column, it’s inset at its start (
         <code>--uikit-layout-inset-start</code>, see{' '}
-        <a href={publicUrl('layout')}>Layout</a>
-        ).
+        <a href={publicUrl('layout')}>Layout</a>).
       </li>
       <li>
-        <code>fill</code>: filled by its content, not scrolled (e.g. a map under
-        its bars, as Framework7’s <code>.page</code> without its{' '}
-        <code>.page-content</code>): not a scroller, its content running under
-        the bars, the safe areas and a floating column, on the page background
-        (not the page below showing through as it slides in).
+        With <code>fill</code>, its content fills it and doesn’t scroll, for
+        example a map under its bars (like Framework7’s <code>.page</code>{' '}
+        without its <code>.page-content</code>). It’s then not a scroller. Its
+        content runs under the bars, the safe area insets and a floating column,
+        still on the page background, so the page below doesn’t show through as
+        it slides in.
       </li>
       <li>
-        A text field typed into in it, scrolled into view above the on-screen
-        keyboard (see{' '}
+        A text field typed into inside it is scrolled into view above the
+        on-screen keyboard (see{' '}
         <PartLink
           component="viewport"
           part="useFocusScroll"
         />
-        ; with <code>fill</code>, not).
+        ), except with <code>fill</code>.
       </li>
       <li>
         Renders a <code>div</code>.

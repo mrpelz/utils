@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
@@ -9,7 +9,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
@@ -19,6 +22,7 @@ import {
   sfSquareAndPencil,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { sidebarSections } from './content.js';
 import {
   sidebarRootRows,
@@ -39,58 +43,112 @@ const RootPart: FunctionComponent = () => {
     title: 'Sidebar.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'tint', 'variant'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': ['selected'],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'Sidebar.Toolbar': [],
+            'TextField.Clear': [],
+            'TextField.Control': ['aria-label', 'placeholder', 'type'],
+            'TextField.Frame': [],
+            'TextField.Root': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Sidebar.Root"
     >
       <div className="sidebar-demo-panel demo-picture">
         <Sidebar.Root {...props}>
-          <Sidebar.Toolbar>
+          <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
             <Button.Root
+              {...partProps['Button.Root']}
               tint="var(--uikit-glass-content)"
               variant="borderless"
               onClick={() => addLog('edit')}
             >
-              <Button.Label>Edit</Button.Label>
+              <Button.Label {...partProps['Button.Label']}>Edit</Button.Label>
             </Button.Root>
           </Sidebar.Toolbar>
-          <TextField.Root>
-            <TextField.Frame>
-              <Symbol icon={sfMagnifyingglass} />
+          <TextField.Root {...partProps['TextField.Root']}>
+            <TextField.Frame {...partProps['TextField.Frame']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfMagnifyingglass}
+              />
               <TextField.Control
+                {...partProps['TextField.Control']}
                 aria-label="Search"
                 placeholder="Search"
                 type="search"
               />
-              <TextField.Clear />
+              <TextField.Clear {...partProps['TextField.Clear']} />
             </TextField.Frame>
           </TextField.Root>
-          <List.Root listStyle="sidebar">
+          <List.Root
+            {...partProps['List.Root']}
+            listStyle="sidebar"
+          >
             {sidebarSections.map(([title, rows]) => (
-              <List.Section key={title}>
-                <List.Header prominence="nested">
-                  <List.Title>{title}</List.Title>
+              <List.Section
+                key={title}
+                {...partProps['List.Section']}
+              >
+                <List.Header
+                  {...partProps['List.Header']}
+                  prominence="nested"
+                >
+                  <List.Title {...partProps['List.Title']}>{title}</List.Title>
                 </List.Header>
-                <List.Group>
+                <List.Group {...partProps['List.Group']}>
                   {rows.map(([value, rowTitle, icon]) => (
                     <List.Item
                       key={value}
+                      {...partProps['List.Item']}
                       selected={value === 'inbox'}
                     >
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={icon} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={icon}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
-                        <List.Title render={<button type="button" />}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title
+                          {...partProps['List.Title']}
+                          render={<button type="button" />}
+                        >
                           {rowTitle}
                         </List.Title>
                       </List.Content>
@@ -118,54 +176,116 @@ const ToolbarPart: FunctionComponent = () => {
     title: 'Sidebar.Toolbar',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'aria-label',
+              'onClick',
+              'shape',
+              'tint',
+              'variant',
+            ],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'Sidebar.Root': ['aria-label'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Sidebar.Toolbar"
     >
       <div className="sidebar-demo-panel demo-picture">
-        <Sidebar.Root aria-label="Mailboxes">
+        <Sidebar.Root
+          {...partProps['Sidebar.Root']}
+          aria-label="Mailboxes"
+        >
           <Sidebar.Toolbar {...props}>
             <Button.Root
+              {...partProps['Button.Root']}
               tint="var(--uikit-glass-content)"
               variant="borderless"
               onClick={() => addLog('edit')}
             >
-              <Button.Label>Edit</Button.Label>
+              <Button.Label {...partProps['Button.Label']}>Edit</Button.Label>
             </Button.Root>
             <Button.Root
+              {...partProps['Button.Root']}
               aria-label="Compose"
               shape="circle"
               tint="var(--uikit-glass-content)"
               variant="borderless"
               onClick={() => addLog('compose')}
             >
-              <Button.Icon>
-                <Symbol icon={sfSquareAndPencil} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfSquareAndPencil}
+                />
               </Button.Icon>
             </Button.Root>
           </Sidebar.Toolbar>
-          <List.Root listStyle="sidebar">
+          <List.Root
+            {...partProps['List.Root']}
+            listStyle="sidebar"
+          >
             {sidebarSections.map(([title, rows]) => (
-              <List.Section key={title}>
-                <List.Header prominence="nested">
-                  <List.Title>{title}</List.Title>
+              <List.Section
+                key={title}
+                {...partProps['List.Section']}
+              >
+                <List.Header
+                  {...partProps['List.Header']}
+                  prominence="nested"
+                >
+                  <List.Title {...partProps['List.Title']}>{title}</List.Title>
                 </List.Header>
-                <List.Group>
+                <List.Group {...partProps['List.Group']}>
                   {rows.map(([value, rowTitle, icon]) => (
-                    <List.Item key={value}>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={icon} />
+                    <List.Item
+                      key={value}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={icon}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
-                        <List.Title render={<button type="button" />}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title
+                          {...partProps['List.Title']}
+                          render={<button type="button" />}
+                        >
                           {rowTitle}
                         </List.Title>
                       </List.Content>
@@ -193,67 +313,134 @@ const ToolbarGroupPart: FunctionComponent = () => {
     title: 'Sidebar.ToolbarGroup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'aria-label',
+              'onClick',
+              'shape',
+              'tint',
+              'variant',
+            ],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['render'],
+            'Sidebar.Root': ['aria-label'],
+            'Sidebar.Toolbar': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Sidebar.ToolbarGroup"
     >
       <div className="sidebar-demo-panel demo-picture">
-        <Sidebar.Root aria-label="Mailboxes">
-          <Sidebar.Toolbar>
+        <Sidebar.Root
+          {...partProps['Sidebar.Root']}
+          aria-label="Mailboxes"
+        >
+          <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
             <Button.Root
+              {...partProps['Button.Root']}
               tint="var(--uikit-glass-content)"
               variant="borderless"
               onClick={() => addLog('edit')}
             >
-              <Button.Label>Edit</Button.Label>
+              <Button.Label {...partProps['Button.Label']}>Edit</Button.Label>
             </Button.Root>
             <Sidebar.ToolbarGroup {...props}>
               <Button.Root
+                {...partProps['Button.Root']}
                 aria-label="New Folder"
                 shape="circle"
                 tint="var(--uikit-glass-content)"
                 variant="borderless"
                 onClick={() => addLog('new folder')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfFolderBadgePlus} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfFolderBadgePlus}
+                  />
                 </Button.Icon>
               </Button.Root>
               <Button.Root
+                {...partProps['Button.Root']}
                 aria-label="Compose"
                 shape="circle"
                 tint="var(--uikit-glass-content)"
                 variant="borderless"
                 onClick={() => addLog('compose')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfSquareAndPencil} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquareAndPencil}
+                  />
                 </Button.Icon>
               </Button.Root>
             </Sidebar.ToolbarGroup>
           </Sidebar.Toolbar>
-          <List.Root listStyle="sidebar">
+          <List.Root
+            {...partProps['List.Root']}
+            listStyle="sidebar"
+          >
             {sidebarSections.map(([title, rows]) => (
-              <List.Section key={title}>
-                <List.Header prominence="nested">
-                  <List.Title>{title}</List.Title>
+              <List.Section
+                key={title}
+                {...partProps['List.Section']}
+              >
+                <List.Header
+                  {...partProps['List.Header']}
+                  prominence="nested"
+                >
+                  <List.Title {...partProps['List.Title']}>{title}</List.Title>
                 </List.Header>
-                <List.Group>
+                <List.Group {...partProps['List.Group']}>
                   {rows.map(([value, rowTitle, icon]) => (
-                    <List.Item key={value}>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={icon} />
+                    <List.Item
+                      key={value}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={icon}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
-                        <List.Title render={<button type="button" />}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title
+                          {...partProps['List.Title']}
+                          render={<button type="button" />}
+                        >
                           {rowTitle}
                         </List.Title>
                       </List.Content>
@@ -275,25 +462,27 @@ export const SidebarParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>The panel, and a toolbar at its top with buttons at its ends.</li>
       <li>
-        Its search field and list are other components’ (
-        <a href={publicUrl('text-field')}>Text field</a>,{' '}
-        <a href={publicUrl('list')}>List</a>); its place and size, its{' '}
-        <a href={publicUrl('layout')}>Layout</a> column’s.
+        Its search field and list come from other components (
+        <a href={publicUrl('text-field')}>Text Field</a>,{' '}
+        <a href={publicUrl('list')}>List</a>). Its place and size come from its{' '}
+        <a href={publicUrl('layout')}>Layout</a> column.
       </li>
-      <li>The views show the panel on a picture, as behind its glass.</li>
+      <li>
+        The views show the panel over a picture, so you can see its glass.
+      </li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
           component="layout"
           part="Layout.Column"
         />{' '}
-        (floating), or a{' '}
+        <span>(floating), or a</span>{' '}
         <PartLink
           component="drawer"
           part="Drawer.Popup"
         />{' '}
-        (a phone’s)
+        <span>(on a phone)</span>
         <ul>
           <li>
             <PartLink
@@ -307,12 +496,12 @@ export const SidebarParts: FunctionComponent = () => (
                   part="Sidebar.Toolbar"
                 />
                 <ul>
-                  <li>
+                  <li className="demo-tree-context">
                     <PartLink
                       component="button"
                       part="Button.Root"
                     />{' '}
-                    (borderless, at each end), or
+                    <span>(borderless, at each end), or</span>
                   </li>
                   <li>
                     <PartLink
@@ -320,26 +509,36 @@ export const SidebarParts: FunctionComponent = () => (
                       part="Sidebar.ToolbarGroup"
                     />{' '}
                     (several)
+                    <ul>
+                      <li className="demo-tree-context">
+                        <PartLink
+                          component="button"
+                          part="Button.Root"
+                        />
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </li>
-              <li>
+              <li className="demo-tree-context">
                 <PartLink
                   component="text-field"
                   part="TextField.Root"
                 />{' '}
-                →{' '}
+                <span>→</span>{' '}
                 <PartLink
                   component="text-field"
                   part="TextField.Frame"
                 />
               </li>
-              <li>
+              <li className="demo-tree-context">
                 <PartLink
                   component="list"
                   part="List.Root"
                 />{' '}
-                (<code>listStyle=&quot;sidebar&quot;</code>)
+                <span>(</span>
+                <code>listStyle=&quot;sidebar&quot;</code>
+                <span>)</span>
               </li>
             </ul>
           </li>
@@ -355,15 +554,15 @@ export const SidebarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The glass panel (corners 20px, 10px from its column’s sides), its
-        content scrolling inside it.
+        The glass panel, with 20px corners, 10px from its column’s sides. Its
+        content scrolls inside it.
       </li>
       <li>
-        Sets the search field’s look (44px, the selection fill) and the list’s
-        selection fill.
+        Sets the search field’s look (44px high, on the selection fill) and the
+        list’s selection fill.
       </li>
       <li>
-        Renders a <code>nav</code> (a landmark: name it).
+        Renders a <code>nav</code>, a landmark that needs a name.
       </li>
     </ul>
     <RootPart />
@@ -378,9 +577,9 @@ export const SidebarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its toolbar: its buttons at its two ends, in Body, their highlights 8px
-        from the panel’s top and sides; 54px from the panel’s top to what
-        follows.
+        The panel’s toolbar, with its buttons at both ends, in Body. Their
+        highlights sit 8px from the panel’s top and sides, and there’s 54px from
+        the panel’s top to what follows.
       </li>
       <li>
         Renders a <code>div</code>.

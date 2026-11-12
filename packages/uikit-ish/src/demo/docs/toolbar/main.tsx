@@ -11,7 +11,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   sfArchivebox,
@@ -22,6 +25,7 @@ import {
   sfSquareAndPencil,
   sfTrash,
 } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsButton,
   getPropOptionsPageControl,
@@ -52,75 +56,116 @@ export const ToolbarDemo: FunctionComponent = () => {
   // (Of its own: `prominent`, too.)
   const propsButton = buttonProps as ToolbarButtonProps;
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
       baseUiId="toolbar"
-      controls={[controlRoot, controlButton]}
+      controls={[controlRoot, controlButton, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateButton]}
+      state={[stateRoot, stateButton, partState]}
       title="Toolbar"
     >
       <Toolbar.Root
         key={elementKey}
         {...propsRoot}
       >
-        <Toolbar.Leading>
+        <Toolbar.Leading {...partProps['Toolbar.Leading']}>
           <Toolbar.Button
             aria-label="Action 1"
             {...propsButton}
             shape={propsButton.shape ?? 'circle'}
           >
-            <Button.Icon>
-              <Symbol icon={sfFolder} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfFolder}
+              />
             </Button.Icon>
           </Toolbar.Button>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Action 2"
             shape="circle"
             onClick={() => addLog('Action 2 clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfFlag} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfFlag}
+              />
             </Button.Icon>
           </Toolbar.Button>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Action 3"
             shape="circle"
             onClick={() => addLog('Action 3 clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfArchivebox} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfArchivebox}
+              />
             </Button.Icon>
           </Toolbar.Button>
         </Toolbar.Leading>
-        <Toolbar.Trailing>
+        <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Action 4"
             shape="circle"
             onClick={() => addLog('Action 4 clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfArrowshapeTurnUpLeft} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfArrowshapeTurnUpLeft}
+              />
             </Button.Icon>
           </Toolbar.Button>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Action 5"
             shape="circle"
             onClick={() => addLog('Action 5 clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfSquareAndPencil} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfSquareAndPencil}
+              />
             </Button.Icon>
           </Toolbar.Button>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Action 6"
             shape="circle"
             onClick={() => addLog('Action 6 clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfTrash} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfTrash}
+              />
             </Button.Icon>
           </Toolbar.Button>
         </Toolbar.Trailing>
@@ -161,33 +206,61 @@ export const ToolbarPageDotsDemo: FunctionComponent = () => {
     { external: externalPageControl, title: 'page control' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
       baseUiId="toolbar"
       id={id}
       log={log}
-      state={[stateContent, stateRoot, stateButton, statePageControl]}
       title="Toolbar (Page Dots)"
       controls={[
         controlContent,
         controlRoot,
         controlButton,
         controlPageControl,
+        partControls,
+      ]}
+      state={[
+        stateContent,
+        stateRoot,
+        stateButton,
+        statePageControl,
+        partState,
       ]}
     >
       <Toolbar.Root
         key={elementKey}
         {...propsRoot}
       >
-        <Toolbar.Leading>
+        <Toolbar.Leading {...partProps['Toolbar.Leading']}>
           <Toolbar.Button
             aria-label="Folders"
             {...propsButton}
             shape={propsButton.shape ?? 'circle'}
           >
-            <Button.Icon>
-              <Symbol icon={sfFolder} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfFolder}
+              />
             </Button.Icon>
           </Toolbar.Button>
         </Toolbar.Leading>
@@ -196,14 +269,18 @@ export const ToolbarPageDotsDemo: FunctionComponent = () => {
           count={content.pages}
           {...propsPageControl}
         />
-        <Toolbar.Trailing>
+        <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             aria-label="Share"
             shape="circle"
             onClick={() => addLog('Share clicked')}
           >
-            <Button.Icon>
-              <Symbol icon={sfSquareAndArrowUp} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfSquareAndArrowUp}
+              />
             </Button.Icon>
           </Toolbar.Button>
         </Toolbar.Trailing>
@@ -238,81 +315,127 @@ export const ToolbarSymbolsDemo: FunctionComponent = () => {
     { external: externalButton, title: 'button (first)' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
       baseUiId="toolbar"
-      controls={[controlContent, controlRoot, controlGroup, controlButton]}
       id={id}
       log={log}
-      state={[stateContent, stateRoot, stateGroup, stateButton]}
+      state={[stateContent, stateRoot, stateGroup, stateButton, partState]}
       title="Toolbar (Symbols)"
+      controls={[
+        controlContent,
+        controlRoot,
+        controlGroup,
+        controlButton,
+        partControls,
+      ]}
     >
       <Toolbar.Root
         key={elementKey}
         {...propsRoot}
       >
-        <Toolbar.Trailing>
+        <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
           <Toolbar.Group {...propsGroup}>
             <Toolbar.Button
               aria-label="Action 1"
               {...propsButton}
               shape={propsButton.shape ?? 'circle'}
             >
-              <Button.Icon>
-                <Symbol icon={sfFolder} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFolder}
+                />
               </Button.Icon>
             </Toolbar.Button>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Action 2"
               shape="circle"
               onClick={() => addLog('Action 2 clicked')}
             >
-              <Button.Icon>
-                <Symbol icon={sfFlag} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFlag}
+                />
               </Button.Icon>
             </Toolbar.Button>
             {content.symbols >= 3 ? (
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Action 3"
                 shape="circle"
                 onClick={() => addLog('Action 3 clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfArchivebox} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfArchivebox}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             ) : null}
             {content.symbols >= 4 ? (
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Action 4"
                 shape="circle"
                 onClick={() => addLog('Action 4 clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfArrowshapeTurnUpLeft} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfArrowshapeTurnUpLeft}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             ) : null}
             {content.symbols >= 5 ? (
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Action 5"
                 shape="circle"
                 onClick={() => addLog('Action 5 clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfSquareAndPencil} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquareAndPencil}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             ) : null}
             {content.symbols >= 6 ? (
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Action 6"
                 shape="circle"
                 onClick={() => addLog('Action 6 clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfTrash} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfTrash}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             ) : null}
@@ -341,31 +464,49 @@ export const ToolbarTextDemo: FunctionComponent = () => {
   // (Of its own: `prominent`, too.)
   const propsButton = buttonProps as ToolbarButtonProps;
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Toolbar.Button': ['onClick', 'prominent'],
+            'Button.Label': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isStretched
       baseUiId="toolbar"
-      controls={[controlRoot, controlButton]}
+      controls={[controlRoot, controlButton, partControls]}
       id={id}
       log={log}
-      state={[stateRoot, stateButton]}
+      state={[stateRoot, stateButton, partState]}
       title="Toolbar (Text)"
     >
       <Toolbar.Root
         key={elementKey}
         {...propsRoot}
       >
-        <Toolbar.Leading>
+        <Toolbar.Leading {...partProps['Toolbar.Leading']}>
           <Toolbar.Button {...propsButton}>
-            <Button.Label>Edit</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Edit</Button.Label>
           </Toolbar.Button>
         </Toolbar.Leading>
-        <Toolbar.Trailing>
+        <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
           <Toolbar.Button
+            {...partProps['Toolbar.Button']}
             prominent
             onClick={() => addLog('Done clicked')}
           >
-            <Button.Label>Done</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Done</Button.Label>
           </Toolbar.Button>
         </Toolbar.Trailing>
       </Toolbar.Root>

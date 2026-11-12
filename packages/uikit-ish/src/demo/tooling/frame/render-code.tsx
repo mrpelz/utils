@@ -151,6 +151,34 @@ const standInValue = (name: string) =>
 const parameterList = /^[^(=]*\((?<list>[^)]*)\)/u;
 const singleParameter = /^\s*(?<single>[\w$]+)\s*=>/u;
 
+// A list split at its commas, not those in brackets (e.g. `[a, b]`).
+const splitTopLevel = (list: string) => {
+  const parts: string[] = [];
+  let depth = 0;
+  let part = '';
+  for (const character of list) {
+    if ('[{('.includes(character)) depth += 1;
+    if (']})'.includes(character)) depth -= 1;
+    if (character === ',' && depth === 0) {
+      parts.push(part);
+      part = '';
+    } else {
+      part += character;
+    }
+  }
+  parts.push(part);
+  return parts.map((entry) => entry.trim()).filter(Boolean);
+};
+
+// A parameter without its default (`a = 0`: `a`); an array's (`[a = 0,
+// b]`), its elements' names.
+const parameterName = (parameter: string): string | readonly string[] =>
+  parameter.startsWith('[')
+    ? splitTopLevel(parameter.slice(1, parameter.lastIndexOf(']'))).map(
+        (element) => element.split('=')[0]?.trim() ?? '',
+      )
+    : (parameter.split('=')[0]?.trim() ?? '');
+
 const positionalParameters = (renderFunction: unknown) => {
   const source = Function.prototype.toString.call(renderFunction);
   const listed =
@@ -159,10 +187,7 @@ const positionalParameters = (renderFunction: unknown) => {
     '';
   return listed.trimStart().startsWith('{')
     ? undefined
-    : listed
-        .split(',')
-        .map((parameter) => parameter.split('=')[0]?.trim() ?? '')
-        .filter(Boolean);
+    : splitTopLevel(listed).map((parameter) => parameterName(parameter));
 };
 
 /**
@@ -177,8 +202,19 @@ const callRenderFunction = (
   const positional = positionalParameters(renderFunction);
   if (positional) {
     return {
-      parameters: positional.join(', '),
-      result: renderFunction(...positional.map((name) => standInValue(name))),
+      parameters: positional
+        .map((name) =>
+          typeof name === 'string' ? name : `[${name.join(', ')}]`,
+        )
+        .join(', '),
+      // (An array's: its elements', each a stand-in.)
+      result: renderFunction(
+        ...positional.map((name) =>
+          typeof name === 'string'
+            ? standInValue(name)
+            : name.map((element) => standInValue(element)),
+        ),
+      ),
     };
   }
 
@@ -199,6 +235,35 @@ const callRenderFunction = (
   return { parameters, result };
 };
 
+// Demo-only components (see `hideFromCode`): left out of the code shown
+// (all of it, or some of its props).
+const hiddenFromCode = new WeakMap<object, readonly string[] | true>();
+
+/**
+ * Leaves a demo-only component out of the code shown: a readout feeding
+ * the diagnostics (rendering nothing a reader would write), or, given
+ * `props`, only those props of it (e.g. a stand-in's demo-only ones).
+ */
+export const hideFromCode = (
+  component: unknown,
+  props: readonly string[] | true = true,
+): void => {
+  if (typeof component !== 'function') return;
+  hiddenFromCode.set(component, props);
+};
+
+// An element's props in the code shown: without those hidden (see
+// `hideFromCode`), or none if all of it is.
+const codeProps = (
+  element: ReactElement<Record<string, unknown>>,
+): Record<string, unknown> | undefined => {
+  const hidden = hiddenFromCode.get(element.type as object);
+  if (hidden === true) return undefined;
+  const props = { ...element.props };
+  for (const key of hidden ?? []) delete props[key];
+  return props;
+};
+
 const unwrap = (
   node: ReactNode,
   context: readonly string[] = [],
@@ -209,7 +274,9 @@ const unwrap = (
   if (!isValidElement(node)) return node;
 
   const element = node as ReactElement<Record<string, unknown>>;
-  const { children, ...props } = element.props;
+  const visible = codeProps(element);
+  if (!visible) return null;
+  const { children, ...props } = visible;
   // (Preact's compat copies an element's `className` to `class`: written once.)
   if ('className' in props) delete props.class;
 
@@ -272,6 +339,14 @@ const unwrapRenderFunction = (
   context: readonly string[],
 ): ReactNode[] => {
   const { parameters, result } = callRenderFunction(renderFunction);
+  // Text computed from its stand-ins (not just showing them: e.g. a time
+  // from seconds, `NaN`): the function as written, on its line.
+  if (
+    (typeof result === 'string' && result.includes('NaN')) ||
+    (typeof result === 'number' && Number.isNaN(result))
+  ) {
+    return [`{${Function.prototype.toString.call(renderFunction)}}`];
+  }
   // Text (e.g. a value's): as a template literal, on its line (its
   // stand-ins' expressions interpolated).
   if (typeof result === 'string' || typeof result === 'number') {

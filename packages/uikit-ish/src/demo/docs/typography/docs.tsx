@@ -26,13 +26,13 @@ export const typographyRows: readonly PropRow[] = [
     code(union('body')),
     <>The text style: its size, line height, weight and tracking.</>,
   ],
-  ['emphasized', 'boolean', code('false'), 'The style’s bold weight.'],
-  ['italic', 'boolean', code('false'), 'Italic.'],
+  ['emphasized', 'boolean', code('false'), 'Uses the style’s bold weight.'],
+  ['italic', 'boolean', code('false'), 'Sets the text in italics.'],
   [
     'color',
     union('primary', 'secondary', 'tertiary', 'quaternary'),
     'inherited',
-    'A label color (label, secondary label, …).',
+    'A label color (label, secondary label, and so on).',
   ],
   [
     'textSize',
@@ -52,15 +52,15 @@ export const typographyRows: readonly PropRow[] = [
     ),
     'inherited (large)',
     <>
-      The text size: of its text and of everything in it (the text styles’
-      tokens, e.g. a list’s rows).
+      The text size, for its text and for everything inside it that uses the
+      text styles’ tokens (for example a list’s rows).
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'Its text (and anything sized with it, e.g. a Symbol).',
+    'Its text, and anything sized with it, for example a Symbol.',
   ],
   ...renderRows('span', 'HTMLElement').map((row): PropRow =>
     row[0] === 'render'
@@ -69,8 +69,8 @@ export const typographyRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a heading (<code>{'<h1 />'}</code>), a paragraph (
-            <code>{'<p />'}</code>).
+            {row[3]} For example a heading (<code>{'<h1 />'}</code>) or a
+            paragraph (<code>{'<p />'}</code>).
           </>,
         ]
       : row,

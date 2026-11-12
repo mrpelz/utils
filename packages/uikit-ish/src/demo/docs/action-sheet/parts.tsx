@@ -11,12 +11,16 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   actionSheetActionRows,
   actionSheetActionsRows,
@@ -52,45 +56,81 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'ActionSheet.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'ActionSheet.Action': ['variant'],
+            'ActionSheet.Actions': [],
+            'ActionSheet.Description': [],
+            'ActionSheet.Header': [],
+            'ActionSheet.Popup': [],
+            'ActionSheet.Title': [],
+            'ActionSheet.Trigger': ['render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <ActionSheet.Root
           key={elementKey}
           {...props}
         >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
-              <ActionSheet.Action variant="destructive">
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -110,34 +150,64 @@ const TriggerPart: FunctionComponent = () => {
     title: 'ActionSheet.Trigger',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'ActionSheet.Action': ['variant'],
+          'ActionSheet.Actions': [],
+          'ActionSheet.Description': [],
+          'ActionSheet.Header': [],
+          'ActionSheet.Popup': [],
+          'ActionSheet.Root': [],
+          'ActionSheet.Title': [],
+          'Button.Label': [],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Trigger"
     >
-      <Viewport.Content>
-        <ActionSheet.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ActionSheet.Root {...partProps['ActionSheet.Root']}>
           <ActionSheet.Trigger {...props}>
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
-              <ActionSheet.Action variant="destructive">
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -157,41 +227,77 @@ const PopupPart: FunctionComponent = () => {
     title: 'ActionSheet.Popup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'ActionSheet.Action': ['variant'],
+          'ActionSheet.Actions': [],
+          'ActionSheet.Description': [],
+          'ActionSheet.Header': [],
+          'ActionSheet.Root': [],
+          'ActionSheet.Title': [],
+          'ActionSheet.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Popup"
     >
-      <Viewport.Content>
-        <ActionSheet.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
+          defaultOpen
+        >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
           <ActionSheet.Popup {...props}>
-            <ActionSheet.Header>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
-              <ActionSheet.Action variant="destructive">
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -211,41 +317,77 @@ const HeaderPart: FunctionComponent = () => {
     title: 'ActionSheet.Header',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'ActionSheet.Action': ['variant'],
+          'ActionSheet.Actions': [],
+          'ActionSheet.Description': [],
+          'ActionSheet.Popup': [],
+          'ActionSheet.Root': [],
+          'ActionSheet.Title': [],
+          'ActionSheet.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Header"
     >
-      <Viewport.Content>
-        <ActionSheet.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
+          defaultOpen
+        >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
             <ActionSheet.Header {...props}>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
-              <ActionSheet.Action variant="destructive">
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -265,41 +407,75 @@ const TitlePart: FunctionComponent = () => {
     title: 'ActionSheet.Title',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'ActionSheet.Action': ['variant'],
+          'ActionSheet.Actions': [],
+          'ActionSheet.Description': [],
+          'ActionSheet.Header': [],
+          'ActionSheet.Popup': [],
+          'ActionSheet.Root': [],
+          'ActionSheet.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Title"
     >
-      <Viewport.Content>
-        <ActionSheet.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
+          defaultOpen
+        >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
               <ActionSheet.Title {...props}>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
-              <ActionSheet.Action variant="destructive">
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -319,41 +495,75 @@ const DescriptionPart: FunctionComponent = () => {
     title: 'ActionSheet.Description',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'ActionSheet.Action': ['variant'],
+          'ActionSheet.Actions': [],
+          'ActionSheet.Header': [],
+          'ActionSheet.Popup': [],
+          'ActionSheet.Root': [],
+          'ActionSheet.Title': [],
+          'ActionSheet.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Description"
     >
-      <Viewport.Content>
-        <ActionSheet.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
+          defaultOpen
+        >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
               <ActionSheet.Description {...props}>
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
-              <ActionSheet.Action variant="destructive">
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -373,41 +583,77 @@ const ActionsPart: FunctionComponent = () => {
     title: 'ActionSheet.Actions',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'ActionSheet.Action': ['variant'],
+          'ActionSheet.Description': [],
+          'ActionSheet.Header': [],
+          'ActionSheet.Popup': [],
+          'ActionSheet.Root': [],
+          'ActionSheet.Title': [],
+          'ActionSheet.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Actions"
     >
-      <Viewport.Content>
-        <ActionSheet.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
+          defaultOpen
+        >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
             <ActionSheet.Actions {...props}>
-              <ActionSheet.Action variant="destructive">
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -427,39 +673,73 @@ const ActionPart: FunctionComponent = () => {
     title: 'ActionSheet.Action',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'ActionSheet.Action (others)': [],
+          'ActionSheet.Actions': [],
+          'ActionSheet.Description': [],
+          'ActionSheet.Header': [],
+          'ActionSheet.Popup': [],
+          'ActionSheet.Root': [],
+          'ActionSheet.Title': [],
+          'ActionSheet.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActionSheet.Action"
     >
-      <Viewport.Content>
-        <ActionSheet.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
+          defaultOpen
+        >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
               <ActionSheet.Action {...props}>Delete Photo</ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action (others)']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -480,53 +760,96 @@ const CreateHandlePart: FunctionComponent = () => {
   const id = 'action-sheet-parts-create-handle';
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'ActionSheet.Action': ['variant'],
+            'ActionSheet.Actions': [],
+            'ActionSheet.Description': [],
+            'ActionSheet.Header': [],
+            'ActionSheet.Popup': [],
+            'ActionSheet.Root': ['handle', 'onOpenChange'],
+            'ActionSheet.Title': [],
+            'ActionSheet.Trigger': ['handle', 'id', 'render'],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="ActionSheet.createHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <ActionSheet.Trigger
+          {...partProps['ActionSheet.Trigger']}
           handle={photoSheet}
           id="action-sheet-parts-photo-trigger"
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Delete Photo</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Delete Photo
+          </Button.Label>
         </ActionSheet.Trigger>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="borderless"
           onClick={() => photoSheet.open('action-sheet-parts-photo-trigger')}
         >
-          <Button.Label>Open Imperatively</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Open Imperatively
+          </Button.Label>
         </Button.Root>
         <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
           handle={photoSheet}
           onOpenChange={(isOpen: boolean, { reason }) =>
             addLog(`open change: ${String(isOpen)} (${reason})`)
           }
         >
-          <ActionSheet.Popup>
-            <ActionSheet.Header>
-              <ActionSheet.Title>Delete Photo?</ActionSheet.Title>
-              <ActionSheet.Description>
+          <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+            <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+              <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                Delete Photo?
+              </ActionSheet.Title>
+              <ActionSheet.Description
+                {...partProps['ActionSheet.Description']}
+              >
                 It will be deleted from all your devices.
               </ActionSheet.Description>
             </ActionSheet.Header>
-            <ActionSheet.Actions>
-              <ActionSheet.Action variant="destructive">
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+              <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
+                variant="destructive"
+              >
                 Delete Photo
               </ActionSheet.Action>
-              <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+              <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                Remove from Album
+              </ActionSheet.Action>
             </ActionSheet.Actions>
           </ActionSheet.Popup>
         </ActionSheet.Root>
@@ -546,62 +869,102 @@ const UseCreateActionSheetHandlePart: FunctionComponent = () => {
     'const deleteSheet = useCreateActionSheetHandle<{ action: string; title: string }>();',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'ActionSheet.Action': ['variant'],
+            'ActionSheet.Actions': [],
+            'ActionSheet.Description': [],
+            'ActionSheet.Header': [],
+            'ActionSheet.Popup': [],
+            'ActionSheet.Root': ['handle', 'onOpenChange'],
+            'ActionSheet.Title': [],
+            'ActionSheet.Trigger': ['handle', 'payload', 'render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="useCreateActionSheetHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="action-sheet-demo-triggers">
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             handle={deleteSheet}
             payload={{ action: 'Delete Photo', title: 'Delete Photo?' }}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Photo</Button.Label>
           </ActionSheet.Trigger>
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             handle={deleteSheet}
             payload={{ action: 'Delete Video', title: 'Delete Video?' }}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Video</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>Video</Button.Label>
           </ActionSheet.Trigger>
         </div>
         <ActionSheet.Root
+          {...partProps['ActionSheet.Root']}
           handle={deleteSheet}
           onOpenChange={(isOpen: boolean, { reason }) =>
             addLog(`open change: ${String(isOpen)} (${reason})`)
           }
         >
           {({ payload }) => (
-            <ActionSheet.Popup>
-              <ActionSheet.Header>
-                <ActionSheet.Title>{payload?.title}</ActionSheet.Title>
-                <ActionSheet.Description>
+            <ActionSheet.Popup {...partProps['ActionSheet.Popup']}>
+              <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+                <ActionSheet.Title {...partProps['ActionSheet.Title']}>
+                  {payload?.title}
+                </ActionSheet.Title>
+                <ActionSheet.Description
+                  {...partProps['ActionSheet.Description']}
+                >
                   It will be deleted from all your devices.
                 </ActionSheet.Description>
               </ActionSheet.Header>
-              <ActionSheet.Actions>
-                <ActionSheet.Action variant="destructive">
+              <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
+                <ActionSheet.Action
+                  {...partProps['ActionSheet.Action']}
+                  variant="destructive"
+                >
                   {payload?.action}
                 </ActionSheet.Action>
-                <ActionSheet.Action>Remove from Album</ActionSheet.Action>
+                <ActionSheet.Action {...partProps['ActionSheet.Action']}>
+                  Remove from Album
+                </ActionSheet.Action>
               </ActionSheet.Actions>
             </ActionSheet.Popup>
           )}
@@ -615,16 +978,16 @@ const UseCreateActionSheetHandlePart: FunctionComponent = () => {
 export const ActionSheetParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: its state (open), for its parts.</li>
-      <li>Trigger: the control it’s about, and shown at.</li>
+      <li>Root: holds its state (open) for its parts.</li>
+      <li>Trigger: the control it’s about, where it shows.</li>
       <li>
-        Popup: the panel at its trigger (without one, at the bottom), the page
-        dimmed behind it.
+        Popup: the panel at its trigger (or, without one, at the bottom), with
+        the page dimmed behind it.
       </li>
-      <li>In it: its header (title, description), its actions.</li>
-      <li>Handles: triggers outside the root, opening it imperatively.</li>
+      <li>Inside it: its header (title and description) and its actions.</li>
+      <li>Handles: triggers outside the root, and opening it from code.</li>
       <li>
-        The views’ phone screens contain it (<code>container</code>); press each
+        The views’ phone screens contain it (<code>container</code>). Press each
         view’s button to open its sheet.
       </li>
     </ul>
@@ -640,14 +1003,14 @@ export const ActionSheetParts: FunctionComponent = () => (
               component="action-sheet"
               part="ActionSheet.Trigger"
             />{' '}
-            (optional; or outside it, by a handle)
+            (optional; or outside the root, through a handle)
           </li>
           <li>
             <PartLink
               component="action-sheet"
               part="ActionSheet.Popup"
             />{' '}
-            (in its portal, its backdrop behind it)
+            (in its portal, with its backdrop behind it)
             <ul>
               <li>
                 <PartLink
@@ -691,8 +1054,6 @@ export const ActionSheetParts: FunctionComponent = () => (
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
       <li>
         <PartLink
           component="action-sheet"
@@ -719,9 +1080,9 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its state: <code>open</code> or <code>defaultOpen</code>,{' '}
-        <code>onOpenChange</code> (with why: its trigger pressed, an action, a
-        press outside, Escape); <code>modal</code> by default.
+        Holds its state: <code>open</code> or <code>defaultOpen</code>, and{' '}
+        <code>onOpenChange</code> (with the reason: its trigger pressed, an
+        action, a press outside, or Escape). It’s <code>modal</code> by default.
       </li>
       <li>Renders no element of its own.</li>
     </ul>
@@ -737,13 +1098,13 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The control its choices are about (e.g. a{' '}
-        <a href={publicUrl('button')}>Button</a>:{' '}
-        <code>{'render={<Button.Root />}'}</code>): the sheet shows at it.
+        The control its choices are about (for example a{' '}
+        <a href={publicUrl('button')}>Button</a>,{' '}
+        <code>{'render={<Button.Root />}'}</code>). The sheet shows at it.
       </li>
       <li>
-        Optional: opened by the app (<code>open</code>), it shows at its
-        container’s bottom.
+        It’s optional. When the app opens the sheet (<code>open</code>), it
+        shows at its container’s bottom.
       </li>
       <li>
         Renders a <code>button</code>.
@@ -761,17 +1122,18 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The panel (an <a href={publicUrl('alert')}>Alert</a>’s: the menus’
-        glass, 300px wide, 34px corners): below its trigger, 8px from it (above
-        it, if there’s no room), scaling in from it; without a trigger, at its{' '}
-        <code>container</code>’s bottom, above its safe area.
+        The panel, like an <a href={publicUrl('alert')}>Alert</a>’s (the menus’
+        glass, 300px wide, with 34px corners). It sits below its trigger, 8px
+        away (or above it, without room), and scales in from it. Without a
+        trigger, it sits at its <code>container</code>’s bottom, above the safe
+        area.
       </li>
       <li>
-        The page dimmed behind it; a press outside closes it. Taller than the
-        room for it, it scrolls.
+        The page is dimmed behind it, and a press outside closes it. When it’s
+        taller than the room it has, it scrolls.
       </li>
       <li>
-        Renders its portal (no box of its own), its backdrop’s and its
+        Renders its portal (without a box of its own), its backdrop’s and its
         positioner’s <code>div</code>s, and its own <code>div</code> (a{' '}
         <code>dialog</code>).
       </li>
@@ -788,9 +1150,9 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its title and description, as an{' '}
-        <a href={publicUrl('alert')}>Alert</a>’s, but closer to its actions
-        (18px above them, an alert’s 34px). Many action sheets have only a
+        Optional: its title and description, like an{' '}
+        <a href={publicUrl('alert')}>Alert</a>’s but closer to its actions (18px
+        above them, where an alert has 34px). Many action sheets have only a
         description, or neither.
       </li>
       <li>
@@ -809,8 +1171,8 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its title (Headline); the sheet’s accessible name (without
-        one, name the popup: <code>aria-label</code>).
+        Optional: its title (Headline), which is the sheet’s accessible name.
+        Without one, name the popup with <code>aria-label</code>.
       </li>
       <li>
         Renders an <code>h2</code>.
@@ -828,8 +1190,8 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: what the choice is about (Body); the sheet’s accessible
-        description.
+        Optional: what the choice is about (Body), which is the sheet’s
+        accessible description.
       </li>
       <li>
         Renders a <code>p</code>.
@@ -846,7 +1208,7 @@ export const ActionSheetParts: FunctionComponent = () => (
       <code>ActionSheet.Actions</code>
     </Heading>
     <ul>
-      <li>Its actions, stacked, 10px apart; a destructive one first.</li>
+      <li>Its actions, stacked 10px apart, with a destructive one first.</li>
       <li>
         Renders a <code>div</code>.
       </li>
@@ -863,12 +1225,13 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button closing the sheet (Base UI’s <code>Close</code>), 48px high, a
-        capsule on a gray fill: its <code>variant</code> secondary or
+        A button that closes the sheet (Base UI’s <code>Close</code>): a 48px
+        capsule on a gray fill. Its <code>variant</code> is secondary or
         destructive (red).
       </li>
       <li>
-        No Cancel: a press outside cancels (anchored action sheets have none).
+        There’s no Cancel, because a press outside cancels (anchored action
+        sheets don’t have one).
       </li>
       <li>
         Renders a <code>button</code>.
@@ -886,12 +1249,12 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle linking an action sheet to its triggers outside its root, and
-        opening or closing it imperatively (Base UI’s{' '}
+        A handle that links an action sheet to its triggers outside its root,
+        and opens or closes it from code (Base UI’s{' '}
         <code>Popover.createHandle</code>).
       </li>
       <li>
-        Made once, e.g. at a module’s top level (in a component:{' '}
+        Make it once, for example at a module’s top level (in a component, use{' '}
         <PartLink
           component="action-sheet"
           part="useCreateActionSheetHandle"
@@ -899,8 +1262,9 @@ export const ActionSheetParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Here: made at the module’s top level; a trigger before the root, and a
-        button opening it at that trigger (its <code>open(triggerId)</code>).
+        Here, it’s made at the module’s top level, with a trigger before the
+        root and a button that opens it at that trigger (its{' '}
+        <code>open(triggerId)</code>).
       </li>
     </ul>
     <CreateHandlePart />
@@ -924,9 +1288,9 @@ export const ActionSheetParts: FunctionComponent = () => (
         in a component: the same handle for the component’s lifetime.
       </li>
       <li>
-        Here: two triggers, one sheet, at whichever opened it; each passes what
-        it deletes (its <code>payload</code>), the root’s children a function of
-        it.
+        Here, two triggers share one sheet, which shows at whichever was
+        pressed. Each passes what it deletes as its <code>payload</code>, and
+        the root’s children are a function of it.
       </li>
     </ul>
     <UseCreateActionSheetHandlePart />
@@ -943,7 +1307,7 @@ export const ActionSheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Re-exported as they are (unstyled; see{' '}
+        These are re-exported as they are, without styles (see{' '}
         <a
           href="https://base-ui.com/react/components/popover"
           rel="noreferrer"
@@ -954,17 +1318,17 @@ export const ActionSheetParts: FunctionComponent = () => (
         ):
       </li>
       <li>
-        <code>ActionSheet.Portal</code>, <code>ActionSheet.Backdrop</code>,{' '}
-        <code>ActionSheet.Positioner</code>: rendered by{' '}
+        <code>ActionSheet.Portal</code>, <code>ActionSheet.Backdrop</code> and{' '}
+        <code>ActionSheet.Positioner</code>:{' '}
         <PartLink
           component="action-sheet"
           part="ActionSheet.Popup"
         />{' '}
-        (its container, the dimmed page, its place).
+        renders them (its container, the dimmed page, and its placement).
       </li>
       <li>
-        <code>ActionSheet.Close</code>: a button closing it, unstyled (its
-        actions are{' '}
+        <code>ActionSheet.Close</code>: a button that closes it, without styles
+        (its actions are{' '}
         <PartLink
           component="action-sheet"
           part="ActionSheet.Action"
@@ -972,8 +1336,8 @@ export const ActionSheetParts: FunctionComponent = () => (
         s).
       </li>
       <li>
-        <code>ActionSheet.Arrow</code>, <code>ActionSheet.Viewport</code>: not
-        used (no arrow; nothing animated between triggers).
+        <code>ActionSheet.Arrow</code> and <code>ActionSheet.Viewport</code>:
+        not used, since there’s no arrow and nothing animates between triggers.
       </li>
     </ul>
   </>

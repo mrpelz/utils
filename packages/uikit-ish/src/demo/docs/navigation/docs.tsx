@@ -22,7 +22,7 @@ export const navigationRootRows: readonly PropRow[] = [
         component="navigation"
         part="Navigation.Stack"
       />
-      , and what stays while its pages move: optionally its{' '}
+      , and what should stay still while its pages move: optionally its{' '}
       <PartLink
         component="navigation"
         part="Navigation.SwipeArea"
@@ -54,15 +54,17 @@ export const navigationRootRows: readonly PropRow[] = [
     ].join(''),
     undefined,
     <>
-      Called when the top page goes back: swiped back from its leading edge
-      (released past half its width, or flung; <code>swipe</code>), or a{' '}
+      Called when the top page goes back. That’s either a swipe back from the
+      leading edge, released past half its width or flung (<code>swipe</code>),
+      or a press on a{' '}
       <PartLink
         component="navigation"
         part="Navigation.Back"
       />{' '}
-      pressed (<code>back-press</code>): the app pops its stack. Swiped, as it’s
-      let go, the pop on from where the swipe left it (not popped, it settles
-      back). Without it (or a{' '}
+      (<code>back-press</code>). The app then pops its stack. After a swipe,
+      it’s called as the swipe is let go, and the pop continues from where the
+      swipe left it. If the app doesn’t pop, the page settles back. Without it,
+      or without a{' '}
       <PartLink
         component="navigation"
         part="Navigation.SwipeArea"
@@ -79,16 +81,16 @@ export const navigationStackRows: readonly PropRow[] = [
     'ReactElement[]',
     undefined,
     <>
-      The stack’s pages, bottom to top, each with a <code>key</code> (e.g. a{' '}
-      <a href={publicUrl('page')}>Page</a>, or a{' '}
+      The stack’s pages, from bottom to top, each with a <code>key</code> (for
+      example a <a href={publicUrl('page')}>Page</a>, or a{' '}
       <a href={publicUrl('header')}>Header</a> around one; optionally in a{' '}
       <PartLink
         component="navigation"
         part="Navigation.Page"
       />
-      , keyed instead): keys extended, the new top page is pushed; cut back (by
-      one or more), the top page is popped; otherwise, the new top page is shown
-      at once.
+      , which then gets the key). When the keys are extended, the new top page
+      is pushed. When they’re cut back, by one or more, the top page is popped.
+      Otherwise, the new top page shows at once.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -100,14 +102,14 @@ export const navigationPageRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Shown at once: pushed or popped without sliding in or out, and not swiped
-      back while it’s on top (its{' '}
+      Shows the page at once: it’s pushed and popped without sliding, and can’t
+      be swiped back while it’s on top (its{' '}
       <PartLink
         component="navigation"
         part="Navigation.Back"
       />{' '}
-      still going back, at once). E.g. a page whose own scrolling a slide would
-      disturb (pulled past its ends, see{' '}
+      still goes back, at once). For example, for a page whose own scrolling a
+      slide would disturb, such as one pulled past its ends (see{' '}
       <PartLink
         component="viewport"
         part="Viewport.Overscroll"
@@ -120,9 +122,9 @@ export const navigationPageRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      The page (e.g. a <a href={publicUrl('header')}>Header</a> around a{' '}
-      <a href={publicUrl('page')}>Page</a>), rendered as it is: no element of
-      its own.
+      The page (for example a <a href={publicUrl('header')}>Header</a> around a{' '}
+      <a href={publicUrl('page')}>Page</a>), rendered as it is, without an
+      element of its own.
     </>,
   ],
 ];
@@ -132,7 +134,7 @@ export const navigationSwipeAreaRows: readonly PropRow[] = [
     'width',
     'number',
     code('20'),
-    'Its width (px): how far from the leading edge a swipe back starts.',
+    'Its width (px): how far from the leading edge a swipe back can start.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -148,9 +150,9 @@ export const navigationBackRows: readonly PropRow[] = [
         component="navigation"
         part="Navigation.Persistent"
       />
-      ): in each page’s bar, staying put between pages that both have one,
-      sliding with a page where only it has one; <code>false</code>, always
-      moving with its page.
+      ). In each page’s bar, it stays put between pages that both have one, and
+      slides with a page where only that page has one. <code>false</code> makes
+      it always move with its page.
     </>,
   ],
   [
@@ -158,8 +160,8 @@ export const navigationBackRows: readonly PropRow[] = [
     'boolean',
     'on the root page',
     <>
-      Disabled: not going back. By default, while there’s nothing to go back to
-      (one page, or no <code>onBack</code>).
+      Disables it, so it doesn’t go back. By default, it’s disabled while
+      there’s nothing to go back to (one page, or no <code>onBack</code>).
     </>,
   ],
   [
@@ -167,15 +169,15 @@ export const navigationBackRows: readonly PropRow[] = [
     '(event: MouseEvent) => void',
     undefined,
     <>
-      Called as it’s pressed, before it goes back (
-      <code>event.preventDefault()</code>: it doesn’t).
+      Called when it’s pressed, before it goes back. Call{' '}
+      <code>event.preventDefault()</code> to keep it from going back.
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'Its content: e.g. a back chevron (Button.Icon), labelled by its aria-label (the page below’s title).',
+    'Its content, for example a back chevron (Button.Icon). Label it with an aria-label: the title of the page below.',
   ],
   ...renderRows('button', 'HTMLButtonElement').map((row): PropRow =>
     row[0] === 'render'
@@ -184,7 +186,7 @@ export const navigationBackRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a{' '}
+            {row[3]} For example a{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Button"
@@ -204,16 +206,16 @@ export const navigationPersistentRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      Its id (required): in a transition (pushed, popped, swiped back), while
-      both moving pages have an item of this id, it stays put (the upper page’s
-      shown); otherwise it moves with its page.
+      Its id (required). During a transition (a push, a pop, a swipe back),
+      while both moving pages have an item with this id, it stays put, showing
+      the upper page’s. Otherwise, it moves with its page.
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'The item, or its content (rendering the item itself, by its render).',
+    'The item, or its content when render renders the item itself.',
   ],
   ...renderRows('div', 'HTMLDivElement'),
 ];

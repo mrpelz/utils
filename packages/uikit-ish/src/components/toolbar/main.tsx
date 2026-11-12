@@ -58,7 +58,7 @@ export type {
 //   bar's groups do (scaled up by 1.05), the pressed button showing the
 //   selection.
 // - The bottom bar's padding is 4px 16px 2px, without the home indicator's
-//   34px in it: the safe area is its anchor's (a
+//   34px in it: the safe area inset is its anchor's (a
 //   `Viewport.BlockEnd`, a sheet's), so it sits right above it.
 // - With a subtitle, the title stays in 17px (not smaller than the rows'
 //   text).

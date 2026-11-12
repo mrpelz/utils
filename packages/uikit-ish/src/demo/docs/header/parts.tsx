@@ -1,4 +1,4 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
@@ -12,10 +12,13 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import {
   headerAccessoryRows,
@@ -35,70 +38,131 @@ const RootPart: FunctionComponent = () => {
   const { controls, propsAccessory, propsBar, propsLargeTitle, state } =
     useHeaderControls(id, { hasAccessory: true });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Segmented.Root': ['aria-label', 'defaultValue'],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Subtitle': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Header.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
             <Toolbar.Root
               placement="block-start"
               {...propsBar}
             >
-              <Toolbar.Leading>
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Lists"
                   shape="circle"
                   onClick={() => addLog('Lists clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfChevronBackward}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Contacts</span>
-              <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
+              <Toolbar.Subtitle {...partProps['Toolbar.Subtitle']}>
+                {names.length} people
+              </Toolbar.Subtitle>
             </Header.LargeTitle>
             <Header.Accessory {...propsAccessory}>
               <Segmented.Root
+                {...partProps['Segmented.Root']}
                 aria-label="Show"
                 defaultValue="all"
               >
-                <Segmented.Item value="all">All</Segmented.Item>
-                <Segmented.Item value="favorites">Favorites</Segmented.Item>
-                <Segmented.Highlight />
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="all"
+                >
+                  All
+                </Segmented.Item>
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="favorites"
+                >
+                  Favorites
+                </Segmented.Item>
+                <Segmented.Highlight {...partProps['Segmented.Highlight']} />
               </Segmented.Root>
             </Header.Accessory>
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -112,70 +176,131 @@ const LargeTitlePart: FunctionComponent = () => {
   const { controls, propsAccessory, propsBar, propsLargeTitle, state } =
     useHeaderControls(id, { featured: 'LargeTitle', hasAccessory: true });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Segmented.Root': ['aria-label', 'defaultValue'],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Subtitle': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Header.LargeTitle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
             <Toolbar.Root
               placement="block-start"
               {...propsBar}
             >
-              <Toolbar.Leading>
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Lists"
                   shape="circle"
                   onClick={() => addLog('Lists clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfChevronBackward}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Contacts</span>
-              <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
+              <Toolbar.Subtitle {...partProps['Toolbar.Subtitle']}>
+                {names.length} people
+              </Toolbar.Subtitle>
             </Header.LargeTitle>
             <Header.Accessory {...propsAccessory}>
               <Segmented.Root
+                {...partProps['Segmented.Root']}
                 aria-label="Show"
                 defaultValue="all"
               >
-                <Segmented.Item value="all">All</Segmented.Item>
-                <Segmented.Item value="favorites">Favorites</Segmented.Item>
-                <Segmented.Highlight />
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="all"
+                >
+                  All
+                </Segmented.Item>
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="favorites"
+                >
+                  Favorites
+                </Segmented.Item>
+                <Segmented.Highlight {...partProps['Segmented.Highlight']} />
               </Segmented.Root>
             </Header.Accessory>
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -189,70 +314,131 @@ const AccessoryPart: FunctionComponent = () => {
   const { controls, propsAccessory, propsBar, propsLargeTitle, state } =
     useHeaderControls(id, { featured: 'Accessory', hasAccessory: true });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Segmented.Root': ['aria-label', 'defaultValue'],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Subtitle': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Header.Accessory"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
             <Toolbar.Root
               placement="block-start"
               {...propsBar}
             >
-              <Toolbar.Leading>
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Lists"
                   shape="circle"
                   onClick={() => addLog('Lists clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfChevronBackward}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Contacts</span>
               </Toolbar.Title>
-              <Toolbar.Trailing />
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Contacts</span>
-              <Toolbar.Subtitle>{names.length} people</Toolbar.Subtitle>
+              <Toolbar.Subtitle {...partProps['Toolbar.Subtitle']}>
+                {names.length} people
+              </Toolbar.Subtitle>
             </Header.LargeTitle>
             <Header.Accessory {...propsAccessory}>
               <Segmented.Root
+                {...partProps['Segmented.Root']}
                 aria-label="Show"
                 defaultValue="all"
               >
-                <Segmented.Item value="all">All</Segmented.Item>
-                <Segmented.Item value="favorites">Favorites</Segmented.Item>
-                <Segmented.Highlight />
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="all"
+                >
+                  All
+                </Segmented.Item>
+                <Segmented.Item
+                  {...partProps['Segmented.Item']}
+                  value="favorites"
+                >
+                  Favorites
+                </Segmented.Item>
+                <Segmented.Highlight {...partProps['Segmented.Highlight']} />
               </Segmented.Root>
             </Header.Accessory>
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {names.map((name) => (
-                    <List.Item key={name}>
-                      <List.Content>
-                        <List.Title>{name}</List.Title>
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -265,10 +451,10 @@ export const HeaderParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A root (no box of its own) around the app’s bar (a top{' '}
+        A root without a box of its own, around the app’s bar (a top{' '}
         <a href={publicUrl('toolbar')}>Toolbar</a>, anchored) and its{' '}
-        <a href={publicUrl('page')}>Page</a>: an optional large title, and an
-        optional accessory staying below the bar.
+        <a href={publicUrl('page')}>Page</a>. The page can have a large title,
+        and an accessory that stays below the bar.
       </li>
       <li>
         The views’ pages scroll under the bar: scroll them to see the titles
@@ -277,7 +463,7 @@ export const HeaderParts: FunctionComponent = () => (
     </ul>
     <ul className="demo-tree">
       <li className="demo-tree-context">
-        <span>The app’s root, e.g. </span>
+        <span>The app’s root, for example </span>
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -323,7 +509,7 @@ export const HeaderParts: FunctionComponent = () => (
                     <PartLink part="Header.Accessory" /> (optional)
                   </li>
                   <li className="demo-tree-context">
-                    <span>the page’s content (e.g. lists)</span>
+                    <span>the page’s content (for example lists)</span>
                   </li>
                 </ul>
               </li>
@@ -351,13 +537,14 @@ export const HeaderParts: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockStart"
         />
-        , its child) to its page: the page’s content starts below the bar (a{' '}
+        , its child) to its page. The page’s content starts below the bar (with
+        a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        at its start, as high as the bar), the bar’s title fades in as the large
-        title scrolls away, and what scrolls under the bar blurs beneath it (the
+        at its start, as tall as the bar). The bar’s title fades in as the large
+        title scrolls away. What scrolls under the bar blurs beneath it (the
         bar’s anchor’s edge effect, see{' '}
         <PartLink
           component="viewport"
@@ -366,11 +553,12 @@ export const HeaderParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Around the page, or within it (e.g. a tab’s panel rendered as the page):
-        the bar stays where it is either way.
+        It can go around the page, or inside it (for example when a tab’s panel
+        renders as the page). The bar stays put either way.
       </li>
       <li>
-        Renders a <code>display: contents</code> element: no box of its own.
+        Renders an element with <code>display: contents</code>, without a box of
+        its own.
       </li>
     </ul>
     <RootPart />
@@ -385,8 +573,8 @@ export const HeaderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The page’s title, large (Large Title Emphasized), below the bar,
-        scrolling with the page; fading out as it goes under the bar.
+        The page’s large title (Large Title Emphasized), below the bar. It
+        scrolls with the page, and fades out as it goes under the bar.
       </li>
       <li>
         A subtitle (
@@ -394,11 +582,12 @@ export const HeaderParts: FunctionComponent = () => (
           component="toolbar"
           part="Toolbar.Subtitle"
         />
-        ) below it in 15px.
+        ) can go below it, in 15px.
       </li>
       <li>
-        Renders a <code>div</code> as a <code>heading</code> (level 1;{' '}
-        <code>render</code>, e.g. an <code>h1</code>).
+        Renders a <code>div</code> as a <code>heading</code> (level 1), or
+        another element through <code>render</code>, for example an{' '}
+        <code>h1</code>.
       </li>
     </ul>
     <LargeTitlePart />
@@ -413,24 +602,26 @@ export const HeaderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What stays with the bar (a search field, a segmented control): after the
-        large title, scrolling with it, then sticking below the bar.
+        What stays with the bar, such as a search field or a segmented control.
+        It comes after the large title and scrolls with it, then sticks below
+        the bar.
       </li>
       <li>
-        16px from the sides, 8px above the content; stuck, the bar’s edge effect
-        reaches under it too (
+        It sits 16px from the sides and 8px above the content. While stuck, the
+        bar’s edge effect reaches under it too (
         <PartLink
           component="viewport"
           part="useViewportEdgeElement"
         />
-        ), what scrolls under it blurred, as under the bar.
+        ), so what scrolls under it blurs, as under the bar.
       </li>
       <li>
-        It sticks below the bar, by its height (measured, also a taller one: a
-        two-line title).
+        It sticks below the bar at the bar’s measured height, which also works
+        for a taller bar with a two-line title.
       </li>
       <li>
-        Renders a <code>div</code> (<code>render</code>).
+        Renders a <code>div</code>, or another element through{' '}
+        <code>render</code>.
       </li>
     </ul>
     <AccessoryPart />

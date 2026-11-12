@@ -7,7 +7,7 @@
   .demo-page {
     max-width: 64rem;
 
-    /* (Clear of the device's safe areas, see webpack.config.js.) */
+    /* (Clear of the device's safe area insets, see webpack.config.js.) */
     padding: 2rem max(1rem, env(safe-area-inset-right))
       calc(4rem + env(safe-area-inset-bottom))
       max(1rem, env(safe-area-inset-left));

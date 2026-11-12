@@ -10,7 +10,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -21,6 +24,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfEllipsis, sfSquareAndArrowUp } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import { islandRootRows, islandSnapGroupRows } from './docs.js';
 import { getPropOptionsOverviewRoot } from './props.js';
@@ -35,82 +39,150 @@ const LiveView: FunctionComponent = () => {
     { external, isOpen: true, title: 'Island.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Island.Content': [],
+            'Island.Grabber': [],
+            'Island.Header': [],
+            'Island.SnapGroup': ['value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isExpanded
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Island"
     >
-      <Viewport.Content />
-      <Viewport.Anchor
-        edge="block-end"
+      <Viewport.Content {...partProps['Viewport.Content']} />
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
         edgeEffect="none"
       >
         <Island.Root
           key={`${key}`}
           {...props}
         >
-          <Island.Header>
-            <Island.Grabber />
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+          <Island.Header {...partProps['Island.Header']}>
+            <Island.Grabber {...partProps['Island.Grabber']} />
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Share"
                   shape="circle"
                   onClick={() => addLog('Share clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfSquareAndArrowUp} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndArrowUp}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>Harbor Café</Toolbar.Title>
-              <Toolbar.Trailing>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                Harbor Café
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="More"
                   shape="circle"
                   onClick={() => addLog('More clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfEllipsis} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfEllipsis}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Island.Header>
-          <Island.Content>
-            <Viewport.Padding edge="block-start" />
+          <Island.Content {...partProps['Island.Content']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             {/* Its header alone: an empty group first. */}
-            <Island.SnapGroup value="header" />
-            <Island.SnapGroup value="peek">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
-                    <List.Item>
-                      <List.Content>
-                        <List.Title>Open until 6 PM</List.Title>
-                        <List.Subtitle>Café · 300 m</List.Subtitle>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="header"
+            />
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="peek"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Open until 6 PM
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          Café · 300 m
+                        </List.Subtitle>
                       </List.Content>
                     </List.Item>
                   </List.Group>
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="details">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="details"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {['Call', 'Website', 'Directions'].map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -118,15 +190,25 @@ const LiveView: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Island.SnapGroup value="all">
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Island.SnapGroup
+              {...partProps['Island.SnapGroup']}
+              value="all"
+            >
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
-                          <List.Subtitle>Review</List.Subtitle>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Review
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     ))}
@@ -134,10 +216,13 @@ const LiveView: FunctionComponent = () => {
                 </List.Section>
               </List.Root>
             </Island.SnapGroup>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Island.Content>
         </Island.Root>
-      </Viewport.Anchor>
+      </Viewport.BlockEnd>
     </Component>
   );
 };
@@ -157,19 +242,19 @@ export const IslandOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A sheet’s glass capsule (dark, edged as a{' '}
-        <a href={publicUrl('sidebar')}>Sidebar</a>’s: a light rim, a glow
-        outside) that’s always there, floating over the page’s content (e.g. a
-        map that fills the screen), in a bottom{' '}
+        A sheet’s glass capsule that’s always there, floating above the page’s
+        content (for example a map that fills the screen), in a{' '}
         <PartLink
           component="viewport"
-          part="Viewport.Anchor"
+          part="Viewport.BlockEnd"
         />
-        .
+        . In dark mode, its glass has an edge like a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>’s: a light rim with a glow
+        outside.
       </li>
       <li>
-        Swiped up, it reveals more, stop by stop (its snap groups); never
-        closed.
+        Swiped up, it reveals more, stop by stop (its snap groups). It never
+        closes.
       </li>
     </ul>
     <LiveView />
@@ -182,11 +267,12 @@ export const IslandOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Complex UI over a canvas that fills the screen and stays put: a map, a
-        photo, a drawing; revealed as needed, the canvas kept in view.
+        For complex UI above a canvas that fills the screen and stays put, such
+        as a map, a photo or a drawing. It reveals what’s needed and keeps the
+        canvas in view.
       </li>
       <li>
-        Progressive detail: a place’s name, then its hours, then everything
+        For progressive detail: a place’s name, then its hours, then everything
         about it (see <a href={publicUrl('island/composition')}>Composition</a>
         ).
       </li>
@@ -200,11 +286,11 @@ export const IslandOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A task of its own, over the page, then gone: a{' '}
-        <a href={publicUrl('sheet')}>Sheet</a> (modal, dismissed).
+        A task of its own that sits above the page and then goes away: use a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a> (modal, and dismissed when done).
       </li>
       <li>
-        A few commands for a scrolling page: a{' '}
+        A few commands for a scrolling page: use a{' '}
         <a href={publicUrl('toolbar')}>Toolbar</a> at its bottom.
       </li>
     </ul>
@@ -216,9 +302,10 @@ export const IslandOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most islands set, across their parts.</li>
+      <li>The props most islands set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('island/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('island/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -239,13 +326,14 @@ export const IslandOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Not a dialog: part of the page, in its order, its content reachable as
-        any other (its stops a pointer’s and a wheel’s; by keyboard, its content
-        scrolls into view as it’s focused).
+        It’s not a dialog. It’s part of the page, in the page’s order, and its
+        content is reachable like any other. Its stops are for pointers and
+        wheels; with the keyboard, its content scrolls into view as it gets
+        focus.
       </li>
       <li>
-        Its grabber is hidden from assistive tech; give the bar a title (its
-        content’s name).
+        Its grabber is hidden from assistive technology. Give the bar a title
+        that names its content.
       </li>
     </ul>
 
@@ -257,37 +345,37 @@ export const IslandOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Compact: 8px from the screen’s sides and bottom (the home indicator over
-        its bottom margin), its corners 42px (as iOS 26’s floating sheets,
-        measured). Regular: a floating panel at the inline start, up to 375px
-        wide.
+        Compact: 8px from the screen’s sides and bottom (the home indicator sits
+        over its bottom margin), with 42px corners. Regular: a floating panel at
+        the inline start, up to 375px wide.
       </li>
       <li>
         Its box is what it shows: as tall as its stop (or, without stops, its
-        content), so the page’s paddings and the content layer’s{' '}
+        content). So the page’s paddings and the content layer’s{' '}
         <code>--uikit-viewport-anchor-block-end</code> follow it as it settles.
       </li>
       <li>
-        Up to 64px below the screen’s top, and clear of the top inset and the
-        bars there (e.g. a page’s navigation bar, its back button still
-        reached); its content scrolls at its top stop only, a pull down from its
-        start (a touch, or a wheel or trackpad scroll begun there) handing back
-        to the island.
+        It reaches up to 64px below the screen’s top, and stays clear of the top
+        inset and the bars there (for example a page’s navigation bar, so its
+        back button can still be reached). Its content only scrolls at its top
+        stop. A pull down from the content’s start (a touch, or a wheel or
+        trackpad scroll that started there) hands back to the island.
       </li>
       <li>
-        With the keyboard (a field in it typed into): pushed up with its anchor
-        (a bottom one, <code>keyboard=&quot;push&quot;</code>), its room above
-        it as before, its stops no taller; fully extended, its top staying as
-        its bottom follows the keyboard; back at its stop as the keyboard hides.
+        When a field inside it is typed into, the keyboard pushes it up with its
+        anchor (at the bottom, the keyboard pushes an anchor up by default). The
+        room above it stays as before, and its stops get no taller. Fully
+        extended, its top stays put while its bottom follows the keyboard. It
+        goes back to its stop as the keyboard hides.
       </li>
       <li>
-        Swiped: flung, a stop at a time; otherwise to the nearest stop, let go.
-        Never closed: its lowest stop its least (e.g. a sliver, its grabber
-        alone).
+        When swiped and flung, it moves one stop at a time. Otherwise, it goes
+        to the nearest stop when let go. It never closes: its lowest stop is the
+        least it shows (for example a sliver with only its grabber).
       </li>
       <li>
-        Touches beside it and above it reach the page’s content beneath (e.g.
-        the map).
+        Touches next to it and above it reach the page’s content beneath, such
+        as the map.
       </li>
     </ul>
   </>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 // The prop controls' `[overlay]` (see usePropControl): a part overlaid, its
-// box hatched over it (as the safe areas are, see shared/style.css), above
+// box hatched over it (as the safe area insets are, see shared/style.css), above
 // its content (a `style` alone draws below it). Marked by its style (a
 // custom property), drawn in a layer of the page's (over the stage, the
 // box clipped to it and to its device's screen), following the part each

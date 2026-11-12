@@ -5,7 +5,10 @@ import { FunctionComponent, useMemo } from 'react';
 import { ActionSheet, Button, Viewport } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -15,6 +18,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   actionSheetActionRows,
   actionSheetPopupRows,
@@ -36,49 +40,82 @@ const LiveView: FunctionComponent = () => {
     { external: externalRoot, title: 'ActionSheet.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'ActionSheet.Action': ['onClick', 'variant'],
+            'ActionSheet.Actions': [],
+            'ActionSheet.Description': [],
+            'ActionSheet.Header': [],
+            'ActionSheet.Popup': ['aria-label'],
+            'ActionSheet.Trigger': ['render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="popover"
-      controls={[controlContent, controlRoot]}
+      controls={[controlContent, controlRoot, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateContent, stateRoot]}
+      state={[stateContent, stateRoot, partState]}
       title="Action sheet"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <ActionSheet.Root
           key={keyRoot}
           {...propsRoot}
         >
           <ActionSheet.Trigger
+            {...partProps['ActionSheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Photo</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Photo
+            </Button.Label>
           </ActionSheet.Trigger>
-          <ActionSheet.Popup aria-label="Delete Photo">
+          <ActionSheet.Popup
+            {...partProps['ActionSheet.Popup']}
+            aria-label="Delete Photo"
+          >
             {content.header ? (
-              <ActionSheet.Header>
-                <ActionSheet.Description>
+              <ActionSheet.Header {...partProps['ActionSheet.Header']}>
+                <ActionSheet.Description
+                  {...partProps['ActionSheet.Description']}
+                >
                   This photo will be deleted from all your devices.
                 </ActionSheet.Description>
               </ActionSheet.Header>
             ) : null}
-            <ActionSheet.Actions>
+            <ActionSheet.Actions {...partProps['ActionSheet.Actions']}>
               <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
                 variant="destructive"
                 onClick={() => addLog('action: delete photo')}
               >
                 Delete Photo
               </ActionSheet.Action>
               <ActionSheet.Action
+                {...partProps['ActionSheet.Action']}
                 onClick={() => addLog('action: remove from album')}
               >
                 Remove from Album
@@ -106,12 +143,13 @@ export const ActionSheetOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Choices about an action the person just started: at the control that
+        Choices about an action someone just started, shown at the control that
         started it.
       </li>
       <li>
-        Modal: the page dimmed; a press outside cancels. In a regular width, the
-        same choices in a <a href={publicUrl('popover')}>Popover</a> (see{' '}
+        It’s modal, with the page dimmed, and a press outside cancels it. On a
+        regular width, the same choices go in a{' '}
+        <a href={publicUrl('popover')}>Popover</a> (see{' '}
         <a
           href={publicUrl(
             'action-sheet/composition#a-popover-in-a-regular-width',
@@ -132,12 +170,12 @@ export const ActionSheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Confirming or choosing how to do something the person started: Delete
-        Photo or Remove from Album, Discard Changes.
+        For confirming, or choosing how to do, something someone started: Delete
+        Photo or Remove from Album, or Discard Changes.
       </li>
       <li>
-        A set of commands at its control: two to a few actions, a destructive
-        one first.
+        For a set of commands at their control: two to a few actions, with a
+        destructive one first.
       </li>
     </ul>
 
@@ -149,14 +187,14 @@ export const ActionSheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Commands that aren’t about confirming (Share, Duplicate, Rename): a{' '}
+        Commands that aren’t about confirming (Share, Duplicate, Rename): use a{' '}
         <a href={publicUrl('menu')}>Menu</a>.
       </li>
       <li>
-        Information the app must tell, or a question not tied to a control: an{' '}
-        <a href={publicUrl('alert')}>Alert</a>.
+        Information the app must give, or a question not tied to a control: use
+        an <a href={publicUrl('alert')}>Alert</a>.
       </li>
-      <li>Undoable actions: just do them, offer undo.</li>
+      <li>Actions that can be undone: just do them, and offer undo.</li>
     </ul>
 
     <Heading
@@ -168,7 +206,8 @@ export const ActionSheetOverview: FunctionComponent = () => (
     <ul>
       <li>The props most action sheets set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('action-sheet/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('action-sheet/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -195,7 +234,8 @@ export const ActionSheetOverview: FunctionComponent = () => (
           component="action-sheet"
           part="ActionSheet.Title"
         />{' '}
-        (without one, by <code>aria-label</code>, as here) and described by its{' '}
+        (or, without one, by <code>aria-label</code>, as here) and described by
+        its{' '}
         <PartLink
           component="action-sheet"
           part="ActionSheet.Description"
@@ -203,12 +243,12 @@ export const ActionSheetOverview: FunctionComponent = () => (
         .
       </li>
       <li>
-        Opening moves focus into it, trapped there (modal); closing returns it
-        to its trigger. Escape closes it.
+        Opening moves focus into it and traps it there (it’s modal). Closing
+        returns focus to its trigger. Escape closes it.
       </li>
       <li>
-        Its actions are buttons, labeled by what they do; a destructive one is
-        red, and says so (Delete).
+        Its actions are buttons, labeled by what they do. A destructive one is
+        red, and its label says so (Delete).
       </li>
     </ul>
 
@@ -220,13 +260,13 @@ export const ActionSheetOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Below its trigger, 8px from it (above it, if there’s no room), scaling
-        in from it; opened by the app without a trigger, at the bottom of its
-        container.
+        It sits below its trigger, 8px away (or above it, without room), and
+        scales in from it. When the app opens it without a trigger, it sits at
+        the bottom of its container.
       </li>
       <li>
-        Each action closes it (after its click handler); a press outside, or
-        Escape, cancels.
+        Each action closes it, after its click handler. A press outside, or
+        Escape, cancels it.
       </li>
     </ul>
   </>

@@ -27,7 +27,7 @@
     }
 
     /* A header within it: its bar anchored (fixed, not within its padding),
-       the safe areas its own. */
+       the safe area insets its own. */
     & > .uikit-header-root > .uikit-viewport-anchor {
       --uikit-safe-area-inset-top: var(--uikit-page-safe-top);
       --uikit-safe-area-inset-bottom: var(--uikit-page-safe-bottom);
@@ -38,7 +38,7 @@
     }
 
     /* Filled by its content (`fill`), not scrolling: no padding (its
-       content under the bars and the safe areas, their insets its own),
+       content under the bars and the safe area insets, their sizes its own),
        its content filling it. */
     &[data-fill] {
       display: grid;

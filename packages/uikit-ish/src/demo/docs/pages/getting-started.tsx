@@ -179,8 +179,8 @@ export const GettingStartedPage: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Provider"
         />{' '}
-        tracks the window: its safe areas, the on-screen keyboard, scrolling.
-        Bars and sheets read it.
+        tracks the window: its safe area insets, the on-screen keyboard,
+        scrolling. Bars and sheets read it.
       </li>
     </ul>
     <p>And a little CSS of your own, as the library leaves the page to you:</p>
@@ -198,7 +198,7 @@ export const GettingStartedPage: FunctionComponent = () => (
     </p>
     <ul className="demo-tree">
       <li className="demo-tree-context">
-        Your render root (e.g. <code>body</code>)
+        Your render root (for example <code>body</code>)
         <ul>
           <li>
             <code>Styles</code>
@@ -392,7 +392,7 @@ export const GettingStartedPage: FunctionComponent = () => (
         Let the page reach under the status bar and the home indicator:{' '}
         <code>viewport-fit=cover</code> in the viewport meta tag, and a
         translucent status bar on iOS. The library keeps its bars clear of the
-        safe areas for you.
+        safe area insets for you.
       </li>
       <li>
         On iOS 27, a translucent status bar blurs your top bar: add the inline

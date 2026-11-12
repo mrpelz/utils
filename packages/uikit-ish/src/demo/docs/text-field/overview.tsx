@@ -1,9 +1,12 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { List, TextField } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -13,6 +16,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   textFieldControlRows,
   textFieldErrorRows,
@@ -43,43 +47,78 @@ const LiveView: FunctionComponent = () => {
       title: 'TextField.Control',
     });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Below': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['className'],
+            'List.Section': [],
+            'List.Trailing': [],
+            'TextField.Clear': [],
+            'TextField.Description': [],
+            'TextField.Error': [],
+            'TextField.Label': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[controlContent, controlRoot, controlControl]}
+      controls={[controlContent, controlRoot, controlControl, partControls]}
       id={id}
       log={log}
-      state={[stateContent, stateRoot, stateControl]}
+      state={[stateContent, stateRoot, stateControl, partState]}
       title="Text field"
     >
-      <List.Root className="text-field-demo-list">
-        <List.Section>
-          <List.Group>
+      <List.Root
+        {...partProps['List.Root']}
+        className="text-field-demo-list"
+      >
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <TextField.Root
               key={`${keyRoot}-${keyControl}`}
-              render={<List.Item />}
+              render={<List.Item {...partProps['List.Item']} />}
               {...propsRoot}
             >
-              <List.Content>
-                {content.label ? <TextField.Label>Name</TextField.Label> : null}
+              <List.Content {...partProps['List.Content']}>
+                {content.label ? (
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Name
+                  </TextField.Label>
+                ) : null}
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
                   aria-label={content.label ? undefined : 'Name'}
                   {...propsControl}
                   onValueChange={(value: string) => addLog(`value: ${value}`)}
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
-              <List.Below>
+              <List.Below {...partProps['List.Below']}>
                 {content.description ? (
-                  <TextField.Description>
+                  <TextField.Description
+                    {...partProps['TextField.Description']}
+                  >
                     As shown to others.
                   </TextField.Description>
                 ) : null}
-                <TextField.Error>Please enter a name.</TextField.Error>
+                <TextField.Error {...partProps['TextField.Error']}>
+                  Please enter a name.
+                </TextField.Error>
               </List.Below>
             </TextField.Root>
           </List.Group>
@@ -104,17 +143,18 @@ export const TextFieldOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Free text, a line (or several) of it (Base UI’s <code>Field</code>): a
-        name, an address, a search.
+        Free text, a line or several of it, such as a name, an address or a
+        search. It’s Base UI’s <code>Field</code>.
       </li>
       <li>
-        As a <a href={publicUrl('list')}>List</a> row (a form’s, Settings’): its
-        label the row’s title, its value at the row’s end; or stacked on its
-        own; or a search field’s capsule.
+        It can be a <a href={publicUrl('list')}>List</a> row (as in a form or a
+        settings app), with its label as the row’s title and its value at the
+        row’s end. Or it can stand on its own, stacked, or be a search field’s
+        capsule.
       </li>
       <li>
-        Validated as the browser’s inputs are (and by a function of the app’s),
-        its error below it.
+        It’s validated like the browser’s inputs (and by a function of the
+        app’s), with its error below it.
       </li>
     </ul>
     <LiveView />
@@ -127,21 +167,24 @@ export const TextFieldOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Something only people know: a name, an email address, a note (see{' '}
+        For something only people know: a name, an email address, a note (see{' '}
         <a href={publicUrl('text-field/composition#in-a-form-list')}>
           Composition
         </a>
         ).
       </li>
       <li>
-        Searching: a search field (
+        For searching: a search field (
         <PartLink
           component="text-field"
           part="TextField.Frame"
         />
-        ), filtering what’s shown.
+        ) that filters what’s shown.
       </li>
-      <li>Entry with suggestions: what people have typed before, contacts.</li>
+      <li>
+        For entry with suggestions, such as what people typed before, or
+        contacts.
+      </li>
     </ul>
 
     <Heading
@@ -152,18 +195,18 @@ export const TextFieldOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A pick from a known set: a{' '}
+        A pick from a known set: use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control, a{' '}
-        <a href={publicUrl('list')}>List</a> with checkmarks, a{' '}
+        <a href={publicUrl('list')}>List</a> with checkmarks, or a{' '}
         <a href={publicUrl('menu')}>Menu</a>.
       </li>
       <li>
-        A number in a range: a <a href={publicUrl('slider')}>Slider</a> or a{' '}
-        <a href={publicUrl('stepper')}>Stepper</a>; a date: a{' '}
-        <a href={publicUrl('date-picker')}>Date picker</a>.
+        A number in a range: use a <a href={publicUrl('slider')}>Slider</a> or a{' '}
+        <a href={publicUrl('stepper')}>Stepper</a>. A date: use a{' '}
+        <a href={publicUrl('date-picker')}>Date Picker</a>.
       </li>
       <li>
-        A text asked for at a moment (a name for a new folder): an{' '}
+        A text asked for in the moment (a name for a new folder): use an{' '}
         <a href={publicUrl('alert')}>Alert</a>’s field.
       </li>
     </ul>
@@ -175,9 +218,10 @@ export const TextFieldOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most fields set, across their parts.</li>
+      <li>The props most fields set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('text-field/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('text-field/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -222,22 +266,25 @@ export const TextFieldOverview: FunctionComponent = () => (
           component="text-field"
           part="TextField.Label"
         />
-        ; without one (a placeholder alone), give it an <code>aria-label</code>.
+        . Without one (with only a placeholder), give it an{' '}
+        <code>aria-label</code>.
       </li>
       <li>
         Its description and its error describe it (<code>aria-describedby</code>
-        ); invalid, it’s <code>aria-invalid</code>.
+        ). When it’s invalid, it’s <code>aria-invalid</code>.
       </li>
       <li>
-        The clear button is out of the tab order, named “Clear text”: the
-        keyboard clears by selecting and deleting.
+        The clear button is out of the tab order and named “Clear text”. With
+        the keyboard, people clear the field by selecting and deleting.
       </li>
       <li>
         Its <code>type</code>, <code>inputMode</code>, <code>autoComplete</code>{' '}
-        and <code>enterKeyHint</code> pick iOS’s keyboard and its autofill.
+        and <code>enterKeyHint</code> pick the on-screen keyboard and its
+        autofill.
       </li>
       <li>
-        Invalid isn’t told by color alone: the error message says what to fix.
+        Color alone doesn’t say it’s invalid: the error message says what to
+        fix.
       </li>
     </ul>
 
@@ -249,27 +296,30 @@ export const TextFieldOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row: the label in Body, the value after it (aligned to the row’s end
-        with a label; filling the row without one), 17px.
+        As a row: the label in Body, and the value after it at 17px (aligned
+        with the row’s end when there’s a label, filling the row when there
+        isn’t).
       </li>
       <li>
-        Standalone (not a row): label, control, description and error stacked,
-        4px apart; the label in Subheadline.
+        On its own (not a row): the label, control, description and error
+        stacked 4px apart, with the label in Subheadline.
       </li>
       <li>
-        The clear button only while it’s filled: by default while it’s focused
-        too (<code>whileEditing</code>; its <code>mode</code>: also{' '}
-        <code>unlessEditing</code>, <code>always</code>), clearing as typing
-        would (its change handlers run), focusing the control.
+        The clear button shows only while the field is filled, and by default
+        only while it has focus too (<code>whileEditing</code>; its{' '}
+        <code>mode</code> can also be <code>unlessEditing</code> or{' '}
+        <code>always</code>). It clears the field as typing would (its change
+        handlers run), and focuses the control.
       </li>
       <li>
-        Validated when its <code>validationMode</code> says: on submitting its{' '}
-        <a href={publicUrl('form')}>Form</a> (then on each change), on leaving
-        it, or on each change; invalid, its value in red, its error shown.
+        It’s validated when its <code>validationMode</code> says: when its{' '}
+        <a href={publicUrl('form')}>Form</a> is submitted (then on each change),
+        when focus leaves it, or on each change. When it’s invalid, its value
+        turns red and its error shows.
       </li>
       <li>
-        Its description and error in Caption 1 (12px), below it; disabled,
-        dimmed (55%).
+        Its description and error are in Caption 1 (12px), below it. When it’s
+        disabled, it’s dimmed (55%).
       </li>
     </ul>
   </>

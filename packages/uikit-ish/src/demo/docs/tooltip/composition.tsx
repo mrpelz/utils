@@ -1,11 +1,14 @@
 import '../toolbar/style.css';
 import './style.css';
 
-import { FunctionComponent, useRef } from 'react';
+import { FunctionComponent, useMemo, useRef } from 'react';
 
 import { Button, Symbol, Toolbar, Tooltip } from '../../../components/index.js';
+import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -19,86 +22,184 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
+
+/* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
+const inAToolbarCode = `{/* One provider: once one has shown, the next shows at once. */}
+<Tooltip.Provider>
+  <Toolbar.Root placement="block-start">
+    <Toolbar.Title>
+      <span>Notes</span>
+    </Toolbar.Title>
+    <Toolbar.Trailing>
+      <Toolbar.Group>
+        <Tooltip.Root>
+          <Tooltip.Trigger
+            aria-label="Share"
+            render={<Toolbar.Button shape="circle" />}
+          >
+            <Button.Icon>
+              <Symbol icon={sfSquareAndArrowUp} />
+            </Button.Icon>
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Positioner>
+              <Tooltip.Popup>Share</Tooltip.Popup>
+            </Tooltip.Positioner>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+        …
+      </Toolbar.Group>
+    </Toolbar.Trailing>
+  </Toolbar.Root>
+</Tooltip.Provider>`;
+
+const heldOpenCode = `const pin = useRef<HTMLSpanElement>(null);
+
+<span ref={pin}>
+  <Symbol icon={sfMappinAndEllipse} />
+</span>
+{/* No trigger: held open at the pin. */}
+<Tooltip.Root open>
+  <Tooltip.Portal>
+    <Tooltip.Positioner anchor={pin}>
+      <Tooltip.Popup>You Are Here</Tooltip.Popup>
+    </Tooltip.Positioner>
+  </Tooltip.Portal>
+</Tooltip.Root>`;
+/* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** A toolbar's symbol buttons, their tooltips sharing a provider. */
 const InAToolbar: FunctionComponent = () => {
   const [log, addLog] = useLog();
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Button': ['onClick', 'shape'],
+            'Toolbar.Group': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Tooltip.Popup': [],
+            'Tooltip.Portal': [],
+            'Tooltip.Positioner': [],
+            'Tooltip.Provider': [],
+            'Tooltip.Root': [],
+            'Tooltip.Trigger': ['aria-label', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('tooltip-composition-toolbar') },
+  );
 
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
+      controls={[partControls]}
       id="tooltip-composition-toolbar"
       log={log}
+      state={[partState]}
       title="Tooltips in a toolbar"
     >
       <div className="tooltip-demo-buttons">
         <div className="toolbar-demo-bar">
-          <Tooltip.Provider>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Title>
+          <Tooltip.Provider {...partProps['Tooltip.Provider']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Notes</span>
               </Toolbar.Title>
-              <Toolbar.Trailing>
-                <Toolbar.Group>
-                  <Tooltip.Root>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                <Toolbar.Group {...partProps['Toolbar.Group']}>
+                  <Tooltip.Root {...partProps['Tooltip.Root']}>
                     <Tooltip.Trigger
+                      {...partProps['Tooltip.Trigger']}
                       aria-label="Share"
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           shape="circle"
                           onClick={() => addLog('share clicked')}
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfSquareAndArrowUp} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfSquareAndArrowUp}
+                        />
                       </Button.Icon>
                     </Tooltip.Trigger>
-                    <Tooltip.Portal>
-                      <Tooltip.Positioner>
-                        <Tooltip.Popup>Share</Tooltip.Popup>
+                    <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+                      <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+                        <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                          Share
+                        </Tooltip.Popup>
                       </Tooltip.Positioner>
                     </Tooltip.Portal>
                   </Tooltip.Root>
-                  <Tooltip.Root>
+                  <Tooltip.Root {...partProps['Tooltip.Root']}>
                     <Tooltip.Trigger
+                      {...partProps['Tooltip.Trigger']}
                       aria-label="Duplicate"
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           shape="circle"
                           onClick={() => addLog('duplicate clicked')}
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfPlusSquareOnSquare} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfPlusSquareOnSquare}
+                        />
                       </Button.Icon>
                     </Tooltip.Trigger>
-                    <Tooltip.Portal>
-                      <Tooltip.Positioner>
-                        <Tooltip.Popup>Duplicate</Tooltip.Popup>
+                    <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+                      <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+                        <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                          Duplicate
+                        </Tooltip.Popup>
                       </Tooltip.Positioner>
                     </Tooltip.Portal>
                   </Tooltip.Root>
-                  <Tooltip.Root>
+                  <Tooltip.Root {...partProps['Tooltip.Root']}>
                     <Tooltip.Trigger
+                      {...partProps['Tooltip.Trigger']}
                       aria-label="Delete"
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           shape="circle"
                           onClick={() => addLog('delete clicked')}
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfTrash} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfTrash}
+                        />
                       </Button.Icon>
                     </Tooltip.Trigger>
-                    <Tooltip.Portal>
-                      <Tooltip.Positioner>
-                        <Tooltip.Popup>Delete</Tooltip.Popup>
+                    <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+                      <Tooltip.Positioner {...partProps['Tooltip.Positioner']}>
+                        <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                          Delete
+                        </Tooltip.Popup>
                       </Tooltip.Positioner>
                     </Tooltip.Portal>
                   </Tooltip.Root>
@@ -116,12 +217,29 @@ const InAToolbar: FunctionComponent = () => {
 const HeldOpen: FunctionComponent = () => {
   const pin = useRef<HTMLSpanElement>(null);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Tooltip.Popup': [],
+          'Tooltip.Portal': [],
+          'Tooltip.Positioner': ['anchor'],
+          'Tooltip.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState('tooltip-composition-held') },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="tooltip"
+      controls={[partControls]}
       id="tooltip-composition-held"
+      state={[partState]}
       title="Tooltip held open"
     >
       <div className="tooltip-demo-buttons">
@@ -129,12 +247,23 @@ const HeldOpen: FunctionComponent = () => {
           ref={pin}
           className="tooltip-demo-pin"
         >
-          <Symbol icon={sfMappinAndEllipse} />
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfMappinAndEllipse}
+          />
         </span>
-        <Tooltip.Root open>
-          <Tooltip.Portal>
-            <Tooltip.Positioner anchor={pin}>
-              <Tooltip.Popup>You Are Here</Tooltip.Popup>
+        <Tooltip.Root
+          {...partProps['Tooltip.Root']}
+          open
+        >
+          <Tooltip.Portal {...partProps['Tooltip.Portal']}>
+            <Tooltip.Positioner
+              {...partProps['Tooltip.Positioner']}
+              anchor={pin}
+            >
+              <Tooltip.Popup {...partProps['Tooltip.Popup']}>
+                You Are Here
+              </Tooltip.Popup>
             </Tooltip.Positioner>
           </Tooltip.Portal>
         </Tooltip.Root>
@@ -163,16 +292,17 @@ export const TooltipComposition: FunctionComponent = () => (
     <ul>
       <li>
         A <a href={publicUrl('toolbar')}>Toolbar</a>’s symbol buttons (
-        <code>{'render={<Toolbar.Button />}'}</code>), each named (
-        <code>aria-label</code>), each with its tooltip.
+        <code>{'render={<Toolbar.Button />}'}</code>), each with a name (
+        <code>aria-label</code>) and its own tooltip.
       </li>
       <li>
-        In one{' '}
+        They share one{' '}
         <PartLink
           component="tooltip"
           part="Tooltip.Provider"
         />
-        : once one has shown, moving to the next shows its tooltip at once.
+        : once one tooltip has shown, moving to the next button shows its
+        tooltip at once.
       </li>
       <li>
         <strong>Library:</strong> the tooltips (
@@ -185,13 +315,14 @@ export const TooltipComposition: FunctionComponent = () => (
           component="tooltip"
           part="Tooltip.Provider"
         />
-        ) showing the next at once.
+        ) that shows the next one at once.
       </li>
       <li>
-        <strong>Demo:</strong> the buttons, their names and what each does
+        <strong>Demo:</strong> the buttons, their names, and what each does
         (logged).
       </li>
     </ul>
+    <CodeView code={inAToolbarCode} />
     <InAToolbar />
 
     <Heading
@@ -202,17 +333,19 @@ export const TooltipComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        No trigger: held open (<code>open</code>), placed at any element (
+        There’s no trigger. It’s held open (<code>open</code>) and placed at any
+        element (the{' '}
         <PartLink
           component="tooltip"
           part="Tooltip.Positioner"
         />
-        ’s <code>anchor</code>): a label for good, on touch too.
+        ’s <code>anchor</code>), as a lasting label that works on touch too.
       </li>
       <li>
-        As <a href={publicUrl('slider')}>Slider</a>’s and{' '}
-        <a href={publicUrl('progress')}>Progress</a>’ value labels, and a{' '}
-        <a href={publicUrl('page-control')}>Page control</a>’s.
+        That’s how the value labels of a{' '}
+        <a href={publicUrl('slider')}>Slider</a>, a{' '}
+        <a href={publicUrl('progress')}>Progress</a> and a{' '}
+        <a href={publicUrl('page-control')}>Page Control</a> work.
       </li>
       <li>
         <strong>Library:</strong> holding it open (<code>open</code>) at an
@@ -224,9 +357,11 @@ export const TooltipComposition: FunctionComponent = () => (
         <code>anchor</code>).
       </li>
       <li>
-        <strong>Demo:</strong> the element it’s pinned to (a ref) and its label.
+        <strong>Demo:</strong> the element it’s pinned to (a ref), and its
+        label.
       </li>
     </ul>
+    <CodeView code={heldOpenCode} />
     <HeldOpen />
   </>
 );

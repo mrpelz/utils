@@ -135,7 +135,7 @@ const Positioner = forwardRef<HTMLDivElement, EditMenuPositionerProps>(
   ) => {
     const ref = useForwardedRef(forwardedRef);
     useCloseOutOfView(ref);
-    // Within its container (e.g. the views' frames), clear of its safe area;
+    // Within its container (e.g. the views' frames), clear of its safe area insets;
     // growing rather than scrolling (unless its own is given).
     const collision = useCollision({ collisionBoundary, collisionPadding });
     const [grow, growRef] = useGrowAvoidance({}, ref);

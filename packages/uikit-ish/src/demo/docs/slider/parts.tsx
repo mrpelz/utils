@@ -6,12 +6,14 @@ import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfSunMax, sfSunMin } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   sliderControlRows,
   sliderIndicatorRows,
@@ -56,41 +58,74 @@ const RootPart: FunctionComponent = () => {
   // (A range, by its values: a thumb for each.)
   const isRange = Array.isArray(props.value ?? props.defaultValue);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Symbol': ['edge'],
+            'Slider.Thumb': ['aria-label', 'index'],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Root"
     >
       <Slider.Root
         key={elementKey}
         {...props}
       >
-        <Slider.Symbol edge="min">
-          <Symbol icon={sfSunMin} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="min"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMin}
+          />
         </Slider.Symbol>
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
             <Slider.Thumb
+              {...partProps['Slider.Thumb']}
               aria-label={isRange ? 'Minimum brightness' : 'Brightness'}
               index={0}
             />
             {isRange ? (
               <Slider.Thumb
+                {...partProps['Slider.Thumb']}
                 aria-label="Maximum brightness"
                 index={1}
               />
             ) : null}
           </Slider.Track>
         </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="max"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMax}
+          />
         </Slider.Symbol>
       </Slider.Root>
     </Component>
@@ -109,26 +144,45 @@ const LabelPart: FunctionComponent = () => {
     title: 'Slider.Label',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Thumb': [],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Label"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={60}
         onValueCommitted={logCommit(addLog)}
       >
         <Slider.Label {...props}>Brightness</Slider.Label>
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            <Slider.Thumb />
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
+            <Slider.Thumb {...partProps['Slider.Thumb']} />
           </Slider.Track>
         </Slider.Control>
       </Slider.Root>
@@ -148,27 +202,47 @@ const ValuePart: FunctionComponent = () => {
     title: 'Slider.Value',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Label': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Thumb': [],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Value"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={60}
         onValueCommitted={logCommit(addLog)}
       >
-        <Slider.Label>Brightness</Slider.Label>
+        <Slider.Label {...partProps['Slider.Label']}>Brightness</Slider.Label>
         <Slider.Value {...props} />
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            <Slider.Thumb />
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
+            <Slider.Thumb {...partProps['Slider.Thumb']} />
           </Slider.Track>
         </Slider.Control>
       </Slider.Root>
@@ -188,32 +262,67 @@ const ControlPart: FunctionComponent = () => {
     title: 'Slider.Control',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Indicator': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Symbol': ['edge'],
+            'Slider.Thumb': ['aria-label'],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Control"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={60}
         onValueCommitted={logCommit(addLog)}
       >
-        <Slider.Symbol edge="min">
-          <Symbol icon={sfSunMin} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="min"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMin}
+          />
         </Slider.Symbol>
         <Slider.Control {...props}>
-          <Slider.Track>
-            <Slider.Indicator />
-            <Slider.Thumb aria-label="Brightness" />
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
+            <Slider.Thumb
+              {...partProps['Slider.Thumb']}
+              aria-label="Brightness"
+            />
           </Slider.Track>
         </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="max"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMax}
+          />
         </Slider.Symbol>
       </Slider.Root>
     </Component>
@@ -232,32 +341,67 @@ const TrackPart: FunctionComponent = () => {
     title: 'Slider.Track',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Symbol': ['edge'],
+            'Slider.Thumb': ['aria-label'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Track"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={60}
         onValueCommitted={logCommit(addLog)}
       >
-        <Slider.Symbol edge="min">
-          <Symbol icon={sfSunMin} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="min"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMin}
+          />
         </Slider.Symbol>
-        <Slider.Control>
+        <Slider.Control {...partProps['Slider.Control']}>
           <Slider.Track {...props}>
-            <Slider.Indicator />
-            <Slider.Thumb aria-label="Brightness" />
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
+            <Slider.Thumb
+              {...partProps['Slider.Thumb']}
+              aria-label="Brightness"
+            />
           </Slider.Track>
         </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="max"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMax}
+          />
         </Slider.Symbol>
       </Slider.Root>
     </Component>
@@ -276,32 +420,67 @@ const IndicatorPart: FunctionComponent = () => {
     title: 'Slider.Indicator',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Control': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Symbol': ['edge'],
+            'Slider.Thumb': ['aria-label'],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Indicator"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={60}
         onValueCommitted={logCommit(addLog)}
       >
-        <Slider.Symbol edge="min">
-          <Symbol icon={sfSunMin} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="min"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMin}
+          />
         </Slider.Symbol>
-        <Slider.Control>
-          <Slider.Track>
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
             <Slider.Indicator {...props} />
-            <Slider.Thumb aria-label="Brightness" />
+            <Slider.Thumb
+              {...partProps['Slider.Thumb']}
+              aria-label="Brightness"
+            />
           </Slider.Track>
         </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="max"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMax}
+          />
         </Slider.Symbol>
       </Slider.Root>
     </Component>
@@ -318,36 +497,70 @@ const ThumbPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Slider.Thumb' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Thumb (others)': ['aria-label', 'index'],
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Symbol': ['edge'],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Thumb"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={[25, 75]}
         onValueCommitted={logCommit(addLog)}
       >
-        <Slider.Symbol edge="min">
-          <Symbol icon={sfSunMin} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="min"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMin}
+          />
         </Slider.Symbol>
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
             <Slider.Thumb {...props} />
             <Slider.Thumb
+              {...partProps['Slider.Thumb (others)']}
               aria-label="Maximum brightness"
               index={1}
             />
           </Slider.Track>
         </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="max"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMax}
+          />
         </Slider.Symbol>
       </Slider.Root>
     </Component>
@@ -366,36 +579,79 @@ const TicksPart: FunctionComponent = () => {
     title: 'Slider.Ticks',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Root': [
+              'defaultValue',
+              'each',
+              'for',
+              'onValueCommitted',
+              'step',
+              'tick',
+            ],
+            'Slider.Symbol': ['edge'],
+            'Slider.Thumb': ['aria-label'],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Ticks"
     >
       <Slider.Root
         key={elementKey}
+        {...partProps['Slider.Root']}
         defaultValue={60}
         // (A tick for each step.)
         step={100 / (props.count - 1)}
         onValueCommitted={logCommit(addLog)}
       >
-        <Slider.Symbol edge="min">
-          <Symbol icon={sfSunMin} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="min"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMin}
+          />
         </Slider.Symbol>
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
             <Slider.Ticks {...props} />
-            <Slider.Thumb aria-label="Brightness" />
+            <Slider.Thumb
+              {...partProps['Slider.Thumb']}
+              aria-label="Brightness"
+            />
           </Slider.Track>
         </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol']}
+          edge="max"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMax}
+          />
         </Slider.Symbol>
       </Slider.Root>
     </Component>
@@ -412,32 +668,65 @@ const SymbolPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Slider.Symbol' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Slider.Symbol (others)': ['edge'],
+            'Slider.Control': [],
+            'Slider.Indicator': [],
+            'Slider.Root': ['defaultValue', 'onValueCommitted'],
+            'Slider.Thumb': ['aria-label'],
+            'Slider.Track': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       isStretched
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Slider.Symbol"
     >
       <Slider.Root
+        {...partProps['Slider.Root']}
         defaultValue={60}
         onValueCommitted={logCommit(addLog)}
       >
         <Slider.Symbol {...props}>
-          <Symbol icon={sfSunMin} />
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMin}
+          />
         </Slider.Symbol>
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            <Slider.Thumb aria-label="Brightness" />
+        <Slider.Control {...partProps['Slider.Control']}>
+          <Slider.Track {...partProps['Slider.Track']}>
+            <Slider.Indicator {...partProps['Slider.Indicator']} />
+            <Slider.Thumb
+              {...partProps['Slider.Thumb']}
+              aria-label="Brightness"
+            />
           </Slider.Track>
         </Slider.Control>
-        <Slider.Symbol edge="max">
-          <Symbol icon={sfSunMax} />
+        <Slider.Symbol
+          {...partProps['Slider.Symbol (others)']}
+          edge="max"
+        >
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfSunMax}
+          />
         </Slider.Symbol>
       </Slider.Root>
     </Component>
@@ -460,20 +749,20 @@ export const SliderParts: FunctionComponent = () => (
           component="slider"
           part="Slider.Control"
         />
-        : the area taking presses and drags.
+        : the area that takes presses and drags.
       </li>
       <li>
-        In it,{' '}
+        Inside it, the{' '}
         <PartLink
           component="slider"
           part="Slider.Track"
         />
-        : its fill (
+        , with its fill (
         <PartLink
           component="slider"
           part="Slider.Indicator"
         />
-        ) and a knob (
+        ) and one knob (
         <PartLink
           component="slider"
           part="Slider.Thumb"
@@ -481,80 +770,97 @@ export const SliderParts: FunctionComponent = () => (
         ) per value.
       </li>
       <li>
-        Optional, around them: a label, the value, the ends’ symbols. On the
+        Optional, around them: a label, the value and the ends’ symbols. On the
         track: ticks.
       </li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="slider"
-          part="Slider.Root"
-        />
+          component="list"
+          part="List.Span"
+        />{' '}
+        <span>(optional: across a list row)</span>
         <ul>
           <li>
             <PartLink
               component="slider"
-              part="Slider.Label"
-            />{' '}
-            (optional)
-          </li>
-          <li>
-            <PartLink
-              component="slider"
-              part="Slider.Value"
-            />{' '}
-            (optional)
-          </li>
-          <li>
-            <PartLink
-              component="slider"
-              part="Slider.Symbol"
-            />{' '}
-            (optional, at the minimum’s end)
-          </li>
-          <li>
-            <PartLink
-              component="slider"
-              part="Slider.Control"
+              part="Slider.Root"
             />
             <ul>
               <li>
                 <PartLink
                   component="slider"
-                  part="Slider.Track"
+                  part="Slider.Label"
+                />{' '}
+                (optional)
+              </li>
+              <li>
+                <PartLink
+                  component="slider"
+                  part="Slider.Value"
+                />{' '}
+                (optional)
+              </li>
+              <li>
+                <PartLink
+                  component="slider"
+                  part="Slider.Symbol"
+                />{' '}
+                (optional, at the minimum’s end)
+                <ul>
+                  <li className="demo-tree-context">
+                    <PartLink
+                      component="symbol"
+                      part="Symbol"
+                    />
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <PartLink
+                  component="slider"
+                  part="Slider.Control"
                 />
                 <ul>
                   <li>
                     <PartLink
                       component="slider"
-                      part="Slider.Indicator"
+                      part="Slider.Track"
                     />
-                  </li>
-                  <li>
-                    <PartLink
-                      component="slider"
-                      part="Slider.Ticks"
-                    />{' '}
-                    (optional)
-                  </li>
-                  <li>
-                    <PartLink
-                      component="slider"
-                      part="Slider.Thumb"
-                    />{' '}
-                    (one, or two for a range)
+                    <ul>
+                      <li>
+                        <PartLink
+                          component="slider"
+                          part="Slider.Indicator"
+                        />
+                      </li>
+                      <li>
+                        <PartLink
+                          component="slider"
+                          part="Slider.Ticks"
+                        />{' '}
+                        (optional)
+                      </li>
+                      <li>
+                        <PartLink
+                          component="slider"
+                          part="Slider.Thumb"
+                        />{' '}
+                        (one, or two for a range)
+                      </li>
+                    </ul>
                   </li>
                 </ul>
               </li>
+              <li>
+                <PartLink
+                  component="slider"
+                  part="Slider.Symbol"
+                />{' '}
+                (optional, at the maximum’s end)
+              </li>
             </ul>
-          </li>
-          <li>
-            <PartLink
-              component="slider"
-              part="Slider.Symbol"
-            />{' '}
-            (optional, at the maximum’s end)
           </li>
         </ul>
       </li>
@@ -569,20 +875,22 @@ export const SliderParts: FunctionComponent = () => (
     <ul>
       <li>Base UI’s slider root.</li>
       <li>
-        Value: <code>value</code> or <code>defaultValue</code> (a number, or an
-        array of them for a range).
+        Its value: <code>value</code> or <code>defaultValue</code> (a number, or
+        an array of them for a range).
       </li>
       <li>
-        Bounds and steps: <code>min</code>, <code>max</code>, <code>step</code>,{' '}
-        <code>largeStep</code>.
+        Its bounds and steps: <code>min</code>, <code>max</code>,{' '}
+        <code>step</code> and <code>largeStep</code>.
       </li>
       <li>
-        Formatting: <code>format</code>, <code>locale</code>.
+        Its formatting: <code>format</code> and <code>locale</code>.
       </li>
       <li>
         The fill’s <code>tint</code>.
       </li>
-      <li>Lays out its children in a row; the track takes the space left.</li>
+      <li>
+        It lays out its children in a row, and the track takes the space left.
+      </li>
     </ul>
     <RootPart />
     <h3>Props</h3>
@@ -596,13 +904,14 @@ export const SliderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s label: names the slider’s inputs (<code>aria-labelledby</code>
-        ); the knob needs no <code>aria-label</code>.
+        Base UI’s label. It names the slider’s inputs (
+        <code>aria-labelledby</code>), so the knob needs no{' '}
+        <code>aria-label</code>.
       </li>
-      <li>Body text style.</li>
+      <li>In the Body text style.</li>
       <li>
-        Where it is among the parts, or by <code>placement</code>: before or
-        after them all, or on a line above or below.
+        It sits where it is among the parts, or where <code>placement</code>{' '}
+        puts it: before or after them all, or on a line above or below.
       </li>
     </ul>
     <LabelPart />
@@ -620,10 +929,10 @@ export const SliderParts: FunctionComponent = () => (
         Base UI’s value (an <code>output</code>): the formatted value, or what
         its function child makes of it.
       </li>
-      <li>Tabular numerals, as wide as its widest value.</li>
+      <li>In tabular numerals, as wide as its widest value.</li>
       <li>
-        Placed as the label (at the line’s end, above or below), or in a tooltip
-        on each knob, always or momentarily.
+        It’s placed like the label (at the line’s end, above or below), or in a
+        tooltip on each knob, always or only momentarily.
       </li>
     </ul>
     <ValuePart />
@@ -637,9 +946,10 @@ export const SliderParts: FunctionComponent = () => (
       <code>Slider.Control</code>
     </Heading>
     <ul>
-      <li>Base UI’s control: the area taking presses and drags.</li>
+      <li>Base UI’s control: the area that takes presses and drags.</li>
       <li>
-        As high as the knob (28px), at least 120px long, filling the root.
+        It’s as tall as the knob (28px), at least 120px long, and fills the
+        root.
       </li>
     </ul>
     <ControlPart />
@@ -656,7 +966,7 @@ export const SliderParts: FunctionComponent = () => (
       <li>
         Base UI’s track: the 6px bar, in a fill color (<code>systemFill</code>).
       </li>
-      <li>Holds the fill, the ticks and the knobs.</li>
+      <li>It holds the fill, the ticks and the knobs.</li>
     </ul>
     <TrackPart />
     <h3>Props</h3>
@@ -671,9 +981,9 @@ export const SliderParts: FunctionComponent = () => (
     <ul>
       <li>
         Base UI’s indicator: the fill in the tint, from the minimum to the value
-        (between the values, for a range).
+        (or between the values, for a range).
       </li>
-      <li>Placed by the value: spans the whole track at the maximum.</li>
+      <li>The value places it, so it spans the whole track at the maximum.</li>
     </ul>
     <IndicatorPart />
     <h3>Props</h3>
@@ -687,12 +997,12 @@ export const SliderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s thumb: the knob, holding the hidden range input that gets
+        Base UI’s thumb: the knob, which holds the hidden range input that gets
         focus and keys.
       </li>
       <li>
-        A range: two, by <code>index</code>, each named (<code>aria-label</code>
-        ) for what it sets.
+        A range has two, by <code>index</code>, each named (
+        <code>aria-label</code>) for what it sets.
       </li>
     </ul>
     <ThumbPart />
@@ -707,11 +1017,11 @@ export const SliderParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Tick marks inside the track, one per each of the <code>count</code>{' '}
+        Tick marks inside the track, one for each of the <code>count</code>{' '}
         values between the ends.
       </li>
       <li>
-        Where the fill ends at them; match the root’s <code>step</code> to them.
+        The fill ends at them. Match the root’s <code>step</code> to them.
       </li>
       <li>Hidden from assistive technology.</li>
     </ul>

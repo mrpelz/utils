@@ -1,7 +1,7 @@
 /* Viewport (see main.tsx). */
 @layer uikit-ish {
   /* iOS 26, a Home Screen app (marked by its layers, see main.tsx; under
-     a translucent status bar, the page under the safe areas): a document no
+     a translucent status bar, the page under the safe area insets): a document no
      taller than its window gets a layout viewport short by the status
      bar's height (WebKit bug 301108), nothing painted below it (the
      layers neither). As tall as the screen, the document gets the full one
@@ -31,7 +31,7 @@
      main.tsx): its
      background, where nothing paints its own (a page's default, see Page):
      beneath the layers, the content layer without one of its own (its
-     overscroll areas beneath it), behind the safe areas and past its
+     overscroll areas beneath it), behind the safe area insets and past its
      content's ends. */
   :root[data-uikit-viewport-window] {
     background-color: var(--color-ui-system-grouped-background);
@@ -251,7 +251,7 @@
   /* A scroller's edge effect (see EdgeEffects), fixed at its edge as its
      bars are (beneath them, a layer of its own: Safari's overlap testing,
      see above), as tall as the tallest (`--uikit-viewport-edge-size`, its
-     safe area too) and what's stuck to them (`--uikit-viewport-edge-extent`).
+     safe area inset too) and what's stuck to them (`--uikit-viewport-edge-extent`).
      Showing as content scrolls under the bars
      (`--uikit-viewport-edge-progress`, measured). */
   .uikit-viewport-edge-effect {

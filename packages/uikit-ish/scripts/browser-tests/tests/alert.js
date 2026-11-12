@@ -74,6 +74,7 @@ export const tests = [
     name: 'alert: in its container (a phone’s screen), centered, its backdrop filling it',
     run: async (page) => {
       await page.open('alert-overview', 'light', {
+        isFramed: true,
         state: [null, { defaultOpen: true }],
       });
       await sleep(500);

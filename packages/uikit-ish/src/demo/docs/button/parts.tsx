@@ -3,12 +3,16 @@ import { FunctionComponent, useMemo } from 'react';
 import { Button, Symbol } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfHeartFill } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { buttonIconRows, buttonLabelRows, buttonRootRows } from './docs.js';
 import { getPropOptionsRoot, propOptionsPart } from './props.js';
 
@@ -22,24 +26,43 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Button.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Button.Root"
     >
       <Button.Root
         key={elementKey}
         {...props}
       >
-        <Button.Icon>
-          <Symbol icon={sfHeartFill} />
+        <Button.Icon {...partProps['Button.Icon']}>
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfHeartFill}
+          />
         </Button.Icon>
-        <Button.Label>Like</Button.Label>
+        <Button.Label {...partProps['Button.Label']}>Like</Button.Label>
       </Button.Root>
     </Component>
   );
@@ -57,24 +80,44 @@ const IconPart: FunctionComponent = () => {
     title: 'Button.Icon',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'variant'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Button.Icon"
     >
       <Button.Root
+        {...partProps['Button.Root']}
         variant="bordered"
         onClick={() => addLog('Like clicked')}
       >
         <Button.Icon {...props}>
-          <Symbol icon={sfHeartFill} />
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfHeartFill}
+          />
         </Button.Icon>
-        <Button.Label>Like</Button.Label>
+        <Button.Label {...partProps['Button.Label']}>Like</Button.Label>
       </Button.Root>
     </Component>
   );
@@ -92,22 +135,42 @@ const LabelPart: FunctionComponent = () => {
     title: 'Button.Label',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Root': ['onClick', 'variant'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Button.Label"
     >
       <Button.Root
+        {...partProps['Button.Root']}
         variant="bordered"
         onClick={() => addLog('Like clicked')}
       >
-        <Button.Icon>
-          <Symbol icon={sfHeartFill} />
+        <Button.Icon {...partProps['Button.Icon']}>
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfHeartFill}
+          />
         </Button.Icon>
         <Button.Label {...props}>Like</Button.Label>
       </Button.Root>
@@ -120,7 +183,7 @@ export const ButtonParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>Root: the button, the control people press.</li>
-      <li>Its content: a symbol, a label, or both (in their order).</li>
+      <li>Its content: a symbol, a label, or both, in their order.</li>
     </ul>
     <ul className="demo-tree">
       <li>
@@ -135,6 +198,14 @@ export const ButtonParts: FunctionComponent = () => (
               part="Button.Icon"
             />{' '}
             (optional)
+            <ul>
+              <li className="demo-tree-context">
+                <PartLink
+                  component="symbol"
+                  part="Symbol"
+                />
+              </li>
+            </ul>
           </li>
           <li>
             <PartLink
@@ -156,16 +227,16 @@ export const ButtonParts: FunctionComponent = () => (
     <ul>
       <li>
         Its look: <code>variant</code>, <code>size</code>, <code>shape</code>,{' '}
-        <code>tint</code>, <code>textColor</code>, <code>destructive</code>,{' '}
-        <code>fill</code>; glass, <code>context</code>.
+        <code>tint</code>, <code>textColor</code>, <code>destructive</code> and{' '}
+        <code>fill</code>, and for glass, <code>context</code>.
       </li>
       <li>
         Its action: <code>onClick</code> (without one, it’s disabled), and{' '}
         <code>onSecondaryClick</code>.
       </li>
       <li>
-        Renders a <code>button</code> (Base UI’s <code>Button</code>); glass,
-        its glass and a content <code>span</code> inside.
+        Renders a <code>button</code> (Base UI’s <code>Button</code>). For
+        glass, its glass and a content <code>span</code> go inside.
       </li>
     </ul>
     <RootPart />
@@ -181,7 +252,7 @@ export const ButtonParts: FunctionComponent = () => (
     <ul>
       <li>
         A symbol (a <a href={publicUrl('symbol')}>Symbol</a>), in the label’s
-        text style (glass: 19px, Semibold).
+        text style (19px Semibold on glass).
       </li>
       <li>
         Renders a <code>span</code>.
@@ -198,7 +269,7 @@ export const ButtonParts: FunctionComponent = () => (
       <code>Button.Label</code>
     </Heading>
     <ul>
-      <li>The label, truncated when the button is narrower than it.</li>
+      <li>The label, which truncates when the button is narrower than it.</li>
       <li>
         Renders a <code>span</code>.
       </li>

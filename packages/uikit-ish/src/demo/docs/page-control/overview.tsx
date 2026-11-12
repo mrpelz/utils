@@ -54,8 +54,8 @@ export const PageControlOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>Dots for a row of pages, the current one highlighted.</li>
-      <li>Moves to the previous or next page, or scrubs across them.</li>
+      <li>Dots for a row of pages, with the current one highlighted.</li>
+      <li>It moves to the previous or next page, or scrubs across them.</li>
     </ul>
     <LiveView />
 
@@ -68,10 +68,11 @@ export const PageControlOverview: FunctionComponent = () => (
     <ul>
       <li>
         For a flat sequence of pages of the same kind, swiped through one at a
-        time: Weather’s cities, an onboarding’s screens, a photo’s pages.
+        time, such as a weather app’s cities, an onboarding’s screens or a
+        document’s pages.
       </li>
       <li>
-        A handful of pages (about ten at most): it shows where you are, not
+        For a handful of pages (about ten at most). It shows where you are, not
         what’s on the pages.
       </li>
     </ul>
@@ -84,19 +85,19 @@ export const PageControlOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Sections of an app, each with its own content: a{' '}
-        <a href={publicUrl('tab-bar')}>Tab bar</a>.
+        Sections of an app, each with its own content: use a{' '}
+        <a href={publicUrl('tab-bar')}>Tab Bar</a>.
       </li>
       <li>
-        Views of the same content, named: a{' '}
+        Named views of the same content: use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
       <li>
-        Many items, or items to pick by name: a{' '}
+        Many items, or items picked by name: use a{' '}
         <a href={publicUrl('list')}>List</a>.
       </li>
       <li>
-        Going deeper into an item:{' '}
+        Going deeper into an item: use a{' '}
         <a href={publicUrl('navigation')}>Navigation</a>.
       </li>
     </ul>
@@ -110,7 +111,8 @@ export const PageControlOverview: FunctionComponent = () => (
     <ul>
       <li>The props most page controls set.</li>
       <li>
-        All its props: <a href={publicUrl('page-control/parts')}>Parts</a>.
+        All its props are on the{' '}
+        <a href={publicUrl('page-control/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -137,24 +139,23 @@ export const PageControlOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        It has the <code>slider</code> role (an adjustable control): its value
-        the current page, from 1 to <code>count</code>, read as “3 of 8” (
+        It has the <code>slider</code> role, as an adjustable control. Its value
+        is the current page, from 1 to <code>count</code>, read as “3 of 8” (
         <code>format</code>).
       </li>
       <li>
-        Named “Page” unless given an <code>aria-label</code>; name it by what
-        its pages are (e.g. “Cities”).
+        It’s named “Page” unless given an <code>aria-label</code>. Name it for
+        what its pages are (for example “Cities”).
       </li>
       <li>
-        Keyboard: Tab focuses it; the arrow keys go to the previous or next page
-        (Left and Right by reading direction), Home and End to the first and
-        last.
+        Tab focuses it. The arrow keys go to the previous or next page (Left and
+        Right follow the reading direction), and Home and End go to the first
+        and last.
       </li>
       <li>
-        Its dots are small: it’s an indicator first, the pages themselves should
-        also swipe (see{' '}
-        <a href={publicUrl('page-control/composition')}>Composition</a>
-        ).
+        Its dots are small. It’s an indicator first, so the pages themselves
+        should swipe too (see{' '}
+        <a href={publicUrl('page-control/composition')}>Composition</a>).
       </li>
     </ul>
 
@@ -169,11 +170,11 @@ export const PageControlOverview: FunctionComponent = () => (
         A press before or after the current dot goes to the previous or next
         page.
       </li>
-      <li>Dragged along it, it scrubs: a page per dot passed.</li>
+      <li>Dragging along it scrubs, one page per dot passed.</li>
       <li>
-        Of more than 7 pages, 8 dots show at a time: the outermost two shrink
-        where there are pages beyond, and the window moves as the current page
-        nears them.
+        With more than 7 pages, 8 dots show at a time. The outer two shrink
+        where there are more pages beyond, and the window moves as the current
+        page gets close to them.
       </li>
       <li>
         With <code>momentaryTooltip</code>, the current page shows above it

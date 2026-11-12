@@ -120,8 +120,8 @@ export const sliderRootRows: readonly PropRow[] = [
       when the value is at <code>min</code> or <code>max</code>:{' '}
       <code>center</code>, the thumb’s center at the control’s edge;{' '}
       <code>edge</code>, inset so its edge is at the control’s edge;{' '}
-      <code>edge-client-only</code>, as <code>edge</code>, but rendered after
-      hydration. (Base UI’s default is <code>center</code>; the knob here is
+      <code>edge-client-only</code>, like <code>edge</code>, but rendered after
+      hydration. (Base UI’s default is <code>center</code>; here, the knob is
       inset.)
     </>,
   ],
@@ -129,7 +129,7 @@ export const sliderRootRows: readonly PropRow[] = [
     'orientation',
     union('horizontal', 'vertical'),
     code(union('horizontal')),
-    'The component orientation. Vertical, the minimum is at the bottom.',
+    'The component orientation. When vertical, the minimum is at the bottom.',
   ],
   [
     'disabled',
@@ -182,7 +182,7 @@ export const sliderRootRows: readonly PropRow[] = [
       />
       ’s id
     </>,
-    'The ids of the elements labelling the slider: set on the root (a group) and on every thumb’s input.',
+    'The ids of the elements labelling the slider. It’s set on the root (a group) and on every thumb’s input.',
   ],
   [
     'tint',
@@ -198,7 +198,7 @@ export const sliderRootRows: readonly PropRow[] = [
     <>
       <code>pointer</code> (disabled: <code>not-allowed</code>)
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -206,7 +206,7 @@ export const sliderRootRows: readonly PropRow[] = [
 export const sliderLabelRows: readonly PropRow[] = [
   placementRow(
     [],
-    'Placed before or after the other parts, or on a line above or below them (at its start).',
+    'Where it’s placed: before or after the other parts, or on a line above or below them (at the line’s start).',
   ),
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -214,7 +214,7 @@ export const sliderLabelRows: readonly PropRow[] = [
 export const sliderValueRows: readonly PropRow[] = [
   placementRow(
     ['tooltip', 'momentary-tooltip'],
-    'Placed before or after the other parts, or on a line above or below them (at its end); or in a tooltip on each thumb (its own value): always, or momentary (while hovered, or a knob dragged or focused by keyboard). In tooltips, the value itself is only for assistive technology.',
+    'Where it’s placed: before or after the other parts, or on a line above or below them (at the line’s end). Or in a tooltip on each thumb, showing its own value, always or only momentarily (while hovered, or while a knob is dragged or focused by keyboard). With tooltips, the value itself is only for assistive technology.',
   ),
   [
     'children',
@@ -292,7 +292,7 @@ export const sliderThumbRows: readonly PropRow[] = [
     'aria-valuetext',
     'string',
     <>
-      with a <code>format</code>, the formatted value; a range’s:{' '}
+      with a <code>format</code>, the formatted value; for a range,{' '}
       <code>€40 start range</code>, <code>€120 end range</code>
     </>,
     <>
@@ -364,8 +364,8 @@ export const sliderTicksRows: readonly PropRow[] = [
     'number',
     undefined,
     <>
-      The values across the slider (required; usually{' '}
-      <code>(max − min) / step + 1</code>): ticks mark those between its ends,
+      The number of values across the slider (required; usually{' '}
+      <code>(max − min) / step + 1</code>). Ticks mark those between its ends,
       not the ends themselves.
     </>,
   ],
@@ -380,8 +380,8 @@ export const sliderSymbolRows: readonly PropRow[] = [
     <>
       The end of the slider the symbol stands for (required). Clicking it moves
       the first thumb to the minimum (<code>min</code>), or the last thumb to
-      the maximum (<code>max</code>), as the Home/End keys do; with a range, the
-      other end stays.
+      the maximum (<code>max</code>), as the Home and End keys do. With a range,
+      the other end stays.
     </>,
   ],
   [
@@ -395,7 +395,7 @@ export const sliderSymbolRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      The symbol, e.g. a{' '}
+      The symbol, for example a{' '}
       <PartLink
         component="symbol"
         part="Symbol"

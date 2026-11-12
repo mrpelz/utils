@@ -123,14 +123,14 @@ export const IosQuirksPage: FunctionComponent = () => (
     <p>
       The workarounds people report don’t help here. We tried a{' '}
       <code>position: fixed</code> element at the top with a background color:
-      opaque and half transparent, as tall as the safe area and only a few
-      pixels tall, narrower and wider, at the very top and a few pixels below.
-      We also tried one painting nothing (<code>background-clip: text</code>),
-      one fading into the bar’s edge effect, and one fading in as content
-      scrolls under the bar. The blur stayed every time. The other status bar
-      styles avoid it: with <code>default</code> and <code>black</code>, the
-      system draws its own opaque bar above the page, so nothing of the page is
-      under the status bar.
+      opaque and half transparent, as tall as the top safe area inset and only a
+      few pixels tall, narrower and wider, at the very top and a few pixels
+      below. We also tried one painting nothing (
+      <code>background-clip: text</code>), one fading into the bar’s edge
+      effect, and one fading in as content scrolls under the bar. The blur
+      stayed every time. The other status bar styles avoid it: with{' '}
+      <code>default</code> and <code>black</code>, the system draws its own
+      opaque bar above the page, so nothing of the page is under the status bar.
     </p>
 
     <Heading
@@ -150,8 +150,8 @@ export const IosQuirksPage: FunctionComponent = () => (
     <p>
       The script recognizes iOS 27 by Safari’s version (<code>Version/27</code>
       ), because since iOS 26 the OS version in the user agent is frozen (it
-      reads <code>iPhone OS 18_7</code>). An iPad presents itself as a Mac, so
-      the script tells it apart by its touch points.
+      reads <code>iPhone OS 18_7</code>). On iPadOS, Safari presents itself as a
+      Mac, so the script tells it apart by its touch points.
     </p>
     <CodeView code={headCode} />
     <p>
@@ -254,7 +254,8 @@ export const IosQuirksPage: FunctionComponent = () => (
       There’s no error in the console. The device’s log (Console.app on a Mac,
       with the phone attached) shows a <code>JetsamEvent</code>: iOS killed the
       tab’s WebContent process for going over its memory limit
-      (&ldquo;per-process-limit&rdquo;), at about 1.6 GB on an iPhone 15 Pro.
+      (&ldquo;per-process-limit&rdquo;), at about 1.6 GB on the recent phone we
+      tested.
     </p>
     <p>
       Almost all of that memory is WebKit’s own native heap (the{' '}
@@ -413,10 +414,10 @@ export const IosQuirksPage: FunctionComponent = () => (
       App switcher snapshots (iPadOS)
     </Heading>
     <p>
-      When you open the app switcher on an iPad, or go to the Home Screen,
-      iPadOS resizes the app’s window a few times to take its snapshots, while
-      the page is still on screen. An app that lays itself out by width sees
-      those sizes as real, switches its layout and back, and loses its state.{' '}
+      When you open the app switcher on iPadOS, or go to the Home Screen, iPadOS
+      resizes the app’s window a few times to take its snapshots, while the page
+      is still on screen. An app that lays itself out by width sees those sizes
+      as real, switches its layout and back, and loses its state.{' '}
       <PartLink
         component="viewport"
         part="useSizeClass"
@@ -431,7 +432,7 @@ export const IosQuirksPage: FunctionComponent = () => (
       What you see
     </Heading>
     <p>
-      You leave a Home Screen app on an iPad and come back. A sidebar layout has
+      You leave a Home Screen app on iPadOS and come back. A sidebar layout has
       turned into a stack and back again in the meantime: every page is mounted
       anew, scroll positions are gone, and anything held in component state is
       reset. Nothing in the app asked for that.
@@ -444,11 +445,11 @@ export const IosQuirksPage: FunctionComponent = () => (
       Why it happens
     </Heading>
     <p>
-      Measured on an iPad Air with iPadOS 26: about half a second before the
-      page is hidden, a landscape window (1180×820) is turned portrait
-      (820×1180), then shrunk to the size of a half-width Split View (585×820).
-      That last size is <code>compact</code>, so a size class read from the
-      window’s width flips to <code>compact</code> and, once the app is back, to{' '}
+      Measured on a tablet with iPadOS 26: about half a second before the page
+      is hidden, a landscape window (1180×820) is turned portrait (820×1180),
+      then shrunk to the size of a half-width Split View (585×820). That last
+      size is <code>compact</code>, so a size class read from the window’s width
+      flips to <code>compact</code> and, once the app is back, to{' '}
       <code>regular</code> again. Neither the screen’s size (always the portrait
       one) nor the page’s visibility (shown throughout) tells these resizes from
       real ones. While the app is hidden, the window still reads as the last
@@ -534,7 +535,7 @@ export const IosQuirksPage: FunctionComponent = () => (
     <p>
       iOS’s software keyboard doesn’t resize the layout viewport, and it comes
       with habits of its own: it scrolls the page to the focused field, zooms
-      into small text, and on an iPad it can hide while the field keeps its
+      into small text, and on iPadOS it can hide while the field keeps its
       focus. The library handles each of these, so bars and accessories sit on
       the keyboard and the page stays where it was.
     </p>
@@ -619,7 +620,7 @@ export const IosQuirksPage: FunctionComponent = () => (
       back without the jump.
     </p>
     <p>
-      On an iPad, the keyboard’s hide key hides the keyboard but keeps the field
+      On iPadOS, the keyboard’s hide key hides the keyboard but keeps the field
       focused. Tapping the field again shows the keyboard, and iOS scrolls
       again. So the guard forgets its field as soon as the keyboard hides, and
       treats the next tap as a fresh focus.

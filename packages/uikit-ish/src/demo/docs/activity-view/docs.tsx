@@ -27,14 +27,14 @@ export const activityViewHeaderRows = rows(
       component="activity-view"
       part="ActivityView.Heading"
     />
-    , and e.g. the sheet’s close button at its end.
+    , and for example the sheet’s close button at its end.
   </>,
 );
 
 export const activityViewThumbnailRows = rows(
   <>
-    A picture of what’s shared (e.g. an <code>img</code>), 64px, its corners
-    16px.
+    A picture of what’s shared (for example an <code>img</code>), 64px, with
+    16px corners.
   </>,
 );
 
@@ -50,8 +50,8 @@ export const activityViewHeadingRows = rows(
       component="activity-view"
       part="ActivityView.Subtitle"
     />
-    , then (12px below) e.g. a menu (a <a href={publicUrl('button')}>Button</a>)
-    and a{' '}
+    , then, 12px below, for example a menu (a{' '}
+    <a href={publicUrl('button')}>Button</a>) and a{' '}
     <PartLink
       component="activity-view"
       part="ActivityView.Message"
@@ -61,15 +61,15 @@ export const activityViewHeadingRows = rows(
 );
 
 export const activityViewTitleRows = rows(
-  'What’s shared, named (15px, medium).',
+  'The name of what’s shared (15px, medium).',
 );
 
 export const activityViewSubtitleRows = rows(
-  'More about it (13px, in the secondary label color), e.g. its count, its URL.',
+  'More about it (13px, in the secondary label color), for example its count or its URL.',
 );
 
 export const activityViewMessageRows = rows(
-  'A note on sharing (13px, in the secondary label color), e.g. who can edit.',
+  'A note about sharing (13px, in the secondary label color), for example who can edit.',
 );
 
 export const activityViewPeopleRows: readonly PropRow[] = [
@@ -83,14 +83,14 @@ export const activityViewPeopleRows: readonly PropRow[] = [
         component="activity-view"
         part="ActivityView.Person"
       />
-      s, in a row scrolling sideways (24px from its start, 14px apart).
+      s, in a row that scrolls sideways (24px from its start, 14px apart).
     </>,
   ],
   [
     'aria-label',
     'string',
     undefined,
-    'Its name (it has the list role), e.g. “People”.',
+    'Its name (it has the list role), for example “People”.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -100,14 +100,14 @@ export const activityViewPersonRows: readonly PropRow[] = [
     'onClick',
     '(event: MouseEvent) => void',
     undefined,
-    'Sharing with the person (it’s a button).',
+    'Shares with the person (it’s a button).',
   ],
   [
     'children',
     'ReactNode',
     undefined,
     <>
-      An <a href={publicUrl('avatar')}>Avatar</a> (a group’s:{' '}
+      An <a href={publicUrl('avatar')}>Avatar</a> (for a group, an{' '}
       <PartLink
         component="avatar"
         part="Avatar.Group"
@@ -129,13 +129,13 @@ export const activityViewPersonRows: readonly PropRow[] = [
 ];
 
 export const activityViewNameRows = rows(
-  'The person’s name (12px, two lines; with a count: one, truncated).',
+  'The person’s name (12px, on two lines; with a count, on one line, truncated).',
   'span',
   'HTMLSpanElement',
 );
 
 export const activityViewCountRows = rows(
-  'How many people a group is (e.g. “2 People”), below its name, in the secondary label color.',
+  'How many people a group has (for example “2 People”), below its name, in the secondary label color.',
   'span',
   'HTMLSpanElement',
 );
@@ -151,14 +151,14 @@ export const activityViewActionsRows: readonly PropRow[] = [
         component="activity-view"
         part="ActivityView.Action"
       />
-      s, in a row scrolling sideways.
+      s, in a row that scrolls sideways.
     </>,
   ],
   [
     'aria-label',
     'string',
     undefined,
-    'Its name (it has the list role), e.g. “Actions”.',
+    'Its name (it has the list role), for example “Actions”.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -168,7 +168,7 @@ export const activityViewActionRows: readonly PropRow[] = [
     'onClick',
     '(event: MouseEvent) => void',
     undefined,
-    'The action (it’s a button).',
+    'Does the action (it’s a button).',
   ],
   [
     'children',
@@ -194,15 +194,15 @@ export const activityViewActionRows: readonly PropRow[] = [
 export const activityViewSymbolRows = rows(
   <>
     The action’s symbol (a <a href={publicUrl('symbol')}>Symbol</a>, 25px,
-    light) in a 70px circle on a fill; hidden from assistive technology (the
-    label names it).
+    light) in a 70px circle on a fill. It’s hidden from assistive technology,
+    because the label names the action.
   </>,
   'span',
   'HTMLSpanElement',
 );
 
 export const activityViewLabelRows = rows(
-  'The action’s name (13px, two lines).',
+  'The action’s name (13px, on two lines).',
   'span',
   'HTMLSpanElement',
 );

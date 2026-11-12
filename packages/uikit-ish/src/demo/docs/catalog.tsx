@@ -403,7 +403,7 @@ export const categories = {
   },
   presentation: {
     description:
-      'Surfaces above the page: transient, or modal for a focused task.',
+      'Surfaces above the page, either transient or modal for a focused task.',
     title: 'Presentation',
   },
 
@@ -420,7 +420,7 @@ export const categories = {
     title: 'Choices & Input',
   },
   status: {
-    description: 'Showing a quantity or a state, at the scope it describes.',
+    description: 'Showing a quantity or a state, where it applies.',
     title: 'Status',
   },
 } as const;
@@ -457,7 +457,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SettingsOverview,
     Parts: SettingsParts,
     summary:
-      'The settings the components follow (color scheme, contrast, motion, transparency, text size): the system’s, overridden by providers for what’s within them.',
+      'The settings the components follow (color scheme, contrast, motion, transparency, text size). They’re the system’s, and a provider can override them for what’s inside it.',
     title: 'Settings',
   },
   {
@@ -475,7 +475,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ViewportOverview,
     Parts: ViewportParts,
     summary:
-      'The app’s window as layers: a scrolling content layer, bars floating at its edges, kept clear of the safe areas and the keyboard.',
+      'The app’s window as layers: a scrolling content layer, with bars floating at its edges, kept clear of the safe area insets and the keyboard.',
     title: 'Viewport',
   },
   {
@@ -491,7 +491,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: LayoutOverview,
     Parts: LayoutParts,
     summary:
-      'Columns side by side (a sidebar, a list, a detail): sized, resizable or flexible, one floating.',
+      'Columns side by side (a sidebar, a list, a detail), sized, resizable or flexible, with one that can float.',
     title: 'Layout',
   },
   {
@@ -510,7 +510,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SidebarOverview,
     Parts: SidebarParts,
     summary:
-      'An app’s sections in a floating glass panel at its leading edge: a toolbar, a search field and a list; a drawer on a phone.',
+      'An app’s sections in a floating glass panel at its leading edge, with a toolbar, a search field and a list. On a phone, it goes in a drawer.',
     title: 'Sidebar',
   },
   {
@@ -528,7 +528,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: DrawerOverview,
     Parts: DrawerParts,
     summary:
-      'A column over the content from an edge (e.g. a sidebar on a phone): swiped in, or opened by a button.',
+      'A column that comes over the content from an edge (for example a sidebar on a phone). It’s swiped in, or opened by a button.',
     title: 'Drawer',
   },
   {
@@ -569,7 +569,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: NavigationOverview,
     Parts: NavigationParts,
     summary:
-      'A stack of pages, drilled into and back out of: pushed over each other, popped by a back button or a swipe from the leading edge.',
+      'A stack of pages to drill into and back out of. Pages are pushed on top of each other, and popped by a back button or a swipe from the leading edge.',
     title: 'Navigation',
   },
   {
@@ -586,7 +586,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: PageOverview,
     Parts: PageParts,
     summary:
-      'What a screen shows: its content’s scroll container, filling its place, on the grouped or plain page background.',
+      'What a screen shows: the scroll container for its content, filling its place, on the grouped or plain page background.',
     title: 'Page',
   },
   {
@@ -604,7 +604,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: HeaderOverview,
     Parts: HeaderParts,
     summary:
-      'A page’s header: a bar sticking to its top, a large title scrolling away beneath it as the bar’s own title fades in.',
+      'A page’s header: a bar that stays at its top, and a large title that scrolls away beneath it as the bar’s own title fades in.',
     title: 'Header',
   },
   {
@@ -625,7 +625,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ToolbarOverview,
     Parts: ToolbarParts,
     summary:
-      'A bar of commands for the current view: glass capsules of buttons at its ends, a title or a control between them; at the bottom, or at the top as a navigation bar.',
+      'A bar of commands for the current view, with glass capsules of buttons at its ends and a title or a control between them. It sits at the bottom, or at the top as a navigation bar.',
     title: 'Toolbar',
   },
   {
@@ -642,7 +642,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: CollapsibleOverview,
     Parts: CollapsibleParts,
     summary:
-      'Content shown or hidden by a trigger, opening in place: a sidebar’s sections collapsing by their titles.',
+      'Content that a trigger shows or hides, opening in place, such as a sidebar’s sections collapsing by their titles.',
     title: 'Collapsible',
   },
   {
@@ -659,7 +659,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: AccordionOverview,
     Parts: AccordionParts,
     summary:
-      'Collapsibles of which one is open at a time: accounts, categories, or steps, the others out of the way.',
+      'Collapsibles of which one is open at a time, such as accounts, categories or steps, with the others out of the way.',
     title: 'Accordion',
   },
   {
@@ -675,7 +675,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: PageControlOverview,
     Parts: PageControlParts,
     summary:
-      'Dots for a row of pages, the current one highlighted: pressed beside it, or scrubbed across, it steps to the previous or next page.',
+      'Dots for a row of pages, with the current one highlighted. A press next to it, or scrubbing across, goes to the previous or next page.',
     title: 'Page Control',
   },
   {
@@ -693,7 +693,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SheetOverview,
     Parts: SheetParts,
     summary:
-      'A focused task over the page: from the bottom on a phone, large or medium, a form sheet on a tablet; dismissed by its buttons or dragged down.',
+      'A focused task above the page. On a phone, it comes from the bottom, large or medium; on a tablet, it’s a form sheet. Its buttons dismiss it, or a drag down.',
     title: 'Sheet',
   },
   {
@@ -709,7 +709,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: IslandOverview,
     Parts: IslandParts,
     summary:
-      'A sheet’s glass capsule that’s always there, over a page’s content such as a map: swiped up, it reveals more, stop by stop.',
+      'A sheet’s glass capsule that’s always there, above a page’s content such as a map. Swiped up, it reveals more, stop by stop.',
     title: 'Island',
   },
   {
@@ -727,7 +727,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: PopoverOverview,
     Parts: PopoverParts,
     summary:
-      'A transient view at the control that shows it, its arrow pointing at it: a small task or a few settings, in a regular width (a sheet in a compact one).',
+      'A transient view at the control that shows it, with its arrow pointing at that control, for a small task or a few settings. It’s for regular widths; compact ones use a sheet.',
     title: 'Popover',
   },
   {
@@ -745,7 +745,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: AlertOverview,
     Parts: AlertParts,
     summary:
-      'Important information that needs a response now: a title, a message, its actions; modal, the page dimmed. Sparingly.',
+      'Important information that needs a response now: a title, a message and its actions. It’s modal, with the page dimmed, so use it sparingly.',
     title: 'Alert',
   },
   {
@@ -763,7 +763,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ActionSheetOverview,
     Parts: ActionSheetParts,
     summary:
-      'Choices about an action the person just started, at its control: a destructive one first; a popover in a regular width.',
+      'Choices about an action someone just started, at its control, with a destructive one first. On a regular width, it’s a popover.',
     title: 'Action Sheet',
   },
   {
@@ -781,7 +781,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: TooltipOverview,
     Parts: TooltipParts,
     summary:
-      'A short label at a control, on hover and keyboard focus (not on touch); or held open, labeling an element for good.',
+      'A short label at a control, on hover and keyboard focus (not on touch). Or held open, as a lasting label for an element.',
     title: 'Tooltip',
   },
   {
@@ -810,7 +810,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ListOverview,
     Parts: ListParts,
     summary:
-      'Rows of data in sections, with headers and footers: settings, forms, inboxes, contacts; pressed, swiped, reordered and selected.',
+      'Rows of data in sections, with headers and footers, for settings, forms, inboxes and contacts. Rows can be pressed, swiped, reordered and selected.',
     title: 'List',
   },
   {
@@ -828,7 +828,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: TypographyOverview,
     Parts: TypographyParts,
     summary:
-      'Text in the text styles, Large Title to Caption 2: emphasized or italic, in a label color, at a text size.',
+      'Text in the text styles, from Large Title to Caption 2, emphasized or italic, in a label color, at a text size.',
     title: 'Typography',
   },
   {
@@ -845,7 +845,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: AvatarOverview,
     Parts: AvatarParts,
     summary:
-      'A person: their photo in a circle, or their initials; several people in one circle; a badge on its corner.',
+      'A person: their photo in a circle, or their initials. Several people can share one circle, and a badge can sit on its corner.',
     title: 'Avatar',
   },
   {
@@ -862,7 +862,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SymbolOverview,
     Parts: SymbolParts,
     summary:
-      'An icon sized, weighted and colored as the text around it: a button’s, a tab’s, a row’s image; a badge on it.',
+      'An icon sized, weighted and colored like the text around it, for a button, a tab or a row’s image. A badge can sit on it.',
     title: 'Symbol',
   },
   {
@@ -879,7 +879,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ActivityViewOverview,
     Parts: ActivityViewParts,
     summary:
-      'Sharing: what’s shared, people to share with and actions, in rows; in a sheet (compact) or a popover (regular).',
+      'Sharing: what’s shared, people to share with, and actions, in rows. It goes in a sheet (compact) or a popover (regular).',
     title: 'Activity View',
   },
   {
@@ -896,7 +896,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ContextualMenuOverview,
     Parts: ContextualMenuParts,
     summary:
-      'Actions on a piece of content, summoned from it: the content lifts above the blurred page, or turns into a preview, a menu below it.',
+      'Actions on a piece of content, summoned from it. The content lifts above the blurred page, or turns into a preview, with a menu below it.',
     title: 'Contextual Menu',
   },
   {
@@ -917,7 +917,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: MenuOverview,
     Parts: MenuParts,
     summary:
-      'Actions and choices behind a control, in a glass popup at it: compact or regular, with submenus, toggles and quick actions.',
+      'Actions and choices behind a control, in a glass popup at that control, compact or regular, with submenus, toggles and quick actions.',
     title: 'Menu',
   },
   {
@@ -934,7 +934,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: EditMenuOverview,
     Parts: EditMenuParts,
     summary:
-      'Actions on a selection in a horizontal glass capsule above it: opened by the app, more actions scrolling or behind a chevron.',
+      'Actions on a selection, in a horizontal glass capsule above it. The app opens it, and more actions scroll or sit behind a chevron.',
     title: 'Edit Menu',
   },
   {
@@ -953,7 +953,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ButtonOverview,
     Parts: ButtonParts,
     summary:
-      'Performs an action at once: a label, a symbol or both, borderless, on a fill or the tint, or glass over content.',
+      'Performs an action at once, with a label, a symbol or both: borderless, on a fill or the tint, or glass above content.',
     title: 'Button',
   },
   {
@@ -971,7 +971,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: FormOverview,
     Parts: FormParts,
     summary:
-      'Fields filled in and submitted together, laid out as a list: its sections fieldsets, its rows fields; validated, their values by name.',
+      'Fields filled in and submitted together, laid out as a list, with fieldsets as its sections and fields as its rows. They’re validated, and their values submitted by name.',
     title: 'Form',
   },
   {
@@ -993,7 +993,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: DatePickerOverview,
     Parts: DatePickerParts,
     summary:
-      'Picks a date, a time or both, or a range of dates: compact buttons opening a calendar in a popover, or the calendar in place.',
+      'Picks a date, a time, both, or a range of dates: compact buttons that open a calendar in a popover, or the calendar in place.',
     title: 'Date Picker',
   },
   {
@@ -1010,7 +1010,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ColorPickerOverview,
     Parts: ColorPickerParts,
     summary:
-      'Picks a color from a grid, a spectrum or sliders, with its opacity and saved colors; opened from a color well, in a popover or a sheet.',
+      'Picks a color from a grid, a spectrum or sliders, with its opacity and saved colors. It opens from a color well, in a popover or a sheet.',
     title: 'Color Picker',
   },
   {
@@ -1027,7 +1027,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: RollOverview,
     Parts: RollParts,
     summary:
-      'A wheel of columns, each scrolled to select a row in the band across its center: the parts of a value side by side, e.g. a time’s hours and minutes.',
+      'A wheel of columns, each scrolled to select a row in the band across its center. It shows the parts of a value side by side, such as a time’s hours and minutes.',
     title: 'Roll',
   },
   {
@@ -1045,7 +1045,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: TextFieldOverview,
     Parts: TextFieldParts,
     summary:
-      'Free text in a list row, on its own or in a search capsule: validated as the browser’s inputs are, its errors below it.',
+      'Free text, in a list row, on its own, or in a search capsule. It’s validated like the browser’s inputs, with its errors below it.',
     title: 'Text Field',
   },
   {
@@ -1063,7 +1063,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SegmentedOverview,
     Parts: SegmentedParts,
     summary:
-      'Chooses one of a few options shown side by side, e.g. a chart’s period, or which of a list’s items to show.',
+      'Chooses one of a few options shown side by side, such as a chart’s period, or which of a list’s items to show.',
     title: 'Segmented',
   },
   {
@@ -1081,7 +1081,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SliderOverview,
     Parts: SliderParts,
     summary:
-      'Sets a value between a minimum and a maximum (or a range, with two knobs) by dragging along a track, e.g. brightness or a playback position.',
+      'Sets a value between a minimum and a maximum (or a range, with two knobs) by dragging along a track, such as brightness or a playback position.',
     title: 'Slider',
   },
   {
@@ -1099,7 +1099,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: StepperOverview,
     Parts: StepperParts,
     summary:
-      'Steps a number up or down, a press at a time, with “−” and “+” in a capsule; the app shows the value, e.g. in its list row.',
+      'Steps a number up or down, one press at a time, with “−” and “+” in a capsule. The app shows the value, for example in its list row.',
     title: 'Stepper',
   },
   {
@@ -1117,7 +1117,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: SwitchOverview,
     Parts: SwitchParts,
     summary:
-      'Turns one setting on or off, taking effect at once: for settings, usually as the trailing control of a list row.',
+      'Turns one setting on or off, taking effect at once. In settings, it’s usually the trailing control of a list row.',
     title: 'Switch',
   },
   {
@@ -1136,7 +1136,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: CheckboxOverview,
     Parts: CheckboxParts,
     summary:
-      'Selection circles: checkboxes for several, radios for one, before a list’s rows or with labels.',
+      'Selection circles: checkboxes for several items and radios for one, before a list’s rows or with labels.',
     title: 'Checkbox',
   },
   {
@@ -1154,7 +1154,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: ProgressOverview,
     Parts: ProgressParts,
     summary:
-      'Work going on: a bar filling as it advances, labeled, its value shown; or, of unknown length, spinning spokes.',
+      'Work going on: a labeled bar that fills as it advances and shows its value, or spinning spokes for work of unknown length.',
     title: 'Progress',
   },
   {
@@ -1171,7 +1171,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: BadgeOverview,
     Parts: BadgeParts,
     summary:
-      'A count in a red capsule, or a dot: something new waiting, on a tab’s or a button’s symbol, an avatar’s corner, or in a row.',
+      'A count in a red capsule, or a dot, for something new waiting. It sits on a tab’s or a button’s symbol, an avatar’s corner, or in a row.',
     title: 'Badge',
   },
 ];

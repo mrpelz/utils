@@ -67,10 +67,11 @@ export const DatePickerOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>Picks a date, a time, or both, or a range of dates.</li>
+      <li>Picks a date, a time, both, or a range of dates.</li>
       <li>
-        Compact: buttons showing the value, the calendar (or the time) in a
-        popover; inline: the calendar in place.
+        In its compact style, it shows the value on buttons that open the
+        calendar (or the time) in a popover. In its inline style, the calendar
+        sits in place.
       </li>
     </ul>
     <LiveView />
@@ -83,11 +84,12 @@ export const DatePickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        For dates and times: an appointment, a reminder, a birthday, a stay.
+        For dates and times: an appointment, a reminder, a birthday or a stay.
       </li>
       <li>
-        Compact where space is short (a list row), inline where picking the date
-        is the task (collapsed, it’s a choice of an ordered value).
+        Use the compact style where space is short (a list row), and the inline
+        style where picking the date is the task. (Collapsed, it’s a choice of
+        an ordered value.)
       </li>
     </ul>
 
@@ -99,15 +101,16 @@ export const DatePickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Other values in columns (sizes, measures): a{' '}
+        Other values in columns (sizes, measures): use a{' '}
         <a href={publicUrl('roll')}>Roll</a>.
       </li>
       <li>
-        A number a step at a time: a <a href={publicUrl('stepper')}>Stepper</a>.
+        A number, one step at a time: use a{' '}
+        <a href={publicUrl('stepper')}>Stepper</a>.
       </li>
       <li>
-        Typed dates (e.g. known from a document): a{' '}
-        <a href={publicUrl('text-field')}>Text field</a>.
+        Typed dates (for example copied from a document): use a{' '}
+        <a href={publicUrl('text-field')}>Text Field</a>.
       </li>
     </ul>
 
@@ -120,7 +123,8 @@ export const DatePickerOverview: FunctionComponent = () => (
     <ul>
       <li>The props most date pickers set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('date-picker/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('date-picker/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -150,17 +154,18 @@ export const DatePickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The compact style’s buttons show the value; the time’s is named “Time”.
-        They open popovers (Base UI’s: focus moves in, Escape closes them).
+        The compact style’s buttons show the value, and the time’s button is
+        named “Time”. They open popovers (Base UI’s: focus moves inside, and
+        Escape closes them).
       </li>
       <li>
-        The days are a group of buttons, named by the month’s title, one of them
-        tabbable: arrow keys move by a day or a week, Page Up and Page Down by a
-        month, Home and End to the week’s ends; each day is named in full
-        (“Sunday, April 20, 2025”).
+        The days are a group of buttons, named by the month’s title, with one of
+        them in the tab order. The arrow keys move by a day or a week, Page Up
+        and Page Down by a month, and Home and End to the week’s ends. Each day
+        is named in full (“Sunday, April 20, 2025”).
       </li>
       <li>
-        The rolls (month and year, the time) are listboxes (see{' '}
+        The rolls (month and year, and the time) are listboxes (see{' '}
         <a href={publicUrl('roll')}>Roll</a>).
       </li>
       <li>
@@ -169,7 +174,7 @@ export const DatePickerOverview: FunctionComponent = () => (
           component="date-picker"
           part="DatePicker.CalendarMessage"
         />
-        ) is announced; an error as an alert.
+        ) is announced, and an error as an alert.
       </li>
     </ul>
 
@@ -181,22 +186,22 @@ export const DatePickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The calendar’s title opens a month and year roll over the days; its
+        The calendar’s title opens a month and year roll over the days. Its
         arrows go to the previous or next month, sliding.
       </li>
       <li>
-        The months sit side by side, scrolled sideways natively (a finger, a
-        trackpad), snapping to one month per flick; not beyond the limits. What
-        a swipe does is <code>swipe</code>’s: by default a date’s turns the
-        month, a range’s is dragged across.
+        The months sit side by side and scroll sideways natively (by finger or
+        trackpad), snapping one month per flick, and not past the limits.{' '}
+        <code>swipe</code> sets what a swipe does: by default, it turns the
+        month for a date, and drags across for a range.
       </li>
       <li>
-        With a time, the Time row’s button shows the time’s roll in the days’
-        place.
+        With a time, the Time row’s button shows the time’s roll in place of the
+        days.
       </li>
       <li>
-        A range: a start, then an end, pressed or dragged across (held at the
-        edge, the drag goes on to the next month).
+        A range takes a start, then an end, pressed or dragged across. Held at
+        the edge, the drag goes on to the next month.
       </li>
       <li>
         Names, numerals, the hour cycle and the week’s first day follow the

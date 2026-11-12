@@ -1,7 +1,7 @@
 import '../sheet/style.css';
 import './style.css';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
@@ -12,7 +12,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -30,6 +33,7 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   menuItemRows,
   menuPositionerRows,
@@ -53,88 +57,165 @@ const LiveView: FunctionComponent = () => {
   // Its device by the size: a phone (compact), a tablet (regular).
   const stage = (props.size ?? sizeClass) === 'regular' ? 'tablet' : 'phone';
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Root': ['shape', 'size', 'variant'],
+            'Menu.Icon': [],
+            'Menu.Item': ['destructive', 'onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': [],
+            'Menu.Portal': [],
+            'Menu.Positioner': [],
+            'Menu.QuickAction': ['onClick'],
+            'Menu.QuickActions': [],
+            'Menu.Root': ['size'],
+            'Menu.Separator': [],
+            'Menu.SubmenuRoot': [],
+            'Menu.SubmenuTrigger': [],
+            'Menu.Trigger': ['aria-label', 'render'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasWallpaper
       isExpanded
       isInline
       baseUiId="menu"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage={stage}
-      state={[state]}
+      state={[state, partState]}
       title="Menu"
     >
-      <Viewport.Content>
-        <Menu.Root size={props.size ?? sizeClass}>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Menu.Root
+          {...partProps['Menu.Root']}
+          size={props.size ?? sizeClass}
+        >
           <Menu.Trigger
+            {...partProps['Menu.Trigger']}
             aria-label="More"
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 shape="circle"
                 size="large"
                 variant="glass"
               />
             }
           >
-            <Button.Icon>
-              <Symbol icon={sfEllipsis} />
+            <Button.Icon {...partProps['Button.Icon']}>
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfEllipsis}
+              />
             </Button.Icon>
           </Menu.Trigger>
-          <Menu.Portal>
-            <Menu.Positioner>
-              <Menu.Popup>
-                <Menu.QuickActions>
-                  <Menu.QuickAction onClick={() => addLog('Share clicked')}>
-                    <Menu.Icon>
-                      <Symbol icon={sfSquareAndArrowUp} />
+          <Menu.Portal {...partProps['Menu.Portal']}>
+            <Menu.Positioner {...partProps['Menu.Positioner']}>
+              <Menu.Popup {...partProps['Menu.Popup']}>
+                <Menu.QuickActions {...partProps['Menu.QuickActions']}>
+                  <Menu.QuickAction
+                    {...partProps['Menu.QuickAction']}
+                    onClick={() => addLog('Share clicked')}
+                  >
+                    <Menu.Icon {...partProps['Menu.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndArrowUp}
+                      />
                     </Menu.Icon>
-                    <Menu.Label>Share</Menu.Label>
+                    <Menu.Label {...partProps['Menu.Label']}>Share</Menu.Label>
                   </Menu.QuickAction>
-                  <Menu.QuickAction onClick={() => addLog('Favorite clicked')}>
-                    <Menu.Icon>
-                      <Symbol icon={sfHeart} />
+                  <Menu.QuickAction
+                    {...partProps['Menu.QuickAction']}
+                    onClick={() => addLog('Favorite clicked')}
+                  >
+                    <Menu.Icon {...partProps['Menu.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfHeart}
+                      />
                     </Menu.Icon>
-                    <Menu.Label>Favorite</Menu.Label>
+                    <Menu.Label {...partProps['Menu.Label']}>
+                      Favorite
+                    </Menu.Label>
                   </Menu.QuickAction>
                 </Menu.QuickActions>
-                <Menu.Item onClick={() => addLog('Rename clicked')}>
-                  <Menu.Icon>
-                    <Symbol icon={sfPencil} />
+                <Menu.Item
+                  {...partProps['Menu.Item']}
+                  onClick={() => addLog('Rename clicked')}
+                >
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfPencil}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Rename</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Rename</Menu.Label>
                 </Menu.Item>
-                <Menu.SubmenuRoot>
-                  <Menu.SubmenuTrigger>
-                    <Menu.Icon>
-                      <Symbol icon={sfFolder} />
+                <Menu.SubmenuRoot {...partProps['Menu.SubmenuRoot']}>
+                  <Menu.SubmenuTrigger {...partProps['Menu.SubmenuTrigger']}>
+                    <Menu.Icon {...partProps['Menu.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfFolder}
+                      />
                     </Menu.Icon>
-                    <Menu.Label>Move to</Menu.Label>
+                    <Menu.Label {...partProps['Menu.Label']}>
+                      Move to
+                    </Menu.Label>
                   </Menu.SubmenuTrigger>
-                  <Menu.Portal>
-                    <Menu.Positioner>
-                      <Menu.Popup>
-                        <Menu.Item onClick={() => addLog('Documents clicked')}>
-                          <Menu.Label>Documents</Menu.Label>
+                  <Menu.Portal {...partProps['Menu.Portal']}>
+                    <Menu.Positioner {...partProps['Menu.Positioner']}>
+                      <Menu.Popup {...partProps['Menu.Popup']}>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Documents clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Documents
+                          </Menu.Label>
                         </Menu.Item>
-                        <Menu.Item onClick={() => addLog('Downloads clicked')}>
-                          <Menu.Label>Downloads</Menu.Label>
+                        <Menu.Item
+                          {...partProps['Menu.Item']}
+                          onClick={() => addLog('Downloads clicked')}
+                        >
+                          <Menu.Label {...partProps['Menu.Label']}>
+                            Downloads
+                          </Menu.Label>
                         </Menu.Item>
                       </Menu.Popup>
                     </Menu.Positioner>
                   </Menu.Portal>
                 </Menu.SubmenuRoot>
-                <Menu.Separator />
+                <Menu.Separator {...partProps['Menu.Separator']} />
                 <Menu.Item
+                  {...partProps['Menu.Item']}
                   destructive
                   onClick={() => addLog('Delete clicked')}
                 >
-                  <Menu.Icon>
-                    <Symbol icon={sfTrash} />
+                  <Menu.Icon {...partProps['Menu.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </Menu.Icon>
-                  <Menu.Label>Delete</Menu.Label>
+                  <Menu.Label {...partProps['Menu.Label']}>Delete</Menu.Label>
                 </Menu.Item>
               </Menu.Popup>
             </Menu.Positioner>
@@ -160,12 +241,12 @@ export const MenuOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Actions and choices behind a control, in a glass popup at it (Base UI’s{' '}
-        <code>Menu</code>).
+        Actions and choices behind a control, in a glass popup at that control.
+        It’s Base UI’s <code>Menu</code>.
       </li>
       <li>
-        A phone’s menu or a tablet’s (<code>size</code>): its items’ size, where
-        its submenus open.
+        It comes as a phone’s menu or a tablet’s (<code>size</code>), which sets
+        its items’ size and where its submenus open.
       </li>
     </ul>
     <LiveView />
@@ -178,16 +259,17 @@ export const MenuOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A control’s secondary actions, out of the way: a toolbar’s “More” button
-        (Notes, Files).
+        For a control’s secondary actions, kept out of the way, such as behind a
+        toolbar’s “More” button.
       </li>
       <li>
-        A choice among a few options, shown on its button (a pop-up button: sort
-        by, filter).
+        For a choice among a few options, shown on its button (a pop-up button
+        for sorting or filtering).
       </li>
       <li>
-        A history or alternatives on a held press (
-        <code>openOn=&quot;secondaryClick&quot;</code>: a back button’s pages).
+        For a history or alternatives on a held press (
+        <code>openOn=&quot;secondaryClick&quot;</code>), such as a back button’s
+        pages.
       </li>
     </ul>
 
@@ -199,23 +281,23 @@ export const MenuOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Actions on a piece of content, summoned from it: a{' '}
-        <a href={publicUrl('contextual-menu')}>Contextual menu</a>.
+        Actions on a piece of content, summoned from it: use a{' '}
+        <a href={publicUrl('contextual-menu')}>Contextual Menu</a>.
       </li>
       <li>
-        Actions on selected text: an{' '}
-        <a href={publicUrl('edit-menu')}>Edit menu</a>.
+        Actions on selected text: use an{' '}
+        <a href={publicUrl('edit-menu')}>Edit Menu</a>.
       </li>
       <li>
-        Choices about an action the person just started (Delete, or not): an{' '}
-        <a href={publicUrl('action-sheet')}>Action sheet</a>.
+        Choices about an action someone just started (Delete, or not): use an{' '}
+        <a href={publicUrl('action-sheet')}>Action Sheet</a>.
       </li>
       <li>
-        A few settings, or a small task: a{' '}
+        A few settings, or a small task: use a{' '}
         <a href={publicUrl('popover')}>Popover</a>.
       </li>
       <li>
-        A choice always visible: a{' '}
+        A choice that’s always visible: use a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
     </ul>
@@ -229,7 +311,8 @@ export const MenuOverview: FunctionComponent = () => (
     <ul>
       <li>The props most menus set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('menu/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('menu/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -252,17 +335,18 @@ export const MenuOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The popup has the <code>menu</code> role, its items{' '}
+        The popup has the <code>menu</code> role, and its items are{' '}
         <code>menuitem</code>, <code>menuitemcheckbox</code> and{' '}
-        <code>menuitemradio</code>; the trigger tells it opens one.
+        <code>menuitemradio</code>. The trigger says that it opens a menu.
       </li>
       <li>
-        A symbol-only trigger needs a name (<code>aria-label</code>, “More”).
+        A symbol-only trigger needs a name (<code>aria-label</code>, for example
+        “More”).
       </li>
       <li>
-        Keyboard: Enter or Space opens it, the arrow keys move between items
-        (and into submenus), typing jumps to an item (its <code>label</code>),
-        Escape closes it, focus returning to the trigger.
+        Enter or Space opens it, the arrow keys move between items (and into
+        submenus), and typing jumps to an item (by its <code>label</code>).
+        Escape closes it, and focus returns to the trigger.
       </li>
       <li>
         Its scale-in doesn’t follow <code>prefers-reduced-motion</code>.
@@ -277,12 +361,12 @@ export const MenuOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        On touch, it opens as the finger goes down: dragging on to an item and
-        lifting chooses it.
+        On touch, it opens as the finger goes down, so dragging on to an item
+        and lifting chooses it.
       </li>
       <li>
-        Compact: 40px items, submenus over their trigger; regular: 36px items,
-        submenus beside it (see{' '}
+        Compact menus have 40px items, with submenus over their trigger. Regular
+        ones have 36px items, with submenus next to it (see{' '}
         <PartLink
           component="menu"
           part="Menu.SubmenuRoot"
@@ -291,10 +375,10 @@ export const MenuOverview: FunctionComponent = () => (
       </li>
       <li>
         With toggles, every item keeps a column for the checkmark. A popup
-        taller than the room beside its trigger grows over it (flipped if it
-        fits on the other side, else shifted); only taller than the screen, it
-        scrolls. A compact submenu without room below its trigger covers it; a
-        press outside it closes it alone.
+        taller than the room next to its trigger grows over it (flipped if it
+        fits on the other side, otherwise shifted). Only when it’s taller than
+        the screen does it scroll. A compact submenu without room below its
+        trigger covers it, and a press outside it closes only the submenu.
       </li>
       <li>It closes once its trigger scrolls out of view.</li>
     </ul>

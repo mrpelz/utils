@@ -399,7 +399,7 @@ const SheetContent: FunctionComponent = () => (
       />
     </Showcase>
     <Showcase
-      footer="On a tablet, Cancel and Done is a task: a form sheet, centered."
+      footer="On a tablet, a task with Cancel and Done goes in a form sheet, in the center."
       title="Header"
     >
       <SimpleSheet
@@ -442,13 +442,13 @@ const SheetContent: FunctionComponent = () => (
     </Showcase>
     <Showcase
       isStacked
-      footer="Expand it, scroll the reviews, then drag the header down: with the groups scrolled away and no header stop, it swipes out at once."
+      footer="Expand it, scroll the reviews, then drag the header down. With the groups scrolled away and no header stop, it swipes out at once."
       title="Snapping by Groups, Without a Header Stop"
     >
       <PlaceSheet hasHeaderStop={false} />
     </Showcase>
     <Showcase
-      footer="Typed into: lifted above the keyboard (a floating one 8px above it), its field scrolled into view; snapping, its stops no taller, back at its stop as the keyboard hides."
+      footer="When a field is typed into, the keyboard lifts the sheet (a floating one sits 8px above it) and scrolls the field into view. When it snaps, its stops get no taller, and it goes back to its stop as the keyboard hides."
       title="With Fields (Lifted by the Keyboard)"
     >
       <SimpleSheet
@@ -507,10 +507,7 @@ const PlaceIsland: FunctionComponent<{
   const [stop, setStop] = useState(initialStop);
 
   return (
-    <Viewport.Anchor
-      edge="block-end"
-      edgeEffect="none"
-    >
+    <Viewport.BlockEnd edgeEffect="none">
       <Island.Root
         snapPoint={stop}
         onSnapPointChange={(next: string) => setStop(next)}
@@ -542,7 +539,7 @@ const PlaceIsland: FunctionComponent<{
           <Viewport.Padding edge="block-end" />
         </Island.Content>
       </Island.Root>
-    </Viewport.Anchor>
+    </Viewport.BlockEnd>
   );
 };
 

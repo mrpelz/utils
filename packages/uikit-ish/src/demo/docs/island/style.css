@@ -17,11 +17,11 @@
   }
 }
 
-/* Its controls (credits) clear of the island and of the safe areas: over
+/* Its controls (credits) clear of the island and of the safe area insets: over
    MapLibre's own (unlayered, so these too). */
 .island-demo-map .maplibregl-ctrl-bottom-left,
 .island-demo-map .maplibregl-ctrl-bottom-right {
-  /* (The anchor's size its content's: its safe area padding besides, less
+  /* (The anchor's size its content's: its safe area inset padding besides, less
      what the keyboard covers, as the anchor's.) */
   bottom: calc(
     var(--uikit-viewport-anchor-block-end, 0px) +

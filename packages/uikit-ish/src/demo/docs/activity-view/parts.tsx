@@ -11,13 +11,17 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfDocumentOnDocument, sfHeart } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { photo } from '../avatar/props.js';
+import { partPropMaps } from '../part-options.js';
 import {
   activityViewActionRows,
   activityViewActionsRows,
@@ -53,72 +57,144 @@ const HeaderPart: FunctionComponent = () => {
     title: 'ActivityView.Header',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Header"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
           <ActivityView.Header {...props}>
-            <ActivityView.Thumbnail>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -139,72 +215,144 @@ const ThumbnailPart: FunctionComponent = () => {
     title: 'ActivityView.Thumbnail',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Thumbnail"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
             <ActivityView.Thumbnail {...props}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -225,72 +373,144 @@ const HeadingPart: FunctionComponent = () => {
     title: 'ActivityView.Heading',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Heading"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
             <ActivityView.Heading {...props}>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -311,72 +531,142 @@ const TitlePart: FunctionComponent = () => {
     title: 'ActivityView.Title',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Title"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
               <ActivityView.Title {...props}>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -397,74 +687,144 @@ const SubtitlePart: FunctionComponent = () => {
     title: 'ActivityView.Subtitle',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Subtitle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
               <ActivityView.Subtitle {...props}>
                 12 Photos
               </ActivityView.Subtitle>
-              <ActivityView.Message>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -485,72 +845,144 @@ const MessagePart: FunctionComponent = () => {
     title: 'ActivityView.Message',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Message"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
               <ActivityView.Message {...props}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -571,72 +1003,147 @@ const SeparatorPart: FunctionComponent = () => {
     title: 'ActivityView.Separator',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Separator (others)': [],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Separator"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
           <ActivityView.Separator {...props} />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator
+            {...partProps['ActivityView.Separator (others)']}
+          />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -657,72 +1164,141 @@ const PeoplePart: FunctionComponent = () => {
     title: 'ActivityView.People',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.People"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
           <ActivityView.People {...props}>
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -746,72 +1322,142 @@ const PersonPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Person (others)': ['onClick'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Person"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
             <ActivityView.Person {...props}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person (others)']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -832,72 +1478,143 @@ const NamePart: FunctionComponent = () => {
     title: 'ActivityView.Name',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Name (others)': [],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Name"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
               <ActivityView.Name {...props}>Kate Brown</ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name (others)']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -918,72 +1635,142 @@ const CountPart: FunctionComponent = () => {
     title: 'ActivityView.Count',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Count"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
               <ActivityView.Count {...props}>2 People</ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -1004,72 +1791,141 @@ const ActionsPart: FunctionComponent = () => {
     title: 'ActivityView.Actions',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Actions"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
           <ActivityView.Actions {...props}>
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -1093,72 +1949,142 @@ const ActionPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Action (others)': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Action"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
             <ActivityView.Action {...props}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action (others)']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -1179,72 +2105,147 @@ const SymbolPart: FunctionComponent = () => {
     title: 'ActivityView.Symbol',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Symbol (others)': [],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Label': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Symbol"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
               <ActivityView.Symbol {...props}>
-                <Symbol icon={sfDocumentOnDocument} />
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Copy</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Copy
+              </ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol
+                {...partProps['ActivityView.Symbol (others)']}
+              >
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -1265,72 +2266,143 @@ const LabelPart: FunctionComponent = () => {
     title: 'ActivityView.Label',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'ActivityView.Label (others)': [],
+            'ActivityView.Action': ['onClick'],
+            'ActivityView.Actions': ['aria-label'],
+            'ActivityView.Count': [],
+            'ActivityView.Header': [],
+            'ActivityView.Heading': [],
+            'ActivityView.Message': [],
+            'ActivityView.Name': [],
+            'ActivityView.People': ['aria-label'],
+            'ActivityView.Person': ['onClick'],
+            'ActivityView.Separator': [],
+            'ActivityView.Subtitle': [],
+            'ActivityView.Symbol': [],
+            'ActivityView.Thumbnail': [],
+            'ActivityView.Title': [],
+            'Avatar.Fallback': [],
+            'Avatar.Group': [],
+            'Avatar.Root': [],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="ActivityView.Label"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <div className="activity-view-demo-panel">
-          <ActivityView.Header>
-            <ActivityView.Thumbnail>
+          <ActivityView.Header {...partProps['ActivityView.Header']}>
+            <ActivityView.Thumbnail {...partProps['ActivityView.Thumbnail']}>
               <img
                 alt=""
                 src={photo(30)}
               />
             </ActivityView.Thumbnail>
-            <ActivityView.Heading>
-              <ActivityView.Title>Weekend Photos</ActivityView.Title>
-              <ActivityView.Subtitle>12 Photos</ActivityView.Subtitle>
-              <ActivityView.Message>
+            <ActivityView.Heading {...partProps['ActivityView.Heading']}>
+              <ActivityView.Title {...partProps['ActivityView.Title']}>
+                Weekend Photos
+              </ActivityView.Title>
+              <ActivityView.Subtitle {...partProps['ActivityView.Subtitle']}>
+                12 Photos
+              </ActivityView.Subtitle>
+              <ActivityView.Message {...partProps['ActivityView.Message']}>
                 Only invited people can edit.
               </ActivityView.Message>
             </ActivityView.Heading>
           </ActivityView.Header>
-          <ActivityView.Separator />
-          <ActivityView.People aria-label="People">
-            <ActivityView.Person onClick={() => addLog('person: Kate Brown')}>
-              <Avatar.Root>
-                <Avatar.Fallback>KB</Avatar.Fallback>
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.People
+            {...partProps['ActivityView.People']}
+            aria-label="People"
+          >
+            <ActivityView.Person
+              {...partProps['ActivityView.Person']}
+              onClick={() => addLog('person: Kate Brown')}
+            >
+              <Avatar.Root {...partProps['Avatar.Root']}>
+                <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                  KB
+                </Avatar.Fallback>
               </Avatar.Root>
-              <ActivityView.Name>Kate Brown</ActivityView.Name>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Kate Brown
+              </ActivityView.Name>
             </ActivityView.Person>
             <ActivityView.Person
+              {...partProps['ActivityView.Person']}
               onClick={() => addLog('person: Gary and Fatima')}
             >
-              <Avatar.Group>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+              <Avatar.Group {...partProps['Avatar.Group']}>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
-                <Avatar.Root>
-                  <Avatar.Fallback>GF</Avatar.Fallback>
+                <Avatar.Root {...partProps['Avatar.Root']}>
+                  <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+                    GF
+                  </Avatar.Fallback>
                 </Avatar.Root>
               </Avatar.Group>
-              <ActivityView.Name>Gary and Fatima</ActivityView.Name>
-              <ActivityView.Count>2 People</ActivityView.Count>
+              <ActivityView.Name {...partProps['ActivityView.Name']}>
+                Gary and Fatima
+              </ActivityView.Name>
+              <ActivityView.Count {...partProps['ActivityView.Count']}>
+                2 People
+              </ActivityView.Count>
             </ActivityView.Person>
           </ActivityView.People>
-          <ActivityView.Separator />
-          <ActivityView.Actions aria-label="Actions">
-            <ActivityView.Action onClick={() => addLog('action: Copy')}>
-              <ActivityView.Symbol>
-                <Symbol icon={sfDocumentOnDocument} />
+          <ActivityView.Separator {...partProps['ActivityView.Separator']} />
+          <ActivityView.Actions
+            {...partProps['ActivityView.Actions']}
+            aria-label="Actions"
+          >
+            <ActivityView.Action
+              {...partProps['ActivityView.Action']}
+              onClick={() => addLog('action: Copy')}
+            >
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfDocumentOnDocument}
+                />
               </ActivityView.Symbol>
               <ActivityView.Label {...props}>Copy</ActivityView.Label>
             </ActivityView.Action>
             <ActivityView.Action
+              {...partProps['ActivityView.Action']}
               onClick={() => addLog('action: Add to Favorites')}
             >
-              <ActivityView.Symbol>
-                <Symbol icon={sfHeart} />
+              <ActivityView.Symbol {...partProps['ActivityView.Symbol']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeart}
+                />
               </ActivityView.Symbol>
-              <ActivityView.Label>Add to Favorites</ActivityView.Label>
+              <ActivityView.Label {...partProps['ActivityView.Label (others)']}>
+                Add to Favorites
+              </ActivityView.Label>
             </ActivityView.Action>
           </ActivityView.Actions>
         </div>
@@ -1345,74 +2417,177 @@ export const ActivityViewParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Parts placed in the app’s <a href={publicUrl('sheet')}>Sheet</a>{' '}
-        (compact) or
-        <a href={publicUrl('popover')}>Popover</a> (regular): no root of its
-        own.
+        (compact) or <a href={publicUrl('popover')}>Popover</a> (regular). It
+        has no root of its own.
       </li>
       <li>
-        What’s shared (a header), people and actions (rows scrolling sideways),
-        separators between them; more actions as a{' '}
-        <a href={publicUrl('list')}>List</a>
-        below.
+        What’s shared (a header), people and actions (rows that scroll
+        sideways), and separators between them. More actions can follow as a{' '}
+        <a href={publicUrl('list')}>List</a>.
       </li>
       <li>
-        Apps (an app icon row, people’s app badges) aren’t built: a
+        Apps (a row of app icons, app badges on people) aren’t built. Use a{' '}
         <a href={publicUrl('badge')}>Badge</a> on an avatar instead.
       </li>
     </ul>
     <ul className="demo-tree">
-      <li>
-        <PartLink part="ActivityView.Header" /> (optional)
+      <li className="demo-tree-context">
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />{' '}
+        <span>or</span>{' '}
+        <PartLink
+          component="popover"
+          part="Popover.Popup"
+        />
         <ul>
-          <li>
-            <PartLink part="ActivityView.Thumbnail" /> (optional)
-          </li>
-          <li>
-            <PartLink part="ActivityView.Heading" />
+          <li className="demo-tree-context">
+            <PartLink
+              component="sheet"
+              part="Sheet.Header"
+            />{' '}
+            <span>or</span>{' '}
+            <PartLink
+              component="popover"
+              part="Popover.Header"
+            />
             <ul>
               <li>
-                <PartLink part="ActivityView.Title" />
-              </li>
-              <li>
-                <PartLink part="ActivityView.Subtitle" /> (optional)
-              </li>
-              <li>
-                <PartLink part="ActivityView.Message" /> (optional)
+                <PartLink
+                  component="activity-view"
+                  part="ActivityView.Header"
+                />{' '}
+                (optional)
+                <ul>
+                  <li>
+                    <PartLink
+                      component="activity-view"
+                      part="ActivityView.Thumbnail"
+                    />{' '}
+                    (optional)
+                  </li>
+                  <li>
+                    <PartLink
+                      component="activity-view"
+                      part="ActivityView.Heading"
+                    />
+                    <ul>
+                      <li>
+                        <PartLink
+                          component="activity-view"
+                          part="ActivityView.Title"
+                        />
+                      </li>
+                      <li>
+                        <PartLink
+                          component="activity-view"
+                          part="ActivityView.Subtitle"
+                        />{' '}
+                        (optional)
+                      </li>
+                      <li>
+                        <PartLink
+                          component="activity-view"
+                          part="ActivityView.Message"
+                        />{' '}
+                        (optional)
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
-        </ul>
-      </li>
-      <li>
-        <PartLink part="ActivityView.Separator" />
-      </li>
-      <li>
-        <PartLink part="ActivityView.People" /> (optional)
-        <ul>
-          <li>
-            <PartLink part="ActivityView.Person" />
+          <li className="demo-tree-context">
+            <PartLink
+              component="sheet"
+              part="Sheet.Content"
+            />{' '}
+            <span>or</span>{' '}
+            <PartLink
+              component="popover"
+              part="Popover.Body"
+            />
             <ul>
               <li>
-                <PartLink part="ActivityView.Name" />
+                <PartLink
+                  component="activity-view"
+                  part="ActivityView.Separator"
+                />{' '}
+                (between its sections){' '}
               </li>
               <li>
-                <PartLink part="ActivityView.Count" /> (optional: a group’s)
+                <PartLink
+                  component="activity-view"
+                  part="ActivityView.People"
+                />{' '}
+                (optional)
+                <ul>
+                  <li>
+                    <PartLink
+                      component="activity-view"
+                      part="ActivityView.Person"
+                    />
+                    <ul>
+                      <li className="demo-tree-context">
+                        <PartLink
+                          component="avatar"
+                          part="Avatar.Root"
+                        />
+                      </li>
+                      <li>
+                        <PartLink
+                          component="activity-view"
+                          part="ActivityView.Name"
+                        />
+                      </li>
+                      <li>
+                        <PartLink
+                          component="activity-view"
+                          part="ActivityView.Count"
+                        />{' '}
+                        (optional: a group’s)
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
               </li>
-            </ul>
-          </li>
-        </ul>
-      </li>
-      <li>
-        <PartLink part="ActivityView.Actions" /> (optional)
-        <ul>
-          <li>
-            <PartLink part="ActivityView.Action" />
-            <ul>
               <li>
-                <PartLink part="ActivityView.Symbol" />
+                <PartLink
+                  component="activity-view"
+                  part="ActivityView.Actions"
+                />{' '}
+                (optional)
+                <ul>
+                  <li>
+                    <PartLink
+                      component="activity-view"
+                      part="ActivityView.Action"
+                    />
+                    <ul>
+                      <li>
+                        <PartLink
+                          component="activity-view"
+                          part="ActivityView.Symbol"
+                        />
+                      </li>
+                      <li>
+                        <PartLink
+                          component="activity-view"
+                          part="ActivityView.Label"
+                        />
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
               </li>
-              <li>
-                <PartLink part="ActivityView.Label" />
+              <li className="demo-tree-context">
+                <PartLink
+                  component="list"
+                  part="List.Root"
+                />{' '}
+                <span>(optional: more actions)</span>
               </li>
             </ul>
           </li>
@@ -1428,8 +2603,8 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What’s shared, at the top (16px in, its parts 16px apart): a thumbnail,
-        a heading, and e.g. a close button.
+        What’s shared, at the top (16px in, with its parts 16px apart): a
+        thumbnail, a heading, and for example a close button.
       </li>
     </ul>
     <HeaderPart />
@@ -1444,7 +2619,8 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A picture of what’s shared: 64px, its corners 16px, a hairline border.
+        A picture of what’s shared: 64px, with 16px corners and a hairline
+        border.
       </li>
     </ul>
     <ThumbnailPart />
@@ -1459,8 +2635,8 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The title and subtitle (1px apart), then (12px below) e.g. a menu and a
-        message.
+        The title and subtitle (1px apart), then, 12px below, for example a menu
+        and a message.
       </li>
     </ul>
     <HeadingPart />
@@ -1474,7 +2650,7 @@ export const ActivityViewParts: FunctionComponent = () => (
       <code>ActivityView.Title</code>
     </Heading>
     <ul>
-      <li>What’s shared, named: 15px, medium.</li>
+      <li>The name of what’s shared: 15px, medium.</li>
     </ul>
     <TitlePart />
     <h3>Props</h3>
@@ -1500,7 +2676,7 @@ export const ActivityViewParts: FunctionComponent = () => (
       <code>ActivityView.Message</code>
     </Heading>
     <ul>
-      <li>A note on sharing: 13px, in the secondary label color.</li>
+      <li>A note about sharing: 13px, in the secondary label color.</li>
     </ul>
     <MessagePart />
     <h3>Props</h3>
@@ -1514,7 +2690,7 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Between its sections: a hairline, 16px in. Renders an <code>hr</code>.
+        A hairline between its sections, 16px in. Renders an <code>hr</code>.
       </li>
     </ul>
     <SeparatorPart />
@@ -1529,12 +2705,12 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        People to share with, in a row scrolling sideways (24px from its start,
-        14px apart).
+        People to share with, in a row that scrolls sideways (24px from its
+        start, 14px apart).
       </li>
       <li>
-        Renders a <code>div</code> with the <code>list</code> role: name it (
-        <code>aria-label</code>).
+        Renders a <code>div</code> with the <code>list</code> role. Name it with{' '}
+        <code>aria-label</code>.
       </li>
     </ul>
     <PeoplePart />
@@ -1568,8 +2744,9 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The person’s name: 12px, two lines; with a{' '}
-        <PartLink part="ActivityView.Count" />, one line, truncated.
+        The person’s name: 12px, on two lines. With a{' '}
+        <PartLink part="ActivityView.Count" />, it takes one line, and
+        truncates.
       </li>
     </ul>
     <NamePart />
@@ -1584,7 +2761,7 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        How many people a group is, below its name, in the secondary label
+        How many people a group has, below its name, in the secondary label
         color.
       </li>
     </ul>
@@ -1599,10 +2776,10 @@ export const ActivityViewParts: FunctionComponent = () => (
       <code>ActivityView.Actions</code>
     </Heading>
     <ul>
-      <li>Actions, in a row scrolling sideways.</li>
+      <li>Actions, in a row that scrolls sideways.</li>
       <li>
-        Renders a <code>div</code> with the <code>list</code> role: name it (
-        <code>aria-label</code>).
+        Renders a <code>div</code> with the <code>list</code> role. Name it with{' '}
+        <code>aria-label</code>.
       </li>
     </ul>
     <ActionsPart />
@@ -1636,10 +2813,13 @@ export const ActivityViewParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The action’s symbol, light, in a 70px circle on a fill (darker while
-        pressed).
+        The action’s symbol, in a light weight, in a 70px circle on a fill
+        (darker while pressed).
       </li>
-      <li>Hidden from assistive technology: the label names the action.</li>
+      <li>
+        It’s hidden from assistive technology, because the label names the
+        action.
+      </li>
     </ul>
     <SymbolPart />
     <h3>Props</h3>
@@ -1652,7 +2832,7 @@ export const ActivityViewParts: FunctionComponent = () => (
       <code>ActivityView.Label</code>
     </Heading>
     <ul>
-      <li>The action’s name: 13px, two lines.</li>
+      <li>The action’s name: 13px, on two lines.</li>
     </ul>
     <LabelPart />
     <h3>Props</h3>

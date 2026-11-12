@@ -20,7 +20,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   sfCalendar,
@@ -40,7 +43,7 @@ import {
   sfTrash,
   sfTray,
 } from '../../tooling/icons.js';
-import { propOptionsPopup } from '../drawer/props.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsSidebarColumn,
   propOptionsContent,
@@ -82,8 +85,8 @@ export const SidebarDemo: FunctionComponent = () => {
     { external: externalRoot, title: 'root' },
   );
   const [controlColumn, propsColumn, stateColumn, keyColumn] = usePropControl(
-    propOptionsPopup,
-    { external: externalColumn, title: 'Drawer.Popup' },
+    useMemo(() => getPropOptionsSidebarColumn(addLog), [addLog]),
+    { external: externalColumn, title: 'column (sidebar)' },
   );
   const [controlSidebar, propsSidebar, stateSidebar, keySidebar] =
     usePropControl(propOptionsSidebar, {
@@ -100,6 +103,65 @@ export const SidebarDemo: FunctionComponent = () => {
     title: 'column (content)',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'aria-label',
+              'onClick',
+              'shape',
+              'tint',
+              'variant',
+            ],
+            'Collapsible.Panel': ['render'],
+            'Collapsible.Root': ['defaultOpen', 'render'],
+            'Collapsible.Trigger': ['nativeButton', 'render'],
+            'Header.LargeTitle': [],
+            'List.Accessory': ['aria-label', 'onClick', 'render'],
+            'List.Checkmark': [],
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleRoot': [],
+            'List.CollapsibleTrigger': ['aria-label', 'render'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': ['level', 'onClick', 'selected'],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': ['background', 'className'],
+            'Sidebar.Toolbar': [],
+            'Sidebar.ToolbarGroup': [],
+            'Switch.Root': ['aria-label', 'checked', 'onCheckedChange'],
+            'Switch.Thumb': [],
+            'TextField.Clear': [],
+            'TextField.Control': ['aria-label', 'placeholder', 'type'],
+            'TextField.Frame': [],
+            'TextField.Root': [],
+            'Toolbar.Root': ['context', 'placement'],
+            'Toolbar.Title': [],
+            'Viewport.Background': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
@@ -113,6 +175,7 @@ export const SidebarDemo: FunctionComponent = () => {
         controlColumn,
         controlSidebar,
         controlContentColumn,
+        partControls,
       ]}
       state={[
         stateContent,
@@ -120,17 +183,18 @@ export const SidebarDemo: FunctionComponent = () => {
         stateColumn,
         stateSidebar,
         stateContentColumn,
+        partState,
       ]}
     >
       {content.background === 'picture' ? (
-        <Viewport.Background>
+        <Viewport.Background {...partProps['Viewport.Background']}>
           <div
             aria-hidden="true"
             className="demo-picture"
           />
         </Viewport.Background>
       ) : null}
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -142,71 +206,111 @@ export const SidebarDemo: FunctionComponent = () => {
             {...propsColumn}
           >
             <Sidebar.Root {...propsSidebar}>
-              <Sidebar.Toolbar>
+              <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
                 <Button.Root
+                  {...partProps['Button.Root']}
                   tint="var(--uikit-glass-content)"
                   variant="borderless"
                   onClick={() => addLog('edit')}
                 >
-                  <Button.Label>Edit</Button.Label>
+                  <Button.Label {...partProps['Button.Label']}>
+                    Edit
+                  </Button.Label>
                 </Button.Root>
-                <Sidebar.ToolbarGroup>
+                <Sidebar.ToolbarGroup {...partProps['Sidebar.ToolbarGroup']}>
                   <Button.Root
+                    {...partProps['Button.Root']}
                     aria-label="New Folder"
                     shape="circle"
                     tint="var(--uikit-glass-content)"
                     variant="borderless"
                     onClick={() => addLog('new folder')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfFolderBadgePlus} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfFolderBadgePlus}
+                      />
                     </Button.Icon>
                   </Button.Root>
                   <Button.Root
+                    {...partProps['Button.Root']}
                     aria-label="Compose"
                     shape="circle"
                     tint="var(--uikit-glass-content)"
                     variant="borderless"
                     onClick={() => addLog('compose')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfSquareAndPencil} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndPencil}
+                      />
                     </Button.Icon>
                   </Button.Root>
                 </Sidebar.ToolbarGroup>
               </Sidebar.Toolbar>
-              <TextField.Root>
-                <TextField.Frame>
-                  <Symbol icon={sfMagnifyingglass} />
+              <TextField.Root {...partProps['TextField.Root']}>
+                <TextField.Frame {...partProps['TextField.Frame']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  />
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     aria-label="Search"
                     placeholder="Search"
                     type="search"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </TextField.Frame>
               </TextField.Root>
-              <List.Root listStyle="sidebar">
+              <List.Root
+                {...partProps['List.Root']}
+                listStyle="sidebar"
+              >
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Library</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Library
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item selected={selected === 'Inbox'}>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfTray} />
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Inbox'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfTray}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Inbox');
@@ -216,18 +320,30 @@ export const SidebarDemo: FunctionComponent = () => {
                           Inbox
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        <List.Detail>12</List.Detail>
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        <List.Detail {...partProps['List.Detail']}>
+                          12
+                        </List.Detail>
                       </List.Trailing>
                     </List.Item>
-                    <List.Item selected={selected === 'Favorites'}>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfHeart} />
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Favorites'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfHeart}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Favorites');
@@ -237,18 +353,30 @@ export const SidebarDemo: FunctionComponent = () => {
                           Favorites
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        <List.Detail>3</List.Detail>
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        <List.Detail {...partProps['List.Detail']}>
+                          3
+                        </List.Detail>
                       </List.Trailing>
                     </List.Item>
-                    <List.Item selected={selected === 'Recents'}>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfClock} />
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Recents'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfClock}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Recents');
@@ -262,26 +390,51 @@ export const SidebarDemo: FunctionComponent = () => {
                   </Collapsible.Panel>
                 </Collapsible.Root>
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Folders</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Folders
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.CollapsibleRoot defaultOpen>
-                      <List.Item selected={selected === 'Projects'}>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfFolder} />
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.CollapsibleRoot
+                      {...partProps['List.CollapsibleRoot']}
+                      defaultOpen
+                    >
+                      <List.Item
+                        {...partProps['List.Item']}
+                        selected={selected === 'Projects'}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfFolder}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('select: Projects');
@@ -291,33 +444,52 @@ export const SidebarDemo: FunctionComponent = () => {
                             Projects
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <List.Detail>8</List.Detail>
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <List.Detail {...partProps['List.Detail']}>
+                            8
+                          </List.Detail>
                           <List.CollapsibleTrigger
+                            {...partProps['List.CollapsibleTrigger']}
                             aria-label="Projects: nested"
                             render={
                               <List.Accessory
+                                {...partProps['List.Accessory']}
                                 render={<button type="button" />}
                               />
                             }
                           >
-                            <List.Disclosure />
+                            <List.Disclosure
+                              {...partProps['List.Disclosure']}
+                            />
                           </List.CollapsibleTrigger>
                         </List.Trailing>
                       </List.Item>
-                      <List.CollapsiblePanel>
-                        <List.CollapsibleRoot defaultOpen>
+                      <List.CollapsiblePanel
+                        {...partProps['List.CollapsiblePanel']}
+                      >
+                        <List.CollapsibleRoot
+                          {...partProps['List.CollapsibleRoot']}
+                          defaultOpen
+                        >
                           <List.Item
+                            {...partProps['List.Item']}
                             level={1}
                             selected={selected === 'Design'}
                           >
-                            <List.Leading>
-                              <List.Image variant="symbol">
-                                <Symbol icon={sfFolder} />
+                            <List.Leading {...partProps['List.Leading']}>
+                              <List.Image
+                                {...partProps['List.Image']}
+                                variant="symbol"
+                              >
+                                <Symbol
+                                  {...partProps.Symbol}
+                                  icon={sfFolder}
+                                />
                               </List.Image>
                             </List.Leading>
-                            <List.Content>
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => {
                                   addLog('select: Design');
@@ -327,31 +499,45 @@ export const SidebarDemo: FunctionComponent = () => {
                                 Design
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
+                            <List.Trailing {...partProps['List.Trailing']}>
                               <List.CollapsibleTrigger
+                                {...partProps['List.CollapsibleTrigger']}
                                 aria-label="Design: nested"
                                 render={
                                   <List.Accessory
+                                    {...partProps['List.Accessory']}
                                     render={<button type="button" />}
                                   />
                                 }
                               >
-                                <List.Disclosure />
+                                <List.Disclosure
+                                  {...partProps['List.Disclosure']}
+                                />
                               </List.CollapsibleTrigger>
                             </List.Trailing>
                           </List.Item>
-                          <List.CollapsiblePanel>
+                          <List.CollapsiblePanel
+                            {...partProps['List.CollapsiblePanel']}
+                          >
                             <List.Item
+                              {...partProps['List.Item']}
                               level={2}
                               selected={selected === 'Drafts'}
                             >
-                              <List.Leading>
-                                <List.Image variant="symbol">
-                                  <Symbol icon={sfDocument} />
+                              <List.Leading {...partProps['List.Leading']}>
+                                <List.Image
+                                  {...partProps['List.Image']}
+                                  variant="symbol"
+                                >
+                                  <Symbol
+                                    {...partProps.Symbol}
+                                    icon={sfDocument}
+                                  />
                                 </List.Image>
                               </List.Leading>
-                              <List.Content>
+                              <List.Content {...partProps['List.Content']}>
                                 <List.Title
+                                  {...partProps['List.Title']}
                                   render={<button type="button" />}
                                   onClick={() => {
                                     addLog('select: Drafts');
@@ -361,23 +547,33 @@ export const SidebarDemo: FunctionComponent = () => {
                                   Drafts
                                 </List.Title>
                               </List.Content>
-                              <List.Trailing>
-                                <List.Detail>2</List.Detail>
+                              <List.Trailing {...partProps['List.Trailing']}>
+                                <List.Detail {...partProps['List.Detail']}>
+                                  2
+                                </List.Detail>
                               </List.Trailing>
                             </List.Item>
                           </List.CollapsiblePanel>
                         </List.CollapsibleRoot>
                         <List.Item
+                          {...partProps['List.Item']}
                           level={1}
                           selected={selected === 'Photos'}
                         >
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={sfPhoto} />
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfPhoto}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog('select: Photos');
@@ -390,14 +586,24 @@ export const SidebarDemo: FunctionComponent = () => {
                         </List.Item>
                       </List.CollapsiblePanel>
                     </List.CollapsibleRoot>
-                    <List.Item selected={selected === 'Trash'}>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfTrash} />
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Trash'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfTrash}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Trash');
@@ -413,28 +619,52 @@ export const SidebarDemo: FunctionComponent = () => {
                 {/* Rows with trailing controls: a switch, a checkmark
                    (choosing), an info button. */}
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Options</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Options
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item onClick={forwardClick('[role=switch]')}>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfEye} />
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.Item
+                      {...partProps['List.Item']}
+                      onClick={forwardClick('[role=switch]')}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfEye}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
-                        <List.Title>Show Hidden</List.Title>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Show Hidden
+                        </List.Title>
                       </List.Content>
-                      <List.Trailing>
+                      <List.Trailing {...partProps['List.Trailing']}>
                         <Switch.Root
+                          {...partProps['Switch.Root']}
                           aria-label="Show Hidden"
                           checked={isHiddenShown}
                           onCheckedChange={(isChecked) => {
@@ -442,18 +672,25 @@ export const SidebarDemo: FunctionComponent = () => {
                             setIsHiddenShown(isChecked);
                           }}
                         >
-                          <Switch.Thumb />
+                          <Switch.Thumb {...partProps['Switch.Thumb']} />
                         </Switch.Root>
                       </List.Trailing>
                     </List.Item>
-                    <List.Item>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfTextformat} />
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfTextformat}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('sort by: Name');
@@ -463,18 +700,27 @@ export const SidebarDemo: FunctionComponent = () => {
                           Sort by Name
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        {sortBy === 'Name' ? <List.Checkmark /> : null}
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        {sortBy === 'Name' ? (
+                          <List.Checkmark {...partProps['List.Checkmark']} />
+                        ) : null}
                       </List.Trailing>
                     </List.Item>
-                    <List.Item>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfCalendar} />
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfCalendar}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('sort by: Date');
@@ -484,31 +730,44 @@ export const SidebarDemo: FunctionComponent = () => {
                           Sort by Date
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        {sortBy === 'Date' ? <List.Checkmark /> : null}
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        {sortBy === 'Date' ? (
+                          <List.Checkmark {...partProps['List.Checkmark']} />
+                        ) : null}
                       </List.Trailing>
                     </List.Item>
-                    <List.Item>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfPerson2} />
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfPerson2}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => addLog('select: Shared')}
                         >
                           Shared
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
+                      <List.Trailing {...partProps['List.Trailing']}>
                         <List.Accessory
+                          {...partProps['List.Accessory']}
                           aria-label="Info"
                           render={<button type="button" />}
                           onClick={() => addLog('shared info')}
                         >
-                          <Symbol icon={sfICircle} />
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfICircle}
+                          />
                         </List.Accessory>
                       </List.Trailing>
                     </List.Item>
@@ -519,17 +778,19 @@ export const SidebarDemo: FunctionComponent = () => {
           </Layout.Column>
           <Layout.Column {...propsContentColumn}>
             <Header.Root>
-              <Viewport.BlockStart>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
                 <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
                   context="adaptive"
                   placement="block-start"
                 >
-                  <Toolbar.Title>
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{selected}</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root
+                {...partProps['Page.Root']}
                 background={
                   content.pageBackground === 'grouped' ? 'grouped' : 'plain'
                 }
@@ -539,33 +800,46 @@ export const SidebarDemo: FunctionComponent = () => {
                     : undefined
                 }
               >
-                <Viewport.Padding edge="block-start" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
                 {/* (Its glass by what's behind it: e.g. the picture.) */}
 
-                <Header.LargeTitle>
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                   <span>{selected}</span>
                 </Header.LargeTitle>
 
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {Array.from(
                         { length: 12 },
                         (_, index) => `Item ${index + 1}`,
                       ).map((item) => (
-                        <List.Item key={item}>
-                          <List.Content>
-                            <List.Title>{item}</List.Title>
+                        <List.Item
+                          key={item}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {item}
+                            </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            <List.Detail>{selected}</List.Detail>
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            <List.Detail {...partProps['List.Detail']}>
+                              {selected}
+                            </List.Detail>
                           </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -630,6 +904,69 @@ export const SidebarCompactDemo: FunctionComponent = () => {
     title: 'column (content)',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'aria-label',
+              'onClick',
+              'shape',
+              'tint',
+              'variant',
+            ],
+            'Collapsible.Panel': ['render'],
+            'Collapsible.Root': ['defaultOpen', 'render'],
+            'Collapsible.Trigger': ['nativeButton', 'render'],
+            'Drawer.SwipeArea': [],
+            'Header.LargeTitle': [],
+            'List.Accessory': ['aria-label', 'onClick', 'render'],
+            'List.Checkmark': [],
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleRoot': [],
+            'List.CollapsibleTrigger': ['aria-label', 'render'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': ['level', 'onClick', 'selected'],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': ['background', 'className'],
+            'Sidebar.Toolbar': [],
+            'Sidebar.ToolbarGroup': [],
+            'Switch.Root': ['aria-label', 'checked', 'onCheckedChange'],
+            'Switch.Thumb': [],
+            'TextField.Clear': [],
+            'TextField.Control': ['aria-label', 'placeholder', 'type'],
+            'TextField.Frame': [],
+            'TextField.Root': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['context', 'placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Background': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
@@ -644,6 +981,7 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         controlDrawer,
         controlSidebar,
         controlContentColumn,
+        partControls,
       ]}
       state={[
         stateContent,
@@ -652,17 +990,18 @@ export const SidebarCompactDemo: FunctionComponent = () => {
         stateDrawer,
         stateSidebar,
         stateContentColumn,
+        partState,
       ]}
     >
       {content.background === 'picture' ? (
-        <Viewport.Background>
+        <Viewport.Background {...partProps['Viewport.Background']}>
           <div
             aria-hidden="true"
             className="demo-picture"
           />
         </Viewport.Background>
       ) : null}
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root
           key={`${keyRoot}-${keyColumn}-${keyDrawer}-${keySidebar}-${keyContentColumn}`}
           {...propsRoot}
@@ -677,78 +1016,118 @@ export const SidebarCompactDemo: FunctionComponent = () => {
               setIsOpen(isNextOpen);
             }}
           >
-            <Drawer.SwipeArea />
+            <Drawer.SwipeArea {...partProps['Drawer.SwipeArea']} />
             <Drawer.Popup
               key={keyColumn}
               aria-label="Sidebar"
               {...propsColumn}
             >
               <Sidebar.Root {...propsSidebar}>
-                <Sidebar.Toolbar>
+                <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
                   <Button.Root
+                    {...partProps['Button.Root']}
                     tint="var(--uikit-glass-content)"
                     variant="borderless"
                     onClick={() => addLog('edit')}
                   >
-                    <Button.Label>Edit</Button.Label>
+                    <Button.Label {...partProps['Button.Label']}>
+                      Edit
+                    </Button.Label>
                   </Button.Root>
-                  <Sidebar.ToolbarGroup>
+                  <Sidebar.ToolbarGroup {...partProps['Sidebar.ToolbarGroup']}>
                     <Button.Root
+                      {...partProps['Button.Root']}
                       aria-label="New Folder"
                       shape="circle"
                       tint="var(--uikit-glass-content)"
                       variant="borderless"
                       onClick={() => addLog('new folder')}
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfFolderBadgePlus} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfFolderBadgePlus}
+                        />
                       </Button.Icon>
                     </Button.Root>
                     <Button.Root
+                      {...partProps['Button.Root']}
                       aria-label="Compose"
                       shape="circle"
                       tint="var(--uikit-glass-content)"
                       variant="borderless"
                       onClick={() => addLog('compose')}
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfSquareAndPencil} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfSquareAndPencil}
+                        />
                       </Button.Icon>
                     </Button.Root>
                   </Sidebar.ToolbarGroup>
                 </Sidebar.Toolbar>
-                <TextField.Root>
-                  <TextField.Frame>
-                    <Symbol icon={sfMagnifyingglass} />
+                <TextField.Root {...partProps['TextField.Root']}>
+                  <TextField.Frame {...partProps['TextField.Frame']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfMagnifyingglass}
+                    />
                     <TextField.Control
+                      {...partProps['TextField.Control']}
                       aria-label="Search"
                       placeholder="Search"
                       type="search"
                     />
-                    <TextField.Clear />
+                    <TextField.Clear {...partProps['TextField.Clear']} />
                   </TextField.Frame>
                 </TextField.Root>
-                <List.Root listStyle="sidebar">
+                <List.Root
+                  {...partProps['List.Root']}
+                  listStyle="sidebar"
+                >
                   <Collapsible.Root
+                    {...partProps['Collapsible.Root']}
                     defaultOpen
-                    render={<List.Section />}
+                    render={<List.Section {...partProps['List.Section']} />}
                   >
                     <Collapsible.Trigger
+                      {...partProps['Collapsible.Trigger']}
                       nativeButton={false}
-                      render={<List.Header prominence="nested" />}
+                      render={
+                        <List.Header
+                          {...partProps['List.Header']}
+                          prominence="nested"
+                        />
+                      }
                     >
-                      <List.Title>Library</List.Title>
-                      <List.Disclosure />
+                      <List.Title {...partProps['List.Title']}>
+                        Library
+                      </List.Title>
+                      <List.Disclosure {...partProps['List.Disclosure']} />
                     </Collapsible.Trigger>
-                    <Collapsible.Panel render={<List.Group />}>
-                      <List.Item selected={selected === 'Inbox'}>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfTray} />
+                    <Collapsible.Panel
+                      {...partProps['Collapsible.Panel']}
+                      render={<List.Group {...partProps['List.Group']} />}
+                    >
+                      <List.Item
+                        {...partProps['List.Item']}
+                        selected={selected === 'Inbox'}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfTray}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('select: Inbox');
@@ -760,18 +1139,30 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                             Inbox
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <List.Detail>12</List.Detail>
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <List.Detail {...partProps['List.Detail']}>
+                            12
+                          </List.Detail>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item selected={selected === 'Favorites'}>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfHeart} />
+                      <List.Item
+                        {...partProps['List.Item']}
+                        selected={selected === 'Favorites'}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfHeart}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('select: Favorites');
@@ -783,18 +1174,30 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                             Favorites
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <List.Detail>3</List.Detail>
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <List.Detail {...partProps['List.Detail']}>
+                            3
+                          </List.Detail>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item selected={selected === 'Recents'}>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfClock} />
+                      <List.Item
+                        {...partProps['List.Item']}
+                        selected={selected === 'Recents'}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfClock}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('select: Recents');
@@ -810,26 +1213,51 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                     </Collapsible.Panel>
                   </Collapsible.Root>
                   <Collapsible.Root
+                    {...partProps['Collapsible.Root']}
                     defaultOpen
-                    render={<List.Section />}
+                    render={<List.Section {...partProps['List.Section']} />}
                   >
                     <Collapsible.Trigger
+                      {...partProps['Collapsible.Trigger']}
                       nativeButton={false}
-                      render={<List.Header prominence="nested" />}
+                      render={
+                        <List.Header
+                          {...partProps['List.Header']}
+                          prominence="nested"
+                        />
+                      }
                     >
-                      <List.Title>Folders</List.Title>
-                      <List.Disclosure />
+                      <List.Title {...partProps['List.Title']}>
+                        Folders
+                      </List.Title>
+                      <List.Disclosure {...partProps['List.Disclosure']} />
                     </Collapsible.Trigger>
-                    <Collapsible.Panel render={<List.Group />}>
-                      <List.CollapsibleRoot defaultOpen>
-                        <List.Item selected={selected === 'Projects'}>
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={sfFolder} />
+                    <Collapsible.Panel
+                      {...partProps['Collapsible.Panel']}
+                      render={<List.Group {...partProps['List.Group']} />}
+                    >
+                      <List.CollapsibleRoot
+                        {...partProps['List.CollapsibleRoot']}
+                        defaultOpen
+                      >
+                        <List.Item
+                          {...partProps['List.Item']}
+                          selected={selected === 'Projects'}
+                        >
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfFolder}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog('select: Projects');
@@ -841,33 +1269,52 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                               Projects
                             </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            <List.Detail>8</List.Detail>
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            <List.Detail {...partProps['List.Detail']}>
+                              8
+                            </List.Detail>
                             <List.CollapsibleTrigger
+                              {...partProps['List.CollapsibleTrigger']}
                               aria-label="Projects: nested"
                               render={
                                 <List.Accessory
+                                  {...partProps['List.Accessory']}
                                   render={<button type="button" />}
                                 />
                               }
                             >
-                              <List.Disclosure />
+                              <List.Disclosure
+                                {...partProps['List.Disclosure']}
+                              />
                             </List.CollapsibleTrigger>
                           </List.Trailing>
                         </List.Item>
-                        <List.CollapsiblePanel>
-                          <List.CollapsibleRoot defaultOpen>
+                        <List.CollapsiblePanel
+                          {...partProps['List.CollapsiblePanel']}
+                        >
+                          <List.CollapsibleRoot
+                            {...partProps['List.CollapsibleRoot']}
+                            defaultOpen
+                          >
                             <List.Item
+                              {...partProps['List.Item']}
                               level={1}
                               selected={selected === 'Design'}
                             >
-                              <List.Leading>
-                                <List.Image variant="symbol">
-                                  <Symbol icon={sfFolder} />
+                              <List.Leading {...partProps['List.Leading']}>
+                                <List.Image
+                                  {...partProps['List.Image']}
+                                  variant="symbol"
+                                >
+                                  <Symbol
+                                    {...partProps.Symbol}
+                                    icon={sfFolder}
+                                  />
                                 </List.Image>
                               </List.Leading>
-                              <List.Content>
+                              <List.Content {...partProps['List.Content']}>
                                 <List.Title
+                                  {...partProps['List.Title']}
                                   render={<button type="button" />}
                                   onClick={() => {
                                     addLog('select: Design');
@@ -879,31 +1326,45 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                                   Design
                                 </List.Title>
                               </List.Content>
-                              <List.Trailing>
+                              <List.Trailing {...partProps['List.Trailing']}>
                                 <List.CollapsibleTrigger
+                                  {...partProps['List.CollapsibleTrigger']}
                                   aria-label="Design: nested"
                                   render={
                                     <List.Accessory
+                                      {...partProps['List.Accessory']}
                                       render={<button type="button" />}
                                     />
                                   }
                                 >
-                                  <List.Disclosure />
+                                  <List.Disclosure
+                                    {...partProps['List.Disclosure']}
+                                  />
                                 </List.CollapsibleTrigger>
                               </List.Trailing>
                             </List.Item>
-                            <List.CollapsiblePanel>
+                            <List.CollapsiblePanel
+                              {...partProps['List.CollapsiblePanel']}
+                            >
                               <List.Item
+                                {...partProps['List.Item']}
                                 level={2}
                                 selected={selected === 'Drafts'}
                               >
-                                <List.Leading>
-                                  <List.Image variant="symbol">
-                                    <Symbol icon={sfDocument} />
+                                <List.Leading {...partProps['List.Leading']}>
+                                  <List.Image
+                                    {...partProps['List.Image']}
+                                    variant="symbol"
+                                  >
+                                    <Symbol
+                                      {...partProps.Symbol}
+                                      icon={sfDocument}
+                                    />
                                   </List.Image>
                                 </List.Leading>
-                                <List.Content>
+                                <List.Content {...partProps['List.Content']}>
                                   <List.Title
+                                    {...partProps['List.Title']}
                                     render={<button type="button" />}
                                     onClick={() => {
                                       addLog('select: Drafts');
@@ -915,23 +1376,33 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                                     Drafts
                                   </List.Title>
                                 </List.Content>
-                                <List.Trailing>
-                                  <List.Detail>2</List.Detail>
+                                <List.Trailing {...partProps['List.Trailing']}>
+                                  <List.Detail {...partProps['List.Detail']}>
+                                    2
+                                  </List.Detail>
                                 </List.Trailing>
                               </List.Item>
                             </List.CollapsiblePanel>
                           </List.CollapsibleRoot>
                           <List.Item
+                            {...partProps['List.Item']}
                             level={1}
                             selected={selected === 'Photos'}
                           >
-                            <List.Leading>
-                              <List.Image variant="symbol">
-                                <Symbol icon={sfPhoto} />
+                            <List.Leading {...partProps['List.Leading']}>
+                              <List.Image
+                                {...partProps['List.Image']}
+                                variant="symbol"
+                              >
+                                <Symbol
+                                  {...partProps.Symbol}
+                                  icon={sfPhoto}
+                                />
                               </List.Image>
                             </List.Leading>
-                            <List.Content>
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => {
                                   addLog('select: Photos');
@@ -946,14 +1417,24 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                           </List.Item>
                         </List.CollapsiblePanel>
                       </List.CollapsibleRoot>
-                      <List.Item selected={selected === 'Trash'}>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfTrash} />
+                      <List.Item
+                        {...partProps['List.Item']}
+                        selected={selected === 'Trash'}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfTrash}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('select: Trash');
@@ -971,28 +1452,52 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                   {/* Rows with trailing controls: a switch, a checkmark
                    (choosing), an info button. */}
                   <Collapsible.Root
+                    {...partProps['Collapsible.Root']}
                     defaultOpen
-                    render={<List.Section />}
+                    render={<List.Section {...partProps['List.Section']} />}
                   >
                     <Collapsible.Trigger
+                      {...partProps['Collapsible.Trigger']}
                       nativeButton={false}
-                      render={<List.Header prominence="nested" />}
+                      render={
+                        <List.Header
+                          {...partProps['List.Header']}
+                          prominence="nested"
+                        />
+                      }
                     >
-                      <List.Title>Options</List.Title>
-                      <List.Disclosure />
+                      <List.Title {...partProps['List.Title']}>
+                        Options
+                      </List.Title>
+                      <List.Disclosure {...partProps['List.Disclosure']} />
                     </Collapsible.Trigger>
-                    <Collapsible.Panel render={<List.Group />}>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfEye} />
+                    <Collapsible.Panel
+                      {...partProps['Collapsible.Panel']}
+                      render={<List.Group {...partProps['List.Group']} />}
+                    >
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfEye}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
-                          <List.Title>Show Hidden</List.Title>
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Hidden
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             aria-label="Show Hidden"
                             checked={isHiddenShown}
                             onCheckedChange={(isChecked) => {
@@ -1000,18 +1505,25 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                               setIsHiddenShown(isChecked);
                             }}
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfTextformat} />
+                      <List.Item {...partProps['List.Item']}>
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfTextformat}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('sort by: Name');
@@ -1021,18 +1533,27 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                             Sort by Name
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          {sortBy === 'Name' ? <List.Checkmark /> : null}
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          {sortBy === 'Name' ? (
+                            <List.Checkmark {...partProps['List.Checkmark']} />
+                          ) : null}
                         </List.Trailing>
                       </List.Item>
-                      <List.Item>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfCalendar} />
+                      <List.Item {...partProps['List.Item']}>
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfCalendar}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('sort by: Date');
@@ -1042,31 +1563,44 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                             Sort by Date
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          {sortBy === 'Date' ? <List.Checkmark /> : null}
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          {sortBy === 'Date' ? (
+                            <List.Checkmark {...partProps['List.Checkmark']} />
+                          ) : null}
                         </List.Trailing>
                       </List.Item>
-                      <List.Item>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfPerson2} />
+                      <List.Item {...partProps['List.Item']}>
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfPerson2}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => addLog('select: Shared')}
                           >
                             Shared
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <List.Accessory
+                            {...partProps['List.Accessory']}
                             aria-label="Info"
                             render={<button type="button" />}
                             onClick={() => addLog('shared info')}
                           >
-                            <Symbol icon={sfICircle} />
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfICircle}
+                            />
                           </List.Accessory>
                         </List.Trailing>
                       </List.Item>
@@ -1078,13 +1612,15 @@ export const SidebarCompactDemo: FunctionComponent = () => {
           </Drawer.Root>
           <Layout.Column {...propsContentColumn}>
             <Header.Root>
-              <Viewport.BlockStart>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
                 <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
                   context="adaptive"
                   placement="block-start"
                 >
-                  <Toolbar.Leading>
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                     <Toolbar.Button
+                      {...partProps['Toolbar.Button']}
                       aria-label="Show Sidebar"
                       shape="circle"
                       onClick={() => {
@@ -1092,19 +1628,23 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                         setIsOpen(true);
                       }}
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfListBullet} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfListBullet}
+                        />
                       </Button.Icon>
                     </Toolbar.Button>
                   </Toolbar.Leading>
-                  <Toolbar.Title>
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{selected}</span>
                   </Toolbar.Title>
                   {/* (Balancing it: the title centered.) */}
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
               <Page.Root
+                {...partProps['Page.Root']}
                 background={
                   content.pageBackground === 'grouped' ? 'grouped' : 'plain'
                 }
@@ -1114,33 +1654,46 @@ export const SidebarCompactDemo: FunctionComponent = () => {
                     : undefined
                 }
               >
-                <Viewport.Padding edge="block-start" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
                 {/* (Its glass by what's behind it: e.g. the picture.) */}
 
-                <Header.LargeTitle>
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                   <span>{selected}</span>
                 </Header.LargeTitle>
 
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {Array.from(
                         { length: 12 },
                         (_, index) => `Item ${index + 1}`,
                       ).map((item) => (
-                        <List.Item key={item}>
-                          <List.Content>
-                            <List.Title>{item}</List.Title>
+                        <List.Item
+                          key={item}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {item}
+                            </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            <List.Detail>{selected}</List.Detail>
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            <List.Detail {...partProps['List.Detail']}>
+                              {selected}
+                            </List.Detail>
                           </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -1163,97 +1716,209 @@ export const SidebarEditingDemo: FunctionComponent = () => {
   const [isHiddenShown, setIsHiddenShown] = useState(false);
   const [sortBy, setSortBy] = useState('Name');
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'aria-label',
+              'onClick',
+              'shape',
+              'tint',
+              'variant',
+            ],
+            'Collapsible.Panel': ['render'],
+            'Collapsible.Root': ['defaultOpen', 'render'],
+            'Collapsible.Trigger': ['nativeButton', 'render'],
+            'Header.LargeTitle': [],
+            'Layout.Column': ['aria-label', 'defaultSize', 'floating'],
+            'Layout.Root': [],
+            'List.Accessory': ['aria-label', 'onClick', 'render'],
+            'List.Checkbox': ['aria-label', 'by'],
+            'List.Checkmark': [],
+            'List.CollapsiblePanel': [],
+            'List.CollapsibleRoot': [],
+            'List.CollapsibleTrigger': ['aria-label', 'render'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': ['level', 'onClick', 'selected'],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': ['className'],
+            'Sidebar.Root': [],
+            'Sidebar.Toolbar': [],
+            'Sidebar.ToolbarGroup': [],
+            'Switch.Root': ['aria-label', 'checked', 'onCheckedChange'],
+            'Switch.Thumb': [],
+            'TextField.Clear': [],
+            'TextField.Control': ['aria-label', 'placeholder', 'type'],
+            'TextField.Frame': [],
+            'TextField.Root': [],
+            'Toolbar.Root': ['context', 'placement'],
+            'Toolbar.Title': [],
+            'Viewport.Background': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
+      controls={[partControls]}
       id={id}
       log={log}
       stage="tablet"
+      state={[partState]}
       title="Sidebar (Editing)"
     >
-      <Viewport.Background>
+      <Viewport.Background {...partProps['Viewport.Background']}>
         <div
           aria-hidden="true"
           className="demo-picture"
         />
       </Viewport.Background>
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         {/* (On the picture: no line between the columns.) */}
-        <Layout.Root hideSeparators>
+        <Layout.Root
+          {...partProps['Layout.Root']}
+          hideSeparators
+        >
           <Layout.Column
+            {...partProps['Layout.Column']}
             floating
             aria-label="Sidebar"
             defaultSize={336}
           >
-            <Sidebar.Root>
-              <Sidebar.Toolbar>
+            <Sidebar.Root {...partProps['Sidebar.Root']}>
+              <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
                 <Button.Root
+                  {...partProps['Button.Root']}
                   tint="var(--uikit-glass-content)"
                   variant="borderless"
                   onClick={() => addLog('edit')}
                 >
-                  <Button.Label>Done</Button.Label>
+                  <Button.Label {...partProps['Button.Label']}>
+                    Done
+                  </Button.Label>
                 </Button.Root>
-                <Sidebar.ToolbarGroup>
+                <Sidebar.ToolbarGroup {...partProps['Sidebar.ToolbarGroup']}>
                   <Button.Root
+                    {...partProps['Button.Root']}
                     aria-label="New Folder"
                     shape="circle"
                     tint="var(--uikit-glass-content)"
                     variant="borderless"
                     onClick={() => addLog('new folder')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfFolderBadgePlus} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfFolderBadgePlus}
+                      />
                     </Button.Icon>
                   </Button.Root>
                   <Button.Root
+                    {...partProps['Button.Root']}
                     aria-label="Compose"
                     shape="circle"
                     tint="var(--uikit-glass-content)"
                     variant="borderless"
                     onClick={() => addLog('compose')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfSquareAndPencil} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndPencil}
+                      />
                     </Button.Icon>
                   </Button.Root>
                 </Sidebar.ToolbarGroup>
               </Sidebar.Toolbar>
-              <TextField.Root>
-                <TextField.Frame>
-                  <Symbol icon={sfMagnifyingglass} />
+              <TextField.Root {...partProps['TextField.Root']}>
+                <TextField.Frame {...partProps['TextField.Frame']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMagnifyingglass}
+                  />
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     aria-label="Search"
                     placeholder="Search"
                     type="search"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </TextField.Frame>
               </TextField.Root>
-              <List.Root listStyle="sidebar">
+              <List.Root
+                {...partProps['List.Root']}
+                listStyle="sidebar"
+              >
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Library</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Library
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item selected={selected === 'Inbox'}>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Inbox" />
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Inbox'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Inbox"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfTray} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfTray}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Inbox');
@@ -1263,21 +1928,36 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                           Inbox
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        <List.Detail>12</List.Detail>
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        <List.Detail {...partProps['List.Detail']}>
+                          12
+                        </List.Detail>
                       </List.Trailing>
                     </List.Item>
-                    <List.Item selected={selected === 'Favorites'}>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Favorites" />
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Favorites'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Favorites"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfHeart} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfHeart}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Favorites');
@@ -1287,21 +1967,36 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                           Favorites
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        <List.Detail>3</List.Detail>
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        <List.Detail {...partProps['List.Detail']}>
+                          3
+                        </List.Detail>
                       </List.Trailing>
                     </List.Item>
-                    <List.Item selected={selected === 'Recents'}>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Recents" />
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Recents'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Recents"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfClock} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfClock}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Recents');
@@ -1315,29 +2010,57 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                   </Collapsible.Panel>
                 </Collapsible.Root>
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Folders</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Folders
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.CollapsibleRoot defaultOpen>
-                      <List.Item selected={selected === 'Projects'}>
-                        <List.Leading>
-                          <List.Checkbox aria-label="Projects" />
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.CollapsibleRoot
+                      {...partProps['List.CollapsibleRoot']}
+                      defaultOpen
+                    >
+                      <List.Item
+                        {...partProps['List.Item']}
+                        selected={selected === 'Projects'}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Checkbox
+                            {...partProps['List.Checkbox']}
+                            aria-label="Projects"
+                          />
                         </List.Leading>
-                        <List.Leading>
-                          <List.Image variant="symbol">
-                            <Symbol icon={sfFolder} />
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfFolder}
+                            />
                           </List.Image>
                         </List.Leading>
-                        <List.Content>
+                        <List.Content {...partProps['List.Content']}>
                           <List.Title
+                            {...partProps['List.Title']}
                             render={<button type="button" />}
                             onClick={() => {
                               addLog('select: Projects');
@@ -1347,36 +2070,58 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                             Projects
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <List.Detail>8</List.Detail>
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <List.Detail {...partProps['List.Detail']}>
+                            8
+                          </List.Detail>
                           <List.CollapsibleTrigger
+                            {...partProps['List.CollapsibleTrigger']}
                             aria-label="Projects: nested"
                             render={
                               <List.Accessory
+                                {...partProps['List.Accessory']}
                                 render={<button type="button" />}
                               />
                             }
                           >
-                            <List.Disclosure />
+                            <List.Disclosure
+                              {...partProps['List.Disclosure']}
+                            />
                           </List.CollapsibleTrigger>
                         </List.Trailing>
                       </List.Item>
-                      <List.CollapsiblePanel>
-                        <List.CollapsibleRoot defaultOpen>
+                      <List.CollapsiblePanel
+                        {...partProps['List.CollapsiblePanel']}
+                      >
+                        <List.CollapsibleRoot
+                          {...partProps['List.CollapsibleRoot']}
+                          defaultOpen
+                        >
                           <List.Item
+                            {...partProps['List.Item']}
                             level={1}
                             selected={selected === 'Design'}
                           >
-                            <List.Leading>
-                              <List.Checkbox aria-label="Design" />
+                            <List.Leading {...partProps['List.Leading']}>
+                              <List.Checkbox
+                                {...partProps['List.Checkbox']}
+                                aria-label="Design"
+                              />
                             </List.Leading>
-                            <List.Leading>
-                              <List.Image variant="symbol">
-                                <Symbol icon={sfFolder} />
+                            <List.Leading {...partProps['List.Leading']}>
+                              <List.Image
+                                {...partProps['List.Image']}
+                                variant="symbol"
+                              >
+                                <Symbol
+                                  {...partProps.Symbol}
+                                  icon={sfFolder}
+                                />
                               </List.Image>
                             </List.Leading>
-                            <List.Content>
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => {
                                   addLog('select: Design');
@@ -1386,34 +2131,51 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                                 Design
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
+                            <List.Trailing {...partProps['List.Trailing']}>
                               <List.CollapsibleTrigger
+                                {...partProps['List.CollapsibleTrigger']}
                                 aria-label="Design: nested"
                                 render={
                                   <List.Accessory
+                                    {...partProps['List.Accessory']}
                                     render={<button type="button" />}
                                   />
                                 }
                               >
-                                <List.Disclosure />
+                                <List.Disclosure
+                                  {...partProps['List.Disclosure']}
+                                />
                               </List.CollapsibleTrigger>
                             </List.Trailing>
                           </List.Item>
-                          <List.CollapsiblePanel>
+                          <List.CollapsiblePanel
+                            {...partProps['List.CollapsiblePanel']}
+                          >
                             <List.Item
+                              {...partProps['List.Item']}
                               level={2}
                               selected={selected === 'Drafts'}
                             >
-                              <List.Leading>
-                                <List.Checkbox aria-label="Drafts" />
+                              <List.Leading {...partProps['List.Leading']}>
+                                <List.Checkbox
+                                  {...partProps['List.Checkbox']}
+                                  aria-label="Drafts"
+                                />
                               </List.Leading>
-                              <List.Leading>
-                                <List.Image variant="symbol">
-                                  <Symbol icon={sfDocument} />
+                              <List.Leading {...partProps['List.Leading']}>
+                                <List.Image
+                                  {...partProps['List.Image']}
+                                  variant="symbol"
+                                >
+                                  <Symbol
+                                    {...partProps.Symbol}
+                                    icon={sfDocument}
+                                  />
                                 </List.Image>
                               </List.Leading>
-                              <List.Content>
+                              <List.Content {...partProps['List.Content']}>
                                 <List.Title
+                                  {...partProps['List.Title']}
                                   render={<button type="button" />}
                                   onClick={() => {
                                     addLog('select: Drafts');
@@ -1423,26 +2185,39 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                                   Drafts
                                 </List.Title>
                               </List.Content>
-                              <List.Trailing>
-                                <List.Detail>2</List.Detail>
+                              <List.Trailing {...partProps['List.Trailing']}>
+                                <List.Detail {...partProps['List.Detail']}>
+                                  2
+                                </List.Detail>
                               </List.Trailing>
                             </List.Item>
                           </List.CollapsiblePanel>
                         </List.CollapsibleRoot>
                         <List.Item
+                          {...partProps['List.Item']}
                           level={1}
                           selected={selected === 'Photos'}
                         >
-                          <List.Leading>
-                            <List.Checkbox aria-label="Photos" />
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Checkbox
+                              {...partProps['List.Checkbox']}
+                              aria-label="Photos"
+                            />
                           </List.Leading>
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={sfPhoto} />
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfPhoto}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog('select: Photos');
@@ -1455,17 +2230,30 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                         </List.Item>
                       </List.CollapsiblePanel>
                     </List.CollapsibleRoot>
-                    <List.Item selected={selected === 'Trash'}>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Trash" />
+                    <List.Item
+                      {...partProps['List.Item']}
+                      selected={selected === 'Trash'}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Trash"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfTrash} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfTrash}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('select: Trash');
@@ -1481,31 +2269,58 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                 {/* Rows with trailing controls: a switch, a checkmark
                    (choosing), an info button. */}
                 <Collapsible.Root
+                  {...partProps['Collapsible.Root']}
                   defaultOpen
-                  render={<List.Section />}
+                  render={<List.Section {...partProps['List.Section']} />}
                 >
                   <Collapsible.Trigger
+                    {...partProps['Collapsible.Trigger']}
                     nativeButton={false}
-                    render={<List.Header prominence="nested" />}
+                    render={
+                      <List.Header
+                        {...partProps['List.Header']}
+                        prominence="nested"
+                      />
+                    }
                   >
-                    <List.Title>Options</List.Title>
-                    <List.Disclosure />
+                    <List.Title {...partProps['List.Title']}>
+                      Options
+                    </List.Title>
+                    <List.Disclosure {...partProps['List.Disclosure']} />
                   </Collapsible.Trigger>
-                  <Collapsible.Panel render={<List.Group />}>
-                    <List.Item onClick={forwardClick('[role=switch]')}>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Show Hidden" />
+                  <Collapsible.Panel
+                    {...partProps['Collapsible.Panel']}
+                    render={<List.Group {...partProps['List.Group']} />}
+                  >
+                    <List.Item
+                      {...partProps['List.Item']}
+                      onClick={forwardClick('[role=switch]')}
+                    >
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Show Hidden"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfEye} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfEye}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
-                        <List.Title>Show Hidden</List.Title>
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Show Hidden
+                        </List.Title>
                       </List.Content>
-                      <List.Trailing>
+                      <List.Trailing {...partProps['List.Trailing']}>
                         <Switch.Root
+                          {...partProps['Switch.Root']}
                           aria-label="Show Hidden"
                           checked={isHiddenShown}
                           onCheckedChange={(isChecked) => {
@@ -1513,21 +2328,31 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                             setIsHiddenShown(isChecked);
                           }}
                         >
-                          <Switch.Thumb />
+                          <Switch.Thumb {...partProps['Switch.Thumb']} />
                         </Switch.Root>
                       </List.Trailing>
                     </List.Item>
-                    <List.Item>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Sort by Name" />
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Sort by Name"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfTextformat} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfTextformat}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('sort by: Name');
@@ -1537,21 +2362,33 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                           Sort by Name
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        {sortBy === 'Name' ? <List.Checkmark /> : null}
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        {sortBy === 'Name' ? (
+                          <List.Checkmark {...partProps['List.Checkmark']} />
+                        ) : null}
                       </List.Trailing>
                     </List.Item>
-                    <List.Item>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Sort by Date" />
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Sort by Date"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfCalendar} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfCalendar}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => {
                             addLog('sort by: Date');
@@ -1561,34 +2398,50 @@ export const SidebarEditingDemo: FunctionComponent = () => {
                           Sort by Date
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
-                        {sortBy === 'Date' ? <List.Checkmark /> : null}
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        {sortBy === 'Date' ? (
+                          <List.Checkmark {...partProps['List.Checkmark']} />
+                        ) : null}
                       </List.Trailing>
                     </List.Item>
-                    <List.Item>
-                      <List.Leading>
-                        <List.Checkbox aria-label="Shared" />
+                    <List.Item {...partProps['List.Item']}>
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Checkbox
+                          {...partProps['List.Checkbox']}
+                          aria-label="Shared"
+                        />
                       </List.Leading>
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={sfPerson2} />
+                      <List.Leading {...partProps['List.Leading']}>
+                        <List.Image
+                          {...partProps['List.Image']}
+                          variant="symbol"
+                        >
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfPerson2}
+                          />
                         </List.Image>
                       </List.Leading>
-                      <List.Content>
+                      <List.Content {...partProps['List.Content']}>
                         <List.Title
+                          {...partProps['List.Title']}
                           render={<button type="button" />}
                           onClick={() => addLog('select: Shared')}
                         >
                           Shared
                         </List.Title>
                       </List.Content>
-                      <List.Trailing>
+                      <List.Trailing {...partProps['List.Trailing']}>
                         <List.Accessory
+                          {...partProps['List.Accessory']}
                           aria-label="Info"
                           render={<button type="button" />}
                           onClick={() => addLog('shared info')}
                         >
-                          <Symbol icon={sfICircle} />
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfICircle}
+                          />
                         </List.Accessory>
                       </List.Trailing>
                     </List.Item>
@@ -1597,46 +2450,66 @@ export const SidebarEditingDemo: FunctionComponent = () => {
               </List.Root>
             </Sidebar.Root>
           </Layout.Column>
-          <Layout.Column clearFloating>
+          <Layout.Column
+            {...partProps['Layout.Column']}
+            clearFloating
+          >
             <Header.Root>
-              <Viewport.BlockStart>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
                 <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
                   context="adaptive"
                   placement="block-start"
                 >
-                  <Toolbar.Title>
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{selected}</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root className="sidebar-demo-transparent">
-                <Viewport.Padding edge="block-start" />
+              <Page.Root
+                {...partProps['Page.Root']}
+                className="sidebar-demo-transparent"
+              >
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
                 {/* (Its glass by what's behind it: e.g. the picture.) */}
 
-                <Header.LargeTitle>
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                   <span>{selected}</span>
                 </Header.LargeTitle>
 
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {Array.from(
                         { length: 12 },
                         (_, index) => `Item ${index + 1}`,
                       ).map((item) => (
-                        <List.Item key={item}>
-                          <List.Content>
-                            <List.Title>{item}</List.Title>
+                        <List.Item
+                          key={item}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {item}
+                            </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            <List.Detail>{selected}</List.Detail>
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            <List.Detail {...partProps['List.Detail']}>
+                              {selected}
+                            </List.Detail>
                           </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>

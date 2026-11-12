@@ -15,12 +15,12 @@ const safeAreaRow: PropRow = [
   union('all', 'block', 'inline', 'none'),
   code(union('all')),
   <>
-    The safe area insets kept clear (as padding): all, those of the block
-    dimension (top, bottom) or the inline one (left, right) only, or none (CSS{' '}
-    <code>env(safe-area-inset-*)</code>). Its own background reaches the
-    screen’s edge, its content clear of them: the anchor is the surface (a bar’s
-    background goes on the anchor, by its <code>className</code>; its content
-    spaced inside it).
+    Which safe area insets it keeps clear, as padding (CSS{' '}
+    <code>env(safe-area-inset-*)</code>): all of them, only the block ones (top
+    and bottom), only the inline ones (left and right), or none. Its own
+    background reaches the screen’s edge, while its content stays clear. So the
+    anchor is the surface: put a bar’s background on the anchor (with its{' '}
+    <code>className</code>), and space its content inside it.
   </>,
 ];
 
@@ -30,34 +30,34 @@ const contentSafeAreaRow: PropRow = [
   union('auto', 'all', 'block', 'inline', 'none'),
   code(union('auto')),
   <>
-    The safe area insets kept clear (as padding), as an anchor’s (all, the block
-    dimension’s, the inline one’s, or none), or <code>auto</code>, by what it
-    holds:
+    Which safe area insets it keeps clear, as padding. The values are an
+    anchor’s (all, block, inline or none), plus <code>auto</code>, which decides
+    by what it holds:
     <ul>
       <li>
-        Its content itself (e.g. a list after a{' '}
+        Its content itself (for example a list after a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />
-        ): all. Its content starts clear of them (the status bar, the home
-        indicator) and scrolls on under them; its paddings don’t count them
+        ): all. Its content starts clear of the status bar and the home
+        indicator, and scrolls on under them. Its paddings don’t count them
         again.
       </li>
       <li>
-        A child scrolling on its own, as its direct child (a{' '}
+        A direct child that scrolls on its own (a{' '}
         <a href={publicUrl('page')}>Page</a>, a{' '}
         <a href={publicUrl('header')}>Header</a> around one, a{' '}
         <a href={publicUrl('layout')}>Layout</a>, a{' '}
-        <a href={publicUrl('navigation')}>Navigation</a>, e.g. a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>, for example a{' '}
         <a href={publicUrl('tab-bar')}>Tab bar</a>’s panel rendered as one):
-        none. That child fills the screen, under the status bar too, its own
-        bars and paddings keeping its content clear; kept clear here, it would
-        stop at their border instead.
+        none. That child fills the screen, under the status bar too, and its own
+        bars and paddings keep its content clear. Kept clear here, it would stop
+        short at the insets instead.
       </li>
     </ul>
-    Set it to keep the insets clear (or not) whatever it holds, e.g.{' '}
-    <code>none</code> for content behind the status bar.
+    Set it to decide yourself, whatever it holds. For example, <code>none</code>{' '}
+    for content behind the status bar.
   </>,
 ];
 
@@ -66,23 +66,24 @@ const anchorHandleRow: PropRow = [
   'ViewportAnchorHandle',
   undefined,
   <>
-    Its handle (
+    A handle (
     <PartLink
       component="viewport"
       part="Viewport.createAnchorHandle"
     />
-    , in a component{' '}
+    , or{' '}
     <PartLink
       component="viewport"
       part="useCreateViewportAnchorHandle"
-    />
-    ), linking it to the{' '}
+    />{' '}
+    in a component) that links it to the{' '}
     <PartLink
       component="viewport"
       part="Viewport.Padding"
     />
-    s given it (their <code>anchor</code>, alone or among others’): as high as
-    it, or as the tallest of the anchors they’re linked to.
+    s given the same handle (in their <code>anchor</code>, alone or with
+    others). Such a padding is as tall as this anchor, or as the tallest of the
+    anchors it’s linked to.
   </>,
 ];
 
@@ -91,9 +92,9 @@ const anchorKeyboardRow: PropRow = [
   union('push', 'cover'),
   code(union('push')),
   <>
-    At the block end: pushed up by the on-screen keyboard (e.g. a message
-    field), or covered by it (e.g. a tab bar). At the other edges: none (side
-    anchors always end at the keyboard’s top).
+    At the block end: pushed up by the on-screen keyboard (for example a message
+    field), or covered by it (for example a tab bar). It has no effect at the
+    other edges: side anchors always end at the keyboard’s top.
   </>,
 ];
 
@@ -102,33 +103,41 @@ const edgeEffectRow: PropRow = [
   union('soft', 'hard', 'none'),
   code(union('soft')),
   <>
-    At the block start or end: its scroll edge effect, as content scrolls under
-    it: <code>soft</code>, a blur fading out away from the edge;{' '}
-    <code>hard</code>, a solid backing with a dividing line (untinted, in the
-    scroller’s own background color, as it changes, so it matches the page; a
-    scroller without one, the system background). Drawn by the scroller beneath
-    (a <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}
+    At the block start or end: what shows where content scrolls under it.{' '}
+    <code>soft</code> is a blur that fades out away from the edge.{' '}
+    <code>hard</code> is a solid backing with a dividing line. The backing isn’t
+    tinted: it takes the scroller’s own background color, following it as it
+    changes, so it matches the page (the system background if the scroller has
+    none).
+    <br />
+    The effect is drawn by the scroller beneath (a{' '}
+    <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}
     <PartLink
       component="viewport"
       part="Viewport.Content"
     />
-    ): one per edge, as tall as the tallest anchor there, also under what’s
-    stuck to it (
+    ), one per edge. It’s as tall as the tallest anchor at that edge, and also
+    reaches under what’s stuck to it (
     <PartLink
       component="viewport"
       part="useViewportEdgeElement"
     />
-    ). On iOS 27 (<code>isIos27</code>: the app’s head starting it below the
-    status bar, see{' '}
-    <a href={publicUrl('ios-quirks#the-status-bar-blur')}>iOS Quirks</a>), unset
-    at the screen’s top (not in a sheet, popover or island, nor a portal
-    container): <code>hard</code>, beneath the system’s status bar, its backing,
-    untinted, the status bar’s color (the page’s as the app loaded, read once by
-    iOS), solid at rest too once the page’s is another. How much of the content
-    shows through it: <code>soft</code>, solid under half of the effect, fading
-    out past it; with a veil (<code>--uikit-viewport-edge-veil</code>, 0 to 1:
-    the heavier, the less; set on the scroller or above), solid under that share
-    of the anchor. A sheet’s is <code>0.75</code>.
+    ).
+    <br />
+    On iOS 27, a bar at the screen’s top defaults to <code>hard</code>. That
+    applies when <code>isIos27</code> is set (the app’s head starts the page
+    below the status bar, see{' '}
+    <a href={publicUrl('ios-quirks#the-status-bar-blur')}>iOS Quirks</a>), and
+    not inside a sheet, popover, island or portal container. Its untinted
+    backing then has the status bar’s color, which iOS reads once from the page
+    as the app loads. If the page’s background changes later, the backing stays
+    solid even at rest.
+    <br />
+    How much content shows through: a <code>soft</code> effect is solid under
+    half of it and fades out past that. A veil (
+    <code>--uikit-viewport-edge-veil</code>, 0 to 1, set on the scroller or
+    above) makes it solid under that share of the anchor instead. The heavier
+    the veil, the less shows. A sheet’s veil is <code>0.75</code>.
   </>,
 ];
 
@@ -137,10 +146,11 @@ const edgeTintRow: PropRow = [
   'string',
   undefined,
   <>
-    At the block start or end: a CSS color for its edge effect (e.g. to tell a
-    state for a while: recording), shown at rest too; <code>soft</code>, under
-    its fade; <code>hard</code>, as its backing. Changes crossfade. Not the only
-    sign of the state: pair it with a label or a symbol.
+    At the block start or end: a CSS color for its edge effect, shown at rest
+    too. Use it to signal a temporary state, such as recording. A{' '}
+    <code>soft</code> effect shows it under its fade, a <code>hard</code> one as
+    its backing. Changes crossfade. Don’t make it the only sign of the state:
+    pair it with a label or a symbol.
   </>,
 ];
 
@@ -150,15 +160,17 @@ export const viewportProviderRows: readonly PropRow[] = [
     'RefObject<HTMLElement | null>',
     'the page filling its screen, or the document’s scrolling element',
     <>
-      The scroll container tracked. Unset: the scroller filling its screen (a{' '}
+      The scroll container to track. Unset, it tracks the scroller that fills
+      its screen, or else the document. That’s a{' '}
       <a href={publicUrl('page')}>Page</a> or a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Content"
       />
-      : registered as they mount; the innermost, as pages show and hide, e.g. a
-      tab’s; never an overlay’s, a popover’s, a sheet’s or an island’s content
-      or what’s in them), or the document’s. Its direction and edges, for{' '}
+      , registered as they mount. When several fill it, the innermost wins,
+      updated as pages show and hide (a tab’s, for example). An overlay’s
+      content never counts: not a popover’s, a sheet’s or an island’s, nor
+      anything inside them. Its direction and edges feed{' '}
       <PartLink
         component="viewport"
         part="useViewportScroll"
@@ -168,13 +180,13 @@ export const viewportProviderRows: readonly PropRow[] = [
         component="viewport"
         part="useScrollDirection"
       />
-      . Pulled past an end where it doesn’t bounce by itself (not Safari), it’s
-      moved along only while a{' '}
+      . In browsers where it doesn’t bounce by itself (anything but Safari), a
+      pull past an end moves it along only while a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Overscroll"
       />{' '}
-      is shown; otherwise, the browser’s own scrolling is left as it is.
+      is shown. Otherwise, the browser’s own scrolling is left alone.
     </>,
   ],
   [
@@ -182,14 +194,15 @@ export const viewportProviderRows: readonly PropRow[] = [
     'boolean',
     code('true'),
     <>
-      Its status bar tapped, the current scroller (
+      When the status bar is tapped, the current scroller (
       <PartLink
         component="viewport"
         part="useCurrentScroller"
       />
-      ) scrolls to its top, smoothly, as in iOS apps. Only on iOS, in a Home
-      Screen app, for a provider of the window’s (no <code>screen</code>), and
-      while the app’s document doesn’t scroll itself (see{' '}
+      ) scrolls smoothly to its top, as in native iOS apps. This works only on
+      iOS, in a Home Screen app, for a provider of the window (no{' '}
+      <code>screen</code>), and while the app’s document doesn’t scroll itself
+      (see{' '}
       <PartLink
         component="viewport"
         part="trackStatusBarTaps"
@@ -202,31 +215,36 @@ export const viewportProviderRows: readonly PropRow[] = [
     'HTMLElement | RefObject<HTMLElement | null> | null',
     'the provided portal container, or the window',
     <>
-      The app’s screen, when it isn’t the window (e.g. a device’s frame in a
-      page, as here): the visual viewport within it (what the keyboard covers of
-      its bottom, how far its top is scrolled away while the keyboard shows),
-      its custom properties set on it, not the root element. Measured against
-      its layers’ containing block (the window, unless the screen or an ancestor
-      contains them, e.g. a{' '}
+      The app’s screen, when it isn’t the window (for example a device frame on
+      a page, as here). The provider then tracks the visual viewport within it:
+      how much of its bottom the keyboard covers, and how far its top is
+      scrolled away while the keyboard shows. The custom properties are set on
+      it instead of the root element.
+      <br />
+      It’s measured against its layers’ containing block. That’s the window,
+      unless the screen or an ancestor contains them (for example a{' '}
       <PartLink
         component="layout"
         part="Layout.Column"
       />
-      ), read anew as that resizes (e.g. within an app’s content layer, resized
-      above the keyboard: then, nothing covered). An app’s background beneath
-      its layers, as the window’s (e.g. a page of its own in a{' '}
-      <a href={publicUrl('navigation')}>Navigation</a> stack, not the page below
-      showing through as it slides in; a background of its own kept). By
-      default, the portal container provided by{' '}
-      <code>PortalContainerContext</code> (the app’s screen for its popups,
-      too); <code>null</code>: the window.
+      ). It’s measured again when that block resizes. For example, inside an
+      app’s content layer that shrinks above the keyboard, nothing is covered.
+      <br />
+      The screen gets an app’s background beneath its layers, as the window
+      does. In a <a href={publicUrl('navigation')}>Navigation</a> stack, for
+      example, the page below doesn’t show through as a new one slides in. A
+      background of its own is kept.
+      <br />
+      By default, it’s the portal container from{' '}
+      <code>PortalContainerContext</code>, which also holds the app’s popups.{' '}
+      <code>null</code> means the window.
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'The app (or the part of it) using the hooks. It renders no element of its own.',
+    'The app, or the part of it that uses the hooks. It renders no element of its own.',
   ],
 ];
 
@@ -240,8 +258,9 @@ export const viewportContentRows: readonly PropRow[] = [
     union('resize', 'overlay'),
     code(union('resize')),
     <>
-      With the on-screen keyboard: resized to what’s above it (its end scrolls
-      into view), or overlaid by it (filling the layout viewport, from its top).
+      With the on-screen keyboard: resized to the space above it, so its end can
+      scroll into view, or overlaid by it, still filling the layout viewport
+      from its top.
     </>,
   ],
   contentSafeAreaRow,
@@ -250,15 +269,15 @@ export const viewportContentRows: readonly PropRow[] = [
     'boolean',
     'while it holds its content itself',
     <>
-      Bouncing even when its content fits: it has at least 1px to scroll, so a
-      drag on it is its own (rubber-banding the content layer, the bars
-      staying), not the document’s (on iOS, moving the whole app).{' '}
-      <code>false</code>: only content taller than it scrolls. Unset: not while
-      its child scrolls on its own (a <a href={publicUrl('page')}>Page</a>, a{' '}
+      Bounces even when its content fits: it always has at least 1px to scroll.
+      A drag on it then rubber-bands the content layer while the bars stay put,
+      instead of moving the document (on iOS, the whole app). <code>false</code>
+      : only content taller than it scrolls. Unset, it bounces, except while a
+      child scrolls on its own (a <a href={publicUrl('page')}>Page</a>, a{' '}
       <a href={publicUrl('header')}>Header</a> around one, a{' '}
       <a href={publicUrl('layout')}>Layout</a>, a{' '}
-      <a href={publicUrl('navigation')}>Navigation</a>), which bouncing it would
-      move whole.
+      <a href={publicUrl('navigation')}>Navigation</a>). Bouncing would move
+      that child as a whole.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -270,10 +289,10 @@ export const viewportAnchorRows: readonly PropRow[] = [
     union('block-start', 'block-end', 'inline-start', 'inline-end'),
     undefined,
     <>
-      The edge it floats at (required): <code>block-start</code> (the top, e.g.
-      a toolbar), <code>block-end</code> (the bottom, e.g. a tab bar), or the
-      inline ones (the leading and trailing sides, e.g. a compact sidebar;
-      mirrored right to left).
+      The edge it floats at (required): <code>block-start</code> (the top, for
+      example a toolbar), <code>block-end</code> (the bottom, for example a tab
+      bar), or an inline edge (the leading or trailing side, for example a
+      compact sidebar; mirrored in right-to-left languages).
     </>,
   ],
   edgeEffectRow,
@@ -289,7 +308,7 @@ export const viewportBlockStartRows: readonly PropRow[] = [
     'keyboard',
     union('push', 'cover'),
     code(union('push')),
-    'None at the top (an anchor’s prop, effective at the block end).',
+    'No effect at the top. It’s an anchor prop that only works at the block end.',
   ],
   edgeEffectRow,
   edgeTintRow,
@@ -313,11 +332,11 @@ export const viewportPaddingRows: readonly PropRow[] = [
     union('block-start', 'block-end'),
     code(union('block-start')),
     <>
-      Where it is in its scroll container: at its start (
-      <code>block-start</code>, e.g. under a header’s bar) or its end (
-      <code>block-end</code>, e.g. above a tab bar); its scroll padding set
-      there. Without an <code>anchor</code>, it makes room for the anchors at
-      that edge: as high as the tallest of them in its scope.
+      Where it sits in its scroll container: at the start (
+      <code>block-start</code>, for example under a header’s bar) or at the end
+      (<code>block-end</code>, for example above a tab bar). It sets the scroll
+      padding at that edge. Without an <code>anchor</code>, it makes room for
+      the anchors at that edge in its scope, as tall as the tallest of them.
     </>,
   ],
   [
@@ -326,12 +345,12 @@ export const viewportPaddingRows: readonly PropRow[] = [
     <>all at its edge (in its scope)</>,
     <>
       The anchors it makes room for, by their handles (each anchor’s{' '}
-      <code>handle</code>): one, or several (as high as the tallest of them),
-      instead of all at its edge. E.g. a toolbar, not a toast floating over the
-      content above it; or both, for the last rows to stay clear of the toast.{' '}
-      <code>null</code>: none, whatever anchors are in its scope: its{' '}
-      <code>margin</code> alone, a gap of the app’s (e.g. content meant to
-      scroll under a bar, still spaced from the edge).
+      <code>handle</code>), instead of all anchors at its edge. Give one, or
+      several (it’s then as tall as the tallest). For example, a toolbar but not
+      a toast floating above it, or both, so the last rows stay clear of the
+      toast. <code>null</code> makes room for no anchor at all, whatever is in
+      its scope. Only its <code>margin</code> is left, for example for content
+      meant to scroll under a bar while still keeping a gap to the edge.
     </>,
   ],
   [
@@ -342,9 +361,10 @@ export const viewportPaddingRows: readonly PropRow[] = [
       <code>-end</code>); none before a large title
     </>,
     <>
-      The gap between the content and its container’s edge, beyond the anchors
-      (px, or a CSS length): the library’s content margin by default, themed by
-      its tokens. Set it to override one padding (e.g. <code>0</code>).
+      The gap between the content and its container’s edge, in addition to the
+      anchors (px, or a CSS length). By default, it’s the library’s content
+      margin, set by its tokens. Set it to override it for one padding (for
+      example <code>0</code>).
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -356,15 +376,15 @@ export const viewportKeyboardAccessoryRows: readonly PropRow[] = [
     'number',
     code('8'),
     <>
-      How far above the keyboard it’s kept, lifted (px): e.g. more for a card
-      drawn past its box while lifted.
+      How far above the keyboard it’s kept while lifted (px). Use more for a
+      card that draws past its box while lifted, for example.
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'What’s typed into: e.g. a field’s row, with what belongs to it.',
+    'What’s typed into, with what belongs to it. For example, a field’s row.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -375,9 +395,9 @@ export const viewportOverscrollRows: readonly PropRow[] = [
     union('block-start', 'block-end'),
     code(union('block-start')),
     <>
-      The end it’s past: the content’s start (<code>block-start</code>, e.g.
-      pulling to refresh) or its end (<code>block-end</code>, e.g. pulling on to
-      the next page).
+      Which end it appears past: the content’s start (<code>block-start</code>,
+      for example to pull to refresh) or its end (<code>block-end</code>, for
+      example to pull on to the next page).
     </>,
   ],
   [
@@ -385,14 +405,15 @@ export const viewportOverscrollRows: readonly PropRow[] = [
     'ViewportAnchorHandle | ViewportAnchorHandle[] | null',
     <>all at its edge (in its scope)</>,
     <>
-      The bars it comes out from under, by their handles (one, or several: the
-      tallest of them), instead of all at its edge, as a{' '}
+      The bars it comes out from under, by their handles, instead of all bars at
+      its edge. Give one, or several (it then starts at the tallest). This works
+      like a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Padding"
       />
-      ’s. <code>null</code>: none, from the screen’s edge (inside the safe
-      area).
+      ’s <code>anchor</code>. <code>null</code>: under no bar, starting at the
+      screen’s edge (inside the safe area).
     </>,
   ],
   [
@@ -400,13 +421,13 @@ export const viewportOverscrollRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Kept shown at rest, e.g. while refreshing: the{' '}
+      Keeps it shown at rest, for example while refreshing. The{' '}
       <PartLink
         component="viewport"
         part="Viewport.Padding"
       />{' '}
-      at its edge makes room for it beyond the bars, the content settling there
-      (300ms), and back once closed.
+      at its edge makes room for it beyond the bars, and the content moves there
+      (300ms). Once closed, the content moves back.
     </>,
   ],
   [
@@ -414,20 +435,20 @@ export const viewportOverscrollRows: readonly PropRow[] = [
     union('all', 'block', 'inline', 'none'),
     code(union('all')),
     <>
-      The safe area insets it shows only clear of while pulled in: all, those of
-      the block dimension (top, bottom) or the inline one (left, right) only, or
-      none. Not kept clear, it shows in the inset too (e.g. behind the status
-      bar, as a refresh control), there even at rest, just past the content’s
-      end (e.g. faded by its progress,{' '}
-      <code>--uikit-viewport-overscroll-progress</code>); open, it rests clear
-      of it all the same.
+      Which safe area insets it stays clear of while it’s pulled in: all, only
+      the block ones (top and bottom), only the inline ones (left and right), or
+      none. Where it isn’t kept clear, it also shows inside the inset (for
+      example behind the status bar, like a refresh control). There it shows
+      even at rest, just past the content’s end, so fade it by its progress (
+      <code>--uikit-viewport-overscroll-progress</code>). When open, it rests
+      clear of the inset all the same.
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'What shows past the end (e.g. an activity indicator, a hint). Its custom properties, inherited: --uikit-viewport-overscroll (the pull at its edge, px) and --uikit-viewport-overscroll-progress (0 to 1, of its own size; open, 1).',
+    'What shows past the end, for example an activity indicator or a hint. It inherits two custom properties: --uikit-viewport-overscroll (how far it’s pulled at its edge, px) and --uikit-viewport-overscroll-progress (0 to 1, relative to its own size; 1 when open).',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -438,13 +459,13 @@ export const useAnchorSizeRows: readonly PropRow[] = [
     'edge',
     union('block-start', 'block-end', 'inline-start', 'inline-end'),
     undefined,
-    'The edge whose tallest anchor (in its scope) it reads.',
+    'The edge whose tallest anchor it reads (in its scope).',
   ],
   [
     'handle',
     'ViewportAnchorHandle | ViewportAnchorHandle[] | null',
     undefined,
-    'The anchors it reads instead, by their handles: one, or several (the tallest of them); null: none (0).',
+    'The anchors to read instead, by their handles: one, or several (it reads the tallest). null reads none, and returns 0.',
   ],
 ];
 
@@ -454,7 +475,7 @@ export const useAnchorSizeReturnRows: readonly PropRow[] = [
     '(return)',
     'number',
     undefined,
-    'The tallest anchor’s size (px) along its edge’s axis, without the safe area insets it keeps clear; live (e.g. a tab bar collapsing); 0 without one.',
+    'The tallest anchor’s size along its edge’s axis (px), without the safe area insets it keeps clear. It updates live, for example as a tab bar collapses. 0 without an anchor.',
   ],
 ];
 
@@ -465,13 +486,13 @@ export const useVisualViewportRows: readonly PropRow[] = [
     'height',
     'number',
     undefined,
-    'The visual viewport’s height (px): less the on-screen keyboard, while it’s shown.',
+    'The visual viewport’s height (px). While the on-screen keyboard shows, it’s without the keyboard.',
   ],
   [
     'left',
     'number',
     undefined,
-    'The visual viewport’s offset from the layout viewport’s left edge (px), e.g. while zoomed in.',
+    'The visual viewport’s offset from the layout viewport’s left edge (px), for example while zoomed in.',
   ],
   [
     'top',
@@ -483,13 +504,13 @@ export const useVisualViewportRows: readonly PropRow[] = [
     'keyboardInset',
     'number',
     undefined,
-    'What the visual viewport doesn’t show of the layout viewport’s bottom (px, rounded): the on-screen keyboard’s height (0 without one).',
+    'The on-screen keyboard’s height (px, rounded): the part of the fixed layers’ box the visual viewport doesn’t show at the bottom. 0 without a keyboard.',
   ],
   [
     'isHidden',
     'boolean',
     undefined,
-    'Whether the page is hidden (the Page Visibility API: another tab, the app left, also a Home Screen app’s). Meanwhile the rest is kept as it was (e.g. the keyboard’s height: the focus-shift guard focuses its field again as the page is shown); shown, it’s read anew once the keyboard has settled.',
+    'Whether the page is hidden (the Page Visibility API): in another tab, or the app left, a Home Screen app’s too. Meanwhile, the other values are kept as they were, such as the keyboard’s height (the focus-shift guard focuses its field again when the page shows). Once the page is shown and the keyboard has settled, they’re read again.',
   ],
 ];
 
@@ -497,7 +518,7 @@ const thresholdRow: PropRow = [
   'options.threshold',
   'number',
   code('8'),
-  'How far (px) to scroll from where the direction last turned before it changes, so jitter doesn’t flip it (more: a steadier direction). Overscrolling (e.g. bouncing back from the end) never changes it.',
+  'How far to scroll from where the direction last turned before it changes (px), so jitter doesn’t flip it. More gives a steadier direction. Overscrolling, such as bouncing back from an end, never changes it.',
 ];
 
 /** `useViewportScroll(listener, options)`: its arguments. */
@@ -506,7 +527,7 @@ export const useViewportScrollRows: readonly PropRow[] = [
     'listener',
     '(event: ViewportScrollEvent) => void',
     undefined,
-    'Called on every scroll of the tracked scroll container, and as it’s overscrolled; it can change between renders without resubscribing.',
+    'Called on every scroll of the tracked scroll container, and while it’s overscrolled. It can change between renders without resubscribing.',
   ],
   thresholdRow,
 ];
@@ -522,32 +543,32 @@ export const viewportScrollEventRows: readonly PropRow[] = [
     'direction',
     `${union('down', 'up')} | undefined`,
     undefined,
-    'The direction scrolled in, once past the threshold (until then: none); not changed by overscrolling.',
+    'The direction scrolled in, once past the threshold (none until then). Overscrolling doesn’t change it.',
   ],
-  ['atTop', 'boolean', undefined, 'Scrolled to (or past) the start.'],
+  ['atTop', 'boolean', undefined, 'Scrolled to the start, or past it.'],
   [
     'atBottom',
     'boolean',
     undefined,
-    'Scrolled to (or past) the end (within 1px).',
+    'Scrolled to the end, or past it (within 1px).',
   ],
   [
     'position',
     'number',
     undefined,
-    'The scroll position (px), within the scroll range: overscrolled, its end.',
+    'The scroll position (px), within the scroll range. While overscrolled, it’s the end it’s past.',
   ],
   [
     'overscroll',
     'number',
     undefined,
-    'How far it’s pulled past an end (px), rubber-banded: negative past the start (e.g. pulling to refresh), positive past the end; 0 within. Safari’s own bounce; elsewhere, a touch or a wheel pulling at an end (damped; a wheel’s stiffer, at most half the container’s height): the content moved along only while a Viewport.Overscroll is shown, else staying. A wheel’s inertia (its fingers lifted: told by the browser, WheelEvent momentum, or by its deceleration, then back to before the fling) never pulls.',
+    'How far it’s pulled past an end (px), rubber-banded: negative past the start (for example to pull to refresh), positive past the end, 0 in between. In Safari, that’s its own bounce. Elsewhere, it’s a touch or a wheel pulling at an end, damped (a wheel more stiffly, to at most half the container’s height). There the content only moves along while a Viewport.Overscroll is shown. A wheel’s inertia never pulls: once the fingers lift (as the browser reports it, or as the deceleration shows), the pull goes back to where it was before the fling.',
   ],
   [
     'isHeld',
     'boolean',
     undefined,
-    'Overscrolling held: a touch, or a wheel’s fingers until quiet (150ms) or until its inertia starts, still pulling. Once not, it’s released (e.g. to act then), bouncing back.',
+    'Whether the overscroll is still held: by a touch, or by a wheel’s fingers until it goes quiet (150ms) or its inertia starts. Once released, it bounces back. That’s the moment to act, for example to start refreshing.',
   ],
 ];
 
@@ -557,7 +578,7 @@ export const useCurrentScrollerRows: readonly PropRow[] = [
     '(return value)',
     'Element | undefined',
     undefined,
-    'The current scroller: the newest open popover’s body or sheet’s content; else an island’s content scrolled from its start; else the scroller the provider tracks. Outside a provider: undefined.',
+    'The current scroller: the newest open popover’s body or sheet’s content, else an island’s content scrolled from its start, else the scroller the provider tracks. Outside a provider, undefined.',
   ],
 ];
 
@@ -571,14 +592,14 @@ const elementRefRow: PropRow = [
   'ref',
   'RefObject<Element | null>',
   undefined,
-  'The element (as first mounted: a later element in the ref isn’t observed).',
+  'The element, as it was first mounted. A later element in the ref isn’t observed.',
 ];
 
 const scrollerRow: PropRow = [
   'options.scroller',
   'RefObject<HTMLElement | null>',
   'the viewport',
-  'The scroll container whose box (inside its borders and scroll bars) is the visible area; otherwise the layout viewport. No provider needed.',
+  'The scroll container whose box (inside its borders and scroll bars) is the visible area. Otherwise it’s the layout viewport. No provider needed.',
 ];
 
 /** `useElementVisibility(ref, options)`: its arguments. */
@@ -588,16 +609,16 @@ export const useElementVisibilityRows: readonly PropRow[] = [
     'options.threshold',
     'number',
     code('0'),
-    'How much of the element (0–1) must be visible to count; 0: any of it, even an edge.',
+    'How much of the element must be visible to count (0–1). 0 counts any of it, even an edge.',
   ],
   [
     'options.rootMargin',
     'string',
     code(union('0px')),
     <>
-      Grows (or, negative, shrinks) the visible area, as CSS margins (e.g.{' '}
-      <code>&apos;100% 0px&apos;</code>: a screen above and below, to prepare
-      what’s about to scroll in).
+      Grows the visible area, or shrinks it with negative values, as CSS
+      margins. For example, <code>&apos;100% 0px&apos;</code> adds a screen
+      above and below, to prepare what’s about to scroll in.
     </>,
   ],
   scrollerRow,
@@ -610,9 +631,9 @@ export const useElementVisibilityReturnRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Whether the element is visible (an <code>IntersectionObserver</code>’s
-      report: re-rendering only as it changes); <code>false</code> until it
-      reports, and on the server.
+      Whether the element is visible, as an <code>IntersectionObserver</code>{' '}
+      reports it. It re-renders only when that changes. <code>false</code> until
+      the first report, and on the server.
     </>,
   ],
 ];
@@ -624,7 +645,7 @@ export const useElementGeometryRows: readonly PropRow[] = [
     'listener',
     '(geometry: ElementGeometry) => void',
     undefined,
-    'Called with the element’s geometry (below) as it’s measured: once per frame while anything scrolls or resizes (while it’s visible; once more as it leaves), and as it mounts. It can change without resubscribing; nothing re-renders unless it does (e.g. setting state).',
+    'Called with the element’s geometry (below) each time it’s measured: when it mounts, and once per frame while anything scrolls or resizes. That happens only while it’s visible, plus once as it leaves. The listener can change without resubscribing. Nothing re-renders unless the listener causes it (for example by setting state).',
   ],
   scrollerRow,
 ];
@@ -635,26 +656,11 @@ export const elementGeometryRows: readonly PropRow[] = [
     'top',
     'number',
     undefined,
-    'From the visible area’s top edge to the element’s (px): positive while the element’s edge is inside the area, negative once past it.',
+    'The distance from the visible area’s top edge to the element’s (px). Positive while the element’s edge is inside the area, negative once it’s past.',
   ],
-  [
-    'right',
-    'number',
-    undefined,
-    'From the visible area’s right edge to the element’s (px), as top.',
-  ],
-  [
-    'bottom',
-    'number',
-    undefined,
-    'From the visible area’s bottom edge to the element’s (px), as top.',
-  ],
-  [
-    'left',
-    'number',
-    undefined,
-    'From the visible area’s left edge to the element’s (px), as top.',
-  ],
+  ['right', 'number', undefined, 'The same, from the right edge (px).'],
+  ['bottom', 'number', undefined, 'The same, from the bottom edge (px).'],
+  ['left', 'number', undefined, 'The same, from the left edge (px).'],
   ['width', 'number', undefined, 'The element’s width (px, its border box).'],
   ['height', 'number', undefined, 'The element’s height (px, its border box).'],
   [
@@ -692,9 +698,9 @@ export const elementGeometryRows: readonly PropRow[] = [
     'ElementGeometry | undefined',
     undefined,
     <>
-      Measured once a frame while it (or anything around it) scrolls or resizes,
-      only while it’s visible, once more as it leaves; <code>undefined</code>{' '}
-      until measured, and on the server.
+      Measured once per frame while it, or anything around it, scrolls or
+      resizes. That happens only while it’s visible, plus once as it leaves.{' '}
+      <code>undefined</code> until it’s measured, and on the server.
     </>,
   ],
 ];
@@ -704,7 +710,7 @@ const releaseRow: PropRow = [
   '(return)',
   '() => void',
   undefined,
-  'Lets go of it (once; more calls do nothing).',
+  'Removes the guard. Only the first call counts.',
 ];
 
 export const preventInputZoomRows: readonly PropRow[] = [releaseRow];
@@ -715,7 +721,7 @@ export const trackStatusBarTapsArgumentRows: readonly PropRow[] = [
     'onTap',
     '(event: Event) => void',
     undefined,
-    'Called as the status bar is tapped (with the document’s scroll event).',
+    'Called when the status bar is tapped, with the document’s scroll event.',
   ],
 ];
 
@@ -725,7 +731,7 @@ export const trackStatusBarTapsRows: readonly PropRow[] = [
     '(return)',
     '() => void',
     undefined,
-    'Stops calling it (the document restored with the last).',
+    'Stops calling it. When the last caller stops, the document is restored.',
   ],
 ];
 
@@ -735,7 +741,7 @@ export const useStatusBarTapsRows: readonly PropRow[] = [
     'enabled',
     'boolean',
     code('true'),
-    'Whether it’s called (while mounted; its latest `onTap`).',
+    'Whether it’s called while the component is mounted. The latest `onTap` is used.',
   ],
 ];
 
@@ -744,7 +750,7 @@ export const useInputZoomPreventionRows: readonly PropRow[] = [
     'enabled',
     'boolean',
     code('true'),
-    'Whether it holds the guard (while mounted).',
+    'Whether the guard is active while the component is mounted.',
   ],
 ];
 
@@ -753,13 +759,13 @@ export const useFocusScrollRows: readonly PropRow[] = [
     'ref',
     'RefObject<HTMLElement | null>',
     undefined,
-    'The element marked (its data-viewport-focus-scroll): a scroller, or what’s around fields.',
+    'The element to mark (with data-viewport-focus-scroll): a scroller, or something around text fields.',
   ],
   [
     'mode',
     `${union('target', 'none')} | false`,
     code(union('target')),
-    'What it is to the text fields in it (the nearest marked element around one decides): target, the scroller keeping them in view above the keyboard; none, keeping them as they are (e.g. a component placing them itself); false, unmarked.',
+    'What it means for the text fields inside it. The nearest marked element around a field decides. target: this scroller keeps them in view above the keyboard. none: they’re left as they are (for example when a component places them itself). false: no mark.',
   ],
 ];
 
@@ -768,7 +774,7 @@ export const preventFocusShiftRows: readonly PropRow[] = [
     'target',
     'Document | HTMLElement',
     code('document'),
-    'Where touched text fields are focused without scrolling (its descendants), and the one focused as the page hides is focused again as it’s shown.',
+    'Where it works: text fields inside it are focused without scrolling when touched. A field focused as the page hides is focused again when it shows.',
   ],
 ];
 
@@ -779,9 +785,14 @@ export const useFocusShiftPreventionRows: readonly PropRow[] = [
     'target',
     'RefObject<HTMLElement | null>',
     'the document',
-    'Where touched text fields are focused without scrolling, and the one focused as the page hides is focused again as it’s shown.',
+    'Where it works: text fields inside it are focused without scrolling when touched. A field focused as the page hides is focused again when it shows.',
   ],
-  ['enabled', 'boolean', code('true'), 'Whether it guards (while mounted).'],
+  [
+    'enabled',
+    'boolean',
+    code('true'),
+    'Whether the guard is active while the component is mounted.',
+  ],
 ];
 
 export const preventTextActionsRows: readonly PropRow[] = [
@@ -789,7 +800,7 @@ export const preventTextActionsRows: readonly PropRow[] = [
     'target',
     'HTMLElement',
     undefined,
-    'Where a held press selects no text and shows no browser text menu (its user-select and -webkit-touch-callout, none).',
+    'Where a held press selects no text and shows no browser text menu. It sets user-select and -webkit-touch-callout to none.',
   ],
 ];
 
@@ -798,7 +809,7 @@ export const preventTextActionsReturnRows: readonly PropRow[] = [
     '(return)',
     '() => void',
     undefined,
-    'Restores its own values (once; more calls do nothing).',
+    'Restores the element’s own values. Only the first call counts.',
   ],
 ];
 
@@ -809,7 +820,12 @@ export const useTextActionsPreventionRows: readonly PropRow[] = [
     undefined,
     'Where a held press selects no text and shows no browser text menu.',
   ],
-  ['enabled', 'boolean', code('true'), 'Whether it applies (while mounted).'],
+  [
+    'enabled',
+    'boolean',
+    code('true'),
+    'Whether it applies while the component is mounted.',
+  ],
 ];
 
 export const useSizeClassReturnRows: readonly PropRow[] = [
@@ -819,13 +835,15 @@ export const useSizeClassReturnRows: readonly PropRow[] = [
     undefined,
     <>
       The window’s horizontal size class: <code>regular</code> from 768px (a
-      tablet’s window), <code>compact</code> below (a phone’s); before hydration
-      (server rendering), <code>compact</code>. Held while iPadOS resizes the
-      window for its app switcher’s snapshots (still shown, each resize
-      announced by an orientation change that contradicts the window’s shape;
-      its layout switching would remount it), until the orientation matches the
-      window again or the page is shown anew. A real rotation or resize (e.g.
-      Split View) changes it.
+      tablet’s window), <code>compact</code> below (a phone’s). Before
+      hydration, during server rendering, it’s <code>compact</code>.
+      <br />
+      It holds its value while iPadOS resizes the window for the app switcher’s
+      snapshots. The page is still showing then, and switching its layout would
+      remount it. iPadOS announces each such resize with an orientation change
+      that contradicts the window’s shape. The value is held until the
+      orientation matches the window again, or the page is shown anew. A real
+      rotation or resize (for example Split View) changes it.
     </>,
   ],
 ];
@@ -835,7 +853,7 @@ export const useViewportEdgeElementRows: readonly PropRow[] = [
     'ref',
     'RefObject<HTMLElement | null>',
     undefined,
-    'What sticks to the edge’s bars (e.g. a sticky search field below the top bar).',
+    'What sticks to the edge’s bars, for example a sticky search field below the top bar.',
   ],
   [
     'edge',

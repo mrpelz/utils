@@ -15,7 +15,7 @@ const cursorRow: PropRow = [
   <>
     <code>pointer</code> (disabled: <code>not-allowed</code>)
   </>,
-  'The cursor (where the pointer hovers).',
+  'The cursor shown while the pointer hovers it.',
 ];
 
 const inputRefRow: PropRow = [
@@ -130,7 +130,7 @@ export const checkboxRootRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     'a checkmark (mixed: a dash) in a Checkbox.Indicator',
-    'What the circle shows while ticked (or mixed): by default, the checkmark and the dash.',
+    'What the circle shows while it’s ticked (or mixed). By default, the checkmark and the dash.',
   ],
   nativeButtonRow(false),
   ...baseUiRows('span', 'HTMLElement'),
@@ -177,7 +177,7 @@ export const radioRootRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     'a checkmark in a Radio.Indicator',
-    'What the circle shows while chosen: by default, the checkmark.',
+    'What the circle shows while it’s chosen. By default, the checkmark.',
   ],
   nativeButtonRow(false),
   ...baseUiRows('span', 'HTMLElement'),

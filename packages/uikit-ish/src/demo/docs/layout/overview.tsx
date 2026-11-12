@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Header,
@@ -11,6 +11,8 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
   Contents,
@@ -19,6 +21,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
 import { layoutColumnRows, layoutRootRows } from './docs.js';
@@ -44,49 +47,101 @@ const LiveView: FunctionComponent = () => {
     ],
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Checkmark': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': [],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isExpanded
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="tablet"
-      state={state}
+      state={[...state, partState]}
       title="Layout"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}
             {...propsFirst}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>Mailboxes</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
                   {sidebarSections.map(([title, rows]) => (
-                    <List.Section key={title}>
-                      <List.Header>
-                        <List.Title>{title}</List.Title>
+                    <List.Section
+                      key={title}
+                      {...partProps['List.Section']}
+                    >
+                      <List.Header {...partProps['List.Header']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {title}
+                        </List.Title>
                       </List.Header>
-                      <List.Group>
+                      <List.Group {...partProps['List.Group']}>
                         {rows.map(([value, rowTitle, icon]) => (
-                          <List.Item key={value}>
-                            <List.Leading>
-                              <List.Image variant="symbol">
-                                <Symbol icon={icon} />
+                          <List.Item
+                            key={value}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Leading {...partProps['List.Leading']}>
+                              <List.Image
+                                {...partProps['List.Image']}
+                                variant="symbol"
+                              >
+                                <Symbol
+                                  {...partProps.Symbol}
+                                  icon={icon}
+                                />
                               </List.Image>
                             </List.Leading>
-                            <List.Content>
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => {
                                   addLog(`select: ${value}`);
@@ -96,8 +151,12 @@ const LiveView: FunctionComponent = () => {
                                 {rowTitle}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              {selected === value ? <List.Checkmark /> : null}
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              {selected === value ? (
+                                <List.Checkmark
+                                  {...partProps['List.Checkmark']}
+                                />
+                              ) : null}
                             </List.Trailing>
                           </List.Item>
                         ))}
@@ -105,7 +164,10 @@ const LiveView: FunctionComponent = () => {
                     </List.Section>
                   ))}
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -114,29 +176,43 @@ const LiveView: FunctionComponent = () => {
             {...propsSecond}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{rowTitles[selected]}</span>
                   </Toolbar.Title>
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -161,15 +237,16 @@ export const LayoutOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Columns side by side: a sidebar, a list, a detail; each its own scroll
-        container (a <a href={publicUrl('page')}>Page</a> in it).
+        Columns side by side, such as a sidebar, a list and a detail view. Each
+        one is its own scroll container (put a{' '}
+        <a href={publicUrl('page')}>Page</a> in it).
       </li>
       <li>
-        Sized, resizable, or sharing the free space; one may float over the
-        others (a <a href={publicUrl('sidebar')}>Sidebar</a>).
+        A column can have a size, be resizable, or share the free space. One can
+        float above the others (a <a href={publicUrl('sidebar')}>Sidebar</a>).
       </li>
       <li>
-        On a phone, the app’s choice: a column as a{' '}
+        On a phone, it’s up to the app: a column can become a{' '}
         <a href={publicUrl('drawer')}>Drawer</a> instead, swiped in from its
         edge.
       </li>
@@ -184,14 +261,15 @@ export const LayoutOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A tablet’s app: a sidebar of sections, a list, the selected item’s
-        detail (Mail, Notes, Files).
+        For a tablet app with a sidebar of sections, a list, and the selected
+        item’s detail, as in a mail or notes app.
       </li>
       <li>
-        A list and its detail side by side, the list resizable (or fixed).
+        For a list and its detail side by side, with the list resizable or
+        fixed.
       </li>
       <li>
-        The same columns on a phone: the list (or an inspector) as a{' '}
+        For the same columns on a phone, with the list (or an inspector) as a{' '}
         <a href={publicUrl('drawer')}>Drawer</a> (see{' '}
         <a href={publicUrl('drawer/composition')}>its Composition</a>).
       </li>
@@ -205,13 +283,13 @@ export const LayoutOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        One page at a time, drilled into: a{' '}
-        <a href={publicUrl('navigation')}>Navigation</a> (on a phone, a split’s
-        columns as stack levels).
+        One page at a time, drilled into: use a{' '}
+        <a href={publicUrl('navigation')}>Navigation</a>. On a phone, a split’s
+        columns become levels of the stack.
       </li>
       <li>
-        Something over the page for a moment: a{' '}
-        <a href={publicUrl('sheet')}>Sheet</a>, a{' '}
+        Something above the page for a moment: use a{' '}
+        <a href={publicUrl('sheet')}>Sheet</a> or a{' '}
         <a href={publicUrl('popover')}>Popover</a>.
       </li>
     </ul>
@@ -223,9 +301,10 @@ export const LayoutOverview: FunctionComponent = () => (
       Key props
     </Heading>
     <ul>
-      <li>The props most layouts set, across their parts.</li>
+      <li>The props most layouts set, across the parts.</li>
       <li>
-        All parts’ props: <a href={publicUrl('layout/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('layout/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -252,14 +331,15 @@ export const LayoutOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its parts are <code>div</code>s without roles: a column’s landmark, if
-        wanted, by its content (a <a href={publicUrl('sidebar')}>Sidebar</a> is
-        a <code>navigation</code>) or its attributes.
+        Its parts are <code>div</code>s without roles. A column gets a landmark
+        from its content (a <a href={publicUrl('sidebar')}>Sidebar</a> is a{' '}
+        <code>navigation</code>), or from attributes you add.
       </li>
       <li>
-        A resizable column’s divider is a focusable <code>separator</code>{' '}
-        (vertical, its value the column’s size while sized): the arrow keys
-        resize it (10px; Shift: 50px), Home and End to its smallest and largest.
+        A resizable column’s divider is a focusable <code>separator</code>. It’s
+        vertical, and while the column is sized, its value is the column’s size.
+        The arrow keys resize it (10px, or 50px with Shift), and Home and End
+        jump to its smallest and largest size.
       </li>
       <li>A divider’s focus ring is its 2px line in the tint.</li>
     </ul>
@@ -272,38 +352,41 @@ export const LayoutOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row of columns filling its container: sized ones at their size
-        (between <code>minSize</code>, 240px, and <code>maxSize</code>), the
-        others sharing the free space; a hairline between them.
+        A row of columns that fills its container. Sized columns keep their size
+        (between <code>minSize</code>, 240px, and <code>maxSize</code>). The
+        others share the free space. A hairline separates them.
       </li>
       <li>
-        Resizable: a 10px divider over the hairline at its end, a 2px line in
-        the tint while dragged or focused.
+        A resizable column gets a 10px divider over the hairline at its end. It
+        shows a 2px line in the tint while dragged or focused.
       </li>
       <li>
-        Floating (regular): over the others at the start (its size, or 320px),
-        which span the layout beneath it; the column clear of it insets its
-        page’s content by its size.
+        A floating column (on regular widths) sits above the others at the
+        start, at its size or 320px. The others span the layout beneath it, and
+        the column next to it insets its page’s content by its size.
       </li>
       <li>
-        Each column the containing block of its fixed layers: a header’s bar (in
-        a{' '}
+        Each column is the containing block for its fixed layers. A header’s bar
+        (in a{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockStart"
         />
-        ) spans its column.
+        ) spans its column, not the screen.
       </li>
       <li>
-        Behind it all, where columns have no background, what’s behind the
-        layout: e.g. a{' '}
+        Where columns have no background, what’s behind the layout shows, for
+        example a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Background"
         />
         .
       </li>
-      <li>Mirrored right to left (floating columns’ sides, dividers’ keys).</li>
+      <li>
+        It mirrors in right-to-left languages, including floating columns’ sides
+        and the dividers’ keys.
+      </li>
     </ul>
   </>
 );

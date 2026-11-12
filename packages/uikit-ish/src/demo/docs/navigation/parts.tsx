@@ -1,4 +1,4 @@
-import { FunctionComponent, useCallback, useState } from 'react';
+import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -13,10 +13,13 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { pages } from './content.js';
 import {
   navigationBackRows,
@@ -62,66 +65,112 @@ const RootPart: FunctionComponent = () => {
   const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop, { featured: 'Root' });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       setup={setup}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
             {keys.map((key, index) => (
               <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
                     {index > 0 ? (
-                      <Toolbar.Leading>
+                      <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                         <Navigation.Back
                           aria-label={pages[keys[index - 1] ?? '']?.title}
                           {...propsBack}
                         >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
+                          <Button.Icon {...partProps['Button.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfChevronBackward}
+                            />
                           </Button.Icon>
                         </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {pages[key]?.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Content>
+                          <List.Item
+                            key={child}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => push(child)}
                               >
                                 {pages[child]?.title}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              <List.DrillIn />
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              <List.DrillIn {...partProps['List.DrillIn']} />
                             </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -151,66 +200,112 @@ const StackPart: FunctionComponent = () => {
   const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop, { featured: 'Stack' });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       setup={setup}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation.Stack"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
             {keys.map((key, index) => (
               <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
                     {index > 0 ? (
-                      <Toolbar.Leading>
+                      <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                         <Navigation.Back
                           aria-label={pages[keys[index - 1] ?? '']?.title}
                           {...propsBack}
                         >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
+                          <Button.Icon {...partProps['Button.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfChevronBackward}
+                            />
                           </Button.Icon>
                         </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {pages[key]?.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Content>
+                          <List.Item
+                            key={child}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => push(child)}
                               >
                                 {pages[child]?.title}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              <List.DrillIn />
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              <List.DrillIn {...partProps['List.DrillIn']} />
                             </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -243,66 +338,112 @@ const SwipeAreaPart: FunctionComponent = () => {
   const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop, { featured: 'SwipeArea' });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       setup={setupPushed}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation.SwipeArea"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
             {keys.map((key, index) => (
               <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
                     {index > 0 ? (
-                      <Toolbar.Leading>
+                      <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                         <Navigation.Back
                           aria-label={pages[keys[index - 1] ?? '']?.title}
                           {...propsBack}
                         >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
+                          <Button.Icon {...partProps['Button.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfChevronBackward}
+                            />
                           </Button.Icon>
                         </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {pages[key]?.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Content>
+                          <List.Item
+                            key={child}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => push(child)}
                               >
                                 {pages[child]?.title}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              <List.DrillIn />
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              <List.DrillIn {...partProps['List.DrillIn']} />
                             </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -332,66 +473,112 @@ const BackPart: FunctionComponent = () => {
   const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop, { featured: 'Back' });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       setup={setupPushed}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation.Back"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
             {keys.map((key, index) => (
               <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
                     {index > 0 ? (
-                      <Toolbar.Leading>
+                      <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                         <Navigation.Back
                           aria-label={pages[keys[index - 1] ?? '']?.title}
                           {...propsBack}
                         >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
+                          <Button.Icon {...partProps['Button.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfChevronBackward}
+                            />
                           </Button.Icon>
                         </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {pages[key]?.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Content>
+                          <List.Item
+                            key={child}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => push(child)}
                               >
                                 {pages[child]?.title}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              <List.DrillIn />
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              <List.DrillIn {...partProps['List.DrillIn']} />
                             </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -433,42 +620,82 @@ const PersistentPart: FunctionComponent = () => {
   } = useNavigationControls(id, addLog, pop, { featured: 'Persistent' });
   const { persistentId, ...persistent } = propsPersistent;
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Navigation.Persistent': ['onClick', 'persistentId'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       setup={setup}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation.Persistent"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
             {keys.map((key, index) => (
               <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Leading>
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                       {index > 0 ? (
                         <Navigation.Back
                           aria-label={pages[keys[index - 1] ?? '']?.title}
                           {...propsBack}
                         >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
+                          <Button.Icon {...partProps['Button.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfChevronBackward}
+                            />
                           </Button.Icon>
                         </Navigation.Back>
                       ) : null}
                     </Toolbar.Leading>
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
-                    <Toolbar.Trailing>
+                    <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                       <Navigation.Persistent
+                        {...partProps['Navigation.Persistent']}
                         persistentId={
                           typeof persistentId === 'function'
                             ? persistentId(key)
@@ -477,35 +704,47 @@ const PersistentPart: FunctionComponent = () => {
                         {...persistent}
                         onClick={() => addLog(`select: ${key}`)}
                       >
-                        <Button.Label>Select</Button.Label>
+                        <Button.Label {...partProps['Button.Label']}>
+                          Select
+                        </Button.Label>
                       </Navigation.Persistent>
                     </Toolbar.Trailing>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {pages[key]?.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Content>
+                          <List.Item
+                            key={child}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => push(child)}
                               >
                                 {pages[child]?.title}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              <List.DrillIn />
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              <List.DrillIn {...partProps['List.DrillIn']} />
                             </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -545,18 +784,48 @@ const PagePart: FunctionComponent = () => {
     state,
   } = useNavigationControls(id, addLog, pop, { featured: 'Page' });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       setup={setup}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation.Page"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
@@ -566,49 +835,65 @@ const PagePart: FunctionComponent = () => {
                 {...propsPage}
               >
                 <Header.Root>
-                  <Viewport.BlockStart>
-                    <Toolbar.Root placement="block-start">
+                  <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                    <Toolbar.Root
+                      {...partProps['Toolbar.Root']}
+                      placement="block-start"
+                    >
                       {index > 0 ? (
-                        <Toolbar.Leading>
+                        <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                           <Navigation.Back
                             aria-label={pages[keys[index - 1] ?? '']?.title}
                             {...propsBack}
                           >
-                            <Button.Icon>
-                              <Symbol icon={sfChevronBackward} />
+                            <Button.Icon {...partProps['Button.Icon']}>
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfChevronBackward}
+                              />
                             </Button.Icon>
                           </Navigation.Back>
                         </Toolbar.Leading>
                       ) : null}
-                      <Toolbar.Title>
+                      <Toolbar.Title {...partProps['Toolbar.Title']}>
                         <span>{pages[key]?.title}</span>
                       </Toolbar.Title>
                     </Toolbar.Root>
                   </Viewport.BlockStart>
-                  <Page.Root>
-                    <Viewport.Padding edge="block-start" />
-                    <List.Root>
-                      <List.Section>
-                        <List.Group>
+                  <Page.Root {...partProps['Page.Root']}>
+                    <Viewport.Padding
+                      {...partProps['Viewport.Padding']}
+                      edge="block-start"
+                    />
+                    <List.Root {...partProps['List.Root']}>
+                      <List.Section {...partProps['List.Section']}>
+                        <List.Group {...partProps['List.Group']}>
                           {pages[key]?.children.map((child) => (
-                            <List.Item key={child}>
-                              <List.Content>
+                            <List.Item
+                              key={child}
+                              {...partProps['List.Item']}
+                            >
+                              <List.Content {...partProps['List.Content']}>
                                 <List.Title
+                                  {...partProps['List.Title']}
                                   render={<button type="button" />}
                                   onClick={() => push(child)}
                                 >
                                   {pages[child]?.title}
                                 </List.Title>
                               </List.Content>
-                              <List.Trailing>
-                                <List.DrillIn />
+                              <List.Trailing {...partProps['List.Trailing']}>
+                                <List.DrillIn {...partProps['List.DrillIn']} />
                               </List.Trailing>
                             </List.Item>
                           ))}
                         </List.Group>
                       </List.Section>
                     </List.Root>
-                    <Viewport.Padding edge="block-end" />
+                    <Viewport.Padding
+                      {...partProps['Viewport.Padding']}
+                      edge="block-end"
+                    />
                   </Page.Root>
                 </Header.Root>
               </Navigation.Page>
@@ -625,18 +910,18 @@ export const NavigationParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        The root, holding the stack’s state; in it, the stack (the app’s pages,
-        keyed, each with its bar: from the first pushed page, the back button)
-        and the swipe area.
+        The root holds the stack’s state. Inside it are the stack (the app’s
+        keyed pages, each with its bar, and a back button from the first pushed
+        page on) and the swipe area.
       </li>
       <li>
-        Around each page, a frame of its own (moved in transitions); at the
-        leading edge, the swipe area, where a swipe back starts.
+        Each page gets a frame of its own, which moves during transitions. The
+        swipe area sits at the leading edge, where a swipe back starts.
       </li>
     </ul>
     <ul className="demo-tree">
       <li className="demo-tree-context">
-        <span>The app’s root, e.g. </span>
+        <span>The app’s root, for example </span>
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -652,7 +937,7 @@ export const NavigationParts: FunctionComponent = () => (
               <li className="demo-tree-context">
                 <span>
                   A bar outside the stack (optional, instead of the pages’ own
-                  back buttons), e.g. a{' '}
+                  back buttons), for example a{' '}
                 </span>
                 <PartLink
                   component="viewport"
@@ -676,7 +961,7 @@ export const NavigationParts: FunctionComponent = () => (
                   <li className="demo-tree-context">
                     <span>The pages (keyed children, each in a frame: </span>
                     <code>data-navigation-part=&quot;page&quot;</code>
-                    <span>), e.g. </span>
+                    <span>), for example </span>
                     <PartLink
                       component="header"
                       part="Header.Root"
@@ -715,14 +1000,26 @@ export const NavigationParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The navigation: its stack’s state (the keys its{' '}
-        <PartLink part="Navigation.Stack" /> holds, a transition), for its{' '}
-        <PartLink part="Navigation.Back" />, its{' '}
-        <PartLink part="Navigation.SwipeArea" />, and its stack.
+        The navigation. It holds its stack’s state (the keys its{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Stack"
+        />{' '}
+        holds, and the current transition) for its{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Back"
+        />
+        , its{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.SwipeArea"
+        />{' '}
+        and its stack.
       </li>
       <li>
-        What stays while pages move can go in it, outside the stack: e.g. a bar
-        of its own (a{' '}
+        What should stay still while pages move can go inside it, outside the
+        stack. For example, a bar of its own (a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Root"
@@ -732,10 +1029,10 @@ export const NavigationParts: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockStart"
         />
-        ), over the pages’ own bars; only its items take the pointer.
+        ) above the pages’ own bars. Only that bar’s items take the pointer.
       </li>
       <li>
-        Renders a <code>div</code>, as high as its container (
+        Renders a <code>div</code>, as tall as its container (
         <code>height: 100%</code>).
       </li>
     </ul>
@@ -751,18 +1048,18 @@ export const NavigationParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The stack: its children’s keys decide what moves (pushed, popped, or
-        shown at once).
+        The stack. Its children’s keys decide what moves: pushed, popped, or
+        shown at once.
       </li>
       <li>
-        Each page in a frame filling it (absolutely placed): the top one shown,
-        those under it hidden and inert, kept mounted; each page’s{' '}
-        <a href={publicUrl('header')}>Header</a> moving with it, its bar and
-        title too.
+        Each page sits in a frame that fills the stack (absolutely positioned).
+        The top page shows. Those under it are hidden and inert, but stay
+        mounted. Each page’s <a href={publicUrl('header')}>Header</a> moves with
+        it, bar and title included.
       </li>
       <li>
-        Renders a <code>div</code>, filling its root, clipping the pages as they
-        move.
+        Renders a <code>div</code> that fills its root and clips the pages as
+        they move.
       </li>
     </ul>
     <StackPart />
@@ -777,19 +1074,23 @@ export const NavigationParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Around a page of the stack (optional; keyed, as the stack’s child, in
-        place of the page): how it comes and goes.
+        An optional wrapper around one page of the stack, keyed in the page’s
+        place as the stack’s child. It sets how that page comes and goes.
       </li>
       <li>
-        Instant (<code>instant</code>): pushed or popped, shown at once, no
-        slide in or out; on top, not swiped back (its{' '}
-        <PartLink part="Navigation.Back" /> still going back, at once). The page
-        coming or going decides: pushed onto an instant page, or popped off one
-        to it, the other page slides as any.
+        An <code>instant</code> page shows at once when pushed or popped,
+        without sliding. While on top, it can’t be swiped back, though its{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Back"
+        />{' '}
+        still goes back, at once. The page that’s coming or going decides: when
+        a page is pushed onto an instant page, or popped off one back to it, the
+        other page slides as usual.
       </li>
       <li>
-        E.g. a page whose own scrolling a slide would disturb: pulled past its
-        ends (a{' '}
+        Use it for a page whose own scrolling a slide would disturb, such as a
+        page pulled past its ends (a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Overscroll"
@@ -797,12 +1098,12 @@ export const NavigationParts: FunctionComponent = () => (
         ’s refresh, or turning pages).
       </li>
       <li>
-        Here, every page instant (its control): drilling in and going back show
-        the pages at once; not instant, they slide.
+        Here, the control makes every page instant. Drilling in and going back
+        then show the pages at once; otherwise, they slide.
       </li>
       <li>
-        Renders no element: its page as it is (in the stack’s frame, as without
-        it).
+        Renders no element. Its page sits in the stack’s frame as it would
+        without it.
       </li>
     </ul>
     <PagePart />
@@ -817,39 +1118,41 @@ export const NavigationParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Where a swipe back starts (touch, or a mouse): a strip at the leading
-        edge (<code>width</code>, 20px), over the pages; without one, pages
-        aren’t swiped back.
+        Where a swipe back starts, by touch or mouse: a strip at the leading
+        edge (<code>width</code>, 20px), above the pages. Without one, pages
+        can’t be swiped back.
       </li>
       <li>
-        Rendered while a page can be popped (the root’s <code>onBack</code>,
-        more than one page; at rest, or while popping) or a swipe goes on;
-        nothing otherwise.
+        It renders while a page can be popped (the root has <code>onBack</code>,
+        and there’s more than one page, at rest or while popping), or while a
+        swipe is going on. Otherwise, it renders nothing.
       </li>
       <li>
-        Swiped, the top page follows the finger; let go past half the width (or
-        flung), <code>onBack</code> is called (reason <code>swipe</code>, as
-        it’s let go: the pop on from there); otherwise it settles back.
+        While swiped, the top page follows the finger. Let go past half the
+        width, or flung, and <code>onBack</code> is called with the reason{' '}
+        <code>swipe</code>, as it’s let go, and the pop continues from there.
+        Otherwise, it settles back.
       </li>
       <li>
-        Also while a page is popped (still leaving: a swipe again, the cascade
-        of going back quickly, see{' '}
+        It also works while a page is being popped and is still leaving: swiping
+        again then cascades, as when going back quickly (see{' '}
         <a href={publicUrl('navigation/composition#going-back-quickly')}>
           Composition
         </a>
-        ); not while one is pushed.
+        ). It doesn’t work while a page is being pushed.
       </li>
       <li>
-        Its swipes are its own: nothing scrolls meanwhile, and a{' '}
+        Its swipes are its own. Nothing scrolls meanwhile, and a{' '}
         <PartLink
           component="sheet"
           part="Sheet.Root"
         />{' '}
-        around it isn’t swiped down along (Base UI’s{' '}
+        around it isn’t swiped down along with it (Base UI’s{' '}
         <code>data-base-ui-swipe-ignore</code>).
       </li>
       <li>
-        Renders a <code>div</code>: nothing of its own to see, so overlaid here.
+        Renders a <code>div</code>. There’s nothing of it to see, so it’s
+        overlaid here.
       </li>
     </ul>
     <SwipeAreaPart />
@@ -864,33 +1167,37 @@ export const NavigationParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button taking its navigation back: the root’s <code>onBack</code>{' '}
-        (reason <code>back-press</code>), the app popping its stack (pushed and
-        popped as any change of it).
+        A button that takes its navigation back. It calls the root’s{' '}
+        <code>onBack</code> with the reason <code>back-press</code>, and the app
+        pops its stack, like any change to it.
       </li>
       <li>
-        In each pushed page’s bar (as here): a persistent item (
-        <code>persistentId</code>, <code>back</code> by default, see{' '}
-        <PartLink part="Navigation.Persistent" />
-        ), sliding in with the first pushed page, staying put on deeper ones and
-        back, sliding out with the first again.
+        It can sit in each pushed page’s bar, as here. Then it’s a persistent
+        item (<code>persistentId</code>, <code>back</code> by default, see{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />
+        ): it slides in with the first pushed page, stays put on deeper pages
+        and on the way back, and slides out with the first page again.
       </li>
       <li>
-        Or anywhere in its root: e.g. in a bar of its own outside the stack,
-        still while the pages move (rendered while there’s a page to go back
-        to).
+        Or it can sit anywhere inside its root, for example in a bar of its own
+        outside the stack. There it stays still while the pages move, and
+        renders while there’s a page to go back to.
       </li>
       <li>
-        On the root page (nothing to go back to), or without <code>onBack</code>
-        , disabled.
+        It’s disabled on the root page (with nothing to go back to), or without{' '}
+        <code>onBack</code>.
       </li>
       <li>
-        Renders a <code>button</code>; e.g. a{' '}
+        Renders a <code>button</code>, or another element through its{' '}
+        <code>render</code>, for example a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Button"
-        />{' '}
-        by its <code>render</code>, labelled by the page below’s title.
+        />
+        , labelled with the title of the page below.
       </li>
     </ul>
     <BackPart />
@@ -905,27 +1212,33 @@ export const NavigationParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An item of a page’s bar (e.g. a{' '}
+        An item of a page’s bar (for example a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Button"
+        />
+        , through its <code>render</code>) that stays put through a transition
+        (a push, a pop, a swipe back), as long as both moving pages have an item
+        with its <code>persistentId</code>. The upper page’s item shows, and
+        doesn’t move.
+      </li>
+      <li>
+        If only one of the pages has it, it moves with its page. A back button
+        works this way (a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Back"
         />{' '}
-        by its <code>render</code>) that stays put through a transition (pushed,
-        popped, swiped back) while both moving pages have an item of its{' '}
-        <code>persistentId</code>: the upper page’s shown, unmoved.
+        is persistent by default): it slides in with the first page that has
+        one, and out with it.
       </li>
       <li>
-        Only one of them having it, it moves with its page: e.g. a back button
-        (a <PartLink part="Navigation.Back" /> is one, by default) slides in
-        with the first page to have one, and out with it.
+        Here, Select is on every page and stays put throughout. Give each page
+        its own <code>persistentId</code>, and it moves with its page instead.
       </li>
       <li>
-        Here, Select (on every page) stays put throughout; each page’s own id (
-        <code>persistentId</code>), it moves with its page.
-      </li>
-      <li>
-        Renders a <code>div</code> (its item’s box), or its item itself by its{' '}
-        <code>render</code>.
+        Renders a <code>div</code> (its item’s box), or the item itself through
+        its <code>render</code>.
       </li>
     </ul>
     <PersistentPart />

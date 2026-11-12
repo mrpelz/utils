@@ -29,8 +29,8 @@ export const sheetRootRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the drawer is opened or closed (with Base UI’s
-      event details, e.g. the <code>reason</code>: <code>swipe</code> when
-      swiped down; <code>eventDetails.cancel()</code> keeps it open).
+      event details, for example the <code>reason</code>: <code>swipe</code>{' '}
+      when swiped down; <code>eventDetails.cancel()</code> keeps it open).
     </>,
   ],
   [
@@ -44,10 +44,10 @@ export const sheetRootRows: readonly PropRow[] = [
     union('down', 'up', 'left', 'right', 'none'),
     code(union('down')),
     <>
-      The direction it’s swiped away in (Base UI’s: one), its exit then
-      following the flick out through that edge; or <code>none</code> (this
-      library’s): not swiped away at all, closed by a press outside it, Escape
-      or its close button only.
+      The direction it’s swiped away in (Base UI’s directions). Its exit then
+      follows the flick out through that edge. <code>none</code> is this
+      library’s: it can’t be swiped away at all, and only a press outside it,
+      Escape or its close button close it.
     </>,
   ],
   [
@@ -57,13 +57,14 @@ export const sheetRootRows: readonly PropRow[] = [
     <>
       Snap points used to position the drawer: fractions of the viewport’s
       height (0–1), pixels (above 1), or <code>px</code>/<code>rem</code>{' '}
-      strings. (A sheet’s heights are its <code>detent</code>s.) Left out with{' '}
+      strings. (A sheet’s heights are its <code>detent</code>s.) Leave it out
+      with{' '}
       <PartLink
         component="sheet"
         part="Sheet.SnapGroup"
       />
-      s in it (this library’s): their ends, measured live, named by their{' '}
-      <code>value</code>s here and below.
+      s inside (this library’s): their ends are then the snap points, measured
+      live and named by their <code>value</code>s here and below.
     </>,
   ],
   [
@@ -71,8 +72,9 @@ export const sheetRootRows: readonly PropRow[] = [
     'number | string | null',
     undefined,
     <>
-      The initial snap point value when uncontrolled (again as it opens): with
-      snap groups, a group’s <code>value</code>, by default the lowest.
+      The initial snap point value when uncontrolled, used again each time it
+      opens. With snap groups, it’s a group’s <code>value</code>, the lowest by
+      default.
     </>,
   ],
   [
@@ -118,9 +120,9 @@ export const sheetRootRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Whether to prevent the drawer from closing on outside presses (e.g. while
-      edited; swiping it down still closes it, unless its{' '}
-      <code>onOpenChange</code> cancels).
+      Whether to prevent the drawer from closing on outside presses, for example
+      while it’s being edited. Swiping it down still closes it, unless its{' '}
+      <code>onOpenChange</code> cancels that.
     </>,
   ],
   [
@@ -178,7 +180,7 @@ export const sheetRootRows: readonly PropRow[] = [
     'ReactNode | ((props: { payload }) => ReactNode)',
     undefined,
     <>
-      Its trigger and its popup; or a function of the active trigger’s{' '}
+      Its trigger and its popup, or a function of the active trigger’s{' '}
       <code>payload</code>.
     </>,
   ],
@@ -219,14 +221,14 @@ export const sheetTriggerRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      The stop it opens the sheet at (this library’s): a{' '}
+      The stop it opens the sheet at (this library’s), for a deep link: a{' '}
       <PartLink
         component="sheet"
         part="Sheet.SnapGroup"
       />
-      ’s <code>value</code>, a deep link into it (controlled, told to the root’s{' '}
-      <code>onSnapPointChange</code>); left out, the root’s{' '}
-      <code>defaultSnapPoint</code>.
+      ’s <code>value</code>. When controlled, the root’s{' '}
+      <code>onSnapPointChange</code> is told. Left out, the root’s{' '}
+      <code>defaultSnapPoint</code> applies.
     </>,
   ],
   [
@@ -234,8 +236,8 @@ export const sheetTriggerRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      ID of the trigger: also the active trigger in controlled mode (the root’s{' '}
-      <code>triggerId</code>).
+      ID of the trigger. It also names the active trigger in controlled mode
+      (the root’s <code>triggerId</code>).
     </>,
   ],
   nativeButtonRow(true),
@@ -246,7 +248,7 @@ export const sheetTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
+            {row[3]} For example a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -265,28 +267,29 @@ export const sheetPopupRows: readonly PropRow[] = [
     'detent',
     union('large', 'medium'),
     code(union('large')),
-    'Compact: the whole screen but 10px at the top, opaque; or its content’s height, a floating glass panel.',
+    'Its height on compact widths. large: the whole screen except 10px at the top, opaque. medium: its content’s height, as a floating glass panel.',
   ],
   [
     'compact',
     'boolean',
     'by the window’s width (compact below 768px)',
-    'A sheet from the bottom (its detent), or not compact, what regular says.',
+    'Makes it a sheet from the bottom, with its detent. When it isn’t compact, regular sets what it is.',
   ],
   [
     'regular',
     union('card', 'form'),
     code(union('form')),
     <>
-      What it is in a regular width (a tablet’s; not compact): a form sheet,
-      centered (up to 936px by 852px, e.g. for editing); or a card from the
-      bottom at the leading edge, as a regular{' '}
+      What it is on a regular width, such as a tablet’s (when it isn’t compact).{' '}
+      <code>form</code>: a form sheet in the center, up to 936px by 852px, for
+      example for editing. <code>card</code>: a card from the bottom at the
+      leading edge, like a regular{' '}
       <PartLink
         component="island"
         part="Island.Root"
       />{' '}
-      (375px wide, 10px in, up to 64px below the top), its detent, swiping and
-      snapping kept (e.g. over a map).
+      (375px wide, 10px in, up to 64px below the top). It keeps its detent,
+      swiping and snapping, for example over a map.
     </>,
   ],
   [
@@ -294,14 +297,15 @@ export const sheetPopupRows: readonly PropRow[] = [
     union('grouped', 'plain'),
     code(union('plain')),
     <>
-      Its background, as a page’s (
+      Its background, like a page’s (
       <PartLink
         component="page"
         part="Page.Root"
       />
-      ’s): grouped for grouped lists in it (their own background then
-      transparent, the sheet’s around them), plain for plain lists and other
-      content. Not the medium detent’s (glass).
+      ’s). <code>grouped</code> suits grouped lists inside: their own background
+      turns transparent, and the sheet’s shows around them. <code>plain</code>{' '}
+      suits plain lists and other content. It doesn’t apply to the medium
+      detent, which is glass.
     </>,
   ],
   [
@@ -310,7 +314,7 @@ export const sheetPopupRows: readonly PropRow[] = [
     <>
       <code>document.body</code>
     </>,
-    'Where its portal renders it (Base UI’s Drawer.Portal); fixed to it if it’s a containing block (e.g. transformed), as the views here. Clip it with overflow: clip, not hidden: focus moving into the sheet, still below it, would scroll it.',
+    'Where its portal renders it (Base UI’s Drawer.Portal). If that’s a containing block (for example a transformed element, like the views here), the sheet is fixed to it. Clip it with overflow: clip, not hidden, because otherwise focus moving into the sheet while it’s still below would scroll it.',
   ],
   [
     'initialFocus',
@@ -365,16 +369,17 @@ export const sheetHeaderRows: readonly PropRow[] = [
         component="sheet"
         part="Sheet.Grabber"
       />
-      , optional), then e.g. a <a href={publicUrl('toolbar')}>Toolbar</a> (its{' '}
-      <code>placement=&quot;block-start&quot;</code>), with its title and
-      buttons. Over the content, which scrolls under it (its content making room
-      with a{' '}
+      , optional), then for example a <a href={publicUrl('toolbar')}>Toolbar</a>{' '}
+      (with <code>placement=&quot;block-start&quot;</code>) with its title and
+      buttons. It sits above the content, which scrolls under it, and the
+      content makes room with a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Padding"
       />
-      ). Only a grabber: over the content too, no bar (its own bars, e.g. a
-      navigation’s, below it, as the content’s top safe area inset).
+      . With only a grabber, it sits above the content too, without a bar. The
+      content’s own bars (for example a navigation’s) go below it, treating it
+      as the content’s top safe area inset.
     </>,
   ],
   [
@@ -382,18 +387,19 @@ export const sheetHeaderRows: readonly PropRow[] = [
     union('soft', 'hard', 'none'),
     code(union('soft')),
     <>
-      Its scroll edge effect, as the content scrolls under it (as a{' '}
+      Its scroll edge effect, as the content scrolls under it (like a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Anchor"
       />
-      ’s): <code>soft</code>, a blur fading out away from it; <code>hard</code>,
-      a solid backing with a dividing line; <code>none</code>. Only a grabber:
-      none. The content fades out under it, whatever the sheet’s background:
-      fully hidden under a share of it (<code>--uikit-viewport-edge-veil</code>,
-      0 to 1, a sheet’s <code>0.75</code>, heavier than a page’s; set on the
-      popup or above), showing past it. On a medium sheet’s glass, no blur: the
-      fade alone.
+      ’s). <code>soft</code>: a blur that fades out away from it.{' '}
+      <code>hard</code>: a solid backing with a dividing line. <code>none</code>
+      : nothing, which is also what a header with only a grabber gets. Whatever
+      the sheet’s background, the content fades out under it. It’s fully hidden
+      under a share of the header (<code>--uikit-viewport-edge-veil</code>, 0 to
+      1; a sheet’s is <code>0.75</code>, heavier than a page’s; set it on the
+      popup or above), and shows past it. On a medium sheet’s glass, there’s no
+      blur, only the fade.
     </>,
   ],
   [
@@ -401,7 +407,7 @@ export const sheetHeaderRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      A color for its edge effect, shown at rest too (as a{' '}
+      A color for its edge effect, shown at rest too (like a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Anchor"
@@ -417,9 +423,9 @@ export const sheetGrabberRows: readonly PropRow[] = [
     'cursor',
     'string (a CSS cursor)',
     <>
-      <code>grab</code> (swiped: <code>grabbing</code>)
+      <code>grab</code> (<code>grabbing</code> while swiped)
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -430,17 +436,17 @@ export const sheetSnapGroupRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      Its snap point’s name: the sheet snaps to show everything up to its end
-      (its header too), named so in the root’s <code>snapPoint</code>,{' '}
-      <code>defaultSnapPoint</code> and <code>onSnapPointChange</code>.
-      Required.
+      Its snap point’s name (required). The sheet snaps to show everything up to
+      the group’s end, its header included. The root’s <code>snapPoint</code>,{' '}
+      <code>defaultSnapPoint</code> and <code>onSnapPointChange</code> use this
+      name.
     </>,
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'What it reveals: content up to its end, after the group before it.',
+    'What it reveals: the content after the group before it, up to its own end.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -451,14 +457,14 @@ export const sheetContentRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      What scrolls: e.g. a <a href={publicUrl('list')}>List</a>, a form, a{' '}
-      <a href={publicUrl('navigation')}>Navigation</a>. Under a header with more
-      than a grabber, first a{' '}
+      What scrolls, for example a <a href={publicUrl('list')}>List</a>, a form
+      or a <a href={publicUrl('navigation')}>Navigation</a>. Under a header with
+      more than a grabber, start with a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Padding"
       />{' '}
-      (<code>edge=&quot;block-start&quot;</code>), making room for it.
+      (<code>edge=&quot;block-start&quot;</code>) to make room for it.
     </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
@@ -469,7 +475,7 @@ export const sheetTitleRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'The sheet’s title: its accessible name.',
+    'The sheet’s title, which is its accessible name.',
   ],
   ...baseUiRows('h2', 'HTMLHeadingElement'),
 ];
@@ -479,7 +485,7 @@ export const sheetDescriptionRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'What the sheet is for: its accessible description.',
+    'What the sheet is for, which is its accessible description.',
   ],
   ...baseUiRows('p', 'HTMLParagraphElement'),
 ];
@@ -493,14 +499,14 @@ export const sheetCloseRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a{' '}
+            {row[3]} For example a{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Button"
             >
               {'<Toolbar.Button />'}
             </PartLink>{' '}
-            (Cancel, Done, its close symbol).
+            (Cancel, Done, or a close symbol).
           </>,
         ]
       : row,
@@ -517,8 +523,8 @@ export const sheetHandleTypeRows: readonly PropRow[] = [
     'type parameter',
     code('unknown'),
     <>
-      What its triggers pass the sheet as they open it (their{' '}
-      <code>payload</code>; the root’s children as a function of it).
+      What its triggers pass to the sheet as they open it (their{' '}
+      <code>payload</code>). The root’s children can be a function of it.
     </>,
   ],
 ];
@@ -530,7 +536,7 @@ export const sheetHandleRows: readonly PropRow[] = [
     'SheetHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>Drawer.Handle</code>): passed to a{' '}
+      A handle (Base UI’s <code>Drawer.Handle</code>). Pass it to a{' '}
       <PartLink
         component="sheet"
         part="Sheet.Root"
@@ -540,8 +546,8 @@ export const sheetHandleRows: readonly PropRow[] = [
         component="sheet"
         part="Sheet.Trigger"
       />
-      s (their <code>handle</code>); from the hook, the same for the component’s
-      lifetime.
+      s (their <code>handle</code>). The hook returns the same one for the
+      component’s lifetime.
     </>,
   ],
   [

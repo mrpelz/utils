@@ -13,11 +13,15 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { textFieldRootRows } from '../text-field/docs.js';
 import { fieldsetLegendRows, fieldsetRootRows, formRows } from './docs.js';
 import {
@@ -38,15 +42,57 @@ const FormPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Form' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['fill', 'size', 'type', 'variant'],
+            'Field.Root': ['name', 'render'],
+            'Fieldset.Legend': [],
+            'Fieldset.Root': [],
+            'List.Below': [],
+            'List.Block': ['style'],
+            'List.Content': [],
+            'List.Detail': ['className'],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Span': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'Stepper.Decrement': [],
+            'Stepper.Group': [],
+            'Stepper.Increment': [],
+            'Stepper.Input': ['aria-label'],
+            'Stepper.Root': ['min', 'onValueChange', 'value'],
+            'TextField.Control': [
+              'aria-label',
+              'placeholder',
+              'required',
+              'type',
+            ],
+            'TextField.Error': [],
+            'TextField.Root': ['name', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Form"
     >
       <Form
@@ -54,65 +100,81 @@ const FormPart: FunctionComponent = () => {
         {...props}
         style={{ width: 'min(402px, 100%)', ...props.style }}
       >
-        <List.Root>
-          <Fieldset.Root>
-            <Fieldset.Legend>
-              <List.Title>Order</List.Title>
+        <List.Root {...partProps['List.Root']}>
+          <Fieldset.Root {...partProps['Fieldset.Root']}>
+            <Fieldset.Legend {...partProps['Fieldset.Legend']}>
+              <List.Title {...partProps['List.Title']}>Order</List.Title>
             </Fieldset.Legend>
-            <List.Group>
+            <List.Group {...partProps['List.Group']}>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="email"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Span>
+                <List.Span {...partProps['List.Span']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     required
                     aria-label="Email"
                     placeholder="Email"
                     type="email"
                   />
                 </List.Span>
-                <List.Below>
-                  <TextField.Error />
+                <List.Below {...partProps['List.Below']}>
+                  <TextField.Error {...partProps['TextField.Error']} />
                 </List.Below>
               </TextField.Root>
               <Field.Root
+                {...partProps['Field.Root']}
                 name="quantity"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <List.Title>Quantity</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>Quantity</List.Title>
                 </List.Content>
-                <List.Trailing>
-                  <List.Detail className="form-demo-value">
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <List.Detail
+                    {...partProps['List.Detail']}
+                    className="form-demo-value"
+                  >
                     {quantity ?? '–'}
                   </List.Detail>
                 </List.Trailing>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <Stepper.Root
+                    {...partProps['Stepper.Root']}
                     min={1}
                     value={quantity}
                     onValueChange={(next: number | null) => setQuantity(next)}
                   >
-                    <Stepper.Group>
-                      <Stepper.Input aria-label="Quantity" />
-                      <Stepper.Decrement />
-                      <Stepper.Increment />
+                    <Stepper.Group {...partProps['Stepper.Group']}>
+                      <Stepper.Input
+                        {...partProps['Stepper.Input']}
+                        aria-label="Quantity"
+                      />
+                      <Stepper.Decrement {...partProps['Stepper.Decrement']} />
+                      <Stepper.Increment {...partProps['Stepper.Increment']} />
                     </Stepper.Group>
                   </Stepper.Root>
                 </List.Trailing>
               </Field.Root>
             </List.Group>
           </Fieldset.Root>
-          <List.Section>
-            <List.Block style={{ paddingInline: 0 }}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Block
+              {...partProps['List.Block']}
+              style={{ paddingInline: 0 }}
+            >
               <Button.Root
+                {...partProps['Button.Root']}
                 fill
                 size="large"
                 type="submit"
                 variant="bordered-prominent"
               >
-                <Button.Label>Order</Button.Label>
+                <Button.Label {...partProps['Button.Label']}>
+                  Order
+                </Button.Label>
               </Button.Root>
             </List.Block>
           </List.Section>
@@ -134,51 +196,90 @@ const FieldsetRootPart: FunctionComponent = () => {
     title: 'Fieldset.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Form: ['onFormSubmit', 'style'],
+            'Button.Label': [],
+            'Button.Root': ['fill', 'size', 'type', 'variant'],
+            'Fieldset.Legend': [],
+            'List.Block': ['style'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'TextField.Control': ['placeholder'],
+            'TextField.Label': [],
+            'TextField.Root': ['name', 'render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Fieldset.Root"
     >
       <Form
+        {...partProps.Form}
         style={{ width: 'min(402px, 100%)' }}
         onFormSubmit={(values: Record<string, unknown>) =>
           addLog(`submitted: ${JSON.stringify(values)}`)
         }
       >
-        <List.Root>
+        <List.Root {...partProps['List.Root']}>
           <Fieldset.Root {...props}>
-            <Fieldset.Legend>
-              <List.Title>Contact</List.Title>
+            <Fieldset.Legend {...partProps['Fieldset.Legend']}>
+              <List.Title {...partProps['List.Title']}>Contact</List.Title>
             </Fieldset.Legend>
-            <List.Group>
+            <List.Group {...partProps['List.Group']}>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="name"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Name</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Name
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
-                  <TextField.Control placeholder="Name" />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <TextField.Control
+                    {...partProps['TextField.Control']}
+                    placeholder="Name"
+                  />
                 </List.Trailing>
               </TextField.Root>
             </List.Group>
           </Fieldset.Root>
-          <List.Section>
-            <List.Block style={{ paddingInline: 0 }}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Block
+              {...partProps['List.Block']}
+              style={{ paddingInline: 0 }}
+            >
               <Button.Root
+                {...partProps['Button.Root']}
                 fill
                 size="large"
                 type="submit"
                 variant="bordered-prominent"
               >
-                <Button.Label>Save</Button.Label>
+                <Button.Label {...partProps['Button.Label']}>Save</Button.Label>
               </Button.Root>
             </List.Block>
           </List.Section>
@@ -199,32 +300,62 @@ const FieldsetLegendPart: FunctionComponent = () => {
     title: 'Fieldset.Legend',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Form: ['style'],
+          'Fieldset.Root': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'TextField.Control': ['placeholder'],
+          'TextField.Label': [],
+          'TextField.Root': ['name', 'render'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Fieldset.Legend"
     >
-      <Form style={{ width: 'min(402px, 100%)' }}>
-        <List.Root>
-          <Fieldset.Root>
+      <Form
+        {...partProps.Form}
+        style={{ width: 'min(402px, 100%)' }}
+      >
+        <List.Root {...partProps['List.Root']}>
+          <Fieldset.Root {...partProps['Fieldset.Root']}>
             <Fieldset.Legend {...props}>
-              <List.Title>Contact</List.Title>
+              <List.Title {...partProps['List.Title']}>Contact</List.Title>
             </Fieldset.Legend>
-            <List.Group>
+            <List.Group {...partProps['List.Group']}>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="name"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
               >
-                <List.Content>
-                  <TextField.Label>Name</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Name
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
-                  <TextField.Control placeholder="Name" />
+                <List.Trailing {...partProps['List.Trailing']}>
+                  <TextField.Control
+                    {...partProps['TextField.Control']}
+                    placeholder="Name"
+                  />
                 </List.Trailing>
               </TextField.Root>
             </List.Group>
@@ -248,61 +379,104 @@ const FieldPart: FunctionComponent = () => {
     title: 'Field.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Form: ['onFormSubmit', 'style'],
+            'Button.Label': [],
+            'Button.Root': ['fill', 'size', 'type', 'variant'],
+            'List.Block': ['style'],
+            'List.Content': [],
+            'List.Detail': ['className'],
+            'List.Group': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'Stepper.Decrement': [],
+            'Stepper.Group': [],
+            'Stepper.Increment': [],
+            'Stepper.Input': ['aria-label'],
+            'Stepper.Root': ['min', 'onValueChange', 'value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Field"
     >
       <Form
+        {...partProps.Form}
         style={{ width: 'min(402px, 100%)' }}
         onFormSubmit={(values: Record<string, unknown>) =>
           addLog(`submitted: ${JSON.stringify(values)}`)
         }
       >
-        <List.Root>
-          <List.Section>
-            <List.Group>
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               <Field.Root
                 key={elementKey}
                 {...props}
               >
-                <List.Content>
-                  <List.Title>Quantity</List.Title>
+                <List.Content {...partProps['List.Content']}>
+                  <List.Title {...partProps['List.Title']}>Quantity</List.Title>
                 </List.Content>
-                <List.Detail className="form-demo-value">
+                <List.Detail
+                  {...partProps['List.Detail']}
+                  className="form-demo-value"
+                >
                   {quantity ?? '–'}
                 </List.Detail>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <Stepper.Root
+                    {...partProps['Stepper.Root']}
                     min={1}
                     value={quantity}
                     onValueChange={(next: number | null) => setQuantity(next)}
                   >
-                    <Stepper.Group>
-                      <Stepper.Input aria-label="Quantity" />
-                      <Stepper.Decrement />
-                      <Stepper.Increment />
+                    <Stepper.Group {...partProps['Stepper.Group']}>
+                      <Stepper.Input
+                        {...partProps['Stepper.Input']}
+                        aria-label="Quantity"
+                      />
+                      <Stepper.Decrement {...partProps['Stepper.Decrement']} />
+                      <Stepper.Increment {...partProps['Stepper.Increment']} />
                     </Stepper.Group>
                   </Stepper.Root>
                 </List.Trailing>
               </Field.Root>
             </List.Group>
           </List.Section>
-          <List.Section>
-            <List.Block style={{ paddingInline: 0 }}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Block
+              {...partProps['List.Block']}
+              style={{ paddingInline: 0 }}
+            >
               <Button.Root
+                {...partProps['Button.Root']}
                 fill
                 size="large"
                 type="submit"
                 variant="bordered-prominent"
               >
-                <Button.Label>Submit</Button.Label>
+                <Button.Label {...partProps['Button.Label']}>
+                  Submit
+                </Button.Label>
               </Button.Root>
             </List.Block>
           </List.Section>
@@ -321,14 +495,15 @@ export const FormParts: FunctionComponent = () => (
           component="form"
           part="Form"
         />
-        : Base UI’s, collecting and validating its fields.
+        : Base UI’s form, which collects and validates its fields.
       </li>
       <li>
-        Fieldset: a list section of fields, its legend the section’s header.
+        Fieldset: a list section of fields, with the section’s header as its
+        legend.
       </li>
       <li>
-        Field: Base UI’s, a value by its name (text fields are{' '}
-        <a href={publicUrl('text-field')}>Text field</a>s).
+        Field: Base UI’s field, a value under its name (text fields are{' '}
+        <a href={publicUrl('text-field')}>Text Field</a>s).
       </li>
     </ul>
     <ul className="demo-tree">
@@ -338,25 +513,85 @@ export const FormParts: FunctionComponent = () => (
           part="Form"
         />
         <ul>
-          <li>
+          <li className="demo-tree-context">
             <PartLink
-              component="form"
-              part="Fieldset.Root"
-            />{' '}
-            (optional)
+              component="list"
+              part="List.Root"
+            />
             <ul>
               <li>
                 <PartLink
                   component="form"
-                  part="Fieldset.Legend"
+                  part="Fieldset.Root"
                 />{' '}
-                (optional)
-              </li>
-              <li>
+                (optional; rendering a{' '}
                 <PartLink
-                  component="form"
-                  part="Field"
+                  component="list"
+                  part="List.Section"
                 />
+                )
+                <ul>
+                  <li>
+                    <PartLink
+                      component="form"
+                      part="Fieldset.Legend"
+                    />{' '}
+                    (optional; rendering a{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Header"
+                    />
+                    )
+                  </li>
+                  <li className="demo-tree-context">
+                    <PartLink
+                      component="list"
+                      part="List.Group"
+                    />
+                    <ul>
+                      <li className="demo-tree-context">
+                        <PartLink
+                          component="text-field"
+                          part="TextField.Root"
+                        />
+                        <span>s, for text fields</span>
+                      </li>
+                      <li>
+                        <PartLink
+                          component="form"
+                          part="Field"
+                        >
+                          Field.Root
+                        </PartLink>{' '}
+                        (rendering a{' '}
+                        <PartLink
+                          component="list"
+                          part="List.Item"
+                        />
+                        ), around other controls
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li className="demo-tree-context">
+                <PartLink
+                  component="list"
+                  part="List.Section"
+                />{' '}
+                <span>→</span>{' '}
+                <PartLink
+                  component="list"
+                  part="List.Block"
+                />{' '}
+                <span>→</span>{' '}
+                <PartLink
+                  component="button"
+                  part="Button.Root"
+                />{' '}
+                <span>(</span>
+                <code>type=&quot;submit&quot;</code>
+                <span>)</span>
               </li>
             </ul>
           </li>
@@ -372,13 +607,14 @@ export const FormParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI’s form, as it is: its fields’ values by name to{' '}
-        <code>onFormSubmit</code>, validated (<code>validationMode</code>),
-        external <code>errors</code> shown on them.
+        Base UI’s form, as it is. It passes its fields’ values by name to{' '}
+        <code>onFormSubmit</code>, validates them (<code>validationMode</code>),
+        and shows external <code>errors</code> on them.
       </li>
       <li>
-        Laid out as a <a href={publicUrl('list')}>List</a>: fieldsets its
-        sections, fields its rows; a <a href={publicUrl('button')}>Button</a> of{' '}
+        It’s laid out as a <a href={publicUrl('list')}>List</a>, with fieldsets
+        as its sections and fields as its rows. A{' '}
+        <a href={publicUrl('button')}>Button</a> with{' '}
         <code>type=&quot;submit&quot;</code> submits it.
       </li>
       <li>
@@ -402,10 +638,10 @@ export const FormParts: FunctionComponent = () => (
           component="list"
           part="List.Section"
         />
-        : <code>disabled</code> disables them all.
+        . <code>disabled</code> disables them all.
       </li>
       <li>
-        Renders a <code>fieldset</code> (its browser styles reset).
+        Renders a <code>fieldset</code>, with its browser styles reset.
       </li>
     </ul>
     <FieldsetRootPart />
@@ -420,23 +656,23 @@ export const FormParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The fieldset’s legend (Base UI’s): it names the fieldset (Base UI sets
-        the fieldset’s <code>aria-labelledby</code> to it; an accessible name,
-        not a form field’s name).
+        The fieldset’s legend (Base UI’s), which names the fieldset. Base UI
+        sets the fieldset’s <code>aria-labelledby</code> to it. It’s an
+        accessible name, not a form field’s name.
       </li>
       <li>
-        Rendered as the section’s{' '}
+        It’s rendered as the section’s{' '}
         <PartLink
           component="list"
           part="List.Header"
         />
-        , its children the header’s parts, as any header’s (a{' '}
+        , and its children are the header’s parts, as in any header (a{' '}
         <PartLink
           component="list"
           part="List.Title"
         />
-        , …); another header by <code>render</code> (e.g.{' '}
-        <code>{'<List.Header prominence="nested" />'}</code>).
+        , and so on). Render another header with <code>render</code> (for
+        example <code>{'<List.Header prominence="nested" />'}</code>).
       </li>
     </ul>
     <FieldsetLegendPart />
@@ -459,20 +695,20 @@ export const FormParts: FunctionComponent = () => (
         >
           Base UI’s Field
         </a>
-        ):{' '}
+        ).{' '}
         <PartLink
           component="form"
           part="Field"
         >
           Field.Root
         </PartLink>{' '}
-        names a value in the form, its control’s.
+        names a value in the form: its control’s.
       </li>
       <li>
-        Around a control that isn’t a text field (a{' '}
+        Put it around a control that isn’t a text field (a{' '}
         <a href={publicUrl('stepper')}>Stepper</a>, a{' '}
         <a href={publicUrl('slider')}>Slider</a>, a{' '}
-        <a href={publicUrl('date-picker')}>Date picker</a>), rendered as its row
+        <a href={publicUrl('date-picker')}>Date Picker</a>), rendered as its row
         (
         <PartLink
           component="list"
@@ -488,7 +724,7 @@ export const FormParts: FunctionComponent = () => (
           component="text-field"
           part="TextField.Root"
         />
-        s: Base UI’s field, styled; its other parts (
+        s, which are Base UI’s field with styles. Its other parts (
         <PartLink
           component="form"
           part="Field"
@@ -508,8 +744,9 @@ export const FormParts: FunctionComponent = () => (
           part="Field"
         >
           Field.Error
-        </PartLink>
-        , …) as <a href={publicUrl('text-field/parts')}>Text field’s</a>.
+        </PartLink>{' '}
+        and so on) work as the{' '}
+        <a href={publicUrl('text-field/parts')}>Text Field</a>’s do.
       </li>
     </ul>
     <FieldPart />

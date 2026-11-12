@@ -10,12 +10,16 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   alertActionRows,
   alertActionsRows,
@@ -55,44 +59,78 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Alert.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Alert.Action': ['variant'],
+            'Alert.Actions': [],
+            'Alert.Description': [],
+            'Alert.Header': [],
+            'Alert.Popup': [],
+            'Alert.Title': [],
+            'Alert.Trigger': ['render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Alert.Root
           key={elementKey}
           {...props}
         >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Delete Note?</Alert.Title>
-              <Alert.Description>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -112,33 +150,61 @@ const TriggerPart: FunctionComponent = () => {
     title: 'Alert.Trigger',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action': ['variant'],
+          'Alert.Actions': [],
+          'Alert.Description': [],
+          'Alert.Header': [],
+          'Alert.Popup': [],
+          'Alert.Root': [],
+          'Alert.Title': [],
+          'Button.Label': [],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Trigger"
     >
-      <Viewport.Content>
-        <Alert.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root {...partProps['Alert.Root']}>
           <Alert.Trigger {...props}>
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Delete Note?</Alert.Title>
-              <Alert.Description>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -158,40 +224,74 @@ const PopupPart: FunctionComponent = () => {
     title: 'Alert.Popup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action': ['variant'],
+          'Alert.Actions': [],
+          'Alert.Description': [],
+          'Alert.Header': [],
+          'Alert.Root': [],
+          'Alert.Title': [],
+          'Alert.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Popup"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
           <Alert.Popup {...props}>
-            <Alert.Header>
-              <Alert.Title>Delete Note?</Alert.Title>
-              <Alert.Description>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -211,40 +311,74 @@ const HeaderPart: FunctionComponent = () => {
     title: 'Alert.Header',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action': ['variant'],
+          'Alert.Actions': [],
+          'Alert.Description': [],
+          'Alert.Popup': [],
+          'Alert.Root': [],
+          'Alert.Title': [],
+          'Alert.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Header"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
+          <Alert.Popup {...partProps['Alert.Popup']}>
             <Alert.Header {...props}>
-              <Alert.Title>Delete Note?</Alert.Title>
-              <Alert.Description>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -264,40 +398,72 @@ const TitlePart: FunctionComponent = () => {
     title: 'Alert.Title',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action': ['variant'],
+          'Alert.Actions': [],
+          'Alert.Description': [],
+          'Alert.Header': [],
+          'Alert.Popup': [],
+          'Alert.Root': [],
+          'Alert.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Title"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
               <Alert.Title {...props}>Delete Note?</Alert.Title>
-              <Alert.Description>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -317,40 +483,74 @@ const DescriptionPart: FunctionComponent = () => {
     title: 'Alert.Description',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action': ['variant'],
+          'Alert.Actions': [],
+          'Alert.Header': [],
+          'Alert.Popup': [],
+          'Alert.Root': [],
+          'Alert.Title': [],
+          'Alert.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Description"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Delete Note?</Alert.Title>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
               <Alert.Description {...props}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -370,47 +570,84 @@ const FieldsPart: FunctionComponent = () => {
     title: 'Alert.Fields',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action': ['variant'],
+          'Alert.Actions': [],
+          'Alert.Description': [],
+          'Alert.Field': ['aria-label', 'defaultValue', 'placeholder'],
+          'Alert.Header': [],
+          'Alert.Popup': [],
+          'Alert.Root': [],
+          'Alert.Title': [],
+          'Alert.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Fields"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Rename Folder</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Rename Folder
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Rename Folder</Alert.Title>
-              <Alert.Description>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Rename Folder
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 Enter a name for this folder.
               </Alert.Description>
             </Alert.Header>
             <Alert.Fields {...props}>
               <Alert.Field
+                {...partProps['Alert.Field']}
                 aria-label="Name"
                 defaultValue="Recipes"
                 placeholder="Name"
               />
             </Alert.Fields>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="primary">Save</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="primary"
+              >
+                Save
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -429,47 +666,86 @@ const FieldPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Alert.Field' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Alert.Action': ['variant'],
+            'Alert.Actions': [],
+            'Alert.Description': [],
+            'Alert.Fields': [],
+            'Alert.Header': [],
+            'Alert.Popup': [],
+            'Alert.Root': [],
+            'Alert.Title': [],
+            'Alert.Trigger': ['render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Field"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Rename Folder</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Rename Folder
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Rename Folder</Alert.Title>
-              <Alert.Description>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Rename Folder
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 Enter a name for this folder.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Fields>
+            <Alert.Fields {...partProps['Alert.Fields']}>
               <Alert.Field
                 aria-label="Name"
                 {...props}
               />
             </Alert.Fields>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="primary">Save</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="primary"
+              >
+                Save
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -489,40 +765,74 @@ const ActionsPart: FunctionComponent = () => {
     title: 'Alert.Actions',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action': ['variant'],
+          'Alert.Description': [],
+          'Alert.Header': [],
+          'Alert.Popup': [],
+          'Alert.Root': [],
+          'Alert.Title': [],
+          'Alert.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Actions"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Delete Note?</Alert.Title>
-              <Alert.Description>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
             <Alert.Actions {...props}>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -542,39 +852,71 @@ const ActionPart: FunctionComponent = () => {
     title: 'Alert.Action',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Alert.Action (others)': [],
+          'Alert.Actions': [],
+          'Alert.Description': [],
+          'Alert.Header': [],
+          'Alert.Popup': [],
+          'Alert.Root': [],
+          'Alert.Title': [],
+          'Alert.Trigger': ['render'],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
       baseUiId="alert-dialog"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Alert.Action"
     >
-      <Viewport.Content>
-        <Alert.Root defaultOpen>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Alert.Root
+          {...partProps['Alert.Root']}
+          defaultOpen
+        >
           <Alert.Trigger
+            {...partProps['Alert.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Delete Note</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Delete Note
+            </Button.Label>
           </Alert.Trigger>
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Delete Note?</Alert.Title>
-              <Alert.Description>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action (others)']}>
+                Cancel
+              </Alert.Action>
               <Alert.Action {...props}>Delete</Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
@@ -596,50 +938,91 @@ const CreateHandlePart: FunctionComponent = () => {
   const id = 'alert-parts-create-handle';
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Alert.Action': ['variant'],
+            'Alert.Actions': [],
+            'Alert.Description': [],
+            'Alert.Header': [],
+            'Alert.Popup': [],
+            'Alert.Root': ['handle', 'onOpenChange'],
+            'Alert.Title': [],
+            'Alert.Trigger': ['handle', 'render'],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="alert-dialog"
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="Alert.createHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Alert.Trigger
+          {...partProps['Alert.Trigger']}
           handle={deleteAlert}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Delete Note</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Delete Note
+          </Button.Label>
         </Alert.Trigger>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="borderless"
           onClick={() => deleteAlert.open(null)}
         >
-          <Button.Label>Open Imperatively</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Open Imperatively
+          </Button.Label>
         </Button.Root>
         <Alert.Root
+          {...partProps['Alert.Root']}
           handle={deleteAlert}
           onOpenChange={(isOpen: boolean, { reason }) =>
             addLog(`open change: ${String(isOpen)} (${reason})`)
           }
         >
-          <Alert.Popup>
-            <Alert.Header>
-              <Alert.Title>Delete Note?</Alert.Title>
-              <Alert.Description>
+          <Alert.Popup {...partProps['Alert.Popup']}>
+            <Alert.Header {...partProps['Alert.Header']}>
+              <Alert.Title {...partProps['Alert.Title']}>
+                Delete Note?
+              </Alert.Title>
+              <Alert.Description {...partProps['Alert.Description']}>
                 This note will be deleted from all your devices.
               </Alert.Description>
             </Alert.Header>
-            <Alert.Actions>
-              <Alert.Action>Cancel</Alert.Action>
-              <Alert.Action variant="destructive">Delete</Alert.Action>
+            <Alert.Actions {...partProps['Alert.Actions']}>
+              <Alert.Action {...partProps['Alert.Action']}>Cancel</Alert.Action>
+              <Alert.Action
+                {...partProps['Alert.Action']}
+                variant="destructive"
+              >
+                Delete
+              </Alert.Action>
             </Alert.Actions>
           </Alert.Popup>
         </Alert.Root>
@@ -659,58 +1042,102 @@ const UseCreateAlertHandlePart: FunctionComponent = () => {
     'const deleteItemAlert = useCreateAlertHandle<{ title: string }>();',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Alert.Action': ['variant'],
+            'Alert.Actions': [],
+            'Alert.Description': [],
+            'Alert.Header': [],
+            'Alert.Popup': [],
+            'Alert.Root': ['handle', 'onOpenChange'],
+            'Alert.Title': [],
+            'Alert.Trigger': ['handle', 'payload', 'render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'Viewport.Content': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
       baseUiId="alert-dialog"
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="useCreateAlertHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Alert.Trigger
+          {...partProps['Alert.Trigger']}
           handle={deleteItemAlert}
           payload={{ title: 'Delete Note?' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Delete Note</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Delete Note
+          </Button.Label>
         </Alert.Trigger>
         <Alert.Trigger
+          {...partProps['Alert.Trigger']}
           handle={deleteItemAlert}
           payload={{ title: 'Delete Folder?' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Delete Folder</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Delete Folder
+          </Button.Label>
         </Alert.Trigger>
         <Alert.Root
+          {...partProps['Alert.Root']}
           handle={deleteItemAlert}
           onOpenChange={(isOpen: boolean, { reason }) =>
             addLog(`open change: ${String(isOpen)} (${reason})`)
           }
         >
           {({ payload }) => (
-            <Alert.Popup>
-              <Alert.Header>
-                <Alert.Title>{payload?.title}</Alert.Title>
-                <Alert.Description>
+            <Alert.Popup {...partProps['Alert.Popup']}>
+              <Alert.Header {...partProps['Alert.Header']}>
+                <Alert.Title {...partProps['Alert.Title']}>
+                  {payload?.title}
+                </Alert.Title>
+                <Alert.Description {...partProps['Alert.Description']}>
                   This note will be deleted from all your devices.
                 </Alert.Description>
               </Alert.Header>
-              <Alert.Actions>
-                <Alert.Action>Cancel</Alert.Action>
-                <Alert.Action variant="destructive">Delete</Alert.Action>
+              <Alert.Actions {...partProps['Alert.Actions']}>
+                <Alert.Action {...partProps['Alert.Action']}>
+                  Cancel
+                </Alert.Action>
+                <Alert.Action
+                  {...partProps['Alert.Action']}
+                  variant="destructive"
+                >
+                  Delete
+                </Alert.Action>
               </Alert.Actions>
             </Alert.Popup>
           )}
@@ -724,15 +1151,16 @@ const UseCreateAlertHandlePart: FunctionComponent = () => {
 export const AlertParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: its state (open), for its parts.</li>
-      <li>Trigger: what opens it (or the app, by a handle).</li>
-      <li>Popup: the panel, centered, the page dimmed behind it.</li>
+      <li>Root: holds its state (open) for its parts.</li>
+      <li>Trigger: what opens it (or the app does, through a handle).</li>
+      <li>Popup: the panel, centered, with the page dimmed behind it.</li>
       <li>
-        In it: its header (title, description), its text fields, its actions.
+        Inside it: its header (title and description), its text fields, and its
+        actions.
       </li>
-      <li>Handles: triggers outside the root, opening it imperatively.</li>
+      <li>Handles: triggers outside the root, and opening it from code.</li>
       <li>
-        The views’ phone screens contain it (<code>container</code>); press each
+        The views’ phone screens contain it (<code>container</code>). Press each
         view’s button to open its alert.
       </li>
     </ul>
@@ -748,14 +1176,14 @@ export const AlertParts: FunctionComponent = () => (
               component="alert"
               part="Alert.Trigger"
             />{' '}
-            (optional; or outside it, by a handle)
+            (optional; or outside the root, through a handle)
           </li>
           <li>
             <PartLink
               component="alert"
               part="Alert.Popup"
             />{' '}
-            (in its portal, its backdrop behind it)
+            (in its portal, with its backdrop behind it)
             <ul>
               <li>
                 <PartLink
@@ -813,15 +1241,13 @@ export const AlertParts: FunctionComponent = () => (
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
       <li>
         <PartLink
           component="alert"
           part="Alert.createHandle"
         />{' '}
-        (an alert’s handle, for its triggers outside it, and opening it
-        imperatively)
+        (an alert’s handle, for its triggers outside it, and for opening it from
+        code)
         <ul>
           <li>
             <PartLink
@@ -842,13 +1268,13 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its state: <code>open</code> or <code>defaultOpen</code>,{' '}
-        <code>onOpenChange</code> (with why: its trigger pressed, an action,
-        Escape).
+        Holds its state: <code>open</code> or <code>defaultOpen</code>, and{' '}
+        <code>onOpenChange</code> (with the reason: its trigger pressed, an
+        action, or Escape).
       </li>
       <li>
-        Always modal: a press outside doesn’t close it (Base UI’s{' '}
-        <code>AlertDialog</code>); its actions do.
+        It’s always modal, so a press outside doesn’t close it (Base UI’s{' '}
+        <code>AlertDialog</code>). Its actions do.
       </li>
       <li>Renders no element of its own.</li>
     </ul>
@@ -864,9 +1290,10 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What opens it: e.g. a <a href={publicUrl('button')}>Button</a> (
-        <code>{'render={<Button.Root />}'}</code>). Optional: an alert the app
-        opens (e.g. after a failed save) has none, opened by a handle (see{' '}
+        What opens it, for example a <a href={publicUrl('button')}>Button</a> (
+        <code>{'render={<Button.Root />}'}</code>). It’s optional: an alert the
+        app opens itself (for example after a failed save) has none, and opens
+        through a handle (see{' '}
         <PartLink
           component="alert"
           part="Alert.createHandle"
@@ -889,23 +1316,23 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The panel (the menus’ glass, 300px wide, 34px corners), centered in its{' '}
-        <code>container</code>; the page dimmed behind it (its backdrop);
-        scaling in from 110%.
+        The panel (the menus’ glass, 300px wide, with 34px corners), centered in
+        its <code>container</code>, with the page dimmed behind it (its
+        backdrop). It scales in from 110%.
       </li>
       <li>
-        While a field in it (
+        While a field inside it (
         <PartLink
           component="alert"
           part="Alert.Field"
         />
-        ) is typed into and the keyboard covers it, lifted as a whole until it’s
-        8px above the keyboard, its backdrop staying (a{' '}
+        ) is typed into and the keyboard covers it, it’s lifted as a whole until
+        it’s 8px above the keyboard, while its backdrop stays (like a{' '}
         <PartLink
           component="viewport"
           part="Viewport.KeyboardAccessory"
         />
-        ; in a{' '}
+        , in a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
@@ -913,9 +1340,9 @@ export const AlertParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Renders its portal (a <code>div</code> with no box of its own), its
-        backdrop’s <code>div</code>, its viewport’s <code>div</code> (Base UI’s
-        <code>AlertDialog.Viewport</code>, centering it), and its own{' '}
+        Renders its portal (a <code>div</code> without a box of its own), its
+        backdrop’s <code>div</code>, its viewport’s <code>div</code> (Base UI’s{' '}
+        <code>AlertDialog.Viewport</code>, which centers it), and its own{' '}
         <code>div</code> (an <code>alertdialog</code>).
       </li>
     </ul>
@@ -947,7 +1374,7 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its title (Headline): short, a question or a statement; the alert’s
+        Its title (Headline): short, a question or a statement. It’s the alert’s
         accessible name.
       </li>
       <li>
@@ -966,8 +1393,8 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its message (Body), a short, complete sentence; the alert’s
-        accessible description.
+        Optional: its message (Body), a short, complete sentence. It’s the
+        alert’s accessible description.
       </li>
       <li>
         Renders a <code>p</code>.
@@ -1003,13 +1430,13 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A text field (Base UI’s <code>Input</code>): 52px high, on a gray fill
-        with 26px corners; named by its <code>aria-label</code> (its placeholder
-        shows).
+        A text field (Base UI’s <code>Input</code>), 52px tall, on a gray fill
+        with 26px corners. Name it with its <code>aria-label</code>; its
+        placeholder shows.
       </li>
       <li>
-        Its value the app’s (<code>onValueChange</code>), read by the action
-        that uses it.
+        The app holds its value (<code>onValueChange</code>), and the action
+        that uses it reads it.
       </li>
       <li>
         Renders an <code>input</code>.
@@ -1027,9 +1454,9 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its actions: two side by side, 16px apart; more than two stacked, 10px
-        apart (by themselves); <code>stacked</code> for two whose labels don’t
-        fit.
+        Its actions. Two sit side by side, 16px apart. More than two stack on
+        their own, 10px apart. Use <code>stacked</code> for two whose labels
+        don’t fit.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1047,11 +1474,13 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button closing the alert (Base UI’s <code>Close</code>), 48px high, a
-        capsule: its <code>variant</code> secondary (Cancel), primary (the
-        default action, in the tint), or destructive (red).
+        A button that closes the alert (Base UI’s <code>Close</code>): a 48px
+        capsule. Its <code>variant</code> is secondary (Cancel), primary (the
+        default action, in the tint) or destructive (red).
       </li>
-      <li>Its own action: its click handler (the app’s), then it closes.</li>
+      <li>
+        Its own action runs first (the app’s click handler), then it closes.
+      </li>
       <li>
         Renders a <code>button</code>.
       </li>
@@ -1068,12 +1497,12 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle linking an alert to its triggers outside its root, and opening
-        or closing it imperatively (Base UI’s{' '}
-        <code>AlertDialog.createHandle</code>): e.g. after a failed save.
+        A handle that links an alert to its triggers outside its root, and opens
+        or closes it from code (Base UI’s <code>AlertDialog.createHandle</code>
+        ), for example after a failed save.
       </li>
       <li>
-        Made once, e.g. at a module’s top level (in a component:{' '}
+        Make it once, for example at a module’s top level (in a component, use{' '}
         <PartLink
           component="alert"
           part="useCreateAlertHandle"
@@ -1081,8 +1510,8 @@ export const AlertParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Here: made at the module’s top level; a trigger before the root, and a
-        button opening it imperatively (its <code>open(null)</code>).
+        Here, it’s made at the module’s top level, with a trigger before the
+        root and a button that opens it from code (its <code>open(null)</code>).
       </li>
     </ul>
     <CreateHandlePart />
@@ -1106,8 +1535,8 @@ export const AlertParts: FunctionComponent = () => (
         in a component: the same handle for the component’s lifetime.
       </li>
       <li>
-        Here: two triggers, one alert; each passes its title (its{' '}
-        <code>payload</code>), the root’s children a function of it.
+        Here, two triggers open one alert. Each passes its title as its{' '}
+        <code>payload</code>, and the root’s children are a function of it.
       </li>
     </ul>
     <UseCreateAlertHandlePart />
@@ -1124,7 +1553,7 @@ export const AlertParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Re-exported as they are (unstyled; see{' '}
+        These are re-exported as they are, without styles (see{' '}
         <a
           href="https://base-ui.com/react/components/alert-dialog"
           rel="noreferrer"
@@ -1135,24 +1564,23 @@ export const AlertParts: FunctionComponent = () => (
         ):
       </li>
       <li>
-        <code>Alert.Portal</code>, <code>Alert.Backdrop</code>: rendered by{' '}
+        <code>Alert.Portal</code>, <code>Alert.Backdrop</code> and{' '}
+        <code>Alert.Viewport</code>:{' '}
         <PartLink
           component="alert"
           part="Alert.Popup"
         />{' '}
-        (its container, the dimmed page).
+        renders them (its container, the dimmed page, and the box that centers
+        it).
       </li>
       <li>
-        <code>Alert.Close</code>: a button closing it, unstyled (its actions are{' '}
+        <code>Alert.Close</code>: a button that closes it, without styles (its
+        actions are{' '}
         <PartLink
           component="alert"
           part="Alert.Action"
         />
         s).
-      </li>
-      <li>
-        <code>Alert.Viewport</code>: a container around the popup (not used: the
-        popup is centered itself).
       </li>
     </ul>
   </>

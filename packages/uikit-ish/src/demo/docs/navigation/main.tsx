@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent, useCallback, useState } from 'react';
+import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -16,7 +16,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import { pages } from './content.js';
 import { useNavigationControls } from './props.js';
 
@@ -61,16 +64,56 @@ export const NavigationDemo: FunctionComponent = () => {
   const { controls, propsBack, propsRoot, propsStack, propsSwipeArea, state } =
     useNavigationControls(id, addLog, pop);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Header.LargeTitle': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': [],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Segmented.Root': [
+              'aria-label',
+              'className',
+              'onValueChange',
+              'value',
+            ],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={state}
+      state={[...state, partState]}
       title="Navigation"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Navigation.Root {...propsRoot}>
           <Navigation.SwipeArea {...propsSwipeArea} />
           <Navigation.Stack {...propsStack}>
@@ -79,60 +122,81 @@ export const NavigationDemo: FunctionComponent = () => {
 
               return (
                 <Header.Root key={key}>
-                  <Viewport.BlockStart>
-                    <Toolbar.Root placement="block-start">
+                  <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                    <Toolbar.Root
+                      {...partProps['Toolbar.Root']}
+                      placement="block-start"
+                    >
                       {depth > 0 ? (
-                        <Toolbar.Leading>
+                        <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                           <Navigation.Back
                             aria-label={pages[keys[depth - 1] ?? '']?.title}
                             {...propsBack}
                           >
-                            <Button.Icon>
-                              <Symbol icon={sfChevronBackward} />
+                            <Button.Icon {...partProps['Button.Icon']}>
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={sfChevronBackward}
+                              />
                             </Button.Icon>
                           </Navigation.Back>
                         </Toolbar.Leading>
                       ) : null}
-                      <Toolbar.Title>
+                      <Toolbar.Title {...partProps['Toolbar.Title']}>
                         <span>{page.title}</span>
                       </Toolbar.Title>
                     </Toolbar.Root>
                   </Viewport.BlockStart>
-                  <Page.Root>
-                    <Viewport.Padding edge="block-start" />
-                    <Header.LargeTitle>
+                  <Page.Root {...partProps['Page.Root']}>
+                    <Viewport.Padding
+                      {...partProps['Viewport.Padding']}
+                      edge="block-start"
+                    />
+                    <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                       <span>{page.title}</span>
                     </Header.LargeTitle>
 
-                    <List.Root>
-                      <List.Section>
-                        <List.Group>
+                    <List.Root {...partProps['List.Root']}>
+                      <List.Section {...partProps['List.Section']}>
+                        <List.Group {...partProps['List.Group']}>
                           {page.children.map((child) => (
-                            <List.Item key={child}>
-                              <List.Content>
+                            <List.Item
+                              key={child}
+                              {...partProps['List.Item']}
+                            >
+                              <List.Content {...partProps['List.Content']}>
                                 <List.Title
+                                  {...partProps['List.Title']}
                                   render={<button type="button" />}
                                   onClick={() => push(child)}
                                 >
                                   {pages[child]?.title ?? child}
                                 </List.Title>
                               </List.Content>
-                              <List.Trailing>
-                                <List.DrillIn />
+                              <List.Trailing {...partProps['List.Trailing']}>
+                                <List.DrillIn {...partProps['List.DrillIn']} />
                               </List.Trailing>
                             </List.Item>
                           ))}
                           {Array.from({ length: 12 }, (_, index) => (
-                            <List.Item key={index}>
-                              <List.Content>
-                                <List.Title>Row {index + 1}</List.Title>
+                            <List.Item
+                              key={index}
+                              {...partProps['List.Item']}
+                            >
+                              <List.Content {...partProps['List.Content']}>
+                                <List.Title {...partProps['List.Title']}>
+                                  Row {index + 1}
+                                </List.Title>
                               </List.Content>
                             </List.Item>
                           ))}
                         </List.Group>
                       </List.Section>
                     </List.Root>
-                    <Viewport.Padding edge="block-end" />
+                    <Viewport.Padding
+                      {...partProps['Viewport.Padding']}
+                      edge="block-end"
+                    />
                   </Page.Root>
                 </Header.Root>
               );
@@ -141,8 +205,9 @@ export const NavigationDemo: FunctionComponent = () => {
         </Navigation.Root>
       </Viewport.Content>
       {/* The stacks, as a tab bar's: switched at once. */}
-      <Viewport.BlockEnd>
+      <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
         <Segmented.Root
+          {...partProps['Segmented.Root']}
           aria-label="Stack"
           className="navigation-demo-stacks"
           value={stack}
@@ -151,9 +216,19 @@ export const NavigationDemo: FunctionComponent = () => {
             setStack(value as Stack);
           }}
         >
-          <Segmented.Item value="settings">Settings</Segmented.Item>
-          <Segmented.Item value="mail">Mail</Segmented.Item>
-          <Segmented.Highlight />
+          <Segmented.Item
+            {...partProps['Segmented.Item']}
+            value="settings"
+          >
+            Settings
+          </Segmented.Item>
+          <Segmented.Item
+            {...partProps['Segmented.Item']}
+            value="mail"
+          >
+            Mail
+          </Segmented.Item>
+          <Segmented.Highlight {...partProps['Segmented.Highlight']} />
         </Segmented.Root>
       </Viewport.BlockEnd>
     </Component>

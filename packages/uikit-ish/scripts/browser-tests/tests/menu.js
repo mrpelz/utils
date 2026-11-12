@@ -796,7 +796,7 @@ export const tests = [
   {
     name: 'menu: rendered into its frame, opening doesn’t move its trigger (its portal has no box)',
     run: async (page) => {
-      await page.open('menu-parts-root');
+      await page.open('menu-parts-root', 'light', { isFramed: true });
       const before = await page.rect('button');
       await page.click([
         before.x + before.width / 2,

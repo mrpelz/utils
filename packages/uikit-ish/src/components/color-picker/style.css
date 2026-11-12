@@ -544,38 +544,19 @@
   }
 
   /* Its named colors (see `Named`): its list's cards as wide as the panel's
-     content, on its background; its index at its end, in the panel's
-     inset (16px), kept centered in its container's view (between its
-     scroll paddings, see Viewport.Padding: e.g. a sheet's header) as it's
-     scrolled (a percentage of a sticky offset: of the scrollport). */
+     content, on its background; its index (placed by the list, see
+     List.Index) at its end, in the panel's inset (16px), centered on what's
+     in view of it (e.g. below a sheet's header). */
   .uikit-color-picker-named {
-    display: grid;
-    align-items: start;
-    grid-template-columns: minmax(0, 1fr) 0;
-
     /* Its end as far from what follows (e.g. the opacity) as a list's
        sections are apart: the view's 16px, and the rest. */
     & > .uikit-list-root {
       --uikit-list-container-background: transparent;
       --uikit-list-inset: 0px;
+      --uikit-list-index-offset: -16px;
 
       margin-block-end: calc(var(--uikit-list-section-spacing) - 16px);
     }
-  }
-
-  .uikit-color-picker-named-index {
-    position: sticky;
-    z-index: 3;
-    top: calc(
-      50% +
-        (
-          var(--uikit-viewport-padding-block-start, 0px) -
-            var(--uikit-viewport-padding-block-end, 0px)
-        ) /
-        2
-    );
-    width: 16px;
-    translate: 0 -50%;
   }
 
   .uikit-color-picker-well {

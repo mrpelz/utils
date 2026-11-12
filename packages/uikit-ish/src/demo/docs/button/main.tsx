@@ -7,10 +7,12 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { sfHeartFill } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsRoot,
   propOptionsContent,
@@ -113,13 +115,38 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
     title: 'matrix',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'context',
+              'destructive',
+              'disabled',
+              'onClick',
+              'shape',
+              'size',
+              'variant',
+            ],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       baseUiId="button"
-      controls={control}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[stateControl]}
+      state={[stateControl, partState]}
       title="Button (Matrix)"
     >
       <div className="button-demo-matrix">
@@ -142,6 +169,7 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
             {matrixColumns.map(({ disabled, labelType }) => (
               <Button.Root
                 key={`${labelType}-${String(disabled)}`}
+                {...partProps['Button.Root']}
                 context={props.context}
                 destructive={props.destructive}
                 disabled={disabled}
@@ -151,12 +179,17 @@ export const ButtonMatrixDemo: FunctionComponent = () => {
                 onClick={() => addLog(`${variant} ${size ?? ''} clicked`)}
               >
                 {labelType === 'text' ? null : (
-                  <Button.Icon>
-                    <Symbol icon={sfHeartFill} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfHeartFill}
+                    />
                   </Button.Icon>
                 )}
                 {labelType === 'symbol' ? null : (
-                  <Button.Label>Label</Button.Label>
+                  <Button.Label {...partProps['Button.Label']}>
+                    Label
+                  </Button.Label>
                 )}
               </Button.Root>
             ))}

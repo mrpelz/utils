@@ -250,196 +250,158 @@ const PropSelector = <T extends PropMap>({
 
 const undefinedString = '$undefined';
 
-export const usePropControl = <T extends PropMap>(
+/** A prop map's emphasis options (with a `style` prop): outline, overlay. */
+type Emphasis = {
+  outline?: MappedProp<CSSProperties>;
+  overlay?: MappedProp<CSSProperties>;
+};
+
+// With a `style` prop: an outline option and an overlay option (the part's
+// box hatched over it, see overlay.ts), each toggled by its checkbox (one
+// at a time), so the part can be seen (red, as every demo's).
+const emphasisOf = (propMap: PropMap): Emphasis =>
+  'style' in propMap
+    ? {
+        outline: new MappedProp<CSSProperties>(
+          { outline: '2px dashed red', outlineOffset: '2px' },
+          '[outline]',
+        ),
+        overlay: new MappedProp<CSSProperties>(
+          { [overlayProperty]: '1' } as CSSProperties,
+          '[overlay]',
+        ),
+      }
+    : {};
+
+/** A prop map, its keys sorted, `style` with its emphasis options. */
+const sortedPropMap = <T extends PropMap>(
   propMap: T,
-  {
-    emphasize,
-    external: externalState,
-    isOpen,
-    title,
-  }: {
-    /**
-     * Its part emphasized by default (its `style`'s `[outline]` or
-     * `[overlay]`, see below): e.g. the part a section is about; overlaid,
-     * a part showing nothing of its own (e.g. a swipe area).
-     */
-    emphasize?: 'outline' | 'overlay';
-    /** Its state from the URL (see `useProvidedState`). */
-    external?: unknown;
-    /**
-     * Open at first (the demo's subject, e.g. the part a section is
-     * about); untitled (a demo's only control), it is.
-     */
-    isOpen?: boolean;
-    title?: string;
-  } = {},
-): [ReactNode, ControlledProps<T>, object, string] => {
-  // With a `style` prop: an outline option and an overlay option (the
-  // part's box hatched over it, see overlay.ts), each toggled by its
-  // checkbox (one at a time), so the part can be seen (red, as every
-  // demo's).
-  const [outline, overlay] = useMemo(
-    () =>
-      'style' in propMap
-        ? [
-            new MappedProp<CSSProperties>(
-              { outline: '2px dashed red', outlineOffset: '2px' },
-              '[outline]',
-            ),
-            new MappedProp<CSSProperties>(
-              { [overlayProperty]: '1' } as CSSProperties,
-              '[overlay]',
-            ),
-          ]
-        : [undefined, undefined],
-    [propMap],
-  );
-
-  const propMapSorted = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.keys(propMap)
-          .toSorted()
-          .map(
-            (key) =>
-              [
-                key,
-                key === 'style' && outline && overlay
-                  ? [...(propMap[key] ?? []), outline, overlay]
-                  : propMap[key],
-              ] as const,
-          ),
-      ) as unknown as T,
-    [outline, overlay, propMap],
-  );
-
-  const initialState = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.entries(propMapSorted).map(
-          ([key, [firstValue]]) =>
-            [
-              key,
-              key === 'style' && emphasize
-                ? ({ outline, overlay }[emphasize] ?? firstValue)
-                : firstValue,
-            ] as const,
-        ),
-      ) as {
-        [P in keyof T]: T[P][0];
-      },
-    [emphasize, outline, overlay, propMapSorted],
-  );
-
-  const fromExternalState = useMemo(() => {
-    if (!externalState) return undefined;
-    if (!isObject(externalState)) return undefined;
-
-    const { $rest, ...externalState_ } = externalState as object & {
-      $rest?: true;
-    };
-    const externalState__ = $rest
-      ? { ...initialState, ...externalState_ }
-      : externalState_;
-
-    return Object.fromEntries(
-      Object.entries(externalState__).map(([key, value]) => {
-        if (typeof value !== 'string') {
-          return [key, value] as const;
-        }
-
-        if (value.startsWith('$')) {
-          if (value === undefinedString) {
-            return [key, undefined] as const;
-          }
-
-          const mappedProp = propMapSorted[key as keyof T]?.find(
-            (candidate) => {
-              if (
-                !(candidate instanceof MappedProp) ||
-                candidate.label !== value.slice(1)
-              ) {
-                return false;
-              }
-
-              return true;
-            },
-          ) as MappedProp<unknown> | undefined;
-
-          return [key, mappedProp] as const;
-        }
-
-        return [key, value] as const;
-      }),
-    ) as {
-      [P in keyof T]: T[P][number];
-    };
-  }, [externalState, initialState, propMapSorted]);
-
-  const [state, setState] = useState(fromExternalState ?? initialState);
-
-  useEffect(() => {
-    /**
-     * legal here because prop control needs to
-     * maintain its own state for interactive input
-     *
-     * externalState is expected to only change when when
-     * triggering manual URL fragment updates for test purposes
-     */
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setState(fromExternalState ?? initialState);
-  }, [fromExternalState, initialState]);
-
-  const isModified = useMemo(
-    () => !isEqual(initialState, state),
-    [initialState, state],
-  );
-
-  const resetState = useCallback(() => setState(initialState), [initialState]);
-
-  const mappedState = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.entries(state).map(
-          ([key, value]) =>
-            [key, value instanceof MappedProp ? value.value : value] as const,
-        ),
+  { outline, overlay }: Emphasis,
+): T =>
+  Object.fromEntries(
+    Object.keys(propMap)
+      .toSorted()
+      .map(
+        (key) =>
+          [
+            key,
+            key === 'style' && outline && overlay
+              ? [...(propMap[key] ?? []), outline, overlay]
+              : propMap[key],
+          ] as const,
       ),
-    [state],
+  ) as unknown as T;
+
+/** A prop map's initial state: each prop's first value (or emphasized). */
+const initialStateOf = <T extends PropMap>(
+  propMap: T,
+  emphasize: 'outline' | 'overlay' | undefined,
+  emphasis: Emphasis,
+): PropMapState<T> =>
+  Object.fromEntries(
+    Object.entries(propMap).map(
+      ([key, [firstValue]]) =>
+        [
+          key,
+          key === 'style' && emphasize
+            ? (emphasis[emphasize] ?? firstValue)
+            : firstValue,
+        ] as const,
+    ),
+  ) as PropMapState<T>;
+
+/** A state from the URL (see `encodeState`), or none. */
+const decodeState = <T extends PropMap>(
+  propMap: T,
+  initialState: PropMapState<T>,
+  externalState: unknown,
+): PropMapState<T> | undefined => {
+  if (!externalState) return undefined;
+  if (!isObject(externalState)) return undefined;
+
+  const { $rest, ...externalState_ } = externalState as object & {
+    $rest?: true;
+  };
+  const externalState__ = $rest
+    ? { ...initialState, ...externalState_ }
+    : externalState_;
+
+  return Object.fromEntries(
+    Object.entries(externalState__).map(([key, value]) => {
+      if (typeof value !== 'string') {
+        return [key, value] as const;
+      }
+
+      if (value.startsWith('$')) {
+        if (value === undefinedString) {
+          return [key, undefined] as const;
+        }
+
+        const mappedProp = propMap[key as keyof T]?.find(
+          (candidate) =>
+            candidate instanceof MappedProp &&
+            candidate.label === value.slice(1),
+        ) as MappedProp<unknown> | undefined;
+
+        return [key, mappedProp] as const;
+      }
+
+      return [key, value] as const;
+    }),
+  ) as PropMapState<T>;
+};
+
+/** A state's props: mapped props' values. */
+const mapState = <T extends PropMap>(
+  state: PropMapState<T>,
+): ControlledProps<T> =>
+  Object.fromEntries(
+    Object.entries(state).map(
+      ([key, value]) =>
+        [key, value instanceof MappedProp ? value.value : value] as const,
+    ),
   ) as ControlledProps<T>;
 
+/** A state for the URL: `undefined` and mapped props by name. */
+const encodeState = (state: object): object =>
+  Object.fromEntries(
+    Object.entries(state).map(([key, value]) => {
+      if (value === undefined) {
+        return [key, undefinedString] as const;
+      }
+
+      if (value instanceof MappedProp) {
+        return [key, `$${value.label}`] as const;
+      }
+
+      return [key, value] as const;
+    }),
+  );
+
+/** A prop map's section in the config column: its props' controls. */
+const PropControlSection = <T extends PropMap>({
+  initialState,
+  isOpen,
+  outline,
+  overlay,
+  propMap,
+  setState,
+  state,
+  title,
+}: Emphasis & {
+  initialState: PropMapState<T>;
+  isOpen?: boolean;
+  propMap: T;
+  setState: Dispatch<SetStateAction<PropMapState<T>>>;
+  state: PropMapState<T>;
+  title?: string;
+}): ReactNode => {
+  const isModified = !isEqual(initialState, state);
   const isOutlined = outline !== undefined && state.style === outline;
   const isOverlaid = overlay !== undefined && state.style === overlay;
-  useOverlay(isOverlaid);
 
-  const toExternalState = useMemo(
-    () =>
-      Object.fromEntries(
-        Object.entries(state).map(([key, value]) => {
-          if (value === undefined) {
-            return [key, undefinedString] as const;
-          }
-
-          if (value instanceof MappedProp) {
-            return [key, `$${value.label}`] as const;
-          }
-
-          return [key, value] as const;
-        }),
-      ),
-    [state],
-  ) as object;
-
-  // A key for the controlled element: changing with its props, so it
-  // mounts anew (e.g. for a `defaultValue`, only read as it mounts).
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- new with the props
-  const elementKey = useMemo(() => crypto.randomUUID(), [mappedState]);
-
-  return [
-    <section
-      key={0}
-      className="demo-config-section"
-    >
+  return (
+    <section className="demo-config-section">
       <details open={isOpen ?? !title}>
         <summary className="demo-config-heading">
           <span className="demo-config-title">{title ?? 'Props'}</span>
@@ -481,7 +443,7 @@ export const usePropControl = <T extends PropMap>(
           ) : null}
         </summary>
         <div className="demo-props">
-          {Object.entries(propMapSorted).map(([key, values]) => (
+          {Object.entries(propMap).map(([key, values]) => (
             <PropSelector<T>
               key={key}
               initialState={initialState}
@@ -495,16 +457,263 @@ export const usePropControl = <T extends PropMap>(
         <button
           className="demo-button"
           disabled={!isModified}
-          onClick={resetState}
+          onClick={() => setState(initialState)}
         >
           Reset
         </button>
       </details>
-    </section>,
+    </section>
+  );
+};
+
+export const usePropControl = <T extends PropMap>(
+  propMap: T,
+  {
+    emphasize,
+    external: externalState,
+    isOpen,
+    title,
+  }: {
+    /**
+     * Its part emphasized by default (its `style`'s `[outline]` or
+     * `[overlay]`, see below): e.g. the part a section is about; overlaid,
+     * a part showing nothing of its own (e.g. a swipe area).
+     */
+    emphasize?: 'outline' | 'overlay';
+    /** Its state from the URL (see `useProvidedState`). */
+    external?: unknown;
+    /**
+     * Open at first (the demo's subject, e.g. the part a section is
+     * about); untitled (a demo's only control), it is.
+     */
+    isOpen?: boolean;
+    title?: string;
+  } = {},
+): [ReactNode, ControlledProps<T>, object, string] => {
+  const emphasis = useMemo(() => emphasisOf(propMap), [propMap]);
+  const propMapSorted = useMemo(
+    () => sortedPropMap(propMap, emphasis),
+    [emphasis, propMap],
+  );
+
+  const initialState = useMemo(
+    () => initialStateOf(propMapSorted, emphasize, emphasis),
+    [emphasis, emphasize, propMapSorted],
+  );
+
+  const fromExternalState = useMemo(
+    () => decodeState(propMapSorted, initialState, externalState),
+    [externalState, initialState, propMapSorted],
+  );
+
+  const [state, setState] = useState(fromExternalState ?? initialState);
+
+  useEffect(() => {
+    /**
+     * legal here because prop control needs to
+     * maintain its own state for interactive input
+     *
+     * externalState is expected to only change when when
+     * triggering manual URL fragment updates for test purposes
+     */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setState(fromExternalState ?? initialState);
+  }, [fromExternalState, initialState]);
+
+  const mappedState = useMemo(() => mapState(state), [state]);
+
+  useOverlay(
+    emphasis.overlay !== undefined && state.style === emphasis.overlay,
+  );
+
+  const toExternalState = useMemo(() => encodeState(state), [state]);
+
+  // A key for the controlled element: changing with its props, so it
+  // mounts anew (e.g. for a `defaultValue`, only read as it mounts).
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- new with the props
+  const elementKey = useMemo(() => crypto.randomUUID(), [mappedState]);
+
+  return [
+    <PropControlSection<T>
+      key={0}
+      initialState={initialState}
+      isOpen={isOpen}
+      outline={emphasis.outline}
+      overlay={emphasis.overlay}
+      propMap={propMapSorted}
+      setState={setState}
+      state={state}
+      title={title}
+    />,
     mappedState,
     toExternalState,
     elementKey,
   ] as const;
+};
+
+/** Each part's props, by its name (see `usePartControls`). */
+export type PartProps = Record<string, Record<string, any>>;
+
+/** Part names and their prop maps (see `usePartControls`). */
+export type PartPropMaps = Record<string, PropMap>;
+
+// The key marking the parts' state among a demo's (see `usePartControls`).
+const partsKey = '$parts';
+
+/**
+ * A demo's other parts' prop controls (see `partPropMaps`): a section per
+ * part (titled by its name, closed), their state one object for the URL
+ * (by part, as each `usePropControl`'s), and each part's props, to spread
+ * on all its elements in the demo (before their own props, which win).
+ * Its state marked (`$parts`), found among the demo's provided states
+ * (`provided`) wherever it is: not by its index, the URL's states may be
+ * fewer (e.g. a link setting the first only), or their number vary.
+ */
+export const usePartControls = (
+  propMaps: PartPropMaps,
+  { provided = [] }: { provided?: readonly unknown[] } = {},
+): [ReactNode, PartProps, object] => {
+  const externalState = useMemo(() => {
+    const entry = provided.find(
+      (state) => isObject(state) && partsKey in state,
+    ) as Record<string, unknown> | undefined;
+    return entry?.[partsKey];
+  }, [provided]);
+
+  const prepared = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(propMaps).map(([part, propMap]) => {
+          const emphasis = emphasisOf(propMap);
+          const sorted = sortedPropMap(propMap, emphasis);
+          return [
+            part,
+            {
+              emphasis,
+              initialState: initialStateOf(sorted, undefined, emphasis),
+              sorted,
+            },
+          ] as const;
+        }),
+      ),
+    [propMaps],
+  );
+
+  const initialStates = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(prepared).map(
+          ([part, { initialState }]) => [part, initialState] as const,
+        ),
+      ),
+    [prepared],
+  );
+
+  const fromExternalState = useMemo(() => {
+    if (!isObject(externalState)) return undefined;
+    return Object.fromEntries(
+      Object.entries(prepared).map(([part, { initialState, sorted }]) => [
+        part,
+        decodeState(
+          sorted,
+          initialState,
+          (externalState as Record<string, unknown>)[part],
+        ) ?? initialState,
+      ]),
+    );
+  }, [externalState, prepared]);
+
+  const [states, setStates] = useState<Record<string, PropMapState<PropMap>>>(
+    fromExternalState ?? initialStates,
+  );
+
+  useEffect(() => {
+    // (As `usePropControl`'s: the URL's state, set anew.)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setStates(fromExternalState ?? initialStates);
+  }, [fromExternalState, initialStates]);
+
+  // Each part's setter, as `useState`'s (stable).
+  const setters = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(prepared).map(
+          (part) =>
+            [
+              part,
+              ((action: SetStateAction<PropMapState<PropMap>>) =>
+                setStates((states_) => ({
+                  ...states_,
+                  [part]:
+                    typeof action === 'function'
+                      ? action(states_[part] ?? {})
+                      : action,
+                }))) as Dispatch<SetStateAction<PropMapState<PropMap>>>,
+            ] as const,
+        ),
+      ),
+    [prepared],
+  );
+
+  const props = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.keys(prepared).map(
+          (part) =>
+            [
+              part,
+              // (Only those set: an unset prop isn't passed at all, so it
+              // can't override what a part's own props, or what it renders,
+              // set, e.g. a trigger's handlers merged into its `render`.)
+              Object.fromEntries(
+                Object.entries(mapState(states[part] ?? {})).filter(
+                  ([, value]) => value !== undefined,
+                ),
+              ) as Record<string, any>,
+            ] as const,
+        ),
+      ),
+    [prepared, states],
+  );
+
+  useOverlay(
+    Object.entries(prepared).some(
+      ([part, { emphasis }]) =>
+        emphasis.overlay !== undefined &&
+        states[part]?.style === emphasis.overlay,
+    ),
+  );
+
+  const toExternalState = useMemo(
+    () => ({
+      [partsKey]: Object.fromEntries(
+        Object.entries(states).map(
+          ([part, state]) => [part, encodeState(state)] as const,
+        ),
+      ),
+    }),
+    [states],
+  );
+
+  const controls = Object.entries(prepared).map(
+    ([part, { emphasis, initialState, sorted }]) => (
+      <PropControlSection
+        key={part}
+        initialState={initialState}
+        isOpen={false}
+        outline={emphasis.outline}
+        overlay={emphasis.overlay}
+        propMap={sorted}
+        state={states[part] ?? initialState}
+        title={part}
+        setState={
+          setters[part] as Dispatch<SetStateAction<PropMapState<PropMap>>>
+        }
+      />
+    ),
+  );
+
+  return [controls, props, toExternalState];
 };
 
 export const commonPropOptions = {

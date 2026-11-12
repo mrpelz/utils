@@ -3,10 +3,14 @@ import { FunctionComponent, useMemo } from 'react';
 import { Stepper } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { partPropMaps } from '../part-options.js';
 import {
   stepperGroupRows,
   stepperHalfRows,
@@ -30,25 +34,45 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Stepper.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Stepper.Decrement': [],
+            'Stepper.Group': [],
+            'Stepper.Increment': [],
+            'Stepper.Input': ['aria-label'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Stepper.Root"
     >
       <Stepper.Root
         key={elementKey}
         {...props}
       >
-        <Stepper.Group>
-          <Stepper.Input aria-label="Quantity" />
-          <Stepper.Decrement />
-          <Stepper.Increment />
+        <Stepper.Group {...partProps['Stepper.Group']}>
+          <Stepper.Input
+            {...partProps['Stepper.Input']}
+            aria-label="Quantity"
+          />
+          <Stepper.Decrement {...partProps['Stepper.Decrement']} />
+          <Stepper.Increment {...partProps['Stepper.Increment']} />
         </Stepper.Group>
       </Stepper.Root>
     </Component>
@@ -66,21 +90,41 @@ const GroupPart: FunctionComponent = () => {
     title: 'Stepper.Group',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Stepper.Decrement': [],
+          'Stepper.Increment': [],
+          'Stepper.Input': ['aria-label'],
+          'Stepper.Root': ['defaultValue'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Stepper.Group"
     >
-      <Stepper.Root defaultValue={5}>
+      <Stepper.Root
+        {...partProps['Stepper.Root']}
+        defaultValue={5}
+      >
         <Stepper.Group {...props}>
-          <Stepper.Input aria-label="Quantity" />
-          <Stepper.Decrement />
-          <Stepper.Increment />
+          <Stepper.Input
+            {...partProps['Stepper.Input']}
+            aria-label="Quantity"
+          />
+          <Stepper.Decrement {...partProps['Stepper.Decrement']} />
+          <Stepper.Increment {...partProps['Stepper.Increment']} />
         </Stepper.Group>
       </Stepper.Root>
     </Component>
@@ -98,21 +142,38 @@ const InputPart: FunctionComponent = () => {
     title: 'Stepper.Input',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Stepper.Decrement': [],
+          'Stepper.Group': [],
+          'Stepper.Increment': [],
+          'Stepper.Root': ['defaultValue'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Stepper.Input"
     >
-      <Stepper.Root defaultValue={5}>
-        <Stepper.Group>
+      <Stepper.Root
+        {...partProps['Stepper.Root']}
+        defaultValue={5}
+      >
+        <Stepper.Group {...partProps['Stepper.Group']}>
           <Stepper.Input {...props} />
-          <Stepper.Decrement />
-          <Stepper.Increment />
+          <Stepper.Decrement {...partProps['Stepper.Decrement']} />
+          <Stepper.Increment {...partProps['Stepper.Increment']} />
         </Stepper.Group>
       </Stepper.Root>
     </Component>
@@ -130,21 +191,41 @@ const DecrementPart: FunctionComponent = () => {
     title: 'Stepper.Decrement',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Stepper.Group': [],
+          'Stepper.Increment': [],
+          'Stepper.Input': ['aria-label'],
+          'Stepper.Root': ['defaultValue'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Stepper.Decrement"
     >
-      <Stepper.Root defaultValue={5}>
-        <Stepper.Group>
-          <Stepper.Input aria-label="Quantity" />
+      <Stepper.Root
+        {...partProps['Stepper.Root']}
+        defaultValue={5}
+      >
+        <Stepper.Group {...partProps['Stepper.Group']}>
+          <Stepper.Input
+            {...partProps['Stepper.Input']}
+            aria-label="Quantity"
+          />
           <Stepper.Decrement {...props} />
-          <Stepper.Increment />
+          <Stepper.Increment {...partProps['Stepper.Increment']} />
         </Stepper.Group>
       </Stepper.Root>
     </Component>
@@ -162,20 +243,40 @@ const IncrementPart: FunctionComponent = () => {
     title: 'Stepper.Increment',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Stepper.Decrement': [],
+          'Stepper.Group': [],
+          'Stepper.Input': ['aria-label'],
+          'Stepper.Root': ['defaultValue'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Stepper.Increment"
     >
-      <Stepper.Root defaultValue={5}>
-        <Stepper.Group>
-          <Stepper.Input aria-label="Quantity" />
-          <Stepper.Decrement />
+      <Stepper.Root
+        {...partProps['Stepper.Root']}
+        defaultValue={5}
+      >
+        <Stepper.Group {...partProps['Stepper.Group']}>
+          <Stepper.Input
+            {...partProps['Stepper.Input']}
+            aria-label="Quantity"
+          />
+          <Stepper.Decrement {...partProps['Stepper.Decrement']} />
           <Stepper.Increment {...props} />
         </Stepper.Group>
       </Stepper.Root>
@@ -187,42 +288,56 @@ const IncrementPart: FunctionComponent = () => {
 export const StepperParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: the number field, its value and range.</li>
-      <li>Group: the capsule, holding the input and the halves.</li>
-      <li>Input: the value, visually hidden (none is shown).</li>
-      <li>Decrement, Increment: the halves, “−” and “+”.</li>
-      <li>All needed.</li>
+      <li>Root: the number field, with its value and range.</li>
+      <li>Group: the capsule, which holds the input and the halves.</li>
+      <li>Input: the value, visually hidden (no value is shown).</li>
+      <li>Decrement and Increment: the halves, “−” and “+”.</li>
+      <li>All of them are needed.</li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="stepper"
-          part="Stepper.Root"
-        />
+          component="list"
+          part="List.Trailing"
+        />{' '}
+        <span>(optional: at a list row’s end, after a</span>{' '}
+        <PartLink
+          component="list"
+          part="List.Detail"
+        />{' '}
+        <span>showing the value)</span>
         <ul>
           <li>
             <PartLink
               component="stepper"
-              part="Stepper.Group"
+              part="Stepper.Root"
             />
             <ul>
               <li>
                 <PartLink
                   component="stepper"
-                  part="Stepper.Input"
+                  part="Stepper.Group"
                 />
-              </li>
-              <li>
-                <PartLink
-                  component="stepper"
-                  part="Stepper.Decrement"
-                />
-              </li>
-              <li>
-                <PartLink
-                  component="stepper"
-                  part="Stepper.Increment"
-                />
+                <ul>
+                  <li>
+                    <PartLink
+                      component="stepper"
+                      part="Stepper.Input"
+                    />
+                  </li>
+                  <li>
+                    <PartLink
+                      component="stepper"
+                      part="Stepper.Decrement"
+                    />
+                  </li>
+                  <li>
+                    <PartLink
+                      component="stepper"
+                      part="Stepper.Increment"
+                    />
+                  </li>
+                </ul>
               </li>
             </ul>
           </li>
@@ -239,18 +354,19 @@ export const StepperParts: FunctionComponent = () => (
     <ul>
       <li>The field (Base UI’s number field), around the capsule.</li>
       <li>
-        State: <code>value</code> or <code>defaultValue</code>,{' '}
-        <code>onValueChange</code> (with why: a half, a key, the wheel),{' '}
-        <code>onValueCommitted</code>.
+        Its state: <code>value</code> or <code>defaultValue</code>,{' '}
+        <code>onValueChange</code> (with the reason: a half, a key, the wheel),
+        and <code>onValueCommitted</code>.
       </li>
       <li>
-        Range and steps: <code>min</code>, <code>max</code> (a half disables at
-        its end), <code>step</code> (<code>smallStep</code>,{' '}
-        <code>largeStep</code> with alt and shift), <code>snapOnStep</code>.
+        Its range and steps: <code>min</code> and <code>max</code> (a half is
+        disabled at its end), <code>step</code> (with <code>smallStep</code> and{' '}
+        <code>largeStep</code> for Alt and Shift), and <code>snapOnStep</code>.
       </li>
       <li>
-        Can be <code>disabled</code>, <code>readOnly</code> or{' '}
-        <code>required</code>; submits with a form by its <code>name</code>.
+        It can be <code>disabled</code>, <code>readOnly</code> or{' '}
+        <code>required</code>, and submits with a form under its{' '}
+        <code>name</code>.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -267,8 +383,11 @@ export const StepperParts: FunctionComponent = () => (
       <code>Stepper.Group</code>
     </Heading>
     <ul>
-      <li>The capsule: the two halves, a separator between them.</li>
-      <li>Focused by keyboard (its input), a ring around it; pressed, none.</li>
+      <li>The capsule: the two halves, with a separator between them.</li>
+      <li>
+        With keyboard focus (on its input), it gets a ring. Pressing it shows
+        none.
+      </li>
       <li>
         Renders a <code>div</code> with the <code>group</code> role.
       </li>
@@ -285,12 +404,13 @@ export const StepperParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The value, in a visually hidden input: what the keyboard focuses (arrow
-        keys step) and assistive tech reads, a spin button.
+        The value, in a visually hidden input. It’s what the keyboard focuses
+        (the arrow keys step it), and what assistive technology reads, as a spin
+        button.
       </li>
       <li>
-        Name it (<code>aria-label</code>) by what it counts: the stepper has no
-        visible label of its own.
+        Name it (<code>aria-label</code>) after what it counts, because the
+        stepper has no visible label of its own.
       </li>
       <li>
         Renders an <code>input</code>.
@@ -307,10 +427,10 @@ export const StepperParts: FunctionComponent = () => (
       <code>Stepper.Decrement</code>
     </Heading>
     <ul>
-      <li>The leading half: “−”, a step down.</li>
+      <li>The leading half: “−”, one step down.</li>
       <li>
-        Held, it repeats. Disabled at <code>min</code>, or by its own{' '}
-        <code>disabled</code>.
+        Held, it keeps stepping. It’s disabled at <code>min</code>, or by its
+        own <code>disabled</code>.
       </li>
       <li>
         Renders a <code>button</code>.
@@ -327,10 +447,10 @@ export const StepperParts: FunctionComponent = () => (
       <code>Stepper.Increment</code>
     </Heading>
     <ul>
-      <li>The trailing half: “+”, a step up.</li>
+      <li>The trailing half: “+”, one step up.</li>
       <li>
-        Held, it repeats. Disabled at <code>max</code>, or by its own{' '}
-        <code>disabled</code>.
+        Held, it keeps stepping. It’s disabled at <code>max</code>, or by its
+        own <code>disabled</code>.
       </li>
       <li>
         Renders a <code>button</code>.
@@ -348,7 +468,7 @@ export const StepperParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Re-exported as they are (unstyled; see{' '}
+        These are re-exported as they are, without styles (see{' '}
         <a
           href="https://base-ui.com/react/components/number-field"
           rel="noreferrer"
@@ -359,9 +479,9 @@ export const StepperParts: FunctionComponent = () => (
         ):
       </li>
       <li>
-        <code>Stepper.ScrubArea</code>, <code>Stepper.ScrubAreaCursor</code>:
-        dragging across a label to change the value, which this stepper doesn’t
-        do.
+        <code>Stepper.ScrubArea</code> and <code>Stepper.ScrubAreaCursor</code>:
+        for dragging across a label to change the value, which this stepper
+        doesn’t do.
       </li>
     </ul>
   </>

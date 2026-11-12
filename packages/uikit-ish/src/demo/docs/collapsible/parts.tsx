@@ -3,10 +3,15 @@ import { FunctionComponent, useMemo } from 'react';
 import { Collapsible, List } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  type PartProps,
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { partPropMaps } from '../part-options.js';
 import {
   collapsiblePanelRows,
   collapsibleRootRows,
@@ -19,22 +24,22 @@ import {
 } from './props.js';
 
 /** The section's rows (the panel's content). */
-const rows = (
+const rows = (partProps: PartProps = {}) => (
   <>
-    <List.Item>
-      <List.Content>
-        <List.Title>Proxy</List.Title>
+    <List.Item {...partProps['List.Item']}>
+      <List.Content {...partProps['List.Content']}>
+        <List.Title {...partProps['List.Title']}>Proxy</List.Title>
       </List.Content>
-      <List.Trailing>
-        <List.Detail>Off</List.Detail>
+      <List.Trailing {...partProps['List.Trailing']}>
+        <List.Detail {...partProps['List.Detail']}>Off</List.Detail>
       </List.Trailing>
     </List.Item>
-    <List.Item>
-      <List.Content>
-        <List.Title>DNS</List.Title>
+    <List.Item {...partProps['List.Item']}>
+      <List.Content {...partProps['List.Content']}>
+        <List.Title {...partProps['List.Title']}>DNS</List.Title>
       </List.Content>
-      <List.Trailing>
-        <List.Detail>Automatic</List.Detail>
+      <List.Trailing {...partProps['List.Trailing']}>
+        <List.Detail {...partProps['List.Detail']}>Automatic</List.Detail>
       </List.Trailing>
     </List.Item>
   </>
@@ -55,30 +60,64 @@ const RootPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Collapsible.Panel': ['render'],
+            'Collapsible.Trigger': ['nativeButton', 'render'],
+            'List.Content': [],
+            'List.Detail': [],
+            'List.Disclosure': [],
+            'List.Group': [],
+            'List.Header': [],
+            'List.Item': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Collapsible.Root"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
+      <List.Root
+        {...partProps['List.Root']}
+        style={{ width: 'min(402px, 100%)' }}
+      >
         <Collapsible.Root
           key={elementKey}
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
           {...props}
         >
           <Collapsible.Trigger
+            {...partProps['Collapsible.Trigger']}
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
           >
-            <List.Title>Advanced</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>Advanced</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Collapsible.Trigger>
-          <Collapsible.Panel render={<List.Group />}>{rows}</Collapsible.Panel>
+          <Collapsible.Panel
+            {...partProps['Collapsible.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
+            {rows(partProps)}
+          </Collapsible.Panel>
         </Collapsible.Root>
       </List.Root>
     </Component>
@@ -96,29 +135,60 @@ const TriggerPart: FunctionComponent = () => {
     title: 'Collapsible.Trigger',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Collapsible.Panel': ['render'],
+          'Collapsible.Root': ['defaultOpen', 'render'],
+          'List.Content': [],
+          'List.Detail': [],
+          'List.Disclosure': [],
+          'List.Group': [],
+          'List.Header': [],
+          'List.Item': [],
+          'List.Root': ['style'],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Collapsible.Trigger"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
+      <List.Root
+        {...partProps['List.Root']}
+        style={{ width: 'min(402px, 100%)' }}
+      >
         <Collapsible.Root
+          {...partProps['Collapsible.Root']}
           defaultOpen
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
         >
           <Collapsible.Trigger
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
             {...props}
           >
-            <List.Title>Advanced</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>Advanced</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Collapsible.Trigger>
-          <Collapsible.Panel render={<List.Group />}>{rows}</Collapsible.Panel>
+          <Collapsible.Panel
+            {...partProps['Collapsible.Panel']}
+            render={<List.Group {...partProps['List.Group']} />}
+          >
+            {rows(partProps)}
+          </Collapsible.Panel>
         </Collapsible.Root>
       </List.Root>
     </Component>
@@ -136,33 +206,60 @@ const PanelPart: FunctionComponent = () => {
     title: 'Collapsible.Panel',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Collapsible.Root': ['defaultOpen', 'render'],
+          'Collapsible.Trigger': ['nativeButton', 'render'],
+          'List.Content': [],
+          'List.Detail': [],
+          'List.Disclosure': [],
+          'List.Group': [],
+          'List.Header': [],
+          'List.Item': [],
+          'List.Root': ['style'],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Collapsible.Panel"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
+      <List.Root
+        {...partProps['List.Root']}
+        style={{ width: 'min(402px, 100%)' }}
+      >
         <Collapsible.Root
+          {...partProps['Collapsible.Root']}
           defaultOpen
-          render={<List.Section />}
+          render={<List.Section {...partProps['List.Section']} />}
         >
           <Collapsible.Trigger
+            {...partProps['Collapsible.Trigger']}
             nativeButton={false}
-            render={<List.Header />}
+            render={<List.Header {...partProps['List.Header']} />}
           >
-            <List.Title>Advanced</List.Title>
-            <List.Disclosure />
+            <List.Title {...partProps['List.Title']}>Advanced</List.Title>
+            <List.Disclosure {...partProps['List.Disclosure']} />
           </Collapsible.Trigger>
           <Collapsible.Panel
             key={elementKey}
-            render={<List.Group />}
+            render={<List.Group {...partProps['List.Group']} />}
             {...props}
           >
-            {rows}
+            {rows(partProps)}
           </Collapsible.Panel>
         </Collapsible.Root>
       </List.Root>
@@ -175,28 +272,78 @@ export const CollapsibleParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        Base UI’s parts: its root, a trigger, the panel; each rendering what it
+        Base UI’s parts: the root, a trigger and the panel. Each renders what it
         collapses (<code>render</code>).
       </li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="collapsible"
-          part="Collapsible.Root"
-        />
+          component="list"
+          part="List.Root"
+        />{' '}
+        <span>(here)</span>
         <ul>
           <li>
             <PartLink
               component="collapsible"
-              part="Collapsible.Trigger"
-            />
-          </li>
-          <li>
+              part="Collapsible.Root"
+            />{' '}
+            (here rendering a{' '}
             <PartLink
-              component="collapsible"
-              part="Collapsible.Panel"
+              component="list"
+              part="List.Section"
             />
+            )
+            <ul>
+              <li>
+                <PartLink
+                  component="collapsible"
+                  part="Collapsible.Trigger"
+                />{' '}
+                (here rendering a{' '}
+                <PartLink
+                  component="list"
+                  part="List.Header"
+                />
+                )
+                <ul>
+                  <li className="demo-tree-context">
+                    <PartLink
+                      component="list"
+                      part="List.Title"
+                    />{' '}
+                    <span>and</span>{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Disclosure"
+                    />
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <PartLink
+                  component="collapsible"
+                  part="Collapsible.Panel"
+                />{' '}
+                (here rendering a{' '}
+                <PartLink
+                  component="list"
+                  part="List.Group"
+                />
+                )
+                <ul>
+                  <li className="demo-tree-context">
+                    <span>its rows (</span>
+                    <PartLink
+                      component="list"
+                      part="List.Item"
+                    />
+                    <span>s)</span>
+                  </li>
+                </ul>
+              </li>
+            </ul>
           </li>
         </ul>
       </li>
@@ -210,11 +357,11 @@ export const CollapsibleParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its state: <code>defaultOpen</code>, or <code>open</code> and{' '}
-        <code>onOpenChange</code>; <code>disabled</code>.
+        Holds its state: <code>defaultOpen</code>, or <code>open</code> and{' '}
+        <code>onOpenChange</code>, and <code>disabled</code>.
       </li>
       <li>
-        Renders a <code>div</code>, or what it’s given: here a{' '}
+        Renders a <code>div</code>, or what it’s given. Here, a{' '}
         <PartLink
           component="list"
           part="List.Section"
@@ -234,16 +381,17 @@ export const CollapsibleParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button toggling it: <code>aria-expanded</code>,{' '}
-        <code>aria-controls</code>, <code>data-panel-open</code> (a{' '}
+        A button that toggles it. It sets <code>aria-expanded</code>,{' '}
+        <code>aria-controls</code> and <code>data-panel-open</code> (which turns
+        a{' '}
         <PartLink
           component="list"
           part="List.Disclosure"
         />{' '}
-        in it turning down).
+        inside it down).
       </li>
       <li>
-        Here a{' '}
+        Here, it renders a{' '}
         <PartLink
           component="list"
           part="List.Header"
@@ -263,16 +411,16 @@ export const CollapsibleParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What it collapses, its height and opacity transitioning (300ms; Base
-        UI’s <code>--collapsible-panel-height</code>, starting and ending
-        styles).
+        What it collapses. Its height and opacity transition (300ms), using Base
+        UI’s <code>--collapsible-panel-height</code> and its starting and ending
+        styles.
       </li>
       <li>
-        Closed, removed (or hidden: <code>keepMounted</code>,{' '}
-        <code>hiddenUntilFound</code>).
+        While closed, it’s removed, or hidden with <code>keepMounted</code> or{' '}
+        <code>hiddenUntilFound</code>.
       </li>
       <li>
-        Here a{' '}
+        Here, it renders a{' '}
         <PartLink
           component="list"
           part="List.Group"

@@ -60,6 +60,7 @@ import type {
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
+  ListIndexItemProps,
   ListIndexProps,
   ListItemProps,
   ListRootProps,
@@ -94,6 +95,7 @@ export type {
   ListGroupProps,
   ListHeaderProps,
   ListImageProps,
+  ListIndexItemProps,
   ListIndexProps,
   ListItemProps,
   ListRootProps,
@@ -290,10 +292,11 @@ const Root = forwardRef<HTMLElement, ListRootProps>(
 const StyledSection = forwardRef<
   HTMLElement,
   Omit<ListSectionProps, 'editing'>
->(({ className, render, ...props }, ref) =>
+>(({ className, indexValue, render, ...props }, ref) =>
   useRender({
     defaultTagName: 'section',
     props: {
+      'data-index-value': indexValue,
       'data-list-part': 'section',
       className: cn('uikit-list-section', className),
       ...props,
@@ -1323,6 +1326,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
     dropName,
     editing: itemEditing,
     id: idProp,
+    indexValue,
     level,
     reorderHandle,
     selected,
@@ -2061,6 +2065,7 @@ const Item = forwardRef<HTMLElement, ListItemProps>((itemProps, ref) => {
         data-clickable={props.onClick ? '' : undefined}
         data-edit-leading={editSide(editing, 'leading')}
         data-edit-trailing={editSide(editing, 'trailing')}
+        data-index-value={indexValue}
         data-selected={selected ? '' : undefined}
         data-swipeable={isSwipeable ? '' : undefined}
         id={id}
@@ -2882,10 +2887,14 @@ const Block = forwardRef<HTMLElement, ListBlockProps>(
     }),
 );
 
-// Index (Framework7 “List Index”): letters in the tint
-// color, selected by pressing or scrubbing over them (clicking each item).
-// Placing it is up to the page (Framework7: at the page's edge), above the
-// sticky headers of plain lists (z-index 2).
+// Index (Framework7 “List Index”): letters (or any short keys) in the tint
+// color, selected by pressing or scrubbing over them (clicking each item),
+// each jumping to its section (see `IndexItem`). In its list's root, it's
+// placed by the list: at the list's end edge (in its inset, if it has one),
+// above the sticky headers of plain lists (z-index 2), centered on the list,
+// or on what's in view of it (between its scroll container's scroll
+// paddings: e.g. under a page's bars), sticky (see style.css); the root
+// relative for it, its anchor spanning the root.
 
 const StyledIndex = forwardRef<HTMLElement, ListIndexProps>(
   ({ className, render, size, ...props }, ref) =>
@@ -2963,28 +2972,107 @@ const Index = forwardRef<HTMLElement, ListIndexProps>(
     );
 
     return (
-      <StyledIndex
-        ref={ref}
-        {...props}
-        {...handlers}
-      />
+      <span className="uikit-list-index-anchor">
+        <StyledIndex
+          ref={ref}
+          {...props}
+          {...handlers}
+        />
+      </span>
     );
   },
 );
 
-const IndexItem = forwardRef<HTMLElement, PartProps<'button'>>(
-  ({ className, render, ...props }, ref) =>
-    useRender({
+/** An element's scroll container (or the document's). */
+const scrollContainerOf = (element: HTMLElement): HTMLElement => {
+  for (
+    let parent = element.parentElement;
+    parent;
+    parent = parent.parentElement
+  ) {
+    const { overflowY } = getComputedStyle(parent);
+    if (
+      (overflowY === 'auto' || overflowY === 'scroll') &&
+      parent.scrollHeight > parent.clientHeight
+    ) {
+      return parent;
+    }
+  }
+  return (document.scrollingElement ?? document.documentElement) as HTMLElement;
+};
+
+/**
+ * Its list's section (or row, see `ListItemProps`' `indexValue`) for an
+ * index item: its value's (the first in the list), or (none) that of the
+ * next item after it in the index that has one, else the last before it.
+ */
+const sectionOf = (item: HTMLElement): HTMLElement | undefined => {
+  const index = item.closest('[data-list-part=index]');
+  const root = item.closest('[data-list-part=root]');
+  if (!index || !root) return undefined;
+  const sections = new Map<string, HTMLElement>();
+  for (const section of root.querySelectorAll<HTMLElement>(
+    ':is([data-list-part=section], [data-list-part=item])[data-index-value]',
+  )) {
+    const { indexValue } = section.dataset;
+    if (indexValue !== undefined && !sections.has(indexValue)) {
+      sections.set(indexValue, section);
+    }
+  }
+  const values = [
+    ...index.querySelectorAll<HTMLElement>('[data-list-part=index-item]'),
+  ].map((element) => element.dataset.indexValue ?? '');
+  const at = values.indexOf(item.dataset.indexValue ?? '');
+  const after = values.slice(at).find((value) => sections.has(value));
+  const before = values.slice(0, at).findLast((value) => sections.has(value));
+  const value = after ?? before;
+  return value === undefined ? undefined : sections.get(value);
+};
+
+/**
+ * Scrolls a section (or row) to the top of its scroll container's view (below its
+ * scroll padding: e.g. a page's bar, see `Viewport.Padding`), at once.
+ */
+const jumpToSection = (section: HTMLElement) => {
+  const scroller = scrollContainerOf(section);
+  const padding =
+    Number.parseFloat(getComputedStyle(scroller).scrollPaddingBlockStart) || 0;
+  const top =
+    scroller === document.scrollingElement
+      ? 0
+      : scroller.getBoundingClientRect().top;
+  scroller.scrollTo({
+    behavior: 'instant',
+    top:
+      scroller.scrollTop + section.getBoundingClientRect().top - top - padding,
+  });
+};
+
+const IndexItem = forwardRef<HTMLElement, ListIndexItemProps>(
+  ({ children, className, onClick, render, value, ...props }, ref) => {
+    const text = typeof children === 'string' ? children : undefined;
+
+    return useRender({
       defaultTagName: 'button',
       props: {
+        'data-index-value': value ?? text,
         'data-list-part': 'index-item',
         className: cn('uikit-list-index-item', className),
         type: 'button',
         ...useSecondaryClick(props),
+        children,
+        // Jumping to its section, unless the app's handler prevents it.
+        onClick: (event: MouseEvent<HTMLElement>) => {
+          onClick?.(event as MouseEvent<HTMLButtonElement>);
+          if (event.defaultPrevented) return;
+          const section = sectionOf(event.currentTarget);
+          if (section) jumpToSection(section);
+        },
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
 /**

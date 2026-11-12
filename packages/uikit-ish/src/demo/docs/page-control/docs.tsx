@@ -24,8 +24,8 @@ export const pageControlRows: readonly PropRow[] = [
     'number',
     code('0'),
     <>
-      The initially current page, from 0 (uncontrolled). To render a controlled
-      page control, use the <code>value</code> prop instead.
+      The page that’s current at first, from 0 (uncontrolled). To render a
+      controlled page control, use the <code>value</code> prop instead.
     </>,
   ],
   [
@@ -33,9 +33,9 @@ export const pageControlRows: readonly PropRow[] = [
     '(page: number, eventDetails) => void',
     undefined,
     <>
-      Called with the page to go to, and why (<code>reason</code>, as Base UI’s
-      slider’s): <code>track-press</code> (a press before or after the current
-      dot), <code>drag</code> (scrubbing across the dots), or{' '}
+      Called with the page to go to, and why (<code>reason</code>, like Base
+      UI’s slider’s): <code>track-press</code> (a press before or after the
+      current dot), <code>drag</code> (scrubbing across the dots), or{' '}
       <code>keyboard</code>.
     </>,
   ],
@@ -43,16 +43,16 @@ export const pageControlRows: readonly PropRow[] = [
     'disabled',
     'boolean',
     code('false'),
-    'Ignores presses, drags and keys; out of the tab order.',
+    'Ignores presses, drags and keys, and leaves the tab order.',
   ],
   [
     'variant',
     union('glass', 'plain'),
     code('glass'),
     <>
-      <code>glass</code>: a glass capsule (e.g. in a{' '}
-      <a href={publicUrl('toolbar')}>Toolbar</a>); <code>plain</code>: dots
-      only, over content.
+      <code>glass</code>: a glass capsule (for example in a{' '}
+      <a href={publicUrl('toolbar')}>Toolbar</a>). <code>plain</code>: only the
+      dots, over content.
     </>,
   ],
   [
@@ -62,8 +62,9 @@ export const pageControlRows: readonly PropRow[] = [
       the toolbar’s, or <code>bright</code> (<code>dim</code> in dark mode)
     </>,
     <>
-      Brightness of the content behind its glass: a plain page, or a background
-      of the app’s (e.g. a picture); <code>adaptive</code>: by what’s behind it.
+      How bright the content behind its glass is: a plain page, or a background
+      of the app’s own (for example a picture). <code>adaptive</code> follows
+      what’s behind it.
     </>,
   ],
   [
@@ -71,15 +72,15 @@ export const pageControlRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      The current page (see <code>format</code>) in a tooltip above it while
-      it’s hovered, pressed or focused by keyboard.
+      Shows the current page (see <code>format</code>) in a tooltip above it
+      while it’s hovered, pressed or focused by keyboard.
     </>,
   ],
   [
     'format',
     '(page: number, count: number) => string',
     code('3 of 8'),
-    'The current page as text: its accessible value, and its tooltip’s.',
+    'The current page as text, for its accessible value and its tooltip.',
   ],
   ['aria-label', 'string', code('Page'), 'Its accessible name.'],
   ...elementRows('div', 'HTMLDivElement'),

@@ -7,9 +7,11 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsClear,
   getPropOptionsControl,
@@ -62,6 +64,26 @@ export const TextFieldDemo: FunctionComponent = () => {
     { external: externalError, title: 'error' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Below': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Trailing': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
@@ -77,6 +99,7 @@ export const TextFieldDemo: FunctionComponent = () => {
         controlClear,
         controlDescription,
         controlError,
+        partControls,
       ]}
       state={[
         stateRoot,
@@ -85,24 +108,25 @@ export const TextFieldDemo: FunctionComponent = () => {
         stateClear,
         stateDescription,
         stateError,
+        partState,
       ]}
     >
-      <List.Root>
-        <List.Section>
-          <List.Group>
+      <List.Root {...partProps['List.Root']}>
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
             <TextField.Root
               key={`${keyRoot}-${keyControl}`}
               {...propsRoot}
-              render={<List.Item />}
+              render={<List.Item {...partProps['List.Item']} />}
             >
-              <List.Content>
+              <List.Content {...partProps['List.Content']}>
                 <TextField.Label {...propsLabel}>Name</TextField.Label>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control {...propsControl} />
                 <TextField.Clear {...propsClear} />
               </List.Trailing>
-              <List.Below>
+              <List.Below {...partProps['List.Below']}>
                 <TextField.Description {...propsDescription}>
                   As shown to others.
                 </TextField.Description>

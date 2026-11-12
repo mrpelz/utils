@@ -136,8 +136,8 @@ export const QuickBackApp: FunctionComponent = () => {
             title={`Level ${key}`}
             footer={
               <List.Footer>
-                Press back (or swipe back) again while it still slides: each
-                press goes a level further.
+                Press back (or swipe back) again while the page is still
+                sliding, and each press goes one level further.
               </List.Footer>
             }
           >
@@ -207,8 +207,9 @@ export const FromCodeApp: FunctionComponent = () => {
               </List.Group>
               {index > 0 ? (
                 <List.Footer>
-                  Done stays put between the pushed pages (a persistent item, as
-                  the back button), and pops to the root from code.
+                  Done stays put between the pushed pages (it’s a persistent
+                  item, like the back button), and goes back to the root from
+                  code.
                 </List.Footer>
               ) : null}
             </List.Section>
@@ -291,8 +292,8 @@ export const PerTabApp: FunctionComponent = () => {
                     ))}
                   </List.Group>
                   <List.Footer>
-                    Each tab keeps its own stack; its tab pressed again pops it
-                    to its root.
+                    Each tab keeps its own stack. Pressing the selected tab
+                    again takes its stack back to the root.
                   </List.Footer>
                 </List.Section>
               </Level>

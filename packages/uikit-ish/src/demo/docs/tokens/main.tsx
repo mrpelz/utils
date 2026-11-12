@@ -218,8 +218,8 @@ export const TokensPage: FunctionComponent = () => {
       <h1 className="demo-page-title">Design Tokens</h1>
       <p className="demo-lead">
         The custom properties the library’s stylesheet sets on the root, read
-        from it as written and shown live. Press one to copy it as{' '}
-        <code>var(--…)</code>; hover it for its values. Each in light and dark.
+        from it as written and shown live, each in light and dark. Press one to
+        copy it as <code>var(--…)</code>, and hover it to see its values.
       </p>
       <Contents sections={sections} />
 
@@ -232,8 +232,8 @@ export const TokensPage: FunctionComponent = () => {
         </Heading>
         <p className="demo-tokens-legend">
           <ColorChip value="var(--color-ui-system-gray3)" />
-          Each in light and dark, over its scheme’s background; a band below:
-          with increased contrast.
+          Each in light and dark, over its scheme’s background. The band below
+          shows it with increased contrast.
         </p>
         {colorsByRole.map(([title, roleTokens]) => (
           <section key={title}>
@@ -275,7 +275,7 @@ export const TokensPage: FunctionComponent = () => {
         </Heading>
         <p>
           The text styles at the default text size: size / line height,
-          tracking, weight and emphasized weight. (The other text sizes:{' '}
+          tracking, weight and emphasized weight. (For the other text sizes, see{' '}
           <PartLink
             component="typography"
             part="Typography"
@@ -331,7 +331,7 @@ export const TokensPage: FunctionComponent = () => {
           Materials
         </Heading>
         <p>
-          Each material on a backdrop of what it’s for: a{' '}
+          Each material on a backdrop that suits what it’s for: a{' '}
           <PartLink
             component="button"
             part="Button.Root"

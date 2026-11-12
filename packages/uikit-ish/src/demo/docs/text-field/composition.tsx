@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -11,6 +11,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -19,6 +21,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfMagnifyingglass } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -177,27 +180,66 @@ const taken = ['kate', 'john', 'anna'];
 const Validation: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Form: ['className', 'onFormSubmit'],
+            'Button.Label': [],
+            'Button.Root': ['fill', 'size', 'type', 'variant'],
+            'List.Below': [],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Trailing': [],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'autoCapitalize',
+              'autoComplete',
+              'minLength',
+              'required',
+              'type',
+            ],
+            'TextField.Error': ['match'],
+            'TextField.Label': [],
+            'TextField.Root': ['name', 'render', 'validate', 'validationMode'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('text-field-composition-validation') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="text-field-composition-validation"
       log={log}
+      state={[partState]}
       title="Validation"
     >
       <Form
+        {...partProps.Form}
         className="text-field-demo-form"
         onFormSubmit={(values: Record<string, unknown>) =>
           addLog(`submit: ${JSON.stringify(values)}`)
         }
       >
-        <List.Root>
-          <List.Section>
-            <List.Group>
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="username"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
                 validationMode="onBlur"
                 validate={(value: unknown) =>
                   taken.includes(String(value))
@@ -205,63 +247,90 @@ const Validation: FunctionComponent = () => {
                     : null
                 }
               >
-                <List.Content>
-                  <TextField.Label>Username</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Username
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     required
                     autoCapitalize="none"
                     autoComplete="username"
                     minLength={3}
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
-                <List.Below>
-                  <TextField.Error match="valueMissing">
+                <List.Below {...partProps['List.Below']}>
+                  <TextField.Error
+                    {...partProps['TextField.Error']}
+                    match="valueMissing"
+                  >
                     Required.
                   </TextField.Error>
-                  <TextField.Error match="tooShort">
+                  <TextField.Error
+                    {...partProps['TextField.Error']}
+                    match="tooShort"
+                  >
                     At least 3 characters.
                   </TextField.Error>
-                  <TextField.Error match="customError" />
+                  <TextField.Error
+                    {...partProps['TextField.Error']}
+                    match="customError"
+                  />
                 </List.Below>
               </TextField.Root>
               <TextField.Root
+                {...partProps['TextField.Root']}
                 name="email"
-                render={<List.Item />}
+                render={<List.Item {...partProps['List.Item']} />}
                 validationMode="onBlur"
               >
-                <List.Content>
-                  <TextField.Label>Email</TextField.Label>
+                <List.Content {...partProps['List.Content']}>
+                  <TextField.Label {...partProps['TextField.Label']}>
+                    Email
+                  </TextField.Label>
                 </List.Content>
-                <List.Trailing>
+                <List.Trailing {...partProps['List.Trailing']}>
                   <TextField.Control
+                    {...partProps['TextField.Control']}
                     required
                     autoComplete="email"
                     type="email"
                   />
-                  <TextField.Clear />
+                  <TextField.Clear {...partProps['TextField.Clear']} />
                 </List.Trailing>
-                <List.Below>
-                  <TextField.Error match="valueMissing">
+                <List.Below {...partProps['List.Below']}>
+                  <TextField.Error
+                    {...partProps['TextField.Error']}
+                    match="valueMissing"
+                  >
                     Required.
                   </TextField.Error>
-                  <TextField.Error match="typeMismatch">
+                  <TextField.Error
+                    {...partProps['TextField.Error']}
+                    match="typeMismatch"
+                  >
                     Not an email address.
                   </TextField.Error>
                 </List.Below>
               </TextField.Root>
             </List.Group>
-            <List.Footer>Try “kate” as a username.</List.Footer>
-            <List.Footer>
+            <List.Footer {...partProps['List.Footer']}>
+              Try “kate” as a username.
+            </List.Footer>
+            <List.Footer {...partProps['List.Footer']}>
               <Button.Root
+                {...partProps['Button.Root']}
                 fill
                 size="large"
                 type="submit"
                 variant="bordered-prominent"
               >
-                <Button.Label>Sign Up</Button.Label>
+                <Button.Label {...partProps['Button.Label']}>
+                  Sign Up
+                </Button.Label>
               </Button.Root>
             </List.Footer>
           </List.Section>
@@ -278,41 +347,80 @@ const SearchWithClear: FunctionComponent = () => {
     name.toLowerCase().includes(query.toLowerCase()),
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'TextField.Clear': [],
+          'TextField.Control': [
+            'aria-label',
+            'onValueChange',
+            'placeholder',
+            'type',
+            'value',
+          ],
+          'TextField.Frame': [],
+          'TextField.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState('text-field-composition-search') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="text-field-composition-search"
+      state={[partState]}
       title="A search field"
     >
       <div className="text-field-demo-search">
-        <TextField.Root>
-          <TextField.Frame>
-            <Symbol icon={sfMagnifyingglass} />
+        <TextField.Root {...partProps['TextField.Root']}>
+          <TextField.Frame {...partProps['TextField.Frame']}>
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfMagnifyingglass}
+            />
             <TextField.Control
+              {...partProps['TextField.Control']}
               aria-label="Search"
               placeholder="Search"
               type="search"
               value={query}
               onValueChange={setQuery}
             />
-            <TextField.Clear />
+            <TextField.Clear {...partProps['TextField.Clear']} />
           </TextField.Frame>
         </TextField.Root>
-        <List.Root>
-          <List.Section>
-            <List.Group>
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               {matching.map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>{name}</List.Title>
                   </List.Content>
                 </List.Item>
               ))}
             </List.Group>
             {matching.length === 0 ? (
-              <List.Footer>No results for “{query}”.</List.Footer>
+              <List.Footer {...partProps['List.Footer']}>
+                No results for “{query}”.
+              </List.Footer>
             ) : null}
           </List.Section>
         </List.Root>
@@ -325,85 +433,148 @@ const SearchWithClear: FunctionComponent = () => {
 const InAFormList: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Fieldset.Legend': [],
+            'Fieldset.Root': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['className'],
+            'List.Span': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'aria-label',
+              'autoComplete',
+              'inputMode',
+              'onValueChange',
+              'placeholder',
+              'render',
+              'type',
+            ],
+            'TextField.Label': [],
+            'TextField.Root': ['render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('text-field-composition-form') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="text-field-composition-form"
       log={log}
+      state={[partState]}
       title="Fields in a form list"
     >
-      <List.Root className="text-field-demo-list">
-        <Fieldset.Root>
-          <Fieldset.Legend>
-            <List.Title>Contact</List.Title>
+      <List.Root
+        {...partProps['List.Root']}
+        className="text-field-demo-list"
+      >
+        <Fieldset.Root {...partProps['Fieldset.Root']}>
+          <Fieldset.Legend {...partProps['Fieldset.Legend']}>
+            <List.Title {...partProps['List.Title']}>Contact</List.Title>
           </Fieldset.Legend>
-          <List.Group>
-            <TextField.Root render={<List.Item />}>
-              <List.Content>
-                <TextField.Label>Name</TextField.Label>
+          <List.Group {...partProps['List.Group']}>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Content {...partProps['List.Content']}>
+                <TextField.Label {...partProps['TextField.Label']}>
+                  Name
+                </TextField.Label>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   autoComplete="name"
                   placeholder="Required"
                   onValueChange={(value: string) => addLog(`name: ${value}`)}
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
             </TextField.Root>
-            <TextField.Root render={<List.Item />}>
-              <List.Content>
-                <TextField.Label>Phone</TextField.Label>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Content {...partProps['List.Content']}>
+                <TextField.Label {...partProps['TextField.Label']}>
+                  Phone
+                </TextField.Label>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   autoComplete="tel"
                   type="tel"
                   onValueChange={(value: string) => addLog(`phone: ${value}`)}
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
             </TextField.Root>
           </List.Group>
         </Fieldset.Root>
-        <Fieldset.Root>
-          <Fieldset.Legend>
-            <List.Title>Address</List.Title>
+        <Fieldset.Root {...partProps['Fieldset.Root']}>
+          <Fieldset.Legend {...partProps['Fieldset.Legend']}>
+            <List.Title {...partProps['List.Title']}>Address</List.Title>
           </Fieldset.Legend>
-          <List.Group>
-            <TextField.Root render={<List.Item />}>
-              <List.Trailing>
+          <List.Group {...partProps['List.Group']}>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Street"
                   autoComplete="street-address"
                   placeholder="Street"
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
             </TextField.Root>
-            <TextField.Root render={<List.Item />}>
-              <List.Trailing>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Postal code"
                   autoComplete="postal-code"
                   inputMode="numeric"
                   placeholder="Postal code"
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
             </TextField.Root>
           </List.Group>
         </Fieldset.Root>
-        <Fieldset.Root>
-          <Fieldset.Legend>
-            <List.Title>Notes</List.Title>
+        <Fieldset.Root {...partProps['Fieldset.Root']}>
+          <Fieldset.Legend {...partProps['Fieldset.Legend']}>
+            <List.Title {...partProps['List.Title']}>Notes</List.Title>
           </Fieldset.Legend>
-          <List.Group>
-            <TextField.Root render={<List.Item />}>
-              <List.Span>
+          <List.Group {...partProps['List.Group']}>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Span {...partProps['List.Span']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Notes"
                   placeholder="Anything else?"
                   render={<textarea />}
@@ -426,36 +597,81 @@ const Suggestions: FunctionComponent = () => {
       ? []
       : names.filter((name) => name.toLowerCase().startsWith(to.toLowerCase()));
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': ['className'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'aria-autocomplete',
+              'autoComplete',
+              'onValueChange',
+              'value',
+            ],
+            'TextField.Label': [],
+            'TextField.Root': ['render'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('text-field-composition-suggestions') },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
+      controls={[partControls]}
       id="text-field-composition-suggestions"
       log={log}
+      state={[partState]}
       title="Suggestions"
     >
-      <List.Root className="text-field-demo-list">
-        <List.Section>
-          <List.Group>
-            <TextField.Root render={<List.Item />}>
-              <List.Content>
-                <TextField.Label>To:</TextField.Label>
+      <List.Root
+        {...partProps['List.Root']}
+        className="text-field-demo-list"
+      >
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <TextField.Root
+              {...partProps['TextField.Root']}
+              render={<List.Item {...partProps['List.Item']} />}
+            >
+              <List.Content {...partProps['List.Content']}>
+                <TextField.Label {...partProps['TextField.Label']}>
+                  To:
+                </TextField.Label>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-autocomplete="list"
                   autoComplete="off"
                   value={to}
                   onValueChange={setTo}
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </List.Trailing>
             </TextField.Root>
             {matching.map((name) => (
-              <List.Item key={name}>
-                <List.Content>
+              <List.Item
+                key={name}
+                {...partProps['List.Item']}
+              >
+                <List.Content {...partProps['List.Content']}>
                   <List.Title
+                    {...partProps['List.Title']}
                     render={<button type="button" />}
                     onClick={() => {
                       addLog(`to: ${name}`);
@@ -468,7 +684,9 @@ const Suggestions: FunctionComponent = () => {
               </List.Item>
             ))}
           </List.Group>
-          <List.Footer>Type a letter, e.g. “a”.</List.Footer>
+          <List.Footer {...partProps['List.Footer']}>
+            Type a letter, e.g. “a”.
+          </List.Footer>
         </List.Section>
       </List.Root>
     </Component>
@@ -497,28 +715,29 @@ export const TextFieldComposition: FunctionComponent = () => (
     <ul>
       <li>
         The browser’s constraints (<code>required</code>, <code>minLength</code>
-        , <code>type=&quot;email&quot;</code>) and the app’s (
-        <code>validate</code>: a message, or <code>null</code>).
+        , <code>type=&quot;email&quot;</code>) and the app’s own (
+        <code>validate</code>, which returns a message or <code>null</code>).
       </li>
       <li>
-        One{' '}
+        There’s one{' '}
         <PartLink
           component="text-field"
           part="TextField.Error"
         />{' '}
-        per reason (<code>match</code>); the custom one’s text is{' '}
+        per reason (<code>match</code>). The custom one’s text is{' '}
         <code>validate</code>’s message.
       </li>
       <li>
-        Checked on leaving a field (
-        <code>validationMode=&quot;onBlur&quot;</code>
-        ), and all on submitting the <a href={publicUrl('form')}>Form</a>:
-        invalid, it isn’t submitted, its first invalid field focused; valid,{' '}
-        <code>onFormSubmit</code> gets the values (by <code>name</code>).
+        Each field is checked when focus leaves it (
+        <code>validationMode=&quot;onBlur&quot;</code>), and all of them when
+        the <a href={publicUrl('form')}>Form</a> is submitted. If anything is
+        invalid, it isn’t submitted, and the first invalid field gets focus. If
+        everything is valid, <code>onFormSubmit</code> gets the values (by{' '}
+        <code>name</code>).
       </li>
       <li>
-        Inline, below the field: the least interrupting way that works, no
-        alert.
+        The errors show inline, below the field. That’s the least interrupting
+        way that works, without an alert.
       </li>
       <li>
         <strong>Library:</strong> the field’s constraints and{' '}
@@ -527,7 +746,7 @@ export const TextFieldComposition: FunctionComponent = () => (
           component="text-field"
           part="TextField.Error"
         />
-        , one per reason), <code>validationMode</code> and Base UI’s{' '}
+        , one per reason), <code>validationMode</code>, and Base UI’s{' '}
         <PartLink
           component="form"
           part="Form"
@@ -554,16 +773,16 @@ export const TextFieldComposition: FunctionComponent = () => (
           part="TextField.Frame"
         />
         : the capsule, a magnifier, the control (
-        <code>type=&quot;search&quot;</code>: iOS’s Search key), its clear
-        button.
+        <code>type=&quot;search&quot;</code>, for the keyboard’s Search key) and
+        its clear button.
       </li>
       <li>
-        Controlled (<code>value</code>, <code>onValueChange</code>), filtering
-        the rows as typed; nothing found, a footer says so.
+        It’s controlled (<code>value</code>, <code>onValueChange</code>) and
+        filters the rows as you type. When nothing is found, a footer says so.
       </li>
       <li>
-        In a page’s header, a toolbar, a sidebar (see{' '}
-        <a href={publicUrl('header/composition#a-search-field')}>Header</a>,{' '}
+        It can sit in a page’s header, a toolbar or a sidebar (see{' '}
+        <a href={publicUrl('header/composition#a-search-field')}>Header</a> and{' '}
         <a href={publicUrl('toolbar/composition#a-search-field')}>Toolbar</a>).
       </li>
       <li>
@@ -572,15 +791,15 @@ export const TextFieldComposition: FunctionComponent = () => (
           component="text-field"
           part="TextField.Frame"
         />{' '}
-        <code>variant</code>; only its look, it stays a search field):
+        <code>variant</code>). Only its look changes; it stays a search field.
         <ul>
           <li>
             <code>fill</code> (the default): the capsule on the tertiary fill,
             on a page or in a sidebar (as here).
           </li>
           <li>
-            <code>row</code>: a list row’s background, height and corners,
-            beside an inset grouped list, e.g. in a{' '}
+            <code>row</code>: a list row’s background, height and corners, next
+            to an inset grouped list, for example in a{' '}
             <PartLink
               component="header"
               part="Header.Accessory"
@@ -590,13 +809,13 @@ export const TextFieldComposition: FunctionComponent = () => (
             ).
           </li>
           <li>
-            <code>tab-bar</code>: a group’s glass capsule as high as its tabs,
+            <code>tab-bar</code>: a group’s glass capsule, as tall as its tabs,
             in a{' '}
             <PartLink
               component="tab-bar"
               part="TabBar.List"
             />{' '}
-            beside a{' '}
+            next to a{' '}
             <PartLink
               component="tab-bar"
               part="TabBar.Group"
@@ -607,7 +826,7 @@ export const TextFieldComposition: FunctionComponent = () => (
                 'tab-bar/composition#a-search-field-beside-the-tabs',
               )}
             >
-              Tab bar
+              Tab Bar
             </a>
             ).
           </li>
@@ -619,10 +838,10 @@ export const TextFieldComposition: FunctionComponent = () => (
               part="TabBar.Accessory"
             />{' '}
             shown in the collapsed bar, filling it (
-            <a href={publicUrl('tab-bar/composition#search')}>Tab bar</a>).
+            <a href={publicUrl('tab-bar/composition#search')}>Tab Bar</a>).
           </li>
           <li>
-            <code>toolbar</code>: a glass capsule as high as the bar’s buttons,
+            <code>toolbar</code>: a glass capsule as tall as the bar’s buttons,
             in a{' '}
             <PartLink
               component="toolbar"
@@ -635,13 +854,13 @@ export const TextFieldComposition: FunctionComponent = () => (
             ).
           </li>
         </ul>
-        Its glass takes the bar’s colors (its glass context); in a bar at the
+        Its glass takes the bar’s colors (its glass context). In a bar at the
         bottom, a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
         />{' '}
-        tracks the keyboard, pushing the bar up.
+        tracks the keyboard and pushes the bar up.
       </li>
       <li>
         <strong>Library:</strong> the search field (
@@ -649,7 +868,7 @@ export const TextFieldComposition: FunctionComponent = () => (
           component="text-field"
           part="TextField.Frame"
         />
-        ): the capsule, magnifier and clear button (
+        ): the capsule, the magnifier and the clear button (
         <PartLink
           component="text-field"
           part="TextField.Clear"
@@ -657,8 +876,8 @@ export const TextFieldComposition: FunctionComponent = () => (
         ), and its looks (<code>variant</code>).
       </li>
       <li>
-        <strong>Demo:</strong> the query (the app’s state), filtering the rows
-        and the footer when nothing’s found.
+        <strong>Demo:</strong> the query (the app’s state), filtering the rows,
+        and the footer when nothing is found.
       </li>
     </ul>
     <CodeView code={searchCode} />
@@ -672,7 +891,7 @@ export const TextFieldComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Fields as rows (
+        Fields are rows (
         <PartLink
           component="list"
           part="List.Item"
@@ -687,15 +906,16 @@ export const TextFieldComposition: FunctionComponent = () => (
         >
           Fieldset
         </PartLink>{' '}
-        (its legend the section’s header).
+        (with the section’s header as its legend).
       </li>
       <li>
-        A label as the row’s title, the value after it; or no label, the
-        placeholder naming it (and an <code>aria-label</code>).
+        A label is the row’s title, with the value after it. Without a label,
+        the placeholder names it (along with an <code>aria-label</code>).
       </li>
       <li>
-        <code>autoComplete</code>, <code>type</code> and <code>inputMode</code>:
-        iOS’s autofill and keyboards; a <code>textarea</code> for notes.
+        <code>autoComplete</code>, <code>type</code> and <code>inputMode</code>{' '}
+        pick the autofill and the on-screen keyboard. Notes get a{' '}
+        <code>textarea</code>.
       </li>
       <li>
         <strong>Library:</strong> the fields as rows of a grouped list in a{' '}
@@ -703,7 +923,7 @@ export const TextFieldComposition: FunctionComponent = () => (
           component="form"
           part="Fieldset.Root"
         />
-        , their labels, <code>autoComplete</code>, <code>type</code> and{' '}
+        , their labels, and <code>autoComplete</code>, <code>type</code> and{' '}
         <code>inputMode</code>.
       </li>
       <li>
@@ -721,26 +941,26 @@ export const TextFieldComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Mail’s recipients: matching contacts as rows below the field, pressed to
-        fill it.
+        As for a mail app’s recipients: matching contacts show as rows below the
+        field, and pressing one fills it.
       </li>
       <li>
-        Or the browser’s: a <code>{'<datalist>'}</code> by the control’s{' '}
-        <code>list</code> (see the{' '}
+        Or use the browser’s: a <code>{'<datalist>'}</code>, through the
+        control’s <code>list</code> (see the{' '}
         <a href={publicUrl('text-field/parts#textfield-control')}>
           control’s view
         </a>
         ).
       </li>
       <li>
-        <code>autoComplete=&quot;off&quot;</code>: the rows instead of the
+        <code>autoComplete=&quot;off&quot;</code> shows the rows instead of the
         browser’s autofill.
       </li>
       <li>
-        <strong>Library:</strong> the field and the list of rows below it.
+        <strong>Library:</strong> the field, and the list of rows below it.
       </li>
       <li>
-        <strong>Demo:</strong> the recipient (the app’s state), matching
+        <strong>Demo:</strong> the recipient (the app’s state), the matching
         contacts, and filling the field when a row is pressed.
       </li>
     </ul>

@@ -16,19 +16,20 @@ export const layoutRootRows: readonly PropRow[] = [
         component="layout"
         part="Layout.Column"
       />
-      ), leading to trailing; what’s behind it (e.g. a{' '}
+      ), from leading to trailing. Where they have no background, what’s behind
+      the layout shows (for example a{' '}
       <PartLink
         component="viewport"
         part="Viewport.Background"
       />
-      ) shows where they have no background.
+      ).
     </>,
   ],
   [
     'hideSeparators',
     'boolean',
     code('false'),
-    'Its columns without the hairline between them (e.g. on a picture behind them, where a line would look out of place).',
+    'Removes the hairline between its columns, for example over a picture behind them, where a line would look out of place.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -39,40 +40,46 @@ export const layoutColumnRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its content, filling it: e.g. a <a href={publicUrl('page')}>Page</a> (its
-      own scroll container), a <a href={publicUrl('navigation')}>Navigation</a>,
-      a <a href={publicUrl('sidebar')}>Sidebar</a>. Its fixed layers (e.g. a
-      header’s bar) span it, not the screen.
+      Its content, which fills it: for example a{' '}
+      <a href={publicUrl('page')}>Page</a> (its own scroll container), a{' '}
+      <a href={publicUrl('navigation')}>Navigation</a> or a{' '}
+      <a href={publicUrl('sidebar')}>Sidebar</a>. Fixed layers inside it, such
+      as a header’s bar, span the column, not the screen.
     </>,
   ],
   [
     'defaultSize',
     'number',
     undefined,
-    'Its initial size (px, uncontrolled); without a size, it’s flexible (sharing the free space with the other flexible columns).',
+    'Its initial size (px, uncontrolled). Without a size, it’s flexible and shares the free space with the other flexible columns.',
   ],
   ['size', 'number', undefined, 'Its size (px, controlled).'],
-  ['minSize', 'number', code('240'), 'Its smallest size (px; a list’s).'],
+  [
+    'minSize',
+    'number',
+    code('240'),
+    'Its smallest size (px), the width of a list.',
+  ],
   ['maxSize', 'number', 'none', 'Its largest size (px) when resized.'],
   [
     'resizable',
     'boolean',
     code('false'),
-    'Resized by dragging its divider (at its end), or by the arrow keys on it (Shift: further; Home and End: its smallest and largest).',
+    'Lets the user resize it by dragging its divider (at its end), or with the arrow keys on it. Shift moves further, Home and End go to its smallest and largest size.',
   ],
   [
     'onSizeChange',
     '(size: number) => void',
     undefined,
-    'Called while it’s resized (by its divider).',
+    'Called while it’s resized with its divider.',
   ],
   [
     'floating',
     'boolean',
     code('false'),
     <>
-      Floating over the others at the layout’s start (e.g. a{' '}
-      <a href={publicUrl('sidebar')}>Sidebar</a>), which span the layout
+      Floats above the others at the layout’s start (for example a{' '}
+      <a href={publicUrl('sidebar')}>Sidebar</a>). The others span the layout
       underneath it.
     </>,
   ],
@@ -80,7 +87,7 @@ export const layoutColumnRows: readonly PropRow[] = [
     'clearFloating',
     'boolean',
     code('false'),
-    'Next to a floating column: its pages’ content (and a Viewport.Content’s) inset by the floating column’s size, their backgrounds (and bars’ edges) running underneath it.',
+    'For the column next to a floating one: its pages’ content (and a Viewport.Content’s) is inset by the floating column’s size, while their backgrounds and bars’ edges run underneath it.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];

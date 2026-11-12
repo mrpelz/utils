@@ -1,11 +1,14 @@
 import './style.css';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import { Roll, type RollValue } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -15,6 +18,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { rollColumnRows } from './docs.js';
 import { fruits, propOptionsOverview } from './props.js';
 
@@ -30,20 +34,35 @@ const LiveView: FunctionComponent = () => {
     title: 'Roll.Column',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Roll.Item': ['value'],
+            'Roll.Root': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Roll"
     >
       <div className="roll-demo-stack">
         <output className="roll-demo-value">{fruit}</output>
-        <Roll.Root>
+        <Roll.Root {...partProps['Roll.Root']}>
           <Roll.Column
             aria-label="Fruit"
             {...props}
@@ -56,6 +75,7 @@ const LiveView: FunctionComponent = () => {
             {fruits.map((name) => (
               <Roll.Item
                 key={name}
+                {...partProps['Roll.Item']}
                 value={name}
               />
             ))}
@@ -81,12 +101,12 @@ export const RollOverview: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A wheel of columns, each scrolled to select a row: the selection in a
-        band across its center.
+        A wheel of columns, each scrolled to select a row, with the selection in
+        a band across its center.
       </li>
       <li>
-        The parts of a value side by side: a time’s hours and minutes, a date’s
-        month and day.
+        It shows the parts of a value side by side, such as a time’s hours and
+        minutes, or a date’s month and day.
       </li>
     </ul>
     <LiveView />
@@ -99,12 +119,12 @@ export const RollOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        For a value from a long, ordered set, one part per column: times, dates,
-        measures.
+        For a value from a long, ordered set, with one part per column: times,
+        dates, measures.
       </li>
       <li>
-        Inline (in a row, expanded) or on demand (in a popover): a wheel picker,
-        a choice of one from a large set.
+        Inline (in an expanded row) or on demand (in a popover), as a wheel
+        picker for choosing one value from a large set.
       </li>
     </ul>
 
@@ -116,17 +136,18 @@ export const RollOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Dates and times as such: a{' '}
-        <a href={publicUrl('date-picker')}>Date picker</a> (built on rolls, with
-        a calendar).
+        Dates and times as such: use a{' '}
+        <a href={publicUrl('date-picker')}>Date Picker</a>, which is built on
+        rolls and adds a calendar.
       </li>
       <li>
-        A few options, all visible: a{' '}
-        <a href={publicUrl('segmented')}>Segmented</a> control; options with
-        details: a <a href={publicUrl('list')}>List</a>.
+        A few options, all visible: use a{' '}
+        <a href={publicUrl('segmented')}>Segmented</a> control. Options with
+        details: use a <a href={publicUrl('list')}>List</a>.
       </li>
       <li>
-        A number a step at a time: a <a href={publicUrl('stepper')}>Stepper</a>.
+        A number, one step at a time: use a{' '}
+        <a href={publicUrl('stepper')}>Stepper</a>.
       </li>
     </ul>
 
@@ -139,7 +160,8 @@ export const RollOverview: FunctionComponent = () => (
     <ul>
       <li>The props most rolls’ columns set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('roll/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('roll/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -167,21 +189,21 @@ export const RollOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Each column is a <code>listbox</code>, its rows options, the selected
-        one active (<code>aria-activedescendant</code>): name it (
+        Each column is a <code>listbox</code>, with its rows as options and the
+        selected one active (<code>aria-activedescendant</code>). Name it with{' '}
         <PartLink
           component="roll"
           part="Roll.Column"
         />
-        ’s <code>aria-label</code>), e.g. “Hours”.
+        ’s <code>aria-label</code>, for example “Hours”.
       </li>
       <li>
-        Keyboard: Tab focuses a column; the up and down arrow keys move its
-        selection, Page Up and Page Down by five, Home and End to the first and
-        last row. Editable, Enter (or a digit) types a value.
+        Tab focuses a column. The up and down arrow keys move its selection,
+        Page Up and Page Down by five, and Home and End to the first and last
+        row. When it’s editable, Enter (or a digit) starts typing a value.
       </li>
       <li>
-        Disabled rows are announced as such (<code>aria-disabled</code>).
+        Disabled rows are announced as disabled (<code>aria-disabled</code>).
       </li>
     </ul>
 
@@ -193,21 +215,21 @@ export const RollOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A column scrolls natively (touch, wheel, momentum), or follows a mouse
-        drag, and snaps to its rows; settled, the centered row is selected (
-        <code>onValueChange</code>), not while it turns.
+        A column scrolls natively (by touch, wheel and momentum) or follows a
+        mouse drag, and snaps to its rows. Once it settles, the centered row is
+        selected (<code>onValueChange</code>), not while it’s turning.
       </li>
-      <li>Pressed, a row scrolls to the center.</li>
+      <li>Pressing a row scrolls it to the center.</li>
       <li>
-        Settled on a disabled row a moment, the column moves on to the nearest
-        enabled one.
-      </li>
-      <li>
-        <code>editable</code>: pressing the selected row shows a field for a
-        typed value (a numeric keyboard), as time wheels do.
+        When it settles on a disabled row for a moment, the column moves on to
+        the nearest enabled one.
       </li>
       <li>
-        <code>loop</code>: rows repeat endlessly, as time wheels do.
+        With <code>editable</code>, pressing the selected row shows a field for
+        typing a value (with a numeric keyboard), as on time wheels.
+      </li>
+      <li>
+        With <code>loop</code>, the rows repeat endlessly, as on time wheels.
       </li>
     </ul>
   </>

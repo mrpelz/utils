@@ -167,7 +167,7 @@
   gap: 6px;
   opacity: var(--uikit-viewport-overscroll-progress, 0);
 
-  /* (Its sides the library's: clear of the safe area, and of a floating
+  /* (Its sides the library's: clear of the safe area insets, and of a floating
      column, see Layout.) */
   padding-block: 12px;
 

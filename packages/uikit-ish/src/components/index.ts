@@ -194,6 +194,7 @@ export {
   type ListDropTargetProps,
   type ListHeaderProps,
   type ListImageProps,
+  type ListIndexItemProps,
   type ListIndexProps,
   type ListItemProps,
   type ListReorderChange,

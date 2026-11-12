@@ -29,10 +29,10 @@ export const actionSheetRootRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the action sheet is opened or closed (with Base
-      UI’s event details: the <code>reason</code>, e.g.{' '}
+      UI’s event details: the <code>reason</code>, for example{' '}
       <code>trigger-press</code>, <code>close-press</code> (an action),{' '}
-      <code>outside-press</code>, <code>escape-key</code>; the{' '}
-      <code>trigger</code> element; <code>eventDetails.cancel()</code> keeps it
+      <code>outside-press</code> or <code>escape-key</code>, and the{' '}
+      <code>trigger</code> element. <code>eventDetails.cancel()</code> keeps it
       as it is).
     </>,
   ],
@@ -49,7 +49,7 @@ export const actionSheetRootRows: readonly PropRow[] = [
     <>
       Determines if the action sheet enters a modal state when open:{' '}
       <code>true</code>, user interaction is limited to it (page scroll locked,
-      outside pointer interactions disabled: a press outside closes it);{' '}
+      outside pointer interactions disabled, and a press outside closes it);{' '}
       <code>false</code>, user interaction with the rest of the document is
       allowed; <code>trap-focus</code>, focus is trapped, but scroll and outside
       pointer interactions remain enabled.
@@ -111,7 +111,7 @@ export const actionSheetRootRows: readonly PropRow[] = [
     'ReactNode | ((props: { payload }) => ReactNode)',
     undefined,
     <>
-      Its trigger and its popup; or a function of the active trigger’s{' '}
+      Its trigger and its popup, or a function of the active trigger’s{' '}
       <code>payload</code>.
     </>,
   ],
@@ -152,8 +152,8 @@ export const actionSheetTriggerRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      ID of the trigger: also the active trigger in controlled mode (the root’s{' '}
-      <code>triggerId</code>).
+      ID of the trigger. It also names the active trigger in controlled mode
+      (the root’s <code>triggerId</code>).
     </>,
   ],
   nativeButtonRow(true),
@@ -164,7 +164,7 @@ export const actionSheetTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
+            {row[3]} For example a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -185,7 +185,7 @@ export const actionSheetPopupRows: readonly PropRow[] = [
     <>
       <code>document.body</code>
     </>,
-    'Where its portal renders it (Base UI’s Popover.Portal): its dimmed backdrop filling it if it’s a containing block (e.g. transformed), as the views here; without a trigger, the sheet at its bottom.',
+    'Where its portal renders it (Base UI’s Popover.Portal). If that’s a containing block (for example a transformed element, like the views here), its dimmed backdrop fills it, and without a trigger, the sheet sits at its bottom.',
   ],
   [
     'initialFocus',
@@ -256,7 +256,7 @@ export const actionSheetTitleRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its title (Headline): the sheet’s accessible name.',
+    'Its title (Headline), which is the sheet’s accessible name.',
   ],
   ...baseUiRows('h2', 'HTMLHeadingElement'),
 ];
@@ -266,7 +266,7 @@ export const actionSheetDescriptionRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its message (Body): what the choice is about; the sheet’s accessible description.',
+    'Its message (Body): what the choice is about. It’s the sheet’s accessible description.',
   ],
   ...baseUiRows('p', 'HTMLParagraphElement'),
 ];
@@ -282,7 +282,7 @@ export const actionSheetActionsRows: readonly PropRow[] = [
         component="action-sheet"
         part="ActionSheet.Action"
       />
-      ), stacked; a destructive one first.
+      ), stacked, with a destructive one first.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -293,13 +293,13 @@ export const actionSheetActionRows: readonly PropRow[] = [
     'variant',
     union('secondary', 'destructive'),
     code(union('secondary')),
-    'Its kind: secondary (the label’s color), destructive (red, e.g. Delete). No primary: an action sheet has no preferred action.',
+    'Its kind: secondary (in the label’s color) or destructive (red, for example Delete). There’s no primary, because an action sheet has no preferred action.',
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'Its label: what it does (Delete Photo), title case.',
+    'Its label: what it does, in title case (Delete Photo).',
   ],
   nativeButtonRow(true),
   ...baseUiRows('button', 'HTMLButtonElement'),
@@ -316,8 +316,8 @@ export const actionSheetHandleTypeRows: readonly PropRow[] = [
     'type parameter',
     code('unknown'),
     <>
-      What its triggers pass the action sheet as they open it (their{' '}
-      <code>payload</code>; the root’s children as a function of it).
+      What its triggers pass to the action sheet as they open it (their{' '}
+      <code>payload</code>). The root’s children can be a function of it.
     </>,
   ],
 ];
@@ -332,7 +332,7 @@ export const actionSheetHandleRows: readonly PropRow[] = [
     'ActionSheetHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>Popover.Handle</code>): passed to an{' '}
+      A handle (Base UI’s <code>Popover.Handle</code>). Pass it to an{' '}
       <PartLink
         component="action-sheet"
         part="ActionSheet.Root"
@@ -342,8 +342,8 @@ export const actionSheetHandleRows: readonly PropRow[] = [
         component="action-sheet"
         part="ActionSheet.Trigger"
       />
-      s (their <code>handle</code>); from the hook, the same for the component’s
-      lifetime.
+      s (their <code>handle</code>). The hook returns the same one for the
+      component’s lifetime.
     </>,
   ],
   [
@@ -356,7 +356,7 @@ export const actionSheetHandleRows: readonly PropRow[] = [
     '.open(triggerId)',
     '(triggerId: string) => void',
     undefined,
-    'Opens the action sheet at the trigger with this id (a trigger with this handle; in an event handler or an effect).',
+    'Opens the action sheet at the trigger with this id, which must use this handle (in an event handler or an effect).',
   ],
   ['.close()', '() => void', undefined, 'Closes the action sheet.'],
 ];

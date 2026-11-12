@@ -1293,12 +1293,112 @@ export const tests = [
       // At the top of the list (its own scroll container; the document
       // doesn't scroll).
       const [top, documentTop] = await page.evaluate(`(() => {
-        const section = document.querySelector('[data-letter="J"]');
+        const section = document.querySelector('[data-list-part=section][data-index-value="J"]');
         const list = section.closest('.list-demo-scroll');
         return [Math.round(section.getBoundingClientRect().top - list.getBoundingClientRect().top), scrollY];
       })()`);
       assert.deepEqual([top, documentTop], [0, 0]);
       await page.screenshot('list-index');
+    },
+  },
+  {
+    name: 'list: an index is placed by its list: at its end edge, centered on the part of the list in view, also as it scrolls',
+    run: async (page) => {
+      await page.open('list-index');
+      const place = () =>
+        page.evaluate(`(() => {
+          const list = document.querySelector('.list-demo-scroll');
+          const view = list.getBoundingClientRect();
+          const items = document.querySelectorAll('[data-list-part=index-item]');
+          const first = items[0].getBoundingClientRect();
+          const last = items[items.length - 1].getBoundingClientRect();
+          return [Math.round((first.top + last.bottom) / 2 - (view.top + view.bottom) / 2), Math.round(view.right - first.right)];
+        })()`);
+      assert.deepEqual(await place(), [0, 0], 'at rest');
+      await page.evaluate(
+        `document.querySelector(${JSON.stringify('.list-demo-scroll')}).scrollTop = 600`,
+      );
+      await sleep(200);
+      assert.deepEqual(await place(), [0, 0], 'scrolled');
+    },
+  },
+  {
+    name: 'list: an index item jumps to its value’s section; without one, to the next item’s that has one',
+    run: async (page) => {
+      await page.open('list-index');
+      /** The section (its index value) at the top of the list, after `letter` is pressed. */
+      const jump = async (/** @type {string} */ letter) => {
+        const point = await page.evaluate(`(() => {
+          const item = [...document.querySelectorAll('[data-list-part=index-item]')].find((element) => element.textContent === ${JSON.stringify(letter)});
+          const { height, width, x, y } = item.getBoundingClientRect();
+          return [x + width / 2, y + height / 2];
+        })()`);
+        await page.click(/** @type {[number, number]} */ (point));
+        await sleep(300);
+        return page.evaluate(`(() => {
+          const list = document.querySelector('.list-demo-scroll');
+          const top = list.getBoundingClientRect().top;
+          const section = [...list.querySelectorAll('[data-list-part=section]')].find((element) => Math.abs(element.getBoundingClientRect().top - top) < 1);
+          return section?.dataset.indexValue;
+        })()`);
+      };
+      assert.equal(await jump('M'), 'M');
+      // (No contacts under K: L's.)
+      assert.equal(await jump('K'), 'L');
+      assert.equal(await jump('A'), 'A');
+      // None under X or Y: Z's, the last (scrolled as far as the list goes,
+      // so it's in view, not at its top).
+      await jump('X');
+      assert.ok(
+        await page.evaluate(`(() => {
+          const list = document.querySelector(${JSON.stringify('.list-demo-scroll')});
+          const z = list.querySelector(${JSON.stringify('[data-index-value="Z"]')}).getBoundingClientRect();
+          return Math.abs(list.scrollTop + list.clientHeight - list.scrollHeight) < 1 && z.bottom <= list.getBoundingClientRect().bottom + 1;
+        })()`),
+        'Z in view, at the end',
+      );
+      assert.match(await page.log(), /index: K/u);
+    },
+  },
+  {
+    name: 'list: an index of any keys jumps by them, in its own order (element symbols, not letters)',
+    run: async (page) => {
+      await page.open('list-composition-elements');
+      const jump = async (/** @type {string} */ symbol) => {
+        const point = await page.evaluate(`(() => {
+          const item = [...document.querySelectorAll('[data-list-part=index-item]')].find((element) => element.textContent === ${JSON.stringify(symbol)});
+          const { height, width, x, y } = item.getBoundingClientRect();
+          return [x + width / 2, y + height / 2];
+        })()`);
+        await page.click(/** @type {[number, number]} */ (point));
+        await sleep(300);
+        return page.evaluate(`(() => {
+          const list = document.querySelector('.list-demo-scroll');
+          const top = list.getBoundingClientRect().top;
+          const section = [...list.querySelectorAll('[data-list-part=section]')].find((element) => Math.abs(element.getBoundingClientRect().top - top) < 1);
+          return [section?.dataset.indexValue, section?.querySelector('[data-list-part=header]')?.textContent];
+        })()`);
+      };
+      assert.deepEqual(await jump('Mg'), ['Mg', 'Magnesium']);
+      assert.deepEqual(await jump('He'), ['He', 'Helium']);
+      assert.deepEqual(await jump('Si'), ['Si', 'Silicon']);
+    },
+  },
+  {
+    name: 'list: a Below collapses while hidden, by its control',
+    run: async (page) => {
+      await page.open('list-parts-below');
+      const height = () =>
+        page.evaluate(
+          `Math.round(document.querySelector(${JSON.stringify('[data-list-part=below]')}).getBoundingClientRect().height)`,
+        );
+      assert.ok((await height()) > 0, 'shown');
+      await page.setState(0, { hidden: true });
+      await sleep(500);
+      assert.equal(await height(), 0, 'hidden');
+      await page.setState(0, { hidden: false });
+      await sleep(500);
+      assert.ok((await height()) > 0, 'shown again');
     },
   },
   {
@@ -1477,14 +1577,15 @@ export const tests = [
       await page.open('list-collapsible');
       const state = () =>
         page.evaluate(`(() => {
-          const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has([data-list-part=row] > [data-list-part=disclosure])')});
+          const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has([data-list-part=trailing] > [data-list-part=disclosure])')});
           const expandable = row.nextElementSibling;
           return [Math.round(expandable.getBoundingClientRect().height), expandable.inert];
         })()`);
-      assert.deepEqual(await state(), [0, true]);
+      // (Open at first: the demo's `defaultOpen`.)
+      assert.deepEqual(await state(), [68, false]);
       const toggle = /** @type {[number, number]} */ (
         await page.evaluate(`(() => {
-        const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has([data-list-part=row] > [data-list-part=disclosure])')});
+        const row = document.querySelector(${JSON.stringify('[data-list-part=item]:has([data-list-part=trailing] > [data-list-part=disclosure])')});
         row.scrollIntoView({ block: 'center' });
         const { height, width, x, y } = row.getBoundingClientRect();
         return [x + width / 2, y + height / 2];
@@ -1492,10 +1593,10 @@ export const tests = [
       );
       await page.click(toggle);
       await sleep(500);
-      assert.deepEqual(await state(), [68, false]);
+      assert.deepEqual(await state(), [0, true]);
       await page.click(toggle);
       await sleep(500);
-      assert.deepEqual(await state(), [0, true]);
+      assert.deepEqual(await state(), [68, false]);
     },
   },
   {
@@ -1505,13 +1606,17 @@ export const tests = [
       const ends =
         await page.evaluate(`[...document.querySelector(${JSON.stringify('[data-list-part=group]')}).children].slice(1).map((li) => {
         const item = li.querySelector(${JSON.stringify('[data-list-part=row]')});
-        // Relative to its grid area, from the text's column (the title's).
+        // (In its row: from the text's column, the title's, to its end.)
         const style = getComputedStyle(item, '::before');
         const box = item.getBoundingClientRect();
         const start = item.querySelector(${JSON.stringify('[data-list-part=title]')}).getBoundingClientRect().left - box.left;
-        return Math.round(box.width - start - parseFloat(style.left) - parseFloat(style.width));
+        return [Math.round(parseFloat(style.left) - start), Math.round(box.width - parseFloat(style.left) - parseFloat(style.width))];
       })`);
-      assert.deepEqual(ends, [16, 16]);
+      // From the title, to 16px before the edge.
+      assert.deepEqual(ends, [
+        [0, 16],
+        [0, 16],
+      ]);
     },
   },
   {

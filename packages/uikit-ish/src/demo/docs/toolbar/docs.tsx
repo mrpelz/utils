@@ -46,8 +46,8 @@ export const toolbarRootRows: readonly PropRow[] = [
     union('block-end', 'block-start'),
     code(union('block-end')),
     <>
-      Where the bar is: at the bottom (48px capsules, the home indicator’s space
-      below), or at the top (a navigation bar: 44px capsules; see{' '}
+      Where the bar sits: at the bottom (48px capsules, with room for the home
+      indicator below), or at the top as a navigation bar (44px capsules; see{' '}
       <a href={publicUrl('header')}>Header</a>).
     </>,
   ],
@@ -58,9 +58,9 @@ export const toolbarRootRows: readonly PropRow[] = [
       <code>bright</code>, or <code>dim</code> in dark mode
     </>,
     <>
-      Brightness of the content behind the bar’s glass: a plain page, or a
-      background of the app’s (e.g. a picture); <code>adaptive</code>: by what’s
-      behind it (sampled as it scrolls or resizes).
+      How bright the content behind the bar’s glass is: a plain page, or a
+      background of the app’s own (for example a picture). <code>adaptive</code>{' '}
+      follows what’s behind it, sampled as it scrolls or resizes.
     </>,
   ],
   [
@@ -84,7 +84,7 @@ export const toolbarRootRows: readonly PropRow[] = [
     'orientation',
     union('horizontal', 'vertical'),
     code(union('horizontal')),
-    'The orientation of the toolbar (its arrow keys; laid out in a row either way).',
+    'The orientation of the toolbar. It sets the arrow keys; the bar is laid out in a row either way.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -94,7 +94,7 @@ const sideRows = (side: string): readonly PropRow[] => [
     'children',
     'ReactNode',
     undefined,
-    `The bar’s ${side} capsules: buttons of their own, groups.`,
+    `The bar’s ${side} capsules: buttons on their own, or groups.`,
   ],
   ...renderRows('div', 'HTMLElement'),
 ];
@@ -114,28 +114,29 @@ export const toolbarGroupRows: readonly PropRow[] = [
     'number | string',
     code('12'),
     <>
-      The space between its buttons (a length; a number: px), not at its ends
-      (also <code>--uikit-toolbar-group-gap</code>).
+      The space between its buttons, not at its ends (a length, or a number in
+      px; also <code>--uikit-toolbar-group-gap</code>).
     </>,
   ],
   [
     'prominent',
     'boolean',
     code('false'),
-    'A tinted capsule, its content white.',
+    'Tints the capsule, and turns its content white.',
   ],
   [
     'tint',
     'string',
     'the app’s tint',
-    'The tinted capsule’s color (given, the capsule is tinted).',
+    'The tinted capsule’s color. Setting it tints the capsule.',
   ],
   [
     'textColor',
     'string',
     'the glass’ (tinted: white)',
     <>
-      Its content’s color (e.g. for a light <code>tint</code>; unblended).
+      Its content’s color, not blended (for example for a light{' '}
+      <code>tint</code>).
     </>,
   ],
   disabledRow('all toolbar items in the group are'),
@@ -148,14 +149,15 @@ export const toolbarButtonRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Of its own (not in a{' '}
+      On its own (not in a{' '}
       <PartLink
         component="toolbar"
         part="Toolbar.Group"
       >
         Group
       </PartLink>
-      ): tinted glass (<code>variant=&quot;glass-prominent&quot;</code>).
+      ), it gets tinted glass (<code>variant=&quot;glass-prominent&quot;</code>
+      ).
     </>,
   ],
   [
@@ -172,8 +174,9 @@ export const toolbarButtonRows: readonly PropRow[] = [
       <code>glass</code> (in a group: the capsule’s)
     </>,
     <>
-      A <a href={publicUrl('button')}>Button</a>’s variant. Of its own, any; in
-      a group, the classic ones only (the glass is the capsule’s).
+      A <a href={publicUrl('button')}>Button</a>’s variant. On its own, any of
+      them. In a group, only the classic ones, because the glass is the
+      capsule’s.
     </>,
   ],
   [
@@ -181,29 +184,29 @@ export const toolbarButtonRows: readonly PropRow[] = [
     union('capsule', 'circle', 'roundedRectangle'),
     code(union('capsule')),
     <>
-      <code>circle</code>: for a symbol (36px in a group, 48px of its own; top:
-      44px).
+      <code>circle</code> suits a symbol (36px in a group, 48px on its own, 44px
+      at the top).
     </>,
   ],
   [
     'size',
     union('large', 'medium', 'small'),
     undefined,
-    'Of its own, in a classic variant: its size (glass ones are the bar’s; in a group: the capsule’s).',
+    'Its size, on its own in a classic variant. Glass buttons take the bar’s size, and buttons in a group the capsule’s.',
   ],
   [
     'context',
     glassContexts,
     'the bar’s',
-    'Of its own: the brightness behind its glass (in a group: the capsule’s).',
+    'On its own, how bright it is behind its glass. In a group, the capsule’s applies.',
   ],
   [
     'tint',
     'string',
     'the primary color',
     <>
-      Its color (its label or symbol; tinted glass). <code>destructive</code>{' '}
-      wins.
+      Its color: its label or symbol, or its glass when tinted.{' '}
+      <code>destructive</code> wins over it.
     </>,
   ],
   ['destructive', 'boolean', code('false'), 'Tints the button red.'],
@@ -211,7 +214,7 @@ export const toolbarButtonRows: readonly PropRow[] = [
     'fill',
     'boolean',
     code('false'),
-    'Grows to fill the free space (e.g. of its capsule, or of the bar).',
+    'Grows to fill the free space, for example of its capsule or of the bar.',
   ],
   [
     'cursor',
@@ -219,7 +222,7 @@ export const toolbarButtonRows: readonly PropRow[] = [
     <>
       <code>pointer</code> (disabled: <code>not-allowed</code>)
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   secondaryClickRow,
   disabledRow('the item is'),
@@ -233,14 +236,15 @@ export const toolbarTitleRows: readonly PropRow[] = [
     'alignStart',
     'boolean',
     code('false'),
-    'Aligned to the bar’s start, taking its free space; otherwise centered in the bar.',
+    'Aligns it to the bar’s start, taking the free space. Otherwise, it’s centered in the bar.',
   ],
   [
     'children',
     'ReactNode',
     undefined,
     <>
-      The title (e.g. a <code>{'<span>'}</code>, truncated), and an optional{' '}
+      The title (for example a <code>{'<span>'}</code>, truncated), and an
+      optional{' '}
       <PartLink
         component="toolbar"
         part="Toolbar.Subtitle"

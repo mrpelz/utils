@@ -1,9 +1,13 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { Avatar, Badge } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   photo,
   propOptionsContent,
@@ -33,15 +37,37 @@ export const AvatarDemo: FunctionComponent = () => {
     { external: externalImage, title: 'image' },
   );
 
-  const badge = content.badge ? <Badge>3</Badge> : null;
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Avatar.Image': ['src'],
+          'Avatar.Root': [],
+          Badge: [],
+          'Avatar.Fallback': [],
+          'Avatar.Group': ['size'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+  const badge = content.badge ? <Badge {...partProps.Badge}>3</Badge> : null;
   const person = (index: number) => (
-    <Avatar.Root key={index}>
+    <Avatar.Root
+      key={index}
+      {...partProps['Avatar.Root']}
+    >
       {index === 0 ? (
         <Avatar.Image {...propsImage} />
       ) : (
-        <Avatar.Image src={photo(index * 90)} />
+        <Avatar.Image
+          {...partProps['Avatar.Image']}
+          src={photo(index * 90)}
+        />
       )}
-      <Avatar.Fallback>{content.initials}</Avatar.Fallback>
+      <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+        {content.initials}
+      </Avatar.Fallback>
     </Avatar.Root>
   );
 
@@ -49,9 +75,9 @@ export const AvatarDemo: FunctionComponent = () => {
     <Component
       isCentered
       baseUiId="avatar"
-      controls={[controlContent, controlRoot, controlImage]}
+      controls={[controlContent, controlRoot, controlImage, partControls]}
       id={id}
-      state={[stateContent, stateRoot, stateImage]}
+      state={[stateContent, stateRoot, stateImage, partState]}
       title="Avatar"
     >
       <div style={{ padding: 16 }}>
@@ -61,11 +87,16 @@ export const AvatarDemo: FunctionComponent = () => {
             {...propsRoot}
           >
             <Avatar.Image {...propsImage} />
-            <Avatar.Fallback>{content.initials}</Avatar.Fallback>
+            <Avatar.Fallback {...partProps['Avatar.Fallback']}>
+              {content.initials}
+            </Avatar.Fallback>
             {badge}
           </Avatar.Root>
         ) : (
-          <Avatar.Group size={propsRoot.size}>
+          <Avatar.Group
+            {...partProps['Avatar.Group']}
+            size={propsRoot.size}
+          >
             {Array.from({ length: content.people }, (_, index) =>
               person(index),
             )}

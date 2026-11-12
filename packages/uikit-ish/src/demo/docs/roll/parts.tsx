@@ -3,10 +3,14 @@ import { FunctionComponent, useMemo } from 'react';
 import { Roll } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { partPropMaps } from '../part-options.js';
 import {
   rollColumnRows,
   rollItemRows,
@@ -34,24 +38,38 @@ const RootPart: FunctionComponent = () => {
     title: 'Roll.Root',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Roll.Column': ['aria-label', 'defaultValue'],
+          'Roll.Item': ['value'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Roll.Root"
     >
       <Roll.Root {...props}>
         <Roll.Column
+          {...partProps['Roll.Column']}
           aria-label="Fruit"
           defaultValue="Cherry"
         >
           {fruits.map((fruit) => (
             <Roll.Item
               key={fruit}
+              {...partProps['Roll.Item']}
               value={fruit}
             />
           ))}
@@ -71,18 +89,33 @@ const ColumnPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Roll.Column' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Roll.Item': ['value'],
+            'Roll.Root': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Roll.Column"
     >
-      <Roll.Root>
+      <Roll.Root {...partProps['Roll.Root']}>
         <Roll.Column
           key={elementKey}
           {...props}
@@ -90,6 +123,7 @@ const ColumnPart: FunctionComponent = () => {
           {hours.map((hour) => (
             <Roll.Item
               key={hour}
+              {...partProps['Roll.Item']}
               value={hour}
             />
           ))}
@@ -110,18 +144,32 @@ const ItemPart: FunctionComponent = () => {
     title: 'Roll.Item (Durian)',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Roll.Item (others)': ['value'],
+          'Roll.Column': ['aria-label', 'defaultValue'],
+          'Roll.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Roll.Item"
     >
-      <Roll.Root>
+      <Roll.Root {...partProps['Roll.Root']}>
         <Roll.Column
+          {...partProps['Roll.Column']}
           aria-label="Fruit"
           defaultValue="Cherry"
         >
@@ -129,7 +177,9 @@ const ItemPart: FunctionComponent = () => {
             <Roll.Item
               key={fruit}
               value={fruit}
-              {...(fruit === 'Durian' ? props : {})}
+              {...(fruit === 'Durian'
+                ? props
+                : partProps['Roll.Item (others)'])}
             />
           ))}
         </Roll.Column>
@@ -149,24 +199,39 @@ const SeparatorPart: FunctionComponent = () => {
     title: 'Roll.Separator',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Roll.Column': ['aria-label', 'defaultValue'],
+          'Roll.Item': ['value'],
+          'Roll.Root': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Roll.Separator"
     >
-      <Roll.Root>
+      <Roll.Root {...partProps['Roll.Root']}>
         <Roll.Column
+          {...partProps['Roll.Column']}
           aria-label="Hours"
           defaultValue={9}
         >
           {hours.map((hour) => (
             <Roll.Item
               key={hour}
+              {...partProps['Roll.Item']}
               value={hour}
             />
           ))}
@@ -178,12 +243,14 @@ const SeparatorPart: FunctionComponent = () => {
           :
         </Roll.Separator>
         <Roll.Column
+          {...partProps['Roll.Column']}
           aria-label="Minutes"
           defaultValue={41}
         >
           {minutes.map((minute) => (
             <Roll.Item
               key={minute}
+              {...partProps['Roll.Item']}
               value={minute}
             >
               {String(minute).padStart(2, '0')}
@@ -199,7 +266,7 @@ const SeparatorPart: FunctionComponent = () => {
 export const RollParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: the wheel, the band across its center.</li>
+      <li>Root: the wheel, with the band across its center.</li>
       <li>Column: a list of rows, scrolled to select one.</li>
       <li>Item: a row.</li>
       <li>Separator: text between columns (optional).</li>
@@ -243,7 +310,7 @@ export const RollParts: FunctionComponent = () => (
       <code>Roll.Root</code>
     </Heading>
     <ul>
-      <li>The wheel (216px high): its columns side by side, centered.</li>
+      <li>The wheel (216px tall), with its columns side by side, centered.</li>
       <li>The band behind its center marks the selected rows.</li>
       <li>
         Renders a <code>div</code>.
@@ -261,21 +328,22 @@ export const RollParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Rows on a cylinder, scrolled natively (touch, wheel, momentum) or
-        dragged with a mouse, snapping to them; settled, the centered row is
-        selected.
+        Rows on a cylinder, scrolled natively (by touch, wheel and momentum) or
+        dragged with a mouse, snapping to them. Once it settles, the centered
+        row is selected.
       </li>
       <li>
-        State: <code>value</code> or <code>defaultValue</code>,{' '}
-        <code>onValueChange</code> (with why), <code>onHighlightChange</code>.
+        Its state: <code>value</code> or <code>defaultValue</code>,{' '}
+        <code>onValueChange</code> (with the reason), and{' '}
+        <code>onHighlightChange</code>.
       </li>
       <li>
-        <code>editable</code> (typed values), <code>loop</code> (endless),{' '}
-        <code>align</code>, <code>disabled</code>.
+        Also <code>editable</code> (typed values), <code>loop</code> (endless),{' '}
+        <code>align</code> and <code>disabled</code>.
       </li>
       <li>
         Renders a <code>div</code> (its frame) around a <code>div</code> with
-        the <code>listbox</code> role: name it (<code>aria-label</code>).
+        the <code>listbox</code> role. Name it with <code>aria-label</code>.
       </li>
     </ul>
     <ColumnPart />
@@ -290,11 +358,11 @@ export const RollParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A row: its <code>value</code>, shown as text unless given children.
+        A row: its <code>value</code>, shown as text unless it has children.
       </li>
       <li>
-        Pressed, its column scrolls to it. <code>disabled</code>: shown, but the
-        column moves on from it.
+        Pressing it scrolls its column to it. When <code>disabled</code>, it’s
+        shown, but the column moves on from it.
       </li>
       <li>
         Renders a <code>div</code> with the <code>option</code> role.
@@ -311,10 +379,10 @@ export const RollParts: FunctionComponent = () => (
       <code>Roll.Separator</code>
     </Heading>
     <ul>
-      <li>Text between columns, at the band (e.g. a time’s “:”).</li>
+      <li>Text between columns, at the band (for example a time’s “:”).</li>
       <li>
-        Renders a <code>div</code>; hide it from assistive tech (
-        <code>aria-hidden</code>) when it only decorates.
+        Renders a <code>div</code>. Hide it from assistive technology (
+        <code>aria-hidden</code>) when it’s only decorative.
       </li>
     </ul>
     <SeparatorPart />

@@ -27,7 +27,7 @@ const glassContext = (of: string): PropRow => [
   <>
     <code>bright</code>, or <code>dim</code> in dark mode
   </>,
-  `Brightness of the content behind the glass${of}: a plain page, or a background of the app’s (e.g. a picture).`,
+  `How bright the content behind the glass${of} is: a plain page, or a background of the app’s own (for example a picture).`,
 ];
 
 export const tabBarRootRows: readonly PropRow[] = [
@@ -83,7 +83,7 @@ export const tabBarListRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Minimized: only the groups and tabs marked{' '}
+      Minimizes the bar: only the groups and tabs marked{' '}
       <code>visibleWhenCollapsed</code> remain, by default as symbols in
       circles. The bar keeps its width.
     </>,
@@ -92,21 +92,21 @@ export const tabBarListRows: readonly PropRow[] = [
     'collapsedContent',
     collapsedContents,
     'its symbol, or, without one, its label',
-    'What the collapsed bar’s tab shows: its symbol in a circle, its label, or both side by side in a capsule.',
+    'What a tab of the collapsed bar shows: its symbol in a circle, its label, or both side by side in a capsule.',
   ],
   [
     'collapsedPosition',
     collapsedPositions,
     code('inline-start'),
-    'Where the collapsed bar’s tab is, along the bar.',
+    'Where a tab of the collapsed bar sits, along the bar.',
   ],
   [
     'size',
     union('compact', 'regular'),
     code('compact'),
     <>
-      A size class: <code>compact</code> is the phone tab bar (content stacked),{' '}
-      <code>regular</code> the tablet tab bar (content in a row).
+      A size class: <code>compact</code> is a phone’s tab bar (symbol above
+      label), <code>regular</code> a tablet’s (symbol and label in a row).
     </>,
   ],
   glassContext(''),
@@ -135,9 +135,10 @@ export const tabBarGroupRows: readonly PropRow[] = [
     'boolean',
     code('false'),
     <>
-      Remains while the bar is collapsed, with its tabs marked so; groups not
-      marked collapse away (<PartLink part="collapsedSelection" /> picks them:
-      the active tab and its group).
+      Keeps the group while the bar is collapsed, together with its tabs that
+      are marked too. Groups that aren’t marked collapse away. Use{' '}
+      <PartLink part="collapsedSelection" /> to pick them: the active tab and
+      its group.
     </>,
   ],
   [
@@ -146,7 +147,7 @@ export const tabBarGroupRows: readonly PropRow[] = [
     <>
       the list’s <code>collapsedContent</code>
     </>,
-    'What the collapsed bar’s tabs in the group show.',
+    'What the group’s tabs show while the bar is collapsed.',
   ],
   [
     'collapsedPosition',
@@ -154,9 +155,14 @@ export const tabBarGroupRows: readonly PropRow[] = [
     <>
       the list’s <code>collapsedPosition</code>
     </>,
-    'Where the group is, along the collapsed bar.',
+    'Where the group sits, along the collapsed bar.',
   ],
-  ['shape', shapes, 'by their content', 'Default shape of the contained tabs.'],
+  [
+    'shape',
+    shapes,
+    'by their content',
+    'The default shape of the group’s tabs.',
+  ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
@@ -187,21 +193,21 @@ export const tabBarTabRows: readonly PropRow[] = [
     'visibleWhenCollapsed',
     'boolean',
     code('false'),
-    'Remains while the bar is collapsed, in its group (if the group does); tabs not marked collapse away. Several remaining tabs show the selection on the active one.',
+    'Keeps the tab while the bar is collapsed, if its group remains too. Tabs that aren’t marked collapse away. With several remaining tabs, the selection shows on the active one.',
   ],
   [
     'collapsedContent',
     collapsedContents,
     'the group’s, or the list’s',
-    'What the tab shows while its bar is collapsed. Never nothing: a tab with only a label shows its label, one with only a symbol its symbol.',
+    'What the tab shows while its bar is collapsed. It never shows nothing: a tab with only a label shows its label, and one with only a symbol shows its symbol.',
   ],
   [
     'shape',
     shapes,
     'the group’s, or by its content',
     <>
-      <code>circle</code>: sized like a symbol-only tab; <code>capsule</code>:
-      like a stacked tab.
+      <code>circle</code> sizes it like a tab with only a symbol.{' '}
+      <code>capsule</code> sizes it like a stacked tab.
     </>,
   ],
   [
@@ -209,9 +215,9 @@ export const tabBarTabRows: readonly PropRow[] = [
     'MouseEventHandler<HTMLElement>',
     undefined,
     <>
-      A secondary click: a right click (or Control-click: the{' '}
+      Called on a secondary click: a right click or Control-click (the{' '}
       <code>contextmenu</code> event, whose menu it replaces), or a touch held
-      for 500ms (a long press), whose click then doesn’t follow. Not while
+      for 500ms (a long press), after which no click follows. Not called while
       disabled.
     </>,
   ],
@@ -221,7 +227,7 @@ export const tabBarTabRows: readonly PropRow[] = [
     <>
       <code>pointer</code> (disabled: <code>not-allowed</code>)
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   nativeButtonRow(true),
   ...baseUiRows('button', 'HTMLElement'),
@@ -259,8 +265,9 @@ export const tabBarAccessoryRows: readonly PropRow[] = [
     union('both', 'expanded', 'collapsed'),
     code('both'),
     <>
-      The bar’s states it shows in: <code>both</code> morphs between its places;
-      otherwise it fades out and in as the bar collapses and expands.
+      Which of the bar’s states it shows in. With <code>both</code>, it morphs
+      between its two places. Otherwise, it fades out and in as the bar
+      collapses and expands.
     </>,
   ],
   glassContext(' (as the list’s)'),
@@ -281,9 +288,9 @@ export const collapsedSelectionRows: readonly PropRow[] = [
     '{ remains: boolean; tab: number }[]',
     undefined,
     <>
-      Per group: whether it remains (the active tab’s group; without one, the
-      first), and its tab (the active one, or its first) by index; for{' '}
-      <code>visibleWhenCollapsed</code>.
+      For each group: whether it remains (the active tab’s group, or the first
+      one without an active tab), and which tab remains, by index (the active
+      one, or the first). Use it for <code>visibleWhenCollapsed</code>.
     </>,
   ],
 ];

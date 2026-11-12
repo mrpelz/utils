@@ -83,7 +83,7 @@ export type {
 //   overrides this (`circle`: a circle in both sizes). Labels reserve their
 //   selected width, so selecting a tab doesn't shift the tabs.
 // - The bar's inline padding is always 32px.
-// - No padding below the groups: the safe area is its anchor's (a
+// - No padding below the groups: the safe area inset is its anchor's (a
 //   `Viewport.BlockEnd`), so it sits right above it.
 // - In a bar wider than its groups, the space between them widens, the first
 //   at the bar's start, as when collapsed.

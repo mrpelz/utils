@@ -18,16 +18,16 @@ const itemRows: readonly PropRow[] = [
     'destructive',
     'boolean',
     code('false'),
-    'Red content (destructive), e.g. Delete.',
+    'Turns its content red (destructive), for example for Delete.',
   ],
   [
     'cursor',
     'string (a CSS cursor)',
     <>
-      <code>pointer</code> with a click handler (toggles, links, submenu
-      triggers: always), otherwise or while disabled <code>not-allowed</code>
+      <code>pointer</code> with a click handler (always for toggles, links and
+      submenu triggers), otherwise or while disabled <code>not-allowed</code>
     </>,
-    'The cursor (where the pointer hovers).',
+    'The cursor shown while the pointer hovers it.',
   ],
   [
     'disabled',
@@ -79,9 +79,9 @@ export const menuRootRows: readonly PropRow[] = [
     union('compact', 'regular'),
     code(union('compact')),
     <>
-      The size class, for all its popups: <code>compact</code> (a phone’s menu:
-      40px items, submenus over their trigger) or <code>regular</code> (a
-      tablet’s: 36px items, submenus beside it). E.g. from{' '}
+      The size class, for all its popups: <code>compact</code> (a phone’s menu,
+      with 40px items and submenus over their trigger) or <code>regular</code>{' '}
+      (a tablet’s, with 36px items and submenus next to it). For example from{' '}
       <PartLink
         component="viewport"
         part="useSizeClass"
@@ -105,9 +105,9 @@ export const menuRootRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the menu is opened or closed (with Base UI’s
-      event details: the <code>reason</code>, e.g. <code>trigger-press</code>,{' '}
-      <code>item-press</code>, <code>outside-press</code>,{' '}
-      <code>escape-key</code>).
+      event details: the <code>reason</code>, for example{' '}
+      <code>trigger-press</code>, <code>item-press</code>,{' '}
+      <code>outside-press</code> or <code>escape-key</code>).
     </>,
   ],
   [
@@ -139,8 +139,8 @@ export const menuRootRows: readonly PropRow[] = [
     'boolean',
     code('true'),
     <>
-      Whether moving the pointer over items should highlight them (the selection
-      follows the pointer).
+      Whether moving the pointer over items should highlight them, so the
+      selection follows the pointer.
     </>,
   ],
   [
@@ -210,7 +210,7 @@ export const menuRootRows: readonly PropRow[] = [
     'ReactNode | ((props: { payload }) => ReactNode)',
     undefined,
     <>
-      Its trigger and its portal; or a function of the active trigger’s{' '}
+      Its trigger and its portal, or a function of the active trigger’s{' '}
       <code>payload</code>.
     </>,
   ],
@@ -252,9 +252,9 @@ export const menuSubmenuRootRows: readonly PropRow[] = [
         component="menu"
         part="Menu.SubmenuTrigger"
       />{' '}
-      and its portal (its own positioner and popup). Its size: its root menu’s;
-      in an <a href={publicUrl('edit-menu')}>Edit menu</a>, <code>regular</code>
-      .
+      and its portal (its own positioner and popup). It takes its root menu’s
+      size, and is <code>regular</code> in an{' '}
+      <a href={publicUrl('edit-menu')}>Edit Menu</a>.
     </>,
   ],
 ];
@@ -265,11 +265,11 @@ export const menuTriggerRows: readonly PropRow[] = [
     union('click', 'secondaryClick'),
     code(union('click')),
     <>
-      What opens the menu: a click, or a secondary click (a right click; a touch
-      held, then dragged on to the items), a click then being the trigger’s own
-      (e.g. a back button’s history). On touch, a held press also selects the
-      trigger’s text (and shows the browser’s text menu): unless it should stay
-      selectable, turn that off on the trigger (
+      What opens the menu: a click, or a secondary click (a right click, or a
+      held touch dragged on to the items), with a click then staying the
+      trigger’s own (for example a back button with a history). On touch, a held
+      press also selects the trigger’s text and shows the browser’s text menu.
+      Unless the text should stay selectable, turn that off on the trigger (
       <PartLink
         component="viewport"
         part="useTextActionsPrevention"
@@ -281,7 +281,7 @@ export const menuTriggerRows: readonly PropRow[] = [
     'onSecondaryClick',
     '(event: MouseEvent) => void',
     undefined,
-    'Called on a secondary click (a right click, a touch held).',
+    'Called on a secondary click (a right click, or a held touch).',
   ],
   [
     'openOnHover',
@@ -342,7 +342,7 @@ export const menuTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
+            {row[3]} For example a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -387,7 +387,7 @@ export const menuPositionerRows: readonly PropRow[] = [
       <code>{union('block-end')}</code> (a submenu: beside its trigger, compact:
       below it)
     </>,
-    'Its side of its anchor (logical); it moves to the other side to avoid collisions.',
+    'Which side of its anchor it’s on (logical). It moves to the other side to avoid collisions.',
   ],
   [
     'align',
@@ -440,7 +440,7 @@ export const menuPopupRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its items, groups, separators, quick actions; taller than the room beside its trigger, it grows over it (see the positioner’s collisionAvoidance), scrolling only taller than the screen.',
+    'Its items, groups, separators and quick actions. When it’s taller than the room next to its trigger, it grows over it (see the positioner’s collisionAvoidance), and it only scrolls when it’s taller than the screen.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -535,7 +535,7 @@ export const menuItemIndicatorRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     'a checkmark',
-    'What shows while checked (a checkmark, drawn as a stroke).',
+    'What shows while it’s checked (a checkmark, drawn as a stroke).',
   ],
   ...baseUiRows('span', 'HTMLSpanElement'),
 ];
@@ -594,7 +594,7 @@ export const menuRadioItemRows: readonly PropRow[] = [
     'value',
     'any',
     undefined,
-    'Value of the radio item (required): the group’s value when it’s selected.',
+    'Value of the radio item (required), which becomes the group’s value when it’s selected.',
   ],
   [
     'closeOnClick',
@@ -645,7 +645,7 @@ export const menuSubmenuTriggerRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'An item’s contents; a chevron after them (compact and open: turned down).',
+    'An item’s contents, with a chevron after them (turned down when compact and open).',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -661,7 +661,7 @@ export const menuGroupRows: readonly PropRow[] = [
         component="menu"
         part="Menu.GroupLabel"
       />{' '}
-      and items (e.g. a{' '}
+      and items (for example a{' '}
       <PartLink
         component="menu"
         part="Menu.RadioGroup"
@@ -677,7 +677,7 @@ export const menuGroupLabelRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'The section’s title, naming its group.',
+    'The section’s title, which names its group.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -703,7 +703,7 @@ export const menuQuickActionsRows: readonly PropRow[] = [
         component="menu"
         part="Menu.QuickAction"
       />
-      s (2 to 4), in a row at the popup’s top.
+      s (2 to 4), in a row at the top of the popup.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -750,8 +750,8 @@ export const menuIconRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      A <a href={publicUrl('symbol')}>Symbol</a> (Body; regular: Subheadline),
-      28px wide.
+      A <a href={publicUrl('symbol')}>Symbol</a> (Body, or Subheadline when
+      regular), 28px wide.
     </>,
   ],
   ...elementRows('span', 'HTMLSpanElement'),
@@ -762,7 +762,7 @@ export const menuLabelRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'The item’s text (17px; regular: 15px).',
+    'The item’s text (17px, or 15px when regular).',
   ],
   ...elementRows('span', 'HTMLSpanElement'),
 ];
@@ -783,8 +783,8 @@ export const menuShortcutRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      The keyboard shortcut (e.g. <code>⌘C</code>): a string’s glyphs each in a
-      14px cell. Shown only; the app handles the keys.
+      The keyboard shortcut (for example <code>⌘C</code>): a string’s glyphs,
+      each in a 14px cell. It’s only shown; the app handles the keys.
     </>,
   ],
   ...elementRows('kbd', 'HTMLElement'),
@@ -800,8 +800,8 @@ export const menuHandleTypeRows: readonly PropRow[] = [
     'type parameter',
     code('unknown'),
     <>
-      What its triggers pass the menu as they open it (their{' '}
-      <code>payload</code>; the root’s children as a function of it).
+      What its triggers pass to the menu as they open it (their{' '}
+      <code>payload</code>). The root’s children can be a function of it.
     </>,
   ],
 ];
@@ -813,7 +813,7 @@ export const menuHandleRows: readonly PropRow[] = [
     'MenuHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>Menu.Handle</code>): passed to a{' '}
+      A handle (Base UI’s <code>Menu.Handle</code>). Pass it to a{' '}
       <PartLink
         component="menu"
         part="Menu.Root"
@@ -823,8 +823,8 @@ export const menuHandleRows: readonly PropRow[] = [
         component="menu"
         part="Menu.Trigger"
       />
-      s (their <code>handle</code>); from the hook, the same for the component’s
-      lifetime.
+      s (their <code>handle</code>). The hook returns the same one for the
+      component’s lifetime.
     </>,
   ],
   [

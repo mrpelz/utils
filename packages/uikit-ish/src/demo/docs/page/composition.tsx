@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -15,6 +15,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -28,6 +30,7 @@ import {
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { pages } from '../navigation/content.js';
+import { partPropMaps } from '../part-options.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
 
@@ -121,96 +124,186 @@ const viewportCode = `<Viewport.Content>
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** A page of grouped lists, on the grouped background (the default). */
-const BackgroundGrouped: FunctionComponent = () => (
-  <Component
-    isInline
-    id="page-composition-backgrounds"
-    stage="phone"
-    title="Page, grouped"
-  >
-    <Viewport.Content>
-      <Header.Root>
-        <Viewport.BlockStart>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Leading />
-            <Toolbar.Title>
+const BackgroundGrouped: FunctionComponent = () => {
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Header.LargeTitle': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Page.Root': [],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState('page-composition-backgrounds') },
+  );
+  return (
+    <Component
+      isInline
+      controls={[partControls]}
+      id="page-composition-backgrounds"
+      stage="phone"
+      state={[partState]}
+      title="Page, grouped"
+    >
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Header.Root>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                <span>Settings</span>
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <Header.LargeTitle {...partProps['Header.LargeTitle']}>
               <span>Settings</span>
-            </Toolbar.Title>
-            <Toolbar.Trailing />
-          </Toolbar.Root>
-        </Viewport.BlockStart>
-        <Page.Root>
-          <Viewport.Padding edge="block-start" />
-          <Header.LargeTitle>
-            <span>Settings</span>
-          </Header.LargeTitle>
+            </Header.LargeTitle>
 
-          <List.Root>
-            <List.Section>
-              <List.Group>
-                {Object.values(pages)
-                  .slice(0, 5)
-                  .map(({ title }) => (
-                    <List.Item key={title}>
-                      <List.Content>
-                        <List.Title>{title}</List.Title>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
+                  {Object.values(pages)
+                    .slice(0, 5)
+                    .map(({ title }) => (
+                      <List.Item
+                        key={title}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {title}
+                          </List.Title>
+                        </List.Content>
+                      </List.Item>
+                    ))}
+                </List.Group>
+              </List.Section>
+            </List.Root>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
+          </Page.Root>
+        </Header.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+/** A page of a plain list, on the plain background. */
+const BackgroundPlain: FunctionComponent = () => {
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Header.LargeTitle': [],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': ['listStyle'],
+          'List.Section': [],
+          'List.Title': [],
+          'Page.Root': ['background'],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState('page-composition-backgrounds-plain') },
+  );
+  return (
+    <Component
+      isInline
+      controls={[partControls]}
+      id="page-composition-backgrounds-plain"
+      stage="phone"
+      state={[partState]}
+      title="Page, plain"
+    >
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Header.Root>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
+                <span>Contacts</span>
+              </Toolbar.Title>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
+            </Toolbar.Root>
+          </Viewport.BlockStart>
+          <Page.Root
+            {...partProps['Page.Root']}
+            background="plain"
+          >
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <Header.LargeTitle {...partProps['Header.LargeTitle']}>
+              <span>Contacts</span>
+            </Header.LargeTitle>
+
+            <List.Root
+              {...partProps['List.Root']}
+              listStyle="plain"
+            >
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
+                  {names.slice(0, 12).map((name) => (
+                    <List.Item
+                      key={name}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {name}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
-              </List.Group>
-            </List.Section>
-          </List.Root>
-          <Viewport.Padding edge="block-end" />
-        </Page.Root>
-      </Header.Root>
-    </Viewport.Content>
-  </Component>
-);
-
-/** A page of a plain list, on the plain background. */
-const BackgroundPlain: FunctionComponent = () => (
-  <Component
-    isInline
-    id="page-composition-backgrounds-plain"
-    stage="phone"
-    title="Page, plain"
-  >
-    <Viewport.Content>
-      <Header.Root>
-        <Viewport.BlockStart>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Leading />
-            <Toolbar.Title>
-              <span>Contacts</span>
-            </Toolbar.Title>
-            <Toolbar.Trailing />
-          </Toolbar.Root>
-        </Viewport.BlockStart>
-        <Page.Root background="plain">
-          <Viewport.Padding edge="block-start" />
-          <Header.LargeTitle>
-            <span>Contacts</span>
-          </Header.LargeTitle>
-
-          <List.Root listStyle="plain">
-            <List.Section>
-              <List.Group>
-                {names.slice(0, 12).map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
-                    </List.Content>
-                  </List.Item>
-                ))}
-              </List.Group>
-            </List.Section>
-          </List.Root>
-          <Viewport.Padding edge="block-end" />
-        </Page.Root>
-      </Header.Root>
-    </Viewport.Content>
-  </Component>
-);
+                </List.Group>
+              </List.Section>
+            </List.Root>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
+          </Page.Root>
+        </Header.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
 
 /** Pages in a stack: scroll one, push, pop: it's where it was. */
 const InAStack: FunctionComponent = () => {
@@ -225,74 +318,141 @@ const InAStack: FunctionComponent = () => {
     setKeys((current) => current.slice(0, -1));
   };
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.DrillIn': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Navigation.Back': ['aria-label', 'render'],
+            'Navigation.Root': ['onBack'],
+            'Navigation.Stack': [],
+            'Navigation.SwipeArea': [],
+            'Page.Root': [],
+            'Toolbar.Button': ['shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('page-composition-stack') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="page-composition-stack"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Pages in a stack"
     >
-      <Viewport.Content>
-        <Navigation.Root onBack={pop}>
-          <Navigation.SwipeArea />
-          <Navigation.Stack>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Navigation.Root
+          {...partProps['Navigation.Root']}
+          onBack={pop}
+        >
+          <Navigation.SwipeArea {...partProps['Navigation.SwipeArea']} />
+          <Navigation.Stack {...partProps['Navigation.Stack']}>
             {keys.map((key, index) => (
               <Header.Root key={key}>
-                <Viewport.BlockStart>
-                  <Toolbar.Root placement="block-start">
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
                     {index > 0 ? (
-                      <Toolbar.Leading>
+                      <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                         <Navigation.Back
+                          {...partProps['Navigation.Back']}
                           aria-label={pages[keys[index - 1] ?? '']?.title}
-                          render={<Toolbar.Button shape="circle" />}
+                          render={
+                            <Toolbar.Button
+                              {...partProps['Toolbar.Button']}
+                              shape="circle"
+                            />
+                          }
                         >
-                          <Button.Icon>
-                            <Symbol icon={sfChevronBackward} />
+                          <Button.Icon {...partProps['Button.Icon']}>
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={sfChevronBackward}
+                            />
                           </Button.Icon>
                         </Navigation.Back>
                       </Toolbar.Leading>
                     ) : null}
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>{pages[key]?.title}</span>
                     </Toolbar.Title>
                   </Toolbar.Root>
                 </Viewport.BlockStart>
-                <Page.Root>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {pages[key]?.children.map((child) => (
-                          <List.Item key={child}>
-                            <List.Content>
+                          <List.Item
+                            key={child}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => push(child)}
                               >
                                 {pages[child]?.title}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              <List.DrillIn />
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              <List.DrillIn {...partProps['List.DrillIn']} />
                             </List.Trailing>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
-                    <List.Section>
-                      <List.Group>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
                         {names.map((name) => (
-                          <List.Item key={name}>
-                            <List.Content>
-                              <List.Title>{name}</List.Title>
+                          <List.Item
+                            key={name}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Content {...partProps['List.Content']}>
+                              <List.Title {...partProps['List.Title']}>
+                                {name}
+                              </List.Title>
                             </List.Content>
                           </List.Item>
                         ))}
                       </List.Group>
                     </List.Section>
                   </List.Root>
-                  <Viewport.Padding edge="block-end" />
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Page.Root>
               </Header.Root>
             ))}
@@ -308,42 +468,102 @@ const InAColumn: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [selected, setSelected] = useState('inbox');
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Header.LargeTitle': [],
+            'Layout.Column': ['aria-label', 'defaultSize', 'floating'],
+            'Layout.Root': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': ['selected'],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'Page.Root': [],
+            'Sidebar.Root': ['aria-label'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('page-composition-column') },
+  );
+
   return (
     <Component
       isExpanded
       isInline
+      controls={[partControls]}
       id="page-composition-column"
       log={log}
       stage="tablet"
+      state={[partState]}
       title="Page beside a sidebar"
     >
-      <Viewport.Content>
-        <Layout.Root>
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Layout.Root {...partProps['Layout.Root']}>
           <Layout.Column
+            {...partProps['Layout.Column']}
             floating
             aria-label="Sidebar"
             defaultSize={300}
           >
-            <Sidebar.Root aria-label="Mailboxes">
-              <List.Root listStyle="sidebar">
+            <Sidebar.Root
+              {...partProps['Sidebar.Root']}
+              aria-label="Mailboxes"
+            >
+              <List.Root
+                {...partProps['List.Root']}
+                listStyle="sidebar"
+              >
                 {sidebarSections.map(([title, rows]) => (
-                  <List.Section key={title}>
-                    <List.Header prominence="nested">
-                      <List.Title>{title}</List.Title>
+                  <List.Section
+                    key={title}
+                    {...partProps['List.Section']}
+                  >
+                    <List.Header
+                      {...partProps['List.Header']}
+                      prominence="nested"
+                    >
+                      <List.Title {...partProps['List.Title']}>
+                        {title}
+                      </List.Title>
                     </List.Header>
-                    <List.Group>
+                    <List.Group {...partProps['List.Group']}>
                       {rows.map(([value, rowTitle, icon]) => (
                         <List.Item
                           key={value}
+                          {...partProps['List.Item']}
                           selected={selected === value}
                         >
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={icon} />
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={icon}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog(`select: ${value}`);
@@ -361,37 +581,54 @@ const InAColumn: FunctionComponent = () => {
               </List.Root>
             </Sidebar.Root>
           </Layout.Column>
-          <Layout.Column clearFloating>
+          <Layout.Column
+            {...partProps['Layout.Column']}
+            clearFloating
+          >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{rowTitles[selected]}</span>
                   </Toolbar.Title>
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <Header.LargeTitle>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                   <span>{rowTitles[selected]}</span>
                 </Header.LargeTitle>
 
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -405,73 +642,129 @@ const InAColumn: FunctionComponent = () => {
 const OverAViewport: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Header.LargeTitle': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('page-composition-viewport') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="page-composition-viewport"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Page beneath a bottom bar"
     >
       <>
-        <Viewport.Content>
+        <Viewport.Content {...partProps['Viewport.Content']}>
           <Header.Root>
-            <Viewport.BlockStart>
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading />
-                <Toolbar.Title>
+            <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
                   <span>Notes</span>
                 </Toolbar.Title>
-                <Toolbar.Trailing />
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
               </Toolbar.Root>
             </Viewport.BlockStart>
-            <Page.Root>
-              <Viewport.Padding edge="block-start" />
-              <Header.LargeTitle>
+            <Page.Root {...partProps['Page.Root']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                 <span>Notes</span>
               </Header.LargeTitle>
 
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{`Note for ${name}`}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title
+                            {...partProps['List.Title']}
+                          >{`Note for ${name}`}</List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Page.Root>
           </Header.Root>
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <Toolbar.Root>
-            <Toolbar.Leading>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Leading {...partProps['Toolbar.Leading']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Folders"
                 shape="circle"
                 onClick={() => addLog('Folders clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfFolder} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfFolder}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             </Toolbar.Leading>
-            <Toolbar.Title>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>{names.length} Notes</span>
             </Toolbar.Title>
-            <Toolbar.Trailing>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="New note"
                 shape="circle"
                 onClick={() => addLog('New note clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfSquareAndPencil} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfSquareAndPencil}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             </Toolbar.Trailing>
@@ -497,7 +790,7 @@ export const PageComposition: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A page holds a <a href={publicUrl('header')}>Header</a> and its content
-        (lists); it’s held by a stack, a column, a viewport’s content layer.
+        (lists). A stack, a column or a viewport’s content layer holds the page.
       </li>
     </ul>
 
@@ -509,12 +802,12 @@ export const PageComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Grouped lists (<code>insetGrouped</code>, <code>grouped</code>) on the
-        grouped background (the default): Settings’.
+        Grouped lists (<code>insetGrouped</code>, <code>grouped</code>) sit on
+        the grouped background (the default), as in a settings app.
       </li>
       <li>
-        Plain lists and other content on the plain background (
-        <code>background=&quot;plain&quot;</code>): Contacts’.
+        Plain lists and other content sit on the plain background (
+        <code>background=&quot;plain&quot;</code>), as in a contacts app.
       </li>
       <li>
         <strong>Library:</strong> the page’s backgrounds (
@@ -540,17 +833,18 @@ export const PageComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A{' '}
+        Pages are a{' '}
         <PartLink
           component="navigation"
           part="Navigation.Stack"
         />
-        ’s children, one per level, each scrolling on its own; the back button
-        in each pushed page’s bar, staying put between them.
+        ’s children, one per level, each scrolling on its own. The back button
+        sits in each pushed page’s bar and stays put between them.
       </li>
       <li>
-        Under the top one: hidden, kept mounted, so popping back finds it where
-        it was scrolled to (scroll Settings, drill in, go back).
+        The pages under the top one are hidden but stay mounted. So going back
+        finds a page where it was scrolled to (scroll Settings, drill in, and go
+        back to see it).
       </li>
       <li>
         <strong>Library:</strong> pages as a navigation stack’s children, kept
@@ -571,17 +865,18 @@ export const PageComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href={publicUrl('layout')}>Layout</a> column clear of a floating
-        one (<code>clearFloating</code>): its content inset by the sidebar’s
-        size, its background (and its bar’s edge) running underneath it.
+        In a <a href={publicUrl('layout')}>Layout</a> column next to a floating
+        one (<code>clearFloating</code>), its content is inset by the sidebar’s
+        size, while its background (and its bar’s edge) runs underneath it.
       </li>
       <li>
-        Resize the sidebar (its <code>defaultSize</code>, or resizable): the
-        inset follows.
+        Resize the sidebar (its <code>defaultSize</code>, or make it resizable),
+        and the inset follows.
       </li>
       <li>
-        <strong>Library:</strong> the page clear of a floating column (
-        <code>clearFloating</code>), its content inset by the sidebar’s size.
+        <strong>Library:</strong> the page kept clear of a floating column (
+        <code>clearFloating</code>), with its content inset by the sidebar’s
+        size.
       </li>
       <li>
         <strong>Demo:</strong> the sidebar’s rows and the selected one.
@@ -598,18 +893,18 @@ export const PageComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        In a <a href={publicUrl('viewport')}>Viewport</a>’s content layer, a
-        bottom <a href={publicUrl('toolbar')}>Toolbar</a> floating over the
+        In a <a href={publicUrl('viewport')}>Viewport</a>’s content layer, with
+        a bottom <a href={publicUrl('toolbar')}>Toolbar</a> floating above the
         page’s end.
       </li>
       <li>
-        Its end scrolls out from under the bar: a{' '}
+        Its end scrolls out from under the bar, thanks to a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        at the page’s end, as high as the bar (and one at its start, for its
-        header’s bar).
+        at the page’s end as tall as the bar. Another one sits at its start, for
+        its header’s bar.
       </li>
       <li>
         <strong>Library:</strong> the bottom bar (
@@ -617,7 +912,7 @@ export const PageComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        ) and the paddings making room for the bars (
+        ) and the paddings that make room for the bars (
         <PartLink
           component="viewport"
           part="Viewport.Padding"

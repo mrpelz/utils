@@ -29,9 +29,9 @@ export const alertRootRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the alert dialog is opened or closed (with Base
-      UI’s event details: the <code>reason</code>, e.g.{' '}
-      <code>trigger-press</code>, <code>close-press</code> (an action),{' '}
-      <code>escape-key</code>; <code>eventDetails.cancel()</code> keeps it as it
+      UI’s event details: the <code>reason</code>, for example{' '}
+      <code>trigger-press</code>, <code>close-press</code> (an action) or{' '}
+      <code>escape-key</code>. <code>eventDetails.cancel()</code> keeps it as it
       is).
     </>,
   ],
@@ -96,7 +96,7 @@ export const alertRootRows: readonly PropRow[] = [
     'ReactNode | ((props: { payload }) => ReactNode)',
     undefined,
     <>
-      Its trigger and its popup; or a function of the active trigger’s{' '}
+      Its trigger and its popup, or a function of the active trigger’s{' '}
       <code>payload</code>.
     </>,
   ],
@@ -137,8 +137,8 @@ export const alertTriggerRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      ID of the trigger: also the active trigger in controlled mode (the root’s{' '}
-      <code>triggerId</code>).
+      ID of the trigger. It also names the active trigger in controlled mode
+      (the root’s <code>triggerId</code>).
     </>,
   ],
   nativeButtonRow(true),
@@ -149,7 +149,7 @@ export const alertTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
+            {row[3]} For example a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -170,7 +170,7 @@ export const alertPopupRows: readonly PropRow[] = [
     <>
       <code>document.body</code>
     </>,
-    'Where its portal renders it (Base UI’s AlertDialog.Portal); centered in it, and its dimmed backdrop filling it, if it’s a containing block (e.g. transformed), as the views here.',
+    'Where its portal renders it (Base UI’s AlertDialog.Portal). If that’s a containing block (for example a transformed element, like the views here), the alert is centered in it, and its dimmed backdrop fills it.',
   ],
   [
     'initialFocus',
@@ -247,7 +247,7 @@ export const alertTitleRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its title (Headline): the alert’s accessible name.',
+    'Its title (Headline), which is the alert’s accessible name.',
   ],
   ...baseUiRows('h2', 'HTMLHeadingElement'),
 ];
@@ -257,7 +257,7 @@ export const alertDescriptionRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its message (Body): the alert’s accessible description.',
+    'Its message (Body), which is the alert’s accessible description.',
   ],
   ...baseUiRows('p', 'HTMLParagraphElement'),
 ];
@@ -303,7 +303,8 @@ export const alertFieldRows: readonly PropRow[] = [
     'string',
     undefined,
     <>
-      Its placeholder; without a label, name it (<code>aria-label</code>).
+      Its placeholder. Without a label, name the field with{' '}
+      <code>aria-label</code>.
     </>,
   ],
   ...baseUiRows('input', 'HTMLInputElement'),
@@ -314,7 +315,7 @@ export const alertActionsRows: readonly PropRow[] = [
     'stacked',
     'boolean',
     'with more than two actions',
-    'Its actions stacked, full width; otherwise side by side (two). More than two stack by themselves; stack two whose labels don’t fit side by side.',
+    'Stacks its actions at full width. Otherwise, two sit side by side. More than two stack on their own; stack two whose labels don’t fit side by side.',
   ],
   [
     'children',
@@ -326,7 +327,7 @@ export const alertActionsRows: readonly PropRow[] = [
         component="alert"
         part="Alert.Action"
       />
-      ): side by side, the cancel first; stacked, the cancel last.
+      ). Side by side, the cancel action comes first. Stacked, it comes last.
     </>,
   ],
   ...elementRows('div', 'HTMLDivElement'),
@@ -337,13 +338,13 @@ export const alertActionRows: readonly PropRow[] = [
     'variant',
     union('secondary', 'primary', 'destructive'),
     code(union('secondary')),
-    'Its kind: secondary (on a gray fill, e.g. Cancel), primary (in the tint, the default action), destructive (red text, e.g. Delete).',
+    'Its kind: secondary (on a gray fill, for example Cancel), primary (in the tint, for the default action) or destructive (red text, for example Delete).',
   ],
   [
     'children',
     'ReactNode',
     undefined,
-    'Its label: a verb or short phrase (Delete, Save), title case.',
+    'Its label: a verb or a short phrase in title case (Delete, Save).',
   ],
   nativeButtonRow(true),
   ...baseUiRows('button', 'HTMLButtonElement'),
@@ -359,8 +360,8 @@ export const alertHandleTypeRows: readonly PropRow[] = [
     'type parameter',
     code('unknown'),
     <>
-      What its triggers pass the alert as they open it (their{' '}
-      <code>payload</code>; the root’s children as a function of it).
+      What its triggers pass to the alert as they open it (their{' '}
+      <code>payload</code>). The root’s children can be a function of it.
     </>,
   ],
 ];
@@ -372,7 +373,7 @@ export const alertHandleRows: readonly PropRow[] = [
     'AlertHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>AlertDialog.Handle</code>): passed to an{' '}
+      A handle (Base UI’s <code>AlertDialog.Handle</code>). Pass it to an{' '}
       <PartLink
         component="alert"
         part="Alert.Root"
@@ -382,8 +383,8 @@ export const alertHandleRows: readonly PropRow[] = [
         component="alert"
         part="Alert.Trigger"
       />
-      s (their <code>handle</code>); from the hook, the same for the component’s
-      lifetime.
+      s (their <code>handle</code>). The hook returns the same one for the
+      component’s lifetime.
     </>,
   ],
   [
@@ -396,7 +397,7 @@ export const alertHandleRows: readonly PropRow[] = [
     '.open(triggerId)',
     '(triggerId: string | null) => void',
     undefined,
-    'Opens the alert, optionally associating it with a trigger (in an event handler or an effect): e.g. after a failed save.',
+    'Opens the alert, optionally associating it with a trigger (in an event handler or an effect), for example after a failed save.',
   ],
   [
     '.openWithPayload(payload)',

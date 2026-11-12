@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Header,
@@ -13,6 +13,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -20,6 +22,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
 import { names } from '../viewport/content.js';
 import { useLayoutControls } from './props.js';
@@ -102,48 +105,100 @@ const ThreeColumns: FunctionComponent = () => {
     isClosed: true,
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Block': [],
+            'List.Checkmark': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'List.Trailing': [],
+            'Page.Root': ['background'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isExpanded
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="tablet"
-      state={state}
+      state={[...state, partState]}
       title="Layout of three columns"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             key={keyFirst}
             {...propsFirst}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>Mailboxes</span>
                   </Toolbar.Title>
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
                   {sidebarSections.map(([title, rows]) => (
-                    <List.Section key={title}>
-                      <List.Group>
+                    <List.Section
+                      key={title}
+                      {...partProps['List.Section']}
+                    >
+                      <List.Group {...partProps['List.Group']}>
                         {rows.map(([value, rowTitle, icon]) => (
-                          <List.Item key={value}>
-                            <List.Leading>
-                              <List.Image variant="symbol">
-                                <Symbol icon={icon} />
+                          <List.Item
+                            key={value}
+                            {...partProps['List.Item']}
+                          >
+                            <List.Leading {...partProps['List.Leading']}>
+                              <List.Image
+                                {...partProps['List.Image']}
+                                variant="symbol"
+                              >
+                                <Symbol
+                                  {...partProps.Symbol}
+                                  icon={icon}
+                                />
                               </List.Image>
                             </List.Leading>
-                            <List.Content>
+                            <List.Content {...partProps['List.Content']}>
                               <List.Title
+                                {...partProps['List.Title']}
                                 render={<button type="button" />}
                                 onClick={() => {
                                   addLog(`mailbox: ${value}`);
@@ -153,8 +208,12 @@ const ThreeColumns: FunctionComponent = () => {
                                 {rowTitle}
                               </List.Title>
                             </List.Content>
-                            <List.Trailing>
-                              {mailbox === value ? <List.Checkmark /> : null}
+                            <List.Trailing {...partProps['List.Trailing']}>
+                              {mailbox === value ? (
+                                <List.Checkmark
+                                  {...partProps['List.Checkmark']}
+                                />
+                              ) : null}
                             </List.Trailing>
                           </List.Item>
                         ))}
@@ -162,7 +221,10 @@ const ThreeColumns: FunctionComponent = () => {
                     </List.Section>
                   ))}
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -171,24 +233,34 @@ const ThreeColumns: FunctionComponent = () => {
             {...propsSecond}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{rowTitles[mailbox]}</span>
                   </Toolbar.Title>
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog(`message: ${name}`);
@@ -198,15 +270,22 @@ const ThreeColumns: FunctionComponent = () => {
                               {name}
                             </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            {message === name ? <List.Checkmark /> : null}
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            {message === name ? (
+                              <List.Checkmark
+                                {...partProps['List.Checkmark']}
+                              />
+                            ) : null}
                           </List.Trailing>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -215,25 +294,40 @@ const ThreeColumns: FunctionComponent = () => {
             {...propsThird}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{message}</span>
                   </Toolbar.Title>
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root background="plain">
-                <Viewport.Padding edge="block-start" />
-                <List.Root listStyle="plain">
-                  <List.Section>
-                    <List.Block>
+              <Page.Root
+                {...partProps['Page.Root']}
+                background="plain"
+              >
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root
+                  {...partProps['List.Root']}
+                  listStyle="plain"
+                >
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Block {...partProps['List.Block']}>
                       From {message}, in {rowTitles[mailbox]}.
                     </List.Block>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -262,20 +356,47 @@ const Resizable: FunctionComponent = () => {
       isClosed: true,
     });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': ['background'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isExpanded
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       diagnostics={`Contacts: ${String(size)}px (240–480)`}
       id={id}
       log={log}
       setup="const [size, setSize] = useState(320);"
       stage="tablet"
-      state={state}
+      state={[...state, partState]}
       title="Layout with a resizable column"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root {...propsRoot}>
           <Layout.Column
             {...propsFirst}
@@ -286,31 +407,45 @@ const Resizable: FunctionComponent = () => {
             }}
           >
             <Header.Root>
-              <Viewport.BlockStart>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>Contacts</span>
                   </Toolbar.Title>
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -318,7 +453,10 @@ const Resizable: FunctionComponent = () => {
             key={keySecond}
             {...propsSecond}
           >
-            <Page.Root background="plain" />
+            <Page.Root
+              {...partProps['Page.Root']}
+              background="plain"
+            />
           </Layout.Column>
         </Layout.Root>
       </Viewport.Content>
@@ -349,15 +487,48 @@ const BackgroundBehind: FunctionComponent = () => {
     isClosed: true,
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Header.LargeTitle': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': ['selected'],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': ['onClick', 'render'],
+            'Page.Root': ['className'],
+            'Sidebar.Root': ['aria-label'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['context', 'placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isExpanded
       isInline
-      controls={controls}
+      controls={[controls, partControls]}
       id={id}
       log={log}
       stage="tablet"
-      state={state}
+      state={[...state, partState]}
       title="Layout on a background"
     >
       <Viewport.Background {...propsBackground}>
@@ -366,7 +537,7 @@ const BackgroundBehind: FunctionComponent = () => {
           className="demo-picture"
         />
       </Viewport.Background>
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Layout.Root
           {...propsRoot}
           // (On the picture: no line between the columns, unless set.)
@@ -377,26 +548,48 @@ const BackgroundBehind: FunctionComponent = () => {
             aria-label="Sidebar"
             {...propsFirst}
           >
-            <Sidebar.Root aria-label="Mailboxes">
-              <List.Root listStyle="sidebar">
+            <Sidebar.Root
+              {...partProps['Sidebar.Root']}
+              aria-label="Mailboxes"
+            >
+              <List.Root
+                {...partProps['List.Root']}
+                listStyle="sidebar"
+              >
                 {sidebarSections.map(([title, rows]) => (
-                  <List.Section key={title}>
-                    <List.Header prominence="nested">
-                      <List.Title>{title}</List.Title>
+                  <List.Section
+                    key={title}
+                    {...partProps['List.Section']}
+                  >
+                    <List.Header
+                      {...partProps['List.Header']}
+                      prominence="nested"
+                    >
+                      <List.Title {...partProps['List.Title']}>
+                        {title}
+                      </List.Title>
                     </List.Header>
-                    <List.Group>
+                    <List.Group {...partProps['List.Group']}>
                       {rows.map(([value, rowTitle, icon]) => (
                         <List.Item
                           key={value}
+                          {...partProps['List.Item']}
                           selected={selected === value}
                         >
-                          <List.Leading>
-                            <List.Image variant="symbol">
-                              <Symbol icon={icon} />
+                          <List.Leading {...partProps['List.Leading']}>
+                            <List.Image
+                              {...partProps['List.Image']}
+                              variant="symbol"
+                            >
+                              <Symbol
+                                {...partProps.Symbol}
+                                icon={icon}
+                              />
                             </List.Image>
                           </List.Leading>
-                          <List.Content>
+                          <List.Content {...partProps['List.Content']}>
                             <List.Title
+                              {...partProps['List.Title']}
                               render={<button type="button" />}
                               onClick={() => {
                                 addLog(`select: ${value}`);
@@ -419,38 +612,53 @@ const BackgroundBehind: FunctionComponent = () => {
             {...propsSecond}
           >
             <Header.Root>
-              <Viewport.BlockStart>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
                 <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
                   context="adaptive"
                   placement="block-start"
                 >
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <span>{rowTitles[selected]}</span>
                   </Toolbar.Title>
-                  <Toolbar.Trailing />
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']} />
                 </Toolbar.Root>
               </Viewport.BlockStart>
-              <Page.Root className="layout-demo-transparent">
-                <Viewport.Padding edge="block-start" />
-                <Header.LargeTitle>
+              <Page.Root
+                {...partProps['Page.Root']}
+                className="layout-demo-transparent"
+              >
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
                   <span>{rowTitles[selected]}</span>
                 </Header.LargeTitle>
 
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Page.Root>
             </Header.Root>
           </Layout.Column>
@@ -474,13 +682,15 @@ export const LayoutComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A layout holds columns, each holding a{' '}
+        A layout holds columns, and each column holds a{' '}
         <a href={publicUrl('page')}>Page</a> (or a{' '}
-        <a href={publicUrl('navigation')}>Navigation</a>, a{' '}
-        <a href={publicUrl('sidebar')}>Sidebar</a>); it fills a screen (a{' '}
-        <a href={publicUrl('viewport')}>Viewport</a>’s content layer).
+        <a href={publicUrl('navigation')}>Navigation</a>, or a{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a>). The layout fills a screen,
+        inside a <a href={publicUrl('viewport')}>Viewport</a>’s content layer.
       </li>
-      <li>A sidebar and a split view: sections, a list, the selected item.</li>
+      <li>
+        A sidebar and a split view: sections, a list, and the selected item.
+      </li>
     </ul>
 
     <Heading
@@ -491,12 +701,13 @@ export const LayoutComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Mail’s: the mailboxes (fixed), the messages (resizable), the message
-        (flexible, taking what’s left).
+        As in a mail app: the mailboxes (fixed), the messages (resizable) and
+        the message (flexible, taking the rest).
       </li>
       <li>
-        Each a page of its own, scrolling on its own; each at least its{' '}
-        <code>minSize</code> (240px, a list’s narrowest).
+        Each column is a page of its own and scrolls on its own. None gets
+        narrower than its <code>minSize</code> (240px, the narrowest a list
+        should be).
       </li>
       <li>
         <strong>Library:</strong> the layout’s columns (
@@ -504,12 +715,12 @@ export const LayoutComposition: FunctionComponent = () => (
           component="layout"
           part="Layout.Column"
         />
-        : fixed, resizable, flexible, each at least its <code>minSize</code>)
-        and their controls (<code>useLayoutControls</code>).
+        : fixed, resizable and flexible, each at least its <code>minSize</code>
+        ).
       </li>
       <li>
-        <strong>Demo:</strong> the mailboxes and messages, and the selected
-        mailbox and message.
+        <strong>Demo:</strong> the mailboxes and messages, the selected mailbox
+        and message, and the columns’ prop controls.
       </li>
     </ul>
     <CodeView code={threeColumnsCode} />
@@ -523,21 +734,21 @@ export const LayoutComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its divider dragged, or focused and the arrow keys pressed (Shift:
-        further; Home and End: its smallest and largest), between{' '}
-        <code>minSize</code> and <code>maxSize</code>.
+        Drag its divider, or focus it and press the arrow keys (Shift moves
+        further, Home and End go to its smallest and largest size). It stays
+        between <code>minSize</code> and <code>maxSize</code>.
       </li>
       <li>
-        Controlled here (<code>size</code>, <code>onSizeChange</code>): the app
-        holds the size (e.g. to keep it).
+        It’s controlled here (<code>size</code>, <code>onSizeChange</code>): the
+        app holds the size, for example to remember it.
       </li>
       <li>
-        <strong>Library:</strong> dragging the divider or its keys, within{' '}
+        <strong>Library:</strong> resizing by the divider or its keys, within{' '}
         <code>minSize</code> and <code>maxSize</code>, controlled by{' '}
         <code>size</code> and <code>onSizeChange</code>.
       </li>
       <li>
-        <strong>Demo:</strong> holding the size (e.g. to keep it).
+        <strong>Demo:</strong> holding the size, for example to remember it.
       </li>
     </ul>
     <CodeView code={resizableCode} />
@@ -551,9 +762,9 @@ export const LayoutComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Columns that don’t fit as drawers, the app’s choice (by the size class):
-        see <a href={publicUrl('drawer/composition')}>Drawer</a>, e.g. an
-        inspector.
+        Columns that don’t fit can become drawers, if the app chooses so by the
+        size class. For example an inspector (see{' '}
+        <a href={publicUrl('drawer/composition')}>Drawer</a>).
       </li>
     </ul>
 
@@ -570,11 +781,11 @@ export const LayoutComposition: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Background"
         />
-        ), through a floating sidebar’s glass and a transparent page (its list’s
-        background too).
+        ) shows through a floating sidebar’s glass and through a transparent
+        page, including its list’s background.
       </li>
       <li>
-        The bar’s glass by what’s behind it (
+        The bar’s glass adapts to what’s behind it (
         <code>context=&quot;adaptive&quot;</code>).
       </li>
       <li>

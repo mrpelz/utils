@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -16,6 +16,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -35,6 +37,7 @@ import {
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { messages } from '../list/content.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -173,75 +176,149 @@ const cities = ['Berlin', 'Lisbon', 'Oslo', 'Tokyo', 'Lima'];
 const NavigationBar: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Text': ['lines'],
+            'List.Title': [],
+            'Page.Root': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Group': ['gap'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Subtitle': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('toolbar-composition-navigation') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="toolbar-composition-navigation"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Toolbar as a navigation bar"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Leading>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Back"
                   shape="circle"
                   onClick={() => addLog('Back clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfChevronBackward}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
-              <Toolbar.Title>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Inbox</span>
-                <Toolbar.Subtitle>{messages.length} unread</Toolbar.Subtitle>
+                <Toolbar.Subtitle {...partProps['Toolbar.Subtitle']}>
+                  {messages.length} unread
+                </Toolbar.Subtitle>
               </Toolbar.Title>
-              <Toolbar.Trailing>
-                <Toolbar.Group gap={20}>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                <Toolbar.Group
+                  {...partProps['Toolbar.Group']}
+                  gap={20}
+                >
                   <Toolbar.Button
+                    {...partProps['Toolbar.Button']}
                     aria-label="Share"
                     shape="circle"
                     onClick={() => addLog('Share clicked')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfSquareAndArrowUp} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndArrowUp}
+                      />
                     </Button.Icon>
                   </Toolbar.Button>
                   <Toolbar.Button
+                    {...partProps['Toolbar.Button']}
                     aria-label="More"
                     shape="circle"
                     onClick={() => addLog('More clicked')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfEllipsis} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfEllipsis}
+                      />
                     </Button.Icon>
                   </Toolbar.Button>
                 </Toolbar.Group>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
-            <List.Root>
-              <List.Section>
-                <List.Group>
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {messages.map(({ from, preview, subject }) => (
-                    <List.Item key={subject}>
-                      <List.Content>
-                        <List.Title>{from}</List.Title>
-                        <List.Subtitle>{subject}</List.Subtitle>
-                        <List.Text lines={2}>{preview}</List.Text>
+                    <List.Item
+                      key={subject}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          {from}
+                        </List.Title>
+                        <List.Subtitle {...partProps['List.Subtitle']}>
+                          {subject}
+                        </List.Subtitle>
+                        <List.Text
+                          {...partProps['List.Text']}
+                          lines={2}
+                        >
+                          {preview}
+                        </List.Text>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -255,83 +332,148 @@ const EditMode: FunctionComponent = () => {
   const [selected, setSelected] = useState<string[]>([]);
   const isAllSelected = selected.length === messages.length;
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            CheckboxGroup: ['onValueChange', 'render', 'value'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'List.Checkbox': ['aria-label', 'value'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': ['editing'],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Toolbar.Button': ['aria-label', 'destructive', 'onClick', 'shape'],
+            'Toolbar.Group': ['disabled'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('toolbar-composition-edit') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="toolbar-composition-edit"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Toolbar in edit mode"
     >
       <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root editing="leading">
-            <List.Section>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root
+            {...partProps['List.Root']}
+            editing="leading"
+          >
+            <List.Section {...partProps['List.Section']}>
               <CheckboxGroup
-                render={<List.Group />}
+                {...partProps.CheckboxGroup}
+                render={<List.Group {...partProps['List.Group']} />}
                 value={selected}
                 onValueChange={(value: string[]) => setSelected(value)}
               >
                 {messages.map(({ from, subject }) => (
                   <List.Item
                     key={subject}
+                    {...partProps['List.Item']}
                     onClick={forwardClick('[role=checkbox]')}
                   >
-                    <List.Leading>
+                    <List.Leading {...partProps['List.Leading']}>
                       <List.Checkbox
+                        {...partProps['List.Checkbox']}
                         aria-label={subject}
                         value={subject}
                       />
                     </List.Leading>
-                    <List.Content>
-                      <List.Title>{subject}</List.Title>
-                      <List.Subtitle>{from}</List.Subtitle>
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {subject}
+                      </List.Title>
+                      <List.Subtitle {...partProps['List.Subtitle']}>
+                        {from}
+                      </List.Subtitle>
                     </List.Content>
                   </List.Item>
                 ))}
               </CheckboxGroup>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <Toolbar.Root>
-            <Toolbar.Leading>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Leading {...partProps['Toolbar.Leading']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 onClick={() =>
                   setSelected(
                     isAllSelected ? [] : messages.map(({ subject }) => subject),
                   )
                 }
               >
-                <Button.Label>
+                <Button.Label {...partProps['Button.Label']}>
                   {isAllSelected ? 'Deselect All' : 'Select All'}
                 </Button.Label>
               </Toolbar.Button>
             </Toolbar.Leading>
-            <Toolbar.Title>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>{selected.length} Selected</span>
             </Toolbar.Title>
-            <Toolbar.Trailing>
-              <Toolbar.Group disabled={selected.length === 0}>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+              <Toolbar.Group
+                {...partProps['Toolbar.Group']}
+                disabled={selected.length === 0}
+              >
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Move"
                   shape="circle"
                   onClick={() => addLog(`move: ${selected.join(', ')}`)}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfFolder} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfFolder}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   destructive
                   aria-label="Delete"
                   shape="circle"
                   onClick={() => addLog(`delete: ${selected.join(', ')}`)}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfTrash} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfTrash}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Group>
@@ -351,65 +493,130 @@ const Search: FunctionComponent = () => {
     name.toLowerCase().includes(query.toLowerCase()),
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'TextField.Clear': [],
+            'TextField.Control': [
+              'aria-label',
+              'onValueChange',
+              'placeholder',
+              'type',
+              'value',
+            ],
+            'TextField.Frame': ['variant'],
+            'TextField.Root': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Root': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+            'Viewport.Provider': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('toolbar-composition-search') },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
+      controls={[partControls]}
       id="toolbar-composition-search"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Toolbar with a search field"
     >
       {/* Tracking the keyboard over its screen (see Viewport.Provider). */}
-      <Viewport.Provider>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {matching.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <Toolbar.Root>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="Folders"
               shape="circle"
               onClick={() => addLog('Folders clicked')}
             >
-              <Button.Icon>
-                <Symbol icon={sfFolder} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfFolder}
+                />
               </Button.Icon>
             </Toolbar.Button>
-            <TextField.Root>
-              <TextField.Frame variant="toolbar">
-                <Symbol icon={sfMagnifyingglass} />
+            <TextField.Root {...partProps['TextField.Root']}>
+              <TextField.Frame
+                {...partProps['TextField.Frame']}
+                variant="toolbar"
+              >
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
                 <TextField.Control
+                  {...partProps['TextField.Control']}
                   aria-label="Search"
                   placeholder="Search"
                   type="search"
                   value={query}
                   onValueChange={(value: string) => setQuery(value)}
                 />
-                <TextField.Clear />
+                <TextField.Clear {...partProps['TextField.Clear']} />
               </TextField.Frame>
             </TextField.Root>
             <Toolbar.Button
+              {...partProps['Toolbar.Button']}
               aria-label="New contact"
               shape="circle"
               onClick={() => addLog('New contact clicked')}
             >
-              <Button.Icon>
-                <Symbol icon={sfSquareAndPencil} />
+              <Button.Icon {...partProps['Button.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfSquareAndPencil}
+                />
               </Button.Icon>
             </Toolbar.Button>
           </Toolbar.Root>
@@ -424,20 +631,51 @@ const Pages: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const [page, setPage] = useState(0);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            PageControl: ['count', 'onValueChange', 'value'],
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Block': [],
+            'List.Root': [],
+            'List.Section': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('toolbar-composition-pages') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="toolbar-composition-pages"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Toolbar with page dots"
     >
       <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Block>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Block {...partProps['List.Block']}>
                 <h2>{cities[page]}</h2>
                 <p>
                   Page {page + 1} of {cities.length}: press the dots, or drag
@@ -446,22 +684,30 @@ const Pages: FunctionComponent = () => {
               </List.Block>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockEnd>
-          <Toolbar.Root>
-            <Toolbar.Leading>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Leading {...partProps['Toolbar.Leading']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Map"
                 shape="circle"
                 onClick={() => addLog('Map clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfMap} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfMap}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             </Toolbar.Leading>
             <PageControl
+              {...partProps.PageControl}
               count={cities.length}
               value={page}
               onValueChange={(value: number) => {
@@ -469,14 +715,18 @@ const Pages: FunctionComponent = () => {
                 setPage(value);
               }}
             />
-            <Toolbar.Trailing>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
               <Toolbar.Button
+                {...partProps['Toolbar.Button']}
                 aria-label="Cities"
                 shape="circle"
                 onClick={() => addLog('Cities clicked')}
               >
-                <Button.Icon>
-                  <Symbol icon={sfListBullet} />
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfListBullet}
+                  />
                 </Button.Icon>
               </Toolbar.Button>
             </Toolbar.Trailing>
@@ -501,13 +751,13 @@ export const ToolbarComposition: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A toolbar is a bar: placed at an edge by what it’s in, its commands for
-        the content beside it.
+        A toolbar is a bar. What it’s in places it at an edge, and it holds
+        commands for the content next to it.
       </li>
       <li>
-        At the top of a page, its <a href={publicUrl('header')}>Header</a>’s
-        bar; at the bottom of a screen, a{' '}
-        <a href={publicUrl('viewport')}>Viewport</a>’s anchor.
+        At the top of a page, it’s the page’s{' '}
+        <a href={publicUrl('header')}>Header</a> bar. At the bottom of a screen,
+        it sits in a <a href={publicUrl('viewport')}>Viewport</a>’s anchor.
       </li>
     </ul>
 
@@ -524,22 +774,22 @@ export const ToolbarComposition: FunctionComponent = () => (
         <PartLink
           component="viewport"
           part="Viewport.BlockStart"
-        />
-        , staying where it is as its page scrolls under it; a{' '}
+        />{' '}
+        stays put as its page scrolls under it. A{' '}
         <PartLink
           component="header"
           part="Header.Root"
         />{' '}
-        around them ties it to the page (its title, its large title).
+        around them ties it to the page’s title and large title.
       </li>
       <li>
-        Back at its start, the page’s title (a subtitle below it) centered, the
-        page’s actions in a capsule at its end, set wider apart than the default
-        12px (<code>gap</code>), as the bar has room.
+        Back sits at its start, and the page’s title (with a subtitle below) in
+        the center. The page’s actions share a capsule at its end, set wider
+        apart than the default 12px (<code>gap</code>), since the bar has room.
       </li>
       <li>
-        With a large title, the bar’s title fades in as it scrolls away (see{' '}
-        <a href={publicUrl('header')}>Header</a>).
+        With a large title, the bar’s title fades in as the large title scrolls
+        away (see <a href={publicUrl('header')}>Header</a>).
       </li>
       <li>
         <strong>Library:</strong> the bar (
@@ -562,7 +812,7 @@ export const ToolbarComposition: FunctionComponent = () => (
           component="header"
           part="Header.Root"
         />{' '}
-        tying it to the page.
+        that ties it to the page.
       </li>
       <li>
         <strong>Demo:</strong> the page’s rows and the bar’s actions (logged).
@@ -579,24 +829,25 @@ export const ToolbarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Mail’s, while editing: Select All at the start, the count as the title,
-        the selection’s commands in a capsule at the end.
+        As in a mail app while editing: Select All at the start, the count as
+        the title, and the selection’s commands in a capsule at the end.
       </li>
       <li>
-        A disabled capsule (
+        The capsule is disabled (
         <PartLink
           component="toolbar"
           part="Toolbar.Group"
         >
           Group
         </PartLink>{' '}
-        <code>disabled</code>) while nothing is selected; its buttons stay
+        <code>disabled</code>) while nothing is selected. Its buttons stay
         focusable.
       </li>
       <li>
-        A list’s edit mode: see <a href={publicUrl('list/composition')}>List</a>
-        ; a viewport’s bottom bar: see{' '}
-        <a href={publicUrl('viewport/composition')}>Viewport</a>.
+        For a list’s edit mode, see{' '}
+        <a href={publicUrl('list/composition')}>List</a>. For a viewport’s
+        bottom bar, see <a href={publicUrl('viewport/composition')}>Viewport</a>
+        .
       </li>
       <li>
         <strong>Library:</strong> the bottom bar’s sides, its title, and a
@@ -613,7 +864,8 @@ export const ToolbarComposition: FunctionComponent = () => (
           component="checkbox"
           part="CheckboxGroup"
         />
-        , the app’s state), Select All, and the commands on it (logged).
+        , the app’s state), Select All, and the commands that act on it
+        (logged).
       </li>
     </ul>
     <CodeView code={editCode} />
@@ -627,20 +879,20 @@ export const ToolbarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Search at the bottom (e.g. a mail app’s): a{' '}
-        <a href={publicUrl('text-field')}>Text field</a>’s{' '}
+        Search at the bottom, as in a mail app: a{' '}
+        <a href={publicUrl('text-field')}>Text Field</a>’s{' '}
         <PartLink
           component="text-field"
           part="TextField.Frame"
         />{' '}
-        between a button at each end, taking the bar’s free space.
+        sits between a button at each end and takes the bar’s free space.
       </li>
       <li>
-        Without sides: the field grows (<code>flex: 1</code>), the buttons keep
-        their size.
+        Without sides, the field grows (<code>flex: 1</code>), and the buttons
+        keep their size.
       </li>
       <li>
-        It looks like the bar’s capsules: glass, as high as its buttons (
+        It looks like the bar’s capsules: glass, as tall as its buttons (
         <PartLink
           component="text-field"
           part="TextField.Frame"
@@ -648,13 +900,12 @@ export const ToolbarComposition: FunctionComponent = () => (
         <code>variant=&quot;toolbar&quot;</code>).
       </li>
       <li>
-        Pushed up by the on-screen keyboard with its bar (
+        The on-screen keyboard pushes it up together with its bar (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />
-        , <code>keyboard=&quot;push&quot;</code>
-        ).
+        , whose <code>keyboard</code> is <code>push</code> by default).
       </li>
       <li>
         <strong>Library:</strong> the search field taking the bar’s free space
@@ -663,12 +914,12 @@ export const ToolbarComposition: FunctionComponent = () => (
           component="text-field"
           part="TextField.Frame"
         />{' '}
-        <code>variant</code>), and the bar pushed up by the keyboard (
+        <code>variant</code>), and the keyboard pushing the bar up (
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
-        />{' '}
-        <code>keyboard=&quot;push&quot;</code>; the keyboard tracked by a{' '}
+        />
+        , with the keyboard tracked by a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
@@ -676,7 +927,7 @@ export const ToolbarComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        <strong>Demo:</strong> the query (the app’s state) and filtering the
+        <strong>Demo:</strong> the query (the app’s state), and filtering the
         rows.
       </li>
     </ul>
@@ -691,13 +942,13 @@ export const ToolbarComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Between the sides, in a title’s place: a control for the view, e.g.
-        Weather’s page dots (a{' '}
-        <a href={publicUrl('page-control')}>Page control</a>), centered in the
+        A control for the view can take the title’s place between the sides, for
+        example a weather app’s page dots (a{' '}
+        <a href={publicUrl('page-control')}>Page Control</a>), centered in the
         bar.
       </li>
       <li>
-        A segmented control in a toolbar: see{' '}
+        For a segmented control in a toolbar, see{' '}
         <a href={publicUrl('segmented/composition#in-a-toolbar')}>Segmented</a>.
       </li>
       <li>
@@ -706,7 +957,7 @@ export const ToolbarComposition: FunctionComponent = () => (
           component="page-control"
           part="PageControl"
         />{' '}
-        centered between the bar’s sides, taking its glass context.
+        centered between the bar’s sides, taking the bar’s glass context.
       </li>
       <li>
         <strong>Demo:</strong> the page (the app’s state) and the pages.

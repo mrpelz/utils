@@ -1,30 +1,23 @@
 /* List demos (see main.tsx). */
 
-/* An indexed list and its index, in one cell: at least 32rem high, or as
-   high as the index (the list fills it, scrolling on its own). */
+/* An indexed list: in a box 32rem high, scrolling on its own (its index
+   placed by the list, see List.Index). */
 .list-demo-plain {
   display: grid;
-  min-height: 32rem;
+  height: 32rem;
+
+  /* (As tall as a regular index at least: one taller than its list's view
+     is clipped, see List.Index.) */
+  &:has(.uikit-list-index[data-size='regular']) {
+    height: 44rem;
+  }
 }
 
 /* The list, scrolling on its own, without a scroll bar (an overlay scroll
    bar would cover the index at its edge). */
 .list-demo-scroll {
   overflow: auto;
-  height: 0;
-  min-height: 100%;
-  grid-area: 1 / 1;
+  min-height: 0;
   scrollbar-width: none;
-}
-
-/* The index at the list's edge, over it, centered on its visible height
-   (not scrolling with it), above the sticky headers. */
-.list-demo-index {
-  position: relative;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  grid-area: 1 / 1;
-  place-self: center end;
 }
 

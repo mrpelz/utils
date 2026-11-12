@@ -42,14 +42,23 @@ const PageControlPart: FunctionComponent = () => {
 export const PageControlParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>One element: its dots (and its glass, its tooltip) are its own.</li>
+      <li>One element. Its dots, its glass and its tooltip are its own.</li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="page-control"
-          part="PageControl"
-        />
+          component="toolbar"
+          part="Toolbar.Root"
+        />{' '}
+        <span>(between its sides), or over the pages it belongs to</span>
+        <ul>
+          <li>
+            <PartLink
+              component="page-control"
+              part="PageControl"
+            />
+          </li>
+        </ul>
       </li>
     </ul>
 
@@ -61,23 +70,23 @@ export const PageControlParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A dot per page (<code>count</code>), the current one highlighted.
+        One dot per page (<code>count</code>), with the current one highlighted.
       </li>
       <li>
-        State: <code>value</code> or <code>defaultValue</code>,{' '}
-        <code>onValueChange</code> (with why: a press, a drag, a key).
+        Its state: <code>value</code> or <code>defaultValue</code>, and{' '}
+        <code>onValueChange</code> (with the reason: a press, a drag or a key).
       </li>
       <li>
-        Can be <code>disabled</code>.
+        It can be <code>disabled</code>.
       </li>
       <li>
-        Look: <code>variant</code> (glass or plain), <code>context</code> (the
-        glass’ brightness), <code>momentaryTooltip</code> and{' '}
+        Its look: <code>variant</code> (glass or plain), <code>context</code>{' '}
+        (how bright it is behind the glass), <code>momentaryTooltip</code> and{' '}
         <code>format</code> (“3 of 8”).
       </li>
       <li>
-        Of more than 7 pages, 8 dots show at a time, the outermost shrinking
-        towards the pages beyond.
+        With more than 7 pages, 8 dots show at a time, and the outer ones shrink
+        toward the pages beyond.
       </li>
       <li>
         Renders a <code>div</code> with the <code>slider</code> role, named

@@ -4,11 +4,15 @@ import { FunctionComponent, useMemo } from 'react';
 import { Segmented, Symbol } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfCheckmark } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import { periods } from './content.js';
 import {
   segmentedHighlightRows,
@@ -47,14 +51,29 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Segmented.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Segmented.Root"
     >
       <Segmented.Root
@@ -65,12 +84,13 @@ const RootPart: FunctionComponent = () => {
         {items.map(([value, label]) => (
           <Segmented.Item
             key={value}
+            {...partProps['Segmented.Item']}
             value={value}
           >
             {label}
           </Segmented.Item>
         ))}
-        <Segmented.Highlight />
+        <Segmented.Highlight {...partProps['Segmented.Highlight']} />
       </Segmented.Root>
     </Component>
   );
@@ -86,18 +106,35 @@ const ItemPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Segmented.Item' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Segmented.Item (others)': ['value'],
+            'Segmented.Highlight': [],
+            'Segmented.Root': ['aria-label', 'defaultValue', 'onValueChange'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Segmented.Item"
     >
       <Segmented.Root
         key={elementKey}
+        {...partProps['Segmented.Root']}
         aria-label="Period"
         defaultValue="day"
         onValueChange={logChange(addLog)}
@@ -106,12 +143,12 @@ const ItemPart: FunctionComponent = () => {
           <Segmented.Item
             key={value}
             value={value}
-            {...(index === 0 ? props : {})}
+            {...(index === 0 ? props : partProps['Segmented.Item (others)'])}
           >
             {label}
           </Segmented.Item>
         ))}
-        <Segmented.Highlight />
+        <Segmented.Highlight {...partProps['Segmented.Highlight']} />
       </Segmented.Root>
     </Component>
   );
@@ -132,18 +169,34 @@ const HighlightPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Segmented.Item': ['value'],
+            'Segmented.Root': ['aria-label', 'defaultValue', 'onValueChange'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Segmented.Highlight"
     >
       <Segmented.Root
         key={elementKey}
+        {...partProps['Segmented.Root']}
         aria-label="Period"
         defaultValue="day"
         onValueChange={logChange(addLog)}
@@ -151,6 +204,7 @@ const HighlightPart: FunctionComponent = () => {
         {items.map(([value, label]) => (
           <Segmented.Item
             key={value}
+            {...partProps['Segmented.Item']}
             value={value}
           >
             {label}
@@ -177,18 +231,36 @@ const IndicatorPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Segmented.Highlight': [],
+            'Segmented.Item': ['value'],
+            'Segmented.Root': ['aria-label', 'defaultValue', 'onValueChange'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Segmented.Indicator"
     >
       <Segmented.Root
         key={elementKey}
+        {...partProps['Segmented.Root']}
         aria-label="Period"
         defaultValue="day"
         onValueChange={logChange(addLog)}
@@ -196,15 +268,19 @@ const IndicatorPart: FunctionComponent = () => {
         {items.map(([value, label]) => (
           <Segmented.Item
             key={value}
+            {...partProps['Segmented.Item']}
             value={value}
           >
             <Segmented.Indicator {...props}>
-              <Symbol icon={sfCheckmark} />
+              <Symbol
+                {...partProps.Symbol}
+                icon={sfCheckmark}
+              />
             </Segmented.Indicator>{' '}
             {label}
           </Segmented.Item>
         ))}
-        <Segmented.Highlight />
+        <Segmented.Highlight {...partProps['Segmented.Highlight']} />
       </Segmented.Root>
     </Component>
   );
@@ -214,7 +290,7 @@ const IndicatorPart: FunctionComponent = () => {
 export const SegmentedParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: the track, holding the choice.</li>
+      <li>Root: the track, which holds the choice.</li>
       <li>Items: the options.</li>
       <li>Highlight, after them: the selection.</li>
       <li>An item can hold an indicator, rendered while it’s chosen.</li>
@@ -262,23 +338,24 @@ export const SegmentedParts: FunctionComponent = () => (
     <ul>
       <li>Base UI’s radio group, as the track.</li>
       <li>
-        Choice: <code>value</code> or <code>defaultValue</code>,{' '}
+        Its choice: <code>value</code> or <code>defaultValue</code>, and{' '}
         <code>onValueChange</code>.
       </li>
       <li>
-        Can be <code>disabled</code> or <code>readOnly</code>.
+        It can be <code>disabled</code> or <code>readOnly</code>.
       </li>
       <li>
-        Submits with a form: <code>name</code>, <code>required</code>.
+        It submits with a form: <code>name</code>, <code>required</code>.
       </li>
       <li>
-        Separators: <code>hideSeparators</code>.
+        Its separators: <code>hideSeparators</code>.
       </li>
       <li>
-        Too narrow for its items: their labels truncated, or the items scrolled
-        sideways, snapping, the chosen one in view (<code>overflow</code>).
+        When it’s too narrow for its items, their labels truncate, or the items
+        scroll sideways, snapping, with the chosen one in view (
+        <code>overflow</code>).
       </li>
-      <li>Renders the lens shown while an item is pressed.</li>
+      <li>It renders the lens shown while an item is pressed.</li>
     </ul>
     <RootPart />
     <h3>Props</h3>
@@ -292,17 +369,17 @@ export const SegmentedParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An option, by its <code>value</code>; its children its label.
+        An option, by its <code>value</code>, with its children as its label.
       </li>
       <li>
-        Can be <code>disabled</code> or <code>readOnly</code>.
+        It can be <code>disabled</code> or <code>readOnly</code>.
       </li>
       <li>
         Secondary clicks: <code>onSecondaryClick</code>.
       </li>
       <li>
-        Width reserved for the chosen (bolder) label: the control doesn’t change
-        size.
+        It reserves width for the chosen (bolder) label, so the control doesn’t
+        change size.
       </li>
     </ul>
     <ItemPart />
@@ -317,12 +394,12 @@ export const SegmentedParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>The selection, after the items.</li>
-      <li>On the chosen item, sliding between them.</li>
+      <li>It sits on the chosen item and slides between them.</li>
       <li>
-        Hidden while none is chosen, and while an item is pressed (the lens
+        It’s hidden while none is chosen, and while an item is pressed (the lens
         takes over).
       </li>
-      <li>Takes only styling.</li>
+      <li>It only takes styling props.</li>
     </ul>
     <HighlightPart />
     <h3>Props</h3>
@@ -335,12 +412,13 @@ export const SegmentedParts: FunctionComponent = () => (
       <code>Segmented.Indicator</code>
     </Heading>
     <ul>
-      <li>Base UI’s radio indicator, unstyled, inside an item.</li>
+      <li>Base UI’s radio indicator, without styles, inside an item.</li>
       <li>
-        Rendered while its item is chosen (always, with <code>keepMounted</code>
-        ), e.g. for a mark beside the label (here).
+        It renders while its item is chosen (or always, with{' '}
+        <code>keepMounted</code>), for example for a mark next to the label (as
+        here).
       </li>
-      <li>Not used by these segmented controls.</li>
+      <li>These segmented controls don’t use it.</li>
     </ul>
     <IndicatorPart />
     <h3>Props</h3>

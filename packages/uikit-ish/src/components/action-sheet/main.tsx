@@ -42,7 +42,7 @@ export type {
 // color, red), at the control that presented it (below it, above it if there's no
 // room; Base UI's `Popover`, positioned as a popover without an arrow,
 // scaling in from it as menus); presented without one (e.g. by `open`), at
-// its container's bottom, above its safe area. Modal: the page dimmed
+// its container's bottom, above its safe area inset. Modal: the page dimmed
 // behind it, dismissed by a press outside it.
 //
 // In a regular width, a popover (with an arrow) may suit better: the app's
@@ -121,7 +121,7 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
     const popupRef = useForwardedRef(ref);
     const focus = useInitialFocus(popupRef);
     const bottom = useMemo(() => bottomAnchor(container), [container]);
-    // Within its container (e.g. the views' frames), clear of its safe area;
+    // Within its container (e.g. the views' frames), clear of its safe area insets;
     // growing rather than scrolling (see `useGrowAvoidance`).
     const collision = useCollision({});
     const [grow, growRef] = useGrowAvoidance();

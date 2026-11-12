@@ -42,12 +42,6 @@
     }
   }
 
-  /* A list's index, in its anchor (see list.tsx): centered on it. */
-  .kitchen-sink-index {
-    display: flex;
-    align-items: center;
-  }
-
   /* A field around a group of rows, without a box of its own. */
   .kitchen-sink-contents {
     display: contents;

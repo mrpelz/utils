@@ -3,6 +3,7 @@ import {
   ReactNode,
   RefObject,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -34,13 +35,17 @@ import {
   type ViewportScrollEvent,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
-import { Component } from '../../tooling/frame/component.js';
+import { CodeAroundContext, Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
 import {
   MappedProp,
+  usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
-import { useLabelledRef } from '../../tooling/frame/render-code.js';
+import {
+  hideFromCode,
+  useLabelledRef,
+} from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
@@ -52,6 +57,7 @@ import {
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from './content.js';
 import {
   elementGeometryRows,
@@ -114,6 +120,81 @@ import {
   toastAnchor,
 } from './props.js';
 
+/* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
+
+const trackStatusBarTapsCode = `import { trackStatusBarTaps } from '@mrpelz/uikit-ish';
+
+// At the app's start: a status bar tap scrolls the chat to its newest
+// message, not to its top (the provider's scrollsToTop off).
+const stop = trackStatusBarTaps(() => {
+  document
+    .getElementById('newest-message')
+    ?.scrollIntoView({ behavior: 'smooth' });
+});`;
+
+const useCurrentScrollerCode = `import { Button, Toolbar, useCurrentScroller } from '@mrpelz/uikit-ish';
+
+// A bar's button scrolling what the user is looking at back to its top:
+// a sheet's content while one is open, else the current page.
+export const ToTop = () => {
+  const scroller = useCurrentScroller();
+
+  return (
+    <Toolbar.Button
+      disabled={!scroller}
+      onClick={() => scroller?.scrollTo({ behavior: 'smooth', top: 0 })}
+    >
+      <Button.Label>Top</Button.Label>
+    </Toolbar.Button>
+  );
+};`;
+
+const useCreateViewportAnchorHandleCode = `import {
+  Toolbar,
+  useCreateViewportAnchorHandle,
+  Viewport,
+} from '@mrpelz/uikit-ish';
+
+export const Screen = () => {
+  // Made once, kept for the component's lifetime.
+  const barAnchor = useCreateViewportAnchorHandle();
+
+  return (
+    <>
+      <Viewport.Content>
+        <Viewport.Padding edge="block-start" />
+        {/* … */}
+        {/* Room for the toolbar only, not for other anchors at the bottom. */}
+        <Viewport.Padding
+          anchor={barAnchor}
+          edge="block-end"
+        />
+      </Viewport.Content>
+      <Viewport.BlockEnd handle={barAnchor}>
+        <Toolbar.Root placement="block-end">{/* … */}</Toolbar.Root>
+      </Viewport.BlockEnd>
+    </>
+  );
+};`;
+
+const viewportScopeContextCode = `import { useState } from 'react';
+import { ViewportScopeContext } from '@mrpelz/uikit-ish';
+
+// A panel of the app's own that contains fixed layers (its transform):
+// the anchors inside it, and the paddings making room for them, share
+// its scope, not the screen's.
+export const Panel = ({ children }) => {
+  const [scope] = useState(() => ({}));
+
+  return (
+    <ViewportScopeContext.Provider value={scope}>
+      <div style={{ transform: 'translateZ(0)' }}>{children}</div>
+    </ViewportScopeContext.Provider>
+  );
+};`;
+
+/* eslint-enable unicorn/no-incorrect-template-string-interpolation */
+
 const preventInputZoomCode = `// At the app's start: all its fields, while it runs.
 const release = preventInputZoom();`;
 
@@ -138,14 +219,32 @@ const ProviderPartFrame: FunctionComponent<{
   const { atBottom, atTop, direction = '–' } = useScrollDirection();
   const edge = atBottom ? 'bottom' : '–';
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Viewport.Content': ['ref'],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screenRef={screenRef}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.Provider"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -162,22 +261,34 @@ const ProviderPartFrame: FunctionComponent<{
         </dl>
       }
     >
-      <Viewport.Content ref={contentRef}>
-        <Viewport.Padding edge="block-start" />
-        <List.Root>
-          <List.Section>
-            <List.Group>
+      <Viewport.Content
+        {...partProps['Viewport.Content']}
+        ref={contentRef}
+      >
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-start"
+        />
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               {names.map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>{name}</List.Title>
                   </List.Content>
                 </List.Item>
               ))}
             </List.Group>
           </List.Section>
         </List.Root>
-        <Viewport.Padding edge="block-end" />
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-end"
+        />
       </Viewport.Content>
     </Component>
   );
@@ -207,18 +318,31 @@ const ProviderPart: FunctionComponent = () => {
   // (Around the demo, outside its screen: unset, given the screen, as a
   // provider within it would be, see `propOptionsProvider`.)
   const screenRef = useRef<HTMLDivElement>(null);
+  // (In the code: the provider as the app writes it, its props the
+  // controls', around the stage's; not the demo's screen.)
+  const around = useMemo(
+    () => (
+      <Viewport.Provider
+        {...props}
+        screen={undefined}
+      />
+    ),
+    [props],
+  );
 
   return (
     <Viewport.Provider
       {...props}
       screen={props.screen === null ? null : screenRef}
     >
-      <ProviderPartFrame
-        contentRef={contentRef}
-        control={control}
-        screenRef={screenRef}
-        state={state}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <ProviderPartFrame
+          contentRef={contentRef}
+          control={control}
+          screenRef={screenRef}
+          state={state}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -234,31 +358,57 @@ const ContentPart: FunctionComponent = () => {
     title: 'Viewport.Content',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.Content"
     >
       <Viewport.Content {...props}>
-        <Viewport.Padding edge="block-start" />
-        <List.Root>
-          <List.Section>
-            <List.Group>
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-start"
+        />
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               {names.map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>{name}</List.Title>
                   </List.Content>
                 </List.Item>
               ))}
             </List.Group>
           </List.Section>
         </List.Root>
-        <Viewport.Padding edge="block-end" />
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-end"
+        />
       </Viewport.Content>
     </Component>
   );
@@ -279,14 +429,39 @@ const BackgroundPart: FunctionComponent = () => {
     emphasize: 'outline',
     title: 'Viewport.Background',
   });
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': ['edgeEffect'],
+            'Viewport.BlockStart': ['edgeEffect'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
   const button = (label: string, icon: SymbolIcon) => (
     <Toolbar.Button
+      {...partProps['Toolbar.Button']}
       aria-label={label}
       shape="circle"
       onClick={() => addLog(`${label} clicked`)}
     >
-      <Button.Icon>
-        <Symbol icon={icon} />
+      <Button.Icon {...partProps['Button.Icon']}>
+        <Symbol
+          {...partProps.Symbol}
+          icon={icon}
+        />
       </Button.Icon>
     </Toolbar.Button>
   );
@@ -294,11 +469,11 @@ const BackgroundPart: FunctionComponent = () => {
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.Background"
     >
       <Viewport.Background {...props}>
@@ -307,21 +482,34 @@ const BackgroundPart: FunctionComponent = () => {
           className="demo-picture"
         />
       </Viewport.Background>
-      <Viewport.BlockStart edgeEffect="none">
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Leading>
+      <Viewport.BlockStart
+        {...partProps['Viewport.BlockStart']}
+        edgeEffect="none"
+      >
+        <Toolbar.Root
+          {...partProps['Toolbar.Root']}
+          placement="block-start"
+        >
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
             {button('Share', sfSquareAndArrowUp)}
           </Toolbar.Leading>
-          <Toolbar.Title>
+          <Toolbar.Title {...partProps['Toolbar.Title']}>
             <span>Wallpaper</span>
           </Toolbar.Title>
-          <Toolbar.Trailing>{button('More', sfEllipsis)}</Toolbar.Trailing>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+            {button('More', sfEllipsis)}
+          </Toolbar.Trailing>
         </Toolbar.Root>
       </Viewport.BlockStart>
-      <Viewport.BlockEnd edgeEffect="none">
-        <Toolbar.Root>
-          <Toolbar.Leading>{button('Favorite', sfHeart)}</Toolbar.Leading>
-          <Toolbar.Trailing>
+      <Viewport.BlockEnd
+        {...partProps['Viewport.BlockEnd']}
+        edgeEffect="none"
+      >
+        <Toolbar.Root {...partProps['Toolbar.Root']}>
+          <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+            {button('Favorite', sfHeart)}
+          </Toolbar.Leading>
+          <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
             {button('Edit', sfPencil)}
             {button('Delete', sfTrash)}
           </Toolbar.Trailing>
@@ -344,33 +532,62 @@ const AnchorPart: FunctionComponent = () => {
   const isInlineEdge =
     props.edge === 'inline-start' || props.edge === 'inline-end';
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.Anchor"
     >
       <>
-        <Viewport.Content>
+        <Viewport.Content {...partProps['Viewport.Content']}>
           {/* Room for it at either end (the margin alone at the other). */}
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
         {/* The anchor is the surface: its background to the screen's edge,
             its content clear of the insets (its padding). */}
@@ -401,36 +618,70 @@ const BlockStartPart: FunctionComponent = () => {
     title: 'Viewport.BlockStart',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.BlockStart"
     >
       <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
         <Viewport.BlockStart {...props}>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Title>
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            placement="block-start"
+          >
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>Contacts</span>
             </Toolbar.Title>
           </Toolbar.Root>
@@ -451,36 +702,67 @@ const BlockEndPart: FunctionComponent = () => {
     title: 'Viewport.BlockEnd',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': [],
+          'Toolbar.Title': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.BlockEnd"
     >
       <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
         <Viewport.BlockEnd {...props}>
-          <Toolbar.Root>
-            <Toolbar.Title>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>{names.length} Contacts</span>
             </Toolbar.Title>
           </Toolbar.Root>
@@ -527,32 +809,61 @@ const PaddingPart: FunctionComponent = () => {
     },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.BlockEnd': ['className'],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[controlContent, controlStart, controlEnd]}
+      controls={[controlContent, controlStart, controlEnd, partControls]}
       id={id}
       stage="phone"
-      state={[stateContent, stateStart, stateEnd]}
+      state={[stateContent, stateStart, stateEnd, partState]}
       title="Viewport.Padding"
     >
       <>
-        <Viewport.BlockStart>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Title>
+        <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            placement="block-start"
+          >
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>Contacts</span>
             </Toolbar.Title>
           </Toolbar.Root>
         </Viewport.BlockStart>
-        <Viewport.Content>
+        <Viewport.Content {...partProps['Viewport.Content']}>
           <Viewport.Padding {...propsStart} />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
@@ -561,16 +872,19 @@ const PaddingPart: FunctionComponent = () => {
           </List.Root>
           <Viewport.Padding {...propsEnd} />
         </Viewport.Content>
-        <Viewport.BlockEnd className="viewport-demo-surface">
+        <Viewport.BlockEnd
+          {...partProps['Viewport.BlockEnd']}
+          className="viewport-demo-surface"
+        >
           {content.rows === 2 ? (
-            <Toolbar.Root>
-              <Toolbar.Title>
+            <Toolbar.Root {...partProps['Toolbar.Root']}>
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Updated Just Now</span>
               </Toolbar.Title>
             </Toolbar.Root>
           ) : null}
-          <Toolbar.Root>
-            <Toolbar.Title>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>{names.length} Contacts</span>
             </Toolbar.Title>
           </Toolbar.Root>
@@ -604,15 +918,37 @@ const OverscrollView: FunctionComponent<{
     setScroll({ isHeld, overscroll }),
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          ActivityIndicator: ['className', 'display'],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': ['ref'],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       containsOverscroll
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screenRef={screenRef}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.Overscroll"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -628,31 +964,49 @@ const OverscrollView: FunctionComponent<{
         <Viewport.Overscroll {...props}>
           <div className="viewport-demo-pull">
             <ActivityIndicator
+              {...partProps.ActivityIndicator}
               className="viewport-demo-pull-spinner"
               display="reset"
             />
           </div>
         </Viewport.Overscroll>
-        <Viewport.Content ref={contentRef}>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content
+          {...partProps['Viewport.Content']}
+          ref={contentRef}
+        >
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
-        <Viewport.BlockStart>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Title>
+        <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            placement="block-start"
+          >
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>Contacts</span>
             </Toolbar.Title>
           </Toolbar.Root>
@@ -677,54 +1031,105 @@ const KeyboardAccessoryPart: FunctionComponent = () => {
     title: 'Viewport.KeyboardAccessory',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': ['render'],
+          'List.Title': [],
+          'List.Trailing': [],
+          'TextField.Control': ['above', 'placeholder', 'the'],
+          'TextField.Label': [],
+          'TextField.Root': ['render'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+          'Viewport.Provider': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.KeyboardAccessory"
     >
       {/* Tracking the keyboard over its screen. */}
-      <Viewport.Provider>
-        <Viewport.BlockStart>
-          <Toolbar.Root placement="block-start">
-            <Toolbar.Title>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
+        <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            placement="block-start"
+          >
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>Contacts</span>
             </Toolbar.Title>
           </Toolbar.Root>
         </Viewport.BlockStart>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.slice(0, 10).map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
               </List.Group>
             </List.Section>
             {/* (Its section, as the accessory: spaced as sections are.) */}
-            <List.Section render={<Viewport.KeyboardAccessory {...props} />}>
-              <List.Group>
-                <TextField.Root render={<List.Item />}>
-                  <List.Content>
-                    <TextField.Label>Note</TextField.Label>
+            <List.Section
+              {...partProps['List.Section']}
+              render={<Viewport.KeyboardAccessory {...props} />}
+            >
+              <List.Group {...partProps['List.Group']}>
+                <TextField.Root
+                  {...partProps['TextField.Root']}
+                  render={<List.Item {...partProps['List.Item']} />}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <TextField.Label {...partProps['TextField.Label']}>
+                      Note
+                    </TextField.Label>
                   </List.Content>
-                  <List.Trailing>
-                    <TextField.Control placeholder="Typed above the keyboard" />
+                  <List.Trailing {...partProps['List.Trailing']}>
+                    <TextField.Control
+                      {...partProps['TextField.Control']}
+                      placeholder="Typed above the keyboard"
+                    />
                   </List.Trailing>
                 </TextField.Root>
               </List.Group>
             </List.Section>
           </List.Root>
-          <Viewport.Padding edge="block-end" />
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
         </Viewport.Content>
       </Viewport.Provider>
     </Component>
@@ -764,44 +1169,78 @@ const UseFocusScrollPart: FunctionComponent = () => {
   });
   useFocusScroll(scroller, args.mode);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Trailing': [],
+          'TextField.Control': ['above', 'placeholder', 'the'],
+          'TextField.Label': [],
+          'TextField.Root': ['render'],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+          'Viewport.Provider': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="useFocusScroll"
     >
       {/* Tracking the keyboard over its screen. */}
-      <Viewport.Provider>
-        <Viewport.Content>
+      <Viewport.Provider {...partProps['Viewport.Provider']}>
+        <Viewport.Content {...partProps['Viewport.Content']}>
           <div
             ref={scroller}
             className="viewport-demo-scroller"
           >
-            <Viewport.Padding edge="block-start" />
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {focusScrollFields.map((label) => (
                     <TextField.Root
                       key={label}
-                      render={<List.Item />}
+                      {...partProps['TextField.Root']}
+                      render={<List.Item {...partProps['List.Item']} />}
                     >
-                      <List.Content>
-                        <TextField.Label>{label}</TextField.Label>
+                      <List.Content {...partProps['List.Content']}>
+                        <TextField.Label {...partProps['TextField.Label']}>
+                          {label}
+                        </TextField.Label>
                       </List.Content>
-                      <List.Trailing>
-                        <TextField.Control placeholder="Typed above the keyboard" />
+                      <List.Trailing {...partProps['List.Trailing']}>
+                        <TextField.Control
+                          {...partProps['TextField.Control']}
+                          placeholder="Typed above the keyboard"
+                        />
                       </List.Trailing>
                     </TextField.Root>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </div>
         </Viewport.Content>
       </Viewport.Provider>
@@ -816,15 +1255,23 @@ const OverscrollPart: FunctionComponent = () => {
   );
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <OverscrollView
-        contentRef={contentRef}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <OverscrollView
+          contentRef={contentRef}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -875,13 +1322,34 @@ const CreateAnchorHandlePart: FunctionComponent = () => {
     title: 'Viewport.Padding (end)',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Viewport.Padding': ['edge'],
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': [],
+          'Toolbar.Title': [],
+          'Viewport.BlockEnd': ['className', 'handle'],
+          'Viewport.Content': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Viewport.createAnchorHandle"
       diagnostics={
         <HandleSizes
@@ -891,15 +1359,23 @@ const CreateAnchorHandlePart: FunctionComponent = () => {
       }
     >
       <>
-        <Viewport.Content>
-          <Viewport.Padding edge="block-start" />
-          <List.Root>
-            <List.Section>
-              <List.Group>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
                 {names.map((name) => (
-                  <List.Item key={name}>
-                    <List.Content>
-                      <List.Title>{name}</List.Title>
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
                     </List.Content>
                   </List.Item>
                 ))}
@@ -909,17 +1385,19 @@ const CreateAnchorHandlePart: FunctionComponent = () => {
           <Viewport.Padding {...props} />
         </Viewport.Content>
         <Viewport.BlockEnd
+          {...partProps['Viewport.BlockEnd']}
           className="viewport-demo-surface"
           handle={barAnchor}
         >
-          <Toolbar.Root>
-            <Toolbar.Title>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
               <span>{names.length} Contacts</span>
             </Toolbar.Title>
           </Toolbar.Root>
         </Viewport.BlockEnd>
         {/* A toast over the content: room made for it only if linked. */}
         <Viewport.BlockEnd
+          {...partProps['Viewport.BlockEnd']}
           className="viewport-demo-toast-anchor"
           handle={toastAnchor}
         >
@@ -954,113 +1432,209 @@ const AnchorSizes: FunctionComponent = () => {
 };
 
 /** `useAnchorSize`: the bars' sizes, in their screen. */
-const UseAnchorSizePart: FunctionComponent = () => (
-  <Component
-    isInline
-    diagnostics={<AnchorSizes />}
-    id="viewport-parts-use-anchor-size"
-    stage="phone"
-    title="useAnchorSize"
-    setup={`// In the anchors' scope (here: the screen):
+const UseAnchorSizePart: FunctionComponent = () => {
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.BlockEnd': ['className'],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState('viewport-parts-use-anchor-size') },
+  );
+  return (
+    <Component
+      isInline
+      controls={[partControls]}
+      diagnostics={<AnchorSizes />}
+      id="viewport-parts-use-anchor-size"
+      stage="phone"
+      state={[partState]}
+      title="useAnchorSize"
+      setup={`// In the anchors' scope (here: the screen):
 const top = useAnchorSize('block-start');
 const bottom = useAnchorSize('block-end');`}
-  >
-    <>
-      <Viewport.BlockStart>
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Title>
-            <span>Contacts</span>
-          </Toolbar.Title>
-        </Toolbar.Root>
-      </Viewport.BlockStart>
-      <Viewport.Content>
-        <Viewport.Padding edge="block-start" />
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {names.map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
-                  </List.Content>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-        <Viewport.Padding edge="block-end" />
-      </Viewport.Content>
-      <Viewport.BlockEnd className="viewport-demo-surface">
-        <Toolbar.Root>
-          <Toolbar.Title>
-            <span>{names.length} Contacts</span>
-          </Toolbar.Title>
-        </Toolbar.Root>
-      </Viewport.BlockEnd>
-    </>
-  </Component>
-);
+    >
+      <>
+        <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            placement="block-start"
+          >
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
+              <span>Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
+                {names.map((name) => (
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
+        </Viewport.Content>
+        <Viewport.BlockEnd
+          {...partProps['Viewport.BlockEnd']}
+          className="viewport-demo-surface"
+        >
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
+              <span>{names.length} Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+      </>
+    </Component>
+  );
+};
 
 /**
  * `useViewportEdgeElement`'s content (in the anchors' scope): a filter
  * sticking below the bar, the bar's edge effect reaching under it.
  */
-const EdgeElementContent: FunctionComponent = () => {
-  const filter = useLabelledRef<HTMLDivElement>('filter', 'HTMLDivElement');
+/**
+ * The hooks of `useViewportEdgeElement`'s view, inside its screen (their
+ * scope, the anchors'): the filter registered below the bar, the bar's
+ * height told (a part of the demo's tooling: no part of the code shown,
+ * which its setup has).
+ */
+const EdgeElementHooks: FunctionComponent<{
+  readonly filter: RefObject<HTMLDivElement | null>;
+  readonly onTop: (top: number) => void;
+}> = ({ filter, onTop }) => {
   const top = useAnchorSize('block-start');
   useViewportEdgeElement(filter, 'block-start');
+  useLayoutEffect(() => onTop(top), [onTop, top]);
 
-  return (
-    <>
-      <Viewport.BlockStart>
-        <Toolbar.Root placement="block-start">
-          <Toolbar.Title>
-            <span>Contacts</span>
-          </Toolbar.Title>
-        </Toolbar.Root>
-      </Viewport.BlockStart>
-      <Viewport.Content>
-        <Viewport.Padding edge="block-start" />
-        <div
-          ref={filter}
-          className="viewport-demo-sticky"
-          style={{ top }}
-        >
-          <span className="viewport-demo-filter">Favorites only</span>
-        </div>
-        <List.Root>
-          <List.Section>
-            <List.Group>
-              {names.map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
-                  </List.Content>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-        <Viewport.Padding edge="block-end" />
-      </Viewport.Content>
-    </>
-  );
+  return null;
 };
+hideFromCode(EdgeElementHooks);
 
 /** `useViewportEdgeElement`: a filter sticking below the bar. */
-const UseViewportEdgeElementPart: FunctionComponent = () => (
-  <Component
-    isInline
-    id="viewport-parts-use-viewport-edge-element"
-    stage="phone"
-    title="useViewportEdgeElement"
-    setup={`// Sticking below the bar (its height, in the anchors' scope):
+const UseViewportEdgeElementPart: FunctionComponent = () => {
+  const id = 'viewport-parts-use-viewport-edge-element';
+  const filter = useLabelledRef<HTMLDivElement>('filter', 'HTMLDivElement');
+  const [top, setTop] = useState(0);
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Viewport.BlockStart': [],
+          'Viewport.Content': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  return (
+    <Component
+      isInline
+      controls={[partControls]}
+      id={id}
+      stage="phone"
+      state={[partState]}
+      title="useViewportEdgeElement"
+      setup={`// Sticking below the bar (its height, in the anchors' scope):
 const top = useAnchorSize('block-start');
 useViewportEdgeElement(filter, 'block-start');`}
-  >
-    <EdgeElementContent />
-  </Component>
-);
+    >
+      <EdgeElementHooks
+        filter={filter}
+        onTop={setTop}
+      />
+      <>
+        <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            placement="block-start"
+          >
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
+              <span>Contacts</span>
+            </Toolbar.Title>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Viewport.Content {...partProps['Viewport.Content']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <div
+            ref={filter}
+            className="viewport-demo-sticky"
+            style={{ top }}
+          >
+            <span className="viewport-demo-filter">Favorites only</span>
+          </div>
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
+                {names.map((name) => (
+                  <List.Item
+                    key={name}
+                    {...partProps['List.Item']}
+                  >
+                    <List.Content {...partProps['List.Content']}>
+                      <List.Title {...partProps['List.Title']}>
+                        {name}
+                      </List.Title>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
+        </Viewport.Content>
+      </>
+    </Component>
+  );
+};
 
 /** `useVisualViewport`'s readout (inside a provider, see below). */
 const UseVisualViewportView: FunctionComponent = () => {
@@ -1093,9 +1667,14 @@ const UseVisualViewportView: FunctionComponent = () => {
 };
 
 /** `UseVisualViewportView`, in its provider. */
+// (In the code: the provider around the stage's.)
+const plainProvider = <Viewport.Provider />;
+
 const UseVisualViewportPart: FunctionComponent = () => (
   <Viewport.Provider>
-    <UseVisualViewportView />
+    <CodeAroundContext.Provider value={plainProvider}>
+      <UseVisualViewportView />
+    </CodeAroundContext.Provider>
   </Viewport.Provider>
 );
 
@@ -1129,16 +1708,37 @@ const UseViewportScrollView: FunctionComponent<{
     );
   }, options);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Viewport.Content': ['ref'],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       containsOverscroll
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screenRef={screenRef}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="useViewportScroll"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -1157,22 +1757,34 @@ const UseViewportScrollView: FunctionComponent<{
         </dl>
       }
     >
-      <Viewport.Content ref={contentRef}>
-        <Viewport.Padding edge="block-start" />
-        <List.Root>
-          <List.Section>
-            <List.Group>
+      <Viewport.Content
+        {...partProps['Viewport.Content']}
+        ref={contentRef}
+      >
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-start"
+        />
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               {names.map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>{name}</List.Title>
                   </List.Content>
                 </List.Item>
               ))}
             </List.Group>
           </List.Section>
         </List.Root>
-        <Viewport.Padding edge="block-end" />
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-end"
+        />
       </Viewport.Content>
     </Component>
   );
@@ -1187,17 +1799,25 @@ const UseViewportScrollPart: FunctionComponent = () => {
   const [log, addLog] = useLog();
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <UseViewportScrollView
-        addLog={addLog}
-        contentRef={contentRef}
-        log={log}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <UseViewportScrollView
+          addLog={addLog}
+          contentRef={contentRef}
+          log={log}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -1219,15 +1839,33 @@ const UseScrollDirectionView: FunctionComponent<{
     direction = 'undefined',
   } = useScrollDirection(options);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'List.Content': [],
+          'List.Group': [],
+          'List.Item': [],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'Viewport.Content': ['ref'],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       containsOverscroll
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       screenRef={screenRef}
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="useScrollDirection"
       diagnostics={
         <dl className="viewport-demo-metrics">
@@ -1240,22 +1878,34 @@ const UseScrollDirectionView: FunctionComponent<{
         </dl>
       }
     >
-      <Viewport.Content ref={contentRef}>
-        <Viewport.Padding edge="block-start" />
-        <List.Root>
-          <List.Section>
-            <List.Group>
+      <Viewport.Content
+        {...partProps['Viewport.Content']}
+        ref={contentRef}
+      >
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-start"
+        />
+        <List.Root {...partProps['List.Root']}>
+          <List.Section {...partProps['List.Section']}>
+            <List.Group {...partProps['List.Group']}>
               {names.map((name) => (
-                <List.Item key={name}>
-                  <List.Content>
-                    <List.Title>{name}</List.Title>
+                <List.Item
+                  key={name}
+                  {...partProps['List.Item']}
+                >
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>{name}</List.Title>
                   </List.Content>
                 </List.Item>
               ))}
             </List.Group>
           </List.Section>
         </List.Root>
-        <Viewport.Padding edge="block-end" />
+        <Viewport.Padding
+          {...partProps['Viewport.Padding']}
+          edge="block-end"
+        />
       </Viewport.Content>
     </Component>
   );
@@ -1269,15 +1919,23 @@ const UseScrollDirectionPart: FunctionComponent = () => {
   );
   const screenRef = useRef<HTMLDivElement>(null);
 
+  // (In the code: the provider as the app writes it, around the stage's.)
+  const around = useMemo(
+    () => <Viewport.Provider scroller={contentRef} />,
+    [contentRef],
+  );
+
   return (
     <Viewport.Provider
       screen={screenRef}
       scroller={contentRef}
     >
-      <UseScrollDirectionView
-        contentRef={contentRef}
-        screenRef={screenRef}
-      />
+      <CodeAroundContext.Provider value={around}>
+        <UseScrollDirectionView
+          contentRef={contentRef}
+          screenRef={screenRef}
+        />
+      </CodeAroundContext.Provider>
     </Viewport.Provider>
   );
 };
@@ -1412,7 +2070,8 @@ const UseElementGeometryPart: FunctionComponent = () => {
 };
 
 /** The fields of the input guards' views: small fonts, a list, a text area. */
-const GuardFields: FunctionComponent = () => (
+// (An element, not a component: the code shown has its fields, not a tag.)
+const guardFields = (
   <>
     <input
       aria-label="12px"
@@ -1495,7 +2154,7 @@ const UseInputZoomPreventionPart: FunctionComponent = () => {
         className="viewport-demo-fields"
         onFocusCapture={logGuarded(addLog)}
       >
-        <GuardFields />
+        {guardFields}
       </div>
     </Component>
   );
@@ -1534,7 +2193,7 @@ const UseFocusShiftPreventionPart: FunctionComponent = () => {
         className="viewport-demo-fields viewport-demo-fields-tall"
         onFocusCapture={logGuarded(addLog)}
       >
-        <GuardFields />
+        {guardFields}
       </div>
     </Component>
   );
@@ -1601,10 +2260,10 @@ export const ViewportParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        Provider: tracks the visual viewport and scrolling, for the layers and
-        the hooks; around the app.
+        Provider: goes around the app. It tracks the visual viewport and
+        scrolling, for the layers and the hooks.
       </li>
-      <li>Content: the content layer, scrolling.</li>
+      <li>Content: the content layer, which scrolls.</li>
       <li>
         Anchors: bars floating at an edge (
         <PartLink
@@ -1620,7 +2279,7 @@ export const ViewportParts: FunctionComponent = () => (
         >
           BlockEnd
         </PartLink>
-        : the top and the bottom).
+        for the top and the bottom).
       </li>
       <li>
         <PartLink
@@ -1629,8 +2288,8 @@ export const ViewportParts: FunctionComponent = () => (
         >
           Padding
         </PartLink>
-        : a scroll container’s content edge, room for the anchors there (by
-        their scope, or by their handles) and the content margin.
+        : room at a scroll container’s start or end, for the anchors there (by
+        their scope, or by their handles) plus the content margin.
       </li>
       <li>
         <PartLink
@@ -1639,8 +2298,8 @@ export const ViewportParts: FunctionComponent = () => (
         >
           Overscroll
         </PartLink>
-        : what shows past the content’s start or end as it’s pulled there (e.g.
-        a refresh indicator).
+        : what shows past the content’s start or end as it’s pulled there, such
+        as a refresh indicator.
       </li>
       <li>
         <PartLink
@@ -1652,12 +2311,12 @@ export const ViewportParts: FunctionComponent = () => (
         : what’s typed into, kept above the keyboard.
       </li>
       <li>
-        Hooks: what the provider tracks, inside it; and an element’s visibility
-        and geometry, anywhere.
+        Hooks: inside the provider, what it tracks. Anywhere, an element’s
+        visibility and geometry.
       </li>
       <li>
-        The views’ phone screens contain the fixed layers (a{' '}
-        <code>transform</code>); in an app, they’re the window’s.
+        On this page, each phone screen contains its fixed layers (it has a{' '}
+        <code>transform</code>). In an app, they’re fixed to the window.
       </li>
     </ul>
     <ul className="demo-tree">
@@ -1686,14 +2345,14 @@ export const ViewportParts: FunctionComponent = () => (
                   component="viewport"
                   part="Viewport.Padding"
                 />{' '}
-                (at its start and its end: in it, or in a page in it)
+                (at the start and the end, in it or in a page inside it)
               </li>
               <li>
                 <PartLink
                   component="viewport"
                   part="Viewport.KeyboardAccessory"
                 />{' '}
-                (optional, anywhere in it: around what’s typed into)
+                (optional, anywhere inside, around what’s typed into)
               </li>
             </ul>
           </li>
@@ -1702,26 +2361,29 @@ export const ViewportParts: FunctionComponent = () => (
               component="viewport"
               part="Viewport.Overscroll"
             />{' '}
-            (optional, one per end: before the content layer, beneath it)
+            (optional, one per end; rendered before the content layer, beneath
+            it)
           </li>
           <li>
             <PartLink
               component="viewport"
               part="Viewport.Anchor"
             />{' '}
-            (one per edge, optional), or:
+            (optional, at an edge; several can stack there), or its shorthands:
             <ul>
               <li>
                 <PartLink
                   component="viewport"
                   part="Viewport.BlockStart"
-                />
+                />{' '}
+                (<code>edge=&quot;block-start&quot;</code>)
               </li>
               <li>
                 <PartLink
                   component="viewport"
                   part="Viewport.BlockEnd"
-                />
+                />{' '}
+                (<code>edge=&quot;block-end&quot;</code>)
               </li>
             </ul>
           </li>
@@ -1791,7 +2453,7 @@ export const ViewportParts: FunctionComponent = () => (
               component="viewport"
               part="ViewportScopeContext"
             />{' '}
-            (optional: around an element containing fixed layers; set by a{' '}
+            (optional, around an element that contains fixed layers; set by a{' '}
             <PartLink
               component="layout"
               part="Layout.Column"
@@ -1881,7 +2543,7 @@ export const ViewportParts: FunctionComponent = () => (
         </ul>
       </li>
       <li>
-        Status bar taps (iOS, a Home Screen app; a provider’s{' '}
+        Status bar taps (iOS, in a Home Screen app; a provider’s{' '}
         <code>scrollsToTop</code> uses them):{' '}
         <PartLink
           component="viewport"
@@ -1903,26 +2565,27 @@ export const ViewportParts: FunctionComponent = () => (
       <code>Viewport.Provider</code>
     </Heading>
     <ul>
-      <li>Renders no element: a context, around the app.</li>
+      <li>Renders no element. It’s a context that goes around the app.</li>
       <li>
-        Tracks the visual viewport (as custom properties on the root element,
-        which the layers follow, and for{' '}
+        Tracks the visual viewport, as custom properties on the root element
+        that the layers follow, and for{' '}
         <PartLink
           component="viewport"
           part="useVisualViewport"
         />
-        ).
+        .
       </li>
       <li>
-        Tracks a scroll container’s scrolling (<code>scroller</code>; unset, the
-        one filling its screen: a <a href={publicUrl('page')}>Page</a> or a{' '}
+        Tracks a scroll container’s scrolling (its <code>scroller</code>).
+        Unset, that’s the one filling its screen, a{' '}
+        <a href={publicUrl('page')}>Page</a> or a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
         />
-        , following as pages show and hide, never an overlay’s (a popover’s, a
-        sheet’s or an island’s content, or what’s in them); or the document’s),
-        for{' '}
+        , updated as pages show and hide, or else the document. An overlay’s
+        content never counts: not a popover’s, a sheet’s or an island’s, nor
+        anything inside them. The scrolling feeds{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"
@@ -1932,18 +2595,20 @@ export const ViewportParts: FunctionComponent = () => (
           component="viewport"
           part="useScrollDirection"
         />
-        : each takes its own <code>threshold</code>.
+        . Each takes its own <code>threshold</code>.
       </li>
       <li>
-        Tracking the window (as do the layers in it, outside a device’s screen):
-        marks the root as an app’s (<code>data-uikit-viewport-window</code>),
-        its background the app’s beneath the layers. In an iOS Home Screen app,
-        also makes the document as tall as the screen (
-        <code>data-uikit-viewport-standalone</code>): iOS 26 otherwise gives a
-        document no taller than its window a layout viewport short by the status
-        bar’s height, painting nothing below it (WebKit bug 301108).
+        When it tracks the window (as the layers do, outside a device’s screen),
+        it marks the root as an app’s (<code>data-uikit-viewport-window</code>),
+        so the app’s background shows beneath the layers. In an iOS Home Screen
+        app, it also makes the document as tall as the screen (
+        <code>data-uikit-viewport-standalone</code>). Otherwise iOS gives a
+        document no taller than its window a layout viewport that’s short by the
+        status bar’s height, and paints nothing below it (WebKit bug 301108).
       </li>
-      <li>Here: tracking the screen’s content layer, the readout below it.</li>
+      <li>
+        Here, it tracks the screen’s content layer. The readout is below it.
+      </li>
     </ul>
     <ProviderPart />
     <h3>Props</h3>
@@ -1962,21 +2627,21 @@ export const ViewportParts: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Content"
         />{' '}
-        and every other layer, wherever it’s placed among them, filling its
-        provider’s screen (the window, or a screen such as a device’s frame). It
+        and every other layer, wherever you place it among them. It fills its
+        provider’s screen (the window, or a screen such as a device frame). It
         doesn’t scroll, and the keyboard doesn’t move it.
       </li>
       <li>
-        Its children layered, each filling it (images and videos covering it):
-        e.g. a picture, a map or a video. It shows where nothing in front of it
-        paints: between a list’s groups, beside a{' '}
+        Its children are layered, each filling it (images and videos cover it).
+        For example a picture, a map or a video. It shows wherever nothing in
+        front of it paints: between a list’s groups, beside a{' '}
         <a href={publicUrl('layout')}>Layout</a>’s floating{' '}
         <a href={publicUrl('sidebar')}>Sidebar</a>, through transparent pages.
       </li>
       <li>
-        A sibling of the content layer, not inside it (the content layer moves
-        as it bounces, and would carry it along). For a layout that doesn’t fill
-        the screen, give the layout’s box a background of its own instead.
+        Place it next to the content layer, not inside it. The content layer
+        moves as it bounces, and would carry it along. For a layout that doesn’t
+        fill the screen, give the layout’s box its own background instead.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1994,13 +2659,14 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The content layer: filling the viewport, scrolling its content, beneath
-        the anchors.
+        The content layer. It fills the viewport and scrolls its content,
+        beneath the anchors.
       </li>
       <li>
-        With the keyboard: resized to what’s above it (<code>keyboard</code>{' '}
-        <code>resize</code>), or overlaid. A text field typed into in it,
-        scrolled into view above it (by it, or a page in it: see{' '}
+        With the keyboard up, it’s resized to the space above it (
+        <code>keyboard</code> <code>resize</code>), or overlaid. A text field
+        typed into inside it is scrolled into view above the keyboard, by the
+        layer or by a page inside it (see{' '}
         <PartLink
           component="viewport"
           part="useFocusScroll"
@@ -2008,24 +2674,25 @@ export const ViewportParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Keeps the safe area insets clear (<code>safeArea</code>), as padding; by
-        default (<code>auto</code>) not while its direct child scrolls on its
-        own (a <a href={publicUrl('page')}>Page</a>, a{' '}
+        Keeps the safe area insets clear as padding (<code>safeArea</code>). By
+        default (<code>auto</code>), it doesn’t while its direct child scrolls
+        on its own (a <a href={publicUrl('page')}>Page</a>, a{' '}
         <a href={publicUrl('header')}>Header</a>, a{' '}
         <a href={publicUrl('layout')}>Layout</a>, a{' '}
-        <a href={publicUrl('navigation')}>Navigation</a>): that child fills the
-        screen, keeping its content clear itself.
+        <a href={publicUrl('navigation')}>Navigation</a>). That child fills the
+        screen and keeps its content clear itself.
       </li>
       <li>
-        For what’s in it that isn’t padded (e.g. a map’s controls, kept clear of
-        a bar or an island): the anchors’ sizes at its top and bottom, as a{' '}
+        For content that isn’t padded, such as a map’s controls that must stay
+        clear of a bar or an island: it publishes the anchors’ sizes at its top
+        and bottom, as a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        makes room for them (beyond the safe area), as{' '}
+        makes room for them (beyond the safe area inset). They’re{' '}
         <code>--uikit-viewport-anchor-block-start</code> and{' '}
-        <code>--uikit-viewport-anchor-block-end</code>; in a script,{' '}
+        <code>--uikit-viewport-anchor-block-end</code>. In a script, use{' '}
         <PartLink
           component="viewport"
           part="useAnchorSize"
@@ -2033,8 +2700,8 @@ export const ViewportParts: FunctionComponent = () => (
         .
       </li>
       <li>
-        Renders a <code>div</code>; its ref is what a provider’s{' '}
-        <code>scroller</code> tracks.
+        Renders a <code>div</code>. Pass its ref to a provider’s{' '}
+        <code>scroller</code> to track it.
       </li>
     </ul>
     <ContentPart />
@@ -2049,50 +2716,64 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Floats above the content layer at an <code>edge</code>: the top or
-        bottom (a bar, across), the leading or trailing side (a sidebar, from
-        the top to the keyboard).
+        Floats above the content layer at an <code>edge</code>. At the top or
+        bottom, it spans the screen as a bar. At the leading or trailing side,
+        it’s a sidebar running from the top down to the keyboard.
       </li>
       <li>
-        At the bottom, pushed up by the keyboard (<code>keyboard</code>{' '}
-        <code>push</code>) or covered by it.
+        At the bottom, the keyboard either pushes it up (<code>keyboard</code>{' '}
+        <code>push</code>, the default) or covers it.
       </li>
       <li>
-        Keeps the safe area insets clear (<code>safeArea</code>), as padding;
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />{' '}
+        are shorthands for an anchor with its <code>edge</code> set. Either
+        spelling gives the same part.
+      </li>
+      <li>
+        Keeps the safe area insets clear as padding (<code>safeArea</code>). It
         doesn’t inset the content.
       </li>
       <li>
-        At the top or bottom, its scroll edge effect (<code>edgeEffect</code>,{' '}
-        <code>soft</code> by default; <code>hard</code>; <code>none</code>):
-        drawn by the scroller beneath (a <a href={publicUrl('page')}>Page</a>, a
-        sheet’s content, the{' '}
+        At the top or bottom, it has an edge effect (<code>edgeEffect</code>:{' '}
+        <code>soft</code> by default, <code>hard</code> or <code>none</code>).
+        The scroller beneath draws it as content scrolls under the bar (a{' '}
+        <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
         />
-        ) as content scrolls under it, one per edge however many anchors stack
-        there (as tall as the tallest), also under what’s stuck to them (
+        ). There’s one per edge, however many anchors stack there, as tall as
+        the tallest. It also reaches under what’s stuck to them (
         <PartLink
           component="viewport"
           part="useViewportEdgeElement"
         />
-        ). Tinted (<code>edgeTint</code>), at rest too: see{' '}
+        ). It can be tinted, even at rest (<code>edgeTint</code>, see{' '}
         <a href={publicUrl('viewport/composition#a-tinted-edge')}>
           a tinted edge
         </a>
-        .
+        ).
       </li>
       <li>
-        The anchor is the surface: it has no background of its own, so a bar
-        with one (a background, a separator) styles the anchor itself (its{' '}
-        <code>className</code>, the app’s class), reaching the screen’s edge
-        behind the home indicator, its content clear of it. Space the content
-        inside it (its own padding or margin), not by the anchor’s padding
-        (that’s the insets’). Here: <code>viewport-demo-surface</code>.
+        The anchor is the surface, and it has no background of its own. For a
+        bar with a background or a separator, style the anchor itself, with your
+        own class in its <code>className</code>. It then reaches the screen’s
+        edge behind the home indicator, while its content stays clear. Space the
+        content inside with its own padding or margin. The anchor’s padding
+        belongs to the insets. Here, the class is{' '}
+        <code>viewport-demo-surface</code>.
       </li>
       <li>
-        A surface inside the anchor instead ends at the insets: a gap below a
-        bottom bar. Glass bars (a{' '}
+        A surface inside the anchor ends at the insets instead, leaving a gap
+        below a bottom bar. Glass bars need no surface (a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Root"
@@ -2102,7 +2783,7 @@ export const ViewportParts: FunctionComponent = () => (
           component="tab-bar"
           part="TabBar.List"
         />
-        ) need none: the content shows through to the edge.
+        ): the content shows through to the edge.
       </li>
       <li>
         Renders a <code>div</code> (<code>z-index</code> 10).
@@ -2120,8 +2801,13 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An anchor at the top (<code>edge</code> <code>block-start</code>), e.g.
-        a toolbar.
+        Shorthand for a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />{' '}
+        at the top (<code>edge=&quot;block-start&quot;</code>), with all of its
+        other props. The two are interchangeable; use whichever reads better.
       </li>
     </ul>
     <BlockStartPart />
@@ -2136,10 +2822,18 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        An anchor at the bottom (<code>edge</code> <code>block-end</code>), e.g.
-        a tab bar, a toolbar, a message field.
+        Shorthand for a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />{' '}
+        at the bottom (<code>edge=&quot;block-end&quot;</code>), with all of its
+        other props. The two are interchangeable; use whichever reads better.
       </li>
-      <li>Pushed up by the keyboard by default.</li>
+      <li>
+        Like any anchor at the bottom, it’s pushed up by the keyboard by
+        default.
+      </li>
     </ul>
     <BlockEndPart />
     <h3>Props</h3>
@@ -2153,44 +2847,44 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A scroll container’s content edge, at its start (under a bar) or its end
-        (above a tab bar or toolbar): room for the anchors there, so the content
-        scrolls out from under them, and the content margin beyond.
+        Room at a scroll container’s start (under a bar) or end (above a tab bar
+        or toolbar). It makes room for the anchors there, so the content scrolls
+        out from under them, plus the content margin.
       </li>
       <li>
-        The content margin: the library’s gap between content and its
-        container’s edge, 16px by its tokens (
-        <code>--uikit-content-margin-block-start</code>, <code>-end</code>);
-        none before a{' '}
+        The content margin is the library’s gap between content and its
+        container’s edge: 16px, set by its tokens (
+        <code>--uikit-content-margin-block-start</code>, <code>-end</code>).
+        There’s none before a{' '}
         <PartLink
           component="header"
           part="Header.LargeTitle"
         />{' '}
-        (it sits right under the bar). <code>margin</code> overrides it per
-        padding. Without anchors in its scope (e.g. a sheet’s content, or no
-        bar), it’s the margin alone: components never space themselves, the
-        padding does.
+        , which sits right under the bar. <code>margin</code> overrides it for
+        one padding. Without anchors in its scope (for example in a sheet’s
+        content, or without a bar), it’s just the margin. Components never space
+        themselves; the padding does it.
       </li>
       <li>
-        Following no anchors, even with some in its scope:{' '}
-        <code>anchor=&#123;null&#125;</code>, the margin alone (e.g. content
-        meant to scroll under a bar, still spaced from the edge). Not rendering
-        a padding leaves no gap at all.
+        With <code>anchor=&#123;null&#125;</code>, it follows no anchors, even
+        with some in its scope, and is just the margin. That suits content meant
+        to scroll under a bar while still keeping a gap to the edge. Rendering
+        no padding leaves no gap at all.
       </li>
       <li>
-        As high as the tallest anchor at its <code>edge</code> in its scope; or,
-        linked to anchors by their handles (<code>anchor</code>: one, or
-        several), as the tallest of those (see{' '}
+        It’s as tall as the tallest anchor at its <code>edge</code> in its
+        scope. Linked to anchors by their handles (<code>anchor</code>, one or
+        several), it’s as tall as the tallest of those (see{' '}
         <PartLink
           component="viewport"
           part="Viewport.createAnchorHandle"
         />
-        ). Live, as an anchor changes (e.g. a tab bar collapsing; here, the
-        bottom bar’s rows).
+        ). It updates live as an anchor changes, for example as a tab bar
+        collapses. Here, try the bottom bar’s rows.
       </li>
       <li>
-        An anchor’s size without the safe area insets it keeps clear: the scroll
-        container keeps them clear itself (e.g. a{' '}
+        It counts an anchor’s size without the safe area insets the anchor keeps
+        clear. The scroll container keeps those clear itself (for example a{' '}
         <PartLink
           component="page"
           part="Page.Root"
@@ -2198,8 +2892,8 @@ export const ViewportParts: FunctionComponent = () => (
         ’s padding), so the two add up.
       </li>
       <li>
-        Its scope: where the anchors are fixed to, the screen (the window, or a
-        frame like these views’), or an element containing fixed layers (a{' '}
+        Its scope is what the anchors are fixed to: the screen (the window, or a
+        frame like this page’s), or an element that contains fixed layers (a{' '}
         <PartLink
           component="layout"
           part="Layout.Column"
@@ -2212,16 +2906,16 @@ export const ViewportParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Sets its scroll container’s scroll padding at its edge (
-        <code>scroll-padding-block-start</code> or <code>-end</code>): the
-        container’s own padding there and its height, so focus moving and{' '}
-        <code>scrollIntoView</code> stop clear of the anchors; while mounted.
-        Its scroll container is its nearest ancestor scrolling (or the
-        document).
+        While mounted, it sets its scroll container’s scroll padding at its edge
+        (<code>scroll-padding-block-start</code> or <code>-end</code>): the
+        container’s own padding there, plus its height. So moving focus and{' '}
+        <code>scrollIntoView</code> stop clear of the anchors. Its scroll
+        container is its nearest scrolling ancestor, or the document.
       </li>
       <li>
-        One per end of a scroll container. Leave it out where nothing should
-        make room (e.g. a picture under the bar, or a bar with nothing in it).
+        Use one per end of a scroll container. Leave it out where nothing should
+        make room, for example for a picture under the bar, or a bar with
+        nothing in it.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -2241,39 +2935,41 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         What shows past the tracked scroll container’s start (<code>edge</code>{' '}
         <code>block-start</code>) or end (<code>block-end</code>) as it’s pulled
-        there: e.g. a refresh indicator, a hint to the next page (see the{' '}
+        there. For example, a refresh indicator, or a hint to the next page (see
+        the{' '}
         <a href={publicUrl('viewport/composition#pulling-to-refresh')}>
           composition
         </a>
         ).
       </li>
       <li>
-        A layer beneath the content layer (render it before it), from the bars
-        at its edge (as a{' '}
+        It’s a layer beneath the content layer, so render it before that. It
+        comes out from under the bars at its edge (chosen as with a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />
-        ’s <code>anchor</code>): coming out from under them, moved along by the
-        pull as the content’s end, as if in it.
+        ’s <code>anchor</code>), and the pull moves it along with the content’s
+        end, as if it were part of the content.
       </li>
       <li>
-        Safari bounces the content past its ends itself: the layer shows through
-        the gap. Other browsers don’t: while it’s shown, the tracked scroll
-        container is moved along by the pull (as Safari’s; without one shown,
-        nothing is). Where the content stays (the document’s), it slides in over
-        it, by the pull (
+        Safari bounces the content past its ends by itself, and the layer shows
+        through the gap. Other browsers don’t. While it’s shown there, the pull
+        moves the tracked scroll container along, as Safari would. When none is
+        shown, nothing moves. Where the content stays put (the document’s), the
+        layer slides in over it with the pull (
         <PartLink
           component="viewport"
           part="useViewportScroll"
         />
-        ’s <code>overscroll</code>, rubber-banded; bouncing back once released).
+        ’s <code>overscroll</code>, rubber-banded), and bounces back once
+        released.
       </li>
       <li>
-        Its pull, as custom properties for its content’s styles:{' '}
-        <code>--uikit-viewport-overscroll</code> (px) and{' '}
-        <code>--uikit-viewport-overscroll-progress</code> (0 to 1, of its own
-        size), e.g. fading in, turning. Acting on release:{' '}
+        Its pull is available to its content’s styles as custom properties, for
+        example to fade in or turn: <code>--uikit-viewport-overscroll</code>{' '}
+        (px) and <code>--uikit-viewport-overscroll-progress</code> (0 to 1,
+        relative to its own size). To act on release, use{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"
@@ -2281,17 +2977,17 @@ export const ViewportParts: FunctionComponent = () => (
         ’s <code>isHeld</code>.
       </li>
       <li>
-        <code>open</code>: kept shown at rest (e.g. while refreshing), its
-        progress 1; the padding at its edge makes room for it beyond the bars,
-        the content settling there (and back once closed).
+        <code>open</code> keeps it shown at rest, for example while refreshing,
+        with its progress at 1. The padding at its edge makes room for it beyond
+        the bars, and the content moves there. Once closed, it moves back.
       </li>
       <li>
-        Inside a provider tracking the scroll container (its{' '}
-        <code>scroller</code>). Here: pull the list past either end (
+        It must be inside a provider that tracks the scroll container (its{' '}
+        <code>scroller</code>). Here, pull the list past either end (
         <code>edge</code>), or open it.
       </li>
       <li>
-        Renders a <code>div</code> (its area) in a clipping layer.
+        Renders a <code>div</code> (its area) inside a clipping layer.
       </li>
     </ul>
     <OverscrollPart />
@@ -2306,21 +3002,21 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What’s typed into, kept above the on-screen keyboard: while focus is
-        within it and the keyboard covers it, lifted (moved up, its place in the
-        layout kept) until its end is <code>gap</code> above the keyboard; back
-        as focus leaves, or the keyboard hides.
+        Keeps what’s typed into above the on-screen keyboard. While focus is
+        inside it and the keyboard covers it, it’s lifted: moved up, with its
+        place in the layout kept, until its end is <code>gap</code> above the
+        keyboard. It goes back down as focus leaves or the keyboard hides.
       </li>
       <li>
-        For fields the browser can’t scroll into view (an app’s don’t: the
-        document doesn’t scroll, and{' '}
+        For fields the browser can’t scroll into view, together with what
+        belongs to them (for example a color picker’s channel row, slider
+        included). In an app, the document doesn’t scroll, and{' '}
         <PartLink
           component="viewport"
           part="useFocusShiftPrevention"
         />{' '}
-        keeps it from trying), e.g. a field below a sheet’s middle; with what
-        belongs to it (e.g. a color picker’s channel row: its slider too). Its
-        fields aren’t scrolled into view by their scroller meanwhile (see{' '}
+        keeps the browser from trying. Its fields aren’t scrolled into view by
+        their scroller (see{' '}
         <PartLink
           component="viewport"
           part="useFocusScroll"
@@ -2338,18 +3034,23 @@ export const ViewportParts: FunctionComponent = () => (
           component="popover"
           part="Popover.Positioner"
         />{' '}
-        (lifted whole). Nested, the innermost around the focused element lifts,
-        those around it staying: a color picker’s channel row in a popover is
-        lifted within it, the popover staying.
+        , which lift as a whole. When accessories are nested, only the innermost
+        one around the focused element lifts. For example, a color picker’s
+        channel row in a popover lifts within it, and the popover stays.
       </li>
       <li>
-        Lifted (<code>data-lifted</code>), above what’s around it, on{' '}
-        <code>--uikit-viewport-keyboard-accessory-background</code> (none by
-        default); by <code>--uikit-viewport-keyboard-lift</code> (px), following
-        the keyboard (250ms, none with reduced motion). A{' '}
-        <a href={publicUrl('list')}>List</a>’s groups in it, lifted, are
-        outlined and raised (as a row being reordered), not blending into the
-        rows they’re lifted over.
+        It lifts once what’s around it has stopped moving. A sheet that the
+        keyboard lifts itself carries it along, so it isn’t lifted twice. It
+        goes back down at once.
+      </li>
+      <li>
+        While lifted (<code>data-lifted</code>), it sits above what’s around it,
+        on <code>--uikit-viewport-keyboard-accessory-background</code> (none by
+        default). It moves by <code>--uikit-viewport-keyboard-lift</code> (px),
+        following the keyboard (250ms, none with reduced motion). A{' '}
+        <a href={publicUrl('list')}>List</a>’s groups inside it are outlined and
+        raised while lifted, like a row being reordered, so they don’t blend
+        into the rows below.
       </li>
       <li>
         Needs a{' '}
@@ -2357,7 +3058,7 @@ export const ViewportParts: FunctionComponent = () => (
           component="viewport"
           part="Viewport.Provider"
         />{' '}
-        (the keyboard’s height); without one, it stays.
+        for the keyboard’s height. Without one, it stays where it is.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -2375,36 +3076,36 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle naming an anchor, to link paddings to it: given to the anchor (
-        <code>handle</code>) and to the paddings (<code>anchor</code>: one
-        handle, or several, the padding as high as the tallest of them). Made
-        once, e.g. at a module’s top level.
+        A handle that names an anchor, so paddings can link to it. Give it to
+        the anchor (<code>handle</code>) and to the paddings (
+        <code>anchor</code>, one handle or several; the padding is then as tall
+        as the tallest). Make it once, for example at a module’s top level.
       </li>
       <li>
-        For a padding that should follow some anchors, not all at its edge: e.g.
-        a toolbar, not a toast floating above it.
+        For a padding that should follow some anchors, not all at its edge. For
+        example, a toolbar, but not a toast floating above it.
       </li>
       <li>
-        Here, the end padding’s <code>anchor</code> (the room it makes for
-        anchors in the diagnostics, its 16px margin beyond; the content’s last
-        rows, scrolled to the end, show it):
+        Here, the control sets the end padding’s <code>anchor</code>. The
+        diagnostics show the room it makes for anchors, plus its 16px margin.
+        Scroll the content to its end to see the effect on the last rows:
         <ul>
           <li>
-            <code>barAnchor</code>: as high as the toolbar. The toast floats
-            over the last row, as a toast should (it’s brief).
+            <code>barAnchor</code>: as tall as the toolbar. The toast floats
+            over the last row, as a brief toast should.
           </li>
           <li>
-            <code>[barAnchor, toastAnchor]</code>: as high as the taller of the
-            two, the toast. The last rows stay clear of it too, while it’s
-            shown.
+            <code>[barAnchor, toastAnchor]</code>: as tall as the taller of the
+            two, the toast. The last rows stay clear of it too while it shows.
           </li>
           <li>
-            Unset: the tallest anchor at its <code>edge</code> (
-            <code>block-end</code>), the toast too: here the same as both
-            linked, but following any anchor added at the bottom.
+            Unset: as tall as the tallest anchor at its <code>edge</code> (
+            <code>block-end</code>), toast included. Here that’s the same as
+            linking both, but it would also follow any anchor added at the
+            bottom.
           </li>
           <li>
-            <code>null</code>: none, the margin alone (16px). The last rows
+            <code>null</code>: no anchors, just the margin (16px). The last rows
             scroll under the toolbar and the toast, 16px from the screen’s edge.
           </li>
         </ul>
@@ -2424,9 +3125,11 @@ export const ViewportParts: FunctionComponent = () => (
           component="viewport"
           part="Viewport.createAnchorHandle"
         />{' '}
-        in a component: made once, for its lifetime.
+        inside a component. The handle is made once and kept for the component’s
+        lifetime.
       </li>
     </ul>
+    <CodeView code={useCreateViewportAnchorHandleCode} />
 
     <Heading
       id="useanchorsize"
@@ -2436,9 +3139,9 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The size of the tallest anchor at an edge in its scope (or of the
-        tallest of those linked by their handles: one, or several), re-rendering
-        as it changes: e.g. to offset what sticks below a bar (a{' '}
+        Returns the size of the tallest anchor at an edge in its scope, or of
+        the tallest of those linked by their handles. It re-renders as that
+        changes. Use it, for example, to offset what sticks below a bar (as a{' '}
         <PartLink
           component="header"
           part="Header.Accessory"
@@ -2460,12 +3163,12 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Something sticking to an edge’s bars (e.g. a{' '}
+        Registers something that sticks to an edge’s bars (for example a{' '}
         <PartLink
           component="header"
           part="Header.Accessory"
         />
-        , which uses it): while it’s stuck, the edge effect (an anchor’s{' '}
+        , which uses it). While it’s stuck, the edge effect (an anchor’s{' '}
         <code>edgeEffect</code>, see{' '}
         <PartLink
           component="viewport"
@@ -2474,10 +3177,10 @@ export const ViewportParts: FunctionComponent = () => (
         ) reaches beyond the bars to cover it too.
       </li>
       <li>
-        Above the effect (a <code>z-index</code> over 9, the effect’s), so
-        what’s beneath it blurs, not it.
+        Give it a <code>z-index</code> above the effect’s (9), so the effect
+        blurs what’s beneath it, not the element itself.
       </li>
-      <li>Here: a filter sticking below the bar; scroll the list.</li>
+      <li>Here, a filter sticks below the bar. Scroll the list to see it.</li>
     </ul>
     <UseViewportEdgeElementPart />
     <h3>Arguments</h3>
@@ -2491,22 +3194,23 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The anchors’ scope for what’s within: an element’s key that fixed layers
-        are contained by (its value, any object). The library’s containers
-        provide it (
+        Sets the anchors’ scope for everything inside: a key for the element
+        that contains fixed layers (its value can be any object). The library’s
+        containers provide it (
         <PartLink
           component="layout"
           part="Layout.Column"
         />
-        , sheets’ and drawers’ popups); provide it for an element of the app’s
-        that contains fixed layers (a <code>transform</code>,{' '}
-        <code>contain: layout</code>).
+        , and sheets’ and drawers’ popups). Provide it yourself for an element
+        of your own that contains fixed layers (one with a{' '}
+        <code>transform</code>, or <code>contain: layout</code>).
       </li>
       <li>
-        Unset: the provided portal container (a device’s frame, see{' '}
-        <code>PortalContainerContext</code>), or the window.
+        Unset, the scope is the provided portal container (a device frame, see{' '}
+        <code>PortalContainerContext</code>), or else the window.
       </li>
     </ul>
+    <CodeView code={viewportScopeContextCode} />
 
     <Heading
       id="usevisualviewport"
@@ -2516,12 +3220,12 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The visual viewport: its size, its offset, the keyboard’s height;
-        re-rendering as they change.
+        Returns the visual viewport: its size, its offset and the keyboard’s
+        height. It re-renders as they change.
       </li>
       <li>
-        Inside a provider (outside one: read once, not updated). Resize the
-        window to see it change.
+        Use it inside a provider. Outside one, it’s read once and never updated.
+        Resize the window to see it change.
       </li>
     </ul>
     <UseVisualViewportPart />
@@ -2537,21 +3241,22 @@ export const ViewportParts: FunctionComponent = () => (
     <ul>
       <li>
         Calls its listener on every scroll of the tracked scroll container, and
-        as it’s pulled past an end, without re-rendering.
+        while it’s pulled past an end. It doesn’t re-render.
       </li>
       <li>
-        The direction changes past <code>threshold</code> (its own);{' '}
-        <code>overscroll</code>, how far it’s pulled past an end, and{' '}
-        <code>isHeld</code>: e.g. pulling to refresh, or to turn pages (see the{' '}
+        The direction changes past its own <code>threshold</code>.{' '}
+        <code>overscroll</code> tells how far it’s pulled past an end, and{' '}
+        <code>isHeld</code> whether that pull is still held. Use them to pull to
+        refresh, or to turn pages (see the{' '}
         <a href={publicUrl('viewport/composition#pulling-to-refresh')}>
           composition
         </a>
         ).
       </li>
       <li>
-        Inside a provider (outside one: never called). Here: each call logged
-        (one per scroll event, or pull), with the content’s direction, edges and
-        overscroll.
+        Use it inside a provider. Outside one, the listener is never called.
+        Here, each call is logged (one per scroll event or pull), with the
+        content’s direction, edges and overscroll.
       </li>
     </ul>
     <UseViewportScrollPart />
@@ -2568,11 +3273,11 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The scroller the user is looking at, for the app to scroll for them:
-        e.g. back to its top from a button in its own bar.
+        Returns the scroller the user is looking at, so the app can scroll it
+        for them. For example, back to its top from a button in a bar.
       </li>
       <li>
-        By layers: the open{' '}
+        It goes by layers: first the most recently opened{' '}
         <PartLink
           component="popover"
           part="Popover.Popup"
@@ -2582,24 +3287,26 @@ export const ViewportParts: FunctionComponent = () => (
           component="sheet"
           part="Sheet.Content"
         />{' '}
-        opened last; else an{' '}
+        . Otherwise an{' '}
         <PartLink
           component="island"
           part="Island.Content"
         />{' '}
-        while scrolled from its start (scrolled back, the page again); else the
-        scroller its provider tracks (see{' '}
+        while it’s scrolled away from its start (scrolled back, it’s the page
+        again). Otherwise the scroller its provider tracks (see{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
         />
-        : e.g. the shown tab’s page).
+        ; for example the page of the tab that’s shown).
       </li>
       <li>
-        Re-renders as that changes. Inside a provider (outside one:{' '}
-        <code>undefined</code>); only what’s within its screen.
+        It re-renders as that changes. Use it inside a provider; outside one, it
+        returns <code>undefined</code>. It only considers what’s within its
+        provider’s screen.
       </li>
     </ul>
+    <CodeView code={useCurrentScrollerCode} />
     <h3>Returns</h3>
     <PropsTable rows={useCurrentScrollerRows} />
 
@@ -2611,16 +3318,17 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The direction scrolled in (past <code>threshold</code>: more, a steadier
-        direction) and the edges; re-rendering as they change (not with every
-        scroll).
+        Returns the direction scrolled in and whether an edge is reached. It
+        re-renders as they change, not with every scroll. A larger{' '}
+        <code>threshold</code> gives a steadier direction.
       </li>
       <li>
-        Bouncing past an end (e.g. back from the bottom) doesn’t change the
+        Bouncing past an end, for example back from the bottom, doesn’t change
+        the direction.
+      </li>
+      <li>
+        Use it inside a provider. Outside one, it stays at the top, with no
         direction.
-      </li>
-      <li>
-        Inside a provider (outside one: at the top, no direction, unchanging).
       </li>
     </ul>
     <UseScrollDirectionPart />
@@ -2637,25 +3345,25 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Whether an element is in the visible area (an{' '}
-        <code>IntersectionObserver</code>): the viewport, or a scroll container
-        (<code>scroller</code>); re-rendering only as it changes.
+        Returns whether an element is in the visible area, using an{' '}
+        <code>IntersectionObserver</code>. The area is the viewport, or a scroll
+        container (<code>scroller</code>). It re-renders only when that changes.
       </li>
       <li>
-        <code>threshold</code>: how much of it must show;{' '}
-        <code>rootMargin</code>: the area grown or shrunk (e.g. to mount what’s
-        about to scroll in).
+        <code>threshold</code> sets how much of it must show.{' '}
+        <code>rootMargin</code> grows or shrinks the area, for example to mount
+        what’s about to scroll in.
       </li>
       <li>
-        Here: the card starts visible in the box. Scroll the box to hide it;
-        with the viewport as the area (<code>scroller</code> unset), also scroll
-        the page until the box leaves the window (with the box as the area, the
-        page’s scrolling doesn’t matter). Colored while visible, each change
-        logged.
+        Here, the card starts visible in the box. Scroll the box to hide it.
+        With the viewport as the area (<code>scroller</code> unset), also scroll
+        the page until the box leaves the window. With the box as the area, the
+        page’s scrolling doesn’t matter. The card is colored while visible, and
+        each change is logged.
       </li>
       <li>
-        Clipped by the scroll containers around it, in either area (as an{' '}
-        <code>IntersectionObserver</code>).
+        In either area, the scroll containers around it clip it, as they do for
+        any <code>IntersectionObserver</code>.
       </li>
     </ul>
     <UseElementVisibilityPart />
@@ -2673,27 +3381,27 @@ export const ViewportParts: FunctionComponent = () => (
     <ul>
       <li>
         Calls its listener with where an element is in the visible area: its
-        edges’ distances to the area’s, how much of it shows (px, and its
-        share). Nothing re-renders unless the listener does (as{' '}
+        edges’ distances to the area’s, and how much of it shows (in px, and as
+        a share). Nothing re-renders unless the listener causes it, as with{' '}
         <PartLink
           component="viewport"
           part="useViewportScroll"
         />
-        ’s).
+        .
       </li>
       <li>
-        Measured once a frame while anything scrolls or resizes, and only while
-        it’s visible (an{' '}
+        It’s measured once per frame while anything scrolls or resizes, but only
+        while the element is visible (it uses an{' '}
         <PartLink
           component="viewport"
           part="useElementVisibility"
         />{' '}
-        of its own); once more as it leaves.
+        of its own), plus once more as it leaves.
       </li>
       <li>
-        Here: scroll the box both ways, half the card out of it; the card as
-        opaque as it’s visible (its listener setting state), each call logged
-        (one per frame scrolled).
+        Here, scroll the box both ways, with half the card out of it. The card
+        is as opaque as it’s visible (its listener sets state), and each call is
+        logged (one per frame scrolled).
       </li>
     </ul>
     <UseElementGeometryPart />
@@ -2710,17 +3418,18 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The window’s horizontal size class: <code>regular</code> from 768px,{' '}
-        <code>compact</code> below; re-rendering as it changes.
+        Returns the window’s horizontal size class: <code>regular</code> from
+        768px, <code>compact</code> below. It re-renders as it changes.
       </li>
       <li>
-        For presentations by size: e.g. a sheet on <code>compact</code> (a
-        phone), a popover on <code>regular</code> (a tablet), as{' '}
+        Use it to choose a presentation by size, for example a sheet on{' '}
+        <code>compact</code> (a phone) and a popover on <code>regular</code> (a
+        tablet).{' '}
         <PartLink
           component="sheet"
           part="Sheet.Popup"
         />{' '}
-        decides <code>compact</code> by it.
+        decides its own <code>compact</code> by it.
       </li>
       <li>No provider needed.</li>
     </ul>
@@ -2730,37 +3439,40 @@ export const ViewportParts: FunctionComponent = () => (
       <li>
         As the app switcher opens (also on the way to the Home Screen), iPadOS
         resizes the app’s window for its snapshots while the page is still
-        shown: e.g. a landscape window (1180×820) turned portrait (820×1180),
-        then to a half-width Split View size (585×820, <code>compact</code>),
-        about half a second before the page is hidden. Read as it comes, the
-        size class switched to <code>compact</code> and back: an app laid out by
-        it (a sidebar on <code>regular</code>, a stack on <code>compact</code>)
-        remounted, its scroll positions and state lost.
+        showing. For example, a landscape window (1180×820) turns portrait
+        (820×1180), then a half-width Split View size (585×820,{' '}
+        <code>compact</code>), about half a second before the page is hidden.
+        Read naively, the size class switches to <code>compact</code> and back.
+        An app laid out by it (a sidebar on <code>regular</code>, a stack on{' '}
+        <code>compact</code>) then remounts and loses its scroll positions and
+        state.
       </li>
       <li>
-        Each of these resizes is announced by an <code>orientationchange</code>{' '}
-        whose orientation (<code>screen.orientation</code>) contradicts the
-        window’s shape (portrait while the window is still landscape, and the
-        other way), before the window resizes. Then, the size class is held:
-        until an orientation matching the window’s shape, or the page shown
-        again (the window back as it was, the size class read anew).
+        Before each of these resizes, iPadOS fires an{' '}
+        <code>orientationchange</code> whose orientation (
+        <code>screen.orientation</code>) contradicts the window’s shape:
+        portrait while the window is still landscape, or the other way round.
+        From then on, the size class is held, until an orientation matches the
+        window’s shape again, or the page is shown again. By then the window is
+        back as it was, and the size class is read anew.
       </li>
       <li>
-        Real changes aren’t held: a rotation’s <code>orientationchange</code>{' '}
-        comes after its resize (about 0.4s later), matching the window’s shape
-        (e.g. an iPad mini turned portrait, 744px wide: <code>compact</code>); a
-        resize by its user (Split View, Slide Over, Stage Manager) has none.
+        Real changes aren’t held. A rotation’s <code>orientationchange</code>{' '}
+        comes after its resize (about 0.4s later) and matches the window’s shape
+        (for example a small tablet turned portrait, 744px wide, becomes{' '}
+        <code>compact</code>). A resize by the user (Split View, Slide Over,
+        Stage Manager) fires none.
       </li>
       <li>
-        While hidden, the window’s size still reads as the last snapshot’s (its
-        media queries already the real one’s); shown again, it’s resized back (a
-        moment later), the size class read anew. No timer: held by these events
-        alone.
+        While the page is hidden, the window’s size still reads as the last
+        snapshot’s, while its media queries already match the real one. Shown
+        again, it’s resized back a moment later, and the size class is read
+        anew. There’s no timer involved; these events alone decide.
       </li>
       <li>
-        Neither the screen’s size (<code>screen.width</code>,{' '}
-        <code>screen.height</code>: the portrait one, always) nor the page’s
-        visibility (shown throughout) tells these resizes from real ones.
+        Neither the screen’s size (<code>screen.width</code> and{' '}
+        <code>screen.height</code>, always the portrait one) nor the page’s
+        visibility (it stays shown) tells these resizes apart from real ones.
       </li>
     </ul>
     <h3>Returns</h3>
@@ -2774,12 +3486,14 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A text field typed into, scrolled into view above the on-screen keyboard
-        by a provider: by its scroller, once the keyboard has shown and
-        everything has settled (e.g. the content layer resized above it, an{' '}
+        Scrolls a text field that’s being typed into above the on-screen
+        keyboard. A provider does this, using the field’s scroller. It waits
+        until the keyboard is up and everything has settled (for example the
+        content layer shrinking above it, or an{' '}
         <a href={publicUrl('island')}>Island</a> pushed up with its anchor),
-        smoothly; not as it’s focused (iOS’ own scroll is kept off: it moves the
-        whole page, see{' '}
+        then scrolls smoothly. It doesn’t scroll as the field is focused: the
+        browser’s own scroll on iOS is kept off, because it moves the whole page
+        (see{' '}
         <PartLink
           component="viewport"
           part="useFocusShiftPrevention"
@@ -2787,27 +3501,31 @@ export const ViewportParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Again as focus moves to another field (e.g. the keyboard’s ▲▼ buttons)
-        and as it’s typed into (e.g. a text area growing); not once the user has
-        scrolled it away, until then. Its whole shown, 8px from the visible
-        area’s edges (its scroll padding, see{' '}
+        It scrolls again when focus moves to another field (for example with the
+        keyboard’s ▲▼ buttons), and as the field is typed into (for example a
+        growing text area). Once the user scrolls it away, it waits for the next
+        focus or input. It shows the whole field, 8px from the visible area’s
+        edges. The visible area leaves out the scroll padding (see{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />
-        , and the bars the keyboard pushes up); taller than that area, its end.
+        ) and any bars the keyboard pushes up. A field taller than that area
+        shows its end.
       </li>
       <li>
-        By its nearest marked element (<code>data-viewport-focus-scroll</code>
-        ): <code>target</code>, that scroller scrolled (none other: not the
-        page); <code>none</code>, nothing (e.g. a component placing its fields
-        itself); none marked, nothing. This hook marks <code>ref</code>’s
-        element while mounted (also as a prop, e.g.{' '}
+        The field’s nearest marked element decides (
+        <code>data-viewport-focus-scroll</code>). With <code>target</code>, that
+        scroller scrolls, and no other, not even the page. With{' '}
+        <code>none</code>, nothing scrolls (for example when a component places
+        its fields itself). Without a mark, nothing scrolls either. This hook
+        marks <code>ref</code>’s element while mounted. You can also set the
+        attribute as a prop, for example{' '}
         <code>data-viewport-focus-scroll=&quot;none&quot;</code> on a field’s
-        root).
+        root.
       </li>
       <li>
-        Marked already: a{' '}
+        Already marked as <code>target</code>: a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
@@ -2826,19 +3544,18 @@ export const ViewportParts: FunctionComponent = () => (
         <PartLink
           component="island"
           part="Island.Content"
-        />{' '}
-        (<code>target</code>: below a snapping one’s top stop, not scrolling, it
-        stays); a{' '}
+        />
+        . A snapping one below its top stop doesn’t scroll, so it stays. A{' '}
         <PartLink
           component="viewport"
           part="Viewport.KeyboardAccessory"
         />{' '}
-        (<code>none</code>: lifting them instead).
+        is marked <code>none</code>, because it lifts its fields instead.
       </li>
       <li>
-        Here: an app’s own scroller, filling the content layer, its fields down
-        past the keyboard. Unmarked (<code>false</code>), the content layer is
-        the nearest marked one (not scrolling: nothing moves).
+        Here, an app’s own scroller fills the content layer, and its fields
+        reach down past the keyboard. Unmarked (<code>false</code>), the content
+        layer is the nearest mark. It doesn’t scroll, so nothing moves.
       </li>
     </ul>
     <UseFocusScrollPart />
@@ -2853,18 +3570,21 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        iOS zooms the page in as a text field with a font smaller than 16px is
-        focused: guarded, it doesn’t (the viewport’s <code>maximum-scale</code>{' '}
-        1, while held; iOS still lets the page be pinch-zoomed).
+        iOS Safari zooms the page in when a text field with a font smaller than
+        16px gets focus. While this guard is held, it doesn’t. It sets the
+        viewport’s <code>maximum-scale</code> to 1, and iOS still lets the page
+        be pinch-zoomed.
       </li>
       <li>
-        Held until its returned function lets go (by all its holders: the
-        viewport restored with the last). Elsewhere (no iOS), it does nothing (a{' '}
-        <code>maximum-scale</code> would stop pinch zoom there).
+        It’s held until its returned function lets go. With several holders, the
+        viewport is restored when the last one lets go. Outside iOS it does
+        nothing, because a <code>maximum-scale</code> would stop pinch zoom
+        there.
       </li>
       <li>
-        Once for the app (e.g. at its start), it covers all its fields: also
-        those it doesn’t render itself (here, the demos’ own controls).
+        Call it once for the app, for example at its start. It covers all
+        fields, even those the app doesn’t render itself (here, the demos’ own
+        controls).
       </li>
     </ul>
     <CodeView code={preventInputZoomCode} />
@@ -2886,10 +3606,10 @@ export const ViewportParts: FunctionComponent = () => (
         , held while the component is mounted (and <code>enabled</code>).
       </li>
       <li>
-        Here: fields of 12, 15 and 17px, one with suggestions (a{' '}
-        <code>datalist</code>), a text area; each focus logs the page’s zoom.
-        Every demo’s prop controls hold it too (while mounted, as their own
-        fields’ guard), so on this site the zoom stays off either way.
+        Here, there are fields of 12, 15 and 17px, one with suggestions (a{' '}
+        <code>datalist</code>), and a text area. Each focus logs the page’s
+        zoom. Every demo’s prop controls hold the guard too, for their own
+        fields, so on this site the zoom stays off either way.
       </li>
     </ul>
     <UseInputZoomPreventionPart />
@@ -2904,47 +3624,48 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        iOS scrolls the page (its layout viewport) to a text field it focuses,
-        to keep it clear of the keyboard, shifting a fixed layout (e.g. a{' '}
-        <a href={publicUrl('viewport')}>Viewport</a>’s bars). Guarded, a field
-        touched in its target is focused without scrolling (as the tap ends).
+        When iOS focuses a text field, it scrolls the page (its layout viewport)
+        to keep the field clear of the keyboard. That shifts a fixed layout,
+        such as a <a href={publicUrl('viewport')}>Viewport</a>’s bars. With this
+        guard, a field touched inside its target is focused without scrolling,
+        as the tap ends.
       </li>
       <li>
-        Also tapped just beside it (within about a finger’s width, touching no
-        other control) or on its label: iOS focuses it then, too (adjusting the
-        touch to the nearest control).
+        The same goes for a tap just beside a field (within about a finger’s
+        width, touching no other control) or on its label. iOS focuses the field
+        then, too, because it adjusts the touch to the nearest control.
       </li>
       <li>
         The touch’s click doesn’t follow, and the caret goes where the field
-        puts it (not where it was touched). Elsewhere, it does nothing.
+        puts it, not where it was touched. Outside iOS, the guard does nothing.
       </li>
       <li>
-        A field the keyboard still covers as it shows (e.g. at the bottom of a{' '}
-        <a href={publicUrl('layout')}>Layout</a> column, on iPadOS): iOS scrolls
-        the page to reveal it all the same (also later on, focused again); that
-        scroll is put back while its keyboard is shown (until it hides, focus
-        leaves, or a touch, the user’s).
+        If the keyboard still covers the field as it shows (for example at the
+        bottom of a <a href={publicUrl('layout')}>Layout</a> column, on iPadOS),
+        iOS scrolls the page to reveal it anyway, also when it’s focused again
+        later. That scroll is put back while the field’s keyboard shows, until
+        the keyboard hides, focus leaves, or the user touches the screen.
       </li>
       <li>
-        Its keyboard hidden by the user (iPadOS’ hide key), the field still
-        focused: tapped again, it’s left to iOS (no focus from code shows the
-        keyboard then, until focus moves on by a tap), its scroll put back the
-        same, a brief jump as iOS’ visual viewport follows.
+        If the user hides the keyboard with iPadOS’s hide key, the field stays
+        focused. iOS then shows the keyboard again only for a tap it handles
+        itself, not for a focus from code, until a tap moves focus elsewhere. So
+        a tap on that field is left to iOS, and its scroll is put back the same
+        way. You see a brief jump while iOS’s visual viewport catches up.
       </li>
       <li>
-        Also a field already focused, but not by a touch, its keyboard not shown
-        (e.g. a popup’s initial focus, as an{' '}
-        <a href={publicUrl('alert')}>Alert</a> focuses its field): touched, it’s
-        focused anew, without scrolling; also after iPadOS’ keyboard hide key
-        (the keyboard hidden, the field still focused). With its keyboard shown,
-        a touch places the caret as usual.
+        A field that’s already focused without its keyboard, not by a touch, is
+        focused anew without scrolling when touched. That’s a popup’s initial
+        focus, for example, as when an <a href={publicUrl('alert')}>Alert</a>{' '}
+        focuses its field. With the keyboard shown, a touch places the caret as
+        usual.
       </li>
       <li>
-        The page hidden with a field focused in its target (another tab, a Home
-        Screen app left with the keyboard shown) and shown again: the field is
-        focused again without scrolling (its selection as it was), the page’s
-        scroll put back, so the keyboard returns with the bars where they were
-        (the{' '}
+        If the page is hidden while a field inside the target is focused (in
+        another tab, or a Home Screen app left with the keyboard up), the field
+        is focused again without scrolling when the page shows, with its
+        selection as it was. The page’s scroll is put back, so the keyboard
+        returns with the bars where they were (the{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
@@ -2952,11 +3673,11 @@ export const ViewportParts: FunctionComponent = () => (
         keeps their push meanwhile).
       </li>
       <li>
-        Hidden without a field focused (e.g. an iPad with a hardware keyboard)
-        and shown again: the page’s scroll put back too, so it isn’t left
-        shifted up.
+        If the page is hidden without a focused field (for example on a tablet
+        with a hardware keyboard), the page’s scroll is still put back when it
+        shows, so it isn’t left shifted up.
       </li>
-      <li>Until its returned function removes it.</li>
+      <li>It works until its returned function removes it.</li>
     </ul>
     <CodeView code={preventFocusShiftCode} />
     <h3>Arguments</h3>
@@ -2980,9 +3701,9 @@ export const ViewportParts: FunctionComponent = () => (
         mounted (and <code>enabled</code>).
       </li>
       <li>
-        Here: the fields, down to the frame’s bottom; each focus logs how far
-        the page (and the visual viewport) scrolled. The only holder on this
-        page (other demos with fields hold their own).
+        Here, the fields reach down to the frame’s bottom. Each focus logs how
+        far the page and the visual viewport scrolled. This is the only holder
+        on this page; other demos with fields hold their own.
       </li>
     </ul>
     <UseFocusShiftPreventionPart />
@@ -2997,25 +3718,25 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A held press selects text (and shows the browser’s text menu, iOS’
-        callout): on a menu’s trigger opened by a held press (
+        A held press selects text and shows the browser’s text menu (the
+        callout, on iOS). On a menu trigger opened by a held press (
         <PartLink
           component="menu"
           part="Menu.Trigger"
         />
-        ’s <code>openOn=&quot;secondaryClick&quot;</code>), or an edit menu’s
+        ’s <code>openOn=&quot;secondaryClick&quot;</code>), or on an edit menu’s
         anchor (
         <PartLink
           component="edit-menu"
           part="EditMenu.Positioner"
         />
-        ), it shows over the menu. Guarded, its target selects none (its{' '}
-        <code>user-select</code> and <code>-webkit-touch-callout</code>,{' '}
-        <code>none</code>).
+        ), that menu would show over yours. With this guard, its target selects
+        nothing: its <code>user-select</code> and{' '}
+        <code>-webkit-touch-callout</code> are set to <code>none</code>.
       </li>
       <li>
-        An app’s choice: text may well stay selectable. Until its returned
-        function restores the target’s own values.
+        It’s the app’s choice: text may well stay selectable. The guard holds
+        until its returned function restores the target’s own values.
       </li>
     </ul>
     <CodeView code={preventTextActionsCode} />
@@ -3039,7 +3760,7 @@ export const ViewportParts: FunctionComponent = () => (
         on its <code>target</code>, while the component is mounted (and{' '}
         <code>enabled</code>).
       </li>
-      <li>Here: a message to hold (by touch).</li>
+      <li>Here, hold the message (by touch).</li>
     </ul>
     <UseTextActionsPreventionPart />
     <h3>Arguments</h3>
@@ -3053,28 +3774,29 @@ export const ViewportParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Calls <code>onTap</code> as the status bar is tapped, until its returned
-        function stops it. iOS gives a page no touch in the status bar: tapped,
-        it scrolls the document to its top, and nothing else. So, while it’s
-        tracked, the document is kept 1px taller than the screen and scrolled
-        1px; scrolled to its top with no finger down, that’s a tap, and it’s
-        scrolled back to 1px.
+        Calls <code>onTap</code> whenever the status bar is tapped, until its
+        returned function stops it. iOS gives a page no touch event in the
+        status bar. Tapped, it only scrolls the document to its top. So while
+        taps are tracked, the document is kept 1px taller than the screen and
+        scrolled down by 1px. A scroll to the top with no finger down is a tap,
+        and the document is scrolled back to 1px.
       </li>
       <li>
-        Only on iOS, in a Home Screen app; elsewhere it does nothing. For an app
-        whose document doesn’t scroll (its content scrolling in a{' '}
+        It works only on iOS, in a Home Screen app, and does nothing elsewhere.
+        It’s meant for an app whose document doesn’t scroll, with its content
+        scrolling in a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Content"
         />{' '}
-        or <a href={publicUrl('page')}>Page</a>s): it holds the document at its
-        1px, so don’t use it if yours scrolls (a provider’s{' '}
-        <code>scrollsToTop</code> doesn’t then: it tracks the document). A
-        modal’s scroll lock on the document is undone meanwhile (the document
-        never scrolls more than its 1px anyway).
+        or in <a href={publicUrl('page')}>Page</a>s. It holds the document at
+        its 1px, so don’t use it if your document scrolls (a provider’s{' '}
+        <code>scrollsToTop</code> doesn’t then, since it tracks the document). A
+        modal’s scroll lock on the document is undone meanwhile; the document
+        never scrolls more than its 1px anyway.
       </li>
       <li>
-        Several at once share it, each called. A provider’s{' '}
+        Several callers share it, and each one is called. A provider’s{' '}
         <code>scrollsToTop</code> (on by default) already scrolls the{' '}
         <PartLink
           component="viewport"
@@ -3082,10 +3804,12 @@ export const ViewportParts: FunctionComponent = () => (
         >
           current scroller
         </PartLink>{' '}
-        to its top: track taps yourself for anything else (e.g. with it off).
-        See also <a href={publicUrl('ios-quirks')}>iOS Quirks</a>.
+        to its top. Track taps yourself for anything else, for example with that
+        turned off. See also{' '}
+        <a href={publicUrl('ios-quirks#status-bar-taps')}>iOS Quirks</a>.
       </li>
     </ul>
+    <CodeView code={trackStatusBarTapsCode} />
     <h3>Arguments</h3>
     <PropsTable rows={trackStatusBarTapsArgumentRows} />
     <h3>Returns</h3>

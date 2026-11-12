@@ -257,7 +257,7 @@ export const tests = [
     },
   },
   {
-    name: 'segmented: in a bar at the screen’s top or bottom edge, clear of the safe area, over the list it filters',
+    name: 'segmented: in a bar at the screen’s top or bottom edge, clear of the safe area insets, over the list it filters',
     run: async (page) => {
       /** The control's box relative to its screen's, raw: the window's (top, bottom gap). */
       const placed = () =>
@@ -273,7 +273,7 @@ export const tests = [
       // In the navigation bar (Recents: All, Missed).
       await page.open('segmented-composition-header');
       const [top] = await placed();
-      // At the window's top (raw: no safe area), 4px into its bar.
+      // At the window's top (raw: no safe area inset), 4px into its bar.
       assert.equal(top, 4);
       const all = await rows();
       const missed = await page.rect('[role=radio]', 1);
@@ -287,7 +287,7 @@ export const tests = [
       // In the bottom toolbar.
       await page.open('segmented-composition-toolbar');
       const [, bottom] = await placed();
-      // At the window's bottom (raw: no safe area), centered on its bar's
+      // At the window's bottom (raw: no safe area inset), centered on its bar's
       // buttons (2px into it).
       assert.equal(bottom, 8);
     },

@@ -10,9 +10,12 @@ import {
   useViewportScroll,
   Viewport,
 } from '../../../components/index.js';
-import { Component } from '../../tooling/frame/component.js';
+import { CodeAroundContext, Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   sfForwardFill,
@@ -21,6 +24,7 @@ import {
   sfMagnifyingglass,
   sfPlayFill,
 } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   getPropOptionsTab,
   propOptionsAccessoryContent,
@@ -99,6 +103,24 @@ export const TabBarDemo: FunctionComponent = () => {
     (props) => props.visibleWhenCollapsed,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'TabBar.Tab': ['value', 'visibleWhenCollapsed'],
+            Symbol: ['icon'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
@@ -114,6 +136,7 @@ export const TabBarDemo: FunctionComponent = () => {
         controlTab1,
         controlTab2,
         controlTab3,
+        partControls,
       ]}
       state={[
         stateContent,
@@ -123,6 +146,7 @@ export const TabBarDemo: FunctionComponent = () => {
         stateTab1,
         stateTab2,
         stateTab3,
+        partState,
       ]}
     >
       <TabBar.Root
@@ -146,7 +170,7 @@ export const TabBarDemo: FunctionComponent = () => {
             {...propsGroup}
             visibleWhenCollapsed={propsGroup.visibleWhenCollapsed ?? true}
           >
-            <TabBar.Indicator />
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
               value="tab-1"
               {...propsTab1}
@@ -156,10 +180,13 @@ export const TabBarDemo: FunctionComponent = () => {
                   : selection?.tab === 0
               }
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
               value="tab-2"
@@ -170,10 +197,13 @@ export const TabBarDemo: FunctionComponent = () => {
                   : selection?.tab === 1
               }
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             {content.tabs >= 3 ? (
               <TabBar.Tab
@@ -185,32 +215,49 @@ export const TabBarDemo: FunctionComponent = () => {
                     : selection?.tab === 2
                 }
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfHeartFill} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>Label</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Label
+                </TabBar.Label>
               </TabBar.Tab>
             ) : null}
             {content.tabs >= 4 ? (
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 value="tab-4"
                 visibleWhenCollapsed={!areTabsMarked && selection?.tab === 3}
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfHeartFill} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>Label</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Label
+                </TabBar.Label>
               </TabBar.Tab>
             ) : null}
             {content.tabs >= 5 ? (
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 value="tab-5"
                 visibleWhenCollapsed={!areTabsMarked && selection?.tab === 4}
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfHeartFill} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>Label</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Label
+                </TabBar.Label>
               </TabBar.Tab>
             ) : null}
           </TabBar.Group>
@@ -306,6 +353,24 @@ export const TabBarSearchDemo: FunctionComponent = () => {
     ? isSearchMarked
     : Boolean(search?.remains);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'TabBar.Tab': ['value', 'visibleWhenCollapsed'],
+            Symbol: ['icon'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
@@ -323,6 +388,7 @@ export const TabBarSearchDemo: FunctionComponent = () => {
         controlTab3,
         controlSearchGroup,
         controlSearchTab,
+        partControls,
       ]}
       state={[
         stateContent,
@@ -334,6 +400,7 @@ export const TabBarSearchDemo: FunctionComponent = () => {
         stateTab3,
         stateSearchGroup,
         stateSearchTab,
+        partState,
       ]}
     >
       <TabBar.Root
@@ -359,7 +426,7 @@ export const TabBarSearchDemo: FunctionComponent = () => {
             {...propsGroup}
             visibleWhenCollapsed={isGroupRemaining}
           >
-            <TabBar.Indicator />
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
               value="tab-1"
               {...propsTab1}
@@ -369,10 +436,13 @@ export const TabBarSearchDemo: FunctionComponent = () => {
                   : primary?.tab === 0
               }
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
               value="tab-2"
@@ -383,10 +453,13 @@ export const TabBarSearchDemo: FunctionComponent = () => {
                   : primary?.tab === 1
               }
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             {content.tabs >= 3 ? (
               <TabBar.Tab
@@ -398,32 +471,49 @@ export const TabBarSearchDemo: FunctionComponent = () => {
                     : primary?.tab === 2
                 }
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfHeartFill} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>Label</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Label
+                </TabBar.Label>
               </TabBar.Tab>
             ) : null}
             {content.tabs >= 4 ? (
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 value="tab-4"
                 visibleWhenCollapsed={!areTabsMarked && primary?.tab === 3}
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfHeartFill} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>Label</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Label
+                </TabBar.Label>
               </TabBar.Tab>
             ) : null}
             {content.tabs >= 5 ? (
               <TabBar.Tab
+                {...partProps['TabBar.Tab']}
                 value="tab-5"
                 visibleWhenCollapsed={!areTabsMarked && primary?.tab === 4}
               >
-                <TabBar.Icon>
-                  <Symbol icon={sfHeartFill} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfHeartFill}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>Label</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  Label
+                </TabBar.Label>
               </TabBar.Tab>
             ) : null}
           </TabBar.Group>
@@ -432,15 +522,18 @@ export const TabBarSearchDemo: FunctionComponent = () => {
             {...propsSearchGroup}
             visibleWhenCollapsed={isSearchRemaining}
           >
-            <TabBar.Indicator />
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
               aria-label="Search"
               value="secondary-1"
               {...propsSearchTab}
               visibleWhenCollapsed={isSearchRemaining}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -501,13 +594,31 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
     propsGroup.visibleWhenCollapsed ?? propsSearchGroup.visibleWhenCollapsed,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Accessory': ['visibleIn'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="tabs"
       id={id}
       log={log}
-      state={[stateContent, stateRoot, stateList, stateGroup, stateSearchGroup]}
       title="Tab Bar (Accessory)"
       controls={[
         controlContent,
@@ -515,6 +626,15 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
         controlList,
         controlGroup,
         controlSearchGroup,
+        partControls,
+      ]}
+      state={[
+        stateContent,
+        stateRoot,
+        stateList,
+        stateGroup,
+        stateSearchGroup,
+        partState,
       ]}
     >
       <TabBar.Root
@@ -537,33 +657,45 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
                 : primary?.remains
             }
           >
-            <TabBar.Indicator />
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-1"
               visibleWhenCollapsed={primary?.tab === 0}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-2"
               visibleWhenCollapsed={primary?.tab === 1}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-3"
               visibleWhenCollapsed={primary?.tab === 2}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
           </TabBar.Group>
           <TabBar.Group
@@ -574,23 +706,36 @@ export const TabBarAccessoryDemo: FunctionComponent = () => {
                 : search?.remains
             }
           >
-            <TabBar.Indicator />
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="secondary-1"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
         </TabBar.List>
         {content.accessory ? (
-          <TabBar.Accessory visibleIn={content.accessory}>
+          <TabBar.Accessory
+            {...partProps['TabBar.Accessory']}
+            visibleIn={content.accessory}
+          >
             <span className="tab-bar-demo-accessory-title">Not Playing</span>
-            <Symbol icon={sfPlayFill} />
-            <Symbol icon={sfForwardFill} />
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfPlayFill}
+            />
+            <Symbol
+              {...partProps.Symbol}
+              icon={sfForwardFill}
+            />
           </TabBar.Accessory>
         ) : null}
       </TabBar.Root>
@@ -616,50 +761,92 @@ const ScrollDemo: FunctionComponent = () => {
 
   const [selection] = collapsedSelection([['tab-1', 'tab-2', 'tab-3']], value);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': ['collapsed'],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="tabs"
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="Tab Bar (Collapsing on Scroll)"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={(next: unknown) => {
           addLog(`value change: ${String(next)}`);
           setValue(next);
         }}
       >
-        <TabBar.List collapsed={isCollapsed}>
-          <TabBar.Group visibleWhenCollapsed>
-            <TabBar.Indicator />
+        <TabBar.List
+          {...partProps['TabBar.List']}
+          collapsed={isCollapsed}
+        >
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-1"
               visibleWhenCollapsed={selection?.tab === 0}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-2"
               visibleWhenCollapsed={selection?.tab === 1}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-3"
               visibleWhenCollapsed={selection?.tab === 2}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
           </TabBar.Group>
         </TabBar.List>
@@ -669,9 +856,14 @@ const ScrollDemo: FunctionComponent = () => {
 };
 
 /** `ScrollDemo`, tracking the document's scrolling. */
+// (In the code: the provider around the stage's.)
+const plainProvider = <Viewport.Provider />;
+
 export const TabBarScrollDemo: FunctionComponent = () => (
   <Viewport.Provider>
-    <ScrollDemo />
+    <CodeAroundContext.Provider value={plainProvider}>
+      <ScrollDemo />
+    </CodeAroundContext.Provider>
   </Viewport.Provider>
 );
 
@@ -716,15 +908,39 @@ export const TabBarRegularDemo: FunctionComponent = () => {
   );
   const areTabsMarked = Boolean(propsTab1.visibleWhenCollapsed);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'TabBar.Tab': ['value', 'visibleWhenCollapsed'],
+            Symbol: ['icon'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="tabs"
-      controls={[controlRoot, controlGroup, controlList, controlTab1]}
       id={id}
       log={log}
-      state={[stateRoot, stateGroup, stateList, stateTab1]}
+      state={[stateRoot, stateGroup, stateList, stateTab1, partState]}
       title="Tab Bar (regular)"
+      controls={[
+        controlRoot,
+        controlGroup,
+        controlList,
+        controlTab1,
+        partControls,
+      ]}
     >
       <TabBar.Root
         {...propsRoot}
@@ -746,7 +962,7 @@ export const TabBarRegularDemo: FunctionComponent = () => {
             {...propsGroup}
             visibleWhenCollapsed={propsGroup.visibleWhenCollapsed ?? true}
           >
-            <TabBar.Indicator />
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
               value="tab-1"
               {...propsTab1}
@@ -756,58 +972,72 @@ export const TabBarRegularDemo: FunctionComponent = () => {
                   : selection?.tab === 0
               }
             >
-              <TabBar.Icon>
-                <Symbol icon={sfListBullet} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfListBullet}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-2"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 1}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-3"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 2}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-4"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 3}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-5"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 4}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-6"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 5}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-7"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 6}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-8"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 7}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-9"
               visibleWhenCollapsed={!areTabsMarked && selection?.tab === 8}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -823,41 +1053,81 @@ export const TabBarMixedDemo: FunctionComponent = () => {
 
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group': [],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Root': ['defaultValue', 'onValueChange'],
+            'TabBar.Tab': ['aria-label', 'value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="tabs"
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="Tab Bar (Mixed Tabs)"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         defaultValue="tab-1"
         onValueChange={(next: unknown) =>
           addLog(`value change: ${String(next)}`)
         }
       >
-        <TabBar.List>
-          <TabBar.Group>
-            <TabBar.Indicator />
-            <TabBar.Tab value="tab-1">
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+        <TabBar.List {...partProps['TabBar.List']}>
+          <TabBar.Group {...partProps['TabBar.Group']}>
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
+            <TabBar.Tab
+              {...partProps['TabBar.Tab']}
+              value="tab-1"
+            >
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
-            </TabBar.Tab>
-            <TabBar.Tab value="tab-2">
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
-              </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
+              value="tab-2"
+            >
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
+              </TabBar.Icon>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
+            </TabBar.Tab>
+            <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Favorites"
               value="tab-3"
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -893,17 +1163,38 @@ export const TabBarContentDemo: FunctionComponent = () => {
     value,
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       baseUiId="tabs"
-      controls={controlList}
+      controls={[controlList, partControls]}
       id={id}
       log={log}
-      state={[stateList]}
+      state={[stateList, partState]}
       title="Tab Bar (Tab Content)"
     >
       <TabBar.Root
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={(next: unknown) => {
           addLog(`value change: ${String(next)}`);
@@ -911,42 +1202,61 @@ export const TabBarContentDemo: FunctionComponent = () => {
         }}
       >
         <TabBar.List {...propsList}>
-          <TabBar.Group visibleWhenCollapsed={selection?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={selection?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-1"
               visibleWhenCollapsed={selection?.tab === 0}
             >
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               value="tab-2"
               visibleWhenCollapsed={selection?.tab === 1}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
-              <TabBar.Label>Label</TabBar.Label>
+              <TabBar.Label {...partProps['TabBar.Label']}>Label</TabBar.Label>
             </TabBar.Tab>
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Favorites"
               value="tab-3"
               visibleWhenCollapsed={selection?.tab === 2}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfHeartFill} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfHeartFill}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="secondary-1"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>

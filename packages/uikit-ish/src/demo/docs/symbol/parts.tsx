@@ -63,25 +63,28 @@ export const SymbolParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its glyph: <code>icon</code> (any icon’s outlines, e.g. an SF Symbol’s),
-        sized and colored by its text (font size, color), in its one weight.
+        Its glyph: <code>icon</code> (any icon’s outlines, for example an SF
+        Symbol’s), sized and colored by its text (font size, color), in its one
+        weight.
       </li>
       <li>
-        Emphasized, its <code>emphasizedIcon</code> instead (e.g. the filled
-        variant): as much as its host sets <code>--uikit-symbol-emphasis</code>.
-        Here: on itself (<code>style</code>).
+        When emphasized, it shows its <code>emphasizedIcon</code> instead (for
+        example the filled variant), as far as its host sets{' '}
+        <code>--uikit-symbol-emphasis</code>. Here, it’s set on the symbol
+        itself (<code>style</code>).
       </li>
       <li>
-        In a line of text, its ink centered on the text’s (
-        <code>baselineShift</code>), or on the baseline. Here: beside a word.
+        In a line of text, its ink is centered on the text’s (
+        <code>baselineShift</code>), or sits on the baseline. Here, it’s next to
+        a word.
       </li>
       <li>
-        Its children sit on it (positioned on the glyph’s box), e.g. a{' '}
+        Its children sit on it (positioned on the glyph’s box), for example a{' '}
         <a href={publicUrl('badge')}>Badge</a>.
       </li>
       <li>
-        Renders a <code>span</code>, its glyph an SVG hidden from assistive
-        technology.
+        Renders a <code>span</code>, with its glyph as an SVG hidden from
+        assistive technology.
       </li>
     </ul>
     <SymbolPart />

@@ -15,13 +15,17 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfXmark } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   popoverArrowRows,
   popoverBackdropRows,
@@ -66,15 +70,57 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Popover.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'Popover.Arrow': [],
+            'Popover.Body': [],
+            'Popover.Close': ['render'],
+            'Popover.Description': [],
+            'Popover.Header': [],
+            'Popover.Popup': ['className'],
+            'Popover.Portal': [],
+            'Popover.Positioner': [],
+            'Popover.Title': ['render'],
+            'Popover.Trigger': ['render'],
+            'Switch.Root': ['aria-label', 'defaultChecked'],
+            'Switch.Thumb': [],
+            'Toolbar.Button': ['aria-label', 'shape'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Root"
     >
       <Popover.Root
@@ -82,71 +128,110 @@ const RootPart: FunctionComponent = () => {
         {...props}
       >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -172,76 +257,151 @@ const TriggerPart: FunctionComponent = () => {
     title: 'Popover.Trigger',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Trigger"
     >
-      <Popover.Root>
+      <Popover.Root {...partProps['Popover.Root']}>
         <Popover.Trigger {...props}>
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -267,83 +427,164 @@ const PortalPart: FunctionComponent = () => {
     title: 'Popover.Portal',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Portal"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
         <Popover.Portal {...props}>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -369,84 +610,166 @@ const BackdropPart: FunctionComponent = () => {
     title: 'Popover.Backdrop',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Backdrop"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
+        <Popover.Portal {...partProps['Popover.Portal']}>
           <Popover.Backdrop {...props} />
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -472,83 +795,164 @@ const PositionerPart: FunctionComponent = () => {
     title: 'Popover.Positioner',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Positioner"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
+        <Popover.Portal {...partProps['Popover.Portal']}>
           <Popover.Positioner {...props}>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -574,83 +978,161 @@ const PopupPart: FunctionComponent = () => {
     title: 'Popover.Popup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Popup"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
             <Popover.Popup {...props}>
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -676,83 +1158,164 @@ const ArrowPart: FunctionComponent = () => {
     title: 'Popover.Arrow',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Arrow"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
               <Popover.Arrow {...props} />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -778,86 +1341,165 @@ const HeaderPart: FunctionComponent = () => {
     title: 'Popover.Header',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Popup': ['className', 'style'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Header"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
             <Popover.Popup
+              {...partProps['Popover.Popup']}
               className="popover-demo-popup"
               style={{ maxHeight: 180 }}
             >
-              <Popover.Arrow />
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
               <Popover.Header {...props}>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -883,83 +1525,164 @@ const BodyPart: FunctionComponent = () => {
     title: 'Popover.Body',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Body"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
               <Popover.Body {...props}>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -985,84 +1708,166 @@ const ViewportPart: FunctionComponent = () => {
     title: 'Popover.Viewport',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Viewport"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
               <Popover.Viewport {...props}>
-                <Popover.Header>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Title>
-                      <Popover.Title render={<span />}>Display</Popover.Title>
+                <Popover.Header {...partProps['Popover.Header']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
+                      <Popover.Title
+                        {...partProps['Popover.Title']}
+                        render={<span />}
+                      >
+                        Display
+                      </Popover.Title>
                     </Toolbar.Title>
-                    <Toolbar.Trailing>
+                    <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                       <Popover.Close
+                        {...partProps['Popover.Close']}
                         render={
                           <Toolbar.Button
+                            {...partProps['Toolbar.Button']}
                             aria-label="Close"
                             shape="circle"
                           />
                         }
                       >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfXmark}
+                          />
                         </Button.Icon>
                       </Popover.Close>
                     </Toolbar.Trailing>
                   </Toolbar.Root>
                 </Popover.Header>
-                <Popover.Body>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
-                        <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Content>
-                            <List.Title>Show Completed</List.Title>
+                <Popover.Body {...partProps['Popover.Body']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
+                        <List.Item
+                          {...partProps['List.Item']}
+                          onClick={forwardClick('[role=switch]')}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              Show Completed
+                            </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            <Switch.Root aria-label="Show completed">
-                              <Switch.Thumb />
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            <Switch.Root
+                              {...partProps['Switch.Root']}
+                              aria-label="Show completed"
+                            >
+                              <Switch.Thumb {...partProps['Switch.Thumb']} />
                             </Switch.Root>
                           </List.Trailing>
                         </List.Item>
-                        <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Content>
-                            <List.Title>Show Notes</List.Title>
+                        <List.Item
+                          {...partProps['List.Item']}
+                          onClick={forwardClick('[role=switch]')}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              Show Notes
+                            </List.Title>
                           </List.Content>
-                          <List.Trailing>
+                          <List.Trailing {...partProps['List.Trailing']}>
                             <Switch.Root
+                              {...partProps['Switch.Root']}
                               defaultChecked
                               aria-label="Show notes"
                             >
-                              <Switch.Thumb />
+                              <Switch.Thumb {...partProps['Switch.Thumb']} />
                             </Switch.Root>
                           </List.Trailing>
                         </List.Item>
                       </List.Group>
-                      <List.Footer>
-                        <Popover.Description>
+                      <List.Footer {...partProps['List.Footer']}>
+                        <Popover.Description
+                          {...partProps['Popover.Description']}
+                        >
                           For this list only.
                         </Popover.Description>
                       </List.Footer>
@@ -1089,83 +1894,159 @@ const TitlePart: FunctionComponent = () => {
     title: 'Popover.Title',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Title"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
                     <Popover.Title {...props}>Display</Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -1191,82 +2072,161 @@ const DescriptionPart: FunctionComponent = () => {
     title: 'Popover.Description',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Close': ['render'],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Description"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
+                    <List.Footer {...partProps['List.Footer']}>
                       <Popover.Description {...props}>
                         For this list only.
                       </Popover.Description>
@@ -1293,76 +2253,154 @@ const ClosePart: FunctionComponent = () => {
     title: 'Popover.Close',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Button.Label': [],
+          'Button.Root': ['size', 'variant'],
+          'List.Content': [],
+          'List.Footer': [],
+          'List.Group': [],
+          'List.Item': ['onClick'],
+          'List.Root': [],
+          'List.Section': [],
+          'List.Title': [],
+          'List.Trailing': [],
+          'Popover.Arrow': [],
+          'Popover.Body': [],
+          'Popover.Description': [],
+          'Popover.Header': [],
+          'Popover.Popup': ['className'],
+          'Popover.Portal': [],
+          'Popover.Positioner': [],
+          'Popover.Root': [],
+          'Popover.Title': ['render'],
+          'Popover.Trigger': ['render'],
+          'Switch.Root': ['aria-label', 'defaultChecked'],
+          'Switch.Thumb': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.Padding': ['edge'],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
-      state={[state]}
+      state={[state, partState]}
       title="Popover.Close"
     >
-      <Popover.Root defaultOpen>
+      <Popover.Root
+        {...partProps['Popover.Root']}
+        defaultOpen
+      >
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close {...props}>
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -1389,97 +2427,185 @@ const CreateHandlePart: FunctionComponent = () => {
   const id = 'popover-parts-create-handle';
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'Popover.Arrow': [],
+            'Popover.Body': [],
+            'Popover.Close': ['render'],
+            'Popover.Description': [],
+            'Popover.Header': [],
+            'Popover.Popup': ['className'],
+            'Popover.Portal': [],
+            'Popover.Positioner': [],
+            'Popover.Root': ['handle', 'onOpenChange'],
+            'Popover.Title': ['render'],
+            'Popover.Trigger': ['handle', 'id', 'render'],
+            'Switch.Root': ['aria-label', 'defaultChecked'],
+            'Switch.Thumb': [],
+            'Toolbar.Button': ['aria-label', 'shape'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="Popover.createHandle"
     >
       <div className="popover-demo-triggers">
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           handle={displayPopover}
           id="popover-parts-display-trigger"
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="borderless"
           onClick={() => displayPopover.open('popover-parts-display-trigger')}
         >
-          <Button.Label>Open Imperatively</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Open Imperatively
+          </Button.Label>
         </Button.Root>
       </div>
       <Popover.Root
+        {...partProps['Popover.Root']}
         handle={displayPopover}
         onOpenChange={(isOpen: boolean, { reason }) =>
           addLog(`open change: ${String(isOpen)} (${reason})`)
         }
       >
-        <Popover.Portal>
-          <Popover.Positioner>
-            <Popover.Popup className="popover-demo-popup">
-              <Popover.Arrow />
-              <Popover.Header>
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Title>
-                    <Popover.Title render={<span />}>Display</Popover.Title>
+        <Popover.Portal {...partProps['Popover.Portal']}>
+          <Popover.Positioner {...partProps['Popover.Positioner']}>
+            <Popover.Popup
+              {...partProps['Popover.Popup']}
+              className="popover-demo-popup"
+            >
+              <Popover.Arrow {...partProps['Popover.Arrow']} />
+              <Popover.Header {...partProps['Popover.Header']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Popover.Title
+                      {...partProps['Popover.Title']}
+                      render={<span />}
+                    >
+                      Display
+                    </Popover.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                     <Popover.Close
+                      {...partProps['Popover.Close']}
                       render={
                         <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
                           aria-label="Close"
                           shape="circle"
                         />
                       }
                     >
-                      <Button.Icon>
-                        <Symbol icon={sfXmark} />
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfXmark}
+                        />
                       </Button.Icon>
                     </Popover.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Popover.Header>
-              <Popover.Body>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Completed</List.Title>
+              <Popover.Body {...partProps['Popover.Body']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Completed
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
-                          <Switch.Root aria-label="Show completed">
-                            <Switch.Thumb />
+                        <List.Trailing {...partProps['List.Trailing']}>
+                          <Switch.Root
+                            {...partProps['Switch.Root']}
+                            aria-label="Show completed"
+                          >
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
-                      <List.Item onClick={forwardClick('[role=switch]')}>
-                        <List.Content>
-                          <List.Title>Show Notes</List.Title>
+                      <List.Item
+                        {...partProps['List.Item']}
+                        onClick={forwardClick('[role=switch]')}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Show Notes
+                          </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             defaultChecked
                             aria-label="Show notes"
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
                       </List.Item>
                     </List.Group>
-                    <List.Footer>
-                      <Popover.Description>
+                    <List.Footer {...partProps['List.Footer']}>
+                      <Popover.Description
+                        {...partProps['Popover.Description']}
+                      >
                         For this list only.
                       </Popover.Description>
                     </List.Footer>
@@ -1505,106 +2631,193 @@ const UseCreatePopoverHandlePart: FunctionComponent = () => {
     'const optionsPopover = useCreatePopoverHandle<{ title: string }>();',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': ['onClick'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'Popover.Arrow': [],
+            'Popover.Body': [],
+            'Popover.Close': ['render'],
+            'Popover.Description': [],
+            'Popover.Header': [],
+            'Popover.Popup': ['className'],
+            'Popover.Portal': [],
+            'Popover.Positioner': [],
+            'Popover.Root': ['handle', 'onOpenChange'],
+            'Popover.Title': ['render'],
+            'Popover.Trigger': ['handle', 'payload', 'render'],
+            'Switch.Root': ['aria-label', 'defaultChecked'],
+            'Switch.Thumb': [],
+            'Toolbar.Button': ['aria-label', 'shape'],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
       baseUiId="popover"
+      controls={[partControls]}
       id={id}
       log={log}
+      state={[partState]}
       title="useCreatePopoverHandle"
     >
       <div className="popover-demo-triggers">
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           handle={optionsPopover}
           payload={{ title: 'Display' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Display Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Display Options
+          </Button.Label>
         </Popover.Trigger>
         <Popover.Trigger
+          {...partProps['Popover.Trigger']}
           handle={optionsPopover}
           payload={{ title: 'Filter' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Filter Options</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Filter Options
+          </Button.Label>
         </Popover.Trigger>
       </div>
       <Popover.Root
+        {...partProps['Popover.Root']}
         handle={optionsPopover}
         onOpenChange={(isOpen: boolean, { reason }) =>
           addLog(`open change: ${String(isOpen)} (${reason})`)
         }
       >
         {({ payload }) => (
-          <Popover.Portal>
-            <Popover.Positioner>
-              <Popover.Popup className="popover-demo-popup">
-                <Popover.Arrow />
-                <Popover.Header>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Title>
-                      <Popover.Title render={<span />}>
+          <Popover.Portal {...partProps['Popover.Portal']}>
+            <Popover.Positioner {...partProps['Popover.Positioner']}>
+              <Popover.Popup
+                {...partProps['Popover.Popup']}
+                className="popover-demo-popup"
+              >
+                <Popover.Arrow {...partProps['Popover.Arrow']} />
+                <Popover.Header {...partProps['Popover.Header']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
+                      <Popover.Title
+                        {...partProps['Popover.Title']}
+                        render={<span />}
+                      >
                         {payload?.title}
                       </Popover.Title>
                     </Toolbar.Title>
-                    <Toolbar.Trailing>
+                    <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                       <Popover.Close
+                        {...partProps['Popover.Close']}
                         render={
                           <Toolbar.Button
+                            {...partProps['Toolbar.Button']}
                             aria-label="Close"
                             shape="circle"
                           />
                         }
                       >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfXmark}
+                          />
                         </Button.Icon>
                       </Popover.Close>
                     </Toolbar.Trailing>
                   </Toolbar.Root>
                 </Popover.Header>
-                <Popover.Body>
-                  <Viewport.Padding edge="block-start" />
-                  <List.Root>
-                    <List.Section>
-                      <List.Group>
-                        <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Content>
-                            <List.Title>Show Completed</List.Title>
+                <Popover.Body {...partProps['Popover.Body']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root {...partProps['List.Root']}>
+                    <List.Section {...partProps['List.Section']}>
+                      <List.Group {...partProps['List.Group']}>
+                        <List.Item
+                          {...partProps['List.Item']}
+                          onClick={forwardClick('[role=switch]')}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              Show Completed
+                            </List.Title>
                           </List.Content>
-                          <List.Trailing>
-                            <Switch.Root aria-label="Show completed">
-                              <Switch.Thumb />
+                          <List.Trailing {...partProps['List.Trailing']}>
+                            <Switch.Root
+                              {...partProps['Switch.Root']}
+                              aria-label="Show completed"
+                            >
+                              <Switch.Thumb {...partProps['Switch.Thumb']} />
                             </Switch.Root>
                           </List.Trailing>
                         </List.Item>
-                        <List.Item onClick={forwardClick('[role=switch]')}>
-                          <List.Content>
-                            <List.Title>Show Notes</List.Title>
+                        <List.Item
+                          {...partProps['List.Item']}
+                          onClick={forwardClick('[role=switch]')}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              Show Notes
+                            </List.Title>
                           </List.Content>
-                          <List.Trailing>
+                          <List.Trailing {...partProps['List.Trailing']}>
                             <Switch.Root
+                              {...partProps['Switch.Root']}
                               defaultChecked
                               aria-label="Show notes"
                             >
-                              <Switch.Thumb />
+                              <Switch.Thumb {...partProps['Switch.Thumb']} />
                             </Switch.Root>
                           </List.Trailing>
                         </List.Item>
                       </List.Group>
-                      <List.Footer>
-                        <Popover.Description>
+                      <List.Footer {...partProps['List.Footer']}>
+                        <Popover.Description
+                          {...partProps['Popover.Description']}
+                        >
                           For this list only.
                         </Popover.Description>
                       </List.Footer>
@@ -1624,26 +2837,26 @@ const UseCreatePopoverHandlePart: FunctionComponent = () => {
 export const PopoverParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: its state (open), for its parts.</li>
+      <li>Root: holds its state (open) for its parts.</li>
       <li>Trigger: the control it’s shown from, and anchored to.</li>
       <li>
-        Portal, Positioner, Popup: where it renders, where it’s placed, the
-        panel (the menus’ glass).
+        Portal, Positioner and Popup: where it renders, where it’s placed, and
+        the panel itself (the menus’ glass).
       </li>
       <li>
-        In the popup: its arrow, its bar (
+        Inside the popup: its arrow, its bar (
         <PartLink
           component="popover"
           part="Popover.Header"
         />
-        ), its content (
+        ) and its content (
         <PartLink
           component="popover"
           part="Popover.Body"
         />
-        ); its title, description and close button wherever they go.
+        ). Its title, description and close button go wherever they fit.
       </li>
-      <li>Handles: triggers outside the root, opening it imperatively.</li>
+      <li>Handles: triggers outside the root, and opening it from code.</li>
       <li>Press each view’s button to open its popover.</li>
     </ul>
     <ul className="demo-tree">
@@ -1658,7 +2871,7 @@ export const PopoverParts: FunctionComponent = () => (
               component="popover"
               part="Popover.Trigger"
             />{' '}
-            (optional; or outside it, by a handle)
+            (optional; or outside the root, through a handle)
           </li>
           <li>
             <PartLink
@@ -1704,36 +2917,58 @@ export const PopoverParts: FunctionComponent = () => (
                           component="popover"
                           part="Popover.Header"
                         />{' '}
-                        (optional; a toolbar:{' '}
-                        <PartLink
-                          component="popover"
-                          part="Popover.Title"
-                        />
-                        ,{' '}
-                        <PartLink
-                          component="popover"
-                          part="Popover.Close"
-                        />
-                        )
+                        (optional)
+                        <ul>
+                          <li className="demo-tree-context">
+                            <PartLink
+                              component="toolbar"
+                              part="Toolbar.Root"
+                            />{' '}
+                            <span>(with a</span>{' '}
+                            <PartLink
+                              component="popover"
+                              part="Popover.Title"
+                            />{' '}
+                            <span>in its</span>{' '}
+                            <PartLink
+                              component="toolbar"
+                              part="Toolbar.Title"
+                            />
+                            <span>, and a</span>{' '}
+                            <PartLink
+                              component="popover"
+                              part="Popover.Close"
+                            />
+                            <span>)</span>
+                          </li>
+                        </ul>
                       </li>
                       <li>
                         <PartLink
                           component="popover"
                           part="Popover.Body"
                         />{' '}
-                        (optional; what scrolls:{' '}
-                        <PartLink
-                          component="popover"
-                          part="Popover.Description"
-                        />
-                        , optional)
+                        (optional; what scrolls)
                         <ul>
-                          <li>
+                          <li className="demo-tree-context">
                             <PartLink
                               component="viewport"
                               part="Viewport.Padding"
                             />{' '}
-                            (with a header: room for its bar)
+                            <span>(with a header: room for its bar)</span>
+                          </li>
+                          <li className="demo-tree-context">
+                            <span>its content (for example a</span>{' '}
+                            <PartLink
+                              component="list"
+                              part="List.Root"
+                            />
+                            <span>, with a</span>{' '}
+                            <PartLink
+                              component="popover"
+                              part="Popover.Description"
+                            />{' '}
+                            <span>in a footer)</span>
                           </li>
                         </ul>
                       </li>
@@ -1745,8 +2980,6 @@ export const PopoverParts: FunctionComponent = () => (
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
       <li>
         <PartLink
           component="popover"
@@ -1773,9 +3006,9 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its state: <code>open</code> or <code>defaultOpen</code>,{' '}
-        <code>onOpenChange</code> (with why: its trigger pressed, a press
-        outside, Escape, its close button); <code>modal</code>.
+        Holds its state: <code>open</code> or <code>defaultOpen</code>, and{' '}
+        <code>onOpenChange</code> (with the reason: its trigger pressed, a press
+        outside, Escape, or its close button). Also <code>modal</code>.
       </li>
       <li>Renders no element of its own.</li>
     </ul>
@@ -1791,9 +3024,9 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The control it’s shown from, and anchored to: e.g. a{' '}
+        The control it’s shown from, and anchored to, for example a{' '}
         <a href={publicUrl('button')}>Button</a> (
-        <code>{'render={<Button.Root />}'}</code>), a{' '}
+        <code>{'render={<Button.Root />}'}</code>) or a{' '}
         <PartLink
           component="color-picker"
           part="ColorPicker.Well"
@@ -1801,11 +3034,11 @@ export const PopoverParts: FunctionComponent = () => (
         .
       </li>
       <li>
-        Pressed, it opens or closes it; with <code>openOnHover</code>, hovered
+        A press opens or closes it. With <code>openOnHover</code>, hovering does
         too (after <code>delay</code>).
       </li>
       <li>
-        Outside the root, by a handle (see{' '}
+        It can sit outside the root, through a handle (see{' '}
         <PartLink
           component="popover"
           part="Popover.createHandle"
@@ -1828,13 +3061,14 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        No box of its own (<code>display: contents</code>): rendered into a
-        container laid out as a flex column (e.g. a screen), it doesn’t shift
-        its content.
+        It has no box of its own (<code>display: contents</code>), so rendering
+        it into a container laid out as a flex column (such as a screen) doesn’t
+        shift that container’s content.
       </li>
       <li>
-        Where it renders: the document’s body (<code>container</code>); while
-        closed, nothing (<code>keepMounted</code>: hidden).
+        It renders into the document’s body (<code>container</code>). While
+        closed, it renders nothing (or, with <code>keepMounted</code>, stays
+        hidden).
       </li>
       <li>
         Renders a <code>div</code> in its container.
@@ -1852,8 +3086,9 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: a layer under the popup, over the page (unstyled: a popover
-        doesn’t dim the page). Outlined here, to see it.
+        Optional: a layer under the popup, above the page. It has no styles,
+        since a popover doesn’t dim the page. It’s outlined here so you can see
+        it.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1871,31 +3106,32 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Places the popup at its trigger (or <code>anchor</code>): its{' '}
-        <code>side</code> (below by default; logical), its <code>align</code>{' '}
-        (centered by default; in a <a href={publicUrl('list')}>List</a> row,
-        aligned with the row’s end: <code>end</code>).
+        Places the popup at its trigger (or its <code>anchor</code>). Its{' '}
+        <code>side</code> is below by default (logical), and its{' '}
+        <code>align</code> centered by default. In a{' '}
+        <a href={publicUrl('list')}>List</a> row, align it with the row’s end (
+        <code>end</code>).
       </li>
       <li>
-        8px from it (with an arrow, the arrow’s tip) and from the screen’s
-        edges; on the other side if there’s no room.
+        It keeps 8px from the trigger (with an arrow, from the arrow’s tip) and
+        from the screen’s edges. Without room, it goes to the other side.
       </li>
       <li>
-        While a field in it is typed into and the keyboard covers it, lifted as
-        a whole until it’s 8px above the keyboard (a{' '}
+        While a field inside it is typed into and the keyboard covers it, it’s
+        lifted as a whole until it’s 8px above the keyboard (like a{' '}
         <PartLink
           component="viewport"
           part="Viewport.KeyboardAccessory"
         />
-        ; in a{' '}
+        , in a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Provider"
         />
-        ), its arrow then off its trigger.
+        ). Its arrow then no longer points at its trigger.
       </li>
       <li>
-        Renders a <code>div</code> (above the page’s layers).
+        Renders a <code>div</code>, above the page’s layers.
       </li>
     </ul>
     <PositionerPart />
@@ -1910,17 +3146,17 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The panel: the menus’ glass, 13px corners, the arrow’s wedge part of its
-        outline; scaling in from its trigger.
+        The panel: the menus’ glass with 13px corners, and the arrow’s wedge as
+        part of its outline. It scales in from its trigger.
       </li>
       <li>
-        As wide as its content (here: 320px, the app’s); at most as high as the
-        room for it, its{' '}
+        It’s as wide as its content (here 320px, set by the app), and at most as
+        tall as the room it has. Beyond that, its{' '}
         <PartLink
           component="popover"
           part="Popover.Body"
         />{' '}
-        scrolling.
+        scrolls.
       </li>
       <li>
         Renders a <code>div</code> (a <code>dialog</code>).
@@ -1938,19 +3174,19 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: an arrow (a rounded wedge, 56px wide, 13px deep), pointing at
-        the trigger’s center from whichever side the popup ends up on; the popup
-        moves out by its depth.
+        Optional: an arrow (a rounded wedge, 56px wide and 13px deep) that
+        points at the trigger’s center from whichever side the popup ends up on.
+        The popup moves out by its depth.
       </li>
       <li>
-        Drawn by the popup (its outline); renders an empty <code>div</code>{' '}
-        where Base UI places it.
+        The popup draws it as part of its outline. It renders an empty{' '}
+        <code>div</code> where Base UI places it.
       </li>
       <li>
-        With the popover shifted so far that it can’t point at the trigger’s
-        center (e.g. a trigger near a corner of the screen), or over the trigger
-        (too tall to fit on either side), hidden by default (
-        <code>whenShifted</code>), as iOS does.
+        It’s hidden by default (<code>whenShifted</code>) when the popover has
+        shifted so far that it can’t point at the trigger’s center (for example
+        with a trigger near a corner of the screen), or when the popover covers
+        the trigger (too tall to fit on either side).
       </li>
     </ul>
     <ArrowPart />
@@ -1965,9 +3201,9 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional: its bar (16px from the top, 10px above the content): a{' '}
-        <a href={publicUrl('toolbar')}>Toolbar</a> (
-        <code>placement=&quot;block-start&quot;</code>), its title (
+        Optional: its bar (16px from the top, 10px above the content). It holds
+        a <a href={publicUrl('toolbar')}>Toolbar</a> (
+        <code>placement=&quot;block-start&quot;</code>) with its title (
         <PartLink
           component="popover"
           part="Popover.Title"
@@ -1980,15 +3216,16 @@ export const PopoverParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Over the body, which scrolls under it: its edge effect (
-        <code>edgeEffect</code>: soft, the content fading out beneath the bar as
-        it scrolls there, clear while at the top; hard or none;{' '}
-        <code>edgeTint</code>). The body makes room for it with a{' '}
+        It sits above the body, which scrolls under it, with an edge effect.{' '}
+        <code>edgeEffect</code> is soft by default: the content fades out
+        beneath the bar as it scrolls there, and stays clear while at the top.
+        It can also be hard or none, with <code>edgeTint</code> for a color. The
+        body makes room for it with a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        at its start, as a sheet’s content does.
+        at its start, like a sheet’s content.
       </li>
       <li>
         Popovers without a bar (a <a href={publicUrl('roll')}>Roll</a>, a
@@ -2010,9 +3247,9 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its content, scrolling when the popup reaches its maximum height (the
-        room for it); the popup itself doesn’t scroll (its glass and arrow are
-        drawn around it).
+        Its content. It scrolls once the popup reaches its maximum height (the
+        room it has). The popup itself doesn’t scroll, because its glass and
+        arrow are drawn around it.
       </li>
       <li>
         With a{' '}
@@ -2024,12 +3261,12 @@ export const PopoverParts: FunctionComponent = () => (
         <PartLink
           component="viewport"
           part="Viewport.Padding"
-        />
-        : room for the bar, which it scrolls under.
+        />{' '}
+        that makes room for the bar it scrolls under.
       </li>
       <li>
-        Optional: content that can’t outgrow the room goes in the popup as it
-        is.
+        It’s optional. Content that can’t outgrow the room can go in the popup
+        directly.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -2047,13 +3284,13 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Optional (Base UI’s, unstyled): around content that changes between
-        triggers (their <code>payload</code>s, see{' '}
+        Optional, Base UI’s, without styles. It goes around content that changes
+        between triggers (their <code>payload</code>s, see{' '}
         <PartLink
           component="popover"
           part="useCreatePopoverHandle"
         />
-        ), for the app to animate the change (its <code>data-*</code>{' '}
+        ), so the app can animate the change (through its <code>data-*</code>{' '}
         attributes).
       </li>
       <li>
@@ -2071,14 +3308,17 @@ export const PopoverParts: FunctionComponent = () => (
       <code>Popover.Title</code>
     </Heading>
     <ul>
-      <li>Its title (Base UI’s, unstyled): the popup’s accessible name.</li>
       <li>
-        In its bar: a <code>span</code> in the toolbar’s{' '}
+        Its title (Base UI’s, without styles), which is the popup’s accessible
+        name.
+      </li>
+      <li>
+        In its bar, it’s a <code>span</code> in the toolbar’s{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Title"
         />{' '}
-        (<code>{'render={<span />}'}</code>), styled as the toolbar’s.
+        (<code>{'render={<span />}'}</code>), styled like the toolbar’s title.
       </li>
       <li>
         Renders an <code>h2</code>.
@@ -2096,8 +3336,8 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What it’s for (Base UI’s, unstyled): the popup’s accessible description.
-        Here: in a list’s{' '}
+        What it’s for (Base UI’s, without styles), which is the popup’s
+        accessible description. Here, it’s in a list’s{' '}
         <PartLink
           component="list"
           part="List.Footer"
@@ -2120,17 +3360,18 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Closes it (Base UI’s): e.g. a{' '}
+        Closes it (Base UI’s). For example a{' '}
         <PartLink
           component="toolbar"
           part="Toolbar.Button"
         />{' '}
-        in its bar, its close symbol (
+        with a close symbol in its bar (
         <code>{'render={<Toolbar.Button />}'}</code>).
       </li>
       <li>
-        Optional (a press outside closes it too); in a <code>modal</code>{' '}
-        popover, render one, so touch screen readers can leave it.
+        It’s optional, since a press outside closes it too. In a{' '}
+        <code>modal</code> popover, render one, so touch screen readers can
+        leave it.
       </li>
       <li>
         Renders a <code>button</code>.
@@ -2148,12 +3389,12 @@ export const PopoverParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle linking a popover to its triggers outside its root, and opening
-        or closing it imperatively (Base UI’s <code>Popover.createHandle</code>
-        ).
+        A handle that links a popover to its triggers outside its root, and
+        opens or closes it from code (Base UI’s{' '}
+        <code>Popover.createHandle</code>).
       </li>
       <li>
-        Made once, e.g. at a module’s top level (in a component:{' '}
+        Make it once, for example at a module’s top level (in a component, use{' '}
         <PartLink
           component="popover"
           part="useCreatePopoverHandle"
@@ -2161,8 +3402,8 @@ export const PopoverParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Here: made at the module’s top level; a trigger before the root, and a
-        button opening it at that trigger imperatively (its{' '}
+        Here, it’s made at the module’s top level, with a trigger before the
+        root and a button that opens it at that trigger from code (its{' '}
         <code>open(triggerId)</code>).
       </li>
     </ul>
@@ -2187,8 +3428,9 @@ export const PopoverParts: FunctionComponent = () => (
         in a component: the same handle for the component’s lifetime.
       </li>
       <li>
-        Here: two triggers, one popover, at whichever opened it; each passes its
-        title (its <code>payload</code>), the root’s children a function of it.
+        Here, two triggers share one popover, which opens at whichever was
+        pressed. Each passes its title as its <code>payload</code>, and the
+        root’s children are a function of it.
       </li>
     </ul>
     <UseCreatePopoverHandlePart />

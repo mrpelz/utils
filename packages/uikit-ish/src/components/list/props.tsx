@@ -102,6 +102,12 @@ export type ListDropTargetProps = PartProps<'li'> & {
 export type ListSectionProps = PartProps<'section'> & {
   /** Its groups' edit mode, unless their own (see `ListEditing`). */
   editing?: ListEditing;
+  /**
+   * Its value in its list's index (see `ListIndexItemProps`' `value`): a
+   * letter, a group of them (e.g. a language's `Sch`), or any key of the
+   * app's. Pressing the index item of that value scrolls to it.
+   */
+  indexValue?: string;
 };
 
 export type ListItemProps = PartProps<'li'> & {
@@ -120,6 +126,12 @@ export type ListItemProps = PartProps<'li'> & {
    */
   dropName?: string;
   editing?: ListEditing;
+  /**
+   * Its value in its list's index (see `ListSectionProps`' `indexValue`): a
+   * row an index item jumps to, rather than a section (e.g. the first of
+   * its letter's rows, in one group). The first in the list wins.
+   */
+  indexValue?: string;
   /** Its level in a hierarchy (indented 20px per level; e.g. a sidebar). */
   level?: number;
   /**
@@ -429,6 +441,15 @@ export type ListBlockProps = PartProps<'div'> & {
 export type ListIndexProps = PartProps<'nav'> & {
   /** A size class: `compact` (a phone, default) or `regular` (a tablet). */
   size?: 'compact' | 'regular';
+};
+
+export type ListIndexItemProps = PartProps<'button'> & {
+  /**
+   * The section it jumps to (its `indexValue`); without one, the section of
+   * the next item after it in the index that has one.
+   * @default its text
+   */
+  value?: string;
 };
 
 export type Scrub = { item?: HTMLElement };

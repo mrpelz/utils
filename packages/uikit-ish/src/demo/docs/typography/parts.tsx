@@ -40,7 +40,7 @@ const TypographyPart: FunctionComponent = () => {
 export const TypographyParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>One element: its text in a style.</li>
+      <li>One element: its text, in a style.</li>
     </ul>
     <ul className="demo-tree">
       <li>
@@ -59,15 +59,15 @@ export const TypographyParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Look: <code>textStyle</code>, <code>emphasized</code>,{' '}
-        <code>italic</code>, <code>color</code>.
+        Its look: <code>textStyle</code>, <code>emphasized</code>,{' '}
+        <code>italic</code> and <code>color</code>.
       </li>
       <li>
-        Size: <code>textSize</code>, for its text and everything in it.
+        Its size: <code>textSize</code>, for its text and everything inside it.
       </li>
       <li>
-        Renders a <code>span</code>, without a role; another element (a heading,
-        a paragraph) by <code>render</code>.
+        Renders a <code>span</code> without a role, or another element (a
+        heading, a paragraph) through <code>render</code>.
       </li>
     </ul>
     <TypographyPart />

@@ -1,6 +1,6 @@
 import './style.css';
 
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
@@ -15,6 +15,7 @@ import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
@@ -24,6 +25,7 @@ import {
   sfEllipsis,
   sfSquareAndArrowUp,
 } from '../../tooling/icons.js';
+import { partPropMaps } from '../part-options.js';
 import {
   propOptionsBar,
   propOptionsLargeTitle,
@@ -55,90 +57,146 @@ export const HeaderDemo: FunctionComponent = () => {
     { external: externalLargeTitle, title: 'Header.LargeTitle' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'prominent', 'shape'],
+            'Toolbar.Group': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
-      controls={[controlBar, controlTitle, controlLargeTitle]}
+      controls={[controlBar, controlTitle, controlLargeTitle, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={[stateBar, stateTitle, stateLargeTitle]}
+      state={[stateBar, stateTitle, stateLargeTitle, partState]}
       title="Header"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
             <Toolbar.Root
               placement="block-start"
               {...propsBar}
             >
-              <Toolbar.Leading>
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Back"
                   shape="circle"
                   onClick={() => addLog('Back clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfChevronBackward}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
               <Toolbar.Title {...propsTitle}>
                 <span>Inbox</span>
               </Toolbar.Title>
-              <Toolbar.Trailing>
-                <Toolbar.Group>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                <Toolbar.Group {...partProps['Toolbar.Group']}>
                   <Toolbar.Button
+                    {...partProps['Toolbar.Button']}
                     aria-label="Share"
                     shape="circle"
                     onClick={() => addLog('Share clicked')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfSquareAndArrowUp} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndArrowUp}
+                      />
                     </Button.Icon>
                   </Toolbar.Button>
                   <Toolbar.Button
+                    {...partProps['Toolbar.Button']}
                     aria-label="More"
                     shape="circle"
                     onClick={() => addLog('More clicked')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfEllipsis} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfEllipsis}
+                      />
                     </Button.Icon>
                   </Toolbar.Button>
                 </Toolbar.Group>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   prominent
                   aria-label="Done"
                   shape="circle"
                   onClick={() => addLog('Done clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfCheckmark} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfCheckmark}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
             <Header.LargeTitle {...propsLargeTitle}>
               <span>Inbox</span>
             </Header.LargeTitle>
 
-            <List.Root>
-              <List.Section>
-                <List.Group>
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {Array.from({ length: 30 }, (_, index) => (
-                    <List.Item key={index}>
-                      <List.Content>
-                        <List.Title>Message {index + 1}</List.Title>
+                    <List.Item
+                      key={index}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Message {index + 1}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -170,30 +228,63 @@ export const HeaderTitleDemo: FunctionComponent = () => {
     { external: externalSubtitle, title: 'Toolbar.Subtitle' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'prominent', 'shape'],
+            'Toolbar.Group': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
-      controls={[controlBar, controlTitle, controlSubtitle]}
+      controls={[controlBar, controlTitle, controlSubtitle, partControls]}
       id={id}
       log={log}
       stage="phone"
-      state={[stateBar, stateTitle, stateSubtitle]}
+      state={[stateBar, stateTitle, stateSubtitle, partState]}
       title="Header (Title)"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
             <Toolbar.Root
               placement="block-start"
               {...propsBar}
             >
-              <Toolbar.Leading>
+              <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   aria-label="Back"
                   shape="circle"
                   onClick={() => addLog('Back clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfChevronBackward} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfChevronBackward}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Leading>
@@ -201,56 +292,79 @@ export const HeaderTitleDemo: FunctionComponent = () => {
                 <span>Inbox</span>
                 <Toolbar.Subtitle {...propsSubtitle}>Subtitle</Toolbar.Subtitle>
               </Toolbar.Title>
-              <Toolbar.Trailing>
-                <Toolbar.Group>
+              <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                <Toolbar.Group {...partProps['Toolbar.Group']}>
                   <Toolbar.Button
+                    {...partProps['Toolbar.Button']}
                     aria-label="Share"
                     shape="circle"
                     onClick={() => addLog('Share clicked')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfSquareAndArrowUp} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfSquareAndArrowUp}
+                      />
                     </Button.Icon>
                   </Toolbar.Button>
                   <Toolbar.Button
+                    {...partProps['Toolbar.Button']}
                     aria-label="More"
                     shape="circle"
                     onClick={() => addLog('More clicked')}
                   >
-                    <Button.Icon>
-                      <Symbol icon={sfEllipsis} />
+                    <Button.Icon {...partProps['Button.Icon']}>
+                      <Symbol
+                        {...partProps.Symbol}
+                        icon={sfEllipsis}
+                      />
                     </Button.Icon>
                   </Toolbar.Button>
                 </Toolbar.Group>
                 <Toolbar.Button
+                  {...partProps['Toolbar.Button']}
                   prominent
                   aria-label="Done"
                   shape="circle"
                   onClick={() => addLog('Done clicked')}
                 >
-                  <Button.Icon>
-                    <Symbol icon={sfCheckmark} />
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfCheckmark}
+                    />
                   </Button.Icon>
                 </Toolbar.Button>
               </Toolbar.Trailing>
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
-            <List.Root>
-              <List.Section>
-                <List.Group>
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {Array.from({ length: 30 }, (_, index) => (
-                    <List.Item key={index}>
-                      <List.Content>
-                        <List.Title>Message {index + 1}</List.Title>
+                    <List.Item
+                      key={index}
+                      {...partProps['List.Item']}
+                    >
+                      <List.Content {...partProps['List.Content']}>
+                        <List.Title {...partProps['List.Title']}>
+                          Message {index + 1}
+                        </List.Title>
                       </List.Content>
                     </List.Item>
                   ))}
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>

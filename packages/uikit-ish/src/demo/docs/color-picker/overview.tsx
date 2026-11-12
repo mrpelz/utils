@@ -1,6 +1,6 @@
 import '../sheet/style.css';
 
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -14,7 +14,10 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
@@ -30,6 +33,7 @@ import {
   sfXmark,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   colorPickerPanelRows,
   colorPickerRootRows,
@@ -55,10 +59,74 @@ const LiveView: FunctionComponent = () => {
   );
   // (Its modes' control in its panel, or elsewhere: the sheet's header.)
   // The system's color picker's button (left out, none).
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Icon': [],
+            'ColorPicker.Code': [],
+            'ColorPicker.CodeCopy': ['render', 'shape', 'size', 'variant'],
+            'ColorPicker.Eyedropper': ['render'],
+            'ColorPicker.Grid': [],
+            'ColorPicker.Mode': ['value'],
+            'ColorPicker.Modes': [],
+            'ColorPicker.Named': [],
+            'ColorPicker.Opacity': [],
+            'ColorPicker.Panel': [],
+            'ColorPicker.Sliders': ['model', 'range'],
+            'ColorPicker.Spectrum': [],
+            'ColorPicker.Swatches': [],
+            'ColorPicker.SystemColors': ['render'],
+            'ColorPicker.View': ['value'],
+            'ColorPicker.Well': ['color', 'size'],
+            'Popover.Arrow': [],
+            'Popover.Body': [],
+            'Popover.Close': ['render'],
+            'Popover.Header': [],
+            'Popover.Popup': ['style'],
+            'Popover.Portal': [],
+            'Popover.Positioner': [],
+            'Popover.Root': [],
+            'Popover.Trigger': ['render'],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['compact', 'detent'],
+            'Sheet.Root': [],
+            'Sheet.Trigger': ['render'],
+            Symbol: ['icon'],
+            'Toolbar.Button': ['aria-label', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+            'Viewport.Provider': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
   const systemColors = content.systemColors ? (
-    <ColorPicker.SystemColors render={<Toolbar.Button shape="circle" />}>
-      <Button.Icon>
-        <Symbol icon={sfPaintpalette} />
+    <ColorPicker.SystemColors
+      {...partProps['ColorPicker.SystemColors']}
+      render={
+        <Toolbar.Button
+          {...partProps['Toolbar.Button']}
+          shape="circle"
+        />
+      }
+    >
+      <Button.Icon {...partProps['Button.Icon']}>
+        <Symbol
+          {...partProps.Symbol}
+          icon={sfPaintpalette}
+        />
       </Button.Icon>
     </ColorPicker.SystemColors>
   ) : null;
@@ -66,9 +134,20 @@ const LiveView: FunctionComponent = () => {
   // header's toolbar (before its close button).
   const codeCopy =
     !content.code && content.codeCopy ? (
-      <ColorPicker.CodeCopy render={<Toolbar.Button shape="circle" />}>
-        <Button.Icon>
-          <Symbol icon={sfDocumentOnDocument} />
+      <ColorPicker.CodeCopy
+        {...partProps['ColorPicker.CodeCopy']}
+        render={
+          <Toolbar.Button
+            {...partProps['Toolbar.Button']}
+            shape="circle"
+          />
+        }
+      >
+        <Button.Icon {...partProps['Button.Icon']}>
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfDocumentOnDocument}
+          />
         </Button.Icon>
       </ColorPicker.CodeCopy>
     ) : null;
@@ -78,6 +157,7 @@ const LiveView: FunctionComponent = () => {
   // (Its modes' control elsewhere: the popover's or the sheet's header.)
   const parts = () =>
     panelParts({
+      partProps,
       isModesElsewhere: true,
       modes,
       opacity: content.opacity,
@@ -103,23 +183,25 @@ const LiveView: FunctionComponent = () => {
       hasInputGuards
       isCentered
       isInline
-      controls={[controlContent, controlRoot]}
+      controls={[controlContent, controlRoot, partControls]}
       id={id}
       log={log}
       screen={isSheet ? 'centered' : undefined}
       stage={isSheet ? 'phone' : undefined}
-      state={[stateContent, stateRoot]}
+      state={[stateContent, stateRoot, partState]}
       title="Color picker"
     >
       {isSheet ? (
-        <Viewport.Provider>
+        <Viewport.Provider {...partProps['Viewport.Provider']}>
           {/* Tracking the keyboard over its screen (its fields kept above
              it, see Viewport.KeyboardAccessory). */}
-          <Viewport.Content>
-            <Sheet.Root>
+          <Viewport.Content {...partProps['Viewport.Content']}>
+            <Sheet.Root {...partProps['Sheet.Root']}>
               <Sheet.Trigger
+                {...partProps['Sheet.Trigger']}
                 render={
                   <ColorPicker.Well
+                    {...partProps['ColorPicker.Well']}
                     color={color}
                     size="large"
                   />
@@ -132,101 +214,147 @@ const LiveView: FunctionComponent = () => {
                 {...rootProps}
                 render={
                   <Sheet.Popup
+                    {...partProps['Sheet.Popup']}
                     compact
                     detent="medium"
                   />
                 }
               >
-                <Sheet.Header>
-                  <Sheet.Grabber />
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Leading>{systemColors}</Toolbar.Leading>
-                    <Toolbar.Title>
+                <Sheet.Header {...partProps['Sheet.Header']}>
+                  <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                      {systemColors}
+                    </Toolbar.Leading>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>Colors</span>
                     </Toolbar.Title>
-                    <Toolbar.Trailing>
+                    <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                       {codeCopy}
                       <Sheet.Close
+                        {...partProps['Sheet.Close']}
                         render={
                           <Toolbar.Button
+                            {...partProps['Toolbar.Button']}
                             aria-label="Close"
                             shape="circle"
                           />
                         }
                       >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfXmark}
+                          />
                         </Button.Icon>
                       </Sheet.Close>
                     </Toolbar.Trailing>
                   </Toolbar.Root>
-                  {hasModesControl ? modesControl(modes) : null}
+                  {hasModesControl ? modesControl(modes, partProps) : null}
                 </Sheet.Header>
-                <Sheet.Content>
-                  <Viewport.Padding edge="block-start" />
-                  <ColorPicker.Panel>{parts()}</ColorPicker.Panel>
-                  <Viewport.Padding edge="block-end" />
+                <Sheet.Content {...partProps['Sheet.Content']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+                    {parts()}
+                  </ColorPicker.Panel>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
                 </Sheet.Content>
               </ColorPicker.Root>
             </Sheet.Root>
           </Viewport.Content>
         </Viewport.Provider>
       ) : (
-        <Popover.Root>
+        <Popover.Root {...partProps['Popover.Root']}>
           <Popover.Trigger
+            {...partProps['Popover.Trigger']}
             render={
               <ColorPicker.Well
+                {...partProps['ColorPicker.Well']}
                 color={color}
                 size="large"
               />
             }
           />
-          <Popover.Portal>
-            <Popover.Positioner>
+          <Popover.Portal {...partProps['Popover.Portal']}>
+            <Popover.Positioner {...partProps['Popover.Positioner']}>
               <ColorPicker.Root
                 key={keyRoot}
                 {...rootProps}
                 render={
-                  <Popover.Popup style={{ width: 'min(402px, 100vw)' }} />
+                  <Popover.Popup
+                    {...partProps['Popover.Popup']}
+                    style={{ width: 'min(402px, 100vw)' }}
+                  />
                 }
               >
-                <Popover.Arrow />
-                <Popover.Header>
-                  <Toolbar.Root placement="block-start">
-                    <Toolbar.Leading>
+                <Popover.Arrow {...partProps['Popover.Arrow']} />
+                <Popover.Header {...partProps['Popover.Header']}>
+                  <Toolbar.Root
+                    {...partProps['Toolbar.Root']}
+                    placement="block-start"
+                  >
+                    <Toolbar.Leading {...partProps['Toolbar.Leading']}>
                       <ColorPicker.Eyedropper
-                        render={<Toolbar.Button shape="circle" />}
+                        {...partProps['ColorPicker.Eyedropper']}
+                        render={
+                          <Toolbar.Button
+                            {...partProps['Toolbar.Button']}
+                            shape="circle"
+                          />
+                        }
                       >
-                        <Button.Icon>
-                          <Symbol icon={sfEyedropper} />
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfEyedropper}
+                          />
                         </Button.Icon>
                       </ColorPicker.Eyedropper>
                       {systemColors}
                     </Toolbar.Leading>
-                    <Toolbar.Title>
+                    <Toolbar.Title {...partProps['Toolbar.Title']}>
                       <span>Colors</span>
                     </Toolbar.Title>
-                    <Toolbar.Trailing>
+                    <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                       {codeCopy}
                       <Popover.Close
+                        {...partProps['Popover.Close']}
                         render={
                           <Toolbar.Button
+                            {...partProps['Toolbar.Button']}
                             aria-label="Close"
                             shape="circle"
                           />
                         }
                       >
-                        <Button.Icon>
-                          <Symbol icon={sfXmark} />
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfXmark}
+                          />
                         </Button.Icon>
                       </Popover.Close>
                     </Toolbar.Trailing>
                   </Toolbar.Root>
-                  {hasModesControl ? modesControl(modes) : null}
+                  {hasModesControl ? modesControl(modes, partProps) : null}
                 </Popover.Header>
-                <Popover.Body>
-                  <Viewport.Padding edge="block-start" />
-                  <ColorPicker.Panel>{parts()}</ColorPicker.Panel>
+                <Popover.Body {...partProps['Popover.Body']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <ColorPicker.Panel {...partProps['ColorPicker.Panel']}>
+                    {parts()}
+                  </ColorPicker.Panel>
                 </Popover.Body>
               </ColorPicker.Root>
             </Popover.Positioner>
@@ -253,9 +381,9 @@ export const ColorPickerOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Picks a color: from a grid, a spectrum, or red, green and blue sliders
-        (each mixing from the color); its opacity (optional); saved colors.
+        (each mixing from the color), with an optional opacity and saved colors.
       </li>
-      <li>Opened from a color well, in a popover or a sheet.</li>
+      <li>It opens from a color well, in a popover or a sheet.</li>
     </ul>
     <LiveView />
 
@@ -267,10 +395,11 @@ export const ColorPickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        For any color: a drawing’s, a text’s, an app’s tint, a calendar’s.
+        For any color: a drawing’s, a text’s, an app’s tint, or a calendar’s.
       </li>
       <li>
-        For entering a value (a color), not for picking one of the app’s few.
+        For entering a value (a color), not for picking one of the app’s few
+        colors.
       </li>
     </ul>
 
@@ -282,8 +411,8 @@ export const ColorPickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A few named colors (e.g. a label’s): a{' '}
-        <a href={publicUrl('list')}>List</a> of checkmarked rows, or a{' '}
+        A few named colors (for example a label’s): use a{' '}
+        <a href={publicUrl('list')}>List</a> of rows with checkmarks, or a{' '}
         <a href={publicUrl('segmented')}>Segmented</a> control.
       </li>
     </ul>
@@ -297,7 +426,8 @@ export const ColorPickerOverview: FunctionComponent = () => (
     <ul>
       <li>The props most color pickers set.</li>
       <li>
-        All parts’ props: <a href={publicUrl('color-picker/parts')}>Parts</a>.
+        All props of all parts are on the{' '}
+        <a href={publicUrl('color-picker/parts')}>Parts</a> page.
       </li>
     </ul>
     <KeyPropsTable
@@ -332,22 +462,22 @@ export const ColorPickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The grid’s swatches are toggle buttons, named by their colors; the
-        spectrum a slider (arrow keys: the hue across, the lightness down), its
-        value the color.
+        The grid’s swatches are toggle buttons, named by their colors. The
+        spectrum is a slider (the arrow keys move the hue across and the
+        lightness down), with the color as its value.
       </li>
       <li>
         The sliders and the opacity are sliders (Base UI’s), named by their
-        channels (“Red”, “Opacity”); each one’s value a field too (“Red value”,
-        “Opacity percentage”).
+        channels (“Red”, “Opacity”). Each one’s value is a field too (“Red
+        value”, “Opacity percentage”).
       </li>
       <li>
-        Saved colors are buttons, named by their colors; their menu (a secondary
-        click) deletes them.
+        Saved colors are buttons, named by their colors. Their menu (on a
+        secondary click) deletes them.
       </li>
       <li>
-        The well is a button named “Color”: name it by what it colors (e.g.
-        “Tint”).
+        The well is a button named “Color”. Name it after what it colors (for
+        example “Tint”).
       </li>
     </ul>
 
@@ -359,13 +489,13 @@ export const ColorPickerOverview: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Each change applies at once (<code>onValueChange</code>), opacity kept
-        across views.
+        Each change applies at once (<code>onValueChange</code>), and the
+        opacity is kept across views.
       </li>
       <li>
-        The add button saves the color (not if saved); more than ten, the saved
-        colors page, swiped or by their{' '}
-        <a href={publicUrl('page-control')}>Page control</a>.
+        The add button saves the color (unless it’s already saved). With more
+        than ten, the saved colors form pages, which can be swiped or turned
+        with their <a href={publicUrl('page-control')}>Page Control</a>.
       </li>
       <li>
         The eyedropper (
@@ -373,7 +503,7 @@ export const ColorPickerOverview: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.Eyedropper"
         />
-        ) is the browser’s: where there’s none (Safari), it doesn’t show.
+        ) is the browser’s. Where there’s none (Safari), it doesn’t show.
       </li>
       <li>
         The system colors (
@@ -381,38 +511,38 @@ export const ColorPickerOverview: FunctionComponent = () => (
           component="color-picker"
           part="ColorPicker.SystemColors"
         />
-        ) open the system’s color picker; with the opacity, its alpha too where
-        the browser’s has one (e.g. Safari), else its colors opaque, the opacity
-        kept.
+        ) open the system’s color picker. With the opacity, its alpha applies
+        too where the browser’s picker has one (for example Safari’s).
+        Otherwise, its colors are opaque, and the opacity is kept.
       </li>
       <li>
-        Under the sliders, the color’s hex code (
+        Under the sliders sits the color’s hex code (
         <PartLink
           component="color-picker"
           part="ColorPicker.Code"
         />
-        ), typed; before it, its copy button (
+        ), which can be typed. The copy button before it (
         <PartLink
           component="color-picker"
           part="ColorPicker.CodeCopy"
         />
-        ) copies it, or another format (e.g. <code>oklch()</code>), from its
-        menu. Without the code’s row, the copy button is in the header’s
-        toolbar, before its close button.
+        ) copies it, or another format (for example <code>oklch()</code>) from
+        its menu. Without the code’s row, the copy button sits in the header’s
+        toolbar, before the close button.
       </li>
       <li>
-        Named (with <code>named</code>): the CSS named colors (
+        With <code>named</code>, the CSS named colors (
         <PartLink
           component="color-picker"
           part="ColorPicker.CssNamedColors"
         />
-        ) in a list (
+        ) show in a list (
         <PartLink
           component="color-picker"
           part="ColorPicker.Named"
         />
-        ), an index of their first letters at its end. The sheet’s content (or
-        the popover’s body) scrolls it.
+        ), with an index of their first letters at its end. The sheet’s content
+        (or the popover’s body) scrolls it.
       </li>
     </ul>
   </>

@@ -9,7 +9,10 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
@@ -19,6 +22,7 @@ import {
   sfPlayFill,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import {
   collapsedSelectionRows,
   tabBarAccessoryRows,
@@ -98,14 +102,34 @@ const RootPart: FunctionComponent = () => {
   });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="TabBar.Root"
     >
       <TabBar.Root
@@ -114,31 +138,47 @@ const RootPart: FunctionComponent = () => {
         value={value}
         onValueChange={onValueChange}
       >
-        <TabBar.List>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
+        <TabBar.List {...partProps['TabBar.List']}>
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -161,46 +201,83 @@ const ListPart: FunctionComponent = () => {
   });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="TabBar.List"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
         <TabBar.List {...props}>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -227,18 +304,39 @@ const GroupPart: FunctionComponent = () => {
   });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group (others)': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control, controlList]}
+      controls={[control, controlList, partControls]}
       id={id}
       log={log}
-      state={[state, stateList]}
+      state={[state, stateList, partState]}
       title="TabBar.Group"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
@@ -250,29 +348,42 @@ const GroupPart: FunctionComponent = () => {
               sections?.remains
             }
           >
-            <TabBar.Indicator />
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group (others)']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -293,46 +404,84 @@ const IndicatorPart: FunctionComponent = () => {
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Indicator (others)': [],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="TabBar.Indicator"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
-        <TabBar.List>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
+        <TabBar.List {...partProps['TabBar.List']}>
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
             <TabBar.Indicator {...props} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator (others)']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -357,47 +506,87 @@ const TabPart: FunctionComponent = () => {
   });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Tab (others)': [
+              'aria-label',
+              'value',
+              'visibleWhenCollapsed',
+            ],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control, controlList]}
+      controls={[control, controlList, partControls]}
       id={id}
       log={log}
-      state={[state, stateList]}
+      state={[state, stateList, partState]}
       title="TabBar.Tab"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
         <TabBar.List {...propsList}>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
-                {...(index === 0 ? props : {})}
+                {...(index === 0 ? props : partProps['TabBar.Tab (others)'])}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab (others)']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -418,46 +607,86 @@ const IconPart: FunctionComponent = () => {
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Icon (others)': [],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="TabBar.Icon"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
-        <TabBar.List>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
+        <TabBar.List {...partProps['TabBar.List']}>
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon {...(index === 0 ? props : {})}>
-                  <Symbol icon={icon} />
+                <TabBar.Icon
+                  {...(index === 0 ? props : partProps['TabBar.Icon (others)'])}
+                >
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon (others)']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -478,48 +707,88 @@ const LabelPart: FunctionComponent = () => {
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Label (others)': [],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.List': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="TabBar.Label"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
-        <TabBar.List>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
+        <TabBar.List {...partProps['TabBar.List']}>
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label {...(index === 0 ? props : {})}>
+                <TabBar.Label
+                  {...(index === 0
+                    ? props
+                    : partProps['TabBar.Label (others)'])}
+                >
                   {label}
                 </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -540,18 +809,41 @@ const PanelPart: FunctionComponent = () => {
   );
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Panel (others)': ['value'],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.List': [],
+            'TabBar.Root': ['className', 'onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
-      state={[state]}
+      state={[state, partState]}
       title="TabBar.Panel"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         className="tab-bar-demo-panels"
         value={value}
         onValueChange={onValueChange}
@@ -560,37 +852,58 @@ const PanelPart: FunctionComponent = () => {
           <TabBar.Panel
             key={tab}
             value={tab}
-            {...(index === 0 ? props : {})}
+            {...(index === 0 ? props : partProps['TabBar.Panel (others)'])}
           >
             {label}
           </TabBar.Panel>
         ))}
-        <TabBar.Panel value="search">Search</TabBar.Panel>
-        <TabBar.List>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
+        <TabBar.Panel
+          {...partProps['TabBar.Panel (others)']}
+          value="search"
+        >
+          Search
+        </TabBar.Panel>
+        <TabBar.List {...partProps['TabBar.List']}>
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
@@ -615,54 +928,97 @@ const AccessoryPart: FunctionComponent = () => {
   });
   const { onValueChange, search, sections, value } = usePhoneState(addLog);
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'TabBar.Group': ['visibleWhenCollapsed'],
+            'TabBar.Icon': [],
+            'TabBar.Indicator': [],
+            'TabBar.Label': [],
+            'TabBar.Root': ['onValueChange', 'value'],
+            'TabBar.Tab': ['aria-label', 'value', 'visibleWhenCollapsed'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
       isInline
-      controls={[control, controlList]}
+      controls={[control, controlList, partControls]}
       id={id}
       log={log}
-      state={[state, stateList]}
+      state={[state, stateList, partState]}
       title="TabBar.Accessory"
     >
       <TabBar.Root
         key={elementKey}
+        {...partProps['TabBar.Root']}
         value={value}
         onValueChange={onValueChange}
       >
         <TabBar.List {...propsList}>
-          <TabBar.Group visibleWhenCollapsed={sections?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={sections?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             {phoneTabs.map(([tab, label, icon], index) => (
               <TabBar.Tab
                 key={tab}
+                {...partProps['TabBar.Tab']}
                 value={tab}
                 visibleWhenCollapsed={sections?.tab === index}
               >
-                <TabBar.Icon>
-                  <Symbol icon={icon} />
+                <TabBar.Icon {...partProps['TabBar.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={icon}
+                  />
                 </TabBar.Icon>
-                <TabBar.Label>{label}</TabBar.Label>
+                <TabBar.Label {...partProps['TabBar.Label']}>
+                  {label}
+                </TabBar.Label>
               </TabBar.Tab>
             ))}
           </TabBar.Group>
-          <TabBar.Group visibleWhenCollapsed={search?.remains}>
-            <TabBar.Indicator />
+          <TabBar.Group
+            {...partProps['TabBar.Group']}
+            visibleWhenCollapsed={search?.remains}
+          >
+            <TabBar.Indicator {...partProps['TabBar.Indicator']} />
             <TabBar.Tab
+              {...partProps['TabBar.Tab']}
               aria-label="Search"
               value="search"
               visibleWhenCollapsed={search?.remains}
             >
-              <TabBar.Icon>
-                <Symbol icon={sfMagnifyingglass} />
+              <TabBar.Icon {...partProps['TabBar.Icon']}>
+                <Symbol
+                  {...partProps.Symbol}
+                  icon={sfMagnifyingglass}
+                />
               </TabBar.Icon>
             </TabBar.Tab>
           </TabBar.Group>
         </TabBar.List>
         <TabBar.Accessory {...props}>
           <span className="tab-bar-demo-accessory-title">Not Playing</span>
-          <Symbol icon={sfPlayFill} />
-          <Symbol icon={sfForwardFill} />
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfPlayFill}
+          />
+          <Symbol
+            {...partProps.Symbol}
+            icon={sfForwardFill}
+          />
         </TabBar.Accessory>
       </TabBar.Root>
     </Component>
@@ -673,11 +1029,11 @@ const AccessoryPart: FunctionComponent = () => {
 export const TabBarParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
-      <li>Root: the tabs’ state.</li>
+      <li>Root: holds the tabs’ state.</li>
       <li>List: the bar, holding groups (glass capsules).</li>
       <li>
-        Group: its indicator (the selection) and tabs (a symbol and a label
-        each).
+        Group: holds the indicator (the selection) and the tabs, each with a
+        symbol and a label.
       </li>
       <li>
         The root can also hold the sections’ panels, and an accessory after the
@@ -685,66 +1041,91 @@ export const TabBarParts: FunctionComponent = () => (
       </li>
     </ul>
     <ul className="demo-tree">
-      <li>
+      <li className="demo-tree-context">
         <PartLink
-          component="tab-bar"
-          part="TabBar.Root"
-        />
+          component="viewport"
+          part="Viewport.Provider"
+        />{' '}
+        <span>(around the app)</span>
         <ul>
           <li>
             <PartLink
               component="tab-bar"
-              part="TabBar.Panel"
-            />{' '}
-            (one per tab, optional)
-          </li>
-          <li>
-            <PartLink
-              component="tab-bar"
-              part="TabBar.List"
+              part="TabBar.Root"
             />
             <ul>
-              <li>
+              <li className="demo-tree-context">
                 <PartLink
-                  component="tab-bar"
-                  part="TabBar.Group"
-                />{' '}
-                (one or more)
+                  component="viewport"
+                  part="Viewport.Content"
+                />
                 <ul>
                   <li>
                     <PartLink
                       component="tab-bar"
-                      part="TabBar.Indicator"
+                      part="TabBar.Panel"
                     />{' '}
-                    (first)
+                    (optional, one per tab)
+                  </li>
+                </ul>
+              </li>
+              <li className="demo-tree-context">
+                <PartLink
+                  component="viewport"
+                  part="Viewport.BlockEnd"
+                />
+                <ul>
+                  <li>
+                    <PartLink
+                      component="tab-bar"
+                      part="TabBar.List"
+                    />
+                    <ul>
+                      <li>
+                        <PartLink
+                          component="tab-bar"
+                          part="TabBar.Group"
+                        />{' '}
+                        (one or more)
+                        <ul>
+                          <li>
+                            <PartLink
+                              component="tab-bar"
+                              part="TabBar.Indicator"
+                            />{' '}
+                            (first)
+                          </li>
+                          <li>
+                            <PartLink
+                              component="tab-bar"
+                              part="TabBar.Tab"
+                            />
+                            :{' '}
+                            <PartLink
+                              component="tab-bar"
+                              part="TabBar.Icon"
+                            />{' '}
+                            and{' '}
+                            <PartLink
+                              component="tab-bar"
+                              part="TabBar.Label"
+                            />{' '}
+                            (one or both)
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
                   </li>
                   <li>
                     <PartLink
                       component="tab-bar"
-                      part="TabBar.Tab"
-                    />
-                    :{' '}
-                    <PartLink
-                      component="tab-bar"
-                      part="TabBar.Icon"
+                      part="TabBar.Accessory"
                     />{' '}
-                    (one or both) ,{' '}
-                    <PartLink
-                      component="tab-bar"
-                      part="TabBar.Label"
-                    />{' '}
-                    (one or both)
+                    (optional)
                   </li>
                 </ul>
               </li>
             </ul>
-          </li>
-          <li>
-            <PartLink
-              component="tab-bar"
-              part="TabBar.Accessory"
-            />{' '}
-            (optional)
           </li>
         </ul>
       </li>
@@ -767,8 +1148,8 @@ export const TabBarParts: FunctionComponent = () => (
       <li>Base UI’s Tabs root.</li>
       <li>
         Holds the active tab’s value (<code>value</code> or{' '}
-        <code>defaultValue</code>, <code>onValueChange</code>), shared by tabs
-        and panels.
+        <code>defaultValue</code>, and <code>onValueChange</code>), shared by
+        the tabs and the panels.
       </li>
       <li>Links the list and its accessory.</li>
       <li>
@@ -790,20 +1171,20 @@ export const TabBarParts: FunctionComponent = () => (
         The bar, with the <code>tablist</code> role.
       </li>
       <li>
-        <code>size</code>: a phone’s <code>compact</code>, a tablet’s{' '}
-        <code>regular</code>.
+        <code>size</code>: <code>compact</code> for a phone,{' '}
+        <code>regular</code> for a tablet.
       </li>
       <li>
-        Collapsing: <code>collapsed</code>, <code>collapsedContent</code>,{' '}
+        Collapsing: <code>collapsed</code>, <code>collapsedContent</code> and{' '}
         <code>collapsedPosition</code>.
       </li>
       <li>
-        The glass’ <code>context</code>.
+        The glass’s <code>context</code>.
       </li>
       <li>
-        Keyboard focus: <code>activateOnFocus</code>, <code>loopFocus</code>.
+        Keyboard focus: <code>activateOnFocus</code> and <code>loopFocus</code>.
       </li>
-      <li>Renders the lens shown while a tab is pressed.</li>
+      <li>Renders the lens that shows while a tab is pressed.</li>
     </ul>
     <ListPart />
     <h3>Props</h3>
@@ -817,15 +1198,15 @@ export const TabBarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A glass capsule of tabs in the list (here: the sections’, and search’s
-        beside it).
+        A glass capsule of tabs inside the list. Here, one holds the sections,
+        and another holds search next to it.
       </li>
       <li>
-        Remaining while collapsed: <code>visibleWhenCollapsed</code>, how and
-        where.
+        Whether, how and where it remains while collapsed:{' '}
+        <code>visibleWhenCollapsed</code>.
       </li>
       <li>
-        Its tabs’ default <code>shape</code>.
+        The default <code>shape</code> of its tabs.
       </li>
     </ul>
     <GroupPart />
@@ -839,9 +1220,9 @@ export const TabBarParts: FunctionComponent = () => (
       <code>TabBar.Indicator</code>
     </Heading>
     <ul>
-      <li>The selection, first in each group.</li>
-      <li>On the group’s active tab, sliding between its tabs.</li>
-      <li>Hidden while a tab is pressed (the lens takes over).</li>
+      <li>The selection. It comes first in each group.</li>
+      <li>It sits on the group’s active tab, and slides between its tabs.</li>
+      <li>It hides while a tab is pressed, because the lens takes over.</li>
     </ul>
     <IndicatorPart />
     <h3>Props</h3>
@@ -855,20 +1236,21 @@ export const TabBarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A tab, by its <code>value</code>.
+        A tab, identified by its <code>value</code>.
       </li>
       <li>
-        Can be <code>disabled</code>.
+        It can be <code>disabled</code>.
       </li>
       <li>
-        Collapsing: <code>visibleWhenCollapsed</code>, its own{' '}
+        Collapsing: <code>visibleWhenCollapsed</code>, and its own{' '}
         <code>collapsedContent</code> and <code>shape</code>.
       </li>
       <li>
         Secondary clicks: <code>onSecondaryClick</code>.
       </li>
       <li>
-        Without a label: give it an <code>aria-label</code> (as search’s).
+        Without a label, give it an <code>aria-label</code>, like the search
+        tab.
       </li>
     </ul>
     <TabPart />
@@ -883,14 +1265,14 @@ export const TabBarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A tab’s symbol (e.g. a{' '}
+        A tab’s symbol, for example a{' '}
         <PartLink
           component="symbol"
           part="Symbol"
         />
-        , with its badge).
+        , with its badge.
       </li>
-      <li>Sized by the list’s size; bolder while active.</li>
+      <li>Sized by the list’s size, and bolder while active.</li>
     </ul>
     <IconPart />
     <h3>Props</h3>
@@ -905,10 +1287,10 @@ export const TabBarParts: FunctionComponent = () => (
     <ul>
       <li>A tab’s label, sized by the list’s size.</li>
       <li>
-        Width reserved for the active style: tabs don’t shift as the selection
-        changes.
+        It reserves the width of its active style, so tabs don’t shift as the
+        selection changes.
       </li>
-      <li>Never truncates (a group scrolls instead).</li>
+      <li>It never truncates; a group scrolls instead.</li>
     </ul>
     <LabelPart />
     <h3>Props</h3>
@@ -922,14 +1304,14 @@ export const TabBarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A section’s content (Base UI’s, unstyled), shown while the tab of its{' '}
+        A section’s content (Base UI’s, unstyled), shown while the tab with its{' '}
         <code>value</code> is active.
       </li>
       <li>
-        Hidden ones unmount, unless <code>keepMounted</code>.
+        Hidden panels unmount, unless <code>keepMounted</code> is set.
       </li>
       <li>
-        Panels as an app’s pages:{' '}
+        For panels as an app’s pages, see{' '}
         <a href={publicUrl('tab-bar/composition')}>Composition</a>.
       </li>
     </ul>
@@ -951,11 +1333,12 @@ export const TabBarParts: FunctionComponent = () => (
           component="text-field"
           part="TextField.Root"
         />{' '}
-        in it (e.g. a search field) takes its whole width.
+        inside it (for example a search field) takes its whole width.
       </li>
       <li>
-        Above the groups, spanning the bar’s width (however many groups);
-        between them while the bar is collapsed (collapse it with{' '}
+        It sits above the groups and spans the bar’s width, however many groups
+        there are. While the bar is collapsed, it sits between them (collapse it
+        with the{' '}
         <PartLink
           component="tab-bar"
           part="TabBar.List"
@@ -963,7 +1346,7 @@ export const TabBarParts: FunctionComponent = () => (
         ’s control).
       </li>
       <li>
-        In both states, or one: <code>visibleIn</code>.
+        It shows in both states, or in one: <code>visibleIn</code>.
       </li>
     </ul>
     <AccessoryPart />
@@ -978,13 +1361,13 @@ export const TabBarParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What remains while the bar is collapsed: the active tab and its group
-        (without one, the first group’s first tab), for the groups’ and tabs’{' '}
-        <code>visibleWhenCollapsed</code>.
+        Works out what remains while the bar is collapsed: the active tab and
+        its group (without one, the first group’s first tab). Use it for the
+        groups’ and tabs’ <code>visibleWhenCollapsed</code>.
       </li>
       <li>
-        A choice, not the bar’s: the app may keep other groups and tabs instead
-        (marking them itself).
+        It’s the app’s choice, not the bar’s: the app may keep other groups and
+        tabs instead, by marking them itself.
       </li>
     </ul>
     <CodeView code={collapsedSelectionCode} />

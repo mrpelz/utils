@@ -16,7 +16,7 @@ export const drawerRootRows: readonly PropRow[] = [
     'side',
     union('inline-start', 'inline-end'),
     code(union('inline-start')),
-    'The side its popup floats over the content from (hidden towards it, swiped back towards it to close).',
+    'The side its popup slides in from, above the content. It hides towards that side, and is swiped back towards it to close.',
   ],
   ['open', 'boolean', undefined, 'Whether the drawer is currently open.'],
   [
@@ -33,44 +33,43 @@ export const drawerRootRows: readonly PropRow[] = [
     '(open: boolean, eventDetails) => void',
     undefined,
     <>
-      Event handler called when the drawer is opened or closed (with Base UI’s
-      event details, e.g. the <code>reason</code>: a swipe, an outside press, a
-      trigger’s or a close’s press).
+      Called when the drawer opens or closes, with Base UI’s event details.
+      Their <code>reason</code> tells what did it: a swipe, an outside press, or
+      a press on a trigger or a close button.
     </>,
   ],
   [
     'onOpenChangeComplete',
     '(open: boolean) => void',
     undefined,
-    'Event handler called after any animations complete when the drawer is opened or closed.',
+    'Called when the drawer has finished opening or closing, after any animations.',
   ],
   [
     'modal',
     ['boolean', union('trap-focus')].join(' | '),
     code('true'),
     <>
-      Determines if the drawer enters a modal state when open: <code>true</code>
-      , focus is trapped, document page scroll is locked, and pointer
-      interactions on outside elements are disabled; <code>false</code>, user
-      interaction with the rest of the document is allowed;{' '}
-      <code>trap-focus</code>, focus is trapped, but scroll and outside pointer
-      interactions remain enabled.
+      Whether the drawer is modal while open. With <code>true</code>, focus is
+      trapped, the page doesn’t scroll, and the rest of the page can’t be
+      pressed. With <code>false</code>, the rest of the page stays usable. With{' '}
+      <code>trap-focus</code>, focus is trapped, but the page still scrolls and
+      can be pressed.
     </>,
   ],
   [
     'disablePointerDismissal',
     'boolean',
     code('false'),
-    'Whether to prevent the drawer from closing on outside presses (the dimmed content pressed); swiping it back still closes it.',
+    'Whether a press outside it (on the dimmed content) is ignored. Swiping it back still closes it.',
   ],
   [
     'actionsRef',
     'RefObject<{ unmount: () => void; close: () => void } | null>',
     undefined,
     <>
-      A ref to imperative actions: <code>close</code> closes the drawer;{' '}
-      <code>unmount</code> ends its closing phase after an externally controlled
-      closing animation.
+      A ref to actions you can call from code. <code>close</code> closes the
+      drawer. <code>unmount</code> ends its closing phase, after a closing
+      animation you control yourself.
     </>,
   ],
   [
@@ -78,7 +77,7 @@ export const drawerRootRows: readonly PropRow[] = [
     'DrawerHandle<Payload>',
     undefined,
     <>
-      A handle to associate the drawer with a trigger (outside it, e.g. in the
+      A handle that links the drawer to a trigger outside it (for example in the
       content’s bar), made by{' '}
       <PartLink
         component="drawer"
@@ -86,7 +85,7 @@ export const drawerRootRows: readonly PropRow[] = [
       >
         Drawer.createHandle()
       </PartLink>{' '}
-      (in a component:{' '}
+      (inside a component,{' '}
       <PartLink
         component="drawer"
         part="useCreateDrawerHandle"
@@ -101,8 +100,8 @@ export const drawerRootRows: readonly PropRow[] = [
     'string | null',
     undefined,
     <>
-      ID of the trigger that the drawer is associated with (with{' '}
-      <code>open</code>, for a controlled drawer).
+      The ID of the trigger the drawer belongs to, for a controlled drawer (with{' '}
+      <code>open</code>).
     </>,
   ],
   [
@@ -110,8 +109,8 @@ export const drawerRootRows: readonly PropRow[] = [
     'string | null',
     undefined,
     <>
-      ID of the trigger that the drawer is associated with (with{' '}
-      <code>defaultOpen</code>, for an initially open drawer).
+      The ID of the trigger the drawer belongs to, for a drawer that starts open
+      (with <code>defaultOpen</code>).
     </>,
   ],
   [
@@ -129,7 +128,8 @@ export const drawerRootRows: readonly PropRow[] = [
         component="drawer"
         part="Drawer.Popup"
       />
-      , triggers; or a function of the active trigger’s <code>payload</code>.
+      and triggers. Or a function of the active trigger’s <code>payload</code>{' '}
+      that returns them.
     </>,
   ],
 ];
@@ -140,24 +140,24 @@ export const drawerPopupRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Its content, filling it: e.g. a <a href={publicUrl('page')}>Page</a> (its
-      own scroll container, its safe areas its own), a{' '}
-      <a href={publicUrl('sidebar')}>Sidebar</a>.
+      Its content, which fills it: for example a{' '}
+      <a href={publicUrl('page')}>Page</a> (its own scroll container, keeping
+      its own safe area insets) or a <a href={publicUrl('sidebar')}>Sidebar</a>.
     </>,
   ],
   [
     'size',
     'number',
     code('320'),
-    'Its size (px), at most its container’s less 44px.',
+    'Its size (px), at most its container’s width minus 44px.',
   ],
   [
     'floating',
     'boolean',
     code('false'),
     <>
-      Without a background or shadow of its own: its content floats itself (e.g.
-      a floating <a href={publicUrl('sidebar')}>Sidebar</a>).
+      Drops its own background and shadow, for content that floats by itself
+      (for example a floating <a href={publicUrl('sidebar')}>Sidebar</a>).
     </>,
   ],
   [
@@ -165,21 +165,21 @@ export const drawerPopupRows: readonly PropRow[] = [
     'HTMLElement | ShadowRoot | RefObject | null',
     undefined,
     <>
-      A parent element to render the portal element into (else the provided one,{' '}
-      <code>PortalContainerContext</code>, or the body).
+      The element to render the portal into. Without one, it’s the provided one
+      (<code>PortalContainerContext</code>), or the body.
     </>,
   ],
   [
     'finalFocus',
     'boolean | RefObject<HTMLElement | null> | (closeType) => …',
     undefined,
-    'Determines the element to focus when the drawer is closed (by default, its trigger).',
+    'The element to focus when the drawer closes. By default, its trigger.',
   ],
   [
     'initialFocus',
     'boolean | RefObject<HTMLElement | null> | (openType) => …',
     undefined,
-    'Determines the element to focus when the drawer is opened (by default, its first tabbable element).',
+    'The element to focus when the drawer opens. By default, its first focusable element.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -189,13 +189,13 @@ export const drawerSwipeAreaRows: readonly PropRow[] = [
     'width',
     'number',
     code('20'),
-    'Its width (px): how far from the drawer’s edge a swipe starts.',
+    'Its width (px): how far from the drawer’s edge a swipe can start.',
   ],
   [
     'disabled',
     'boolean',
     code('false'),
-    'Whether the swipe area is disabled (the drawer isn’t swiped in).',
+    'Whether the swipe area is disabled, so the drawer can’t be swiped in.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -206,15 +206,14 @@ export const drawerTriggerRows: readonly PropRow[] = [
     'DrawerHandle<Payload>',
     undefined,
     <>
-      A handle to associate the trigger with a drawer (the trigger outside it),
-      made by{' '}
+      A handle that links the trigger to a drawer it’s outside of, made by{' '}
       <PartLink
         component="drawer"
         part="Drawer.createHandle"
       >
         Drawer.createHandle()
       </PartLink>{' '}
-      (in a component:{' '}
+      (inside a component,{' '}
       <PartLink
         component="drawer"
         part="useCreateDrawerHandle"
@@ -228,15 +227,15 @@ export const drawerTriggerRows: readonly PropRow[] = [
     'payload',
     'Payload',
     undefined,
-    'A payload to pass to the drawer when it is opened.',
+    'A value passed to the drawer when this trigger opens it.',
   ],
   [
     'id',
     'string',
     undefined,
     <>
-      ID of the trigger: also the active trigger in controlled mode (the
-      drawer’s <code>triggerId</code>).
+      The trigger’s ID. A controlled drawer uses it to name its active trigger
+      (the drawer’s <code>triggerId</code>).
     </>,
   ],
   nativeButtonRow(true),
@@ -247,7 +246,7 @@ export const drawerTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a{' '}
+            {row[3]} For example a{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Button"
@@ -270,7 +269,7 @@ export const drawerCloseRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a{' '}
+            {row[3]} For example a{' '}
             <PartLink
               component="toolbar"
               part="Toolbar.Button"
@@ -294,8 +293,8 @@ export const drawerHandleTypeRows: readonly PropRow[] = [
     'type parameter',
     code('unknown'),
     <>
-      What its triggers pass the drawer as they open it (their{' '}
-      <code>payload</code>; the drawer’s children as a function of it).
+      The type of what its triggers pass the drawer as they open it (their{' '}
+      <code>payload</code>). The drawer’s children can be a function of it.
     </>,
   ],
 ];
@@ -307,7 +306,7 @@ export const drawerHandleRows: readonly PropRow[] = [
     'DrawerHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>Drawer.Handle</code>): passed to a{' '}
+      A handle (Base UI’s <code>Drawer.Handle</code>). Pass it to a{' '}
       <PartLink
         component="drawer"
         part="Drawer.Root"
@@ -317,27 +316,27 @@ export const drawerHandleRows: readonly PropRow[] = [
         component="drawer"
         part="Drawer.Trigger"
       />
-      s (their <code>handle</code>); from the hook, the same for the component’s
-      lifetime.
+      s (their <code>handle</code>). From the hook, it’s the same handle for the
+      component’s lifetime.
     </>,
   ],
   [
     '.isOpen',
     'boolean',
     undefined,
-    'Whether the drawer is currently open (false while no drawer is attached to the handle).',
+    'Whether the drawer is open. False while no drawer is attached to the handle.',
   ],
   [
     '.open(triggerId)',
     '(triggerId: string | null) => void',
     undefined,
-    'Opens the drawer, optionally associating it with a trigger (in an event handler or an effect).',
+    'Opens the drawer, optionally as if by a given trigger. Call it in an event handler or an effect.',
   ],
   [
     '.openWithPayload(payload)',
     '(payload: Payload) => void',
     undefined,
-    'Opens the drawer with the given payload, without associating it with any trigger.',
+    'Opens the drawer with the given payload, without any trigger.',
   ],
   ['.close()', '() => void', undefined, 'Closes the drawer.'],
 ];

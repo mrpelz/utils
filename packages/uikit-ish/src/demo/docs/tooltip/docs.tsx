@@ -28,9 +28,9 @@ export const tooltipRootRows: readonly PropRow[] = [
     undefined,
     <>
       Event handler called when the tooltip is opened or closed (with Base UI’s
-      event details: the <code>reason</code>, e.g. <code>trigger-hover</code>,{' '}
-      <code>trigger-focus</code>, <code>trigger-press</code>,{' '}
-      <code>escape-key</code>).
+      event details: the <code>reason</code>, for example{' '}
+      <code>trigger-hover</code>, <code>trigger-focus</code>,{' '}
+      <code>trigger-press</code> or <code>escape-key</code>).
     </>,
   ],
   [
@@ -112,7 +112,7 @@ export const tooltipRootRows: readonly PropRow[] = [
     'ReactNode | ((props: { payload }) => ReactNode)',
     undefined,
     <>
-      Its trigger and its portal; or a function of the active trigger’s{' '}
+      Its trigger and its portal, or a function of the active trigger’s{' '}
       <code>payload</code>.
     </>,
   ],
@@ -130,7 +130,7 @@ export const tooltipTriggerRows: readonly PropRow[] = [
       />
       , its <code>delay</code>)
     </>,
-    'How long to wait before opening the tooltip on hover, in milliseconds (Base UI: 600).',
+    'How long to wait before opening the tooltip on hover, in milliseconds (Base UI’s default is 600).',
   ],
   [
     'closeDelay',
@@ -150,8 +150,8 @@ export const tooltipTriggerRows: readonly PropRow[] = [
     code('false'),
     <>
       If <code>true</code>, the tooltip will not open when interacting with this
-      trigger (the trigger itself isn’t disabled: pass its <code>disabled</code>{' '}
-      through <code>render</code>).
+      trigger. The trigger itself isn’t disabled; pass its <code>disabled</code>{' '}
+      through <code>render</code>.
     </>,
   ],
   [
@@ -183,7 +183,7 @@ export const tooltipTriggerRows: readonly PropRow[] = [
           row[1],
           row[2],
           <>
-            {row[3]} E.g. a <a href={publicUrl('button')}>Button</a>’s{' '}
+            {row[3]} For example a <a href={publicUrl('button')}>Button</a>’s{' '}
             <PartLink
               component="button"
               part="Button.Root"
@@ -202,7 +202,7 @@ export const tooltipProviderRows: readonly PropRow[] = [
     'delay',
     'number',
     code('600'),
-    'How long to wait before opening a tooltip on hover, in milliseconds (its triggers’, unless their own).',
+    'How long to wait before opening a tooltip on hover, in milliseconds. It applies to its triggers, unless they set their own.',
   ],
   [
     'closeDelay',
@@ -216,7 +216,12 @@ export const tooltipProviderRows: readonly PropRow[] = [
     code('400'),
     'Another tooltip will open instantly if the previous tooltip is closed within this timeout, in milliseconds.',
   ],
-  ['children', 'ReactNode', undefined, 'Its tooltips (e.g. a toolbar’s).'],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its tooltips, for example a toolbar’s.',
+  ],
 ];
 
 export const tooltipPortalRows: readonly PropRow[] = [
@@ -242,7 +247,7 @@ export const tooltipPositionerRows: readonly PropRow[] = [
     'side',
     union('block-start', 'block-end', 'inline-start', 'inline-end'),
     code(union('block-start')),
-    'Its side of its anchor (logical: above, below, before, after it); it moves to the other side to avoid collisions.',
+    'Which side of its anchor it’s on (logical: above, below, before or after it). It moves to the other side to avoid collisions.',
   ],
   [
     'align',
@@ -271,7 +276,7 @@ export const tooltipPopupRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'Its text: a few words (Subheadline), wrapping past 320px.',
+    'Its text: a few words (Subheadline). It wraps past 320px.',
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -286,8 +291,8 @@ export const tooltipHandleTypeRows: readonly PropRow[] = [
     'type parameter',
     code('unknown'),
     <>
-      What its triggers pass the tooltip as they open it (their{' '}
-      <code>payload</code>; the root’s children as a function of it).
+      What its triggers pass to the tooltip as they open it (their{' '}
+      <code>payload</code>). The root’s children can be a function of it.
     </>,
   ],
 ];
@@ -299,7 +304,7 @@ export const tooltipHandleRows: readonly PropRow[] = [
     'TooltipHandle<Payload>',
     undefined,
     <>
-      A handle (Base UI’s <code>Tooltip.Handle</code>): passed to a{' '}
+      A handle (Base UI’s <code>Tooltip.Handle</code>). Pass it to a{' '}
       <PartLink
         component="tooltip"
         part="Tooltip.Root"
@@ -309,8 +314,8 @@ export const tooltipHandleRows: readonly PropRow[] = [
         component="tooltip"
         part="Tooltip.Trigger"
       />
-      s (their <code>handle</code>); from the hook, the same for the component’s
-      lifetime.
+      s (their <code>handle</code>). The hook returns the same one for the
+      component’s lifetime.
     </>,
   ],
   [

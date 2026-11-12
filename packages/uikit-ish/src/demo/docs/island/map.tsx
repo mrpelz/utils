@@ -8,12 +8,13 @@ import {
   useSettings,
   useVisualViewport,
 } from '../../../components/index.js';
+import { hideFromCode } from '../../tooling/frame/render-code.js';
 
 // A map filling the content layer (MapLibre, OpenStreetMap's tiles; dark,
 // by the color scheme: filtered, see style.css): the page an island floats
 // over. Following the island (`isFollowing`), its camera
 // kept clear of it (its padding: the bottom anchor's size, as the island
-// settles); its controls kept clear of it and of the safe areas always (by
+// settles); its controls kept clear of it and of the safe area insets always (by
 // the content layer's `--uikit-viewport-anchor-block-end`, see style.css).
 // Loaded as it's shown (client only); its worker the file it ships, as an
 // asset (its own lookup, by its module's URL, finds none in a bundle).
@@ -85,7 +86,7 @@ export const MapView: FunctionComponent<{
   useEffect(() => {
     const { current: container } = ref;
     if (!isFollowing || !container) return;
-    // (The anchor's size its content's: its safe area padding besides.)
+    // (The anchor's size its content's: its safe area inset padding besides.)
     const inset =
       Number.parseFloat(
         getComputedStyle(container).getPropertyValue(
@@ -110,3 +111,7 @@ export const MapView: FunctionComponent<{
     </div>
   );
 };
+
+// (A stand-in for the app's map: shown in the code without its demo-only
+// props.)
+hideFromCode(MapView, ['isFollowing']);

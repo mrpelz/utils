@@ -1,9 +1,13 @@
-import { FunctionComponent } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
 import { ActivityIndicator, Progress } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   propOptionsBar,
   propOptionsBarContent,
@@ -51,6 +55,18 @@ export const ProgressDemo: FunctionComponent = () => {
 
   const { label, showValue } = propsBarContent;
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          'Progress.Indicator': [],
+          'Progress.Track': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isCentered
@@ -63,6 +79,7 @@ export const ProgressDemo: FunctionComponent = () => {
         controlIndicator,
         controlLabel,
         controlValue,
+        partControls,
       ]}
       state={[
         stateBar,
@@ -70,6 +87,7 @@ export const ProgressDemo: FunctionComponent = () => {
         stateIndicator,
         stateLabel,
         stateValue,
+        partState,
       ]}
     >
       <div
@@ -90,8 +108,8 @@ export const ProgressDemo: FunctionComponent = () => {
             <Progress.Label {...propsLabel}>{label}</Progress.Label>
           )}
           {showValue ? <Progress.Value {...propsValue} /> : null}
-          <Progress.Track>
-            <Progress.Indicator />
+          <Progress.Track {...partProps['Progress.Track']}>
+            <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
         <ActivityIndicator

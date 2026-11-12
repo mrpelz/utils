@@ -10,12 +10,16 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 import { names } from '../viewport/content.js';
 import {
   sheetCloseRows,
@@ -54,75 +58,151 @@ const RootPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Sheet.Root' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Description': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Root"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
           key={elementKey}
           {...props}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -143,75 +223,151 @@ const TriggerPart: FunctionComponent = () => {
     title: 'Sheet.Trigger',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Description': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Trigger"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
             {...props}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -230,75 +386,151 @@ const PopupPart: FunctionComponent = () => {
     { external, isOpen: true, emphasize: 'outline', title: 'Sheet.Popup' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Description': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Root': ['defaultOpen', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Popup"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           defaultOpen
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
             key={elementKey}
             {...props}
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -319,76 +551,153 @@ const HeaderPart: FunctionComponent = () => {
     title: 'Sheet.Header',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Description': [],
+            'Sheet.Grabber': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['defaultOpen', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Header"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           defaultOpen
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
             <Sheet.Header {...props}>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {/* (Enough to scroll under it.) */}
                     {names.slice(0, 20).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -409,75 +718,152 @@ const GrabberPart: FunctionComponent = () => {
     title: 'Sheet.Grabber',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Description': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['defaultOpen', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Grabber"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           defaultOpen
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
+            <Sheet.Header {...partProps['Sheet.Header']}>
               <Sheet.Grabber {...props} />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -505,74 +891,143 @@ const SnapGroupPart: FunctionComponent = () => {
     title: 'Sheet.SnapGroup',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Sheet.SnapGroup (others)': ['value'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['compact', 'detent'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[controlRoot, control]}
+      controls={[controlRoot, control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[stateRoot, state]}
+      state={[stateRoot, state, partState]}
       title="Sheet.SnapGroup"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
           key={`${keyRoot}`}
           defaultOpen
           {...propsRoot}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Show Place</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Show Place
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             detent="medium"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Harbor Café</Sheet.Title>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Harbor Café
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
               <Sheet.SnapGroup {...props}>
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
-                      <List.Item>
-                        <List.Content>
-                          <List.Title>Open until 6 PM</List.Title>
-                          <List.Subtitle>Café · 300 m</List.Subtitle>
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      <List.Item {...partProps['List.Item']}>
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            Open until 6 PM
+                          </List.Title>
+                          <List.Subtitle {...partProps['List.Subtitle']}>
+                            Café · 300 m
+                          </List.Subtitle>
                         </List.Content>
                       </List.Item>
                     </List.Group>
                   </List.Section>
                 </List.Root>
               </Sheet.SnapGroup>
-              <Sheet.SnapGroup value="details">
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Sheet.SnapGroup
+                {...partProps['Sheet.SnapGroup (others)']}
+                value="details"
+              >
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {['Call', 'Website', 'Directions'].map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
@@ -580,22 +1035,35 @@ const SnapGroupPart: FunctionComponent = () => {
                   </List.Section>
                 </List.Root>
               </Sheet.SnapGroup>
-              <Sheet.SnapGroup value="all">
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Sheet.SnapGroup
+                {...partProps['Sheet.SnapGroup (others)']}
+                value="all"
+              >
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
-                            <List.Subtitle>Review</List.Subtitle>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
+                            <List.Subtitle {...partProps['List.Subtitle']}>
+                              Review
+                            </List.Subtitle>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Sheet.SnapGroup>
             </Sheet.Content>
           </Sheet.Popup>
@@ -617,75 +1085,152 @@ const ContentPart: FunctionComponent = () => {
     title: 'Sheet.Content',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Description': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['defaultOpen', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Content"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           defaultOpen
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
             <Sheet.Content {...props}>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -706,45 +1251,96 @@ const TitlePart: FunctionComponent = () => {
     title: 'Sheet.Title',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Description': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['defaultOpen', 'onOpenChange'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Title"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           defaultOpen
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
                   <Sheet.Title
                     {...props}
                     render={<span />}
@@ -752,34 +1348,55 @@ const TitlePart: FunctionComponent = () => {
                     Add Contact
                   </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -800,75 +1417,152 @@ const DescriptionPart: FunctionComponent = () => {
     title: 'Sheet.Description',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['defaultOpen', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Description"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           defaultOpen
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
+                  <List.Footer {...partProps['List.Footer']}>
                     <Sheet.Description {...props}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -889,78 +1583,153 @@ const ClosePart: FunctionComponent = () => {
     title: 'Sheet.Close',
   });
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Sheet.Close (others)': ['render'],
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Footer': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Content': [],
+            'Sheet.Description': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['defaultOpen', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
-      controls={[control]}
+      controls={[control, partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
-      state={[state]}
+      state={[state, partState]}
       title="Sheet.Close"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           defaultOpen
           onOpenChange={(isOpen: boolean) => addLog(`open: ${String(isOpen)}`)}
         >
           <Sheet.Trigger
+            {...partProps['Sheet.Trigger']}
             render={
               <Button.Root
+                {...partProps['Button.Root']}
                 size="large"
                 variant="bordered"
               />
             }
           >
-            <Button.Label>Add Contact</Button.Label>
+            <Button.Label {...partProps['Button.Label']}>
+              Add Contact
+            </Button.Label>
           </Sheet.Trigger>
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading>
-                  <Sheet.Close render={<Toolbar.Button />}>
-                    <Button.Label>Cancel</Button.Label>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close (others)']}
+                    render={<Toolbar.Button {...partProps['Toolbar.Button']} />}
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Cancel
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Leading>
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
                   <Sheet.Close
                     {...props}
-                    render={<Toolbar.Button prominent />}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
                   >
-                    <Button.Label>Done</Button.Label>
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
-                  <List.Footer>
-                    <Sheet.Description>
+                  <List.Footer {...partProps['List.Footer']}>
+                    <Sheet.Description {...partProps['Sheet.Description']}>
                       Saved to your contacts.
                     </Sheet.Description>
                   </List.Footer>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -981,73 +1750,149 @@ const CreateHandlePart: FunctionComponent = () => {
   const id = 'sheet-parts-create-handle';
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['onClick', 'size', 'variant'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['handle', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['handle', 'render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="Sheet.createHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Trigger
+          {...partProps['Sheet.Trigger']}
           handle={contactSheet}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Add Contact</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Add Contact
+          </Button.Label>
         </Sheet.Trigger>
         <Button.Root
+          {...partProps['Button.Root']}
           variant="borderless"
           onClick={() => contactSheet.open(null)}
         >
-          <Button.Label>Open Imperatively</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Open Imperatively
+          </Button.Label>
         </Button.Root>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           handle={contactSheet}
           onOpenChange={(isOpen: boolean, { reason }) =>
             addLog(`open: ${String(isOpen)} (${reason})`)
           }
         >
           <Sheet.Popup
+            {...partProps['Sheet.Popup']}
             compact
             background="grouped"
           >
-            <Sheet.Header>
-              <Sheet.Grabber />
-              <Toolbar.Root placement="block-start">
-                <Toolbar.Leading />
-                <Toolbar.Title>
-                  <Sheet.Title render={<span />}>Add Contact</Sheet.Title>
+            <Sheet.Header {...partProps['Sheet.Header']}>
+              <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+              <Toolbar.Root
+                {...partProps['Toolbar.Root']}
+                placement="block-start"
+              >
+                <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                <Toolbar.Title {...partProps['Toolbar.Title']}>
+                  <Sheet.Title
+                    {...partProps['Sheet.Title']}
+                    render={<span />}
+                  >
+                    Add Contact
+                  </Sheet.Title>
                 </Toolbar.Title>
-                <Toolbar.Trailing>
-                  <Sheet.Close render={<Toolbar.Button prominent />}>
-                    <Button.Label>Done</Button.Label>
+                <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                  <Sheet.Close
+                    {...partProps['Sheet.Close']}
+                    render={
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        prominent
+                      />
+                    }
+                  >
+                    <Button.Label {...partProps['Button.Label']}>
+                      Done
+                    </Button.Label>
                   </Sheet.Close>
                 </Toolbar.Trailing>
               </Toolbar.Root>
             </Sheet.Header>
-            <Sheet.Content>
-              <Viewport.Padding edge="block-start" />
-              <List.Root>
-                <List.Section>
-                  <List.Group>
+            <Sheet.Content {...partProps['Sheet.Content']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
                     {names.slice(0, 3).map((name) => (
-                      <List.Item key={name}>
-                        <List.Content>
-                          <List.Title>{name}</List.Title>
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
                         </List.Content>
                       </List.Item>
                     ))}
                   </List.Group>
                 </List.Section>
               </List.Root>
-              <Viewport.Padding edge="block-end" />
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
             </Sheet.Content>
           </Sheet.Popup>
         </Sheet.Root>
@@ -1067,41 +1912,86 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
     'const addSheet = useCreateSheetHandle<{ title: string }>();',
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Button.Label': [],
+            'Button.Root': ['size', 'variant'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Sheet.Close': ['render'],
+            'Sheet.Content': [],
+            'Sheet.Grabber': [],
+            'Sheet.Header': [],
+            'Sheet.Popup': ['background', 'compact'],
+            'Sheet.Root': ['handle', 'onOpenChange'],
+            'Sheet.Title': ['render'],
+            'Sheet.Trigger': ['handle', 'payload', 'render'],
+            'Toolbar.Button': ['prominent'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id={id}
       log={log}
       screen="centered"
       stage="phone"
+      state={[partState]}
       title="useCreateSheetHandle"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Sheet.Trigger
+          {...partProps['Sheet.Trigger']}
           handle={addSheet}
           payload={{ title: 'Add Contact' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Add Contact</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>
+            Add Contact
+          </Button.Label>
         </Sheet.Trigger>
         <Sheet.Trigger
+          {...partProps['Sheet.Trigger']}
           handle={addSheet}
           payload={{ title: 'Add Group' }}
           render={
             <Button.Root
+              {...partProps['Button.Root']}
               size="large"
               variant="bordered"
             />
           }
         >
-          <Button.Label>Add Group</Button.Label>
+          <Button.Label {...partProps['Button.Label']}>Add Group</Button.Label>
         </Sheet.Trigger>
         <Sheet.Root
+          {...partProps['Sheet.Root']}
           handle={addSheet}
           onOpenChange={(isOpen: boolean, { reason }) =>
             addLog(`open: ${String(isOpen)} (${reason})`)
@@ -1109,41 +1999,69 @@ const UseCreateSheetHandlePart: FunctionComponent = () => {
         >
           {({ payload }) => (
             <Sheet.Popup
+              {...partProps['Sheet.Popup']}
               compact
               background="grouped"
             >
-              <Sheet.Header>
-                <Sheet.Grabber />
-                <Toolbar.Root placement="block-start">
-                  <Toolbar.Leading />
-                  <Toolbar.Title>
-                    <Sheet.Title render={<span />}>
+              <Sheet.Header {...partProps['Sheet.Header']}>
+                <Sheet.Grabber {...partProps['Sheet.Grabber']} />
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  <Toolbar.Leading {...partProps['Toolbar.Leading']} />
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <Sheet.Title
+                      {...partProps['Sheet.Title']}
+                      render={<span />}
+                    >
                       {payload?.title}
                     </Sheet.Title>
                   </Toolbar.Title>
-                  <Toolbar.Trailing>
-                    <Sheet.Close render={<Toolbar.Button prominent />}>
-                      <Button.Label>Done</Button.Label>
+                  <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+                    <Sheet.Close
+                      {...partProps['Sheet.Close']}
+                      render={
+                        <Toolbar.Button
+                          {...partProps['Toolbar.Button']}
+                          prominent
+                        />
+                      }
+                    >
+                      <Button.Label {...partProps['Button.Label']}>
+                        Done
+                      </Button.Label>
                     </Sheet.Close>
                   </Toolbar.Trailing>
                 </Toolbar.Root>
               </Sheet.Header>
-              <Sheet.Content>
-                <Viewport.Padding edge="block-start" />
-                <List.Root>
-                  <List.Section>
-                    <List.Group>
+              <Sheet.Content {...partProps['Sheet.Content']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
                       {names.slice(0, 3).map((name) => (
-                        <List.Item key={name}>
-                          <List.Content>
-                            <List.Title>{name}</List.Title>
+                        <List.Item
+                          key={name}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {name}
+                            </List.Title>
                           </List.Content>
                         </List.Item>
                       ))}
                     </List.Group>
                   </List.Section>
                 </List.Root>
-                <Viewport.Padding edge="block-end" />
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
               </Sheet.Content>
             </Sheet.Popup>
           )}
@@ -1158,18 +2076,17 @@ export const SheetParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>
-        A root (its state), its trigger, and its popup: a header (its grabber, a
-        toolbar) above its content.
+        A root that holds the state, its trigger, and its popup: a header (with
+        its grabber and a toolbar) above its content.
       </li>
       <li>
-        Base UI’s <code>Drawer</code>, its parts re-exported: its title,
-        description and close buttons; its portal, backdrop and viewport
-        rendered by{' '}
+        It’s Base UI’s <code>Drawer</code>, with its parts re-exported: the
+        title, the description and the close buttons.{' '}
         <PartLink
           component="sheet"
           part="Sheet.Popup"
-        />
-        .
+        />{' '}
+        renders its portal, backdrop and viewport.
       </li>
       <li>Press each view’s button to open its sheet.</li>
     </ul>
@@ -1185,7 +2102,7 @@ export const SheetParts: FunctionComponent = () => (
               component="sheet"
               part="Sheet.Trigger"
             />{' '}
-            (optional; or a handle’s, or <code>open</code>)
+            (optional; or a handle’s trigger, or <code>open</code>)
           </li>
           <li>
             <PartLink
@@ -1197,36 +2114,47 @@ export const SheetParts: FunctionComponent = () => (
                 <PartLink
                   component="sheet"
                   part="Sheet.Header"
-                />{' '}
-                (
-                <PartLink
-                  component="sheet"
-                  part="Sheet.Grabber"
                 />
-                , optional; a toolbar:{' '}
-                <PartLink
-                  component="sheet"
-                  part="Sheet.Close"
-                />
-                ,{' '}
-                <PartLink
-                  component="sheet"
-                  part="Sheet.Title"
-                />
-                )
+                <ul>
+                  <li>
+                    <PartLink
+                      component="sheet"
+                      part="Sheet.Grabber"
+                    />{' '}
+                    (optional)
+                  </li>
+                  <li className="demo-tree-context">
+                    <PartLink
+                      component="toolbar"
+                      part="Toolbar.Root"
+                    />{' '}
+                    <span>(optional, with</span>{' '}
+                    <PartLink
+                      component="sheet"
+                      part="Sheet.Close"
+                    />{' '}
+                    <span>buttons and the</span>{' '}
+                    <PartLink
+                      component="sheet"
+                      part="Sheet.Title"
+                    />
+                    <span>)</span>
+                  </li>
+                </ul>
               </li>
               <li>
                 <PartLink
                   component="sheet"
                   part="Sheet.Content"
-                />{' '}
-                (
-                <PartLink
-                  component="sheet"
-                  part="Sheet.Description"
                 />
-                , optional)
                 <ul>
+                  <li className="demo-tree-context">
+                    <PartLink
+                      component="viewport"
+                      part="Viewport.Padding"
+                    />{' '}
+                    <span>(at its start, below a header with a bar)</span>
+                  </li>
                   <li>
                     <PartLink
                       component="sheet"
@@ -1234,14 +2162,25 @@ export const SheetParts: FunctionComponent = () => (
                     />{' '}
                     (optional; one per stop, in order)
                   </li>
+                  <li className="demo-tree-context">
+                    <span>its content (for example a</span>{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Root"
+                    />
+                    <span>, with a</span>{' '}
+                    <PartLink
+                      component="sheet"
+                      part="Sheet.Description"
+                    />{' '}
+                    <span>as a footer)</span>
+                  </li>
                 </ul>
               </li>
             </ul>
           </li>
         </ul>
       </li>
-    </ul>
-    <ul>
       <li>
         <PartLink
           component="sheet"
@@ -1268,14 +2207,15 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its state: open (<code>open</code> or <code>defaultOpen</code>,{' '}
-        <code>onOpenChange</code>), modal, dismissed by outside presses or not.
+        Holds its state: whether it’s open (<code>open</code> or{' '}
+        <code>defaultOpen</code>, and <code>onOpenChange</code>), whether it’s
+        modal, and whether outside presses dismiss it.
       </li>
       <li>
-        Base UI’s <code>Drawer.Root</code>, its <code>swipeDirection</code> also{' '}
-        <code>none</code>: not swiped away at all (its popup ignored by its
-        swipes). Swiped away in another direction than down, it leaves through
-        that edge.
+        It’s Base UI’s <code>Drawer.Root</code>, and its{' '}
+        <code>swipeDirection</code> also takes <code>none</code>, so it can’t be
+        swiped away at all (its popup ignores swipes). Swiped away in a
+        direction other than down, it leaves through that edge.
       </li>
       <li>Renders no element.</li>
     </ul>
@@ -1291,8 +2231,9 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Opens the sheet; focus returns to it as it closes. Usually a{' '}
-        <a href={publicUrl('button')}>Button</a> (its <code>render</code>).
+        Opens the sheet, and gets focus back when it closes. Usually a{' '}
+        <a href={publicUrl('button')}>Button</a>, through its{' '}
+        <code>render</code>.
       </li>
       <li>
         Renders a <code>button</code>.
@@ -1310,28 +2251,28 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The sheet: <code>detent</code> (large, medium), or not{' '}
-        <code>compact</code>, a form sheet (or, <code>regular</code>{' '}
-        <code>card</code>, a card at the leading edge); in its portal, the page
-        dimmed behind it (Base UI’s <code>Portal</code> and{' '}
-        <code>Backdrop</code>).
+        The sheet. <code>detent</code> sets large or medium. When it isn’t{' '}
+        <code>compact</code>, it’s a form sheet, or, with <code>regular</code>{' '}
+        set to <code>card</code>, a card at the leading edge. It sits in its
+        portal, with the page dimmed behind it (Base UI’s <code>Portal</code>{' '}
+        and <code>Backdrop</code>).
       </li>
       <li>
-        <code>container</code>: here, the phone’s screen (a containing block, so
-        it fills the screen, not the window).
+        <code>container</code>: here, the phone’s screen. That’s a containing
+        block, so the sheet fills the screen rather than the window.
       </li>
       <li>
-        <code>background</code>: grouped for grouped lists in it (here), plain
-        otherwise, as a{' '}
+        <code>background</code>: grouped for grouped lists inside (as here), and
+        plain otherwise, like a{' '}
         <PartLink
           component="page"
           part="Page.Root"
         />
-        ’s; set by the app, not by what’s inside.
+        ’s. The app sets it; the sheet doesn’t look at what’s inside.
       </li>
       <li>
-        Renders a <code>div</code> (a <code>dialog</code>) in its viewport’s{' '}
-        <code>div</code> (where it’s swiped), and its backdrop’s{' '}
+        Renders a <code>div</code> (a <code>dialog</code>) inside its viewport’s{' '}
+        <code>div</code> (where it’s swiped), with its backdrop’s{' '}
         <code>div</code> before it.
       </li>
     </ul>
@@ -1347,27 +2288,28 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Its grabber (
+        Holds its grabber (
         <PartLink
           component="sheet"
           part="Sheet.Grabber"
         />
-        ), above a toolbar of the app’s. (The sheet is swiped down by any of it,
-        its content scrolled to its top.)
+        ) above a toolbar of the app’s. The sheet can be swiped down by any part
+        of it, while its content is scrolled to the top.
       </li>
       <li>
-        Over the content, which scrolls under it, blurred and faded (its{' '}
-        <code>edgeEffect</code>, as a bar’s: soft, hard or none;{' '}
-        <code>edgeTint</code>), whatever it holds; the content makes room with a{' '}
+        It sits above the content, which scrolls under it, blurred and faded,
+        whatever it holds. That’s its <code>edgeEffect</code>, like a bar’s
+        (soft, hard or none), with <code>edgeTint</code>. The content makes room
+        with a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        first, as a page under its toolbar.
+        first, like a page under its toolbar.
       </li>
       <li>
-        With only a grabber, over the content too, no bar (its own bars below
-        it).
+        With only a grabber, it also sits above the content, without a bar (the
+        sheet’s own bars go below it).
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1385,16 +2327,16 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The grabber (36px by 5px, 5px from the top), first in its header:
-        showing the sheet can be swiped (by any of it).
+        The grabber (36px by 5px, 5px from the top), first in its header. It
+        shows that the sheet can be swiped, by any part of the header.
       </li>
-      <li>Optional: left out, a cleaner top.</li>
+      <li>It’s optional. Leave it out for a cleaner top.</li>
       <li>
-        Its <code>cursor</code>: <code>grab</code>, <code>grabbing</code> while
-        the sheet is swiped.
+        Its <code>cursor</code> is <code>grab</code>, and <code>grabbing</code>{' '}
+        while the sheet is swiped.
       </li>
       <li>
-        Renders a <code>div</code>, hidden from assistive tech.
+        Renders a <code>div</code>, hidden from assistive technology.
       </li>
     </ul>
     <GrabberPart />
@@ -1409,22 +2351,24 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A stop of the sheet’s: swiped up, it reveals its content group by group,
-        snapping to show everything up to a group’s end (its header too, clear
-        of the home indicator), measured live as the content changes.
+        One of the sheet’s stops. Swiped up, the sheet reveals its content group
+        by group, snapping to show everything up to a group’s end (its header
+        too, and clear of the home indicator). It’s measured live as the content
+        changes.
       </li>
       <li>
-        Named (<code>value</code>): the root’s <code>snapPoint</code>,{' '}
-        <code>defaultSnapPoint</code> (by default the lowest) and{' '}
-        <code>onSnapPointChange</code> take and give the names, not heights.
+        Each stop is named (<code>value</code>). The root’s{' '}
+        <code>snapPoint</code>, <code>defaultSnapPoint</code> (the lowest by
+        default) and <code>onSnapPointChange</code> take and give those names,
+        not heights.
       </li>
       <li>
         While its content is scrolled away from its start (only possible at the
-        top stop), the groups in it aren’t stops: dragging the header down goes
-        to the header-only stop, or closes the sheet without one. Back at the
-        start, they’re stops again. Asked for while scrolled away (the root’s{' '}
-        <code>snapPoint</code>), a group’s stop is gone to with the content
-        scrolled back to its start.
+        top stop), the groups in it aren’t stops. Dragging the header down then
+        goes to the header-only stop, or closes the sheet if there’s none. Back
+        at the start, they’re stops again. When a group’s stop is asked for
+        while scrolled away (the root’s <code>snapPoint</code>), the sheet goes
+        there and scrolls the content back to its start.
       </li>
       <li>
         Groups follow one another in its{' '}
@@ -1432,24 +2376,25 @@ export const SheetParts: FunctionComponent = () => (
           component="sheet"
           part="Sheet.Content"
         />
-        ; the last holds the rest: reaching past the sheet’s height, its stop is
-        the whole sheet.
+        , and the last one holds the rest. When it reaches past the sheet’s
+        height, its stop is the whole sheet.
       </li>
       <li>
-        Snapping (this library’s own, not Base UI’s): a medium sheet within its
-        glass capsule, as high as its stop, its content clipped and always above
-        the home indicator; a large one moved down. Below its top stop its
-        content doesn’t scroll (dragging it drags the sheet); at its top stop it
-        does, until pulled down from its start (by touch, or by a wheel or
-        trackpad scroll begun there).
+        Snapping is this library’s own, not Base UI’s. A medium sheet sits in
+        its glass capsule as tall as its stop, with its content clipped and
+        always above the home indicator. A large one moves down. Below its top
+        stop, its content doesn’t scroll, so dragging it drags the sheet. At its
+        top stop, it does scroll, until it’s pulled down from its start (by
+        touch, or by a wheel or trackpad scroll that started there).
       </li>
       <li>
-        Swiped: flung, a stop at a time (down from its lowest: closed);
-        otherwise to the nearest stop, let go.
+        When swiped and flung, it moves one stop at a time (and closes when
+        flung down from its lowest). Otherwise, it goes to the nearest stop when
+        let go.
       </li>
       <li>
-        Optional: without groups, the root’s <code>snapPoints</code> (Base UI’s)
-        position it, or none.
+        It’s optional. Without groups, the root’s <code>snapPoints</code> (Base
+        UI’s) position the sheet, or nothing does.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1467,28 +2412,28 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        What scrolls, under the header, filling the sheet (medium: as high as
-        it, up to the screen but 64px); first, a{' '}
+        What scrolls, under the header. It fills the sheet (a medium sheet is as
+        tall as it, up to the screen minus 64px). It starts with a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
         />{' '}
-        (<code>edge=&quot;block-start&quot;</code>) making room for a header
+        (<code>edge=&quot;block-start&quot;</code>) that makes room for a header
         with more than a grabber.
       </li>
       <li>
         Its end scrolls clear of the home indicator (padded by the bottom safe
-        area inset; medium, on it, none), the sheet’s background reaching the
-        edge.
+        area inset, except on a medium sheet, which sits above it), and the
+        sheet’s background reaches the edge.
       </li>
       <li>
-        A text field typed into in it, scrolled into view above the on-screen
-        keyboard (see{' '}
+        A text field typed into inside it is scrolled into view above the
+        on-screen keyboard (see{' '}
         <PartLink
           component="viewport"
           part="useFocusScroll"
         />
-        ); with stops, at its top stop only.
+        ). With stops, that happens at its top stop only.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1506,8 +2451,8 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Names the sheet; unstyled (Base UI’s), here as the toolbar’s title (
-        <code>render</code>: a <code>span</code>).
+        Names the sheet. It’s Base UI’s, without styles, here rendered as the
+        toolbar’s title (<code>render</code>, a <code>span</code>).
       </li>
       <li>
         Renders an <code>h2</code>.
@@ -1524,7 +2469,10 @@ export const SheetParts: FunctionComponent = () => (
       <code>Sheet.Description</code>
     </Heading>
     <ul>
-      <li>Describes the sheet; unstyled (Base UI’s), here a list’s footer.</li>
+      <li>
+        Describes the sheet. It’s Base UI’s, without styles, here a list’s
+        footer.
+      </li>
       <li>
         Renders a <code>p</code>.
       </li>
@@ -1541,8 +2489,9 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Closes the sheet: Cancel, Done (its own <code>onClick</code> first, e.g.
-        saving); usually a toolbar’s button (its <code>render</code>).
+        Closes the sheet, as Cancel or Done (its own <code>onClick</code> runs
+        first, for example to save). Usually a toolbar’s button, through its{' '}
+        <code>render</code>.
       </li>
       <li>
         Renders a <code>button</code>.
@@ -1560,12 +2509,11 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A handle linking a sheet to its triggers outside its root, and opening
-        or closing it imperatively (Base UI’s <code>Drawer.createHandle</code>
-        ).
+        A handle that links a sheet to its triggers outside its root, and opens
+        or closes it from code (Base UI’s <code>Drawer.createHandle</code>).
       </li>
       <li>
-        Made once, e.g. at a module’s top level (in a component:{' '}
+        Make it once, for example at a module’s top level (in a component, use{' '}
         <PartLink
           component="sheet"
           part="useCreateSheetHandle"
@@ -1573,8 +2521,8 @@ export const SheetParts: FunctionComponent = () => (
         ).
       </li>
       <li>
-        Here: made at the module’s top level; a trigger before the root, and a
-        button opening it imperatively (its <code>open()</code>).
+        Here, it’s made at the module’s top level, with a trigger before the
+        root and a button that opens it from code (its <code>open()</code>).
       </li>
     </ul>
     <CreateHandlePart />
@@ -1598,8 +2546,8 @@ export const SheetParts: FunctionComponent = () => (
         in a component: the same handle for the component’s lifetime.
       </li>
       <li>
-        Here: two triggers, one sheet; each passes its title (its{' '}
-        <code>payload</code>), the root’s children a function of it.
+        Here, two triggers open one sheet. Each passes its title as its{' '}
+        <code>payload</code>, and the root’s children are a function of it.
       </li>
     </ul>
     <UseCreateSheetHandlePart />
@@ -1616,7 +2564,7 @@ export const SheetParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Re-exported as they are (unstyled; see{' '}
+        These are re-exported as they are, without styles (see{' '}
         <a
           href="https://base-ui.com/react/components/drawer"
           rel="noreferrer"
@@ -1627,26 +2575,27 @@ export const SheetParts: FunctionComponent = () => (
         ):
       </li>
       <li>
-        <code>Sheet.Portal</code>, <code>Sheet.Backdrop</code>,{' '}
-        <code>Sheet.Viewport</code>: rendered by{' '}
+        <code>Sheet.Portal</code>, <code>Sheet.Backdrop</code> and{' '}
+        <code>Sheet.Viewport</code>:{' '}
         <PartLink
           component="sheet"
           part="Sheet.Popup"
         />{' '}
-        (its container, the dimmed page, where it’s swiped).
+        renders them (its container, the dimmed page, and where it’s swiped).
       </li>
       <li>
-        <code>Sheet.SwipeArea</code>: an area a sheet is swiped open from (these
-        sheets aren’t: presented by the app).
+        <code>Sheet.SwipeArea</code>: an area a sheet is swiped open from. These
+        sheets don’t use it, since the app presents them.
       </li>
       <li>
-        <code>Sheet.Provider</code>, <code>Sheet.Indent</code>,{' '}
-        <code>Sheet.IndentBackground</code>: the page behind scaled back while a
-        sheet is open (a stacked look; not used here, see the overview).
+        <code>Sheet.Provider</code>, <code>Sheet.Indent</code> and{' '}
+        <code>Sheet.IndentBackground</code>: they scale the page behind back
+        while a sheet is open, for a stacked look. They’re not used here (see
+        the overview).
       </li>
       <li>
-        <code>Sheet.VirtualKeyboardProvider</code>: a sheet with fields kept
-        above the software keyboard.
+        <code>Sheet.VirtualKeyboardProvider</code>: keeps a sheet with fields
+        above the on-screen keyboard.
       </li>
     </ul>
   </>

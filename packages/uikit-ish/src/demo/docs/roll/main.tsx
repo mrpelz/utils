@@ -3,8 +3,12 @@ import { FunctionComponent, useMemo } from 'react';
 import { Roll } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
-import { usePropControl } from '../../tooling/frame/prop-control.js';
+import {
+  usePartControls,
+  usePropControl,
+} from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { partPropMaps } from '../part-options.js';
 import {
   fruits,
   getPropOptionsColumn,
@@ -45,15 +49,42 @@ export const RollDemo: FunctionComponent = () => {
     { external: externalSeparator, title: 'separator' },
   );
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Roll.Column (others)': [
+              'align',
+              'aria-label',
+              'defaultValue',
+              'editable',
+              'onValueChange',
+            ],
+            'Roll.Item (others)': ['disabled', 'value'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
   return (
     <Component
       hasInputGuards
       isCentered
-      controls={[controlRoot, controlColumn, controlItem, controlSeparator]}
       id={id}
       log={log}
-      state={[stateRoot, stateColumn, stateItem, stateSeparator]}
+      state={[stateRoot, stateColumn, stateItem, stateSeparator, partState]}
       title="Roll"
+      controls={[
+        controlRoot,
+        controlColumn,
+        controlItem,
+        controlSeparator,
+        partControls,
+      ]}
     >
       <Roll.Root {...propsRoot}>
         <Roll.Column
@@ -64,7 +95,7 @@ export const RollDemo: FunctionComponent = () => {
             <Roll.Item
               key={hour}
               value={hour}
-              {...(hour === 12 ? propsItem : {})}
+              {...(hour === 12 ? propsItem : partProps['Roll.Item (others)'])}
             />
           ))}
         </Roll.Column>
@@ -75,6 +106,7 @@ export const RollDemo: FunctionComponent = () => {
           :
         </Roll.Separator>
         <Roll.Column
+          {...partProps['Roll.Column (others)']}
           editable
           aria-label="Minutes"
           defaultValue={41}
@@ -83,6 +115,7 @@ export const RollDemo: FunctionComponent = () => {
           {minutes.map((minute) => (
             <Roll.Item
               key={minute}
+              {...partProps['Roll.Item (others)']}
               value={minute}
             >
               {String(minute).padStart(2, '0')}
@@ -90,6 +123,7 @@ export const RollDemo: FunctionComponent = () => {
           ))}
         </Roll.Column>
         <Roll.Column
+          {...partProps['Roll.Column (others)']}
           align="start"
           aria-label="Fruit"
           defaultValue="Cherry"
@@ -98,6 +132,7 @@ export const RollDemo: FunctionComponent = () => {
           {fruits.map((fruit) => (
             <Roll.Item
               key={fruit}
+              {...partProps['Roll.Item (others)']}
               disabled={fruit === 'Durian'}
               value={fruit}
             />

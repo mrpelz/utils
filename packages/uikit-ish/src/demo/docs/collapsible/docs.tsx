@@ -16,14 +16,14 @@ export const collapsibleRootRows: readonly PropRow[] = [
     'defaultOpen',
     'boolean',
     code('false'),
-    'Initially open (uncontrolled: its trigger toggles it).',
+    'Open at first (uncontrolled: its trigger toggles it).',
   ],
   [
     'open',
     'boolean',
     undefined,
     <>
-      Open (controlled, with <code>onOpenChange</code>).
+      Whether it’s open (controlled, with <code>onOpenChange</code>).
     </>,
   ],
   [
@@ -42,8 +42,8 @@ export const collapsibleTriggerRows: readonly PropRow[] = [
     'boolean',
     code('true'),
     <>
-      Renders a <code>button</code>; <code>false</code> when it renders another
-      element (e.g. a{' '}
+      Whether it renders a <code>button</code>. Set it to <code>false</code>{' '}
+      when it renders another element (for example a{' '}
       <a href={publicUrl('list/parts#list-header')}>List.Header</a>
       ).
     </>,
@@ -56,15 +56,15 @@ export const collapsiblePanelRows: readonly PropRow[] = [
     'keepMounted',
     'boolean',
     code('false'),
-    'Kept in the document while closed (hidden).',
+    'Keeps it in the document while closed, hidden.',
   ],
   [
     'hiddenUntilFound',
     'boolean',
     code('false'),
     <>
-      Closed, found by the browser’s page search, opening (
-      <code>hidden=&quot;until-found&quot;</code>; overrides{' '}
+      Lets the browser’s page search find it while closed, and opens it when
+      found (<code>hidden=&quot;until-found&quot;</code>; overrides{' '}
       <code>keepMounted</code>).
     </>,
   ],

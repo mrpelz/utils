@@ -1655,6 +1655,59 @@
     }
   }
 
+  /* Its anchor (see `Index`): nothing of its own, outside a list's root. */
+  .uikit-list-index-anchor {
+    display: contents;
+  }
+
+  /* In its list's root: placed by the list, its anchor spanning the root
+     (relative for it) at its end edge, the root's inset (the margin of its
+     groups) its room, if it has one (moved by
+     `--uikit-list-index-offset`, e.g. into a container's inset), over the
+     sticky headers (z-index 2). The index itself centered on the list, or
+     on what's in view of it: sticky, its own height none, on the line
+     between its scroll container's scroll paddings (e.g. a page's bars, see
+     Viewport.Padding), its items centered on that line. */
+  .uikit-list-root:has(> .uikit-list-index-anchor) {
+    position: relative;
+  }
+
+  .uikit-list-root > .uikit-list-index-anchor {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    inset-block: 0;
+    inset-inline-end: calc(
+      max(0px, var(--uikit-list-inset, 16px) - 16px) / 2 +
+        var(--uikit-list-index-offset, 0px)
+    );
+    pointer-events: none;
+
+    & > .uikit-list-index {
+      position: sticky;
+      top: calc(
+        50% +
+          (
+            var(--uikit-viewport-padding-block-start, 0px) -
+              var(--uikit-viewport-padding-block-end, 0px)
+          ) /
+          2
+      );
+      bottom: calc(
+        50% -
+          (
+            var(--uikit-viewport-padding-block-start, 0px) -
+              var(--uikit-viewport-padding-block-end, 0px)
+          ) /
+          2
+      );
+      height: 0;
+      pointer-events: auto;
+    }
+  }
+
   .uikit-list-index-item {
     display: block;
     padding: 0;

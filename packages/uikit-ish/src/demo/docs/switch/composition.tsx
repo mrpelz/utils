@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useRef, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   ActivityIndicator,
@@ -14,6 +14,8 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePartControls } from '../../tooling/frame/prop-control.js';
+import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
   Heading,
@@ -22,6 +24,7 @@ import {
 } from '../../tooling/guide/sections.js';
 import { sfAirplane, sfBellFill } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { partPropMaps } from '../part-options.js';
 
 // A row's code (as Airplane Mode's in the list below).
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
@@ -181,28 +184,73 @@ const DelayedStates: FunctionComponent = () => {
     ['AirDrop', useDelayedSetting(8000)],
   ] as const;
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            ActivityIndicator: ['aria-label', 'display', 'movement', 'size'],
+            'List.Below': ['hidden'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': ['editing', 'onClick'],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'List.Trailing': ['whileEditing'],
+            'Page.Root': [],
+            'Switch.Root': [
+              'aria-label',
+              'checked',
+              'indeterminate',
+              'onCheckedChange',
+              'readOnly',
+            ],
+            'Switch.Thumb': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('switch-composition-delayed') },
+  );
+
   return (
     <Component
       isInline
+      controls={[partControls]}
       id="switch-composition-delayed"
       log={log}
       stage="phone"
+      state={[partState]}
       title="Switch with delayed states"
     >
-      <Viewport.Content>
+      <Viewport.Content {...partProps['Viewport.Content']}>
         <Header.Root>
-          <Viewport.BlockStart>
-            <Toolbar.Root placement="block-start">
-              <Toolbar.Title>
+          <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+            <Toolbar.Root
+              {...partProps['Toolbar.Root']}
+              placement="block-start"
+            >
+              <Toolbar.Title {...partProps['Toolbar.Title']}>
                 <span>Settings</span>
               </Toolbar.Title>
             </Toolbar.Root>
           </Viewport.BlockStart>
-          <Page.Root>
-            <Viewport.Padding edge="block-start" />
-            <List.Root>
-              <List.Section>
-                <List.Group>
+          <Page.Root {...partProps['Page.Root']}>
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-start"
+            />
+            <List.Root {...partProps['List.Root']}>
+              <List.Section {...partProps['List.Section']}>
+                <List.Group {...partProps['List.Group']}>
                   {settings.map(([label, setting]) => {
                     const isSlow =
                       setting.stage === 'slow' || setting.stage === 'stalled';
@@ -210,24 +258,30 @@ const DelayedStates: FunctionComponent = () => {
                     return (
                       <List.Item
                         key={label}
+                        {...partProps['List.Item']}
                         editing={isStalled ? 'trailing' : 'none'}
                         onClick={forwardClick('[role=switch]')}
                       >
-                        <List.Content>
-                          <List.Title>
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
                             {label}: {setting.value ? 'On' : 'Off'}
                           </List.Title>
                         </List.Content>
-                        <List.Trailing>
+                        <List.Trailing {...partProps['List.Trailing']}>
                           <ActivityIndicator
+                            {...partProps.ActivityIndicator}
                             aria-label="Applying"
                             display={isSlow ? 'animate' : 'none'}
                             movement="fade"
                             size="small"
                           />
                         </List.Trailing>
-                        <List.Trailing whileEditing="hide">
+                        <List.Trailing
+                          {...partProps['List.Trailing']}
+                          whileEditing="hide"
+                        >
                           <Switch.Root
+                            {...partProps['Switch.Root']}
                             aria-label={label}
                             checked={setting.target}
                             indeterminate={setting.isPending}
@@ -239,11 +293,14 @@ const DelayedStates: FunctionComponent = () => {
                               setting.change(isChecked);
                             }}
                           >
-                            <Switch.Thumb />
+                            <Switch.Thumb {...partProps['Switch.Thumb']} />
                           </Switch.Root>
                         </List.Trailing>
-                        <List.Below hidden={!isStalled}>
-                          <List.Subtitle>
+                        <List.Below
+                          {...partProps['List.Below']}
+                          hidden={!isStalled}
+                        >
+                          <List.Subtitle {...partProps['List.Subtitle']}>
                             Request delivered successfully, waiting for device
                             to respond.
                           </List.Subtitle>
@@ -254,7 +311,10 @@ const DelayedStates: FunctionComponent = () => {
                 </List.Group>
               </List.Section>
             </List.Root>
-            <Viewport.Padding edge="block-end" />
+            <Viewport.Padding
+              {...partProps['Viewport.Padding']}
+              edge="block-end"
+            />
           </Page.Root>
         </Header.Root>
       </Viewport.Content>
@@ -266,62 +326,117 @@ const DelayedStates: FunctionComponent = () => {
 const InAList: FunctionComponent = () => {
   const [log, addLog] = useLog();
 
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Image': ['style', 'variant'],
+            'List.Item': ['onClick'],
+            'List.Leading': [],
+            'List.Root': ['style'],
+            'List.Section': [],
+            'List.Title': [],
+            'List.Trailing': [],
+            'Switch.Root': [
+              'aria-label',
+              'defaultChecked',
+              'onCheckedChange',
+              'tint',
+            ],
+            'Switch.Thumb': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState('switch-composition-list') },
+  );
+
   return (
     <Component
       isCentered
       isInline
+      controls={[partControls]}
       id="switch-composition-list"
       log={log}
+      state={[partState]}
       title="Switch in a list"
     >
-      <List.Root style={{ width: 'min(402px, 100%)' }}>
-        <List.Section>
-          <List.Group>
-            <List.Item onClick={forwardClick('[role=switch]')}>
-              <List.Leading>
+      <List.Root
+        {...partProps['List.Root']}
+        style={{ width: 'min(402px, 100%)' }}
+      >
+        <List.Section {...partProps['List.Section']}>
+          <List.Group {...partProps['List.Group']}>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[role=switch]')}
+            >
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-orange)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfAirplane} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfAirplane}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
-                <List.Title>Airplane Mode</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Airplane Mode
+                </List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <Switch.Root
+                  {...partProps['Switch.Root']}
                   aria-label="Airplane Mode"
                   tint="var(--color-ui-system-orange)"
                   onCheckedChange={(isChecked: boolean) =>
                     addLog(`airplane mode: ${String(isChecked)}`)
                   }
                 >
-                  <Switch.Thumb />
+                  <Switch.Thumb {...partProps['Switch.Thumb']} />
                 </Switch.Root>
               </List.Trailing>
             </List.Item>
-            <List.Item onClick={forwardClick('[role=switch]')}>
-              <List.Leading>
+            <List.Item
+              {...partProps['List.Item']}
+              onClick={forwardClick('[role=switch]')}
+            >
+              <List.Leading {...partProps['List.Leading']}>
                 <List.Image
+                  {...partProps['List.Image']}
                   style={{ backgroundColor: 'var(--color-ui-system-red)' }}
                   variant="rounded"
                 >
-                  <Symbol icon={sfBellFill} />
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfBellFill}
+                  />
                 </List.Image>
               </List.Leading>
-              <List.Content>
-                <List.Title>Notifications</List.Title>
+              <List.Content {...partProps['List.Content']}>
+                <List.Title {...partProps['List.Title']}>
+                  Notifications
+                </List.Title>
               </List.Content>
-              <List.Trailing>
+              <List.Trailing {...partProps['List.Trailing']}>
                 <Switch.Root
+                  {...partProps['Switch.Root']}
                   defaultChecked
                   aria-label="Notifications"
                   onCheckedChange={(isChecked: boolean) =>
                     addLog(`notifications: ${String(isChecked)}`)
                   }
                 >
-                  <Switch.Thumb />
+                  <Switch.Thumb {...partProps['Switch.Thumb']} />
                 </Switch.Root>
               </List.Trailing>
             </List.Item>
@@ -351,16 +466,18 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Typically: in the trailing slot of <a href={publicUrl('list')}>List</a>{' '}
-        rows.
+        Usually, it sits in the trailing slot of{' '}
+        <a href={publicUrl('list')}>List</a> rows.
       </li>
       <li>
-        The row passes its clicks on to the switch (
+        The row passes its clicks on to the switch (with{' '}
         <code>forwardClick(&apos;[role=switch]&apos;)</code> as its{' '}
-        <code>onClick</code>): the whole row toggles it, as in Settings.
+        <code>onClick</code>), so the whole row toggles it, as in a settings
+        app.
       </li>
       <li>
-        <code>tint</code> can take the row image’s color (Airplane Mode).
+        <code>tint</code> can match the color of the row’s image (Airplane
+        Mode).
       </li>
       <li>
         <strong>Library:</strong> the switch (
@@ -372,7 +489,7 @@ export const SwitchComposition: FunctionComponent = () => (
         <code>tint</code>.
       </li>
       <li>
-        <strong>Demo:</strong> the settings and logging their changes.
+        <strong>Demo:</strong> the settings, and logging their changes.
       </li>
     </ul>
     <CodeView code={listRowCode} />
@@ -386,48 +503,48 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Settings that take a while to apply (e.g. on a device), how long not
-        known: the switch shows what was asked for (<code>checked</code>), the
-        row’s title what’s applied. Every row behaves the same, saying more the
-        longer it waits.
+        Some settings take a while to apply (for example on a device), and how
+        long isn’t known. The switch shows what was asked for (
+        <code>checked</code>), and the row’s title shows what’s applied. Every
+        row behaves the same, saying more the longer it waits.
       </li>
       <li>
-        Asked: the switch indeterminate (<code>indeterminate</code>, its track
-        half tinted while turning on) and read-only (<code>readOnly</code>): the
-        hotspot (0.4s) gets no further.
+        Once asked, the switch is indeterminate (<code>indeterminate</code>,
+        with its track half tinted while turning on) and read-only (
+        <code>readOnly</code>). The hotspot (0.4s) gets no further than that.
       </li>
       <li>
-        Past half a second: an{' '}
+        Past half a second, an{' '}
         <PartLink
           component="progress"
           part="ActivityIndicator"
         />{' '}
-        fades in beside the switch, at its start (not sliding in: its{' '}
-        <code>display</code>, <code>animate</code>; <code>movement</code>,{' '}
-        <code>fade</code>, its spokes fading in place); applied, it finishes its
-        turn, then fades out (<code>none</code>), taking no room: Bluetooth
-        (1.5s).
+        fades in next to the switch, at its start. It doesn’t slide in: its{' '}
+        <code>display</code> is <code>animate</code>, and its{' '}
+        <code>movement</code> is <code>fade</code>, so its spokes fade in place.
+        Once the setting is applied, it finishes its turn, then fades out (
+        <code>none</code>) and takes no room. That’s Bluetooth (1.5s).
       </li>
       <li>
-        Past two seconds, not responding: the switch slides out at the row’s end
-        (the row’s edit mode <code>trailing</code>, the switch’s{' '}
+        Past two seconds without a response, the switch slides out at the row’s
+        end (the row’s edit mode is <code>trailing</code>, and the switch’s{' '}
         <PartLink
           component="list"
           part="List.Trailing"
         />{' '}
-        <code>whileEditing=&quot;hide&quot;</code>), the indicator moving on to
-        the end, and a message under the row (
+        has <code>whileEditing=&quot;hide&quot;</code>). The indicator moves on
+        to the end, and a message shows under the row in a{' '}
         <PartLink
           component="list"
           part="List.Below"
         />
-        : across the row, as a field’s message; styled as a{' '}
+        , across the row like a field’s message. It’s styled as a{' '}
         <PartLink
           component="list"
           part="List.Subtitle"
-        />
-        , the slot only placing it; growing in and out: its <code>hidden</code>
-        ): AirDrop (8s).
+        />{' '}
+        (the slot only places it), and grows in and out through its{' '}
+        <code>hidden</code>. That’s AirDrop (8s).
       </li>
       <li>
         <strong>Library:</strong> the switch’s <code>indeterminate</code> and{' '}
@@ -450,7 +567,7 @@ export const SwitchComposition: FunctionComponent = () => (
       </li>
       <li>
         <strong>Demo:</strong> the delays, the requested and applied states and
-        the stages (<code>useDelayedSetting</code>), the thresholds and the
+        the stages (<code>useDelayedSetting</code>), the thresholds, and the
         titles.
       </li>
     </ul>
@@ -465,13 +582,13 @@ export const SwitchComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Renders a hidden checkbox input: in a{' '}
-        <a href={publicUrl('form')}>Form</a>, submitted by its <code>name</code>
-        , as a native checkbox.
+        It renders a hidden checkbox input, so in a{' '}
+        <a href={publicUrl('form')}>Form</a>, it submits under its{' '}
+        <code>name</code>, like a native checkbox.
       </li>
       <li>
-        Value: <code>value</code> while on, <code>uncheckedValue</code> while
-        off.
+        Its value is <code>value</code> while on, and{' '}
+        <code>uncheckedValue</code> while off.
       </li>
     </ul>
   </>
