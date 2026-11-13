@@ -1,5 +1,6 @@
 import type { ComponentProps, ReactNode, RefObject } from 'react';
 
+import type { GlassModeProps } from '../glass/props.js';
 import type { PortalContainer } from '../utils/main.js';
 import type { ViewportAnchorHandle } from './padding.js';
 
@@ -229,38 +230,39 @@ export type ViewportKeyboardAccessoryProps = ComponentProps<'div'> & {
 /** `Viewport.Background`: its element's (see main.tsx). */
 export type ViewportBackgroundProps = ComponentProps<'div'>;
 
-export type ViewportContentProps = ComponentProps<'div'> & {
-  /**
-   * Bouncing even when its content fits:
-   * at least 1px to scroll, so a drag on it is its own (rubber-banding
-   * here, the bars staying), not the document's (on iOS, moving the whole
-   * app). Off: only content taller than it scrolls.
-   * @default while it holds its content itself; not while its child
-   * scrolls on its own (a `Page`, a `Header` around one, a `Layout`, a
-   * `Navigation`: bouncing it would move them whole)
-   */
-  alwaysBounce?: boolean;
-  /**
-   * With the on-screen keyboard: resized to what's above it (default, so
-   * its end scrolls into view), or overlaid by it.
-   */
-  keyboard?: 'overlay' | 'resize';
-  /**
-   * The safe area insets kept clear (as its padding), or `auto`, by what it
-   * holds (as `alwaysBounce`'s default):
-   * - Its content itself (e.g. a list after a `Viewport.Padding`): `all`.
-   *   Its content starts clear of them (the status bar, the home
-   *   indicator) and scrolls on under them, its paddings not counting
-   *   them again.
-   * - A child scrolling on its own (a `Page`, a `Header` around one, a
-   *   `Layout`, a `Navigation`, as its direct child, e.g. a tab bar's panel
-   *   rendered as one): `none`. That child fills the screen, under the
-   *   status bar too, its own bars and paddings keeping its content clear
-   *   (kept clear here, it would stop at their border).
-   * @default 'auto'
-   */
-  safeArea?: ViewportContentSafeArea;
-};
+export type ViewportContentProps = ComponentProps<'div'> &
+  GlassModeProps & {
+    /**
+     * Bouncing even when its content fits:
+     * at least 1px to scroll, so a drag on it is its own (rubber-banding
+     * here, the bars staying), not the document's (on iOS, moving the whole
+     * app). Off: only content taller than it scrolls.
+     * @default while it holds its content itself; not while its child
+     * scrolls on its own (a `Page`, a `Header` around one, a `Layout`, a
+     * `Navigation`: bouncing it would move them whole)
+     */
+    alwaysBounce?: boolean;
+    /**
+     * With the on-screen keyboard: resized to what's above it (default, so
+     * its end scrolls into view), or overlaid by it.
+     */
+    keyboard?: 'overlay' | 'resize';
+    /**
+     * The safe area insets kept clear (as its padding), or `auto`, by what it
+     * holds (as `alwaysBounce`'s default):
+     * - Its content itself (e.g. a list after a `Viewport.Padding`): `all`.
+     *   Its content starts clear of them (the status bar, the home
+     *   indicator) and scrolls on under them, its paddings not counting
+     *   them again.
+     * - A child scrolling on its own (a `Page`, a `Header` around one, a
+     *   `Layout`, a `Navigation`, as its direct child, e.g. a tab bar's panel
+     *   rendered as one): `none`. That child fills the screen, under the
+     *   status bar too, its own bars and paddings keeping its content clear
+     *   (kept clear here, it would stop at their border).
+     * @default 'auto'
+     */
+    safeArea?: ViewportContentSafeArea;
+  };
 
 export type ElementVisibilityOptions = {
   /**

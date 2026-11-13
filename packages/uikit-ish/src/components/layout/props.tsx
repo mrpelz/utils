@@ -8,6 +8,11 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
    * it.
    */
   clearFloating?: boolean;
+  /**
+   * Initially open (uncontrolled, see `open`).
+   * @default true
+   */
+  defaultOpen?: boolean;
   /** Its initial size (px, uncontrolled); without a size, it's flexible. */
   defaultSize?: number;
   /**
@@ -27,6 +32,16 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
   minSize?: number;
   /** Called while it's resized (by its divider). */
   onSizeChange?: (size: number) => void;
+  /**
+   * Open (controlled): closed, it slides out of the layout (a floating
+   * one off its edge, the others at their size, the columns beside them
+   * taking their place), keeping its size for when it opens again; inert,
+   * hidden once out. The columns beside it follow (a `clearFloating`
+   * one's inset with it). The app's state, its buttons its own (no
+   * handle: see the guide).
+   * @default true
+   */
+  open?: boolean;
   /** Resized by dragging its divider (at its end), or by keys on it. */
   resizable?: boolean;
   /** Its size (px, controlled). */

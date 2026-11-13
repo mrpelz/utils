@@ -4,7 +4,6 @@ import './style.css';
 
 import { Popover as BasePopover } from '@base-ui/react/popover';
 import {
-  ComponentProps,
   createContext,
   forwardRef,
   ReactElement,
@@ -16,6 +15,7 @@ import {
   useState,
 } from 'react';
 
+import { useGlassMode } from '../glass/main.js';
 import { useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
@@ -40,6 +40,7 @@ import {
 import type {
   Nose,
   PopoverArrowProps,
+  PopoverBodyProps,
   PopoverHandle,
   PopoverHeaderProps,
   PopoverPositionerProps,
@@ -49,6 +50,7 @@ import type {
 export type {
   PopoverAlign,
   PopoverArrowProps,
+  PopoverBodyProps,
   PopoverHandle,
   PopoverHeaderProps,
   PopoverPositionerProps,
@@ -482,19 +484,21 @@ const Header = forwardRef<HTMLDivElement, PopoverHeaderProps>(
  * `Viewport`): beside it, not in it, so its mask (fading it out under the
  * header, see style.css) leaves it be.
  */
-const Body = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, forwardedRef) => {
+const Body = forwardRef<HTMLDivElement, PopoverBodyProps>(
+  ({ className, glass = 'auto', ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
     // (An overlay's: never what a provider tracks, see Viewport.)
     useScrollerRegistration(ref, true, true);
     // (the current scroller while open, see Viewport's `useCurrentScroller`.)
     useCurrentLayer(ref, 'overlay');
+    const glassMode = useGlassMode(ref, glass, false);
 
     return (
       <>
         <div
           ref={ref}
           className={cn('uikit-popover-body', className)}
+          data-glass={glassMode}
           data-popover-part="body"
           data-viewport-scroller=""
           {...props}

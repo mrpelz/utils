@@ -32,6 +32,7 @@ import {
   getPropOptionsRoot,
   propOptionsGrabber,
   propOptionsPart,
+  propOptionsScrollContent,
   propOptionsSnapGroup,
 } from './props.js';
 
@@ -648,7 +649,7 @@ const ContentPart: FunctionComponent = () => {
     useMemo(() => getPropOptionsRoot(addLog), [addLog]),
     { external: externalRoot, title: 'Island.Root' },
   );
-  const [control, props, state] = usePropControl(propOptionsPart, {
+  const [control, props, state] = usePropControl(propOptionsScrollContent, {
     external,
     isOpen: true,
     emphasize: 'outline',

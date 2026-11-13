@@ -1,6 +1,12 @@
 import './style.css';
 
-import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
+import {
+  FunctionComponent,
+  ReactNode,
+  useContext,
+  useMemo,
+  useState,
+} from 'react';
 
 import {
   Button,
@@ -21,7 +27,11 @@ import {
   Viewport,
 } from '../../components/index.js';
 import { catalog, categories, type Category } from '../docs/catalog.js';
-import { sfArrowBackward, sfChevronBackward } from '../tooling/icons.js';
+import {
+  sfArrowBackward,
+  sfChevronBackward,
+  sfInsetFilledLeadinghalfArrowLeadingRectangle,
+} from '../tooling/icons.js';
 import { publicUrl } from '../tooling/public-url.js';
 import { ClientOnly } from '../tooling/shared/client-only.js';
 import { useRawDocument } from '../tooling/shared/raw-document.js';
@@ -34,6 +44,8 @@ import {
   LayoutRootContext,
   PopContext,
   PushContext,
+  ShowSidebarButton,
+  SidebarOpenContext,
   type SinkPages,
   SinkSettingsContext,
   SinkSwipeAreas,
@@ -150,49 +162,104 @@ const Index: FunctionComponent<{ onOpen: (id: string) => void }> = ({
   </List.Root>
 );
 
-/** The sidebar (regular): the index, its categories collapsible. */
+/**
+ * The sidebar (regular): its toolbar (in its bar, staying at its top) with
+ * the button hiding it (see `SidebarOpenContext`), the index (in its page,
+ * scrolling), its categories collapsible.
+ */
 const Sections: FunctionComponent<{
+  onHide: () => void;
   onSelect: (id: string) => void;
   selected: string | undefined;
-}> = ({ onSelect, selected }) => (
+}> = ({ onHide, onSelect, selected }) => (
   <Sidebar.Root>
-    <List.Root listStyle="sidebar">
-      <DocsSection />
-      {sections.map(([category, entries]) => (
-        <Collapsible.Root
-          key={category}
-          defaultOpen
-          render={<List.Section />}
-        >
-          <Collapsible.Trigger
-            nativeButton={false}
-            render={<List.Header prominence="nested" />}
+    <Header.Root>
+      <Viewport.BlockStart>
+        <Sidebar.Toolbar>
+          <Button.Root
+            aria-label="Hide Sidebar"
+            shape="circle"
+            tint="var(--uikit-glass-content)"
+            variant="borderless"
+            onClick={onHide}
           >
-            <List.Title>{categories[category].title}</List.Title>
-            <List.Disclosure />
-          </Collapsible.Trigger>
-          <Collapsible.Panel render={<List.Group />}>
-            {entries.map((entry) => (
-              <List.Item
-                key={entry.id}
-                selected={selected === entry.id}
+            <Button.Icon>
+              <Symbol icon={sfInsetFilledLeadinghalfArrowLeadingRectangle} />
+            </Button.Icon>
+          </Button.Root>
+        </Sidebar.Toolbar>
+      </Viewport.BlockStart>
+      <Page.Root>
+        <Viewport.Padding edge="block-start" />
+        <List.Root listStyle="sidebar">
+          <DocsSection />
+          {sections.map(([category, entries]) => (
+            <Collapsible.Root
+              key={category}
+              defaultOpen
+              render={<List.Section />}
+            >
+              <Collapsible.Trigger
+                nativeButton={false}
+                render={<List.Header prominence="nested" />}
               >
-                <List.Content>
-                  <List.Title
-                    render={<button type="button" />}
-                    onClick={() => onSelect(entry.id)}
+                <List.Title>{categories[category].title}</List.Title>
+                <List.Disclosure />
+              </Collapsible.Trigger>
+              <Collapsible.Panel render={<List.Group />}>
+                {entries.map((entry) => (
+                  <List.Item
+                    key={entry.id}
+                    selected={selected === entry.id}
                   >
-                    {entry.title}
-                  </List.Title>
-                </List.Content>
-              </List.Item>
-            ))}
-          </Collapsible.Panel>
-        </Collapsible.Root>
-      ))}
-    </List.Root>
+                    <List.Content>
+                      <List.Title
+                        render={<button type="button" />}
+                        onClick={() => onSelect(entry.id)}
+                      >
+                        {entry.title}
+                      </List.Title>
+                    </List.Content>
+                  </List.Item>
+                ))}
+              </Collapsible.Panel>
+            </Collapsible.Root>
+          ))}
+        </List.Root>
+        <Viewport.Padding edge="block-end" />
+      </Page.Root>
+    </Header.Root>
   </Sidebar.Root>
 );
+
+/**
+ * A page bar's leading items: the sidebar hidden, a button showing it
+ * (staying put across the stack's pages, see `SidebarOpenContext`); its
+ * back button, unless it's the root.
+ */
+const BarLeading: FunctionComponent<{ back: string | undefined }> = ({
+  back,
+}) => {
+  const sidebar = useContext(SidebarOpenContext);
+  const isSidebarHidden = sidebar !== undefined && !sidebar[0];
+  if (back === undefined && !isSidebarHidden) return null;
+
+  return (
+    <Toolbar.Leading>
+      <ShowSidebarButton />
+      {back === undefined ? null : (
+        <Navigation.Back
+          aria-label={back}
+          render={<Toolbar.Button shape="circle" />}
+        >
+          <Button.Icon>
+            <Symbol icon={sfChevronBackward} />
+          </Button.Icon>
+        </Navigation.Back>
+      )}
+    </Toolbar.Leading>
+  );
+};
 
 /**
  * A page of the stack: its bar (its back button, unless it's the root; its
@@ -218,18 +285,7 @@ const StackPage: FunctionComponent<{
         edgeTint={page?.edgeTint}
       >
         <Toolbar.Root placement="block-start">
-          {back === undefined ? null : (
-            <Toolbar.Leading>
-              <Navigation.Back
-                aria-label={back}
-                render={<Toolbar.Button shape="circle" />}
-              >
-                <Button.Icon>
-                  <Symbol icon={sfChevronBackward} />
-                </Button.Icon>
-              </Navigation.Back>
-            </Toolbar.Leading>
-          )}
+          <BarLeading back={back} />
           <Toolbar.Title>
             <span>{pageTitle}</span>
           </Toolbar.Title>
@@ -284,6 +340,12 @@ const App: FunctionComponent = () => {
   const [stack, setStack] = useState<readonly string[]>([]);
   // (Regular: its layout's root, for the swipe area at the screen's edge.)
   const [layoutRoot, setLayoutRoot] = useState<HTMLDivElement | null>(null);
+  // (Regular: the sidebar shown, see `SidebarOpenContext`.)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const sidebarState = useMemo(
+    () => [isSidebarOpen, setIsSidebarOpen] as const,
+    [isSidebarOpen],
+  );
   // (Regular: a component always open, the first at first.)
   const shown = isCompact || stack.length > 0 ? stack : [firstId];
 
@@ -301,39 +363,43 @@ const App: FunctionComponent = () => {
   const keys = isCompact ? ['index', ...shown] : shown;
   const stackView = (
     <LayoutRootContext.Provider value={isCompact ? null : layoutRoot}>
-      <PushContext.Provider value={push}>
-        <PopContext.Provider value={pop}>
-          <Navigation.Root onBack={pop}>
-            {/* (Not while a page with a stack of its own is on top: its own
+      <SidebarOpenContext.Provider value={isCompact ? undefined : sidebarState}>
+        <PushContext.Provider value={push}>
+          <PopContext.Provider value={pop}>
+            <Navigation.Root onBack={pop}>
+              {/* (Not while a page with a stack of its own is on top: its own
             swipe areas, beneath these, take the swipes.) */}
-            {pages[keys.at(-1) ?? '']?.hasOwnStack ? null : <SinkSwipeAreas />}
-            <Navigation.Stack>
-              {/* Each page a navigation page: instant ones (see `isInstant`)
+              {pages[keys.at(-1) ?? '']?.hasOwnStack ? null : (
+                <SinkSwipeAreas />
+              )}
+              <Navigation.Stack>
+                {/* Each page a navigation page: instant ones (see `isInstant`)
               shown at once, not slid in or out. */}
-              {keys.map((key, index) => (
-                <Navigation.Page
-                  key={key}
-                  instant={pages[key]?.isInstant}
-                >
-                  {key === 'index' ? (
-                    <StackPage
-                      back={undefined}
-                      pageKey={key}
-                    >
-                      <Index onOpen={open} />
-                    </StackPage>
-                  ) : (
-                    <StackPage
-                      back={titleOf(keys[index - 1])}
-                      pageKey={key}
-                    />
-                  )}
-                </Navigation.Page>
-              ))}
-            </Navigation.Stack>
-          </Navigation.Root>
-        </PopContext.Provider>
-      </PushContext.Provider>
+                {keys.map((key, index) => (
+                  <Navigation.Page
+                    key={key}
+                    instant={pages[key]?.isInstant}
+                  >
+                    {key === 'index' ? (
+                      <StackPage
+                        back={undefined}
+                        pageKey={key}
+                      >
+                        <Index onOpen={open} />
+                      </StackPage>
+                    ) : (
+                      <StackPage
+                        back={titleOf(keys[index - 1])}
+                        pageKey={key}
+                      />
+                    )}
+                  </Navigation.Page>
+                ))}
+              </Navigation.Stack>
+            </Navigation.Root>
+          </PopContext.Provider>
+        </PushContext.Provider>
+      </SidebarOpenContext.Provider>
     </LayoutRootContext.Provider>
   );
 
@@ -351,9 +417,11 @@ const App: FunctionComponent = () => {
                   aria-label="Components"
                   className={browserInset}
                   defaultSize={300}
+                  open={isSidebarOpen}
                 >
                   <Sections
                     selected={shown[0]}
+                    onHide={() => setIsSidebarOpen(false)}
                     onSelect={open}
                   />
                 </Layout.Column>

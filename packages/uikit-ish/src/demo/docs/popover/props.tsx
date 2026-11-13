@@ -144,6 +144,12 @@ export const propOptionsElement = {
   style: commonPropOptions.style,
 };
 
+/** Its scrolling content's (a part's, see `propOptionsElement`): its glass too. */
+export const propOptionsScrollContent = {
+  ...propOptionsElement,
+  glass: [undefined, 'auto', 'flat', 'live'] as const,
+};
+
 /** `Popover.Arrow`: Base UI's part, hidden when shifted or not. */
 export const propOptionsArrow = {
   ...commonPropOptions,

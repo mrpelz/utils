@@ -62,6 +62,53 @@
       flex: 1 1 auto;
     }
 
+    /* Opening or closing (see main.tsx): sliding, the columns beside it
+       following (their margins here; a floating one's neighbours' inset
+       frame by frame, see main.tsx); hidden once out, shown at once. */
+    .uikit-layout-root[data-transitioning] > & {
+      transition-duration:
+        var(--uikit-layout-duration, 350ms), var(--uikit-layout-duration, 350ms),
+        var(--uikit-layout-duration, 350ms), 0s;
+      transition-property:
+        margin-inline-start, margin-inline-end, translate, visibility;
+      transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    /* Closed: out of the layout (a floating one off its edge, see below),
+       inert, hidden once out. Not narrowed: at its size as it was open
+       (its content never squeezed, whatever it is), it moves out by a
+       negative margin (towards the layout's start; a last column towards
+       its end), the others taking its place. */
+    &[data-closed] {
+      min-width: var(--uikit-layout-column-closing-size, 0);
+      max-width: none;
+      flex: 0 0 var(--uikit-layout-column-closing-size, 0px);
+      margin-inline-start: calc(
+        -1 * var(--uikit-layout-column-closing-size, 0px)
+      );
+      visibility: hidden;
+    }
+
+    .uikit-layout-root[data-transitioning] > &[data-closed] {
+      transition-delay: 0s, 0s, 0s, var(--uikit-layout-duration, 350ms);
+    }
+
+    /* (Also moved by its size: with nothing flexible before it to take
+       its place, its margin alone wouldn't move it; with something, it's
+       out of the clipped layout either way.) */
+    &[data-closed]:last-child:not(:first-child) {
+      margin-inline: 0 calc(-1 * var(--uikit-layout-column-closing-size, 0px));
+      translate: 100%;
+
+      &:dir(rtl) {
+        translate: -100%;
+      }
+    }
+
     /* Base UI's visually hidden inputs (a radio's, a slider thumb's, a
        switch's: inline `position: fixed`) placed by their control instead:
        fixed, their containing block would be the column (`contain: layout`),
@@ -82,6 +129,19 @@
 
       & + [data-layout-part='column']::before {
         content: none;
+      }
+
+      /* Closed: off its edge (its size kept). */
+      &[data-closed] {
+        width: var(--uikit-layout-column-size, 320px);
+        min-width: var(--uikit-layout-column-min, 0);
+        flex: none;
+        margin: 0;
+        translate: -100%;
+
+        &:dir(rtl) {
+          translate: 100%;
+        }
       }
     }
 

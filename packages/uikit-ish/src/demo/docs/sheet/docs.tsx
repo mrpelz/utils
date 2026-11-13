@@ -8,6 +8,7 @@ import {
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { glassModeRow } from '../glass-mode.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -467,6 +468,7 @@ export const sheetContentRows: readonly PropRow[] = [
       (<code>edge=&quot;block-start&quot;</code>) to make room for it.
     </>,
   ],
+  glassModeRow,
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
 

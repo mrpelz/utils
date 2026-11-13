@@ -1,10 +1,10 @@
 import '../glass/style.css';
 import './style.css';
 
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 
 import { cn } from '../utils/main.js';
-import { useSizeClass } from '../viewport/main.js';
+import { useSizeClass, ViewportScopeContext } from '../viewport/main.js';
 import type {
   SidebarRootProps,
   SidebarToolbarGroupProps,
@@ -25,7 +25,11 @@ export type {
 // (`List.Root` of style `sidebar`: capsule rows, sections without a shape of
 // their own), scrolling inside it. Put it in a `Layout` column (`floating`:
 // over the other columns; compact: a drawer, swiped in), which places and sizes
-// it.
+// it. Its toolbar staying at its top while its list scrolls: a page in a
+// header (`Header.Root`: the toolbar in a `Viewport.BlockStart`, the list
+// in a `Page.Root`, a search field in a `Header.Accessory`), as a screen's;
+// it's their screen (their containing block, their scope, its padding
+// their safe area insets).
 //
 // Also:
 // - The glass is the menus' (`glassMedium`: a fill and a soft glow, without
@@ -46,17 +50,22 @@ const Root = forwardRef<HTMLElement, SidebarRootProps>(
     // (Regular: beside the pages' anchored bars and islands, its bottom
     // theirs, see style.css.)
     const isRegular = useSizeClass() === 'regular';
+    // Its bars' scope (holding a page in a header: see style.css), its own:
+    // fixed to it, not adding to the column's.
+    const [scope] = useState(() => ({}));
     return (
-      <nav
-        ref={ref}
-        data-regular={isRegular ? '' : undefined}
-        data-sidebar-part="root"
-        {...props}
-        className={cn(
-          'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
-          className,
-        )}
-      />
+      <ViewportScopeContext.Provider value={scope}>
+        <nav
+          ref={ref}
+          data-regular={isRegular ? '' : undefined}
+          data-sidebar-part="root"
+          {...props}
+          className={cn(
+            'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
+            className,
+          )}
+        />
+      </ViewportScopeContext.Provider>
     );
   },
 );

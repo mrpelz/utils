@@ -3452,9 +3452,17 @@ export const ViewportParts: FunctionComponent = () => (
         <code>orientationchange</code> whose orientation (
         <code>screen.orientation</code>) contradicts the window’s shape:
         portrait while the window is still landscape, or the other way round.
-        From then on, the size class is held, until an orientation matches the
-        window’s shape again, or the page is shown again. By then the window is
-        back as it was, and the size class is read anew.
+        From then on, the size class is held, until the screen turns to an
+        orientation that matches the window’s shape, the window is back at its
+        size from before, or the page is shown again. Then the size class is
+        read anew.
+      </li>
+      <li>
+        In a browser tab, the second snapshot’s <code>orientationchange</code>{' '}
+        reports the first one’s orientation again, and its window (585px wide,
+        the tab’s height) has that shape too. It looks like a match, but the
+        screen hasn’t turned, so the size class stays held. The window is then
+        resized back before the page is hidden.
       </li>
       <li>
         Real changes aren’t held. A rotation’s <code>orientationchange</code>{' '}

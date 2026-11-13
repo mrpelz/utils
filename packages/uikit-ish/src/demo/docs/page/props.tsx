@@ -10,6 +10,7 @@ export const propOptionsRoot = {
   background: [undefined, 'grouped', 'plain'] as const,
   alwaysBounce: [undefined, false] as const,
   fill: [undefined, false, true] as const,
+  glass: [undefined, 'auto', 'flat', 'live'] as const,
 };
 
 // The guide pages' views (see overview.tsx, parts.tsx): the root's props,

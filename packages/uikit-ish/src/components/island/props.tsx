@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 
+import type { GlassModeProps } from '../glass/props.js';
 import type { ViewportEdgeEffect } from '../viewport/main.js';
 
 /** A stop chosen by the user (cancelable: then not the root's own). */
@@ -49,7 +50,7 @@ export type IslandGrabberProps = ComponentProps<'div'> & {
   cursor?: string;
 };
 
-export type IslandContentProps = ComponentProps<'div'>;
+export type IslandContentProps = ComponentProps<'div'> & GlassModeProps;
 
 export type IslandSnapGroupProps = ComponentProps<'div'> & {
   /**

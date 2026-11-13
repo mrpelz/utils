@@ -50,12 +50,15 @@ const ramp = 16;
 
 /**
  * How far content's scrolled under an edge's bars, 0 to 1 (see `ramp`); a
- * pixel's none (a page bouncing always scrolls by one, see Page).
+ * pixel's none (a page bouncing always scrolls by one, see Page); pulled
+ * past an end, as at that end.
  */
 const progressOf = (scroller: Element, edge: BlockEdge) => {
-  const range = scroller.scrollHeight - scroller.clientHeight;
-  const under =
-    edge === 'block-start' ? scroller.scrollTop : range - scroller.scrollTop;
+  const range = Math.max(scroller.scrollHeight - scroller.clientHeight, 0);
+  // (Pulled past an end, bouncing: as at that end. A change during a
+  // bounce ends it on iOS: the page let go while still pulled.)
+  const position = Math.min(Math.max(scroller.scrollTop, 0), range);
+  const under = edge === 'block-start' ? position : range - position;
   return Math.min(Math.max((under - 1) / ramp, 0), 1);
 };
 

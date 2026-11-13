@@ -261,6 +261,15 @@ export const PageOverview: FunctionComponent = () => (
         column’s size, while its background runs beneath it.
       </li>
       <li>
+        Glass in it, such as glass buttons and text fields, is{' '}
+        <a href={publicUrl('glossary#flat-glass')}>flat</a> while it scrolls (by
+        default it always can, as it bounces): opaque, over its background,
+        looking as the live glass would. Its bars’ glass stays live. Set{' '}
+        <code>glass</code> to override it (see{' '}
+        <a href={publicUrl('ios-quirks#layers-under-a-scroll')}>iOS Quirks</a>
+        ).
+      </li>
+      <li>
         To track its scrolling, pass its ref as a{' '}
         <PartLink
           component="viewport"

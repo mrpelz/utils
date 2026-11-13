@@ -331,8 +331,12 @@ export const HeaderOverview: FunctionComponent = () => (
       <li>
         The large title (Large Title Emphasized, 16px from the sides, 10px above
         what follows) fades out over the first half of its way under the bar,
-        while the bar’s title fades in over the second half. It uses
-        scroll-driven animations, without scroll listeners.
+        while the bar’s title fades in over the second half. A scroll listener
+        follows it, not scroll-driven animations, and the large title fades by
+        its text color, not its opacity: either would end the page’s glides on
+        iOS (see{' '}
+        <a href={publicUrl('ios-quirks#layers-under-a-scroll')}>iOS Quirks</a>
+        ). Pulled past an end, neither title changes.
       </li>
       <li>Without a large title, the bar’s title shows at once.</li>
       <li>

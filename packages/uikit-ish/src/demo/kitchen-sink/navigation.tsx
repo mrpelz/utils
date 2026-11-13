@@ -17,7 +17,7 @@ import {
   type SectionValue,
 } from '../docs/navigation/content.js';
 import { sfChevronBackward } from '../tooling/icons.js';
-import { SinkSwipeAreas, usePop } from './shared.js';
+import { ShowSidebarButton, SinkSwipeAreas, usePop } from './shared.js';
 
 // Navigation's apps (pages of their own, each its own stack, see
 // structure.tsx): going back quickly, popping to the root from code (a
@@ -56,6 +56,7 @@ const Level: FunctionComponent<{
     <Viewport.BlockStart>
       <Toolbar.Root placement="block-start">
         <Toolbar.Leading>
+          <ShowSidebarButton />
           {back === undefined ? (
             <LeaveButton />
           ) : (

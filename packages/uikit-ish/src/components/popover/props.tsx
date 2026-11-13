@@ -1,6 +1,7 @@
 import type { Popover as BasePopover } from '@base-ui/react/popover';
 import type { ComponentProps } from 'react';
 
+import type { GlassModeProps } from '../glass/props.js';
 import type { LogicalSide } from '../utils/main.js';
 import type { ViewportEdgeEffect } from '../viewport/main.js';
 
@@ -42,6 +43,8 @@ export type PopoverArrowProps = Omit<BasePopover.Arrow.Props, 'ref'> & {
    */
   whenShifted?: 'hide' | 'show';
 };
+
+export type PopoverBodyProps = ComponentProps<'div'> & GlassModeProps;
 
 export type PopoverHeaderProps = ComponentProps<'div'> & {
   /**

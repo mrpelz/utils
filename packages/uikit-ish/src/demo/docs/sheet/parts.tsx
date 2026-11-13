@@ -42,6 +42,7 @@ import {
   propOptionsGuidePopup,
   propOptionsHeader,
   propOptionsPart,
+  propOptionsScrollContent,
   propOptionsSnapGroup,
 } from './props.js';
 
@@ -1078,7 +1079,7 @@ const ContentPart: FunctionComponent = () => {
   const id = 'sheet-parts-content';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsPart, {
+  const [control, props, state] = usePropControl(propOptionsScrollContent, {
     external,
     isOpen: true,
     emphasize: 'outline',

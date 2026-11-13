@@ -41,6 +41,18 @@ export type { LayoutColumnProps, LayoutRootProps } from './props.js';
 // Each column is the containing block of its fixed layers (e.g. a header's
 // bar, in a `Viewport.BlockStart`): they span it, not the screen.
 //
+// Open or closed (`open`, the app's state; e.g. a sidebar hidden by a
+// button in its toolbar, shown again by one in the content's bars):
+// closed, a column slides out (a floating one off its edge; the others at
+// their size, by a negative margin, the columns beside them taking their
+// place, their content never squeezed), keeping its size for when it opens
+// again; inert, and hidden once out. A `clearFloating` column's inset
+// follows a floating one's slide frame by frame (`useFloatingSize`).
+// Transitions only while a column opens or closes (`data-transitioning`
+// on the root, until its own have finished), not as it's first laid out,
+// nor resized; then its layout's scrollers are drawn anew
+// (`repaintScrollers`).
+//
 // Also:
 // - Resizable.
 
@@ -56,31 +68,168 @@ const clamp = (size: number, min: number, max: number) =>
   Math.min(Math.max(size, min), max);
 
 /**
+ * How much of a floating column shows in its layout (px): as it slides
+ * in or out, its visible part.
+ */
+const visibleSize = (column: HTMLElement, root: HTMLElement) => {
+  const own = column.getBoundingClientRect();
+  const layout = root.getBoundingClientRect();
+  return Math.max(
+    0,
+    Math.round(
+      towardsEnd(root) === 1
+        ? own.right - layout.left
+        : layout.right - own.left,
+    ),
+  );
+};
+
+/**
  * Publishes a floating column's size (regular) as
  * `--uikit-layout-floating-size` on its layout, as it changes (e.g.
- * resized), for the columns clear of it.
+ * resized), for the columns clear of it; closed, none. Opening or closing,
+ * its visible part, frame by frame, until its slide has finished: the
+ * columns clear of it following it. (Not a transition of a registered,
+ * inherited property: see the docs' iOS Quirks, moving values and memory.
+ * This one, inherited by a whole column, moves only while a sidebar opens
+ * or closes, a few hundred milliseconds now and then, not on every
+ * navigation.)
  */
 const useFloatingSize = (
   columnRef: { current: HTMLDivElement | null },
   isFloating: boolean,
+  isOpen: boolean,
 ) => {
+  const wasOpen = useRef(isOpen);
   useLayoutEffect(() => {
     const { current: column } = columnRef;
     const root = column?.parentElement;
     if (!column || !root || !isFloating) return undefined;
 
     const property = '--uikit-layout-floating-size';
-    const resizeObserver = new ResizeObserver(([entry]) => {
-      const size = entry?.borderBoxSize[0]?.inlineSize ?? 0;
+    const publish = (size: number) =>
       root.style.setProperty(property, `${String(size)}px`);
+
+    let frame = 0;
+    const settle = () => {
+      frame = 0;
+      if (isOpen) publish(column.getBoundingClientRect().width);
+      else publish(0);
+    };
+    if (wasOpen.current === isOpen) {
+      if (!isOpen) publish(0);
+    } else {
+      wasOpen.current = isOpen;
+      // (After the style change starts its slide.)
+      const follow = () => {
+        if (column.getAnimations().length === 0) {
+          settle();
+          return;
+        }
+        publish(visibleSize(column, root));
+        frame = requestAnimationFrame(follow);
+      };
+      frame = requestAnimationFrame(follow);
+    }
+
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      // (Not while it slides: followed, see above.)
+      if (!isOpen || frame) return;
+      publish(entry?.borderBoxSize[0]?.inlineSize ?? 0);
     });
     resizeObserver.observe(column);
 
     return () => {
+      cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       root.style.removeProperty(property);
     };
-  }, [columnRef, isFloating]);
+  }, [columnRef, isFloating, isOpen]);
+};
+
+/**
+ * Its scrollers (pages, content layers) drawn anew, once a column has
+ * opened or closed: iOS keeps the tiles it drew ahead of what's shown, off
+ * screen, as they were before (e.g. the content beside a sidebar hidden,
+ * inset as it was, for good). Each given a layer of its own for two frames
+ * (`will-change`), its tiles then drawn afresh: at rest, after the slide
+ * (not during a scroll, see iOS Quirks: layers changing under one).
+ */
+const repaintScrollers = (root: HTMLElement) => {
+  const scrollers = Array.from(
+    root.querySelectorAll<HTMLElement>(
+      '.uikit-page-root, .uikit-viewport-content',
+    ),
+  );
+  for (const scroller of scrollers) scroller.style.willChange = 'transform';
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      for (const scroller of scrollers) {
+        scroller.style.removeProperty('will-change');
+      }
+    }),
+  );
+};
+
+/**
+ * Opening or closing (not as it's first laid out): its layout marked
+ * transitioning (`data-transitioning`) until its own transitions have
+ * finished (none, e.g. with reduced motion: at once). Closing, a column
+ * that isn't floating keeps its size as it moves out (`--uikit-layout-
+ * column-closing-size`, see style.css): its size as last laid out
+ * open (observed; not measured then, which would lay it out closed before
+ * it's marked, its change not transitioned).
+ */
+const useOpenTransition = (
+  columnRef: { current: HTMLDivElement | null },
+  isOpen: boolean,
+) => {
+  const openSize = useRef<number | undefined>(undefined);
+  useLayoutEffect(() => {
+    const { current: column } = columnRef;
+    if (!column || !isOpen) return undefined;
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      openSize.current = entry?.borderBoxSize[0]?.inlineSize;
+    });
+    resizeObserver.observe(column);
+    return () => resizeObserver.disconnect();
+  }, [columnRef, isOpen]);
+
+  const wasOpen = useRef(isOpen);
+  useLayoutEffect(() => {
+    const { current: column } = columnRef;
+    const root = column?.parentElement;
+    if (!column || !root || wasOpen.current === isOpen) return undefined;
+    wasOpen.current = isOpen;
+
+    root.toggleAttribute('data-transitioning', true);
+    if (!isOpen && openSize.current !== undefined) {
+      column.style.setProperty(
+        '--uikit-layout-column-closing-size',
+        `${String(openSize.current)}px`,
+      );
+    }
+    let isCancelled = false;
+    // (After the style change starts them.)
+    const frame = requestAnimationFrame(() => {
+      Promise.allSettled(
+        column.getAnimations().map(({ finished }) => finished),
+      ).then(() => {
+        if (isCancelled) return;
+        delete root.dataset.transitioning;
+        if (isOpen) {
+          column.style.removeProperty('--uikit-layout-column-closing-size');
+        }
+        repaintScrollers(root);
+      });
+    });
+
+    return () => {
+      isCancelled = true;
+      cancelAnimationFrame(frame);
+      delete root.dataset.transitioning;
+    };
+  }, [columnRef, isOpen]);
 };
 
 /** A column side by side: sized (resizable), or sharing the free space. */
@@ -90,11 +239,13 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
       className,
       children,
       clearFloating = false,
+      defaultOpen = true,
       defaultSize,
       floating = false,
       maxSize = Infinity,
       minSize = 240,
       onSizeChange,
+      open: controlledOpen,
       resizable = false,
       size: controlledSize,
       style,
@@ -103,7 +254,10 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
-    useFloatingSize(ref, floating);
+    const [ownOpen] = useState(defaultOpen);
+    const isOpen = controlledOpen ?? ownOpen;
+    useFloatingSize(ref, floating, isOpen);
+    useOpenTransition(ref, isOpen);
     const [ownSize, setOwnSize] = useState(defaultSize);
     const size = controlledSize ?? ownSize;
     const dragRef = useRef<
@@ -143,9 +297,11 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
         <div
           ref={ref}
           data-clear-floating={clearFloating ? '' : undefined}
+          data-closed={isOpen ? undefined : ''}
           data-floating={floating ? '' : undefined}
           data-layout-part="column"
           data-resizable={resizable ? '' : undefined}
+          inert={!isOpen}
           style={columnStyle}
           {...props}
           className={cn('uikit-layout-column', className)}

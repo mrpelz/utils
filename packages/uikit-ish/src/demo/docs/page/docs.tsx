@@ -5,6 +5,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { glassModeRow } from '../glass-mode.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -54,5 +55,6 @@ export const pageRootRows: readonly PropRow[] = [
       the header’s bar), then lists.
     </>,
   ],
+  glassModeRow,
   ...elementRows('div', 'HTMLDivElement'),
 ];

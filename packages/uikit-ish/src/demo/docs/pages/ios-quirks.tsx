@@ -20,6 +20,7 @@ const sections: readonly Section[] = [
   ['the-short-layout-viewport', 'A short layout viewport in Home Screen apps'],
   ['the-keyboard', 'The keyboard'],
   ['native-scrolling-and-touch', 'Native scrolling and touch'],
+  ['layers-under-a-scroll', 'Layers changing under a scroll'],
   ['mouse-events-after-a-long-press', 'Mouse events after a long press'],
   ['pressed-buttons-and-focus', 'Pressed buttons don’t take focus (Safari)'],
   ['status-bar-taps', 'Status bar taps'],
@@ -52,6 +53,16 @@ const appCode = `import { isIos27 } from '@mrpelz/uikit-ish';
 // The head's finding, for your own logic: e.g. a hard edge where you
 // set one yourself.
 const edgeEffect = isIos27() ? 'hard' : 'soft';`;
+
+const fadeCode = `/* Fading something inside a scroller: by its color's alpha, not its
+   opacity (no layer of its own, made, held or dropped). */
+.my-title {
+  color: color-mix(
+    in srgb,
+    var(--color-ui-label) calc(var(--my-fade, 1) * 100%),
+    transparent
+  );
+}`;
 
 const movingCode = `@property --drawer-progress {
   syntax: '<number>';
@@ -371,6 +382,14 @@ export const IosQuirksPage: FunctionComponent = () => (
         every frame while the content is pulled past its end, is reset by the
         content layer’s children.
       </li>
+      <li>
+        <a href={publicUrl('layout')}>Layout</a>: as a floating column (a
+        sidebar) slides in or out, the inset of the column beside it follows it
+        frame by frame, as a custom property on the layout, read deep inside
+        that column’s pages. It isn’t reset below its readers. It moves only
+        while a sidebar opens or closes, a few hundred milliseconds now and
+        then, not on every navigation, so its cost doesn’t add up.
+      </li>
     </ul>
     <p>
       If you change one of these components, keep it that way. A new custom
@@ -478,10 +497,15 @@ export const IosQuirksPage: FunctionComponent = () => (
         component="viewport"
         part="useSizeClass"
       />{' '}
-      holds the size class it had. It lets go when an orientation matches the
-      window’s shape again, or when the page is shown again, and reads the size
-      class anew. There’s no timer: the events alone decide. The details, with
-      the measurements, are under “iPadOS’ snapshots” in{' '}
+      holds the size class it had. It lets go when the screen turns to another
+      orientation that matches the window’s shape (a real rotation), when the
+      window is back at its size from before, or when the page is shown again,
+      and reads the size class anew. There’s no timer: the events alone decide.
+      In a Safari tab, the second snapshot’s <code>orientationchange</code>{' '}
+      repeats the first one’s orientation, and its window (585px wide, as tall
+      as the tab) has that shape too: it looks like a match, but nothing has
+      turned, so the size class stays held. The details, with the measurements,
+      are under “iPadOS’ snapshots” in{' '}
       <PartLink
         component="viewport"
         part="useSizeClass"
@@ -705,7 +729,183 @@ export const IosQuirksPage: FunctionComponent = () => (
         back to one place, or ends it, and cuts the bounce at a scroller’s top
         short, even with nothing to snap to. Leave the document without it.
       </li>
+      <li>
+        <strong>Tiles drawn ahead go stale.</strong> iOS draws a scroller’s
+        content ahead of what’s shown, in tiles. When that content is laid out
+        anew while it’s off screen (the content beside a sidebar that slides
+        out, its inset changing on every frame), those tiles can keep their old
+        drawing for good: scrolled into view, the content shows as it was. Once
+        a{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />{' '}
+        has opened or closed, Layout gives its scrollers a layer of their own
+        for two frames, so their tiles are drawn anew. That happens at rest,
+        after the slide, not during a scroll.
+      </li>
     </ul>
+
+    <Heading
+      id="layers-under-a-scroll"
+      level={2}
+    >
+      Layers changing under a scroll
+    </Heading>
+    <p>
+      A flick stops dead, or a page pulled past its end lets go while the finger
+      is still down, on some pages and not on others, always at the same spot.
+      iOS ends a glide or a bounce when the layers in or around its scroller
+      change while it runs. Nothing in the DOM has to change for that, and no
+      script has to scroll.
+    </p>
+
+    <Heading
+      id="layers-what-you-see"
+      level={3}
+    >
+      What you see
+    </Heading>
+    <ul>
+      <li>
+        A glide ends as a large title scrolls under the bar, or comes back into
+        view.
+      </li>
+      <li>
+        A glide ends as a row of glass buttons or glass text fields passes under
+        a bar, or as glass passes the bottom bar.
+      </li>
+      <li>
+        On a page shorter than the screen, a pull past its end is let go, in a
+        single frame, the moment its large title leaves the top of the screen.
+      </li>
+    </ul>
+    <p>
+      The page’s scroll position simply stops changing, or jumps back to its
+      end. There’s no <code>touchcancel</code>, no script scroll, no focus
+      change, and Chrome doesn’t show any of it.
+    </p>
+
+    <Heading
+      id="layers-why-it-happens"
+      level={3}
+    >
+      Why it happens
+    </Heading>
+    <p>
+      iOS scrolls on its own, from the layers the page last gave it. When a
+      layer in the scroller, or one it meets, is made, dropped or stacked anew
+      during a glide or a bounce, the scroll gets rebuilt, and what was moving
+      stops. What the library found does that:
+    </p>
+    <ul>
+      <li>
+        <strong>Scroll-driven animations</strong> (an{' '}
+        <code>animation-timeline</code> of <code>view()</code> or{' '}
+        <code>scroll()</code>) on something in the scroller, while they’re
+        active.
+      </li>
+      <li>
+        <strong>An element turning translucent.</strong> At an{' '}
+        <code>opacity</code> below 1, an element gets a layer of its own, and
+        loses it again at 1. Fading something inside a scroller by its opacity
+        does both.
+      </li>
+      <li>
+        <strong>A layer leaving the screen during a bounce.</strong> An element
+        with a layer of its own throughout (<code>will-change</code>) gets its
+        drawing dropped once it’s off screen. In a normal scroll that passes; in
+        a bounce past an end, it resets the bounce.
+      </li>
+      <li>
+        <strong>Changes during a bounce.</strong> Styles written while a page is
+        pulled past its end, even small ones, end the pull.
+      </li>
+      <li>
+        <strong>Backdrop filters meeting.</strong> Glass in a scroller has a
+        backdrop filter, and so does a bar’s soft edge effect. Where glass
+        passes under the bar, the glide ends.
+      </li>
+      <li>
+        <strong>Isolated groups.</strong> An element with{' '}
+        <code>isolation: isolate</code> around glass layers, in a scroller, ends
+        its glides too. Without the isolation, though, blend modes in it blend
+        with whatever iOS composites behind them: under a bar’s blur, tinted
+        glass turns darker and duller.
+      </li>
+    </ul>
+
+    <Heading
+      id="layers-what-the-library-does"
+      level={3}
+    >
+      What the library does
+    </Heading>
+    <ul>
+      <li>
+        <a href={publicUrl('header')}>Header</a>: the large title fades out, and
+        the bar’s title in, from a scroll listener, not a scroll-driven
+        animation. The large title, inside the scroller, fades by its text
+        color’s alpha, so it never has a layer of its own. The bar’s title,
+        fixed outside the scroller, has one throughout.
+      </li>
+      <li>
+        <a href={publicUrl('header')}>Header</a> and the{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>’s edge effect: pulled past
+        an end, both read the scroll position as it was at that end, so a bounce
+        changes nothing. The pixel a short page always scrolls by (to bounce at
+        all) counts as none.
+      </li>
+      <li>
+        <a href={publicUrl('glossary#flat-glass')}>Flat glass</a>: while a
+        scroll container can scroll, the glass in it is drawn without what ends
+        glides there: no backdrop filters (opaque, over the container’s own
+        background, as the live glass would look: a blur of a plain color is
+        that color, a brightness filter brightens it by its factor), no isolated
+        hosts (its layers drawn first, in tree order), no blend modes (a tint
+        drawn as the color its layers blend to, labels in their colors, a
+        disabled prominent label as the tint lightened). The <code>glass</code>{' '}
+        prop (<code>auto</code> by default) overrides it with <code>flat</code>{' '}
+        or <code>live</code>. (Pausing live glass while a scroll runs, instead,
+        wasn’t reliable; don’t go back there.)
+      </li>
+    </ul>
+
+    <Heading
+      id="layers-in-your-own-code"
+      level={3}
+    >
+      In your own code
+    </Heading>
+    <ul>
+      <li>
+        No scroll-driven animations on content in a scroller. Follow the scroll
+        with a listener instead, and write to the few elements that change.
+      </li>
+      <li>
+        Fade content in a scroller by its color’s alpha, not its opacity, and
+        don’t give it <code>will-change</code>.
+      </li>
+      <li>
+        Nothing written while a page is pulled past an end: clamp what you read
+        from <code>scrollTop</code> to its range.
+      </li>
+      <li>
+        Glass in content that scrolls: leave its scroll container’s{' '}
+        <code>glass</code> at <code>auto</code>, or set it to <code>flat</code>{' '}
+        (
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
+        , and the content parts of a <a href={publicUrl('sheet')}>Sheet</a>, an{' '}
+        <a href={publicUrl('island')}>Island</a>, a{' '}
+        <a href={publicUrl('popover')}>Popover</a> and the{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>). No backdrop filters of
+        your own in it either.
+      </li>
+    </ul>
+    <CodeView code={fadeCode} />
 
     <Heading
       id="mouse-events-after-a-long-press"

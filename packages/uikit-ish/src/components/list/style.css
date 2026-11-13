@@ -36,11 +36,15 @@
     overflow: clip visible;
     padding: 0;
     border-radius: var(--uikit-list-radius, 24px);
-    background-color: var(
+    background-color: var(--uikit-glass-backdrop);
+    box-shadow: var(--uikit-list-outline-shadow, none);
+
+    /* Its background: what flat glass in it is drawn over (see Glass). */
+    --uikit-glass-backdrop: var(
       --uikit-list-group-background,
       var(--color-ui-secondary-system-grouped-background)
     );
-    box-shadow: var(--uikit-list-outline-shadow, none);
+
     list-style: none;
     margin-block: 0;
     margin-inline: var(--uikit-list-inset, 16px);

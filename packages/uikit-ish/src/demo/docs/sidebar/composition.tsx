@@ -35,6 +35,8 @@ import {
 } from '../../tooling/guide/sections.js';
 import {
   sfFolder,
+  sfInsetFilledLeadinghalfArrowLeadingRectangle,
+  sfInsetFilledLeadingthirdRectangle,
   sfListBullet,
   sfMagnifyingglass,
   sfTrash,
@@ -279,6 +281,66 @@ const sidebarDrawer = useCreateDrawerHandle();
         …
         <Viewport.Padding edge="block-end" />
       </Page.Root>
+    </Header.Root>
+  </Layout.Column>
+</Layout.Root>`;
+
+const hidingCode = `// Whether the sidebar shows: the app's state.
+const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+<Layout.Root>
+  {/* Closed, it slides out; the content's inset glides with it. */}
+  <Layout.Column floating aria-label="Sidebar" defaultSize={300} open={isSidebarOpen}>
+    <Sidebar.Root aria-label="Mailboxes">
+      {/* Its toolbar in a bar (staying at its top), its list in a page. */}
+      <Header.Root>
+        <Viewport.BlockStart>
+          <Sidebar.Toolbar>
+            <Button.Root
+              aria-expanded={isSidebarOpen}
+              aria-label="Hide Sidebar"
+              shape="circle"
+              tint="var(--uikit-glass-content)"
+              variant="borderless"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <Button.Icon>
+                <Symbol icon={sfInsetFilledLeadinghalfArrowLeadingRectangle} />
+              </Button.Icon>
+            </Button.Root>
+          </Sidebar.Toolbar>
+        </Viewport.BlockStart>
+        <Page.Root>
+          <Viewport.Padding edge="block-start" />
+          <List.Root listStyle="sidebar">…</List.Root>
+          <Viewport.Padding edge="block-end" />
+        </Page.Root>
+      </Header.Root>
+    </Sidebar.Root>
+  </Layout.Column>
+  <Layout.Column clearFloating>
+    <Header.Root>
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          {/* Closed: a button showing it again. */}
+          {isSidebarOpen ? null : (
+            <Toolbar.Leading>
+              <Toolbar.Button
+                aria-expanded={false}
+                aria-label="Show Sidebar"
+                shape="circle"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <Button.Icon>
+                  <Symbol icon={sfInsetFilledLeadingthirdRectangle} />
+                </Button.Icon>
+              </Toolbar.Button>
+            </Toolbar.Leading>
+          )}
+          <Toolbar.Title><span>Inbox</span></Toolbar.Title>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Page.Root>…</Page.Root>
     </Header.Root>
   </Layout.Column>
 </Layout.Root>`;
@@ -1714,9 +1776,258 @@ const Adaptive: FunctionComponent = () => {
   );
 };
 
+/**
+ * A tablet: the sidebar hidden by its toolbar's button (in its bar,
+ * staying at its top as its list scrolls), shown again by one in the
+ * content's bar (the app's state, the column's `open`).
+ */
+const Hiding: FunctionComponent = () => {
+  const id = 'sidebar-composition-hiding';
+  const [log, addLog] = useLog();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const setOpen = (isOpen: boolean) => {
+    addLog(`sidebar: ${isOpen ? 'shown' : 'hidden'}`);
+    setIsSidebarOpen(isOpen);
+  };
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Root': [
+              'aria-expanded',
+              'aria-label',
+              'onClick',
+              'shape',
+              'tint',
+              'variant',
+            ],
+            'Header.LargeTitle': [],
+            'Layout.Column': [
+              'aria-label',
+              'clearFloating',
+              'defaultSize',
+              'floating',
+              'open',
+            ],
+            'Layout.Root': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Sidebar.Root': ['aria-label'],
+            'Sidebar.Toolbar': [],
+            'Toolbar.Button': [
+              'aria-expanded',
+              'aria-label',
+              'onClick',
+              'shape',
+            ],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  return (
+    <Component
+      isExpanded
+      isInline
+      controls={[partControls]}
+      id={id}
+      log={log}
+      stage="tablet"
+      state={[partState]}
+      title="Hiding the sidebar"
+    >
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Layout.Root {...partProps['Layout.Root']}>
+          <Layout.Column
+            {...partProps['Layout.Column']}
+            floating
+            aria-label="Sidebar"
+            defaultSize={300}
+            open={isSidebarOpen}
+          >
+            <Sidebar.Root
+              {...partProps['Sidebar.Root']}
+              aria-label="Mailboxes"
+            >
+              <Header.Root>
+                <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                  <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
+                    <Button.Root
+                      {...partProps['Button.Root']}
+                      aria-expanded={isSidebarOpen}
+                      aria-label="Hide Sidebar"
+                      shape="circle"
+                      tint="var(--uikit-glass-content)"
+                      variant="borderless"
+                      onClick={() => setOpen(false)}
+                    >
+                      <Button.Icon {...partProps['Button.Icon']}>
+                        <Symbol
+                          {...partProps.Symbol}
+                          icon={sfInsetFilledLeadinghalfArrowLeadingRectangle}
+                        />
+                      </Button.Icon>
+                    </Button.Root>
+                  </Sidebar.Toolbar>
+                </Viewport.BlockStart>
+                <Page.Root {...partProps['Page.Root']}>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-start"
+                  />
+                  <List.Root
+                    {...partProps['List.Root']}
+                    listStyle="sidebar"
+                  >
+                    {sidebarSections.map(([title, rows]) => (
+                      <List.Section
+                        key={title}
+                        {...partProps['List.Section']}
+                      >
+                        <List.Header
+                          {...partProps['List.Header']}
+                          prominence="nested"
+                        >
+                          <List.Title {...partProps['List.Title']}>
+                            {title}
+                          </List.Title>
+                        </List.Header>
+                        <List.Group {...partProps['List.Group']}>
+                          {rows.map(([value, rowTitle, icon]) => (
+                            <List.Item
+                              key={value}
+                              {...partProps['List.Item']}
+                            >
+                              <List.Leading {...partProps['List.Leading']}>
+                                <List.Image
+                                  {...partProps['List.Image']}
+                                  variant="symbol"
+                                >
+                                  <Symbol
+                                    {...partProps.Symbol}
+                                    icon={icon}
+                                  />
+                                </List.Image>
+                              </List.Leading>
+                              <List.Content {...partProps['List.Content']}>
+                                <List.Title {...partProps['List.Title']}>
+                                  {rowTitle}
+                                </List.Title>
+                              </List.Content>
+                            </List.Item>
+                          ))}
+                        </List.Group>
+                      </List.Section>
+                    ))}
+                  </List.Root>
+                  <Viewport.Padding
+                    {...partProps['Viewport.Padding']}
+                    edge="block-end"
+                  />
+                </Page.Root>
+              </Header.Root>
+            </Sidebar.Root>
+          </Layout.Column>
+          <Layout.Column
+            {...partProps['Layout.Column']}
+            clearFloating
+          >
+            <Header.Root>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  {isSidebarOpen ? null : (
+                    <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        aria-expanded={false}
+                        aria-label="Show Sidebar"
+                        shape="circle"
+                        onClick={() => setOpen(true)}
+                      >
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfInsetFilledLeadingthirdRectangle}
+                          />
+                        </Button.Icon>
+                      </Toolbar.Button>
+                    </Toolbar.Leading>
+                  )}
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <span>Inbox</span>
+                  </Toolbar.Title>
+                </Toolbar.Root>
+              </Viewport.BlockStart>
+              <Page.Root {...partProps['Page.Root']}>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-start"
+                />
+                <Header.LargeTitle {...partProps['Header.LargeTitle']}>
+                  <span>Inbox</span>
+                </Header.LargeTitle>
+                <List.Root {...partProps['List.Root']}>
+                  <List.Section {...partProps['List.Section']}>
+                    <List.Group {...partProps['List.Group']}>
+                      {Array.from(
+                        { length: 8 },
+                        (_, index) => `Message ${index + 1}`,
+                      ).map((item) => (
+                        <List.Item
+                          key={item}
+                          {...partProps['List.Item']}
+                        >
+                          <List.Content {...partProps['List.Content']}>
+                            <List.Title {...partProps['List.Title']}>
+                              {item}
+                            </List.Title>
+                          </List.Content>
+                        </List.Item>
+                      ))}
+                    </List.Group>
+                  </List.Section>
+                </List.Root>
+                <Viewport.Padding
+                  {...partProps['Viewport.Padding']}
+                  edge="block-end"
+                />
+              </Page.Root>
+            </Header.Root>
+          </Layout.Column>
+        </Layout.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['selecting-content', 'Selecting content'],
+  ['hiding-the-sidebar', 'Hiding the sidebar'],
   ['folders-in-a-hierarchy', 'Folders in a hierarchy'],
   ['a-drawer', 'A drawer'],
   ['search', 'Search'],
@@ -1788,6 +2099,69 @@ export const SidebarComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={selectingCode} />
     <Selecting />
+
+    <Heading
+      id="hiding-the-sidebar"
+      level={2}
+    >
+      Hiding the sidebar
+    </Heading>
+    <ul>
+      <li>
+        A button in the sidebar’s toolbar hides it, and one in the content’s bar
+        shows it again, only while it’s hidden. The sidebar slides out, and the
+        content’s inset glides with it (its column’s <code>open</code>, see{' '}
+        <PartLink
+          component="layout"
+          part="Layout.Column"
+        />
+        ).
+      </li>
+      <li>
+        It’s the app’s state, passed as the column’s <code>open</code>, and the
+        buttons are the app’s own. There’s no handle for it: an app has a
+        sidebar or two at most, and the button that shows it has to know it’s
+        hidden, so the state has to reach both buttons anyway.
+      </li>
+      <li>
+        In a stack of pages, put the button that shows it in a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />
+        , so it stays put as pages are pushed and popped.
+      </li>
+      <li>
+        The sidebar’s toolbar stays at its top while its list scrolls: the
+        sidebar holds a{' '}
+        <PartLink
+          component="header"
+          part="Header.Root"
+        />{' '}
+        with the toolbar in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        />{' '}
+        and the list in a{' '}
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
+        , as a screen does. Its list fades out under the toolbar.
+      </li>
+      <li>
+        <strong>Library:</strong> the column sliding out and in, keeping its
+        size, inert while closed, and the content’s inset following. The sidebar
+        as its bar’s screen: where its toolbar sits, the page’s insets, the
+        fade.
+      </li>
+      <li>
+        <strong>Demo:</strong> the open state and the two buttons.
+      </li>
+    </ul>
+    <CodeView code={hidingCode} />
+    <Hiding />
 
     <Heading
       id="folders-in-a-hierarchy"
@@ -2093,6 +2467,7 @@ export const SidebarComposition: FunctionComponent = () => (
 /** Its live views, also on the component's page of demos (and `/all`). */
 export const sidebarCompositionDemos = [
   Selecting,
+  Hiding,
   Hierarchy,
   InADrawer,
   Search,

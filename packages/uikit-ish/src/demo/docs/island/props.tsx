@@ -43,6 +43,12 @@ export const propOptionsPart = {
   style: commonPropOptions.style,
 };
 
+/** Its scrolling content's (a part's, see `propOptionsPart`): its glass too. */
+export const propOptionsScrollContent = {
+  ...propOptionsPart,
+  glass: [undefined, 'auto', 'flat', 'live'] as const,
+};
+
 /** `Island.Grabber`: its element, its cursor. */
 export const propOptionsGrabber = {
   ...propOptionsPart,

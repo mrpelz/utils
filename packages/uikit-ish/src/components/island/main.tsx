@@ -15,6 +15,7 @@ import {
   useState,
 } from 'react';
 
+import { useGlassMode } from '../glass/main.js';
 import {
   stopsOf,
   useContentScrolled,
@@ -685,17 +686,19 @@ const Grabber = forwardRef<HTMLDivElement, IslandGrabberProps>(
  * composited scroller past a parent's rounded clip).
  */
 const Content = forwardRef<HTMLDivElement, IslandContentProps>(
-  ({ className, ...props }, forwardedRef) => {
+  ({ className, glass = 'auto', ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
     // (An overlay's: never what a provider tracks, see Viewport.)
     useScrollerRegistration(ref, true, true);
     // (the current scroller while scrolled from its start, see Viewport's `useCurrentScroller`.)
     useCurrentLayer(ref, 'scrolled');
+    const glassMode = useGlassMode(ref, glass, false);
 
     return (
       <>
         <div
           ref={ref}
+          data-glass={glassMode}
           data-island-part="content"
           // (Its text fields kept in view above the keyboard, see Viewport.)
           data-viewport-focus-scroll="target"

@@ -47,12 +47,12 @@ import {
   getPropOptionsGuideRoot,
   propOptionsArrow,
   propOptionsClose,
-  propOptionsElement,
   propOptionsGuidePositioner,
   propOptionsHeader,
   propOptionsPart,
   propOptionsPopup,
   propOptionsPortal,
+  propOptionsScrollContent,
   propOptionsTitle,
   propOptionsTrigger,
 } from './props.js';
@@ -1518,7 +1518,7 @@ const HeaderPart: FunctionComponent = () => {
 const BodyPart: FunctionComponent = () => {
   const id = 'popover-parts-body';
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsElement, {
+  const [control, props, state] = usePropControl(propOptionsScrollContent, {
     external,
     isOpen: true,
     emphasize: 'outline',

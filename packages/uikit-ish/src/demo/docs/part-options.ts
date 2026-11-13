@@ -119,6 +119,7 @@ import {
   getPropOptionsRoot as getPropOptionsRootIsland,
   propOptionsGrabber as propOptionsGrabberIsland,
   propOptionsPart as propOptionsPartIsland,
+  propOptionsScrollContent as propOptionsScrollContentIsland,
   propOptionsSnapGroup as propOptionsSnapGroupIsland,
 } from './island/props.js';
 import { propOptionsGuideRoot as propOptionsGuideRootLayout } from './layout/props.js';
@@ -183,12 +184,12 @@ import {
   getPropOptionsGuideRoot as getPropOptionsGuideRootPopover,
   propOptionsArrow as propOptionsArrowPopover,
   propOptionsClose as propOptionsClosePopover,
-  propOptionsElement as propOptionsElementPopover,
   propOptionsGuidePositioner as propOptionsGuidePositionerPopover,
   propOptionsHeader as propOptionsHeaderPopover,
   propOptionsPart as propOptionsPartPopover,
   propOptionsPopup as propOptionsPopupPopover,
   propOptionsPortal as propOptionsPortalPopover,
+  propOptionsScrollContent as propOptionsScrollContentPopover,
   propOptionsTitle as propOptionsTitlePopover,
   propOptionsTrigger as propOptionsTriggerPopover,
 } from './popover/props.js';
@@ -218,6 +219,7 @@ import {
   propOptionsGuidePopup as propOptionsGuidePopupSheet,
   propOptionsHeader as propOptionsHeaderSheet,
   propOptionsPart as propOptionsPartSheet,
+  propOptionsScrollContent as propOptionsScrollContentSheet,
   propOptionsSnapGroup as propOptionsSnapGroupSheet,
 } from './sheet/props.js';
 import {
@@ -406,7 +408,7 @@ export const partOptions: Record<string, PartOptions> = {
   Form: getPropOptionsFormForm,
   'Header.Accessory': propOptionsAccessoryHeader,
   'Header.LargeTitle': propOptionsLargeTitleHeader,
-  'Island.Content': propOptionsPartIsland,
+  'Island.Content': propOptionsScrollContentIsland,
   'Island.Grabber': propOptionsGrabberIsland,
   'Island.Header': propOptionsPartIsland,
   'Island.Root': getPropOptionsRootIsland,
@@ -487,7 +489,7 @@ export const partOptions: Record<string, PartOptions> = {
   PageControl: getPropOptionsRootPageControl,
   'Popover.Arrow': propOptionsArrowPopover,
   'Popover.Backdrop': propOptionsPartPopover,
-  'Popover.Body': propOptionsElementPopover,
+  'Popover.Body': propOptionsScrollContentPopover,
   'Popover.Close': propOptionsClosePopover,
   'Popover.Description': propOptionsPartPopover,
   'Popover.Header': propOptionsHeaderPopover,
@@ -516,7 +518,7 @@ export const partOptions: Record<string, PartOptions> = {
   'Segmented.Root': getPropOptionsRootSegmented,
   'Settings.Provider': propOptionsProviderPartSettings,
   'Sheet.Close': propOptionsPartSheet,
-  'Sheet.Content': propOptionsPartSheet,
+  'Sheet.Content': propOptionsScrollContentSheet,
   'Sheet.Description': propOptionsPartSheet,
   'Sheet.Grabber': propOptionsGrabberSheet,
   'Sheet.Header': propOptionsHeaderSheet,

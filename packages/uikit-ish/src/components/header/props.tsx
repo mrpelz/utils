@@ -5,8 +5,8 @@ export type HeaderContextValue = {
   /** Whether the header has a large title (see `LargeTitle`). */
   hasLargeTitle: boolean;
   markLargeTitle?: () => () => void;
-  /** The large title's view timeline (unique per header). */
-  timeline?: string;
+  /** Its root's element (its bar's title found within it). */
+  root?: HTMLElement | null;
 };
 
 export type HeaderRootProps = { children?: ReactNode };

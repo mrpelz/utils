@@ -6,6 +6,7 @@ import {
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { glassModeRow } from '../glass-mode.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -109,6 +110,7 @@ export const islandContentRows: readonly PropRow[] = [
       <a href={publicUrl('list')}>List</a>. With stops, its snap groups.
     </>,
   ],
+  glassModeRow,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 

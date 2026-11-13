@@ -28,7 +28,27 @@ export const sidebarRootRows: readonly PropRow[] = [
       >
         List.Root listStyle=&quot;sidebar&quot;
       </PartLink>
-      ).
+      ). For a toolbar that stays at its top while the list scrolls, a{' '}
+      <PartLink
+        component="header"
+        part="Header.Root"
+      />{' '}
+      instead: the toolbar in a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.BlockStart"
+      />
+      , the list in a{' '}
+      <PartLink
+        component="page"
+        part="Page.Root"
+      />{' '}
+      (the search field in a{' '}
+      <PartLink
+        component="header"
+        part="Header.Accessory"
+      />
+      ). The sidebar is then the page’s screen: it doesn’t scroll itself.
     </>,
   ],
   [

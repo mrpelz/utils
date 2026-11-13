@@ -266,6 +266,7 @@
     --glass-ui-dim-blur: rgb(255 255 255 / 5%);
     --glass-ui-dim-fill: rgb(255 255 255 / 4%);
     --glass-ui-dim-fill-filter: brightness(0.606);
+    --glass-ui-dim-fill-brightness: 0.606;
     --glass-ui-dim-content: #bfbfbf;
     --glass-ui-dim-content-blend: plus-lighter;
     --glass-ui-dim-content-disabled: #262626;
@@ -307,6 +308,7 @@
     --glass-ui-bright-blur: rgb(0 0 0 / 4%);
     --glass-ui-bright-fill: rgb(247 247 247 / 50%);
     --glass-ui-bright-fill-filter: brightness(1.25) brightness(0.969);
+    --glass-ui-bright-fill-brightness: calc(1.25 * 0.969);
     --glass-ui-bright-content: #404040;
     --glass-ui-bright-content-blend: multiply;
     --glass-ui-bright-content-disabled: #d9d9d9;
@@ -337,6 +339,7 @@
     --glass-ui-background-bright-blur: rgb(0 0 0 / 4%);
     --glass-ui-background-bright-fill: rgb(255 255 255 / 30%);
     --glass-ui-background-bright-fill-filter: brightness(1.1);
+    --glass-ui-background-bright-fill-brightness: 1.1;
     --glass-ui-background-bright-content: var(--glass-ui-bright-content);
     --glass-ui-background-bright-content-blend: var(
       --glass-ui-bright-content-blend
@@ -366,6 +369,7 @@
     --glass-ui-background-dim-blur: rgb(0 0 0 / 10%);
     --glass-ui-background-dim-fill: rgb(0 0 0 / 20%);
     --glass-ui-background-dim-fill-filter: brightness(0.8);
+    --glass-ui-background-dim-fill-brightness: 0.8;
     --glass-ui-background-dim-content: var(--glass-ui-dim-content);
     --glass-ui-background-dim-content-blend: var(
       --glass-ui-dim-content-blend
@@ -534,15 +538,19 @@
       --glass-ui-bright-blur: transparent;
       --glass-ui-bright-fill: rgb(247 247 247);
       --glass-ui-bright-fill-filter: none;
+      --glass-ui-bright-fill-brightness: 1;
       --glass-ui-dim-blur: transparent;
       --glass-ui-dim-fill: rgb(28 28 30);
       --glass-ui-dim-fill-filter: none;
+      --glass-ui-dim-fill-brightness: 1;
       --glass-ui-background-bright-blur: transparent;
       --glass-ui-background-bright-fill: rgb(247 247 247);
       --glass-ui-background-bright-fill-filter: none;
+      --glass-ui-background-bright-fill-brightness: 1;
       --glass-ui-background-dim-blur: transparent;
       --glass-ui-background-dim-fill: rgb(28 28 30);
       --glass-ui-background-dim-fill-filter: none;
+      --glass-ui-background-dim-fill-brightness: 1;
       --glass-ui-medium-light-background: rgb(246 246 246);
       --glass-ui-medium-dark-background: rgb(30 30 30);
     }
@@ -553,15 +561,19 @@
       --glass-ui-bright-blur: transparent;
       --glass-ui-bright-fill: rgb(247 247 247);
       --glass-ui-bright-fill-filter: none;
+      --glass-ui-bright-fill-brightness: 1;
       --glass-ui-dim-blur: transparent;
       --glass-ui-dim-fill: rgb(28 28 30);
       --glass-ui-dim-fill-filter: none;
+      --glass-ui-dim-fill-brightness: 1;
       --glass-ui-background-bright-blur: transparent;
       --glass-ui-background-bright-fill: rgb(247 247 247);
       --glass-ui-background-bright-fill-filter: none;
+      --glass-ui-background-bright-fill-brightness: 1;
       --glass-ui-background-dim-blur: transparent;
       --glass-ui-background-dim-fill: rgb(28 28 30);
       --glass-ui-background-dim-fill-filter: none;
+      --glass-ui-background-dim-fill-brightness: 1;
       --glass-ui-medium-light-background: rgb(246 246 246);
       --glass-ui-medium-dark-background: rgb(30 30 30);
     }
@@ -572,15 +584,19 @@
       --glass-ui-bright-blur: transparent;
       --glass-ui-bright-fill: rgb(247 247 247);
       --glass-ui-bright-fill-filter: none;
+      --glass-ui-bright-fill-brightness: 1;
       --glass-ui-dim-blur: transparent;
       --glass-ui-dim-fill: rgb(28 28 30);
       --glass-ui-dim-fill-filter: none;
+      --glass-ui-dim-fill-brightness: 1;
       --glass-ui-background-bright-blur: transparent;
       --glass-ui-background-bright-fill: rgb(247 247 247);
       --glass-ui-background-bright-fill-filter: none;
+      --glass-ui-background-bright-fill-brightness: 1;
       --glass-ui-background-dim-blur: transparent;
       --glass-ui-background-dim-fill: rgb(28 28 30);
       --glass-ui-background-dim-fill-filter: none;
+      --glass-ui-background-dim-fill-brightness: 1;
       --glass-ui-medium-light-background: rgb(246 246 246);
       --glass-ui-medium-dark-background: rgb(30 30 30);
     }

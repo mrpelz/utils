@@ -17,6 +17,7 @@ import {
   useState,
 } from 'react';
 
+import { useGlassMode } from '../glass/main.js';
 import { useSettingsPortalProps } from '../settings/main.js';
 import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
 import {
@@ -733,18 +734,20 @@ const Header = forwardRef<HTMLDivElement, SheetHeaderProps>(
  * (fading it out under the header, see style.css) leaves them be.
  */
 const Content = forwardRef<HTMLDivElement, SheetContentProps>(
-  ({ children, className, ...props }, forwardedRef) => {
+  ({ children, className, glass = 'auto', ...props }, forwardedRef) => {
     const ref = useForwardedRef(forwardedRef);
     // (An overlay's: never what a provider tracks, see Viewport.)
     useScrollerRegistration(ref, true, true);
     // (the current scroller while open, see Viewport's `useCurrentScroller`.)
     useCurrentLayer(ref, 'overlay');
+    const glassMode = useGlassMode(ref, glass, false);
 
     return (
       <>
         <BaseDrawer.Content
           ref={ref}
           className={cn('uikit-sheet-content', className)}
+          data-glass={glassMode}
           data-sheet-part="content"
           data-snap-scroller=""
           // (Its text fields kept in view above the keyboard, see Viewport.)

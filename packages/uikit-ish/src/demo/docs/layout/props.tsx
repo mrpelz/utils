@@ -69,6 +69,8 @@ export const getPropOptionsGuideColumn = (
       ...[undefined, 400, 480].filter((size) => size !== maxSize),
     ],
     resizable: [isResizable, !isResizable] as const,
+    open: [undefined, false, true] as const,
+    defaultOpen: [undefined, false, true] as const,
     floating: isFloating ? [true, undefined] : [undefined, true],
     clearFloating: isClearFloating ? [true, undefined] : [undefined, true],
     onSizeChange: [
@@ -90,6 +92,10 @@ export const getPropOptionsGuideColumn = (
 
   return uncontrolled;
 };
+
+/** A column's control state as a key, without its `open`. */
+const columnKey = (state: object) =>
+  JSON.stringify({ ...state, open: undefined });
 
 /** A view's parts: the one it's about, open and outlined. */
 export type LayoutPart = 'Background' | 'Column' | 'Root';
@@ -165,7 +171,7 @@ export const useLayoutControls = (
       ...options('Background'),
     },
   );
-  const [controlFirst, propsFirst, stateFirst, keyFirst] = usePropControl(
+  const [controlFirst, propsFirst, stateFirst] = usePropControl(
     useMemo(
       () =>
         getPropOptionsGuideColumn(
@@ -183,7 +189,7 @@ export const useLayoutControls = (
       ...options('Column'),
     },
   );
-  const [controlSecond, propsSecond, stateSecond, keySecond] = usePropControl(
+  const [controlSecond, propsSecond, stateSecond] = usePropControl(
     useMemo(
       () =>
         getPropOptionsGuideColumn(
@@ -202,7 +208,7 @@ export const useLayoutControls = (
     },
   );
 
-  const [controlThird, propsThird, stateThird, keyThird] = usePropControl(
+  const [controlThird, propsThird, stateThird] = usePropControl(
     useMemo(
       () =>
         getPropOptionsGuideColumn(
@@ -220,6 +226,13 @@ export const useLayoutControls = (
       ...options('Column', false),
     },
   );
+
+  // Each column's key (see `usePropControl`'s): mounting it anew as its
+  // props change, not as it opens or closes (`open`: transitioned, see
+  // Layout.Column).
+  const keyFirst = useMemo(() => columnKey(stateFirst), [stateFirst]);
+  const keySecond = useMemo(() => columnKey(stateSecond), [stateSecond]);
+  const keyThird = useMemo(() => columnKey(stateThird), [stateThird]);
 
   return {
     controls: [

@@ -26,6 +26,7 @@ export {
   type PopoverAlign,
   type PopoverHandle,
   type PopoverArrowProps,
+  type PopoverBodyProps,
   type PopoverHeaderProps,
   type PopoverPositionerProps,
   useCreatePopoverHandle,
@@ -377,7 +378,11 @@ export {
 } from './typography/main.js';
 
 // Types the components' props refer to
-export type { GlassContextValue } from './glass/main.js';
+export type {
+  GlassContextValue,
+  GlassMode,
+  GlassModeProps,
+} from './glass/main.js';
 export type {
   ColorScheme,
   LogicalSide,

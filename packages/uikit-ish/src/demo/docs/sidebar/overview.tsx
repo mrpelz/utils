@@ -23,6 +23,7 @@ import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
   Contents,
   Heading,
+  PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
 import {
@@ -496,6 +497,32 @@ export const SidebarOverview: FunctionComponent = () => (
       <li>
         Its toolbar has buttons at both ends, with 54px from the panel’s top to
         what follows. A group’s symbols are 18px apart.
+      </li>
+      <li>
+        Holding a{' '}
+        <PartLink
+          component="header"
+          part="Header.Root"
+        />{' '}
+        and a{' '}
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />
+        , it stops scrolling itself: its toolbar stays at its top in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockStart"
+        />
+        , exactly where it was, and its page scrolls beneath it to the panel’s
+        edges. The panel is the bar’s screen, and its padding becomes the page’s
+        insets. Content fades out under the toolbar, as in a{' '}
+        <a href={publicUrl('popover')}>Popover</a>, instead of a blur over the
+        glass. See{' '}
+        <a href={publicUrl('sidebar/composition#hiding-the-sidebar')}>
+          Hiding the sidebar
+        </a>
+        .
       </li>
       <li>
         Its search field is 44px high, on the panel’s selection fill. Its list’s

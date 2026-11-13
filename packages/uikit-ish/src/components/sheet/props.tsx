@@ -2,6 +2,7 @@ import type { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import type { Properties } from 'csstype';
 import type { ComponentProps } from 'react';
 
+import type { GlassModeProps } from '../glass/props.js';
 import type { ViewportEdgeEffect } from '../viewport/main.js';
 
 export type SheetDetent = 'large' | 'medium';
@@ -101,7 +102,8 @@ export type SheetHeaderProps = ComponentProps<'div'> & {
   edgeTint?: string;
 };
 
-export type SheetContentProps = Omit<BaseDrawer.Content.Props, 'ref'>;
+export type SheetContentProps = Omit<BaseDrawer.Content.Props, 'ref'> &
+  GlassModeProps;
 
 /** A handle linking a sheet to its triggers outside it. */
 export type SheetHandle<Payload = unknown> = BaseDrawer.Handle<Payload>;

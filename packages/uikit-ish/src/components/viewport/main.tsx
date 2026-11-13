@@ -16,6 +16,7 @@ import {
 } from 'react';
 import { type WheelEventState, WheelGestures } from 'wheel-gestures';
 
+import { useGlassMode } from '../glass/main.js';
 import {
   cn,
   type PortalContainer,
@@ -858,28 +859,64 @@ const regularQuery = '(width >= 768px)';
 //   ones) and the page's visibility (shown throughout) tell neither apart.
 // - While hidden, the window still reads as the last snapshot's size, its
 //   media queries already the real one's; shown again, it's resized back.
+// In a Safari tab (iPadOS 26, measured on an iPad Air), the second
+// snapshot's `orientationchange` reports the first's orientation again
+// (portrait), its window (585x820-ish, the tab's height) portrait too:
+// matching, though nothing turned. The window's then resized back to its
+// size before them, and the page hidden.
 // So: from an `orientationchange` contradicting the window's shape, the
-// size class held (no remount of a layout by it), until one matching it,
-// or the page shown anew (read anew). No timer.
+// size class held (no remount of a layout by it), until one matching it
+// in another orientation than the one that started the hold (a real
+// rotation turns it), the window resized back to its size then, or the
+// page shown anew (read anew). No timer.
 let isSnapshot = false;
 let heldSizeClass: SizeClass | undefined;
+/** The hold's start: its orientation, the window's size before it. */
+let heldFrom:
+  { height: number; isPortrait: boolean; width: number } | undefined;
+
+/** Whether the screen's orientation is portrait. */
+const isScreenPortrait = () => {
+  const { orientation } = window.screen;
+  return typeof orientation === 'object'
+    ? orientation.type.startsWith('portrait')
+    : Math.abs((window as { orientation?: number }).orientation ?? 0) !== 90;
+};
 
 /** Whether the screen's orientation is the window's shape. */
-const isOrientationTheWindows = () => {
-  const { orientation } = window.screen;
-  const isPortrait =
-    typeof orientation === 'object'
-      ? orientation.type.startsWith('portrait')
-      : Math.abs((window as { orientation?: number }).orientation ?? 0) !== 90;
-  return isPortrait === innerHeight >= innerWidth;
+const isOrientationTheWindows = () =>
+  isScreenPortrait() === innerHeight >= innerWidth;
+
+/** The hold released: the size class read anew. */
+const release = () => {
+  isSnapshot = false;
+  heldFrom = undefined;
 };
 
 if (typeof window !== 'undefined') {
   window.addEventListener('orientationchange', () => {
-    isSnapshot = !isOrientationTheWindows();
+    const isPortrait = isScreenPortrait();
+    if (!isOrientationTheWindows()) {
+      if (!isSnapshot) {
+        heldFrom = { height: innerHeight, isPortrait, width: innerWidth };
+      }
+      isSnapshot = true;
+    } else if (heldFrom?.isPortrait !== isPortrait) {
+      release();
+    }
+  });
+  // eslint-disable-next-line unicorn/prefer-observer-apis -- the window's own size (innerWidth/innerHeight), as the snapshots' events report it
+  window.addEventListener('resize', () => {
+    if (
+      isSnapshot &&
+      innerWidth === heldFrom?.width &&
+      innerHeight === heldFrom.height
+    ) {
+      release();
+    }
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') isSnapshot = false;
+    if (document.visibilityState === 'visible') release();
   });
 }
 
@@ -894,11 +931,13 @@ const subscribeRegular = (onChange: () => void) => {
   query.addEventListener('change', onChange);
   // (Released: read anew, see above.)
   window.addEventListener('orientationchange', onChange);
+  window.addEventListener('resize', onChange);
   document.addEventListener('visibilitychange', onChange);
 
   return () => {
     query.removeEventListener('change', onChange);
     window.removeEventListener('orientationchange', onChange);
+    window.removeEventListener('resize', onChange);
     document.removeEventListener('visibilitychange', onChange);
   };
 };
@@ -1231,6 +1270,7 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
       alwaysBounce,
       children,
       className,
+      glass = 'auto',
       keyboard = 'resize',
       safeArea = 'auto',
       style,
@@ -1241,6 +1281,7 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
     const ref = useForwardedRef(forwardedRef);
     useWindowHold(usePortalContainer(undefined));
     useScrollerRegistration(ref);
+    const glassMode = useGlassMode(ref, glass, alwaysBounce === true);
     const start = useAnchorSize('block-start');
     const end = useAnchorSize('block-end');
 
@@ -1248,6 +1289,7 @@ const Content = forwardRef<HTMLDivElement, ViewportContentProps>(
       <div
         ref={ref}
         data-always-bounce={bounceAttribute(alwaysBounce)}
+        data-glass={glassMode}
         data-keyboard={keyboard}
         data-safe-area={safeArea}
         // (Its text fields kept in view above the keyboard, see

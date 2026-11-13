@@ -85,6 +85,122 @@ export const tests = [
     },
   },
   {
+    name: 'layout: a column closed slides out at its size (inert, hidden, its content not squeezed), the others taking its place; opened, it keeps its size',
+    run: async (page) => {
+      // (Framed: through its controls, as a user does; the column keeps
+      // its key as it opens or closes, so it transitions.)
+      await page.open('layout', 'light', { isFramed: true });
+      /** Picks an option of the sidebar column's `open` control. */
+      const setOpen = (/** @type {string} */ label) =>
+        page.evaluate(
+          `(() => {
+          const section = [...document.querySelectorAll('.demo-config details')].find((element) => element.querySelector('summary').textContent.startsWith('Layout.Column (sidebar)'));
+          const select = section.querySelector('select[name=open]');
+          select.value = [...select.options].find((option) => option.textContent.trim() === ${JSON.stringify(label)}).value;
+          select.dispatchEvent(new Event('change', { bubbles: true }));
+        })()`,
+        );
+      const state = () =>
+        page.evaluate(`(() => {
+          const [first, second] = document.querySelectorAll(${JSON.stringify('.demo-stage [data-layout-part=root] > [data-layout-part=column]')});
+          const root = first.parentElement.getBoundingClientRect();
+          return {
+            content: Math.round(first.querySelector(${JSON.stringify('[data-page-part=root]')}).getBoundingClientRect().width),
+            hidden: getComputedStyle(first).visibility === 'hidden',
+            inert: first.inert,
+            second: Math.round(second.getBoundingClientRect().x - root.x),
+            transitioning: first.parentElement.hasAttribute('data-transitioning'),
+          };
+        })()`);
+      assert.deepEqual(await state(), {
+        content: 280,
+        hidden: false,
+        inert: false,
+        second: 280,
+        transitioning: false,
+      });
+
+      const seconds = page.sample(
+        `Math.round(document.querySelectorAll(${JSON.stringify('.demo-stage [data-layout-part=root] > [data-layout-part=column]')})[1].getBoundingClientRect().x)`,
+        600,
+      );
+      await setOpen('false');
+      /** @type {number[]} */
+      const moved = [...new Set(await seconds)];
+      assert.ok(moved.length > 4, `transitioned: ${moved.join(', ')}`);
+      await sleep(200);
+      assert.deepEqual(await state(), {
+        content: 280,
+        hidden: true,
+        inert: true,
+        second: 0,
+        transitioning: false,
+      });
+
+      await setOpen('true');
+      await sleep(600);
+      assert.deepEqual(await state(), {
+        content: 280,
+        hidden: false,
+        inert: false,
+        second: 280,
+        transitioning: false,
+      });
+    },
+  },
+  {
+    name: 'layout: a floating column closed slides off its edge, the content’s inset following it (transitioned), and back',
+    run: async (page) => {
+      await page.open('sidebar-composition-hiding');
+      const state = () =>
+        page.evaluate(`(() => {
+          const [side, content] = document.querySelectorAll(${JSON.stringify('[data-layout-part=root] > [data-layout-part=column]')});
+          const root = side.parentElement.getBoundingClientRect();
+          return {
+            inert: side.inert,
+            inset: getComputedStyle(content).getPropertyValue('--uikit-layout-inset-start'),
+            show: Boolean(document.querySelector(${JSON.stringify('[aria-label="Show Sidebar"]')})),
+            x: Math.round(side.getBoundingClientRect().right - root.left),
+          };
+        })()`);
+      assert.deepEqual(await state(), {
+        inert: false,
+        inset: '300px',
+        show: false,
+        x: 300,
+      });
+
+      const hide = await page.rect('[aria-label="Hide Sidebar"]');
+      const insets = page.sample(
+        `parseFloat(getComputedStyle(document.querySelectorAll(${JSON.stringify('[data-layout-part=root] > [data-layout-part=column]')})[1]).getPropertyValue('--uikit-layout-inset-start'))`,
+        600,
+      );
+      await page.click([hide.x + hide.width / 2, hide.y + hide.height / 2]);
+      /** @type {number[]} */
+      const sampled = await insets;
+      const between = sampled.filter((inset) => inset > 1 && inset < 299);
+      assert.ok(between.length > 3, `in between: ${sampled.join(', ')}`);
+      await sleep(200);
+      assert.deepEqual(await state(), {
+        inert: true,
+        inset: '0px',
+        show: true,
+        x: 0,
+      });
+
+      const show = await page.rect('[aria-label="Show Sidebar"]');
+      await page.click([show.x + show.width / 2, show.y + show.height / 2]);
+      await sleep(600);
+      assert.deepEqual(await state(), {
+        inert: false,
+        inset: '300px',
+        show: false,
+        x: 300,
+      });
+      assert.match(await page.log(), /sidebar: hidden\nsidebar: shown/u);
+    },
+  },
+  {
     name: 'sidebar: floating over the content, its page clear of it as it is resized; rerendered by its controls',
     run: async (page) => {
       await page.open('sidebar');

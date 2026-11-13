@@ -2,6 +2,7 @@ import './style.css';
 
 import { forwardRef } from 'react';
 
+import { useGlassMode } from '../glass/main.js';
 import { cn, useForwardedRef } from '../utils/main.js';
 import { EdgeEffects, useScrollerRegistration } from '../viewport/main.js';
 import type { PageRootProps } from './props.js';
@@ -33,12 +34,19 @@ const Root = forwardRef<HTMLDivElement, PageRootProps>(
       className,
       background = 'grouped',
       fill = false,
+      glass = 'auto',
       ...props
     },
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
     useScrollerRegistration(ref, !fill);
+    // (Filled, not a scroller: live, unless told.)
+    const glassMode = useGlassMode(
+      ref,
+      fill && glass === 'auto' ? 'live' : glass,
+      alwaysBounce,
+    );
 
     return (
       <div
@@ -46,6 +54,7 @@ const Root = forwardRef<HTMLDivElement, PageRootProps>(
         data-always-bounce={alwaysBounce && !fill ? '' : undefined}
         data-background={background}
         data-fill={fill ? '' : undefined}
+        data-glass={glassMode}
         data-page-part="root"
         // (Its text fields kept in view above the keyboard, see Viewport.)
         data-viewport-focus-scroll={fill ? undefined : 'target'}

@@ -154,6 +154,7 @@
     --uikit-glass-blur: var(--glass-ui-bright-blur);
     --uikit-glass-fill: var(--glass-ui-bright-fill);
     --uikit-glass-fill-filter: var(--glass-ui-bright-fill-filter);
+    --uikit-glass-fill-brightness: var(--glass-ui-bright-fill-brightness);
     --uikit-glass-content: var(--glass-ui-bright-content);
     --uikit-glass-content-blend: var(--glass-ui-bright-content-blend);
     --uikit-glass-content-disabled: var(--glass-ui-bright-content-disabled);
@@ -180,6 +181,7 @@
     --uikit-glass-blur: var(--glass-ui-dim-blur);
     --uikit-glass-fill: var(--glass-ui-dim-fill);
     --uikit-glass-fill-filter: var(--glass-ui-dim-fill-filter);
+    --uikit-glass-fill-brightness: var(--glass-ui-dim-fill-brightness);
     --uikit-glass-content: var(--glass-ui-dim-content);
     --uikit-glass-content-blend: var(--glass-ui-dim-content-blend);
     --uikit-glass-content-disabled: var(--glass-ui-dim-content-disabled);
@@ -219,6 +221,7 @@
     --uikit-glass-blur: var(--glass-ui-background-bright-blur);
     --uikit-glass-fill: var(--glass-ui-background-bright-fill);
     --uikit-glass-fill-filter: var(--glass-ui-background-bright-fill-filter);
+    --uikit-glass-fill-brightness: var(--glass-ui-background-bright-fill-brightness);
     --uikit-glass-content: var(--glass-ui-background-bright-content);
     --uikit-glass-content-blend: var(
       --glass-ui-background-bright-content-blend
@@ -251,6 +254,7 @@
     --uikit-glass-blur: var(--glass-ui-background-dim-blur);
     --uikit-glass-fill: var(--glass-ui-background-dim-fill);
     --uikit-glass-fill-filter: var(--glass-ui-background-dim-fill-filter);
+    --uikit-glass-fill-brightness: var(--glass-ui-background-dim-fill-brightness);
     --uikit-glass-content: var(--glass-ui-background-dim-content);
     --uikit-glass-content-blend: var(--glass-ui-background-dim-content-blend);
     --uikit-glass-content-disabled: var(
@@ -301,6 +305,7 @@
       var(--glass-ui-dim-fill)
     );
     --uikit-glass-fill-filter: var(--glass-ui-bright-fill-filter);
+    --uikit-glass-fill-brightness: var(--glass-ui-bright-fill-brightness);
     --uikit-glass-content: light-dark(
       var(--glass-ui-bright-content),
       var(--glass-ui-dim-content)
@@ -336,6 +341,7 @@
 
     @media (prefers-color-scheme: dark) {
       --uikit-glass-fill-filter: var(--glass-ui-dim-fill-filter);
+      --uikit-glass-fill-brightness: var(--glass-ui-dim-fill-brightness);
       --uikit-glass-content-blend: var(--glass-ui-dim-content-blend);
       --uikit-glass-content-prominent: var(--glass-ui-dim-content-prominent);
       --uikit-glass-content-prominent-blend: var(
@@ -369,6 +375,7 @@
 
     &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
       --uikit-glass-fill-filter: var(--glass-ui-bright-fill-filter);
+      --uikit-glass-fill-brightness: var(--glass-ui-bright-fill-brightness);
       --uikit-glass-content-blend: var(--glass-ui-bright-content-blend);
       --uikit-glass-content-prominent: var(
         --glass-ui-bright-content-prominent
@@ -391,6 +398,7 @@
 
     &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
       --uikit-glass-fill-filter: var(--glass-ui-dim-fill-filter);
+      --uikit-glass-fill-brightness: var(--glass-ui-dim-fill-brightness);
       --uikit-glass-content-blend: var(--glass-ui-dim-content-blend);
       --uikit-glass-content-prominent: var(--glass-ui-dim-content-prominent);
       --uikit-glass-content-prominent-blend: var(
@@ -517,6 +525,117 @@
 
     &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
       --uikit-glass-shadow: var(--glass-ui-panel-dim-shadow);
+    }
+  }
+}
+
+@layer uikit-ish {
+  /*
+   * Flat glass (`data-glass='flat'`, a scroll container's `glass` prop, up
+   * to a live one within it, `data-glass='live'`, and to its bars, fixed:
+   * a `Viewport` anchor in it, e.g. a header's within its page, doesn't
+   * scroll): glass in content that scrolls, drawn without what ends its glides on iOS (see the docs' iOS
+   * Quirks: layers changing under a scroll), looking as the live glass
+   * would:
+   * - No backdrop filters (live glass meeting a bar's blurred edge effect):
+   *   opaque, over its container's background (`--uikit-glass-backdrop`, set
+   *   by what draws it: a page, a list's group). A blur of a plain color is
+   *   that color; a brightness filter, that color brightened (or dimmed) by
+   *   its factor (`--uikit-glass-fill-brightness`).
+   * - No isolated hosts (an isolated group around glass layers): its layers
+   *   drawn first, in tree order (not at `z-index: -1` in an isolated host),
+   *   its host's other children positioned, after them.
+   * - No blend modes (without isolation, they'd blend with whatever iOS
+   *   composites behind them, darker and duller under a bar's blur): a tint
+   *   group drawn as what it blends to, its tint (a white base, saturation
+   *   and overlay leave white, multiplied by the tint); its content's blend
+   *   modes normal, their colors close as they are; a disabled prominent
+   *   label as its blend drew it (below).
+   */
+  @scope ([data-glass='flat']) to ([data-glass='live'], .uikit-viewport-anchor) {
+    .uikit-glass-fill {
+      backdrop-filter: none;
+      background-color: rgb(
+        from var(--uikit-glass-backdrop, var(--color-ui-system-background))
+          calc(r * var(--uikit-glass-fill-brightness, 1))
+          calc(g * var(--uikit-glass-fill-brightness, 1))
+          calc(b * var(--uikit-glass-fill-brightness, 1))
+      );
+      background-image: linear-gradient(
+        var(--uikit-glass-fill),
+        var(--uikit-glass-fill)
+      );
+    }
+
+    .uikit-glass-blur {
+      backdrop-filter: none;
+      background-color: var(
+        --uikit-glass-backdrop,
+        var(--color-ui-system-background)
+      );
+      background-image: linear-gradient(
+        var(--uikit-glass-blur),
+        var(--uikit-glass-blur)
+      );
+    }
+
+    .uikit-glass-medium {
+      backdrop-filter: none;
+      background-color: var(
+        --uikit-glass-backdrop,
+        var(--color-ui-system-background)
+      );
+      background-image: linear-gradient(
+        var(--uikit-glass-background),
+        var(--uikit-glass-background)
+      );
+    }
+
+    :where(:has(> [data-glass-part])) {
+      isolation: auto;
+    }
+
+    :where(:has(> [data-glass-part])) > [data-glass-part] {
+      z-index: auto;
+    }
+
+    :where(:has(> [data-glass-part])) > :where(:not([data-glass-part])) {
+      position: relative;
+    }
+
+    .uikit-glass-tint-group {
+      isolation: auto;
+    }
+
+    .uikit-glass-tint-base,
+    .uikit-glass-tint-saturation,
+    .uikit-glass-tint-overlay {
+      display: none;
+    }
+
+    .uikit-glass-tint {
+      mix-blend-mode: normal;
+    }
+
+    /* A disabled prominent button's label: as its blend drew it (a dark
+       gray added to the tint, `plus-lighter`), the tint lightened, barely
+       apart from it (drawn as it is, dark gray, it'd read as another
+       label, not a disabled one). */
+    .uikit-button-root[data-variant='glass-prominent'] {
+      --uikit-button-color-disabled: color-mix(
+        in srgb,
+        var(--uikit-glass-tint, var(--glass-ui-tint)),
+        #fff 15%
+      ) !important;
+    }
+
+    /* (Over the glass contexts' own, set on their elements.) */
+    :scope,
+    * {
+      --uikit-glass-content-blend: normal !important;
+      --uikit-glass-content-prominent-blend: normal !important;
+      --uikit-symbol-blend: normal !important;
+      --uikit-toolbar-content-blend: normal !important;
     }
   }
 }

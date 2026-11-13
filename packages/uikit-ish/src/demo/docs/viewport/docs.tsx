@@ -6,6 +6,7 @@ import {
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { glassModeRow } from '../glass-mode.js';
 
 // Every part's props, and the hooks' arguments and return values, for the
 // parts page (all) and the overview (its key ones).
@@ -280,6 +281,7 @@ export const viewportContentRows: readonly PropRow[] = [
       that child as a whole.
     </>,
   ],
+  glassModeRow,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
@@ -841,9 +843,9 @@ export const useSizeClassReturnRows: readonly PropRow[] = [
       It holds its value while iPadOS resizes the window for the app switcher’s
       snapshots. The page is still showing then, and switching its layout would
       remount it. iPadOS announces each such resize with an orientation change
-      that contradicts the window’s shape. The value is held until the
-      orientation matches the window again, or the page is shown anew. A real
-      rotation or resize (for example Split View) changes it.
+      that contradicts the window’s shape. The value is held until the screen
+      turns to match the window, the window is back at its size, or the page is
+      shown anew. A real rotation or resize (for example Split View) changes it.
     </>,
   ],
 ];

@@ -102,6 +102,12 @@ export const propOptionsPart = {
   ...commonPropOptions,
 };
 
+/** Its scrolling content's (a part's, see `propOptionsPart`): its glass too. */
+export const propOptionsScrollContent = {
+  ...propOptionsPart,
+  glass: [undefined, 'auto', 'flat', 'live'] as const,
+};
+
 /** `Sheet.Header`: its own element (no `render`), its edge effect. */
 export const propOptionsHeader = {
   className: commonPropOptions.className,

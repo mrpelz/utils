@@ -1,47 +1,28 @@
 /* Header (see main.tsx). */
 @layer uikit-ish {
-  @keyframes uikit-header-fade-in {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes uikit-header-fade-out {
-    from {
-      opacity: 1;
-    }
-
-    to {
-      opacity: 0;
-    }
-  }
-
   /* Its bar (see Root): the app's toolbar in a `Viewport.BlockStart`, its
-     child (its edge effect the anchor's, see Viewport). No box of its own;
-     its large title's timeline, for its bar. Its bar's height
-     (`--uikit-header-bar`, measured, see Viewport.Padding) for its large
-     title and accessory. */
+     child (its edge effect the anchor's, see Viewport). No box of its own.
+     Its bar's height (`--uikit-header-bar`, measured, see Viewport.Padding)
+     for its large title and accessory. */
   .uikit-header-root {
     display: contents;
-    timeline-scope: var(--uikit-header-timeline);
   }
 
   /* (In a navigation's transition, it moves with its page, see
      `Navigation`: its anchor, fixed, within its page's frame.) */
   .uikit-header-root > .uikit-viewport-anchor[data-edge='block-start'] {
-    /* With a large title: the bar's title fades in as the large title
-       scrolls under the bar (see Root: the header's timeline). */
+    /* With a large title: the bar's title hidden until the large title
+       scrolls under the bar (its opacity then written, see main.tsx). */
     .uikit-header-root[data-large-title] >
       &
       > .uikit-toolbar-root
       > [data-toolbar-part='title'] {
-      animation: uikit-header-fade-in linear both;
-      animation-range: exit-crossing 50% exit-crossing 100%;
-      animation-timeline: var(--uikit-header-timeline);
+      opacity: 0;
+
+      /* (Its own layer throughout, in the bar, fixed, outside the page's
+         scroller: its fade changing a value, not the layers; translucent,
+         it got one and lost it again, which ended glides on iOS.) */
+      will-change: opacity;
     }
   }
 
@@ -58,19 +39,23 @@
   }
 
   /* A large title (and subtitle): 16px from the sides, 10px from the bar (its
-     height measured); as it scrolls under the bar, it fades out. */
+     height measured); as it scrolls under the bar, it fades out (its
+     text's alpha written, see main.tsx). */
   .uikit-header-large-title {
     display: flex;
     box-sizing: border-box;
     flex-direction: column;
     padding: 0 16px 10px;
-    animation: uikit-header-fade-out linear both;
-    animation-range: exit-crossing 0% exit-crossing 50%;
-    animation-timeline: view(
-      block calc(var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px))
-        0
+
+    /* Fading by its text's alpha (see main.tsx), not its opacity: inside
+       its page's scroller, no layer of its own. (Translucent, it got one
+       and lost it again; with one throughout, it was dropped as it left the
+       screen: either ended a glide or a bounce on iOS.) */
+    color: color-mix(
+      in srgb,
+      var(--color-ui-label) calc(var(--uikit-header-large-title-fade, 1) * 100%),
+      transparent
     );
-    color: var(--color-ui-label);
     font-size: var(--font-ui-large-title-size);
     font-style: normal;
     font-variation-settings: 'wght'
@@ -82,14 +67,14 @@
     );
     letter-spacing: var(--font-ui-large-title-tracking);
     line-height: var(--font-ui-large-title-line-height);
-    view-timeline-axis: block;
-    view-timeline-inset: calc(
-        var(--uikit-header-bar, 0px) + var(--uikit-page-safe-top, 0px)
-      )
-      0;
-    view-timeline-name: var(--uikit-header-timeline);
 
     & > [data-toolbar-part='subtitle'] {
+      color: color-mix(
+        in srgb,
+        var(--color-ui-secondary-label)
+          calc(var(--uikit-header-large-title-fade, 1) * 100%),
+        transparent
+      );
       font-size: 15px;
       font-variation-settings: 'wght' 510;
       font-weight: round(down, 510, 100);

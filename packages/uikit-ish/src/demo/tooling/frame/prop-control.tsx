@@ -37,7 +37,15 @@ export type ControlledProps<T extends PropMap> = {
   [P in keyof T]: RemappedProp<T[P]>;
 };
 
-const useId = (): string => useMemo(() => crypto.randomUUID(), []);
+// Ids unique in the page (not `crypto.randomUUID`: only in secure contexts,
+// not on a device reaching the dev server by plain HTTP).
+let lastId = 0;
+const nextId = () => {
+  lastId += 1;
+  return String(lastId);
+};
+
+const useId = (): string => useMemo(() => nextId(), []);
 
 const isEqual = <A extends object, B extends A>(a: A, b: B): a is B => {
   if (a === b) return true;
@@ -531,7 +539,7 @@ export const usePropControl = <T extends PropMap>(
   // A key for the controlled element: changing with its props, so it
   // mounts anew (e.g. for a `defaultValue`, only read as it mounts).
   // eslint-disable-next-line react-hooks/exhaustive-deps -- new with the props
-  const elementKey = useMemo(() => crypto.randomUUID(), [mappedState]);
+  const elementKey = useMemo(() => nextId(), [mappedState]);
 
   return [
     <PropControlSection<T>

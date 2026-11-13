@@ -343,7 +343,8 @@ export const tests = [
           const large = scroller.querySelector('[data-header-part=large-title]');
           return {
             bar: Math.round(bar.getBoundingClientRect().top - scroller.getBoundingClientRect().top),
-            large: +getComputedStyle(large).opacity,
+            // (Faded by its text's alpha, see Header: no layer of its own.)
+            large: +(getComputedStyle(large).color.split('/')[1]?.replace(')', '') ?? 1),
             title: +getComputedStyle(title).opacity,
           };
         })()`);

@@ -3,6 +3,7 @@ import './style.css';
 import {
   createContext,
   FunctionComponent,
+  RefObject,
   useLayoutEffect,
   useState,
 } from 'react';
@@ -11,12 +12,15 @@ import type {
   GlassBackgroundProps,
   GlassContext,
   GlassContextValue,
+  GlassMode,
 } from './props.js';
 
 export type {
   GlassBackgroundProps,
   GlassContext,
   GlassContextValue,
+  GlassMode,
+  GlassModeProps,
 } from './props.js';
 
 // Glass building blocks shared by components: glass materials behind
@@ -266,3 +270,47 @@ export const GlassBackground: FunctionComponent<GlassBackgroundProps> = ({
     />
   </>
 );
+
+/** Whether an element can scroll (its content larger than it, either way). */
+const canScroll = (element: HTMLElement) =>
+  element.scrollHeight > element.clientHeight ||
+  element.scrollWidth > element.clientWidth;
+
+/**
+ * A scroll container's glass (its `glass` prop, see `GlassModeProps`), as
+ * its `data-glass`: `auto` resolved, flat while it can scroll (`bounces`:
+ * it does anyway), measured as it or its content resizes; else as given.
+ * Internal (Page, the content parts).
+ */
+export const useGlassMode = (
+  ref: RefObject<HTMLElement | null>,
+  glass: GlassMode,
+  bounces: boolean,
+): 'flat' | 'live' => {
+  const [scrolls, setScrolls] = useState(false);
+  useLayoutEffect(() => {
+    const { current: element } = ref;
+    if (!element || glass !== 'auto' || bounces) return undefined;
+
+    const measure = () => setScrolls(canScroll(element));
+    const resizeObserver = new ResizeObserver(measure);
+    // (It and its children: its content's size.)
+    const observe = () => {
+      resizeObserver.disconnect();
+      resizeObserver.observe(element);
+      for (const child of element.children) resizeObserver.observe(child);
+      measure();
+    };
+    const mutationObserver = new MutationObserver(observe);
+    mutationObserver.observe(element, { childList: true });
+    observe();
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, [bounces, glass, ref]);
+
+  if (glass !== 'auto') return glass;
+  return bounces || scrolls ? 'flat' : 'live';
+};

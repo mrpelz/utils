@@ -342,6 +342,12 @@ export const LayoutOverview: FunctionComponent = () => (
         jump to its smallest and largest size.
       </li>
       <li>A divider’s focus ring is its 2px line in the tint.</li>
+      <li>
+        A closed column is <code>inert</code>: out of the tab order, and not
+        announced. Its content stays mounted, so its scroll position and state
+        survive. The buttons that open and close it are the app’s; give them an{' '}
+        <code>aria-label</code> and <code>aria-expanded</code>.
+      </li>
     </ul>
 
     <Heading
@@ -364,6 +370,31 @@ export const LayoutOverview: FunctionComponent = () => (
         A floating column (on regular widths) sits above the others at the
         start, at its size or 320px. The others span the layout beneath it, and
         the column next to it insets its page’s content by its size.
+      </li>
+      <li>
+        A column can be closed (<code>open</code>, the app’s state): it slides
+        out of the layout in 350ms, a floating column off its edge, others at
+        their size (their content never squeezed) while the columns beside them
+        take their place. A page’s inset glides with it. Closed, it keeps its
+        size for when it opens again, and it’s inert and hidden. With reduced
+        motion, it happens at once.
+      </li>
+      <li>
+        There’s no handle or trigger part for this. An app has a sidebar or two
+        at most, and the button that opens a closed column has to know the
+        column is closed, to show only then. So the state belongs to the app: it
+        passes <code>open</code> and wires its own buttons, for example one in
+        the{' '}
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Toolbar"
+        />{' '}
+        to close it, and one in the content’s bar to open it again (a{' '}
+        <PartLink
+          component="navigation"
+          part="Navigation.Persistent"
+        />{' '}
+        stays put as pages change).
       </li>
       <li>
         Each column is the containing block for its fixed layers. A header’s bar

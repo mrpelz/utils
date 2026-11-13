@@ -16,7 +16,10 @@ import {
   Toolbar,
   type Viewport,
 } from '../../components/index.js';
-import { sfChevronBackward } from '../tooling/icons.js';
+import {
+  sfChevronBackward,
+  sfInsetFilledLeadingthirdRectangle,
+} from '../tooling/icons.js';
 
 // The kitchen sink's pages (see main.tsx) and what they share.
 
@@ -90,6 +93,17 @@ export const usePop = (): (() => void) => useContext(PopContext);
  * stacks' swipe areas at the screen's edge (see `SinkSwipeAreas`).
  */
 export const LayoutRootContext = createContext<HTMLElement | null>(null);
+
+/**
+ * The sidebar shown, and showing or hiding it (regular; else `undefined`):
+ * the app's state, the sidebar's column `open` (see Layout). Its toolbar's
+ * button hides it; a page bar's (persistent, see `StackPage`) shows it
+ * again.
+ */
+type SidebarOpen = readonly [boolean, (open: boolean) => void];
+export const SidebarOpenContext = createContext<SidebarOpen | undefined>(
+  undefined,
+);
 
 /**
  * A stack's swipe areas (in its `Navigation.Root`). Beside the sidebar
@@ -225,14 +239,43 @@ export const DrillRow: FunctionComponent<{
   );
 };
 
-/** The back button of a bare page's own bar (see `isBare`). */
+/**
+ * A page bar's button showing the sidebar, while it's hidden (regular, see
+ * `SidebarOpenContext`): persistent, staying put as its stack's pages
+ * change (each page's top bar has it, nested stacks' too).
+ */
+export const ShowSidebarButton: FunctionComponent = () => {
+  const sidebar = useContext(SidebarOpenContext);
+  if (sidebar === undefined || sidebar[0]) return null;
+
+  return (
+    <Navigation.Persistent
+      aria-label="Show Sidebar"
+      persistentId="show-sidebar"
+      render={<Toolbar.Button shape="circle" />}
+      onClick={() => sidebar[1](true)}
+    >
+      <Button.Icon>
+        <Symbol icon={sfInsetFilledLeadingthirdRectangle} />
+      </Button.Icon>
+    </Navigation.Persistent>
+  );
+};
+
+/**
+ * The leading buttons of a bare page's own top bar (see `isBare`): the
+ * sidebar's (see `ShowSidebarButton`), its back button.
+ */
 export const BackButton: FunctionComponent = () => (
-  <Navigation.Back
-    aria-label="Back"
-    render={<Toolbar.Button shape="circle" />}
-  >
-    <Button.Icon>
-      <Symbol icon={sfChevronBackward} />
-    </Button.Icon>
-  </Navigation.Back>
+  <>
+    <ShowSidebarButton />
+    <Navigation.Back
+      aria-label="Back"
+      render={<Toolbar.Button shape="circle" />}
+    >
+      <Button.Icon>
+        <Symbol icon={sfChevronBackward} />
+      </Button.Icon>
+    </Navigation.Back>
+  </>
 );

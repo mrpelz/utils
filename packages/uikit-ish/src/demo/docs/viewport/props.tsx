@@ -39,6 +39,7 @@ export const propOptionsLayer = {
   keyboard: [undefined, 'resize', 'overlay'] as const,
   alwaysBounce: [undefined, true, false] as const,
   safeArea: contentSafeAreas,
+  glass: [undefined, 'auto', 'flat', 'live'] as const,
 };
 
 // The guide pages' views (see overview.tsx, parts.tsx): each part's props,

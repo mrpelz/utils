@@ -903,6 +903,21 @@ export const GlossaryPage: FunctionComponent = () => (
         it comes in materials of different strength, as{' '}
         <a href={publicUrl('tokens')}>design tokens</a>.
       </Term>
+      <Term term="Flat glass">
+        <See term="Glass" /> drawn without backdrop filters, isolation or blend
+        modes: opaque, over its container’s background, looking as the live
+        glass would there. It doesn’t blur what’s behind it, so content doesn’t
+        show through. A scroll container’s glass is flat while it can scroll
+        (its <code>glass</code> prop, <code>auto</code> by default, set to{' '}
+        <code>flat</code> or <code>live</code> to override it:{' '}
+        <PartLink
+          component="page"
+          part="Page.Root"
+        />{' '}
+        and the content parts). It’s for glass in content that scrolls: on iOS,
+        live glass there ends the page’s glides (see{' '}
+        <Docs to="ios-quirks#layers-under-a-scroll">iOS Quirks</Docs>).
+      </Term>
       <Term term="Semantic colors">
         Colors named by their role instead of their hue: <code>label</code> for
         text, <code>secondaryLabel</code> for quieter text,{' '}

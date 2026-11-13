@@ -86,5 +86,62 @@
     & > [data-list-part='root'] > :last-child {
       margin-block-end: 0;
     }
+
+    /* Holding a page (in a header, its bar's toolbar staying at its top,
+       see main.tsx): not scrolling itself, its page does, under its bar to
+       its edges; the containing block of its bars (fixed: its own, not the
+       column's), their edge effect its page's. Its padding its content's
+       safe area insets instead (on its children: its own margin reads the
+       outer ones): its bar's toolbar where it was (11px from its top,
+       16px from its sides), its page's content 10px from its bottom, the
+       bar's height its gap to it (no content margin). */
+    &:has(> :is(.uikit-header-root, .uikit-page-root)) {
+      overflow: clip;
+      padding: 0;
+      contain: layout;
+
+      & > * {
+        --uikit-safe-area-inset-top: 11px;
+        --uikit-safe-area-inset-bottom: 10px;
+        --uikit-content-margin-block-start: 0px;
+        --uikit-content-margin-block-end: 0px;
+
+        /* Its glass behind its bar: none drawn over it, nor blurred (its
+           tint twice), its page's content fading out under the bar instead
+           (as a popover's body, see Popover). */
+        --uikit-viewport-edge-background: transparent;
+        --uikit-viewport-edge-veil: 0.75;
+      }
+
+      & .uikit-viewport-edge-effect[data-edge-effect='soft']::before {
+        backdrop-filter: none;
+      }
+
+      & .uikit-viewport-anchor {
+        --uikit-viewport-safe-left: 16px;
+        --uikit-viewport-safe-right: 16px;
+      }
+
+      & > .uikit-page-root,
+      & > .uikit-header-root > .uikit-page-root {
+        background-color: transparent;
+
+        /* (Flat glass in it drawn over the panel's glass, see Glass.) */
+        --uikit-glass-backdrop: var(--uikit-glass-background);
+
+        /* Under its bar, fading out: hidden under the share of it the veil
+           is, showing past it and its edge effect's reach (16px); only as
+           content scrolls under it, at the top all shown. */
+        mask-image: linear-gradient(
+          rgb(0 0 0 / calc(1 - var(--uikit-viewport-edge-start-progress, 1)))
+            calc(
+              var(--uikit-viewport-padding-block-start, 0px) *
+                var(--uikit-viewport-edge-veil, 0.75)
+            ),
+          #000 calc(var(--uikit-viewport-padding-block-start, 0px) + 16px)
+        );
+        padding-inline: 16px;
+      }
+    }
   }
 }

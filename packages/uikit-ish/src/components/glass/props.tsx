@@ -22,3 +22,22 @@ export type GlassBackgroundProps = {
   /** Tint layers instead of the fill (tinted glass). */
   tinted?: boolean;
 };
+
+/** A scroll container's glass (see `GlassModeProps`). */
+export type GlassMode = 'auto' | 'flat' | 'live';
+
+/** A scroll container's `glass` prop (Page, content parts). */
+export type GlassModeProps = {
+  /**
+   * The glass in it (e.g. glass buttons, text fields): `live`, blurring
+   * what's behind (backdrop filters, isolated, blended); `flat`, opaque,
+   * drawn over its background (`--uikit-glass-backdrop`) as the live glass
+   * would look, without backdrop filters, isolation or blend modes; `auto`,
+   * flat while it can scroll (its content larger than it, or bouncing
+   * anyway: `alwaysBounce`), else live. Flat for glass in content that
+   * scrolls: on iOS, live glass there ends the scroll's glides (see the
+   * docs' iOS Quirks). A live one within a flat one is live again.
+   * @default 'auto'
+   */
+  glass?: GlassMode;
+};

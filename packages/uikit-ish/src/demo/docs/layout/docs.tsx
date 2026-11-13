@@ -55,6 +55,25 @@ export const layoutColumnRows: readonly PropRow[] = [
   ],
   ['size', 'number', undefined, 'Its size (px, controlled).'],
   [
+    'defaultOpen',
+    'boolean',
+    code('true'),
+    'Whether it’s open at first (uncontrolled).',
+  ],
+  [
+    'open',
+    'boolean',
+    code('true'),
+    <>
+      Whether it’s open (controlled). Closed, it slides out of the layout: a
+      floating column off its edge, others at their size, the columns beside
+      them taking their place, so its content is never squeezed. It keeps its
+      size for when it opens again, and it’s inert and hidden once out. The
+      columns beside it follow, a <code>clearFloating</code> one’s inset with
+      it. It’s the app’s state: the app’s own buttons open and close it.
+    </>,
+  ],
+  [
     'minSize',
     'number',
     code('240'),
