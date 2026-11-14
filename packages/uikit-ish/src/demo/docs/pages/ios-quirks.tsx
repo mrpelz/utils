@@ -21,7 +21,7 @@ const sections: readonly Section[] = [
   ['the-keyboard', 'The keyboard'],
   ['native-scrolling-and-touch', 'Native scrolling and touch'],
   ['layers-under-a-scroll', 'Layers changing under a scroll'],
-  ['mouse-events-after-a-long-press', 'Mouse events after a long press'],
+  ['mouse-events-after-a-long-press', 'Mouse events after a touch'],
   ['pressed-buttons-and-focus', 'Pressed buttons don’t take focus (Safari)'],
   ['status-bar-taps', 'Status bar taps'],
   ['dishonorable-mentions', '(Dis)honorable Mentions'],
@@ -911,7 +911,7 @@ export const IosQuirksPage: FunctionComponent = () => (
       id="mouse-events-after-a-long-press"
       level={2}
     >
-      Mouse events after a long press
+      Mouse events after a touch
     </Heading>
     <p>
       After a touch ends, iOS emulates a mouse for it: <code>mouseover</code>,{' '}
@@ -931,6 +931,20 @@ export const IosQuirksPage: FunctionComponent = () => (
       cancels that touch’s <code>touchend</code> (with a non-passive listener on
       the trigger), and iOS emulates nothing. On Android, the long press’s{' '}
       <code>contextmenu</code> is prevented as well.
+    </p>
+    <p>
+      The emulated events don’t always go to what was touched, either. After a
+      drag on a <a href={publicUrl('grid')}>Grid</a>’s resize handle, iOS sent
+      them to the nearest button, the add tile next to it, and its menu opened.
+      Menus open on <code>mousedown</code>, so holding back the{' '}
+      <code>click</code> wasn’t enough. After any press on a resize handle,{' '}
+      <PartLink
+        component="grid"
+        part="Grid.ResizeHandle"
+      />{' '}
+      swallows the next <code>mousedown</code>, <code>mouseup</code> and{' '}
+      <code>click</code>, wherever they land, for a moment (with a mouse, whose
+      own <code>mousedown</code> already happened, only the other two).
     </p>
 
     <Heading
@@ -1008,6 +1022,13 @@ export const IosQuirksPage: FunctionComponent = () => (
         which never reaches the window. Then it looked like a finger was still
         down, and every tap after it was ignored. The end of each touch is now
         also caught on the element it started on.
+      </li>
+      <li>
+        Turning the screen resets the document’s scroll position, with no finger
+        down. That looked like a tap: the page scrolled smoothly to its top on
+        every turn. The library remembers the window’s size each time it parks
+        the document, and a scroll to the top at another size only parks it
+        again.
       </li>
     </ul>
     <p>

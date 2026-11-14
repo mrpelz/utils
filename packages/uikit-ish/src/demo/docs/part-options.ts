@@ -112,6 +112,17 @@ import {
   propOptionsLegend as propOptionsLegendForm,
 } from './form/props.js';
 import {
+  getPropOptionsBreak as getPropOptionsBreakGrid,
+  getPropOptionsItem as getPropOptionsItemGrid,
+  getPropOptionsResizeHandle as getPropOptionsResizeHandleGrid,
+  getPropOptionsSpacer as getPropOptionsSpacerGrid,
+  getPropOptionsSpawn as getPropOptionsSpawnGrid,
+  propOptionsHeader as propOptionsHeaderGrid,
+  propOptionsRemoveButton as propOptionsRemoveButtonGrid,
+  propOptionsRoot as propOptionsRootGrid,
+  propOptionsSection as propOptionsSectionGrid,
+} from './grid/props.js';
+import {
   propOptionsAccessory as propOptionsAccessoryHeader,
   propOptionsLargeTitle as propOptionsLargeTitleHeader,
 } from './header/props.js';
@@ -406,6 +417,15 @@ export const partOptions: Record<string, PartOptions> = {
   'Fieldset.Legend': propOptionsLegendForm,
   'Fieldset.Root': propOptionsFieldsetForm,
   Form: getPropOptionsFormForm,
+  'Grid.Break': getPropOptionsBreakGrid('break'),
+  'Grid.Header': propOptionsHeaderGrid,
+  'Grid.Item': getPropOptionsItemGrid('item'),
+  'Grid.RemoveButton': propOptionsRemoveButtonGrid,
+  'Grid.ResizeHandle': getPropOptionsResizeHandleGrid,
+  'Grid.Root': propOptionsRootGrid,
+  'Grid.Section': propOptionsSectionGrid,
+  'Grid.Spacer': getPropOptionsSpacerGrid('spacer'),
+  'Grid.Spawn': getPropOptionsSpawnGrid('spawn'),
   'Header.Accessory': propOptionsAccessoryHeader,
   'Header.LargeTitle': propOptionsLargeTitleHeader,
   'Island.Content': propOptionsScrollContentIsland,

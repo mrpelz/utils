@@ -1,0 +1,570 @@
+/* Grid (see main.tsx). */
+@layer uikit-ish {
+  /* Square units: its columns and unit measured (see main.tsx), its rows
+     as tall as a column is wide; placed by CSS grid, in order (`dense`:
+     earlier holes filled). The containing block of its items' positions
+     (offsets measured for gliding), its sections' too. */
+  .uikit-grid-root {
+    position: relative;
+    display: grid;
+    gap: var(--uikit-grid-gap);
+    grid-auto-flow: row;
+    grid-auto-rows: var(--uikit-grid-unit);
+    grid-template-columns: repeat(var(--uikit-grid-columns), minmax(0, 1fr));
+    isolation: isolate;
+    overflow-anchor: none;
+
+    &[data-dense] {
+      grid-auto-flow: row dense;
+    }
+
+    /* (Not shown until its columns and unit are measured: see main.tsx.) */
+    &:not([data-grid-measured]) {
+      visibility: hidden;
+    }
+  }
+
+  /* Holding sections: a column of them, each its own grid of the same
+     columns and unit (from the root's measure), its header across them
+     above its items. */
+  .uikit-grid-root:has(> .uikit-grid-section) {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--uikit-grid-gap) * 2);
+  }
+
+  .uikit-grid-section {
+    position: relative;
+    display: grid;
+    gap: var(--uikit-grid-gap);
+    grid-auto-flow: row;
+    grid-auto-rows: var(--uikit-grid-unit);
+    grid-template-columns: repeat(var(--uikit-grid-columns), minmax(0, 1fr));
+
+    &:has(> .uikit-grid-header) {
+      grid-template-rows: auto;
+    }
+
+    &[data-dense] {
+      grid-auto-flow: row dense;
+    }
+  }
+
+  .uikit-grid-header {
+    grid-column: 1 / -1;
+  }
+
+  /* Editing: its rows (a section's) outlined as one band, as they're read
+     (see layout.ts): its first from the grid's start on off its page's
+     trailing edge, the rows between in from its leading edge and on off
+     it, its last in from the leading edge to the grid's end; behind what's
+     in them. */
+  .uikit-grid-root[data-editing],
+  .uikit-grid-root[data-editing] .uikit-grid-section {
+    &::before {
+      position: absolute;
+      z-index: -1;
+      height: var(--uikit-grid-bands-height, 0);
+      background-color: var(
+        --uikit-grid-band-color,
+        color-mix(in srgb, var(--color-ui-label) 40%, transparent)
+      );
+      content: '';
+      inset-block-start: var(--uikit-grid-bands-top, 0);
+      inset-inline: calc(-1 * var(--uikit-grid-bands-start, 0px)) calc(-1 * var(--uikit-grid-bands-end, 0px));
+      mask: var(--uikit-grid-bands, none) 0 0 / 100% 100% no-repeat;
+      pointer-events: none;
+    }
+  }
+
+  /* An item (a spacer, a dragged cell's placeholder): its effective size's
+     span. */
+  .uikit-grid-item,
+  .uikit-grid-spacer,
+  .uikit-grid-placeholder {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+    grid-column: span var(--uikit-grid-item-columns, 1);
+    grid-row: span var(--uikit-grid-item-rows, 1);
+  }
+
+  /* Editing: what's named dragged by a held touch, not scrolled by it (see
+     main.tsx); the one dragged above the others. */
+  .uikit-grid-root[data-editing] :is(.uikit-grid-item, .uikit-grid-spacer, .uikit-grid-break) {
+    -webkit-user-select: none;
+    user-select: none;
+
+    /* (Held, no tap highlight darkening it, no callout.) */
+    &[data-grid-movable] {
+      cursor: grab;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    &:focus-visible {
+      border-radius: var(--uikit-grid-item-radius, 24px);
+      outline: 2px solid var(--color-ui-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  /* Dragged (see edit.ts): lifted out of the flow, where it was (its
+     inline position and size), above every section. */
+  .uikit-grid-root [data-grid-dragging] {
+    position: absolute;
+    z-index: 2;
+    margin: 0;
+    cursor: grabbing;
+  }
+
+  /* A spawn (see main.tsx): a button as big as its size, dashed as a
+     spacer is (editing or not), its sign in its middle (the app's, e.g. a
+     symbol; none by default) in that color. */
+  .uikit-grid-spawn {
+    box-sizing: border-box;
+    padding: 0;
+    border: 2px dashed
+      var(
+        --uikit-grid-spacer-color,
+        color-mix(in srgb, var(--color-ui-label) 35%, transparent)
+      );
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    margin: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+
+    &::after {
+      position: absolute;
+      width: var(--uikit-grid-sign-size, 32px);
+      height: var(--uikit-grid-sign-size, 32px);
+      margin: auto;
+      background-color: var(
+        --uikit-grid-spacer-color,
+        color-mix(in srgb, var(--color-ui-label) 35%, transparent)
+      );
+      content: '';
+      inset: 0;
+      mask: var(--uikit-grid-spawn-sign, none) center / contain no-repeat;
+      pointer-events: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-ui-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  /* A spacer (a break): a hole, what's in it (e.g. a control removing it)
+     shown only while editing, a spacer outlined then (a break filled, see
+     below). */
+  .uikit-grid-spacer > * {
+    visibility: hidden;
+  }
+
+  .uikit-grid-root[data-editing] :is(.uikit-grid-spacer, .uikit-grid-break) > * {
+    visibility: visible;
+  }
+
+  .uikit-grid-root[data-editing] .uikit-grid-spacer {
+    border: 2px dashed
+      var(
+        --uikit-grid-spacer-color,
+        color-mix(in srgb, var(--color-ui-label) 35%, transparent)
+      );
+    border-radius: var(--uikit-grid-item-radius, 24px);
+  }
+
+  /* A break (one to be, see edit.ts): one row in the grid, drawn as tall
+     as its rows (over its fillers below, see layout.ts), unless after a
+     full row; not editing, not drawn (after a full row: none). */
+  .uikit-grid-break,
+  .uikit-grid-break-placeholder {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    height: calc(
+      var(--uikit-grid-break-height) * var(--uikit-grid-unit) +
+        (var(--uikit-grid-break-height) - 1) * var(--uikit-grid-gap)
+    );
+    align-self: start;
+    grid-row: span 1;
+
+    --uikit-grid-break-height: var(
+      --uikit-grid-break-drawn,
+      var(--uikit-grid-break-rows, 1)
+    );
+  }
+
+  .uikit-grid-root:not([data-editing]) .uikit-grid-break {
+    visibility: hidden;
+
+    &[data-grid-break-none] {
+      display: none;
+    }
+  }
+
+  /* What keeps the rows below a break empty (see layout.ts). */
+  .uikit-grid-break-fill {
+    min-width: 0;
+    grid-row: span 1;
+    pointer-events: none;
+  }
+
+  /* Dragged, taller than a row (an item, a spacer; where it'll land, where
+     it was): its rows below its first fainter; where it lands is decided
+     by its first row (its top left), the others following. */
+  .uikit-grid-root [data-grid-dragging]:is(.uikit-grid-item, .uikit-grid-spacer):not([data-size$='x1']),
+  .uikit-grid-root .uikit-grid-break[data-grid-dragging]:not([data-grid-rows='1']),
+  .uikit-grid-root .uikit-grid-placeholder[data-grid-tall] {
+    mask-image: linear-gradient(
+      #000 0 var(--uikit-grid-unit),
+      rgb(0 0 0 / 35%) 0
+    );
+  }
+
+  /* (A spacer, only outlined: its first row filled, too.) */
+  .uikit-grid-root .uikit-grid-spacer[data-grid-dragging] {
+    background-image: linear-gradient(
+      var(
+          --uikit-grid-first-row-color,
+          color-mix(in srgb, var(--color-ui-label) 20%, transparent)
+        )
+        0 var(--uikit-grid-unit),
+      transparent 0
+    );
+  }
+
+  /* Dragging (see edit.ts): where it'll land, softly filled; where it was
+     (while it's to land after it), outlined. */
+  .uikit-grid-placeholder {
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    background-color: color-mix(in srgb, var(--color-ui-label) 10%, transparent);
+
+    &[data-grid-hole] {
+      border: 2px dashed
+        color-mix(in srgb, var(--color-ui-label) 40%, transparent);
+      background-color: transparent;
+    }
+  }
+
+  /* A spacer to be (see edit.ts): as a spacer, editing. */
+  .uikit-grid-root .uikit-grid-spacer-placeholder {
+    border: 2px dashed
+      var(
+        --uikit-grid-spacer-color,
+        color-mix(in srgb, var(--color-ui-label) 35%, transparent)
+      );
+    background-color: transparent;
+  }
+
+  /* A break, editing (one to be, see edit.ts): the rest of its rows,
+     filled, from where it starts to the grid's end (past what's in the
+     way, see layout.ts), its rows below from their start (not the gap
+     above them); one shape, every corner rounded. Drawn as one box behind
+     it, from its first row's start, its shape a mask (see layout.ts; one
+     image: no seams); while it's dragged, just itself. */
+  .uikit-grid-root[data-editing] .uikit-grid-break,
+  .uikit-grid-root .uikit-grid-break-placeholder {
+    --uikit-grid-break-color: color-mix(
+      in srgb,
+      var(--color-ui-label) 12%,
+      transparent
+    );
+    --uikit-grid-break-pitch: calc(
+      var(--uikit-grid-unit) + var(--uikit-grid-gap)
+    );
+
+    border: none;
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    background-color: transparent;
+
+    &::before {
+      position: absolute;
+      z-index: -1;
+      background-color: var(--uikit-grid-break-color);
+      content: '';
+      inset-block: 0;
+      inset-inline: calc(
+          -1 * var(--uikit-grid-break-from, 0) * var(--uikit-grid-break-pitch)
+        )
+        calc(
+          -1 * var(--uikit-grid-break-rest, 0) * var(--uikit-grid-break-pitch)
+        );
+      mask: var(--uikit-grid-break-shape, none) 0 0 / 100% 100% no-repeat;
+      pointer-events: none;
+    }
+  }
+
+  /* Where it's anchored (a break, one to be): the end of its first row
+     (its row's last free unit, see layout.ts), a return sign there,
+     still (its own element, see main.tsx, edit.ts). */
+  .uikit-grid-root[data-editing] :is(.uikit-grid-break, .uikit-grid-break-placeholder) > .uikit-grid-break-sign {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background-color: var(
+      --uikit-grid-break-sign-color,
+      color-mix(in srgb, var(--color-ui-label) 55%, transparent)
+    );
+    inset-block-start: var(--uikit-grid-break-sign-top, 12px);
+    inset-inline-end: calc(
+      12px - var(--uikit-grid-break-sign, 0) *
+        var(--uikit-grid-break-pitch, 0px)
+    );
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M16 4v6a3 3 0 0 1-3 3H5M8.5 9.5 5 13l3.5 3.5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  .uikit-grid-root[data-editing] :is(.uikit-grid-break, .uikit-grid-break-placeholder):dir(rtl) > .uikit-grid-break-sign {
+    scale: -1 1;
+  }
+
+  /* Keeping nothing empty (after a full row, see layout.ts): a bar in the
+     gap below that row, taking no room. */
+  .uikit-grid-root[data-editing] .uikit-grid-break[data-grid-break-none],
+  .uikit-grid-root .uikit-grid-break-placeholder[data-grid-break-none] {
+    --uikit-grid-break-sign-top: 2px;
+
+    position: absolute;
+    z-index: 1;
+    height: 24px;
+    border-radius: 12px;
+    background-color: var(--uikit-grid-break-color);
+    inset-block-start: calc(var(--uikit-grid-break-top, 0px) - 12px);
+    inset-inline: 0;
+
+    &::before {
+      content: none;
+    }
+  }
+
+  .uikit-grid-root[data-editing] .uikit-grid-break[data-grid-dragging] {
+    background-color: var(--uikit-grid-break-color);
+
+    &::before {
+      content: none;
+    }
+  }
+
+  /* A section taking drops, editing: a row at its end to drop in (empty:
+     its only one), after its cells however they're shown (see edit.ts);
+     outlined as its rows are (see above). */
+  .uikit-grid-root[data-editing] .uikit-grid-section[data-grid-drop]::after {
+    order: 999999;
+    content: '';
+    grid-column: 1 / -1;
+  }
+
+  /* Resized (its handle dragged, see main.tsx): its size to be outlined
+     over it from its top leading corner, nothing moving until it's
+     released; above what's around it. A break's: its rows, as wide. */
+  .uikit-grid-root[data-editing] [data-grid-resizing]::after {
+    position: absolute;
+    z-index: 3;
+    width: calc(
+      var(--uikit-grid-resize-columns, 1) * var(--uikit-grid-unit) +
+        (var(--uikit-grid-resize-columns, 1) - 1) * var(--uikit-grid-gap)
+    );
+    height: calc(
+      var(--uikit-grid-resize-rows, 1) * var(--uikit-grid-unit) +
+        (var(--uikit-grid-resize-rows, 1) - 1) * var(--uikit-grid-gap)
+    );
+    box-sizing: border-box;
+    border: 2px solid var(--color-ui-primary);
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    background-color: color-mix(
+      in srgb,
+      var(--color-ui-primary) 15%,
+      transparent
+    );
+    content: '';
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    pointer-events: none;
+
+    /* (Its size changing as the grid's cells glide; as it appears, at
+       once; with reduced motion, at once.) */
+    transition:
+      width 300ms cubic-bezier(0.32, 0.72, 0, 1),
+      height 300ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  /* Offered while dragging (a spacer, a break to be added, see edit.ts)
+     or taken in by a resize (see main.tsx; its controls hidden while it's
+     marked): a sign in its middle (the app's, e.g. a symbol; none by
+     default), a spacer's in its outline's color, a break's in its return
+     sign's. */
+  .uikit-grid-root[data-editing] [data-grid-merging] > :is(.uikit-grid-resize-handle, .uikit-grid-remove-button) {
+    visibility: hidden;
+  }
+
+  .uikit-grid-root .uikit-grid-spacer-placeholder::after,
+  .uikit-grid-root .uikit-grid-break-placeholder[data-grid-offered]::after,
+  .uikit-grid-root[data-editing] [data-grid-merging]:is(.uikit-grid-spacer, .uikit-grid-break)::after {
+    position: absolute;
+    width: var(--uikit-grid-sign-size, 32px);
+    height: var(--uikit-grid-sign-size, 32px);
+    margin: auto;
+    background-color: var(
+      --uikit-grid-spacer-color,
+      color-mix(in srgb, var(--color-ui-label) 35%, transparent)
+    );
+    content: '';
+    inset: 0;
+    mask: var(--uikit-grid-offer-sign, none) center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  .uikit-grid-root .uikit-grid-break-placeholder[data-grid-offered]::after,
+  .uikit-grid-root[data-editing] .uikit-grid-break[data-grid-merging]::after {
+    background-color: var(
+      --uikit-grid-break-sign-color,
+      color-mix(in srgb, var(--color-ui-label) 55%, transparent)
+    );
+  }
+
+  .uikit-grid-root[data-editing] [data-grid-merging]:is(.uikit-grid-spacer, .uikit-grid-break)::after {
+    mask-image: var(--uikit-grid-merge-sign, none);
+  }
+
+  /* (Over a spacer's outline, not inside it.) */
+  .uikit-grid-root[data-editing] .uikit-grid-spacer[data-grid-resizing]::after {
+    inset-block-start: -2px;
+    inset-inline-start: -2px;
+  }
+
+  /* (A break's: its rows as drawn, as wide.) */
+  .uikit-grid-root[data-editing] .uikit-grid-break[data-grid-resizing]::after {
+    --uikit-grid-resize-shown: max(
+      0,
+      var(--uikit-grid-resize-rows, 1) - var(--uikit-grid-break-rows, 1) +
+        var(--uikit-grid-break-height, 1)
+    );
+
+    width: 100%;
+    height: max(
+      0px,
+      calc(
+        var(--uikit-grid-resize-shown) * var(--uikit-grid-unit) +
+          (var(--uikit-grid-resize-shown) - 1) * var(--uikit-grid-gap)
+      )
+    );
+  }
+
+  /* A cell's corner controls (a resize handle, a remove button): a 44px
+     target in its corner, its line drawn in the label's color. */
+  .uikit-grid-resize-handle,
+  .uikit-grid-remove-button {
+    position: absolute;
+    z-index: 1;
+    display: block;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: none;
+    margin: 0;
+    background: none;
+    color: var(--color-ui-label);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+
+    &:focus-visible {
+      border-radius: 50%;
+      outline: 2px solid var(--color-ui-primary);
+    }
+  }
+
+  .uikit-grid-resize-handle-arc,
+  .uikit-grid-remove-button-x {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-width: 2.5px;
+
+    /* (Its own backing, faint, in a spacer: legible on whatever's behind
+       it; an item's own fill is its backing.) */
+    .uikit-grid-resize-handle-backing,
+    .uikit-grid-remove-button-backing {
+      display: none;
+      stroke: color-mix(
+        in srgb,
+        var(--color-ui-system-background) 45%,
+        transparent
+      );
+      stroke-width: 5px;
+    }
+  }
+
+  /* A resize handle: an arc in its cell's corner (bottom trailing,
+     concentric with its radius); a sign when it only grows or shrinks.
+     Dragged, not scrolling (see main.tsx). */
+  .uikit-grid-resize-handle {
+    cursor: nwse-resize;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    touch-action: none;
+
+    &:dir(rtl) {
+      cursor: nesw-resize;
+      scale: -1 1;
+    }
+  }
+
+  .uikit-grid-resize-handle-arc {
+    .uikit-grid-resize-handle-sign {
+      stroke-width: 1.5px;
+    }
+
+    .uikit-grid-resize-handle-sign-backing {
+      stroke-width: 4px;
+    }
+  }
+
+  /* In an item: in its text's color (its own fill its backing; a card's
+     to redraw them). */
+  .uikit-grid-item :is(.uikit-grid-resize-handle, .uikit-grid-remove-button) {
+    color: inherit;
+  }
+
+  /* A remove button: an x in its cell's top leading corner, drawn as a
+     resize handle is (see above). */
+  .uikit-grid-remove-button {
+    cursor: pointer;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    touch-action: manipulation;
+  }
+
+  /* (In a spacer, only outlined: their own backing; a break's filled.) */
+  .uikit-grid-spacer :is(.uikit-grid-resize-handle-backing, .uikit-grid-remove-button-backing) {
+    display: inline;
+  }
+
+  /* In a break: its rows only; at its last row's last free unit (past
+     what's in the way, not under what's there; see layout.ts). */
+  .uikit-grid-break .uikit-grid-resize-handle {
+    cursor: ns-resize;
+    inset-inline-end: calc(
+      -1 * var(--uikit-grid-break-handle, 0) *
+        var(--uikit-grid-break-pitch, 0px)
+    );
+
+    &:dir(rtl) {
+      cursor: ns-resize;
+    }
+  }
+}

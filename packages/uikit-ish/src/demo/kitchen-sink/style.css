@@ -251,3 +251,129 @@
     --kitchen-sink-live-angle: 360deg;
   }
 }
+
+/* Grid (see grid.tsx): its page on the picture behind it (the page
+   transparent, its flat glass drawn without a backdrop it can't know); its
+   tiles plain until cards. */
+
+/* (Unlayered, over the library's Page.) */
+.kitchen-sink-grid-page {
+  background-color: transparent;
+
+  :is(.uikit-grid-spacer, .uikit-grid-spacer-placeholder, .uikit-grid-spawn) {
+    --uikit-grid-first-row-color: rgb(255 255 255 / 30%);
+    --uikit-grid-spacer-color: rgb(255 255 255 / 60%);
+  }
+
+  :is(.uikit-grid-break, .uikit-grid-break-placeholder) {
+    --uikit-grid-break-color: rgb(255 255 255 / 30%);
+    --uikit-grid-break-sign-color: rgb(255 255 255 / 85%);
+  }
+
+  :is(.uikit-grid-root, .uikit-grid-section) {
+    --uikit-grid-band-color: rgb(255 255 255 / 80%);
+  }
+
+  .uikit-grid-placeholder {
+    background-color: rgb(255 255 255 / 25%);
+
+    &[data-grid-hole] {
+      border-color: rgb(255 255 255 / 45%);
+      background-color: transparent;
+    }
+
+    &:is(.uikit-grid-break-placeholder, .uikit-grid-spacer-placeholder) {
+      background-color: transparent;
+    }
+  }
+
+  --uikit-glass-backdrop: transparent;
+}
+
+@layer demo {
+  .kitchen-sink-grid {
+    margin-inline: 16px;
+  }
+
+  .kitchen-sink-grid-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    padding: 16px 4px 0;
+    color: #fff;
+    container: kitchen-sink-grid-header / inline-size;
+    gap: 12px;
+  }
+
+  .kitchen-sink-grid-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .kitchen-sink-grid-title {
+    font-size: var(--font-ui-title3-size, 20px);
+    font-weight: 600;
+  }
+
+  .kitchen-sink-grid-hint {
+    color: rgb(255 255 255 / 75%);
+    font-size: var(--font-ui-subheadline-size, 15px);
+  }
+
+  /* (A tile's controls in its text's color, see the library's CSS.) */
+  .kitchen-sink-grid .uikit-grid-item {
+    color: #000;
+  }
+
+  .kitchen-sink-grid-tile {
+    display: flex;
+    overflow: hidden;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 24px;
+    background-color: rgb(255 255 255 / 70%);
+    color: #000;
+    font-weight: 600;
+  }
+
+  /* (Its title clear of its remove button, while it's shown.) */
+  .uikit-grid-item:has(> .uikit-grid-remove-button)
+    .kitchen-sink-grid-tile
+    > :first-child {
+    margin-inline-start: 24px;
+  }
+
+  .kitchen-sink-grid-tile-size {
+    color: rgb(0 0 0 / 50%);
+    font-variant-numeric: tabular-nums;
+    font-weight: 400;
+  }
+
+  .kitchen-sink-grid-header-actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+
+    /* (Narrow, e.g. on a phone: one below another, at the end.) */
+    @container kitchen-sink-grid-header (width < 480px) {
+      flex-direction: column;
+      align-items: end;
+    }
+  }
+
+  /* A section's dense switch, its label beside it. */
+  .kitchen-sink-grid-dense {
+    display: flex;
+    flex: none;
+    align-items: center;
+    font-size: var(--font-ui-subheadline-size, 15px);
+    gap: 8px;
+  }
+
+  .kitchen-sink-grid-spacer {
+    place-items: center;
+  }
+}

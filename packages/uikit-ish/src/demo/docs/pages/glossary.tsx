@@ -23,6 +23,7 @@ const sections: readonly Section[] = [
   ['stops-and-snapping', 'Stops and snapping'],
   ['the-keyboard', 'The keyboard'],
   ['touch-and-gestures', 'Touch and gestures'],
+  ['grids-and-tiles', 'Grids and tiles'],
   ['look-and-feel', 'Look and feel'],
 ];
 
@@ -884,6 +885,96 @@ export const GlossaryPage: FunctionComponent = () => (
         A swipe that lets go while still moving fast. A flung sheet or island
         goes on to the next stop in that direction, instead of settling at the
         nearest one.
+      </Term>
+    </dl>
+
+    <Heading
+      id="grids-and-tiles"
+      level={2}
+    >
+      Grids and tiles
+    </Heading>
+    <dl className="demo-glossary">
+      <Term term="Tile">
+        Anything in a <Docs to="grid">Grid</Docs>: an item, a{' '}
+        <See term="Spacer" />, a <See term="Break" /> or an{' '}
+        <See term="Add tile" />. Each takes its place in the order the app
+        stores. Where it lands on screen follows from that order and the grid’s
+        width.
+      </Term>
+      <Term term="Unit">
+        One square of a grid, a column wide and a row tall. A grid gets as many
+        columns as fit its width (3 on a phone) and stretches its units to fill
+        it. An item spans 1 to 3 units each way, written as columns by rows:{' '}
+        <code>2x1</code> is wide and one row tall.
+      </Term>
+      <Term term="Effective size">
+        The size an item is shown at: the size the user chose, snapped to the
+        sizes its content supports, then fitted to the columns (
+        <PartLink
+          component="grid"
+          part="useGridItem"
+        />
+        ). The chosen size is what the app stores. A narrower grid never changes
+        it.
+      </Term>
+      <Term term="Spacer">
+        A deliberate hole in a grid, as big as an item of its size (
+        <PartLink
+          component="grid"
+          part="Grid.Spacer"
+        />
+        ). It shows nothing outside <See term="Edit mode" />.
+      </Term>
+      <Term term="Break">
+        A line break in a grid: the next tile starts a new row (
+        <PartLink
+          component="grid"
+          part="Grid.Break"
+        />
+        ). A break of more rows keeps the rows below empty too. Like a newline
+        in text, it belongs to the row it ends.
+      </Term>
+      <Term
+        also="spawn"
+        term="Add tile"
+      >
+        A dashed tile that adds something when pressed (
+        <PartLink
+          component="grid"
+          part="Grid.Spawn"
+        />
+        ). What it adds, and where, is up to the app.
+      </Term>
+      <Term term="Edit mode">
+        The state where tiles are rearranged (a grid’s <code>editing</code>, a
+        list’s too). Tiles are dragged after a <See term="Long press" />, edit
+        controls such as resize handles appear, and taps on what’s in a tile are
+        held back.
+      </Term>
+      <Term term="Reorder handle">
+        An object the app makes to move rows of a <Docs to="list">List</Docs> or
+        tiles of a <Docs to="grid">Grid</Docs> (
+        <PartLink
+          component="grid"
+          part="Grid.createReorderHandle"
+        />
+        ). It goes on what can be moved and on where it can be dropped. When
+        something is dropped, its <code>onReorder</code> gets the change, and
+        the app moves it in its data. Unlike a <See term="Handle" />, it doesn’t
+        open anything.
+      </Term>
+      <Term term="Stand-in">
+        A spacer or break shown while a tile is dragged, which the drop would
+        add so the tile lands right there. It shows the app’s offer sign. When a
+        resize would take a spacer in (merge it), that spacer shows the merge
+        sign.
+      </Term>
+      <Term term="Row bands">
+        The outlines a grid draws around each section’s rows in{' '}
+        <See term="Edit mode" />. They run in from the page’s leading edge and
+        out at its trailing edge, to show that the tiles are one line read row
+        by row, as text is.
       </Term>
     </dl>
 

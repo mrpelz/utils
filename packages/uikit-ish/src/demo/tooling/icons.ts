@@ -158,10 +158,12 @@ const names = [
   'sfPlayFill',
   'sfPlus',
   'sfPlusCircle',
+  'sfPlusRectangle',
   'sfPlusSquare',
   'sfPlusSquareOnSquare',
   'sfPrinter',
   'sfRecordingtape',
+  'sfRectangleBadgeSparkles',
   'sfShuffle',
   'sfSpeakerFill',
   'sfSpeakerWave3Fill',
@@ -182,6 +184,7 @@ const names = [
   'sfUnderline',
   'sfWifi',
   'sfXmark',
+  'sfXmarkRectangle',
 ] as const;
 
 // The demos' icons: each an empty square (an em wide) until loaded, then
@@ -277,10 +280,12 @@ export const {
   sfPlayFill,
   sfPlus,
   sfPlusCircle,
+  sfPlusRectangle,
   sfPlusSquare,
   sfPlusSquareOnSquare,
   sfPrinter,
   sfRecordingtape,
+  sfRectangleBadgeSparkles,
   sfShuffle,
   sfSpeakerFill,
   sfSpeakerWave3Fill,
@@ -301,4 +306,5 @@ export const {
   sfUnderline,
   sfWifi,
   sfXmark,
+  sfXmarkRectangle,
 } = icons;

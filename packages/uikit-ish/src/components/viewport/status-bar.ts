@@ -19,6 +19,9 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 // (A touch's end caught on what it touched, too: removed meanwhile, e.g. a
 // page's back button, its page gone, its end doesn't reach the window, and
 // a finger would count down still, every scroll ignored.)
+// (Not its scroll reset by the window resizing, e.g. the screen turned:
+// scrolled to its top at another size than it was parked at, parked
+// again; no tap.)
 
 /** The document's marker while tracked (see style.css). */
 const statusBarAttribute = 'data-uikit-viewport-status-bar';
@@ -31,8 +34,25 @@ const isHomeScreenApp = () =>
   typeof navigator !== 'undefined' &&
   (navigator as { standalone?: boolean }).standalone === true;
 
+/** The window's size, and its visual viewport's (see above). */
+const sizeOf = () => {
+  const { visualViewport: viewport } = window;
+  return [
+    innerWidth,
+    innerHeight,
+    viewport?.width ?? 0,
+    viewport?.height ?? 0,
+  ].join('x');
+};
+
+/** The size it was last parked at (see above). */
+let parked = '';
+
 /** Parked: scrolled to its 1px (see above). */
-const park = () => scrollTo({ behavior: 'instant', top: 1 });
+const park = () => {
+  parked = sizeOf();
+  scrollTo({ behavior: 'instant', top: 1 });
+};
 
 const start = () => {
   const root = document.documentElement;
@@ -57,7 +77,9 @@ const start = () => {
   const onScroll = (event: Event) => {
     if (touches > 0) return;
     if (scrollY < 0.5) {
-      for (const listener of listeners) listener(event);
+      if (sizeOf() === parked) {
+        for (const listener of listeners) listener(event);
+      }
       park();
     } else if (scrollY > 1.5) {
       park();
