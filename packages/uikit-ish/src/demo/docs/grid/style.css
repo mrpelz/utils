@@ -1,0 +1,50 @@
+/* Grid demos (see main.tsx). */
+
+/* A device's tile: its name and size, on a plain card filling its item
+   (until cards). */
+.grid-demo-tile {
+  display: grid;
+  box-sizing: border-box;
+  align-content: space-between;
+  padding: 14px 16px;
+  border-radius: var(--uikit-grid-item-radius, 24px);
+  background-color: var(--color-ui-secondary-system-grouped-background);
+  color: var(--color-ui-label);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* (Its title clear of a remove button's x, in edit mode.) */
+.uikit-grid-item:has(> .uikit-grid-remove-button) > .grid-demo-tile {
+  padding-inline-start: 40px;
+}
+
+/* A tile's size, below its name. */
+.grid-demo-size {
+  color: var(--color-ui-secondary-label);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+}
+
+/* A grid on a page: clear of the screen's sides; a button above it. */
+.grid-demo-content {
+  display: grid;
+  padding: 16px;
+  gap: 16px;
+}
+
+/* A section's title (in its header). */
+.grid-demo-heading {
+  margin: 8px 0 0;
+  color: var(--color-ui-label);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* The buttons above a grid, in a row. */
+.grid-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

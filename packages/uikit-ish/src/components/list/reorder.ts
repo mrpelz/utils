@@ -1085,11 +1085,24 @@ export const useCreateReorderHandle = (
   return handle;
 };
 
+/**
+ * A change's names, all `reorder` needs (a `ListReorderChange`, a Grid's).
+ * @internal
+ */
+export type ReorderChangeLike = {
+  readonly items: readonly { readonly name?: string }[];
+  readonly target: {
+    readonly after?: string;
+    readonly before?: string;
+    readonly name?: string;
+  };
+};
+
 // Where moved rows go in a list (`rest`, without them): after `after`, or
 // before `before`; rows not in it taken as those before (after) it.
 const insertionOf = <T>(
   rest: readonly T[],
-  target: ListReorderTarget,
+  target: ReorderChangeLike['target'],
   nameOf: (row: T) => string,
 ) => {
   const afterAt = rest.findIndex((row) => nameOf(row) === target.after);
@@ -1110,17 +1123,17 @@ const insertionOf = <T>(
  */
 export function reorder<T>(
   data: readonly T[],
-  change: ListReorderChange,
+  change: ReorderChangeLike,
   nameOf: (row: T) => string,
 ): readonly T[];
 export function reorder<T, Key extends string>(
   data: Readonly<Record<Key, readonly T[]>>,
-  change: ListReorderChange,
+  change: ReorderChangeLike,
   nameOf: (row: T) => string,
 ): Readonly<Record<Key, readonly T[]>>;
 export function reorder<T>(
   data: readonly T[] | Readonly<Record<string, readonly T[]>>,
-  change: ListReorderChange,
+  change: ReorderChangeLike,
   nameOf: (row: T) => string,
 ): readonly T[] | Readonly<Record<string, readonly T[]>> {
   const isList = Array.isArray(data);

@@ -153,6 +153,10 @@ import { FormComposition, formCompositionDemos } from './form/composition.js';
 import { FormDemo } from './form/main.js';
 import { FormOverview, formOverviewDemos } from './form/overview.js';
 import { FormParts, formPartsDemos } from './form/parts.js';
+import { GridComposition, gridCompositionDemos } from './grid/composition.js';
+import { GridDemo } from './grid/main.js';
+import { GridOverview, gridOverviewDemos } from './grid/overview.js';
+import { GridParts, gridPartsDemos } from './grid/parts.js';
 import {
   HeaderComposition,
   headerCompositionDemos,
@@ -477,6 +481,22 @@ export const catalog: readonly CatalogEntry[] = [
     summary:
       'The app’s window as layers: a scrolling content layer, with bars floating at its edges, kept clear of the safe area insets and the keyboard.',
     title: 'Viewport',
+  },
+  {
+    category: 'structure',
+    demos: [
+      GridDemo,
+      ...gridOverviewDemos,
+      ...gridPartsDemos,
+      ...gridCompositionDemos,
+    ],
+    id: 'grid',
+    Composition: GridComposition,
+    Overview: GridOverview,
+    Parts: GridParts,
+    summary:
+      'Tiles on square units, in the app’s order, each item spanning 1 to 3 columns and rows, like a home screen or a control center. Rearranged by dragging and resizing.',
+    title: 'Grid',
   },
   {
     category: 'structure',

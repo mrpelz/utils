@@ -14,6 +14,7 @@ import {
   type SettingsValues,
   Symbol,
   Toolbar,
+  useSizeClass,
   type Viewport,
 } from '../../components/index.js';
 import {
@@ -264,18 +265,25 @@ export const ShowSidebarButton: FunctionComponent = () => {
 
 /**
  * The leading buttons of a bare page's own top bar (see `isBare`): the
- * sidebar's (see `ShowSidebarButton`), its back button.
+ * sidebar's (see `ShowSidebarButton`), its back button (compact only: its
+ * stack's root otherwise, nothing to go back to; see main.tsx).
  */
-export const BackButton: FunctionComponent = () => (
-  <>
-    <ShowSidebarButton />
-    <Navigation.Back
-      aria-label="Back"
-      render={<Toolbar.Button shape="circle" />}
-    >
-      <Button.Icon>
-        <Symbol icon={sfChevronBackward} />
-      </Button.Icon>
-    </Navigation.Back>
-  </>
-);
+export const BackButton: FunctionComponent = () => {
+  const isCompact = useSizeClass() === 'compact';
+
+  return (
+    <>
+      <ShowSidebarButton />
+      {isCompact ? (
+        <Navigation.Back
+          aria-label="Back"
+          render={<Toolbar.Button shape="circle" />}
+        >
+          <Button.Icon>
+            <Symbol icon={sfChevronBackward} />
+          </Button.Icon>
+        </Navigation.Back>
+      ) : null}
+    </>
+  );
+};

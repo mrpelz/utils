@@ -39,6 +39,7 @@ import { actionsPages } from './actions.js';
 import { choicesPages } from './choices.js';
 import { contentPages } from './content.js';
 import { foundationsPages } from './foundations.js';
+import { gridPages } from './grid.js';
 import { presentationPages } from './presentation.js';
 import {
   LayoutRootContext,
@@ -68,6 +69,7 @@ const pages: SinkPages = {
   ...foundationsPages,
   ...presentationPages,
   ...structurePages,
+  ...gridPages,
   ...viewportPages,
   ...statusPages,
 };
