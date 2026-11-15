@@ -271,14 +271,17 @@
   }
 
   :is(.uikit-grid-root, .uikit-grid-section) {
+    --uikit-grid-area-handle-color: #fff;
+    --uikit-grid-hole-color: rgb(255 255 255 / 45%);
+    --uikit-grid-landing-color: rgb(255 255 255 / 25%);
     --uikit-grid-band-color: rgb(255 255 255 / 80%);
+    --uikit-grid-room-color: rgb(255 255 255 / 30%);
   }
 
   .uikit-grid-placeholder {
     background-color: rgb(255 255 255 / 25%);
 
     &[data-grid-hole] {
-      border-color: rgb(255 255 255 / 45%);
       background-color: transparent;
     }
 
@@ -330,19 +333,15 @@
     display: flex;
     overflow: hidden;
     flex-direction: column;
-    justify-content: space-between;
+    align-items: center;
+    justify-content: center;
     padding: 12px;
     border-radius: 24px;
     background-color: rgb(255 255 255 / 70%);
     color: #000;
     font-weight: 600;
-  }
-
-  /* (Its title clear of its remove button, while it's shown.) */
-  .uikit-grid-item:has(> .uikit-grid-remove-button)
-    .kitchen-sink-grid-tile
-    > :first-child {
-    margin-inline-start: 24px;
+    gap: 2px;
+    text-align: center;
   }
 
   .kitchen-sink-grid-tile-size {

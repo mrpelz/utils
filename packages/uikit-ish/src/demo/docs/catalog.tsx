@@ -495,7 +495,7 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: GridOverview,
     Parts: GridParts,
     summary:
-      'Tiles on square units, in the app’s order, each item spanning 1 to 3 columns and rows, like a home screen or a control center. Rearranged by dragging and resizing.',
+      'Tiles on square units, in the app’s order, each item spanning some columns and rows, like a home screen or a control center. Rearranged by dragging and resizing.',
     title: 'Grid',
   },
   {

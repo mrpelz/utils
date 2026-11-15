@@ -905,8 +905,10 @@ export const GlossaryPage: FunctionComponent = () => (
       <Term term="Unit">
         One square of a grid, a column wide and a row tall. A grid gets as many
         columns as fit its width (3 on a phone) and stretches its units to fill
-        it. An item spans 1 to 3 units each way, written as columns by rows:{' '}
-        <code>2x1</code> is wide and one row tall.
+        it. An item spans some columns and rows (up to the grid’s columns and
+        its most rows), written as columns by rows: <code>2x1</code> is wide and
+        one row tall. With <code>*</code> for its columns, it spans the full
+        width: <code>*x2</code>.
       </Term>
       <Term term="Effective size">
         The size an item is shown at: the size the user chose, snapped to the
@@ -917,6 +919,18 @@ export const GlossaryPage: FunctionComponent = () => (
         />
         ). The chosen size is what the app stores. A narrower grid never changes
         it.
+      </Term>
+      <Term term="Area">
+        The room an item takes in the layout, which can be bigger than the tile
+        it shows (a{' '}
+        <PartLink
+          component="grid"
+          part="Grid.Area"
+        />{' '}
+        in the item). The tile sits in its middle or one of its corners, and the
+        room around it is hatched in <See term="Edit mode" />. A movable tile
+        can be dragged to another of those places. Without an area, an item
+        takes the room of its size.
       </Term>
       <Term term="Spacer">
         A deliberate hole in a grid, as big as an item of its size (
@@ -975,6 +989,14 @@ export const GlossaryPage: FunctionComponent = () => (
         <See term="Edit mode" />. They run in from the page’s leading edge and
         out at its trailing edge, to show that the tiles are one line read row
         by row, as text is.
+      </Term>
+      <Term term="End-of-line column">
+        A narrow column after a grid’s last one, only in{' '}
+        <See term="Edit mode" />; the other columns get narrower to make room
+        for it. Breaks run into it, and a break with no room left in its row
+        shows there. A tile at a row’s end can be resized into it, which moves
+        it to the next row one column wider. A full-width tile reaches into it,
+        unlike a tile exactly as wide as the columns.
       </Term>
     </dl>
 

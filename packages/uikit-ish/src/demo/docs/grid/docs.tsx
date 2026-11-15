@@ -79,7 +79,7 @@ export const gridRootRows: readonly PropRow[] = [
     'editing',
     'boolean',
     code('false'),
-    'Edit mode. Cells with a reorder handle can be dragged (after holding a touch for a moment) and resized by their handles. Taps on what’s in them are held back, except on their edit controls. Spacers and breaks are outlined, and each section’s rows are drawn as bands.',
+    'Edit mode. Cells with a reorder handle can be dragged (after holding a touch for a moment) and resized by their handles. Taps on what’s in them are held back, except on their edit controls. Spacers and breaks are outlined, each section’s rows are drawn as bands, and a narrow end-of-line column follows the last column (see --uikit-grid-end-width).',
   ],
   [
     'dense',
@@ -89,10 +89,22 @@ export const gridRootRows: readonly PropRow[] = [
   ],
   ['gap', 'number', code('12'), 'The gap between cells, in px.'],
   [
+    'minColumns',
+    'number',
+    code('3'),
+    'The fewest columns it lays out, however narrow it is: its units shrink below unitMin then. Every item must support a size this narrow, so a layout never breaks. Wider sizes give way to the widest that fits.',
+  ],
+  [
+    'maxTileRows',
+    'number',
+    code('3'),
+    'The most rows a tile has: taller sizes aren’t shown or offered, and no break keeps more rows empty. Every item must support a size within minColumns and this.',
+  ],
+  [
     'unitSize',
     'number',
     code('110'),
-    'The size of a unit to aim for, in px. The grid gets as many columns as fit its width, and the units stretch to fill it.',
+    'The size of a unit to aim for, in px. The grid gets the columns whose units come closest to it, and the units stretch to fill the width. Outside unitMin and unitMax, it moves that bound.',
   ],
   [
     'unitMin',
@@ -104,7 +116,7 @@ export const gridRootRows: readonly PropRow[] = [
     'unitMax',
     'number',
     code('130'),
-    'The largest a unit stretches to, in px. Above it, the grid adds a column.',
+    'The largest a unit stretches to, in px. Above it, the grid adds a column. If no column count fits between unitMin and unitMax, the grid takes the one that comes closest.',
   ],
   ...rangeRows,
   ...elementRows('div', 'HTMLDivElement'),
@@ -159,9 +171,11 @@ export const gridItemRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      What it shows, filling it, for example a card. A{' '}
-      <PartLink part="Grid.ResizeHandle" /> and a{' '}
-      <PartLink part="Grid.RemoveButton" /> go in here too. What’s in it can
+      What it shows, filling its tile, for example a card. Its tile’s controls
+      go in here too: a <PartLink part="Grid.ResizeHandle" />, a{' '}
+      <PartLink part="Grid.RemoveButton" /> and a{' '}
+      <PartLink part="Grid.AreaButton" />. So does a{' '}
+      <PartLink part="Grid.Area" />, for room around the tile. What’s in it can
       read its size with <PartLink part="useGridItem" />.
     </>,
   ],
@@ -169,7 +183,7 @@ export const gridItemRows: readonly PropRow[] = [
     'defaultSize',
     'GridSize',
     code(union('1x1')),
-    'Its initial size (uncontrolled): columns by rows, each 1 to 3.',
+    'Its initial size (uncontrolled): columns by rows (* for the full width), up to the grid’s columns and maxTileRows.',
   ],
   [
     'size',
@@ -181,7 +195,7 @@ export const gridItemRows: readonly PropRow[] = [
     'supportedSizes',
     'GridSize[]',
     'every size',
-    'The sizes its content can be, usually a constant of the card component. Its size snaps to them (the same shape first, then the closest area), and then to what fits the columns.',
+    'The sizes its content can be, usually a constant of the card component. Its size snaps to them (the same shape first, then the closest area). If that’s wider than the columns, the widest that fits is shown, with the nearest rows. One of them must fit the grid’s minColumns.',
   ],
   onSizeChangeRow('by its resize handle'),
   ...cellRows,
@@ -227,16 +241,16 @@ export const gridBreakRows: readonly PropRow[] = [
       <PartLink part="Grid.RemoveButton" />.
     </>,
   ],
-  ['defaultRows', '1 | 2 | 3', code('1'), 'Its initial rows (uncontrolled).'],
+  ['defaultRows', 'number', code('1'), 'Its initial rows (uncontrolled).'],
   [
     'rows',
-    '1 | 2 | 3',
+    'number',
     undefined,
     'Its rows (controlled): the rest of its row and the rows below it are kept empty, as many rows in all. What follows starts below them.',
   ],
   [
     'onRowsChange',
-    '(rows: 1 | 2 | 3, details: GridSizeChangeDetails) => void',
+    '(rows: number, details: GridSizeChangeDetails) => void',
     undefined,
     'Called when its rows are changed by a resize handle in it. The details list the breaks next to it and anything it grew over, which the app removes.',
   ],
@@ -250,9 +264,10 @@ export const gridSpawnRows: readonly PropRow[] = [
     'ReactNode',
     undefined,
     <>
-      Usually nothing: the sign in its middle comes from the{' '}
-      <code>--uikit-grid-spawn-sign</code> mask. A{' '}
-      <PartLink part="Grid.ResizeHandle" /> can go in here.
+      Its controls, for example a <PartLink part="Grid.ResizeHandle" />, and a{' '}
+      <PartLink part="Grid.Area" />. They go beside its button, not in it. The
+      sign in its middle comes from the <code>--uikit-grid-spawn-sign</code>{' '}
+      mask.
     </>,
   ],
   [
@@ -285,6 +300,63 @@ export const gridSpawnRows: readonly PropRow[] = [
   ...renderRows('button', 'HTMLButtonElement'),
 ];
 
+export const gridAreaRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its controls, in its corners: a <PartLink part="Grid.ResizeHandle" />{' '}
+      resizes the area, a <PartLink part="Grid.RemoveButton" /> removes it (the
+      app stops rendering the area).
+    </>,
+  ],
+  ['defaultSize', 'GridSize', undefined, 'Its initial size (uncontrolled).'],
+  [
+    'size',
+    'GridSize',
+    undefined,
+    'Its size (controlled): the room its item takes in the layout, at least its tile’s size. The rest is hatched in edit mode.',
+  ],
+  [
+    'supportedSizes',
+    'GridSize[]',
+    'every size',
+    'The sizes it can be. Its size snaps to them and fits the columns first. Then its tile fits in it: the widest of the tile’s supported sizes that does.',
+  ],
+  onSizeChangeRow('by a resize handle in it'),
+  [
+    'defaultPlacement',
+    'GridPlacement',
+    code(union('center')),
+    'Its tile’s initial placement (uncontrolled).',
+  ],
+  [
+    'placement',
+    union(
+      'center',
+      'top-leading',
+      'top-trailing',
+      'bottom-leading',
+      'bottom-trailing',
+    ),
+    undefined,
+    'Where its tile sits in it (controlled). In the middle, truly centered even off the unit lines, its size still in whole units. Or in a corner, the tile’s corner on the area’s; in edit mode, 24px in from it (--uikit-grid-corner-inset).',
+  ],
+  [
+    'onPlacementChange',
+    '(placement: GridPlacement) => void',
+    undefined,
+    'Called when its tile’s placement is changed: dragged in it, or moved with the arrow keys (see movable).',
+  ],
+  [
+    'movable',
+    'boolean',
+    code('false'),
+    'Its tile can be moved within it in edit mode, shown by a ring in the tile’s top trailing corner: held and dragged to the middle or a corner, or stepped there with the arrow keys while it has focus. A hold on the hatched room around it moves the whole item instead.',
+  ],
+];
+
 export const gridResizeHandleRows: readonly PropRow[] = [
   [
     'onClick',
@@ -293,8 +365,8 @@ export const gridResizeHandleRows: readonly PropRow[] = [
     <>
       Called when it’s pressed. Pressed with a key, it steps to the next size
       that fits the columns, unless this calls{' '}
-      <code>event.preventDefault()</code>. Pressed with a pointer and released
-      without dragging, nothing changes.
+      <code>event.preventDefault()</code>. A quick tap steps to the next size
+      too. Held and released without dragging, nothing changes.
     </>,
   ],
   ['aria-label', 'string', code(union('Resize')), 'Its accessible name.'],
@@ -306,7 +378,10 @@ export const gridRemoveButtonRows: readonly PropRow[] = [
     'onClick',
     '(event) => void',
     undefined,
-    'What removing does: the app takes the cell out of its data.',
+    <>
+      What removing does: the app takes the cell out of its data. In a{' '}
+      <PartLink part="Grid.Area" />, the area: the app stops rendering it.
+    </>,
   ],
   [
     'aria-label',
@@ -314,6 +389,35 @@ export const gridRemoveButtonRows: readonly PropRow[] = [
     code(union('Remove')),
     'Its accessible name. Name what it removes, for example “Remove Lamp”.',
   ],
+  ...renderRows('button', 'HTMLButtonElement'),
+];
+
+export const gridAreaButtonRows: readonly PropRow[] = [
+  [
+    'onAdd',
+    '(size: GridSize) => void',
+    undefined,
+    <>
+      Called with the area to add: one column wider than the tile, as tall. The
+      app renders a <PartLink part="Grid.Area" /> of that size in the item.
+    </>,
+  ],
+  [
+    'supportedSizes',
+    'GridSize[]',
+    'every size',
+    'The sizes the area could be: if the one column wider isn’t among them, the nearest larger one is suggested, and with none, the button doesn’t show.',
+  ],
+  [
+    'onClick',
+    '(event) => void',
+    undefined,
+    <>
+      Called when it’s pressed, before <code>onAdd</code>, which isn’t called if
+      this calls <code>event.preventDefault()</code>.
+    </>,
+  ],
+  ['aria-label', 'string', code(union('Add area')), 'Its accessible name.'],
   ...renderRows('button', 'HTMLButtonElement'),
 ];
 
@@ -370,7 +474,7 @@ export const gridUseGridItemRows: readonly PropRow[] = [
     'size',
     'GridSize',
     undefined,
-    'Its size as shown: as requested, snapped to what it supports, and fitted to the columns. Use it to pick a level of detail.',
+    'Its size as shown: as requested, snapped to what it supports, and fitted to the columns (and its area). Use it to pick a level of detail.',
   ],
   ['requested', 'GridSize', undefined, 'Its size as the user chose it.'],
   [
@@ -391,5 +495,35 @@ export const gridUseGridItemRows: readonly PropRow[] = [
     '(size: GridSize, details?: GridSizeChangeDetails) => void',
     undefined,
     'Asks for another size, as its resize handle does (for example from a menu).',
+  ],
+];
+
+export const gridUseGridAreaRows: readonly PropRow[] = [
+  [
+    'size',
+    'GridSize',
+    undefined,
+    'Its size as laid out: the room its item takes, snapped, fitted to the columns, at least its tile’s.',
+  ],
+  ['requested', 'GridSize', undefined, 'Its size as the user chose it.'],
+  [
+    'supportedSizes',
+    'GridSize[]',
+    undefined,
+    'The sizes it can be, smallest first.',
+  ],
+  ['placement', 'GridPlacement', undefined, 'Where its tile sits in it.'],
+  ['movable', 'boolean', undefined, 'Whether its tile can be moved within it.'],
+  [
+    'requestSize',
+    '(size: GridSize, details?: GridSizeChangeDetails) => void',
+    undefined,
+    'Asks for another size, as its resize handle does.',
+  ],
+  [
+    'requestPlacement',
+    '(placement: GridPlacement) => void',
+    undefined,
+    'Asks for another placement, as dragging the tile does.',
   ],
 ];

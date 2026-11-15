@@ -14,6 +14,7 @@ import {
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { gridSigns } from '../../tooling/grid-signs.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
 import {
   Contents,
@@ -30,7 +31,7 @@ import {
   gridRootRows,
   gridSpacerRows,
 } from './docs.js';
-import { propOptionsOverviewRoot } from './props.js';
+import { defaultsKey, propOptionsOverviewRoot } from './props.js';
 
 /**
  * A phone: a home's devices by room, Edit and Done above them; in edit
@@ -88,6 +89,7 @@ const LiveView: FunctionComponent = () => {
             'Button.Root': ['onClick', 'variant'],
             'Grid.Header': [],
             'Grid.Item': [
+              'defaultSize',
               'dropName',
               'onSizeChange',
               'reorderHandle',
@@ -139,8 +141,10 @@ const LiveView: FunctionComponent = () => {
               </Button.Root>
             </div>
             <Grid.Root
+              key={defaultsKey(props, ...Object.values(partProps))}
               {...props}
               editing={editing}
+              style={gridSigns()}
             >
               {rooms.map((room) => (
                 <Grid.Section
@@ -196,7 +200,9 @@ export const GridOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Tiles on square units, like a home screen or a control center. Each item
-        spans 1 to 3 columns and rows.
+        spans any number of columns and rows, up to the grid’s columns and{' '}
+        <code>maxTileRows</code> (3), or the full width (<code>*x1</code>,{' '}
+        <code>*x2</code>, …).
       </li>
       <li>
         The app stores the tiles’ order and each item’s size, and nothing else.
@@ -263,7 +269,17 @@ export const GridOverview: FunctionComponent = () => (
     </ul>
     <KeyPropsTable
       parts={[
-        ['Grid.Root', pickRows(gridRootRows, 'editing', 'dense', 'unitSize')],
+        [
+          'Grid.Root',
+          pickRows(
+            gridRootRows,
+            'editing',
+            'dense',
+            'unitSize',
+            'minColumns',
+            'maxTileRows',
+          ),
+        ],
         [
           'Grid.Item',
           pickRows(
@@ -304,8 +320,11 @@ export const GridOverview: FunctionComponent = () => (
       </li>
       <li>
         The edit controls are buttons: “Resize” (Enter or Space steps to the
-        next size), “Remove” and, for <PartLink part="Grid.Spawn" />, “Add”.
-        Give the remove and add buttons names that say what they act on.
+        next size), “Remove”, “Add area” (
+        <PartLink part="Grid.AreaButton" />) and, for{' '}
+        <PartLink part="Grid.Spawn" />, “Add”. Give the remove and add buttons
+        names that say what they act on, for example “Remove the area around
+        Clock”.
       </li>
       <li>
         Spacers and breaks are hidden from assistive technology outside edit
@@ -333,9 +352,15 @@ export const GridOverview: FunctionComponent = () => (
         tiles fill those holes. Only a tile’s first row decides where it goes.
       </li>
       <li>
-        An item’s size snaps to its <code>supportedSizes</code> and then to what
-        fits the columns. The stored size doesn’t change when the grid gets
-        narrower.
+        It never gets fewer columns than <code>minColumns</code> (3). Its units
+        shrink instead.
+      </li>
+      <li>
+        An item’s size snaps to its <code>supportedSizes</code>. If that’s wider
+        than the columns, the widest supported size that fits is shown, so a 4x2
+        card that also supports 3x2 shows as 3x2 on a phone. Each item must
+        support a size that fits <code>minColumns</code>; otherwise the console
+        warns. The stored size doesn’t change when the grid gets narrower.
       </li>
       <li>
         When the width changes, the columns stay while their units fit between{' '}
@@ -351,18 +376,60 @@ export const GridOverview: FunctionComponent = () => (
       </li>
       <li>
         Resizing outlines the new size while the handle is held, and changes it
-        when it’s released. Growing over spacers takes them in.
+        when it’s released. Growing over spacers takes them in. A tap on the
+        handle steps to the next size; holding it without moving does nothing.
+      </li>
+      <li>
+        In edit mode, a narrow column follows the last one (its width in{' '}
+        <code>--uikit-grid-end-width</code>, a third of a unit by default), and
+        the other columns get narrower to make room; rows keep their height.
+        Breaks run into it, and a break with no room left in its row shows there
+        as a narrow tile.
+      </li>
+      <li>
+        A tile at a row’s end that supports a size one column wider can be
+        resized into that column: the outline moves to where the tile will land
+        in the row below, and dragging on grows it further in the same move.
+        Dragged back, the outline returns to the row above once the tile fits
+        there again.
+      </li>
+      <li>
+        A full-width tile reaches into that column, unlike a tile exactly as
+        wide as the columns. A tile at a row’s start that supports the full
+        width becomes full width when resized into it. A break after a
+        full-width tile does nothing, and leaving edit mode removes it.
+      </li>
+      <li>
+        An item can take more room than its tile shows: a{' '}
+        <PartLink part="Grid.Area" /> in it. The tile sits in its middle by
+        default or in a corner (its <code>placement</code>), and the room is
+        hatched in edit mode, with the area’s own controls in its corners. A{' '}
+        <code>movable</code> tile shows a ring and can be dragged to another of
+        those places. In edit mode, a tile in a corner sits 24px in from it (
+        <code>--uikit-grid-corner-inset</code>), off the area’s own controls.
+        Dragging the tile’s handle out of the area steps it to its next size up,
+        even when its placement keeps it at that edge; dragging further grows it
+        more (see{' '}
+        <a href={publicUrl('grid/composition#room-around-a-tile')}>
+          Room around a tile
+        </a>
+        ).
       </li>
       <li>
         Entering and leaving edit mode keeps what’s on screen in place, though
         spacers and breaks appear and disappear.
       </li>
       <li>
-        The signs on offered and merging spacers and breaks, and on{' '}
-        <PartLink part="Grid.Spawn" />, are the app’s: masks in{' '}
-        <code>--uikit-grid-offer-sign</code>,{' '}
+        In edit mode, the grid draws its own corner symbols as plain lines: an x
+        to remove, a ring on tiles that can be moved, and the resize arc, with a
+        moat of dots outside it when a tile can only shrink and inside when it
+        can only grow. Where there’s no fill under them (spacers, add tiles, the
+        hatched room), they get a faint backing. The signs on offered and
+        merging spacers and breaks, and on <PartLink part="Grid.Spawn" />, are
+        the app’s: masks in <code>--uikit-grid-offer-sign</code>,{' '}
         <code>--uikit-grid-merge-sign</code> and{' '}
-        <code>--uikit-grid-spawn-sign</code> (see{' '}
+        <code>--uikit-grid-spawn-sign</code>. Without them, nothing is drawn
+        (see{' '}
         <a href={publicUrl('grid/composition#holes-and-line-breaks')}>
           Composition
         </a>

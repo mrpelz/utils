@@ -10,15 +10,17 @@ export type Device = {
 };
 
 export const devices: readonly Device[] = [
+  { name: 'Now Playing', room: 'Living Room', size: '*x1' },
   { name: 'Lamp', room: 'Living Room', size: '1x1' },
   { name: 'Thermostat', room: 'Living Room', size: '2x2' },
   { name: 'Blinds', room: 'Living Room', size: '1x1' },
   { name: 'Speaker', room: 'Living Room', size: '2x1' },
+  { name: 'Fan', room: 'Living Room', size: '1x1' },
   { name: 'Kettle', room: 'Kitchen', size: '1x1' },
   { name: 'Oven', room: 'Kitchen', size: '2x1' },
   { name: 'Fridge', room: 'Kitchen', size: '1x2' },
   { name: 'Lights', room: 'Kitchen', size: '1x1' },
-  { name: 'Camera', room: 'Garden', size: '3x2' },
+  { name: 'Camera', room: 'Garden', size: '4x2' },
   { name: 'Sprinkler', room: 'Garden', size: '1x1' },
   { name: 'Gate', room: 'Garden', size: '1x1' },
 ];
@@ -30,6 +32,9 @@ export const deviceSizes: readonly GridSize[] = [
   '1x2',
   '2x2',
   '3x2',
+  '4x2',
+  '*x1',
+  '*x2',
 ];
 
 /** The rooms, in order. */

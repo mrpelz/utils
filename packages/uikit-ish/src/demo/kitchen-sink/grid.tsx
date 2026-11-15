@@ -1,15 +1,10 @@
-import {
-  CSSProperties,
-  FunctionComponent,
-  ReactNode,
-  useRef,
-  useState,
-} from 'react';
+import { FunctionComponent, ReactNode, useRef, useState } from 'react';
 
 import {
   Button,
   Grid,
   type GridBreakRows,
+  type GridPlacement,
   type GridReorderChange,
   type GridSize,
   type GridSizeChangeDetails,
@@ -17,16 +12,12 @@ import {
   Menu,
   Page,
   Switch,
-  type SymbolIcon,
   Toolbar,
+  useGridArea,
   useGridItem,
   Viewport,
 } from '../../components/index.js';
-import {
-  sfPlusRectangle,
-  sfRectangleBadgeSparkles,
-  sfXmarkRectangle,
-} from '../tooling/icons.js';
+import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
 import { BackButton, type SinkPages } from './shared.js';
 
 // Grid: a home screen of tiles on a picture. Edit in the bar starts edit
@@ -40,6 +31,7 @@ import { BackButton, type SinkPages } from './shared.js';
  */
 const Tile: FunctionComponent<{ label: string }> = ({ label }) => {
   const item = useGridItem();
+  const area = useGridArea();
   return (
     <>
       <div className="kitchen-sink-grid-tile">
@@ -47,36 +39,13 @@ const Tile: FunctionComponent<{ label: string }> = ({ label }) => {
         <span className="kitchen-sink-grid-tile-size">
           {item?.size}
           {item && item.size !== item.requested ? ` (${item.requested})` : ''}
+          {area ? ` in ${area.size}, ${area.placement}` : ''}
         </span>
       </div>
       <Grid.ResizeHandle />
     </>
   );
 };
-
-/** A symbol as a mask image (a CSS `url()`), for the grid's signs. */
-const maskOf = ({ svgPathData, viewBox }: SymbolIcon) => {
-  const paths = svgPathData
-    .map(
-      ({ d, fillOpacity }) =>
-        `<path d="${d}"${fillOpacity === undefined ? '' : ` fill-opacity="${String(fillOpacity)}"`}/>`,
-    )
-    .join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">${paths}</svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-};
-
-/**
- * The grid's signs (see its CSS): spacers and breaks offered while
- * dragging, sparkling; those a resize takes in, crossed out. (Made once
- * rendered: the symbols are loaded by then.)
- */
-const gridSignsOf = () =>
-  ({
-    '--uikit-grid-merge-sign': maskOf(sfXmarkRectangle),
-    '--uikit-grid-offer-sign': maskOf(sfRectangleBadgeSparkles),
-    '--uikit-grid-spawn-sign': maskOf(sfPlusRectangle),
-  }) as CSSProperties;
 
 /** A section header: its title, a sentence on what to try, its buttons. */
 const SectionHeader: FunctionComponent<{
@@ -118,9 +87,13 @@ const DenseSwitch: FunctionComponent<{
 
 /** A device: its name, size and supported sizes. */
 type Device = {
+  /** The room it takes, around its tile (none: its size). */
+  area?: GridSize;
   /** A camera or a lock, which may also go into Security. */
   isSecure?: boolean;
   name: string;
+  /** Where its tile sits in its area (movable there, if it has one). */
+  placement?: GridPlacement;
   size: GridSize;
   supported?: readonly GridSize[];
 };
@@ -129,12 +102,12 @@ type Room = 'bedroom' | 'kitchen' | 'living' | 'security';
 
 const rooms: readonly { hint?: string; name: Room; title: string }[] = [
   {
-    hint: 'Drag tiles within a room or into another one. Cameras and the back door can also go to Security. Some tiles come in more sizes than others.',
+    hint: 'Drag tiles within a room or into another one. Cameras and the back door can also go to Security. Some tiles come in more sizes than others. Now Playing spans the full width, whatever the columns; the camera is 4x2 where it fits and 3x2 on a phone.',
     name: 'living',
     title: 'Living Room',
   },
   {
-    hint: 'Rooms keep tiles in order and have no breaks, so the back door can only go beside the kettle, not under it. Spacers and Breaks, further down, shows how that works.',
+    hint: 'Rooms keep tiles in order and have no breaks, so the back door can only go beside the kettle, not under it. Spacers and Breaks, further down, shows how that works. The clock is a small tile in a full-width area of three rows: in edit mode, the outer arc resizes the area, the inner one the tile. Hold the clock itself and drag it to a corner of its area or its middle; hold the hatched room to move it with its area. The hatched corner sign on a tile gives it an area too, and the x on an area takes it away again.',
     name: 'kitchen',
     title: 'Kitchen',
   },
@@ -148,16 +121,27 @@ const rooms: readonly { hint?: string; name: Room; title: string }[] = [
 const devicesInitial: Readonly<Record<Room, readonly Device[]>> = {
   bedroom: [],
   kitchen: [
+    { area: '*x3', name: 'Clock', size: '1x1', supported: ['1x1', '2x2'] },
     { name: 'Kettle', size: '1x1', supported: ['1x1'] },
     { name: 'Fridge', size: '1x2', supported: ['1x1', '1x2'] },
     { isSecure: true, name: 'Back Door', size: '1x1', supported: ['1x1'] },
   ],
   living: [
+    {
+      name: 'Now Playing',
+      size: '*x1',
+      supported: ['2x1', '4x1', '*x1', '*x2'],
+    },
     { name: 'Lights', size: '2x1' },
     { name: 'Thermostat', size: '2x2', supported: ['1x1', '2x2'] },
     { name: 'Blinds', size: '1x1' },
     { name: 'Speaker', size: '1x2', supported: ['1x1', '1x2', '2x2'] },
-    { isSecure: true, name: 'Camera', size: '3x2', supported: ['2x2', '3x2'] },
+    {
+      isSecure: true,
+      name: 'Camera',
+      size: '4x2',
+      supported: ['2x2', '3x2', '4x2'],
+    },
   ],
   security: [
     {
@@ -195,7 +179,8 @@ const cellsInitial: readonly Cell[] = [
 
 /**
  * Tidied on Done: breaks at the start or end are dropped (nothing before
- * or after them to end a row for), and breaks one after another become
+ * or after them to end a row for), so are those right after a full width
+ * (its row ends anyway), and breaks one after another become
  * the first of them, their rows added up (3 at most).
  */
 const tidy = (cells: readonly Cell[]): Cell[] => {
@@ -204,6 +189,15 @@ const tidy = (cells: readonly Cell[]): Cell[] => {
   const tidied: Cell[] = [];
   for (const cell of first === -1 ? [] : cells.slice(first, last + 1)) {
     const previous = tidied.at(-1);
+    // (Right after a full width, whose row ends anyway: dropped.)
+    if (
+      cell.kind === 'break' &&
+      previous &&
+      previous.kind !== 'break' &&
+      String(previous.size).startsWith('*')
+    ) {
+      continue;
+    }
     if (cell.kind === 'break' && previous?.kind === 'break') {
       const rows = Math.min(3, (previous.rows ?? 1) + (cell.rows ?? 1));
       tidied[tidied.length - 1] = {
@@ -305,7 +299,6 @@ const GridApp: FunctionComponent = () => {
       }
     />
   );
-  const section = useRef<HTMLElement>(null);
   const cells = draft ?? saved;
 
   // Every room shares one handle. Cameras and locks have a second one that
@@ -326,6 +319,16 @@ const GridApp: FunctionComponent = () => {
       }
       return next;
     });
+  const changeDevice = (name: string, change: Partial<Device>) =>
+    setDevices((current) => {
+      const next = { ...current };
+      for (const room of Object.keys(next) as Room[]) {
+        next[room] = next[room].map((device) =>
+          device.name === name ? { ...device, ...change } : device,
+        );
+      }
+      return next;
+    });
   const deviceTile = (device: Device) => (
     <Grid.Item
       key={device.name}
@@ -338,6 +341,33 @@ const GridApp: FunctionComponent = () => {
       onSizeChange={(size) => resizeDevice(device.name, size)}
     >
       <Tile label={device.name} />
+      {device.area ? (
+        <Grid.Area
+          movable
+          placement={device.placement}
+          size={device.area}
+          onSizeChange={(area) => changeDevice(device.name, { area })}
+          onPlacementChange={(placement) =>
+            changeDevice(device.name, { placement })
+          }
+        >
+          <Grid.ResizeHandle />
+          <Grid.RemoveButton
+            aria-label={`Remove the area around ${device.name}`}
+            onClick={() =>
+              changeDevice(device.name, {
+                area: undefined,
+                placement: undefined,
+              })
+            }
+          />
+        </Grid.Area>
+      ) : (
+        <Grid.AreaButton
+          aria-label={`Add an area around ${device.name}`}
+          onAdd={(area) => changeDevice(device.name, { area })}
+        />
+      )}
     </Grid.Item>
   );
 
@@ -393,25 +423,11 @@ const GridApp: FunctionComponent = () => {
     const name = nameFor('Spacer');
     edit((current) => [...current, { kind: 'spacer', name }]);
   };
-  // A new break goes where it first makes a difference: after the first
-  // cell with room left in its row. Otherwise it goes at the end.
+  // A new break dangles at the end: nothing shifts. Moved, it starts a row
+  // where it's put; left there, it's tidied away on Done (see `tidy`).
   const addBreak = () => {
-    const shown = Array.from(
-      section.current?.querySelectorAll<HTMLElement>('[data-grid-name]') ?? [],
-    );
-    const width = section.current?.clientWidth ?? 0;
-    const at = shown.findIndex(
-      (element, index) =>
-        element.dataset.gridPart !== 'break' &&
-        shown[index + 1]?.dataset.gridPart !== 'break' &&
-        element.offsetLeft + element.offsetWidth < width - 1,
-    );
     const name = nameFor('Break');
-    edit((current) => {
-      const next = [...current];
-      next.splice(at === -1 ? next.length : at + 1, 0, { kind: 'break', name });
-      return next;
-    });
+    edit((current) => [...current, { kind: 'break', name }]);
   };
   const remove = (name: string) =>
     edit((current) => current.filter((cell) => cell.name !== name));
@@ -536,12 +552,11 @@ const GridApp: FunctionComponent = () => {
               </Grid.DropGroup>
             </Grid.Section>
             <Grid.Section
-              ref={section}
               dense={dense.layout}
               reorderHandle={layoutHandle}
             >
               <SectionHeader
-                hint="A spacer leaves a gap, and a break starts a new row. A taller break keeps the rows below it empty too. Drop a tile at the start of a row, or in the empty row at the end, and a break is added to keep it there. Tiles can't leave this section."
+                hint="A spacer leaves a gap, and a break starts a new row. A taller break keeps the rows below it empty too. Drop a tile on any empty spot, even up to three rows below the last, and the breaks and spacers it needs are added. Tiles can't leave this section."
                 title="Spacers and Breaks"
               >
                 <span className="kitchen-sink-grid-header-actions">

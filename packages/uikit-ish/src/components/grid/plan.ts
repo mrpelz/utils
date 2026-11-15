@@ -42,10 +42,12 @@ export type PlanCell = {
   /** A break's rows (else none). */
   breakRows?: number;
   element: HTMLElement;
+  /** A full width: its row ends with it, no break after it. */
+  isFull?: boolean;
   unit: Unit;
 };
 
-type At = { column: number; row: number };
+export type At = { column: number; row: number };
 
 const keyOf = (row: number, column: number) =>
   `${String(row)},${String(column)}`;
@@ -104,8 +106,8 @@ const isAt = (a: At | undefined, b: At) =>
   a?.row === b.row && a.column === b.column;
 
 /**
- * Spacers for a row's free units from one column to another (at most 3
- * wide each), each landing where it's meant to (else none: `undefined`);
+ * Spacers for a row's free units from one column to another (one for
+ * each run of them, as wide), each landing where it's meant to (else none: `undefined`);
  * what they take marked.
  */
 const spacersIn = (
@@ -124,7 +126,7 @@ const spacersIn = (
       continue;
     }
     let end = column;
-    while (end < to && end - column < 3 && !taken.has(keyOf(row, end))) {
+    while (end < to && !taken.has(keyOf(row, end))) {
       end += 1;
     }
     const columns = end - column;
@@ -164,7 +166,7 @@ const beforeOf = (
   target: At,
   taken: Set<string>,
   item: Span,
-  columns: number,
+  { columns, maxRows }: { columns: number; maxRows: number },
 ): Pick<Plan, 'before' | 'resize'> | undefined => {
   const { breakRows } = previous;
   const before: GridReorderInsert[] = [];
@@ -172,8 +174,12 @@ const beforeOf = (
   let from = previous.unit.column + previous.unit.columns;
   const rows = target.row - previous.unit.row;
   if (rows > 0) {
-    if (rows > 3) return undefined;
-    if (breakRows === undefined) {
+    if (rows > maxRows) return undefined;
+    // (After a full width: the next row without one; none further down.)
+    if (previous.isFull && rows > 1) return undefined;
+    if (previous.isFull) {
+      // (Its row ended: nothing between.)
+    } else if (breakRows === undefined) {
       before.push({ kind: 'break', rows: rows as GridBreakRows });
     } else if (rows !== breakRows) {
       resize = { element: previous.element, rows: rows as GridBreakRows };
@@ -284,6 +290,7 @@ export const planAt = ({
   cells,
   columns,
   item,
+  maxRows,
   others,
   target,
 }: {
@@ -291,6 +298,8 @@ export const planAt = ({
   cells: readonly PlanCell[];
   columns: number;
   item: Span;
+  /** The most rows a break keeps (the grid's `maxTileRows`). */
+  maxRows: number;
   others: readonly Unit[];
   target: At;
 }): { index: number; plan: Plan } | undefined => {
@@ -324,7 +333,10 @@ export const planAt = ({
   if (isAt(firstFit(taken, cursor, item.columns, item.rows, columns), target)) {
     return { index, plan: { after: keep(), before: [] } };
   }
-  const before = beforeOf(previous, target, taken, item, columns);
+  const before = beforeOf(previous, target, taken, item, {
+    columns,
+    maxRows,
+  });
   if (!before) return undefined;
   const additions = afterOf(previous, target, { all, taken }, item, columns);
   if (!additions) return undefined;
@@ -333,4 +345,20 @@ export const planAt = ({
     after: additions.length > 0 ? additions : keep(),
   };
   return isAllowed(plan, allows) ? { index, plan } : undefined;
+};
+
+/**
+ * Where a span lands, grown past its row's end (see `ResizeHandle`): the
+ * first place it fits from where it is on, past what's placed before it
+ * (`before`; CSS grid's sparse flow, as `planAt`'s), on `columns` columns.
+ */
+export const landingOf = (
+  before: readonly Unit[],
+  from: At,
+  span: Span,
+  columns: number,
+): At | undefined => {
+  const taken = new Set<string>();
+  for (const unit of before) occupy(taken, unit);
+  return firstFit(taken, from, span.columns, span.rows, columns);
 };

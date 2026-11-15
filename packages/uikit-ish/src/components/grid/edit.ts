@@ -1,9 +1,12 @@
 import { RefObject, useLayoutEffect } from 'react';
 
 import { edgeScrollDelta, frameElapsed } from '../utils/main.js';
+import { dashesOf } from './dashes.js';
 import { cellOf, type GridRange, type GridReorderHandle } from './handle.js';
 import {
   fillsOf,
+  type Metrics,
+  metricsOf,
   placeBreaks,
   reflowDuration,
   reflowEasing,
@@ -39,8 +42,9 @@ import type {
 // - On the first cell of the row below its last one (or on a section's
 //   end row), where the row before would take it back (room at its end): a
 //   break stand-in filling that row and those down to it (its rows), the
-//   placeholder at the row's start. On an empty unit (a break's rows' too):
-//   there, by what's to be added (breaks, spacers: stand-ins) and changed
+//   placeholder at the row's start. On an empty unit (a break's rows', its
+//   end row's, up to 3 rows below its range: see `belowAt`): there, by
+//   what's to be added (breaks, spacers: stand-ins) and changed
 //   (the break before it shortened, shown so), see plan.ts. Dropped, the
 //   change asks for them (`target.addBefore`, `addAfter`, `resize`; its handle's
 //   `breaks`, `spacers`).
@@ -57,7 +61,7 @@ import type {
 /** How far a pointer moves before it's a drag (px). */
 export const slop = 4;
 /** How long a touch holds still before it drags (ms; a flick scrolls). */
-const touchHold = 200;
+export const touchHold = 200;
 /** How long a drag rests on a place before the others make room (ms). */
 const dragSettle = 120;
 /** How far, once they have, it moves on before they do again (units). */
@@ -223,20 +227,6 @@ const boxesOf = (container: HTMLElement) =>
       .map((child): [HTMLElement, Box] => [child, boxOf(child)]),
   );
 
-/** A grid's columns, gap and unit (see main.tsx). */
-type Metrics = { columns: number; gap: number; unit: number };
-
-const metricsOf = (root: HTMLElement): Metrics => {
-  const styles = getComputedStyle(root);
-  const value = (property: string, fallback: number) =>
-    Number.parseFloat(styles.getPropertyValue(property)) || fallback;
-  return {
-    columns: value('--uikit-grid-columns', 1),
-    gap: value('--uikit-grid-gap', 0),
-    unit: value('--uikit-grid-unit', 110),
-  };
-};
-
 /**
  * A trial (see `breakRowsAt`): the cell (or its placeholder) at a gap, no
  * break: where it lands, the cell before it, the bottom of the others.
@@ -249,7 +239,7 @@ type Trial = { bottom: number; landing: Box; previous: Box };
  * (its first cell there after it), or the range's end (the row below all,
  * and below its last one). Needed: the cell, put there (a `trial`), landing
  * in the row of the cell before it (room at its end). From that row down to
- * the one it's to start, at most 3. Its handle there taking breaks
+ * the one it's to start, at most the grid's `maxTileRows`. Its handle there taking breaks
  * (`breaks`); by a layout of the cell in its place (as lifted). Not for a
  * break.
  */
@@ -258,7 +248,7 @@ const breakRowsAt = (
   range: GridRange,
   index: number,
   boxes: ReadonlyMap<HTMLElement, Box>,
-  { gap, unit }: Metrics,
+  { gap, maxRows, unit }: Metrics,
   trial: (index: number) => Trial | undefined,
 ): number => {
   if (item.dataset.gridPart === 'break' || !handleAt(item, range)?.breaks) {
@@ -282,7 +272,7 @@ const breakRowsAt = (
     ? rowOf(next.top)
     : Math.max(last, rowOf(result.bottom + gap));
   const rows = start - row;
-  return rows >= 1 && rows <= 3 ? rows : 0;
+  return rows >= 1 && rows <= maxRows ? rows : 0;
 };
 
 /** Its cells (breaks' fillers too) but one: their bottom (px). */
@@ -376,6 +366,7 @@ const standInOf = (insert: GridReorderInsert) => {
   element.className = 'uikit-grid-placeholder uikit-grid-spacer-placeholder';
   element.style.setProperty('--uikit-grid-item-columns', columns);
   element.style.setProperty('--uikit-grid-item-rows', rows);
+  element.append(dashesOf(Number(columns) || 1, Number(rows) || 1));
   return element;
 };
 
@@ -730,10 +721,12 @@ export const useEditing = (
       const base = baseOf();
       const own = drag.boxes.get(item);
       if (!base || !own) return undefined;
+      // (Columns narrower than rows are tall, while editing.)
       const pitch = metrics.unit + metrics.gap;
+      const across = metrics.column + metrics.gap;
       const unitOf = (box: Box): Unit => ({
-        column: Math.round(box.left / pitch),
-        columns: Math.round((box.width + metrics.gap) / pitch),
+        column: Math.round(box.left / across),
+        columns: Math.round((box.width + metrics.gap) / across),
         row: Math.round((box.top - home.top) / pitch),
         rows: Math.round((box.height + metrics.gap) / pitch),
       });
@@ -752,6 +745,7 @@ export const useEditing = (
                 ) || 1
               : undefined,
           element,
+          isFull: Object.hasOwn(element.dataset, 'gridFull'),
           unit: unitOf(base.get(element) as Box),
         }));
       const others = [...base]
@@ -771,9 +765,10 @@ export const useEditing = (
         cells,
         columns: metrics.columns,
         item: { columns: span.columns, rows: span.rows },
+        maxRows: metrics.maxRows,
         others,
         target: {
-          column: Math.round((at.left - box.left) / pitch),
+          column: Math.round((at.left - box.left) / across),
           row: Math.round((at.top - box.top - home.top) / pitch),
         },
       });
@@ -794,10 +789,40 @@ export const useEditing = (
       ] as const;
     };
 
+    /**
+     * Below its own range (none other there): within the rows a break can
+     * keep empty (3) below its cells, there, by what's to be added (a break
+     * of those rows, spacers; see `emptyAt`). Its range then grows to take
+     * it in.
+     */
+    const belowAt = (at: readonly [number, number]): Slot | undefined => {
+      if (!drag) return undefined;
+      const { home, item, metrics } = drag;
+      const { range } = home.slot;
+      const container = range?.container();
+      if (!range || !container || range.part === 'DropGroup') return undefined;
+      const box = container.getBoundingClientRect();
+      const x = at[0] - box.left;
+      const y = at[1] - box.top;
+      const bottom = Math.max(
+        0,
+        ...membersOf(range, item).map(
+          (element) => element.offsetTop + element.offsetHeight,
+        ),
+      );
+      const isBelow =
+        x >= 0 &&
+        x <= box.width &&
+        y > box.height &&
+        y <= bottom + metrics.maxRows * (metrics.unit + metrics.gap);
+      return isBelow ? emptyAt(range, container) : undefined;
+    };
+
     /** Where it is (see `anchorOf`): a gap, the one it's at, or none (see `move`). */
     const hit = (at: readonly [number, number]): Slot | undefined => {
       if (!drag) return undefined;
       const { item, ranges } = drag;
+      let isInAny = false;
       for (const range of ranges) {
         const container = range.container();
         if (!container) continue;
@@ -805,6 +830,7 @@ export const useEditing = (
         const x = at[0] - box.left;
         const y = at[1] - box.top;
         if (x < 0 || y < 0 || x > box.width || y > box.height) continue;
+        isInAny = true;
         const shown = shownAt(range, container, x, y);
         if (shown) return shown;
         const members = membersOf(range, item);
@@ -813,8 +839,9 @@ export const useEditing = (
           0,
           ...members.map((element) => element.offsetTop + element.offsetHeight),
         );
-        // (On an empty unit: there, by what's to be added.)
-        if (over === -1 && range.part !== 'DropGroup' && y <= bottom) {
+        // (On an empty unit, below its cells too (its end row): there, by
+        // what's to be added.)
+        if (over === -1 && range.part !== 'DropGroup') {
           const empty = emptyAt(range, container);
           if (empty) return empty;
         }
@@ -845,7 +872,7 @@ export const useEditing = (
           };
         }
       }
-      return undefined;
+      return isInAny ? undefined : belowAt(at);
     };
 
     const move = (at: readonly [number, number]) => {
@@ -930,6 +957,9 @@ export const useEditing = (
       placeholder.style.setProperty('--uikit-grid-item-rows', rows);
       hole.style.setProperty('--uikit-grid-item-columns', columns);
       hole.style.setProperty('--uikit-grid-item-rows', isBreak ? '1' : rows);
+      hole.append(
+        dashesOf(Number(columns) || 1, isBreak ? 1 : Number(rows) || 1),
+      );
       // (Taller than a row: its rows below its first shown fainter, see the
       // CSS.)
       placeholder.toggleAttribute('data-grid-tall', !isBreak && rows !== '1');
@@ -972,7 +1002,7 @@ export const useEditing = (
         height: `${String(offsetHeight)}px`,
         left: `${String(offsetLeft)}px`,
         top: `${String(offsetTop)}px`,
-        width: `${String(isBreak ? unit : offsetWidth)}px`,
+        width: `${String(isBreak ? metrics.column : offsetWidth)}px`,
       });
       item.dataset.gridDragging = '';
       show(home.slot);
@@ -982,10 +1012,13 @@ export const useEditing = (
       // up into its row's rest not taken at once, as after a move.)
       drag.movedAt = at;
       const grabbed = at[0] - item.getBoundingClientRect().left;
-      drag.shift = Math.max(0, grabbed - unit / 2);
+      drag.shift = Math.max(0, grabbed - metrics.column / 2);
       if (reduce.matches) return;
       item.animate(
-        [{ width: `${String(offsetWidth)}px` }, { width: `${String(unit)}px` }],
+        [
+          { width: `${String(offsetWidth)}px` },
+          { width: `${String(metrics.column)}px` },
+        ],
         { duration: reflowDuration, easing: reflowEasing },
       );
       item.animate(
@@ -1143,6 +1176,9 @@ export const useEditing = (
       // a remove button, a finger meant for the cell landing on it.)
       const control = target?.closest<HTMLElement>('[data-grid-edit-control]');
       if (control && !Object.hasOwn(control.dataset, 'gridDragThrough')) return;
+      // (A movable tile: moved within its area instead, see main.tsx; its
+      // area's room around it moves the item.)
+      if (target?.closest('[data-grid-movable-body]')) return;
       const item = movableOf(target);
       if (!item || !root.contains(item)) return;
       const isTouch = event.pointerType === 'touch';

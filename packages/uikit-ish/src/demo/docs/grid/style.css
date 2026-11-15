@@ -1,23 +1,21 @@
 /* Grid demos (see main.tsx). */
 
-/* A device's tile: its name and size, on a plain card filling its item
-   (until cards). */
+/* A device's tile: its name (and size), in its middle, on a plain card
+   filling its item (until cards). */
 .grid-demo-tile {
   display: grid;
   box-sizing: border-box;
-  align-content: space-between;
+  align-content: center;
   padding: 14px 16px;
   border-radius: var(--uikit-grid-item-radius, 24px);
   background-color: var(--color-ui-secondary-system-grouped-background);
   color: var(--color-ui-label);
   font-size: 15px;
   font-weight: 600;
+  justify-items: center;
+  text-align: center;
 }
 
-/* (Its title clear of a remove button's x, in edit mode.) */
-.uikit-grid-item:has(> .uikit-grid-remove-button) > .grid-demo-tile {
-  padding-inline-start: 40px;
-}
 
 /* A tile's size, below its name. */
 .grid-demo-size {

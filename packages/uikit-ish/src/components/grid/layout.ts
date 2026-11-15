@@ -7,38 +7,67 @@ import { RefObject, useLayoutEffect, useRef } from 'react';
 export const unitOf = (width: number, gap: number, columns: number): number =>
   Math.max(0, (width - (columns - 1) * gap) / columns);
 
-/** The columns and unit for a width (see the top). */
+/**
+ * A unit's range: from `min` to `max`, stretched to take in `target` (one
+ * aimed for outside them still aimed for).
+ */
+export const unitRangeOf = (
+  min: number,
+  target: number,
+  max: number,
+): readonly [number, number] => [Math.min(min, target), Math.max(max, target)];
+
+/**
+ * The columns and unit for a width (see the top): the columns whose unit is
+ * in range (see `unitRangeOf`) and nearest `target`; none in range, those
+ * whose unit is nearest it. Never fewer than `minColumns` (its units
+ * shrinking below the range then).
+ */
 export const layoutOf = (
   width: number,
   gap: number,
   min: number,
   target: number,
   max: number,
+  minColumns: number,
 ): { columns: number; unit: number } => {
+  const [low, high] = unitRangeOf(min, target, max);
   const fit = (unit: number) =>
     Math.max(1, Math.floor((width + gap) / (unit + gap)));
-  const most = fit(min);
-  let columns = most;
-  let best = Number.POSITIVE_INFINITY;
-  for (let count = fit(max); count <= most; count += 1) {
-    const unit = (width - (count - 1) * gap) / count;
-    if (!(unit >= min && unit <= max && Math.abs(unit - target) < best)) {
+  // (How far a unit is from the range, then from the target.)
+  const missOf = (unit: number) =>
+    [Math.max(0, low - unit, unit - high), Math.abs(unit - target)] as const;
+  let columns = 1;
+  let best: readonly [number, number] | undefined;
+  for (
+    let count = Math.max(1, fit(high) - 1);
+    count <= fit(low) + 1;
+    count += 1
+  ) {
+    const miss = missOf(unitOf(width, gap, count));
+    if (
+      best &&
+      (miss[0] > best[0] || (miss[0] === best[0] && miss[1] >= best[1]))
+    ) {
       continue;
     }
 
-    best = Math.abs(unit - target);
+    best = miss;
     columns = count;
   }
+  columns = Math.max(columns, minColumns);
   return { columns, unit: unitOf(width, gap, columns) };
 };
 
 export const reflowDuration = 300;
 export const reflowEasing = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
-const itemSelector =
-  ':scope [data-grid-part="item"], :scope [data-grid-part="spacer"], :scope [data-grid-part="break"]';
-
-const glidingSelector = `:scope > [data-grid-part="section"], ${itemSelector}`;
+// (A tile in its area too (see main.tsx): re-centered in it as it's resized,
+// gliding there, within its cell, carried by it.)
+// (Not a break: drawn where it's placed at once (its shape by its row's
+// layout, see `placeBreaks`), not gliding apart from it.)
+const glidingSelector =
+  ':scope > [data-grid-part="section"], :scope [data-grid-part="item"], :scope [data-grid-part="spacer"], :scope [data-grid-part="body"]';
 
 /** Its own children in the order they're shown (CSS `order`, else DOM). */
 const shownOrder = (container: Element) =>
@@ -87,7 +116,37 @@ const setStyle = (
   }
 };
 
-type Metrics = { columns: number; gap: number; unit: number };
+/**
+ * A grid's measures (see main.tsx), px: its columns' width (narrower than
+ * its rows are tall while editing, its end-of-line column beside them),
+ * its rows' (`unit`), the gap, that column's width (none: 0).
+ */
+export type Metrics = {
+  column: number;
+  columns: number;
+  end: number;
+  gap: number;
+  /** The most rows a tile has, a break keeps (see `maxTileRows`). */
+  maxRows: number;
+  unit: number;
+};
+
+/** A grid's measures (see `Metrics`), read off its root. */
+export const metricsOf = (element: Element): Metrics => {
+  const root = element.closest('.uikit-grid-root') ?? element;
+  const styles = getComputedStyle(root);
+  const value = (property: string, fallback: number) =>
+    Number.parseFloat(styles.getPropertyValue(property)) || fallback;
+  const unit = value('--uikit-grid-unit', 110);
+  return {
+    column: value('--uikit-grid-column', unit),
+    columns: value('--uikit-grid-columns', 1),
+    end: value('--uikit-grid-end', 0),
+    gap: value('--uikit-grid-gap', 0),
+    maxRows: value('--uikit-grid-max-rows', 3),
+    unit,
+  };
+};
 
 /** A box, by its edges (px). */
 type Rect = { bottom: number; left: number; right: number; top: number };
@@ -115,35 +174,39 @@ const maskOf = (
 
 /**
  * A break's shape (see `placeIn`, the CSS), from its first row's start
- * (`from` columns before it) to the grid's end: its first row from where
+ * (`from` columns before it) to the grid's end (through its end-of-line
+ * column, while editing): its first row from where
  * it starts, its rows below from their start, every corner rounded (the
- * inner one too). Mirrored when right to left. A break to be (`isFaint`,
- * see edit.ts): its rows below its first fainter, its first row drawn in
- * full (`hasFirst`: not when it starts below a full row, its first).
+ * inner one too). Mirrored when right to left. An SVG path (px), for a
+ * `clip-path` (drawn at once, no image to decode) or a mask.
  */
-const breakShape = (
-  { columns, gap, unit }: Metrics,
+export const breakPath = (
+  { column, gap, unit }: Pick<Metrics, 'column' | 'gap' | 'unit'>,
   {
     from,
-    hasFirst,
-    isFaint,
     isRtl,
     radius,
     rows,
+    width,
   }: {
     from: number;
-    hasFirst: boolean;
-    isFaint: boolean;
     isRtl: boolean;
     radius: number;
     rows: number;
+    /** Its container's, its end-of-line column's too (px). */
+    width: number;
   },
-) => {
+): string => {
   const pitch = unit + gap;
-  const width = columns * pitch - gap;
   const height = rows * pitch - gap;
-  const r = Math.min(radius, unit / 2);
-  const start = from * pitch;
+  const start = from * (column + gap);
+  // (Its corners no rounder than its narrowest part: a first row only in
+  // its end-of-line column, too.)
+  const r = Math.min(
+    radius,
+    Math.min(column, unit) / 2,
+    start > 0 ? (width - start) / 2 : Number.POSITIVE_INFINITY,
+  );
   const x = (value: number) => String(isRtl ? width - value : value);
   const y = String;
   const arc = (sweep: 0 | 1, ax: number, ay: number) =>
@@ -178,22 +241,59 @@ const breakShape = (
           arc(1, start + r, 0),
           'Z',
         ].join('');
-  if (!isFaint || (rows === 1 && hasFirst)) {
-    return maskOf(width, height, [[path, 'fill="#000"']]);
-  }
-  const first = hasFirst
-    ? [
-        `M${x(start + r)} 0H${x(width - r)}`,
-        arc(1, width, r),
-        `V${y(unit)}H${x(start)}V${y(r)}`,
-        arc(1, start + r, 0),
-        'Z',
-      ].join('')
-    : undefined;
-  return maskOf(width, height, [
-    [path, 'fill="#000" fill-opacity="0.35"'],
-    ...(first ? [[first, 'fill="#000"'] as const] : []),
-  ]);
+  return path;
+};
+
+/**
+ * A break's resize outline at some rows (see main.tsx, the CSS): its shape
+ * (see `breakPath`) as it'd be, through the end-of-line column, filled
+ * faintly and edged inside (a mask); where it goes from the break's own
+ * box (px).
+ */
+export const breakOutlineOf = (
+  element: HTMLElement,
+  rows: number,
+): {
+  height: number;
+  mask: string;
+  start: number;
+  top: number;
+  width: number;
+} => {
+  const container = element.parentElement;
+  const metrics = metricsOf(element);
+  const styles = getComputedStyle(element);
+  const above =
+    Number.parseFloat(styles.getPropertyValue('--uikit-grid-break-above')) || 0;
+  const from =
+    above > 0 || Object.hasOwn(element.dataset, 'gridBreakNone')
+      ? metrics.columns
+      : Number.parseFloat(styles.getPropertyValue('--uikit-grid-break-from')) ||
+        0;
+  const width = container?.clientWidth ?? 0;
+  const pitch = metrics.unit + metrics.gap;
+  const height = rows * pitch - metrics.gap;
+  const isRtl = styles.direction === 'rtl';
+  const path = breakPath(metrics, {
+    from,
+    isRtl,
+    radius:
+      Number.parseFloat(styles.getPropertyValue('--uikit-grid-item-radius')) ||
+      24,
+    rows,
+    width,
+  });
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}"><clipPath id="c"><path d="${path}"/></clipPath><path d="${path}" fill="#000" fill-opacity="0.15"/><path d="${path}" fill="none" stroke="#000" stroke-width="4" clip-path="url(#c)"/></svg>`;
+  return {
+    height,
+    // (From its container's inline start.)
+    start: -(isRtl
+      ? width - element.offsetLeft - element.offsetWidth
+      : element.offsetLeft),
+    mask: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+    top: -above * pitch,
+    width,
+  };
 };
 
 /** Free columns in a row, one after another (`to`: past the last). */
@@ -207,13 +307,13 @@ const freeRuns = (
   y: number,
   from: number,
   before: readonly HTMLElement[],
-  { columns, gap, unit }: Metrics,
+  { column: width, columns, gap }: Metrics,
 ): Run[] => {
-  const pitch = unit + gap;
+  const pitch = width + gap;
   const runs: Run[] = [];
   let start: number | undefined;
   for (let column = from; column <= columns; column += 1) {
-    const x = column * pitch + unit / 2;
+    const x = column * pitch + width / 2;
     const isTaken =
       column === columns ||
       before.some(
@@ -240,23 +340,33 @@ const keptRows = new WeakMap<HTMLElement, number>();
 /** Where a break goes (see `breakPlace`). */
 type BreakPlace =
   | {
+      /**
+       * Rows drawn above it (its first row full: in that row's end-of-line
+       * column, see `breakShape`).
+       */
+      above: number;
       column: string;
       /** Its rows drawn (its first in the row below the one before it). */
       drawn: number;
       fills: Run[];
       from: number;
-      /**
-       * Where its resize handle goes, by its end (columns on): its last
-       * row's last free unit, not under what's in the way there.
-       */
+      /** Where its resize handle goes, by its end (columns on). */
       handle: number;
       kind: 'cell';
       rest: number;
-      /** Where its return sign goes, the same way: its first row's. */
+      /** Where its return sign goes, the same way. */
       sign: number;
     }
-  /** Nothing kept empty: in the gap below that row, taking no room. */
-  | { kind: 'none'; top: number };
+  /**
+   * Nothing kept empty (no room left in its row): taking no room; while
+   * editing, in its row's end-of-line column (its top, px).
+   */
+  | {
+      /** Right after a full width: no effect, drawn as nothing. */
+      isHidden: boolean;
+      kind: 'none';
+      top: number;
+    };
 
 /**
  * Where a break goes: in the row of the one before it (after a break: the
@@ -265,9 +375,11 @@ type BreakPlace =
  * (else its row's end); fillers in that row's other free runs on, and in
  * the rows below it (its rows less one), so what follows starts below it.
  * No room left in that row: in the row below, its rows there and below
- * (one less) kept empty the same way; one row only, it keeps nothing
- * empty, so it takes no room (drawn in the gap below that row while
- * editing). The same while editing or not.
+ * (one less) kept empty the same way, drawn from that row's end-of-line
+ * column (see `breakShape`); one row only, it keeps nothing
+ * empty, so it takes no room (drawn in that row's end-of-line column while
+ * editing). The same while editing or not. Its sign and handle at its
+ * rows' end (in the end-of-line column, where nothing is in the way).
  */
 const breakPlace = (
   element: HTMLElement,
@@ -287,7 +399,8 @@ const breakPlace = (
     y = isCell ? row : (keptRows.get(previous) ?? row) + pitch;
     start = isCell
       ? Math.round(
-          (previous.offsetLeft + previous.offsetWidth + metrics.gap) / pitch,
+          (previous.offsetLeft + previous.offsetWidth + metrics.gap) /
+            (metrics.column + metrics.gap),
         )
       : 0;
   }
@@ -295,41 +408,42 @@ const breakPlace = (
     Array.from({ length: Math.max(0, count) }, (_, row) =>
       freeRuns(y + (from + row) * pitch, 0, before, metrics),
     ).flat();
-  const last = y + (rows - 1) * pitch;
-  keptRows.set(element, last);
-  const endOf = (row: number, to: number) =>
-    (freeRuns(row, 0, before, metrics).at(-1)?.to ?? to) - to;
+  keptRows.set(element, y + (rows - 1) * pitch);
+  // (Right after a full width (its row ended anyway): nothing.)
+  if (previous?.hasAttribute('data-grid-full') && isCell) {
+    keptRows.set(element, y);
+    return { isHidden: true, kind: 'none', top: y - metrics.unit / 2 };
+  }
   const [first, ...rest] = freeRuns(y, start, before, metrics);
   if (first) {
     return {
+      above: 0,
       column: `${String(first.from + 1)} / ${String(first.to + 1)}`,
       drawn: rows,
       fills: [...rest, ...below(1, rows - 1)],
       from: first.from,
-      handle: endOf(last, first.to),
+      handle: metrics.columns - first.to,
       kind: 'cell',
       rest: metrics.columns - first.to,
-      sign: endOf(y, first.to),
+      sign: metrics.columns - first.to,
     };
   }
   const [next, ...others] =
     rows > 1 ? freeRuns(y + pitch, 0, before, metrics) : [];
   if (!next) {
     keptRows.set(element, y);
-    return {
-      kind: 'none',
-      top: y + metrics.unit / 2 + metrics.gap / 2,
-    };
+    return { isHidden: false, kind: 'none', top: y - metrics.unit / 2 };
   }
   return {
+    above: 1,
     column: `${String(next.from + 1)} / ${String(next.to + 1)}`,
     drawn: rows - 1,
     fills: [...others, ...below(2, rows - 2)],
     from: next.from,
-    handle: endOf(last, next.to),
+    handle: metrics.columns - next.to,
     kind: 'cell',
     rest: metrics.columns - next.to,
-    sign: endOf(y + pitch, next.to),
+    sign: metrics.columns - next.to,
   };
 };
 
@@ -366,6 +480,87 @@ const fillIn = (
     if (last.nextElementSibling !== fill) last.after(fill);
     last = fill;
   }
+};
+
+/**
+ * A break's place (see `breakPlace`) on it: its cell, where it's drawn
+ * from and to, its shape (see the CSS). A break to be: faint (`isFaint`).
+ */
+const styleBreak = (
+  element: HTMLElement,
+  place: BreakPlace,
+  metrics: Metrics & {
+    isFaint: boolean;
+    isRtl: boolean;
+    radius: number;
+    width: number;
+  },
+) => {
+  const isNone = place.kind === 'none';
+  element.toggleAttribute('data-grid-break-none', isNone);
+  element.toggleAttribute(
+    'data-grid-break-hidden',
+    place.kind === 'none' && place.isHidden,
+  );
+  setStyle(
+    element,
+    '--uikit-grid-break-above',
+    isNone || place.above === 0 ? undefined : String(place.above),
+  );
+  setStyle(element, 'grid-column', isNone ? undefined : place.column);
+  setStyle(
+    element,
+    '--uikit-grid-break-top',
+    isNone ? `${String(place.top)}px` : undefined,
+  );
+  // (Where it starts, and the columns after it: drawn from its row's
+  // start to the grid's end, see style.css.)
+  setStyle(
+    element,
+    '--uikit-grid-break-from',
+    isNone ? undefined : String(place.from),
+  );
+  setStyle(
+    element,
+    '--uikit-grid-break-rest',
+    isNone ? undefined : String(place.rest),
+  );
+  setStyle(
+    element,
+    '--uikit-grid-break-drawn',
+    isNone ? undefined : String(place.drawn),
+  );
+  setStyle(
+    element,
+    '--uikit-grid-break-handle',
+    isNone ? undefined : String(place.handle),
+  );
+  setStyle(
+    element,
+    '--uikit-grid-break-sign',
+    isNone ? undefined : String(place.sign),
+  );
+  setStyle(
+    element,
+    '--uikit-grid-break-shape',
+    isNone
+      ? undefined
+      : `path("${breakPath(metrics, {
+          from: place.above > 0 ? metrics.columns : place.from,
+          isRtl: metrics.isRtl,
+          radius: metrics.radius,
+          rows: place.drawn + place.above,
+          width: metrics.width,
+        })}")`,
+  );
+  // (A break to be, of more rows: those below its first fainter.)
+  setStyle(
+    element,
+    '--uikit-grid-break-fade',
+    !isNone && metrics.isFaint && place.drawn + place.above > 1
+      ? `${String(metrics.unit)}px`
+      : undefined,
+  );
 };
 
 /**
@@ -408,54 +603,11 @@ const placeIn = (
         origin,
       });
       const isNone = place.kind === 'none';
-      element.toggleAttribute('data-grid-break-none', isNone);
-      setStyle(element, 'grid-column', isNone ? undefined : place.column);
-      setStyle(
-        element,
-        '--uikit-grid-break-top',
-        isNone ? `${String(place.top)}px` : undefined,
-      );
-      // (Where it starts, and the columns after it: drawn from its row's
-      // start to the grid's end, see style.css.)
-      setStyle(
-        element,
-        '--uikit-grid-break-from',
-        isNone ? undefined : String(place.from),
-      );
-      setStyle(
-        element,
-        '--uikit-grid-break-rest',
-        isNone ? undefined : String(place.rest),
-      );
-      setStyle(
-        element,
-        '--uikit-grid-break-drawn',
-        isNone ? undefined : String(place.drawn),
-      );
-      setStyle(
-        element,
-        '--uikit-grid-break-handle',
-        isNone ? undefined : String(place.handle),
-      );
-      setStyle(
-        element,
-        '--uikit-grid-break-sign',
-        isNone ? undefined : String(place.sign),
-      );
-      setStyle(
-        element,
-        '--uikit-grid-break-shape',
-        isNone
-          ? undefined
-          : breakShape(metrics, {
-              from: place.from,
-              hasFirst: place.drawn === rowsOf(element),
-              isFaint: part === 'placeholder',
-              isRtl: metrics.isRtl,
-              radius: metrics.radius,
-              rows: place.drawn,
-            }),
-      );
+      styleBreak(element, place, {
+        ...metrics,
+        isFaint: part === 'placeholder',
+        width: container.clientWidth,
+      });
       fillIn(element, isNone ? [] : place.fills, kept);
       // (Taking no room: not what the next is placed after, nor in the
       // way.)
@@ -489,22 +641,24 @@ export const placeBreaks = (root: HTMLElement): void => {
     setStyle(element, '--uikit-grid-break-from', undefined);
     setStyle(element, '--uikit-grid-break-rest', undefined);
     setStyle(element, '--uikit-grid-break-shape', undefined);
+    setStyle(element, '--uikit-grid-break-fade', undefined);
     setStyle(element, '--uikit-grid-break-drawn', undefined);
     setStyle(element, '--uikit-grid-break-handle', undefined);
     setStyle(element, '--uikit-grid-break-sign', undefined);
     setStyle(element, '--uikit-grid-break-top', undefined);
+    setStyle(element, '--uikit-grid-break-above', undefined);
     delete element.dataset.gridBreakNone;
+    delete element.dataset.gridBreakHidden;
   }
   if (breaks.length > 0) {
     const styles = getComputedStyle(root);
-    const value = (property: string, fallback: number) =>
-      Number.parseFloat(styles.getPropertyValue(property)) || fallback;
     const metrics = {
-      columns: value('--uikit-grid-columns', 1),
-      gap: value('--uikit-grid-gap', 0),
+      ...metricsOf(root),
       isRtl: styles.direction === 'rtl',
-      radius: value('--uikit-grid-item-radius', 24),
-      unit: value('--uikit-grid-unit', 1),
+      radius:
+        Number.parseFloat(
+          styles.getPropertyValue('--uikit-grid-item-radius'),
+        ) || 24,
     };
     const containers = new Set(breaks.map((element) => element.parentElement));
     for (const container of containers) {
@@ -744,7 +898,7 @@ const grownAreas = (
   cell: HTMLElement,
   columns: number,
   rows: number,
-  { gap, unit }: { gap: number; unit: number },
+  { column, gap, unit }: Metrics,
 ): Rect[] => {
   const pitch = unit + gap;
   const own = rectOf(cell);
@@ -763,7 +917,7 @@ const grownAreas = (
       },
     ];
   }
-  const width = columns * pitch - gap;
+  const width = columns * (column + gap) - gap;
   const isRtl = getComputedStyle(cell).direction === 'rtl';
   return [
     {
@@ -791,12 +945,7 @@ export const mergedBy = (
 ): HTMLElement[] => {
   const container = cell.parentElement;
   if (!container) return [];
-  const styles = getComputedStyle(container);
-  const unit = Number.parseFloat(styles.getPropertyValue('--uikit-grid-unit'));
-  if (!(unit > 0)) return [];
-  const gap =
-    Number.parseFloat(styles.getPropertyValue('--uikit-grid-gap')) || 0;
-  const areas = grownAreas(cell, columns, rows, { gap, unit });
+  const areas = grownAreas(cell, columns, rows, metricsOf(container));
   if (areas.length === 0) return [];
   // (Its cells, in order: what takes room there, by what it belongs to (a
   // break: its fillers too).)
@@ -890,6 +1039,25 @@ export const visibleEdgesOf = (
 /** An element's top on screen by its layout (not its `translate`). */
 const topOf = (element: HTMLElement, root: HTMLElement) =>
   root.getBoundingClientRect().top + layoutPosition(element, root)[1];
+
+/** Keyframes from an offset to none. */
+const fromOffset = (x: number, y: number) => [
+  { translate: `${String(x)}px ${String(y)}px` },
+  { translate: '0 0' },
+];
+
+/**
+ * An element gliding from where it was (`dx`, `dy` off) to where it is, by
+ * a `translate` added to any running one.
+ */
+const glide = (element: HTMLElement, dx: number, dy: number) => {
+  const timing = {
+    composite: 'add',
+    duration: reflowDuration,
+    easing: reflowEasing,
+  } as const;
+  element.animate(fromOffset(dx, dy), timing);
+};
 
 /**
  * Its sections and cells gliding from where they were to where they are, as
@@ -1029,8 +1197,11 @@ export const useReflow = (
       const hasColumns =
         root.style.getPropertyValue('--uikit-grid-columns') !== columns;
       columns = root.style.getPropertyValue('--uikit-grid-columns');
-      const hasUnit = root.style.getPropertyValue('--uikit-grid-unit') !== unit;
-      unit = root.style.getPropertyValue('--uikit-grid-unit');
+      // (Its columns' width too: narrower beside its end-of-line column
+      // as it opens, see main.tsx.)
+      const unitNow = `${root.style.getPropertyValue('--uikit-grid-unit')}/${root.style.getPropertyValue('--uikit-grid-column')}`;
+      const hasUnit = unitNow !== unit;
+      unit = unitNow;
       if (!wasMeasured || !isMeasured) {
         recordAll();
         record();
@@ -1081,19 +1252,20 @@ export const useReflow = (
             : ([element.offsetLeft, element.offsetTop] as const);
         const before = last.get(element);
         last.set(element, position);
-        if (!before || element === dragged.current || reduce.matches) {
+        // (Not one dropped in its area: gliding from where it was let go,
+        // see main.tsx.)
+        if (
+          !before ||
+          element === dragged.current ||
+          Object.hasOwn(element.dataset, 'gridPlaced') ||
+          reduce.matches
+        ) {
           continue;
         }
         const dx = before[0] - position[0];
         const dy = before[1] - position[1];
         if (dx === 0 && dy === 0) continue;
-        element.animate(
-          [
-            { translate: `${String(dx)}px ${String(dy)}px` },
-            { translate: '0 0' },
-          ],
-          { composite: 'add', duration: reflowDuration, easing: reflowEasing },
-        );
+        glide(element, dx, dy);
       }
       record();
     };

@@ -16,9 +16,10 @@ import {
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
+import { gridSigns } from '../../tooling/grid-signs.js';
 import { partPropMaps } from '../part-options.js';
 import { type Device, devices, deviceSizes, rooms } from './content.js';
-import { propOptionsRoot } from './props.js';
+import { defaultsKey, propOptionsRoot } from './props.js';
 
 /**
  * A phone: a home's devices by room, Edit and Done above them (and the
@@ -76,6 +77,7 @@ export const GridDemo: FunctionComponent = () => {
             'Button.Root': ['onClick', 'variant'],
             'Grid.Header': [],
             'Grid.Item': [
+              'defaultSize',
               'dropName',
               'onSizeChange',
               'reorderHandle',
@@ -126,8 +128,10 @@ export const GridDemo: FunctionComponent = () => {
               </Button.Root>
             </div>
             <Grid.Root
+              key={defaultsKey(props, ...Object.values(partProps))}
               {...props}
               editing={editing}
+              style={{ ...gridSigns(), ...props.style }}
             >
               {rooms.map((room) => (
                 <Grid.Section

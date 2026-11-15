@@ -198,28 +198,21 @@ export function reorder<T>(
       );
 }
 
-/** Every size, smallest area first (then the narrower). */
-export const allSizes: readonly GridSize[] = [
-  '1x1',
-  '1x2',
-  '2x1',
-  '1x3',
-  '3x1',
-  '2x2',
-  '2x3',
-  '3x2',
-  '3x3',
-];
+/** Whether a size spans the grid's width (`*`, see `GridSize`). */
+export const isFull = (size: GridSize): boolean => size.startsWith('*');
 
-/** A size's columns and rows. */
-export const spanOf = (size: GridSize): [number, number] => {
-  const [columns = 1, rows = 1] = size.split('x').map(Number);
-  return [columns, rows];
+/**
+ * A size's columns and rows; a full width's (`*`) the grid's `columns`
+ * (unknown: the most a size has otherwise, 6).
+ */
+export const spanOf = (size: GridSize, columns = 6): [number, number] => {
+  const [width = '1', height = '1'] = size.split('x');
+  return [isFull(size) ? columns : Number(width), Number(height)];
 };
 
-const area = (size: GridSize) => {
-  const [columns, rows] = spanOf(size);
-  return columns * rows;
+const area = (size: GridSize, columns?: number) => {
+  const [width, rows] = spanOf(size, columns);
+  return width * rows;
 };
 
 /** Sizes in order: smallest area first, then the narrower. */
@@ -229,43 +222,101 @@ export const sortSizes = (sizes: readonly GridSize[]): GridSize[] =>
   );
 
 /**
- * A requested size, effective: snapped to the supported ones that fit the
- * columns (the same shape first, then the closest area; ties: the
- * smaller), else to the smallest supported.
+ * Every size up to a grid's columns and rows (a full width too), in order
+ * (see `sortSizes`): what's supported, none given.
+ */
+export const sizesUpTo = (columns: number, rows: number): GridSize[] =>
+  sortSizes(
+    [
+      ...Array.from({ length: Math.max(1, columns) }, (_, index) =>
+        String(index + 1),
+      ),
+      '*',
+    ].flatMap((width) =>
+      Array.from(
+        { length: Math.max(1, rows) },
+        (_, index) => `${width}x${String(index + 1)}` as GridSize,
+      ),
+    ),
+  );
+
+/**
+ * A requested size snapped to supported ones: the same shape first, then
+ * the closest area (ties: the smaller).
+ */
+const snapped = (
+  requested: GridSize,
+  sorted: readonly GridSize[],
+  columns: number,
+) => {
+  // (A full width snapping to a full width first, as a shape of its own.)
+  const isFullWanted = isFull(requested);
+  const full = sorted.filter((size) => isFull(size) === isFullWanted);
+  const [columnsWanted, rowsWanted] = spanOf(requested, columns);
+  const shape = columnsWanted / rowsWanted;
+  const base = full.length > 0 ? full : sorted;
+  const sameShape = base.filter((size) => {
+    const [c, r] = spanOf(size, columns);
+    return c / r === shape;
+  });
+  const pool = sameShape.length > 0 ? sameShape : base;
+  const wanted = area(requested, columns);
+  let best = pool[0] ?? '1x1';
+  for (const size of pool) {
+    const distance = Math.abs(area(size, columns) - wanted);
+    if (distance < Math.abs(area(best, columns) - wanted)) best = size;
+  }
+  return best;
+};
+
+/**
+ * A requested size, effective: snapped to the supported ones (see
+ * `snapped`); wider than the columns (or taller than `rows`, within an
+ * area), the widest supported that fits (the nearest rows first, then the
+ * smaller), fitted; none fitting, the narrowest. A full width's: the
+ * grid's `columns`.
  */
 export const effectiveSize = (
   requested: GridSize,
   supported: readonly GridSize[],
   columns: number,
+  {
+    gridColumns = columns,
+    rows: rowsMost = Number.POSITIVE_INFINITY,
+  }: { gridColumns?: number; rows?: number } = {},
 ): { isFitted: boolean; size: GridSize } => {
-  const sorted = sortSizes(supported.length > 0 ? supported : allSizes);
-  const fitting = sorted.filter((size) => spanOf(size)[0] <= columns);
-  const candidates = fitting.length > 0 ? fitting : sorted.slice(0, 1);
-  const [columnsWanted, rowsWanted] = spanOf(requested);
-  const shape = columnsWanted / rowsWanted;
-  const sameShape = candidates.filter((size) => {
-    const [c, r] = spanOf(size);
-    return c / r === shape;
-  });
-  const pool = sameShape.length > 0 ? sameShape : candidates;
-  const wanted = area(requested);
-  let best = pool[0] ?? '1x1';
-  for (const size of pool) {
-    if (Math.abs(area(size) - wanted) < Math.abs(area(best) - wanted)) {
-      best = size;
-    }
+  const sorted = sortSizes(
+    supported.length > 0
+      ? supported
+      : sizesUpTo(gridColumns, Number.isFinite(rowsMost) ? rowsMost : 3),
+  );
+  const size = snapped(requested, sorted, gridColumns);
+  const fits = (each: GridSize) => {
+    const [c, r] = spanOf(each, gridColumns);
+    return c <= columns && r <= rowsMost;
+  };
+  if (fits(size)) return { isFitted: false, size };
+  const [, rows] = spanOf(size, gridColumns);
+  let best: GridSize | undefined;
+  for (const each of sorted) {
+    const [c, r] = spanOf(each, gridColumns);
+    if (!fits(each)) continue;
+    const [bestColumns = 0, bestRows = 0] = best
+      ? spanOf(best, gridColumns)
+      : [];
+    const isBetter =
+      !best ||
+      c > bestColumns ||
+      (c === bestColumns && Math.abs(r - rows) < Math.abs(bestRows - rows));
+    if (isBetter) best = each;
   }
-  // (Fitted: what it'd snap to without the columns is wider than they are.)
-  const unfitted = sorted.filter((size) => {
-    const [c, r] = spanOf(size);
-    return c / r === shape;
-  });
-  const isFitted =
-    fitting.length < sorted.length &&
-    (unfitted.length > 0 ? unfitted : sorted).some(
-      (size) =>
-        spanOf(size)[0] > columns &&
-        Math.abs(area(size) - wanted) <= Math.abs(area(best) - wanted),
-    );
-  return { isFitted, size: best };
+  return {
+    isFitted: true,
+    size:
+      best ??
+      sorted.toSorted(
+        (a, b) => spanOf(a, gridColumns)[0] - spanOf(b, gridColumns)[0],
+      )[0] ??
+      size,
+  };
 };

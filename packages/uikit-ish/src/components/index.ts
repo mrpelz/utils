@@ -275,12 +275,16 @@ export {
 // Pages and layout
 export {
   Grid,
+  type GridAreaButtonProps,
+  type GridAreaProps,
+  type GridAreaState,
   type GridBreakProps,
   type GridBreakRows,
   type GridDropGroupProps,
   type GridHeaderProps,
   type GridItemProps,
   type GridItemState,
+  type GridPlacement,
   type GridReorderChange,
   type GridReorderEventDetails,
   GridReorderHandle,
@@ -299,6 +303,7 @@ export {
   type GridSizeChangeDetails,
   type GridSpacerProps,
   type GridSpawnProps,
+  useGridArea,
   useGridItem,
 } from './grid/main.js';
 export {

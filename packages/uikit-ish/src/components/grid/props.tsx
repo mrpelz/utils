@@ -3,8 +3,25 @@ import type { ComponentProps, ReactNode } from 'react';
 
 import type { GridReorderHandle } from './handle.js';
 
-/** A span: columns by rows, 1 to 3 each (e.g. `'2x1'`: wide, one row). */
-export type GridSize = `${1 | 2 | 3}x${1 | 2 | 3}`;
+/**
+ * A span: columns by rows (e.g. `'2x1'`: wide, one row); `*` for columns:
+ * as wide as the grid, however many columns it has (e.g. `'*x2'`: a full
+ * width, two rows). Any numbers: the grid holds them to its own (wider
+ * than its columns: the widest supported that fits; taller than its
+ * `maxTileRows`: not offered).
+ */
+export type GridSize = `${number}x${number}` | `*x${number}`;
+
+/**
+ * Where a tile sits in its area (see `GridItemProps.area`): in its middle
+ * (truly, off the unit lines if need be), or a corner of it on the area's.
+ */
+export type GridPlacement =
+  | 'bottom-leading'
+  | 'bottom-trailing'
+  | 'center'
+  | 'top-leading'
+  | 'top-trailing';
 
 /** Where cells drop (see `GridReorderTarget`). */
 export type GridReorderPart = 'DropGroup' | 'Root' | 'Section';
@@ -134,6 +151,21 @@ export type GridRootProps = ComponentProps<'div'> &
     editing?: boolean;
     /** The gap between items (px). @default 12 */
     gap?: number;
+    /**
+     * The most rows a tile has (sizes taller not shown, not offered), and
+     * a break keeps empty. Every item must support a size within
+     * `minColumns` and this.
+     * @default 3
+     */
+    maxTileRows?: number;
+    /**
+     * The fewest columns it lays out, however narrow it is (its units
+     * shrinking below `unitMin` then). Every item must support a size this
+     * narrow or narrower, so a layout never breaks: wider sizes give way to
+     * the widest that fits.
+     * @default 3
+     */
+    minColumns?: number;
     /** The largest a unit stretches to (px). @default 130 */
     unitMax?: number;
     /** The smallest a unit shrinks to (px). @default 100 */
@@ -176,6 +208,12 @@ export type GridSizeChangeDetails = {
 
 export type GridItemProps = ComponentProps<'div'> &
   GridDraggableProps & {
+    /**
+     * What it shows, filling its tile (e.g. a card), its tile's controls
+     * (a `ResizeHandle`, a `RemoveButton`, an `AreaButton`); a `Grid.Area`
+     * for room around its tile, its own controls in it.
+     */
+    children?: ReactNode;
     /** Its initial size (uncontrolled). @default '1x1' */
     defaultSize?: GridSize;
     /**
@@ -188,11 +226,61 @@ export type GridItemProps = ComponentProps<'div'> &
     /**
      * The sizes it can be (its content's, declared as a constant: e.g. a
      * card component's `sizes`). Its size snaps to them (the same shape
-     * first, then the closest area), then fits the columns.
+     * first, then the closest area). If that's wider than the columns, the
+     * widest that fits is shown instead (the nearest rows first). One of
+     * them must fit the grid's `minColumns`.
      * @default every size
      */
     supportedSizes?: readonly GridSize[];
   };
+
+/**
+ * Room around an item's (or add tile's) tile (see `Grid.Area`): its size,
+ * where its tile sits in it, whether the tile moves in it.
+ */
+export type GridAreaProps = {
+  /** Its controls (a `ResizeHandle`, a `RemoveButton`), in its corners. */
+  children?: ReactNode;
+  /** Its initial placement (uncontrolled, see `placement`). @default 'center' */
+  defaultPlacement?: GridPlacement;
+  /** Its initial size (uncontrolled, see `size`). */
+  defaultSize?: GridSize;
+  /**
+   * Its tile can be moved within it while editing (a ring in the tile's
+   * top trailing corner): held and dragged (the hatched room around it
+   * moves the whole item), or by the arrow keys while it has focus.
+   * @default false
+   */
+  movable?: boolean;
+  /**
+   * Called as its placement is changed (its tile dragged in it, or moved
+   * by the arrow keys; see `movable`).
+   */
+  onPlacementChange?: (placement: GridPlacement) => void;
+  /**
+   * Called as its size is changed (by a `ResizeHandle` in it), with what
+   * it took in (see `GridSizeChangeDetails`).
+   */
+  onSizeChange?: (size: GridSize, details: GridSizeChangeDetails) => void;
+  /**
+   * Where its tile sits in it (controlled): in its middle (truly, off the
+   * unit lines if need be; its size still in units), or a corner of it on
+   * the area's.
+   */
+  placement?: GridPlacement;
+  /**
+   * Its size (controlled): the room its item takes in the layout, at
+   * least its tile's size, the rest hatched while editing.
+   */
+  size?: GridSize;
+  /**
+   * The sizes it can be (see `GridItemProps.supportedSizes`): its size
+   * snaps to them, then fits the columns; its tile's then fits it (the
+   * widest supported that does).
+   * @default every size
+   */
+  supportedSizes?: readonly GridSize[];
+};
 
 export type GridSpacerProps = ComponentProps<'div'> &
   GridDraggableProps & {
@@ -209,6 +297,11 @@ export type GridSpacerProps = ComponentProps<'div'> &
 
 export type GridSpawnProps = useRender.ComponentProps<'button'> &
   GridDraggableProps & {
+    /**
+     * Its controls (e.g. a `ResizeHandle`), beside its button, not in it;
+     * a `Grid.Area` for room around its tile.
+     */
+    children?: ReactNode;
     /** Its initial size (uncontrolled). @default '1x1' */
     defaultSize?: GridSize;
     /**
@@ -222,14 +315,31 @@ export type GridSpawnProps = useRender.ComponentProps<'button'> &
 
 /**
  * Resizing its item (see `Grid.ResizeHandle`): an arc by default; `render`,
- * e.g. a card's corner.
+ * e.g. a card's corner. In a `Grid.Area`, the area.
  */
 export type GridResizeHandleProps = useRender.ComponentProps<'button'>;
 
 export type GridRemoveButtonProps = useRender.ComponentProps<'button'>;
 
-/** A break's height: the rows it keeps the rest of empty. */
-export type GridBreakRows = 1 | 2 | 3;
+export type GridAreaButtonProps = useRender.ComponentProps<'button'> & {
+  /**
+   * Called with the area to add (see `Grid.AreaButton`): the app renders a
+   * `Grid.Area` of that size in the item.
+   */
+  onAdd?: (size: GridSize) => void;
+  /**
+   * The sizes the area could be, to suggest one of (its `Grid.Area`'s
+   * `supportedSizes`, to be).
+   * @default every size
+   */
+  supportedSizes?: readonly GridSize[];
+};
+
+/**
+ * A break's height: the rows it keeps the rest of empty (1 up to the
+ * grid's `maxTileRows`).
+ */
+export type GridBreakRows = number;
 
 export type GridBreakProps = ComponentProps<'div'> &
   GridDraggableProps & {
@@ -254,7 +364,7 @@ export type GridBreakProps = ComponentProps<'div'> &
 export type GridItemState = {
   /** Whether its grid is editing. */
   editing: boolean;
-  /** Whether it's smaller than snapped, to fit the columns. */
+  /** Whether it's narrower than snapped, to fit the columns. */
   isFitted: boolean;
   /**
    * Asks for another size (its `onSizeChange`, or its own), with what it
@@ -263,7 +373,31 @@ export type GridItemState = {
   requestSize: (size: GridSize, details?: GridSizeChangeDetails) => void;
   /** Its size as the user chose it. */
   requested: GridSize;
-  /** Its effective size: requested, snapped to supported, fitted. */
+  /**
+   * Its effective size: requested, snapped to supported, then the widest
+   * supported that fits if that's too wide (or than its area).
+   */
+  size: GridSize;
+  /** The sizes it can be, in order (smallest area first). */
+  supportedSizes: readonly GridSize[];
+};
+
+/** An item's area and its state (see `useGridArea`). */
+export type GridAreaState = {
+  /** Whether its tile can be moved within it. */
+  movable: boolean;
+  /** Where its tile sits in it. */
+  placement: GridPlacement;
+  /** Asks for another placement (its `onPlacementChange`, or its own). */
+  requestPlacement: (placement: GridPlacement) => void;
+  /** Asks for another size (its `onSizeChange`, or its own). */
+  requestSize: (size: GridSize, details?: GridSizeChangeDetails) => void;
+  /** Its size as the user chose it. */
+  requested: GridSize;
+  /**
+   * Its effective size: the room its item takes in the layout (snapped,
+   * fitted to the columns; at least its tile's).
+   */
   size: GridSize;
   /** The sizes it can be, in order (smallest area first). */
   supportedSizes: readonly GridSize[];

@@ -2,6 +2,7 @@
 
 import type {
   GridBreakRows,
+  GridPlacement,
   GridSize,
   GridSizeChangeDetails,
 } from '../../../components/index.js';
@@ -14,6 +15,19 @@ import {
 // Every part's options (its parts page's, see part-options.ts for the other
 // demos). The reorder handles and names are the app's wiring, set by each
 // view, never controls.
+
+/**
+ * A key for a demo's grid: its parts' `default*` props, only read as they
+ * mount, so a grid mounts anew when one of them changes.
+ */
+export const defaultsKey = (
+  ...props: readonly (Readonly<Record<string, unknown>> | undefined)[]
+): string =>
+  JSON.stringify(
+    props.flatMap((each) =>
+      Object.entries(each ?? {}).filter(([name]) => name.startsWith('default')),
+    ),
+  );
 
 /** A part rendering its own element: its class name and style. */
 const elementOptions = {
@@ -36,9 +50,11 @@ export const propOptionsRoot = {
   editing: [undefined, false, true] as const,
   dense: [undefined, false, true] as const,
   gap: [undefined, 8, 12, 20] as const,
-  unitSize: [undefined, 90, 110, 140] as const,
-  unitMin: [undefined, 80, 100] as const,
-  unitMax: [undefined, 130, 160] as const,
+  maxTileRows: [undefined, 2, 4] as const,
+  minColumns: [undefined, 5, 6] as const,
+  unitSize: [undefined, 90, 180] as const,
+  unitMin: [undefined, 80] as const,
+  unitMax: [undefined, 110] as const,
 };
 
 /** The root's, editing from the start (a view about editing). */
@@ -60,10 +76,50 @@ export const propOptionsDropGroup = {};
 /** An item's size options: its own first, then a few others. */
 const sizesOf = (size: GridSize | undefined) => [
   size,
-  ...([undefined, '1x1', '2x1', '2x2', '3x2'] as const).filter(
+  ...([undefined, '1x1', '2x1', '2x2', '3x2', '4x2'] as const).filter(
     (each) => each !== size,
   ),
 ];
+
+/** An area's options (see `Grid.Area`). */
+export const getPropOptionsArea = (name: string) => (addLog: AddLog) => ({
+  defaultSize: [undefined, '3x2', '*x2'] as const,
+  size: [undefined, '3x3'] as const,
+  supportedSizes: [
+    undefined,
+    new MappedProp<readonly GridSize[]>(
+      ['2x2', '3x2', '*x2', '*x3'],
+      '[2x2, 3x2, *x2, *x3]',
+    ),
+  ] as const,
+  onSizeChange: [
+    new MappedProp(
+      (area: GridSize, { merged }: GridSizeChangeDetails) =>
+        addLog(
+          `${name} area: ${area}${merged.length > 0 ? ` (took in ${merged.join(', ')})` : ''}`,
+        ),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+  defaultPlacement: [undefined, 'top-leading', 'bottom-trailing'] as const,
+  placement: [
+    undefined,
+    'center',
+    'top-leading',
+    'top-trailing',
+    'bottom-leading',
+    'bottom-trailing',
+  ] as const,
+  onPlacementChange: [
+    new MappedProp(
+      (placement: GridPlacement) => addLog(`${name} placement: ${placement}`),
+      '[log change]',
+    ),
+    undefined,
+  ] as const,
+  movable: [undefined, true] as const,
+});
 
 export const getPropOptionsItem =
   (name: string, defaultSize?: GridSize) => (addLog: AddLog) => ({
@@ -77,6 +133,10 @@ export const getPropOptionsItem =
         '[1x1, 2x1, 2x2]',
       ),
       new MappedProp<readonly GridSize[]>(['2x1'], '[2x1]'),
+      new MappedProp<readonly GridSize[]>(
+        ['2x2', '3x2', '4x2'],
+        '[2x2, 3x2, 4x2]',
+      ),
     ] as const,
     onSizeChange: [logSize(addLog, name), undefined] as const,
   });
@@ -125,14 +185,38 @@ export const getPropOptionsResizeHandle = (addLog: AddLog) => ({
   ] as const,
 });
 
-export const propOptionsRemoveButton = {
+export const getPropOptionsRemoveButton = (addLog: AddLog) => ({
   ...commonPropOptions,
   'aria-label': ['Remove Lamp', undefined] as const,
-};
+  onClick: [
+    undefined,
+    new MappedProp(() => addLog('remove button: click'), '[log click]'),
+  ] as const,
+});
+
+export const getPropOptionsAreaButton = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  'aria-label': ['Add an area to Lamp', undefined] as const,
+  onAdd: [
+    new MappedProp(
+      (size: GridSize) => addLog(`area button: add ${size}`),
+      '[log add]',
+    ),
+    undefined,
+  ] as const,
+  supportedSizes: [
+    undefined,
+    new MappedProp<readonly GridSize[]>(['2x2', '3x2'], '[2x2, 3x2]'),
+  ] as const,
+  onClick: [
+    undefined,
+    new MappedProp(() => addLog('area button: click'), '[log click]'),
+  ] as const,
+});
 
 /** The overview's few: how it lays out, not its plumbing. */
 export const propOptionsOverviewRoot = {
   dense: [undefined, true] as const,
-  unitSize: [undefined, 90, 140] as const,
+  unitSize: [undefined, 80] as const,
   gap: [undefined, 8, 20] as const,
 };
