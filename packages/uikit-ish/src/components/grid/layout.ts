@@ -148,6 +148,14 @@ export const metricsOf = (element: Element): Metrics => {
   };
 };
 
+/**
+ * A full width's part of the end-of-line column, editing (see
+ * `fullClipOf`): its first row's upper half (px, as tall), the rest of it
+ * a break's after it (see `breakPlace`).
+ */
+const fullHalfOf = ({ gap, unit }: Pick<Metrics, 'gap' | 'unit'>) =>
+  (unit - gap) / 2;
+
 /** A box, by its edges (px). */
 type Rect = { bottom: number; left: number; right: number; top: number };
 
@@ -175,10 +183,11 @@ const maskOf = (
 /**
  * A break's shape (see `placeIn`, the CSS), from its first row's start
  * (`from` columns before it) to the grid's end (through its end-of-line
- * column, while editing): its first row from where
- * it starts, its rows below from their start, every corner rounded (the
- * inner one too). Mirrored when right to left. An SVG path (px), for a
- * `clip-path` (drawn at once, no image to decode) or a mask.
+ * column, while editing): its first rows (`stem`, one by default) from
+ * where it starts (`top` px down: after a full width, below its part of
+ * that column), its rows below from their start, every corner rounded
+ * (the inner one too). Mirrored when right to left. An SVG path (px), for
+ * a `clip-path` (drawn at once, no image to decode) or a mask.
  */
 export const breakPath = (
   { column, gap, unit }: Pick<Metrics, 'column' | 'gap' | 'unit'>,
@@ -187,12 +196,16 @@ export const breakPath = (
     isRtl,
     radius,
     rows,
+    stem = 1,
+    top = 0,
     width,
   }: {
     from: number;
     isRtl: boolean;
     radius: number;
     rows: number;
+    stem?: number;
+    top?: number;
     /** Its container's, its end-of-line column's too (px). */
     width: number;
   },
@@ -200,12 +213,16 @@ export const breakPath = (
   const pitch = unit + gap;
   const height = rows * pitch - gap;
   const start = from * (column + gap);
+  const isStem = rows <= stem || start === 0;
+  const head = start > 0 ? top : 0;
+  const below = stem * pitch;
   // (Its corners no rounder than its narrowest part: a first row only in
-  // its end-of-line column, too.)
+  // its end-of-line column, too; its part there, below a full width's.)
   const r = Math.min(
     radius,
     Math.min(column, unit) / 2,
     start > 0 ? (width - start) / 2 : Number.POSITIVE_INFINITY,
+    ((isStem ? height : below - gap) - head) / 2,
   );
   const x = (value: number) => String(isRtl ? width - value : value);
   const y = String;
@@ -213,34 +230,33 @@ export const breakPath = (
     `A${y(r)} ${y(r)} 0 0 ${String(isRtl ? 1 - sweep : sweep)} ${x(ax)} ${y(ay)}`;
   const box = (left: number) =>
     [
-      `M${x(left + r)} 0H${x(width - r)}`,
-      arc(1, width, r),
+      `M${x(left + r)} ${y(head)}H${x(width - r)}`,
+      arc(1, width, head + r),
       `V${y(height - r)}`,
       arc(1, width - r, height),
       `H${x(left + r)}`,
       arc(1, left, height - r),
-      `V${y(r)}`,
-      arc(1, left + r, 0),
+      `V${y(head + r)}`,
+      arc(1, left + r, head),
       'Z',
     ].join('');
-  const path =
-    rows === 1 || start === 0
-      ? box(rows === 1 ? start : 0)
-      : [
-          `M${x(start + r)} 0H${x(width - r)}`,
-          arc(1, width, r),
-          `V${y(height - r)}`,
-          arc(1, width - r, height),
-          `H${x(r)}`,
-          arc(1, 0, height - r),
-          `V${y(pitch + r)}`,
-          arc(1, r, pitch),
-          `H${x(start - r)}`,
-          arc(0, start, pitch - r),
-          `V${y(r)}`,
-          arc(1, start + r, 0),
-          'Z',
-        ].join('');
+  const path = isStem
+    ? box(rows <= stem ? start : 0)
+    : [
+        `M${x(start + r)} ${y(head)}H${x(width - r)}`,
+        arc(1, width, head + r),
+        `V${y(height - r)}`,
+        arc(1, width - r, height),
+        `H${x(r)}`,
+        arc(1, 0, height - r),
+        `V${y(below + r)}`,
+        arc(1, r, below),
+        `H${x(start - r)}`,
+        arc(0, start, below - r),
+        `V${y(head + r)}`,
+        arc(1, start + r, head),
+        'Z',
+      ].join('');
   return path;
 };
 
@@ -263,15 +279,24 @@ export const breakOutlineOf = (
   const container = element.parentElement;
   const metrics = metricsOf(element);
   const styles = getComputedStyle(element);
-  const above =
-    Number.parseFloat(styles.getPropertyValue('--uikit-grid-break-above')) || 0;
+  const isNone = Object.hasOwn(element.dataset, 'gridBreakNone');
+  // (Its rows in the end-of-line column first (see `breakPlace`): after a
+  // full width, below its part of it.)
+  const stem = Number(element.dataset.gridBreakStem ?? 1) || 1;
+  const head = Object.hasOwn(element.dataset, 'gridBreakAfterFull')
+    ? fullHalfOf(metrics) + metrics.gap
+    : 0;
+  const pitch = metrics.unit + metrics.gap;
+  const above = isNone
+    ? 0
+    : Number.parseFloat(styles.getPropertyValue('--uikit-grid-break-above')) ||
+      0;
   const from =
-    above > 0 || Object.hasOwn(element.dataset, 'gridBreakNone')
+    above > 0 || isNone
       ? metrics.columns
       : Number.parseFloat(styles.getPropertyValue('--uikit-grid-break-from')) ||
         0;
   const width = container?.clientWidth ?? 0;
-  const pitch = metrics.unit + metrics.gap;
   const height = rows * pitch - metrics.gap;
   const isRtl = styles.direction === 'rtl';
   const path = breakPath(metrics, {
@@ -281,6 +306,8 @@ export const breakOutlineOf = (
       Number.parseFloat(styles.getPropertyValue('--uikit-grid-item-radius')) ||
       24,
     rows,
+    stem,
+    top: head,
     width,
   });
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}"><clipPath id="c"><path d="${path}"/></clipPath><path d="${path}" fill="#000" fill-opacity="0.15"/><path d="${path}" fill="none" stroke="#000" stroke-width="4" clip-path="url(#c)"/></svg>`;
@@ -291,7 +318,9 @@ export const breakOutlineOf = (
       ? width - element.offsetLeft - element.offsetWidth
       : element.offsetLeft),
     mask: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
-    top: -above * pitch,
+    // (Taking no room: its box from its first row's top (after a full
+    // width, below that one's part of the end-of-line column).)
+    top: isNone ? -head : -above * pitch,
     width,
   };
 };
@@ -352,19 +381,29 @@ type BreakPlace =
       from: number;
       /** Where its resize handle goes, by its end (columns on). */
       handle: number;
+      /**
+       * Where its rows above start (px down): after a full width, below
+       * its part of the end-of-line column (see `fullHalfOf`).
+       */
+      head: number;
       kind: 'cell';
       rest: number;
       /** Where its return sign goes, the same way. */
       sign: number;
     }
   /**
-   * Nothing kept empty (no room left in its row): taking no room; while
-   * editing, in its row's end-of-line column (its top, px).
+   * Nothing kept empty (no room left in its row, nor in those rows below
+   * it that what's before it fills; see `breakPlace`): taking no room;
+   * while editing, in its row's end-of-line column, as tall as its rows
+   * (its top, its height, px; after a full width, below its part of
+   * it).
    */
   | {
-      /** Right after a full width: no effect, drawn as nothing. */
-      isHidden: boolean;
+      head: number;
+      height: number;
       kind: 'none';
+      /** The rows filled from their start to their end, from its first. */
+      stem: number;
       top: number;
     };
 
@@ -409,12 +448,10 @@ const breakPlace = (
       freeRuns(y + (from + row) * pitch, 0, before, metrics),
     ).flat();
   keptRows.set(element, y + (rows - 1) * pitch);
-  // (Right after a full width (its row ended anyway): nothing.)
-  if (previous?.hasAttribute('data-grid-full') && isCell) {
-    keptRows.set(element, y);
-    return { isHidden: true, kind: 'none', top: y - metrics.unit / 2 };
-  }
-  const [first, ...rest] = freeRuns(y, start, before, metrics);
+  const isAfterFull = isCell && Object.hasOwn(previous.dataset, 'gridFull');
+  const [first, ...rest] = isAfterFull
+    ? []
+    : freeRuns(y, start, before, metrics);
   if (first) {
     return {
       above: 0,
@@ -423,24 +460,46 @@ const breakPlace = (
       fills: [...rest, ...below(1, rows - 1)],
       from: first.from,
       handle: metrics.columns - first.to,
+      head: 0,
       kind: 'cell',
       rest: metrics.columns - first.to,
       sign: metrics.columns - first.to,
     };
   }
+  // (No room left in its row (a full width's ends it anyway): in the
+  // end-of-line column, down the rows below filled from their start to
+  // their end too (a full width's, a tall tile's at its row's end); after
+  // a full width, below its part of that column (see `fullHalfOf`). No
+  // taller: keeping nothing empty. Taller: the rows after them too, from
+  // their first free unit on.)
+  const head = isAfterFull ? fullHalfOf(metrics) + metrics.gap : 0;
+  let stem = 1;
+  while (
+    stem < metrics.maxRows &&
+    freeRuns(y + stem * pitch, 0, before, metrics).length === 0
+  ) {
+    stem += 1;
+  }
   const [next, ...others] =
-    rows > 1 ? freeRuns(y + pitch, 0, before, metrics) : [];
+    rows > stem ? freeRuns(y + stem * pitch, 0, before, metrics) : [];
   if (!next) {
-    keptRows.set(element, y);
-    return { isHidden: false, kind: 'none', top: y - metrics.unit / 2 };
+    keptRows.set(element, y + (stem - 1) * pitch);
+    return {
+      head,
+      height: rows * pitch - metrics.gap - head,
+      kind: 'none',
+      stem,
+      top: y - metrics.unit / 2 + head,
+    };
   }
   return {
-    above: 1,
+    above: stem,
     column: `${String(next.from + 1)} / ${String(next.to + 1)}`,
-    drawn: rows - 1,
-    fills: [...others, ...below(2, rows - 2)],
+    drawn: rows - stem,
+    fills: [...others, ...below(stem + 1, rows - stem - 1)],
     from: next.from,
     handle: metrics.columns - next.to,
+    head,
     kind: 'cell',
     rest: metrics.columns - next.to,
     sign: metrics.columns - next.to,
@@ -498,9 +557,24 @@ const styleBreak = (
 ) => {
   const isNone = place.kind === 'none';
   element.toggleAttribute('data-grid-break-none', isNone);
-  element.toggleAttribute(
-    'data-grid-break-hidden',
-    place.kind === 'none' && place.isHidden,
+  // (After a full width: below its part of the end-of-line column, its
+  // return sign in the half there, see the CSS; its rows there first.)
+  element.toggleAttribute('data-grid-break-after-full', place.head > 0);
+  const stem = isNone ? place.stem : place.above;
+  if (stem > 0) {
+    element.dataset.gridBreakStem = String(stem);
+  } else {
+    delete element.dataset.gridBreakStem;
+  }
+  setStyle(
+    element,
+    '--uikit-grid-break-none-height',
+    isNone ? `${String(place.height)}px` : undefined,
+  );
+  setStyle(
+    element,
+    '--uikit-grid-break-head',
+    isNone || place.head === 0 ? undefined : `${String(place.head)}px`,
   );
   setStyle(
     element,
@@ -550,6 +624,8 @@ const styleBreak = (
           isRtl: metrics.isRtl,
           radius: metrics.radius,
           rows: place.drawn + place.above,
+          stem: Math.max(1, place.above),
+          top: place.head,
           width: metrics.width,
         })}")`,
   );
@@ -622,6 +698,184 @@ const placeIn = (
 };
 
 /**
+ * A full width's shape, editing (see the CSS): what's past its last
+ * column, in the end-of-line column, cut away below its first row's upper
+ * half (see `fullHalfOf`), the corners left rounded (the inner one too),
+ * on below it. Mirrored when right to left. A `clip-path` (px,
+ * for something in it at `offset` from its top left: its hatch, what its
+ * tile shows; even-odd: all around it, less the cut).
+ */
+const fullClipOf = (
+  cell: HTMLElement,
+  metrics: Metrics & { isRtl: boolean; radius: number },
+  [dx, dy]: readonly [number, number] = [0, 0],
+) => {
+  const width = cell.offsetWidth;
+  const height = cell.offsetHeight;
+  const half = fullHalfOf(metrics);
+  const strip = metrics.end + metrics.gap;
+  const last = width - strip;
+  const r = Math.min(metrics.radius, strip / 2, half / 2);
+  const far = 10_000;
+  const x = (value: number) =>
+    String((metrics.isRtl ? width - value : value) - dx);
+  const y = (value: number) => String(value - dy);
+  const arc = (sweep: 0 | 1, ax: number, ay: number) =>
+    `A${String(r)} ${String(r)} 0 0 ${String(metrics.isRtl ? 1 - sweep : sweep)} ${x(ax)} ${y(ay)}`;
+  const around = `M${x(-far)} ${y(-far)}H${x(width + far)}V${y(height + far)}H${x(-far)}Z`;
+  const cut = [
+    `M${x(last + r)} ${y(half)}H${x(width - r)}`,
+    arc(0, width, half - r),
+    // (On past its bottom: no sliver of it left there, its edge however
+    // it's rounded to pixels.)
+    `H${x(width + far)}V${y(height + far)}H${x(last - r)}V${y(height)}`,
+    arc(0, last, height - r),
+    `V${y(half + r)}`,
+    arc(1, last + r, half),
+    'Z',
+  ].join('');
+  return `path(evenodd, "${around}${cut}")`;
+};
+
+/**
+ * A full width's resize outline at some rows (see main.tsx, the CSS): its
+ * shape as it'd be (see `fullClipOf`; a break's, see `breakOutlineOf`),
+ * filled faintly and edged inside (a mask), from its top left (px); none
+ * while there's no end-of-line column.
+ */
+export const fullOutlineOf = (
+  cell: HTMLElement,
+  rows: number,
+): { height: number; mask: string; width: number } | undefined => {
+  const metrics = metricsOf(cell);
+  if (metrics.end < 1) return undefined;
+  const styles = getComputedStyle(cell);
+  const isRtl = styles.direction === 'rtl';
+  const radius =
+    Number.parseFloat(styles.getPropertyValue('--uikit-grid-item-radius')) ||
+    24;
+  const width = cell.offsetWidth;
+  const height = rows * (metrics.unit + metrics.gap) - metrics.gap;
+  const half = fullHalfOf(metrics);
+  const last = width - metrics.end - metrics.gap;
+  const r = Math.min(radius, (width - last) / 2, half / 2);
+  const x = (value: number) => String(isRtl ? width - value : value);
+  const arc = (sweep: 0 | 1, ax: number, ay: number) =>
+    `A${String(r)} ${String(r)} 0 0 ${String(isRtl ? 1 - sweep : sweep)} ${x(ax)} ${String(ay)}`;
+  const path = [
+    `M${x(r)} 0H${x(width - r)}`,
+    arc(1, width, r),
+    `V${String(half - r)}`,
+    arc(1, width - r, half),
+    `H${x(last + r)}`,
+    arc(0, last, half + r),
+    `V${String(height - r)}`,
+    arc(1, last - r, height),
+    `H${x(r)}`,
+    arc(1, 0, height - r),
+    `V${String(r)}`,
+    arc(1, r, 0),
+    'Z',
+  ].join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}"><clipPath id="c"><path d="${path}"/></clipPath><path d="${path}" fill="#000" fill-opacity="0.15"/><path d="${path}" fill="none" stroke="#000" stroke-width="4" clip-path="url(#c)"/></svg>`;
+  return {
+    height,
+    mask: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+    width,
+  };
+};
+
+/** Cells shaped (see `shapeFulls`), to unshape once they're not. */
+const shaped = new WeakMap<HTMLElement, Set<HTMLElement>>();
+
+/** A cell's shapes (see `shapeFulls`) set, or unset (`undefined`). */
+const shapeCell = (
+  cell: HTMLElement,
+  metrics: (Metrics & { isRtl: boolean; radius: number }) | undefined,
+) => {
+  setStyle(
+    cell,
+    '--uikit-grid-full-shape',
+    metrics ? fullClipOf(cell, metrics) : undefined,
+  );
+  const body = cell.querySelector<HTMLElement>(
+    ':scope > [data-grid-part="body"]',
+  );
+  if (!body) return;
+  setStyle(
+    body,
+    '--uikit-grid-body-shape',
+    metrics
+      ? fullClipOf(cell, metrics, [body.offsetLeft, body.offsetTop])
+      : undefined,
+  );
+  // (How far its tile runs past the last column (a full-width tile, one
+  // in a trailing corner): its trailing controls in by as much, clear of
+  // the cut (see the CSS); its ring only where it'd be in the cut, below
+  // its first row's upper half.)
+  const strip = metrics ? metrics.end + metrics.gap : 0;
+  const overhang = metrics
+    ? Math.max(
+        0,
+        metrics.isRtl
+          ? strip - body.offsetLeft
+          : body.offsetLeft + body.offsetWidth - (cell.offsetWidth - strip),
+      )
+    : 0;
+  const ring = body.querySelector<HTMLElement>(
+    ':scope > .uikit-grid-move-sign',
+  );
+  const isRingCut =
+    metrics !== undefined &&
+    body.offsetTop + (ring?.offsetHeight ?? 44) > fullHalfOf(metrics);
+  setStyle(
+    body,
+    '--uikit-grid-body-overhang',
+    overhang > 0 ? `${String(overhang)}px` : undefined,
+  );
+  setStyle(
+    body,
+    '--uikit-grid-body-overhang-top',
+    overhang > 0 && isRingCut ? `${String(overhang)}px` : undefined,
+  );
+};
+
+/**
+ * Its full widths shaped while editing (see `fullClipOf`), else not; one
+ * no longer a full width (e.g. its area resized to fixed columns), or no
+ * longer in it, unshaped. Shaped: its hatch (an area's room), and what
+ * its tile shows (by its tile's place in it): a full-width tile in a
+ * full-width area, too, shows past its last column only where its area
+ * does (its handle at that column's corner, see the CSS). Not the cell
+ * itself, nor its tile: their resize outlines whole (a full width's in
+ * its shape, see `fullOutlineOf`).
+ */
+const shapeFulls = (root: HTMLElement) => {
+  const fulls = root.querySelectorAll<HTMLElement>(
+    '[data-grid-part="item"][data-grid-full]',
+  );
+  const before = shaped.get(root) ?? new Set<HTMLElement>();
+  const now = new Set(fulls);
+  for (const cell of before) {
+    if (!now.has(cell)) shapeCell(cell, undefined);
+  }
+  shaped.set(root, now);
+  if (fulls.length === 0) return;
+  const styles = getComputedStyle(root);
+  const metrics = {
+    ...metricsOf(root),
+    isRtl: styles.direction === 'rtl',
+    radius:
+      Number.parseFloat(styles.getPropertyValue('--uikit-grid-item-radius')) ||
+      24,
+  };
+  const isShaped = Object.hasOwn(root.dataset, 'editing') && metrics.end >= 1;
+  for (const cell of fulls) {
+    shapeCell(cell, isShaped ? metrics : undefined);
+  }
+};
+
+/**
  * Its breaks as cells (see `breakPlace`): in the order shown, one after
  * another (each placed, the next measured), as tall as their rows (see the
  * CSS); not editing, not drawn (keeping nothing empty: none). Not one
@@ -629,6 +883,7 @@ const placeIn = (
  * Fillers no longer needed removed.
  */
 export const placeBreaks = (root: HTMLElement): void => {
+  shapeFulls(root);
   const kept = new Set<HTMLElement>();
   const breaks = Array.from(
     root.querySelectorAll<HTMLElement>(
@@ -647,8 +902,11 @@ export const placeBreaks = (root: HTMLElement): void => {
     setStyle(element, '--uikit-grid-break-sign', undefined);
     setStyle(element, '--uikit-grid-break-top', undefined);
     setStyle(element, '--uikit-grid-break-above', undefined);
+    setStyle(element, '--uikit-grid-break-none-height', undefined);
+    setStyle(element, '--uikit-grid-break-head', undefined);
     delete element.dataset.gridBreakNone;
-    delete element.dataset.gridBreakHidden;
+    delete element.dataset.gridBreakAfterFull;
+    delete element.dataset.gridBreakStem;
   }
   if (breaks.length > 0) {
     const styles = getComputedStyle(root);

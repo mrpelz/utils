@@ -267,8 +267,8 @@ const cellsInitial: readonly Cell[] = [
 ];
 
 /**
- * Cleaned up on Done: no breaks at the start or end, or right after a
- * full width, breaks in a row merged into one (at most 3 rows).
+ * Cleaned up on Done: no breaks at the start or end, breaks in a row
+ * merged into one (at most 3 rows).
  */
 const tidy = (cells: readonly Cell[]): readonly Cell[] => {
   const first = cells.findIndex(({ kind }) => kind !== 'break');
@@ -276,15 +276,6 @@ const tidy = (cells: readonly Cell[]): readonly Cell[] => {
   const tidied: Cell[] = [];
   for (const cell of first === -1 ? [] : cells.slice(first, last + 1)) {
     const previous = tidied.at(-1);
-    // (Right after a full width, whose row ends anyway: dropped.)
-    if (
-      cell.kind === 'break' &&
-      previous &&
-      previous.kind !== 'break' &&
-      String(previous.size).startsWith('*')
-    ) {
-      continue;
-    }
     if (cell.kind === 'break' && previous?.kind === 'break') {
       const rows = Math.min(3, (previous.rows ?? 1) + (cell.rows ?? 1));
       tidied[tidied.length - 1] = { ...previous, rows: rows as GridBreakRows };
@@ -305,17 +296,15 @@ const maskOf = ({ svgPathData, viewBox }) => {
   return \`url("data:image/svg+xml,\${encodeURIComponent(svg)}")\`;
 };
 
-// Cleaned up on Done: no breaks at the start or end, or right after a
-// full width, breaks in a row merged into one.
+// Cleaned up on Done: no breaks at the start or end, breaks in a row
+// merged into one.
 const tidy = (cells) => {
   const first = cells.findIndex(({ kind }) => kind !== 'break');
   const last = cells.findLastIndex(({ kind }) => kind !== 'break');
   const tidied = [];
   for (const cell of first === -1 ? [] : cells.slice(first, last + 1)) {
     const previous = tidied.at(-1);
-    if (cell.kind === 'break' && previous?.size?.startsWith('*')) {
-      // (Right after a full width, whose row ends anyway: dropped.)
-    } else if (cell.kind === 'break' && previous?.kind === 'break') {
+    if (cell.kind === 'break' && previous?.kind === 'break') {
       const rows = Math.min(3, (previous.rows ?? 1) + (cell.rows ?? 1));
       tidied[tidied.length - 1] = { ...previous, rows };
     } else {
@@ -886,8 +875,19 @@ const change = (name, values) =>
   setTiles((current) =>
     current.map((tile) => (tile.name === name ? { ...tile, ...values } : tile)),
   );
+// On Done, an area stored as big as its tile goes: it adds nothing.
+const toggleEditing = () => {
+  if (editing) {
+    setTiles((current) =>
+      current.map(({ area, placement, ...tile }) =>
+        area === tile.size ? tile : { ...tile, area, placement },
+      ),
+    );
+  }
+  setEditing(!editing);
+};
 
-<Button.Root variant="bordered" onClick={() => setEditing(!editing)}>
+<Button.Root variant="bordered" onClick={toggleEditing}>
   <Button.Label>{editing ? 'Done' : 'Edit'}</Button.Label>
 </Button.Root>
 <Grid.Root editing={editing}>
@@ -1018,6 +1018,16 @@ const Room: FunctionComponent = () => {
                 variant="bordered"
                 onClick={() => {
                   addLog(editing ? 'done' : 'edit');
+                  // (On Done, an area stored as big as its tile goes.)
+                  if (editing) {
+                    setTiles((current) =>
+                      current.map((tile) => {
+                        if (tile.area !== tile.size) return tile;
+                        addLog(`${tile.name} area: removed (as big as it)`);
+                        return { name: tile.name, size: tile.size };
+                      }),
+                    );
+                  }
                   setEditing(!editing);
                 }}
               >
@@ -1174,8 +1184,8 @@ export const GridComposition: FunctionComponent = () => (
       <li>
         Edit mode works on a draft. Cleaning up waits until Done, because breaks
         at the start or end, or breaks in a row, can be steps on the way to the
-        layout the user wants. On Done, breaks at the start and end, and breaks
-        after a full-width tile, are dropped, and breaks in a row become one.
+        layout the user wants. On Done, breaks at the start and end are dropped,
+        and breaks in a row become one.
       </li>
       <li>
         The signs are the app’s. Here they’re SF Symbols turned into mask images
@@ -1261,7 +1271,8 @@ export const GridComposition: FunctionComponent = () => (
         and the app renders a <PartLink part="Grid.Area" /> of that size, the
         tile centered in it. The x on the area’s own corner (a{' '}
         <PartLink part="Grid.RemoveButton" /> in the area) takes it away again:
-        the app stops rendering it, and the tile keeps its size.
+        the app stops rendering it, and the tile keeps its size. On Done, the
+        app also drops an area stored as big as its tile, since it adds nothing.
       </li>
       <li>
         On a narrower grid, the area gives way first, then the tile fits in it.

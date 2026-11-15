@@ -4,6 +4,7 @@
    filling its item (until cards). */
 .grid-demo-tile {
   display: grid;
+  min-width: 0;
   box-sizing: border-box;
   align-content: center;
   padding: 14px 16px;
@@ -12,7 +13,9 @@
   color: var(--color-ui-label);
   font-size: 15px;
   font-weight: 600;
+  hyphens: auto;
   justify-items: center;
+  overflow-wrap: anywhere;
   text-align: center;
 }
 

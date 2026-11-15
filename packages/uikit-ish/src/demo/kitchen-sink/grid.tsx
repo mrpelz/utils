@@ -1,4 +1,4 @@
-import { FunctionComponent, ReactNode, useRef, useState } from 'react';
+import { FunctionComponent, useRef, useState } from 'react';
 
 import {
   Button,
@@ -9,81 +9,20 @@ import {
   type GridSize,
   type GridSizeChangeDetails,
   Header,
+  List,
   Menu,
   Page,
-  Switch,
   Toolbar,
-  useGridArea,
-  useGridItem,
   Viewport,
 } from '../../components/index.js';
 import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
-import { BackButton, type SinkPages } from './shared.js';
+import { DenseSwitch, SectionHeader, Tile } from './grid-shared.js';
+import { BackButton, DrillRow, Rows, type SinkPages } from './shared.js';
 
 // Grid: a home screen of tiles on a picture. Edit in the bar starts edit
 // mode: tiles can be dragged within a section and between sections that
 // accept them, and resized from their corner. Spacers and breaks can be
 // added, moved and removed.
-
-/**
- * A tile shows its name and size (and the size asked for, if the grid gave
- * it a different one). In edit mode its corner resizes it.
- */
-const Tile: FunctionComponent<{ label: string }> = ({ label }) => {
-  const item = useGridItem();
-  const area = useGridArea();
-  return (
-    <>
-      <div className="kitchen-sink-grid-tile">
-        <span>{label}</span>
-        <span className="kitchen-sink-grid-tile-size">
-          {item?.size}
-          {item && item.size !== item.requested ? ` (${item.requested})` : ''}
-          {area ? ` in ${area.size}, ${area.placement}` : ''}
-        </span>
-      </div>
-      <Grid.ResizeHandle />
-    </>
-  );
-};
-
-/** A section header: its title, a sentence on what to try, its buttons. */
-const SectionHeader: FunctionComponent<{
-  children?: ReactNode;
-  hint?: string;
-  title: string;
-}> = ({ children, hint, title }) => (
-  <Grid.Header className="kitchen-sink-grid-header">
-    <span className="kitchen-sink-grid-heading">
-      <span className="kitchen-sink-grid-title">{title}</span>
-      {hint ? <span className="kitchen-sink-grid-hint">{hint}</span> : null}
-    </span>
-    {children}
-  </Grid.Header>
-);
-
-/**
- * A section's dense switch, labeled (unless its title says it). Dense
- * placement is off while editing, so the switch is too.
- */
-const DenseSwitch: FunctionComponent<{
-  checked: boolean;
-  disabled: boolean;
-  isLabeled?: boolean;
-  onCheckedChange: (checked: boolean) => void;
-}> = ({ checked, disabled, isLabeled = true, onCheckedChange }) => (
-  <span className="kitchen-sink-grid-dense">
-    {isLabeled ? <span aria-hidden="true">Dense</span> : null}
-    <Switch.Root
-      aria-label="Dense"
-      checked={checked}
-      disabled={disabled}
-      onCheckedChange={onCheckedChange}
-    >
-      <Switch.Thumb />
-    </Switch.Root>
-  </span>
-);
 
 /** A device: its name, size and supported sizes. */
 type Device = {
@@ -175,12 +114,14 @@ const cellsInitial: readonly Cell[] = [
   { kind: 'break', name: 'Break 1', rows: 2 },
   { kind: 'item', name: 'Garage', size: '2x1' },
   { kind: 'item', name: 'Gate' },
+  { kind: 'item', name: 'Driveway', size: '*x1' },
+  { kind: 'break', name: 'Break 2', rows: 2 },
+  { kind: 'item', name: 'Mailbox' },
 ];
 
 /**
  * Tidied on Done: breaks at the start or end are dropped (nothing before
- * or after them to end a row for), so are those right after a full width
- * (its row ends anyway), and breaks one after another become
+ * or after them to end a row for), and breaks one after another become
  * the first of them, their rows added up (3 at most).
  */
 const tidy = (cells: readonly Cell[]): Cell[] => {
@@ -189,15 +130,6 @@ const tidy = (cells: readonly Cell[]): Cell[] => {
   const tidied: Cell[] = [];
   for (const cell of first === -1 ? [] : cells.slice(first, last + 1)) {
     const previous = tidied.at(-1);
-    // (Right after a full width, whose row ends anyway: dropped.)
-    if (
-      cell.kind === 'break' &&
-      previous &&
-      previous.kind !== 'break' &&
-      String(previous.size).startsWith('*')
-    ) {
-      continue;
-    }
     if (cell.kind === 'break' && previous?.kind === 'break') {
       const rows = Math.min(3, (previous.rows ?? 1) + (cell.rows ?? 1));
       tidied[tidied.length - 1] = {
@@ -329,7 +261,7 @@ const GridApp: FunctionComponent = () => {
       }
       return next;
     });
-  const deviceTile = (device: Device) => (
+  const deviceTile = (device: Device, place: number) => (
     <Grid.Item
       key={device.name}
       dropName={device.name}
@@ -340,7 +272,10 @@ const GridApp: FunctionComponent = () => {
       }
       onSizeChange={(size) => resizeDevice(device.name, size)}
     >
-      <Tile label={device.name} />
+      <Tile
+        label={device.name}
+        place={place}
+      />
       {device.area ? (
         <Grid.Area
           movable
@@ -376,7 +311,7 @@ const GridApp: FunctionComponent = () => {
     onReorder: (change) =>
       setScenes((current) => Grid.reorder(current, change, ({ name }) => name)),
   });
-  const sceneTile = ({ name }: { name: string }) => (
+  const sceneTile = ({ name }: { name: string }, place: number) => (
     <Grid.Item
       key={name}
       defaultSize="2x1"
@@ -384,7 +319,10 @@ const GridApp: FunctionComponent = () => {
       reorderHandle={scenesHandle}
       supportedSizes={['2x1']}
     >
-      <Tile label={name} />
+      <Tile
+        label={name}
+        place={place}
+      />
     </Grid.Item>
   );
 
@@ -416,6 +354,20 @@ const GridApp: FunctionComponent = () => {
   });
   const toggleEditing = () => {
     if (draft) setSaved(tidy(draft));
+    // (On Done, an area stored as big as its tile goes: it adds nothing.)
+    if (editing) {
+      setDevices((current) => {
+        const next = { ...current };
+        for (const room of Object.keys(next) as Room[]) {
+          next[room] = next[room].map((device) =>
+            device.area === device.size
+              ? { ...device, area: undefined, placement: undefined }
+              : device,
+          );
+        }
+        return next;
+      });
+    }
     setDraft(editing ? undefined : [...saved]);
     setEditing(!editing);
   };
@@ -514,7 +466,9 @@ const GridApp: FunctionComponent = () => {
                 >
                   {denseSwitch(room.name)}
                 </SectionHeader>
-                {devices[room.name].map((device) => deviceTile(device))}
+                {devices[room.name].map((device, index) =>
+                  deviceTile(device, index),
+                )}
               </Grid.Section>
             ))}
             <Grid.Section
@@ -528,7 +482,9 @@ const GridApp: FunctionComponent = () => {
               >
                 {denseSwitch('security')}
               </SectionHeader>
-              {devices.security.map((device) => deviceTile(device))}
+              {devices.security.map((device, index) =>
+                deviceTile(device, index),
+              )}
             </Grid.Section>
             <Grid.Section dense={dense.scenes}>
               <SectionHeader
@@ -541,14 +497,17 @@ const GridApp: FunctionComponent = () => {
                 dropName="pinned"
                 reorderHandle={scenesHandle}
               >
-                {scenes.pinned.map((scene) => sceneTile(scene))}
+                {scenes.pinned.map((scene, index) => sceneTile(scene, index))}
               </Grid.DropGroup>
               <Grid.Break />
               <Grid.DropGroup
                 dropName="more"
                 reorderHandle={scenesHandle}
               >
-                {scenes.more.map((scene) => sceneTile(scene))}
+                {/* (After the pinned ones and the break.) */}
+                {scenes.more.map((scene, index) =>
+                  sceneTile(scene, scenes.pinned.length + 1 + index),
+                )}
               </Grid.DropGroup>
             </Grid.Section>
             <Grid.Section
@@ -556,7 +515,7 @@ const GridApp: FunctionComponent = () => {
               reorderHandle={layoutHandle}
             >
               <SectionHeader
-                hint="A spacer leaves a gap, and a break starts a new row. A taller break keeps the rows below it empty too. Drop a tile on any empty spot, even up to three rows below the last, and the breaks and spacers it needs are added. Tiles can't leave this section."
+                hint="A spacer leaves a gap, and a break starts a new row. A taller break keeps the rows below it empty too. Drop a tile on any empty spot, even up to three rows below the last, and the breaks and spacers it needs are added. A break after the full-width tile shows beside it in edit mode; taller than the tile, it keeps the rows below empty. Tiles can't leave this section."
                 title="Spacers and Breaks"
               >
                 <span className="kitchen-sink-grid-header-actions">
@@ -581,7 +540,7 @@ const GridApp: FunctionComponent = () => {
                   {denseSwitch('layout')}
                 </span>
               </SectionHeader>
-              {cells.map((cell) => {
+              {cells.map((cell, place) => {
                 if (cell.kind === 'break') {
                   return (
                     <Grid.Break
@@ -626,7 +585,10 @@ const GridApp: FunctionComponent = () => {
                       resize(cell.name, size, details)
                     }
                   >
-                    <Tile label={cell.name} />
+                    <Tile
+                      label={cell.name}
+                      place={place}
+                    />
                   </Grid.Item>
                 );
               })}
@@ -650,7 +612,7 @@ const GridApp: FunctionComponent = () => {
                   {denseSwitch('garden')}
                 </span>
               </SectionHeader>
-              {garden.map(({ name, size }) => (
+              {garden.map(({ name, size }, place) => (
                 <Grid.Item
                   key={name}
                   dropName={name}
@@ -660,7 +622,10 @@ const GridApp: FunctionComponent = () => {
                     resizeInGarden(name, next, details)
                   }
                 >
-                  <Tile label={name} />
+                  <Tile
+                    label={name}
+                    place={place}
+                  />
                   <Grid.RemoveButton
                     onClick={() =>
                       setGarden((current) =>
@@ -702,7 +667,10 @@ const GridApp: FunctionComponent = () => {
                   key={index}
                   defaultSize={size}
                 >
-                  <Tile label={String(index + 1)} />
+                  <Tile
+                    label={String(index + 1)}
+                    place={index}
+                  />
                 </Grid.Item>
               ))}
             </Grid.Section>
@@ -711,17 +679,29 @@ const GridApp: FunctionComponent = () => {
                 hint="One tile in each size. They can't be moved or resized."
                 title="Every Size"
               />
-              {every.map((size) => (
+              {every.map((size, place) => (
                 <Grid.Item
                   key={size}
                   defaultSize={size}
                   supportedSizes={[size]}
                 >
-                  <Tile label={size} />
+                  <Tile
+                    label={size}
+                    place={place}
+                  />
                 </Grid.Item>
               ))}
             </Grid.Section>
           </Grid.Root>
+          {/* (Every feature at once, to try and to show: its own page.) */}
+          <List.Root className="kitchen-sink-grid-more">
+            <Rows>
+              <DrillRow
+                pageKey="grid/playground"
+                title="Grid Playground"
+              />
+            </Rows>
+          </List.Root>
           <Viewport.Padding edge="block-end" />
         </Page.Root>
       </Header.Root>

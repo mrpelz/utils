@@ -40,6 +40,7 @@ import { choicesPages } from './choices.js';
 import { contentPages } from './content.js';
 import { foundationsPages } from './foundations.js';
 import { gridPages } from './grid.js';
+import { gridPlaygroundPages } from './grid-playground.js';
 import { presentationPages } from './presentation.js';
 import {
   LayoutRootContext,
@@ -70,6 +71,7 @@ const pages: SinkPages = {
   ...presentationPages,
   ...structurePages,
   ...gridPages,
+  ...gridPlaygroundPages,
   ...viewportPages,
   ...statusPages,
 };

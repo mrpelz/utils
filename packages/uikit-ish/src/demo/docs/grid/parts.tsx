@@ -61,7 +61,7 @@ import {
 // part's in a group of its own. Most start in edit mode, where the part
 // does its work; Done and Edit toggle it.
 
-/** The living room's devices (the first four) and the kitchen's. */
+/** The living room's devices and the kitchen's. */
 const livingRoom = devices.filter(({ room }) => room === 'Living Room');
 const kitchen = devices.filter(({ room }) => room === 'Kitchen');
 
@@ -296,6 +296,7 @@ const HeaderPart: FunctionComponent = () => {
     isOpen: true,
     title: 'Grid.Header',
   });
+  const [editing, setEditing] = useState(false);
 
   const [partControls, partProps, partState] = usePartControls(
     useMemo(
@@ -303,8 +304,9 @@ const HeaderPart: FunctionComponent = () => {
         partPropMaps(
           {
             ...sharedParts,
+            ...buttonParts,
             'Grid.Header (others)': [],
-            'Grid.Root': [],
+            'Grid.Root': ['editing'],
             'Grid.Section': [],
           },
           addLog,
@@ -325,9 +327,11 @@ const HeaderPart: FunctionComponent = () => {
       title="Grid.Header"
     >
       <div className="grid-demo-content">
+        {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
+          editing={editing}
           style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
         >
           <Grid.Section {...partProps['Grid.Section']}>
@@ -654,6 +658,7 @@ const SpawnPart: FunctionComponent = () => {
     { emphasize: 'outline', external, isOpen: true, title: 'Grid.Spawn' },
   );
   const [added, setAdded] = useState<readonly Device[]>([]);
+  const [editing, setEditing] = useState(false);
 
   const [partControls, partProps, partState] = usePartControls(
     useMemo(
@@ -661,7 +666,8 @@ const SpawnPart: FunctionComponent = () => {
         partPropMaps(
           {
             ...sharedParts,
-            'Grid.Root': [],
+            ...buttonParts,
+            'Grid.Root': ['editing'],
           },
           addLog,
         ),
@@ -681,9 +687,11 @@ const SpawnPart: FunctionComponent = () => {
       title="Grid.Spawn"
     >
       <div className="grid-demo-content">
+        {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
+          editing={editing}
           style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
         >
           {[...livingRoom.slice(0, 2), ...added].map((device) =>
@@ -729,8 +737,8 @@ const ResizeHandlePart: FunctionComponent = () => {
       () =>
         partPropMaps(
           {
-            ...sharedParts,
             ...buttonParts,
+            'Grid.Item': sharedParts['Grid.Item'],
             'Grid.ResizeHandle (others)': [],
             'Grid.Root': ['editing'],
           },
@@ -1120,9 +1128,21 @@ const CreateReorderHandlePart: FunctionComponent = () => {
   const id = 'grid-parts-create-reorder-handle';
   const [log, addLog] = useLog();
   const [editing, setEditing] = useState(true);
-  const [cells, setCells] = useState<readonly Cell[]>(() =>
-    livingRoom.map((device) => ({ device, kind: 'device', name: device.name })),
-  );
+  // (A spacer and a break to start with: theirs to move, their props'.)
+  const [cells, setCells] = useState<readonly Cell[]>(() => {
+    const [first, ...rest] = livingRoom.map((device): Cell => ({
+      device,
+      kind: 'device',
+      name: device.name,
+    }));
+    return [
+      ...(first ? [first] : []),
+      { kind: 'spacer', name: 'Spacer 0', size: '1x1' },
+      ...rest.slice(0, 2),
+      { kind: 'break', name: 'Break 0', rows: 1 },
+      ...rest.slice(2),
+    ];
+  });
   // (New spacers' and breaks' names.)
   const made = useRef(0);
   const handle = Grid.useCreateReorderHandle({
@@ -1431,8 +1451,9 @@ export const GridParts: FunctionComponent = () => (
       </li>
       <li>
         In edit mode, a narrow end-of-line column follows the last column, and
-        the columns get narrower to make room. Breaks run into it, and
-        full-width tiles reach into it.
+        the columns get narrower to make room. Breaks run into it. A full-width
+        tile reaches into it only in the upper half of its first row, and a
+        break after it shows below that.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1590,8 +1611,11 @@ export const GridParts: FunctionComponent = () => (
         In edit mode it’s filled from where it starts to its row’s end and on
         into the end-of-line column, with a return sign at that end, and the
         rows it keeps empty below. With no room left in its row, it shows as a
-        narrow tile in the end-of-line column. After a full-width tile, it does
-        nothing and isn’t shown.
+        narrow tile in the end-of-line column. After a full-width tile, its rows
+        count from that tile’s first row. It shows in the end-of-line column
+        below the tile’s part of it, as many rows down as it’s tall. No taller
+        than the tile, it keeps nothing empty and has only its resize handle
+        there. Taller, it keeps the rows below the tile empty too.
       </li>
       <li>
         Its resize handle changes its rows. Growing it takes in the breaks next
@@ -1778,6 +1802,13 @@ export const GridParts: FunctionComponent = () => (
         <PartLink part="Grid.RemoveButton" /> on its top leading corner removes
         it. What’s in it can read it with <code>useGridArea</code>, as{' '}
         <PartLink part="useGridItem" /> reads the item.
+      </li>
+      <li>
+        When the tile fills its area, their corners meet and the tile’s controls
+        are the ones shown. Its resize handle resizes the tile first: shrinking
+        it opens room around it, and growing it grows the area along to the
+        smallest of its sizes that fits. A hold on the tile moves the whole
+        item, as it can’t move inside its area.
       </li>
       <li>It renders no element of its own.</li>
     </ul>

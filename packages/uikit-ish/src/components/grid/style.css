@@ -91,7 +91,7 @@
     padding-inline-end: var(--uikit-grid-strip, 0);
   }
 
-  .uikit-grid-item-body[data-size^='*'] {
+  .uikit-grid-item[data-grid-full] > .uikit-grid-item-body[data-size^='*'] {
     margin-inline-end: calc(-1 * var(--uikit-grid-strip, 0px));
   }
 
@@ -181,7 +181,8 @@
     );
     --uikit-grid-room-width: calc(
       var(--uikit-grid-body-columns, 1) * var(--uikit-grid-column-pitch) -
-        var(--uikit-grid-gap)
+        var(--uikit-grid-gap) + var(--uikit-grid-body-strip, 0) *
+        var(--uikit-grid-strip, 0px)
     );
     --uikit-grid-room-height: calc(
       var(--uikit-grid-body-rows, 1) * var(--uikit-grid-pitch) -
@@ -207,6 +208,9 @@
         0 2px,
       transparent 0 10px
     );
+
+    /* (A full width's: in its shape, see layout.ts.) */
+    clip-path: var(--uikit-grid-full-shape, none);
     content: '';
     inset: 0;
     mask-composite: add, add, add, add, exclude, add;
@@ -393,7 +397,7 @@
 
   /* A break (one to be, see edit.ts): one row in the grid, drawn as tall
      as its rows (over its fillers below, see layout.ts), unless after a
-     full row; not editing, not drawn (after a full row: none). */
+     full row; not editing, not drawn (keeping nothing empty: none). */
   .uikit-grid-break,
   .uikit-grid-break-placeholder {
     position: relative;
@@ -410,11 +414,6 @@
       --uikit-grid-break-drawn,
       var(--uikit-grid-break-rows, 1)
     );
-  }
-
-  /* (Right after a full width: nothing, see layout.ts.) */
-  .uikit-grid-root .uikit-grid-break[data-grid-break-hidden] {
-    display: none;
   }
 
   .uikit-grid-root:not([data-editing]) .uikit-grid-break {
@@ -547,8 +546,21 @@
     scale: -1 1;
   }
 
+  /* (After a full width (see layout.ts): in the half of its first row
+     below that one's part of the end-of-line column, its rows' head;
+     taking no room, its own box's top.) */
+  .uikit-grid-root[data-editing] .uikit-grid-break[data-grid-break-after-full] > .uikit-grid-break-sign {
+    inset-block-start: calc(
+      ((var(--uikit-grid-unit) - var(--uikit-grid-gap)) / 2 - 20px) / 2 +
+        var(--uikit-grid-break-head, 0px) - var(--uikit-grid-break-above, 0) *
+        (var(--uikit-grid-unit) + var(--uikit-grid-gap))
+    );
+  }
+
   /* Keeping nothing empty (after a full row, see layout.ts): in that row's
-     end-of-line column (see above), a unit tall, taking no room. */
+     end-of-line column (see above), a unit tall, taking no room; after a
+     full width, below its part of that column, as tall as its rows reach
+     (`--uikit-grid-break-none-height`). */
   .uikit-grid-root[data-editing] .uikit-grid-break[data-grid-break-none],
   .uikit-grid-root .uikit-grid-break-placeholder[data-grid-break-none] {
     /* (What's in it in its own box: nothing past it.) */
@@ -557,7 +569,7 @@
     position: absolute;
     z-index: 1;
     width: var(--uikit-grid-end, 0);
-    height: var(--uikit-grid-unit);
+    height: var(--uikit-grid-break-none-height, var(--uikit-grid-unit));
     border-radius: var(--uikit-grid-item-radius, 24px);
     inset-block-start: var(--uikit-grid-break-top, 0);
     inset-inline-end: 0;
@@ -692,6 +704,20 @@
     mask-image: var(--uikit-grid-merge-sign, linear-gradient(transparent 0 0));
   }
 
+
+  /* (A full width's, still one: its shape as it'd be (see main.tsx,
+     layout.ts), filled and edged by its mask, as a break's below.) */
+  .uikit-grid-root[data-editing] .uikit-grid-item[data-grid-resize-shaped]::after {
+    width: var(--uikit-grid-resize-width, 100%);
+    height: var(--uikit-grid-resize-height, 100%);
+    border: none;
+    border-radius: 0;
+    background-color: var(--color-ui-primary);
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    mask: var(--uikit-grid-resize-shape, none) 0 0 / 100% 100% no-repeat;
+    transition: none;
+  }
 
   /* (A break's: its shape as it'd be, through the end-of-line column (see
      main.tsx, layout.ts), filled and edged by its mask.) */
@@ -865,8 +891,13 @@
   }
 
   /* (Only in an end-of-line column: too narrow for it beside the remove
-     button's x.) */
-  .uikit-grid-break[data-grid-break-none] > .uikit-grid-move-sign {
+     button's x; after a full width, there too. Taking no room there, no
+     room for the x either: its resize handle only, its x back once it's
+     taller than that full width.) */
+  .uikit-grid-break:is([data-grid-break-none], [data-grid-break-after-full])
+    > .uikit-grid-move-sign,
+  .uikit-grid-break[data-grid-break-none][data-grid-break-after-full]
+    .uikit-grid-remove-button {
     display: none;
   }
 
@@ -894,8 +925,9 @@
   /* An area's handle and remove button: in the area's corners, past its
      tile's (see main.tsx), on the room around it: in the label's color
      (not the tile's), with their own backing, as a spacer's. With no room
-     around its tile, its handle's the only one there (its tile's own
-     hidden), and its remove button's hidden (its tile's there). */
+     around its tile (their corners the same): its tile's handle the one
+     there (resizing the tile first, see main.tsx; none: the area's), its
+     tile's remove button too; held, the area moves (see main.tsx). */
   .uikit-grid-resize-handle[data-grid-area-handle],
   .uikit-grid-remove-button[data-grid-area-button] {
     color: var(--uikit-grid-area-handle-color, var(--color-ui-label));
@@ -906,13 +938,48 @@
   }
 
   .uikit-grid-item:not([data-grid-room]):has(
-      [data-grid-area-handle]
+      > .uikit-grid-item-body .uikit-grid-resize-handle
     )
-    .uikit-grid-resize-handle:not([data-grid-area-handle]),
+    > .uikit-grid-item-slot
+    > .uikit-grid-resize-handle[data-grid-area-handle],
   .uikit-grid-item:not([data-grid-room])
     > .uikit-grid-item-slot
     > .uikit-grid-remove-button[data-grid-area-button] {
     display: none;
+  }
+
+  /* (Editing, what its tile shows in its shape (see layout.ts; not its
+     controls, nor its tile's resize outline).) */
+  .uikit-grid-root[data-editing] .uikit-grid-item[data-grid-full]
+    > .uikit-grid-item-body
+    > :not(
+      .uikit-grid-resize-handle,
+      .uikit-grid-remove-button,
+      .uikit-grid-area-button,
+      .uikit-grid-move-sign
+    ) {
+    clip-path: var(--uikit-grid-body-shape, none);
+  }
+
+  /* (Editing, shaped (see layout.ts): past its last column only its first
+     row's upper half, the rest a break's after it; its resize handles at
+     its last column's corner, where it ends once done. Its tile's trailing
+     controls in by as far as it runs past that column (a full-width tile,
+     one in a trailing corner of a full-width area; see layout.ts), its
+     ring only where it'd be cut away; it reads as full width within its
+     area.) */
+  .uikit-grid-root[data-editing] .uikit-grid-item[data-grid-full] {
+    > .uikit-grid-item-slot > .uikit-grid-resize-handle {
+      inset-inline-end: var(--uikit-grid-strip, 0);
+    }
+
+    > .uikit-grid-item-body .uikit-grid-resize-handle {
+      inset-inline-end: var(--uikit-grid-body-overhang, 0);
+    }
+
+    > .uikit-grid-item-body > .uikit-grid-move-sign {
+      inset-inline-end: var(--uikit-grid-body-overhang-top, 0);
+    }
   }
 
   /* Editing, a tile in its area's corner: inset off it (off the area's
@@ -955,7 +1022,7 @@
   }
 
   /* (A full width's, through the end-of-line column, see above.) */
-  .uikit-grid-item[data-grid-room][data-grid-placement='center']
+  .uikit-grid-item[data-grid-full][data-grid-room][data-grid-placement='center']
     > .uikit-grid-item-body[data-size^='*'] {
     width: calc(100% + var(--uikit-grid-strip, 0px));
   }

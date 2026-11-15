@@ -995,8 +995,9 @@ export const GlossaryPage: FunctionComponent = () => (
         <See term="Edit mode" />; the other columns get narrower to make room
         for it. Breaks run into it, and a break with no room left in its row
         shows there. A tile at a row’s end can be resized into it, which moves
-        it to the next row one column wider. A full-width tile reaches into it,
-        unlike a tile exactly as wide as the columns.
+        it to the next row one column wider. A full-width tile reaches into it
+        in the upper half of its first row, unlike a tile exactly as wide as the
+        columns, and a break after it shows below that.
       </Term>
     </dl>
 

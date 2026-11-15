@@ -394,10 +394,12 @@ export const GridOverview: FunctionComponent = () => (
         there again.
       </li>
       <li>
-        A full-width tile reaches into that column, unlike a tile exactly as
-        wide as the columns. A tile at a row’s start that supports the full
-        width becomes full width when resized into it. A break after a
-        full-width tile does nothing, and leaving edit mode removes it.
+        A full-width tile reaches into that column in the upper half of its
+        first row, unlike a tile exactly as wide as the columns. A tile at a
+        row’s start that supports the full width becomes full width when resized
+        into it. A break after a full-width tile shows below that half, as many
+        rows down as it’s tall. Only a break taller than the tile changes the
+        layout: it keeps the rows below the tile empty.
       </li>
       <li>
         An item can take more room than its tile shows: a{' '}

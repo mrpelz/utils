@@ -10,8 +10,10 @@ export type Device = {
 };
 
 export const devices: readonly Device[] = [
-  { name: 'Now Playing', room: 'Living Room', size: '*x1' },
+  // (The lamp alone in its row, the full width after it: a gap a later
+  // tile fills when the grid's dense.)
   { name: 'Lamp', room: 'Living Room', size: '1x1' },
+  { name: 'Now Playing', room: 'Living Room', size: '*x1' },
   { name: 'Thermostat', room: 'Living Room', size: '2x2' },
   { name: 'Blinds', room: 'Living Room', size: '1x1' },
   { name: 'Speaker', room: 'Living Room', size: '2x1' },

@@ -38,6 +38,7 @@ import {
 } from './handle.js';
 import {
   breakOutlineOf,
+  fullOutlineOf,
   layoutOf,
   mergedBy,
   type Metrics,
@@ -747,23 +748,29 @@ const useCell = ({
 
   // (Its area first, fitted to the columns; then its size, fitted to the
   // area; the area at least as big as what it shows.)
+  // (No sizes given: any is supported, fitted as it is, not snapped.)
   const free = effectiveSize(requested, sorted, columns, {
+    isOpen: supportedSizes === undefined,
     rows: maxTileRows,
   });
   const area =
     requestedArea === undefined
       ? undefined
       : effectiveSize(requestedArea, sortedAreas, columns, {
+          isOpen: supportedAreas === undefined,
           rows: maxTileRows,
         }).size;
   const [areaColumns, areaRows] = area ? spanOf(area, columns) : [0, 0];
+  // (A full width in an area that isn't one: as wide as the area.)
+  const sizeGrid = area && !isFull(area) ? areaColumns : columns;
   const { isFitted, size } = area
     ? effectiveSize(free.size, sorted, areaColumns, {
-        gridColumns: columns,
+        gridColumns: sizeGrid,
+        isOpen: supportedSizes === undefined,
         rows: areaRows,
       })
     : free;
-  const [sizeColumns, sizeRows] = spanOf(size, columns);
+  const [sizeColumns, sizeRows] = spanOf(size, sizeGrid);
   const layoutColumns = Math.max(areaColumns, sizeColumns);
   const layoutRows = Math.max(areaRows, sizeRows);
   const isFullWidth = isFull(area ?? size);
@@ -869,6 +876,9 @@ const useCell = ({
       // (Trailing in a full-width area: off its end-of-line column's end.)
       '--uikit-grid-inset-strip': String(stripShare),
       '--uikit-grid-inset-y': String(insetY),
+      // (A full width in a full-width area: on through its end-of-line
+      // column, its hatch's cutout too.)
+      '--uikit-grid-body-strip': isFull(size) && isFullWidth ? '1' : '0',
     },
     // (Hatched while editing: room around its tile.)
     hasRoom: layout !== size,
@@ -1458,6 +1468,8 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     });
 
     const body = useRef<HTMLDivElement>(null);
+    // (Filling its area: nowhere to go in it; held, its area moves (the
+    // item, its cell), its ring the area's, see the CSS.)
     const isPlaceable = state.editing && state.movable && hasRoom;
     const onBodyKeyDown = usePlacing(ref, body, isPlaceable, {
       placement: state.placement,
@@ -1617,6 +1629,7 @@ const showResize = (
   if (!size) {
     delete cell.dataset.gridResizing;
     delete cell.dataset.gridResizeFull;
+    delete cell.dataset.gridResizeShaped;
     cell.style.removeProperty('--uikit-grid-resize-columns');
     cell.style.removeProperty('--uikit-grid-resize-rows');
     cell.style.removeProperty('--uikit-grid-resize-x');
@@ -1648,6 +1661,26 @@ const showResize = (
     cell.style.setProperty(
       '--uikit-grid-resize-width',
       `${String(outline.width)}px`,
+    );
+    return;
+  }
+  // (A full width's, still one: its shape as it'd be (see layout.ts).)
+  const full =
+    cell.dataset.gridPart === 'item' &&
+    Object.hasOwn(cell.dataset, 'gridFull') &&
+    isFull(size)
+      ? fullOutlineOf(cell, rows)
+      : undefined;
+  cell.toggleAttribute('data-grid-resize-shaped', full !== undefined);
+  if (full) {
+    cell.style.setProperty(
+      '--uikit-grid-resize-height',
+      `${String(full.height)}px`,
+    );
+    cell.style.setProperty('--uikit-grid-resize-shape', full.mask);
+    cell.style.setProperty(
+      '--uikit-grid-resize-width',
+      `${String(full.width)}px`,
     );
     return;
   }
@@ -2082,32 +2115,71 @@ const swallowClick = (pointerType: string) => {
 };
 
 /**
+ * A tile filling its area resized (see `resizeTarget`): to a size, and
+ * its area grown along if the size's past it (the smallest supported area
+ * it fits).
+ */
+const growingArea =
+  (
+    item: CellState,
+    columns: number,
+    [areaColumns, areaRows]: readonly [number, number],
+  ) =>
+  (next: GridSize, details?: GridSizeChangeDetails) => {
+    item.requestSize(next, details);
+    const [c, r] = spanOf(next, columns);
+    if (c <= areaColumns && r <= areaRows) return;
+    const grown = item.supportedAreas.find((each) => {
+      const [ac, ar] = spanOf(each, columns);
+      return ac >= c && ar >= r;
+    });
+    if (grown) item.requestArea(grown, details);
+  };
+
+/**
  * What a resize handle resizes (see `ResizeHandle`): its item's area, or
  * its size; within an area of its own, bounded by it (outlined on its
  * tile, changing no layout). Its sizes to go to: those within its bounds
- * (the columns, the grid's `maxTileRows`; an area's).
+ * (the columns, the grid's `maxTileRows`; an area's). A tile filling its
+ * area (its handle the one shown there, see the CSS): the tile resized
+ * first, grown past the area with it (the smallest supported area its
+ * size fits), shrunk alone (room opening around it, the area's handle
+ * shown again).
  */
 const resizeTarget = (
   item: CellState | undefined,
   isAreaHandle: boolean,
   { columns, maxTileRows }: { columns: number; maxTileRows: number },
 ) => {
-  const isBounded = !isAreaHandle && item?.hasArea === true;
-  const [areaColumns, areaRows] = item ? spanOf(item.area, columns) : [0, 0];
-  const most: readonly [number, number] = isBounded
-    ? [areaColumns, areaRows]
-    : [columns, maxTileRows];
+  if (!item) {
+    return {
+      isBounded: false,
+      most: [columns, maxTileRows] as const,
+      request: undefined,
+      resized: undefined,
+      sizes: [],
+    };
+  }
+  const isBounded = !isAreaHandle && item.hasArea;
+  const [areaColumns, areaRows] = spanOf(item.area, columns);
+  const [sizeColumns, sizeRows] = spanOf(item.size, columns);
+  const isFilling =
+    isBounded && sizeColumns === areaColumns && sizeRows === areaRows;
+  const most: readonly [number, number] =
+    isBounded && !isFilling ? [areaColumns, areaRows] : [columns, maxTileRows];
   const sizes = (
-    (isAreaHandle ? item?.supportedAreas : item?.supportedSizes) ?? []
+    isAreaHandle ? item.supportedAreas : item.supportedSizes
   ).filter((size) => {
     const [c, r] = spanOf(size, columns);
     return c <= most[0] && r <= most[1];
   });
+  let request = isAreaHandle ? item.requestArea : item.requestSize;
+  if (isFilling) request = growingArea(item, columns, [areaColumns, areaRows]);
   return {
     isBounded,
     most,
-    request: isAreaHandle ? item?.requestArea : item?.requestSize,
-    resized: isAreaHandle ? item?.area : item?.size,
+    request,
+    resized: isAreaHandle ? item.area : item.size,
     sizes,
   };
 };

@@ -271,7 +271,7 @@ const snapped = (
 
 /**
  * A requested size, effective: snapped to the supported ones (see
- * `snapped`); wider than the columns (or taller than `rows`, within an
+ * `snapped`; any size supported (`isOpen`, no list given): as it is); wider than the columns (or taller than `rows`, within an
  * area), the widest supported that fits (the nearest rows first, then the
  * smaller), fitted; none fitting, the narrowest. A full width's: the
  * grid's `columns`.
@@ -282,15 +282,16 @@ export const effectiveSize = (
   columns: number,
   {
     gridColumns = columns,
+    isOpen = false,
     rows: rowsMost = Number.POSITIVE_INFINITY,
-  }: { gridColumns?: number; rows?: number } = {},
+  }: { gridColumns?: number; isOpen?: boolean; rows?: number } = {},
 ): { isFitted: boolean; size: GridSize } => {
   const sorted = sortSizes(
     supported.length > 0
       ? supported
       : sizesUpTo(gridColumns, Number.isFinite(rowsMost) ? rowsMost : 3),
   );
-  const size = snapped(requested, sorted, gridColumns);
+  const size = isOpen ? requested : snapped(requested, sorted, gridColumns);
   const fits = (each: GridSize) => {
     const [c, r] = spanOf(each, gridColumns);
     return c <= columns && r <= rowsMost;
