@@ -9,6 +9,7 @@ import {
   type GridSize,
   useGridItem,
 } from '../../../components/index.js';
+import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
 import {
@@ -58,6 +59,70 @@ import {
   propOptionsRootEditing,
   propOptionsSection,
 } from './props.js';
+
+/* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
+const useCreateReorderHandleCode = `import { Grid } from '@mrpelz/uikit-ish';
+import { useState } from 'react';
+
+export const Home = ({ editing }: { editing: boolean }) => {
+  const [tiles, setTiles] = useState(['Lamp', 'Lock', 'Fan']);
+  // Made once, kept for the component's lifetime; its options always
+  // the latest render's.
+  const handle = Grid.useCreateReorderHandle({
+    onReorder: (change) =>
+      setTiles((current) => Grid.reorder(current, change, (name) => name)),
+  });
+
+  return (
+    <Grid.Root
+      editing={editing}
+      reorderHandle={handle}
+    >
+      {tiles.map((name) => (
+        <Grid.Item
+          key={name}
+          dropName={name}
+          reorderHandle={handle}
+        >
+          {name}
+        </Grid.Item>
+      ))}
+    </Grid.Root>
+  );
+};`;
+
+const useGridAreaCode = `import { Grid, useGridArea } from '@mrpelz/uikit-ish';
+
+// Inside the item: its area's placement, and moving its tile.
+const Clock = () => {
+  const area = useGridArea();
+  const isLeading = area?.placement === 'top-leading';
+
+  return (
+    <button
+      type="button"
+      onClick={() =>
+        area?.requestPlacement(isLeading ? 'top-trailing' : 'top-leading')
+      }
+    >
+      Clock ({area?.placement ?? 'no area'})
+    </button>
+  );
+};
+
+export const Home = ({ editing }: { editing: boolean }) => (
+  <Grid.Root editing={editing}>
+    <Grid.Item defaultSize="1x1">
+      <Clock />
+      <Grid.Area
+        movable
+        defaultPlacement="top-leading"
+        defaultSize="3x2"
+      />
+    </Grid.Item>
+  </Grid.Root>
+);`;
+/* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 // Each part's view: a few of a home's devices as tiles (see content.ts),
 // the part's own props on one of them (open and outlined), every other
@@ -191,7 +256,7 @@ const RootPart: FunctionComponent = () => {
           key={defaultsKey(props, ...Object.values(partProps))}
           {...props}
           reorderHandle={handle}
-          style={{ ...gridSigns(), ...props.style }}
+          style={gridSigns(props.style)}
         >
           {order.map((device) => deviceItem(device, partProps, { handle }))}
         </Grid.Root>
@@ -255,7 +320,7 @@ const SectionPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           <Grid.Section
             key={elementKey}
@@ -335,7 +400,7 @@ const HeaderPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           <Grid.Section {...partProps['Grid.Section']}>
             <Grid.Header {...props}>
@@ -408,7 +473,7 @@ const DropGroupPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           <Grid.Section {...partProps['Grid.Section']}>
             <Grid.DropGroup
@@ -499,7 +564,7 @@ const ItemPart: FunctionComponent = () => {
           {...partProps['Grid.Root']}
           editing={editing}
           reorderHandle={handle}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {order.map((device) =>
             device.name === 'Thermostat' ? (
@@ -567,7 +632,7 @@ const SpacerPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {deviceItem(besidePart, partProps)}
           {isShown ? (
@@ -635,7 +700,7 @@ const BreakPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {deviceItem(besidePart, partProps)}
           <Grid.Break
@@ -695,7 +760,7 @@ const SpawnPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {[...livingRoom.slice(0, 2), ...added].map((device) =>
             deviceItem(device, partProps),
@@ -772,7 +837,7 @@ const ResizeHandlePart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {livingRoom.map((device) =>
             device.name === 'Thermostat' ? (
@@ -850,7 +915,7 @@ const CornerButtonPart: FunctionComponent = () => {
         <Grid.Root
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {livingRoom.map((device) =>
             device.name === 'Lamp' ? (
@@ -950,7 +1015,7 @@ const RemoveButtonPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {shown.map((device) =>
             device.name === 'Lamp' ? (
@@ -1040,7 +1105,7 @@ const AreaPart: FunctionComponent = () => {
           key={defaultsKey(props, ...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {livingRoom.map((device) =>
             device.name === 'Lamp' ? (
@@ -1147,7 +1212,7 @@ const AreaButtonPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {livingRoom.map((device) =>
             device.name === 'Lamp' ? (
@@ -1302,7 +1367,7 @@ const CreateReorderHandlePart: FunctionComponent = () => {
           {...partProps['Grid.Root']}
           editing={editing}
           reorderHandle={handle}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {cells.map((cell) => {
             if (cell.kind === 'device') {
@@ -1387,7 +1452,7 @@ const UseGridItemPart: FunctionComponent = () => {
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
           editing={editing}
-          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+          style={gridSigns(partProps['Grid.Root']?.style)}
         >
           {devices.map(({ name, size }) => (
             <Grid.Item
@@ -1501,10 +1566,14 @@ export const GridParts: FunctionComponent = () => (
       <li className="demo-tree-context">
         <span>The app’s code: </span>
         <PartLink part="Grid.createReorderHandle" />
-        <span>, </span>
+        <span> (in a component, </span>
+        <PartLink part="Grid.useCreateReorderHandle" />
+        <span>), </span>
         <PartLink part="Grid.reorder" />
         <span>, and in what an item holds, </span>
         <PartLink part="useGridItem" />
+        <span> and </span>
+        <PartLink part="useGridArea" />
       </li>
     </ul>
 
@@ -1716,7 +1785,10 @@ export const GridParts: FunctionComponent = () => (
       </li>
       <li>
         Its resize handle changes its rows. Growing it takes in the breaks next
-        to it.
+        to it. A spacer or a break is only taken in, and marked while it would
+        be, if it has a <code>dropName</code> (how the app is told) and a{' '}
+        <PartLink part="Grid.RemoveButton" />. Otherwise it moves along as tiles
+        do.
       </li>
       <li>
         Renders a <code>div</code>, hidden from assistive technology outside
@@ -1972,7 +2044,7 @@ export const GridParts: FunctionComponent = () => (
         Its controls go in it: a <PartLink part="Grid.ResizeHandle" /> resizes
         the area from its bottom trailing corner, a{' '}
         <PartLink part="Grid.RemoveButton" /> on its top leading corner removes
-        it. What’s in it can read it with <code>useGridArea</code>, as{' '}
+        it. What’s in it can read it with <PartLink part="useGridArea" />, as{' '}
         <PartLink part="useGridItem" /> reads the item.
       </li>
       <li>
@@ -1987,10 +2059,6 @@ export const GridParts: FunctionComponent = () => (
     <AreaPart />
     <h3>Props</h3>
     <PropsTable rows={gridAreaRows} />
-    <h3>
-      <code>useGridArea</code> returns
-    </h3>
-    <PropsTable rows={gridUseGridAreaRows} />
 
     <Heading
       id="grid-createreorderhandle"
@@ -2003,11 +2071,8 @@ export const GridParts: FunctionComponent = () => (
         A handle the app gives to tiles (their <code>reorderHandle</code>) and
         to where they can be dropped (<PartLink part="Grid.Root" />,{' '}
         <PartLink part="Grid.Section" />, <PartLink part="Grid.DropGroup" />
-        ). In a component, use{' '}
-        <PartLink part="Grid.createReorderHandle">
-          Grid.useCreateReorderHandle
-        </PartLink>
-        , which makes it once and keeps its options current.
+        ). In a component, use <PartLink part="Grid.useCreateReorderHandle" />,
+        which makes it once and keeps its options current.
       </li>
       <li>
         With <code>spacers</code> and <code>breaks</code>, a tile lands right
@@ -2018,6 +2083,23 @@ export const GridParts: FunctionComponent = () => (
     </ul>
     <CreateReorderHandlePart />
     <h3>Options</h3>
+    <PropsTable rows={gridCreateReorderHandleRows} />
+
+    <Heading
+      id="grid-usecreatereorderhandle"
+      level={2}
+    >
+      <code>Grid.useCreateReorderHandle</code>
+    </Heading>
+    <ul>
+      <li>
+        <PartLink part="Grid.createReorderHandle" /> in a component: made once,
+        for the component’s lifetime, always with the latest options. Every view
+        on this page uses it.
+      </li>
+    </ul>
+    <CodeView code={useCreateReorderHandleCode} />
+    <h3>Options, Returns</h3>
     <PropsTable rows={gridCreateReorderHandleRows} />
 
     <Heading
@@ -2061,6 +2143,28 @@ export const GridParts: FunctionComponent = () => (
     <UseGridItemPart />
     <h3>Returns</h3>
     <PropsTable rows={gridUseGridItemRows} />
+
+    <Heading
+      id="usegridarea"
+      level={2}
+    >
+      <code>useGridArea</code>
+    </Heading>
+    <ul>
+      <li>
+        For what’s inside an item with a <PartLink part="Grid.Area" />: the
+        area’s size as shown and as asked for, where its tile sits, and asking
+        for another size or placement. Without an area, or outside a grid, it’s{' '}
+        <code>undefined</code>.
+      </li>
+      <li>
+        Below, a clock in a 3x2 area says where it sits, and moves to the other
+        side when pressed. In edit mode, its crosshairs move it too.
+      </li>
+    </ul>
+    <CodeView code={useGridAreaCode} />
+    <h3>Returns</h3>
+    <PropsTable rows={gridUseGridAreaRows} />
   </>
 );
 

@@ -14,7 +14,6 @@ import {
   type SettingsValues,
   Symbol,
   Toolbar,
-  useSizeClass,
   type Viewport,
 } from '../../components/index.js';
 import {
@@ -88,6 +87,13 @@ export const usePush = (): ((key: string) => void) => useContext(PushContext);
 export const PopContext = createContext<() => void>(() => undefined);
 
 export const usePop = (): (() => void) => useContext(PopContext);
+
+/**
+ * A bare page's back label (see `isBare`): the page below it in the stack,
+ * or `undefined` at the stack's root (nothing to go back to). Its own bar's
+ * back button reads it (see `BackButton`).
+ */
+export const BackContext = createContext<string | undefined>(undefined);
 
 /**
  * The layout's root, beside the sidebar (regular; else `null`): for the
@@ -265,25 +271,26 @@ export const ShowSidebarButton: FunctionComponent = () => {
 
 /**
  * The leading buttons of a bare page's own top bar (see `isBare`): the
- * sidebar's (see `ShowSidebarButton`), its back button (compact only: its
- * stack's root otherwise, nothing to go back to; see main.tsx).
+ * sidebar's (see `ShowSidebarButton`), its back button unless it's its
+ * stack's root (see `BackContext`): compact, the index below a component's
+ * page; regular, a page pushed from one (e.g. the grid's playground).
  */
 export const BackButton: FunctionComponent = () => {
-  const isCompact = useSizeClass() === 'compact';
+  const back = useContext(BackContext);
 
   return (
     <>
       <ShowSidebarButton />
-      {isCompact ? (
+      {back === undefined ? null : (
         <Navigation.Back
-          aria-label="Back"
+          aria-label={back}
           render={<Toolbar.Button shape="circle" />}
         >
           <Button.Icon>
             <Symbol icon={sfChevronBackward} />
           </Button.Icon>
         </Navigation.Back>
-      ) : null}
+      )}
     </>
   );
 };

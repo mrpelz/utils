@@ -43,7 +43,7 @@ export type {
 
 // A contextual menu: a trigger and its
 // `Menu`, below it. Opening, what the menu is about is lifted with it, above
-// a blurred `Backdrop`: a `Preview` of it (e.g. a photo to share), or the
+// a dimmed `Backdrop`: a `Preview` of it (e.g. a photo to share), or the
 // trigger itself.
 //
 // The preview and the menu are one popup (its `Positioner`): a stack, its
@@ -254,7 +254,7 @@ const Portal = forwardRef<HTMLDivElement, ContextualMenuPortalProps>(
   ),
 );
 
-// The page blurred and dimmed behind the lifted trigger and the menu.
+// The page dimmed behind the lifted trigger and the menu.
 // (Registered: cut out where the lifted trigger is, see `Trigger`.)
 const Backdrop = forwardRef<
   HTMLDivElement,

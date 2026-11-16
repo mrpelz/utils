@@ -6,6 +6,7 @@ import { FunctionComponent, useEffect, useRef } from 'react';
 import {
   useAnchorSize,
   useSettings,
+  useSizeClass,
   useVisualViewport,
 } from '../../../components/index.js';
 import { hideFromCode } from '../../tooling/frame/render-code.js';
@@ -15,7 +16,8 @@ import { hideFromCode } from '../../tooling/frame/render-code.js';
 // over. Following the island (`isFollowing`), its camera
 // kept clear of it (its padding: the bottom anchor's size, as the island
 // settles); its controls kept clear of it and of the safe area insets always (by
-// the content layer's `--uikit-viewport-anchor-block-end`, see style.css).
+// the content layer's `--uikit-viewport-anchor-block-end`, see style.css;
+// regular, only those at its inline start: the island a panel there).
 // Loaded as it's shown (client only); its worker the file it ships, as an
 // asset (its own lookup, by its module's URL, finds none in a bundle).
 
@@ -47,6 +49,9 @@ export const MapView: FunctionComponent<{
   const bottom = useAnchorSize('block-end');
   const { keyboardInset } = useVisualViewport();
   const { colorScheme } = useSettings();
+  // (Regular: the island a panel at the inline start, as the island's own
+  // size class; the controls at the other end not under it, see style.css.)
+  const isRegular = useSizeClass() === 'regular';
 
   useEffect(() => {
     let isGone = false;
@@ -106,6 +111,7 @@ export const MapView: FunctionComponent<{
     <div
       className="island-demo-map"
       data-color-scheme={colorScheme}
+      data-regular={isRegular ? '' : undefined}
     >
       <div ref={ref} />
     </div>

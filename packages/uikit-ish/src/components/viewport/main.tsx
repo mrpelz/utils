@@ -33,7 +33,7 @@ import {
 } from './edge.js';
 import { EdgeEffects } from './edge-effect.js';
 import { trackFocusScroll } from './focus-scroll.js';
-import { fixedBottom } from './input.js';
+import { fixedBottom, hasKeyboardFocus } from './input.js';
 import { isIos27, ViewportInsetContext } from './ios27.js';
 import {
   createAnchorHandle,
@@ -308,8 +308,12 @@ const readVisual = (
   const height = viewport?.height ?? window.innerHeight;
   const top = viewport?.offsetTop ?? 0;
   // (Against the fixed layers' box: not `innerHeight`, which iOS may
-  // shrink to the visual viewport, see `fixedBottom`.)
-  const keyboardInset = Math.max(0, Math.round(fixedBottom() - height - top));
+  // shrink to the visual viewport, see `fixedBottom`. None without
+  // something it's for focused: e.g. resumed, the visual viewport read as
+  // shrunk a while, see `hasKeyboardFocus`.)
+  const keyboardInset = hasKeyboardFocus()
+    ? Math.max(0, Math.round(fixedBottom() - height - top))
+    : 0;
   if (!screen) {
     return {
       height,
@@ -583,6 +587,10 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     viewport?.addEventListener('resize', onViewport);
     viewport?.addEventListener('scroll', onViewport);
     window.addEventListener('resize', onViewport);
+    // (Focus coming or going: the keyboard's only with it, see
+    // `readVisual`.)
+    document.addEventListener('focusin', onViewport);
+    document.addEventListener('focusout', onViewport);
     // A screen moves with its page (any scroller's).
     if (element) {
       addEventListener('scroll', update, { capture: true, passive: true });
@@ -595,6 +603,8 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       viewport?.removeEventListener('resize', onViewport);
       viewport?.removeEventListener('scroll', onViewport);
       window.removeEventListener('resize', onViewport);
+      document.removeEventListener('focusin', onViewport);
+      document.removeEventListener('focusout', onViewport);
       if (!element) return;
       removeEventListener('scroll', update, { capture: true });
       box?.remove();
@@ -868,8 +878,21 @@ const regularQuery = '(width >= 768px)';
 // size class held (no remount of a layout by it), until one matching it
 // in another orientation than the one that started the hold (a real
 // rotation turns it), the window resized back to its size then, or the
-// page shown anew (read anew). No timer.
+// page shown anew (read anew). No timer. Only on iPadOS (see `isIpadOs`):
+// elsewhere a window's shape contradicts the screen's orientation without
+// any snapshot (e.g. desktop Chrome, reporting a touch point and a portrait
+// screen, its window narrowed), never resized back by itself: held for
+// good.
 let isSnapshot = false;
+
+/**
+ * Whether it's iPadOS (any of its browsers: WebKit's): its own
+ * `navigator.standalone`, and a multi-touch screen (an iPhone's never
+ * changes size class; a Mac's has no touch points).
+ */
+const isIpadOs = () =>
+  typeof (navigator as { standalone?: unknown }).standalone === 'boolean' &&
+  navigator.maxTouchPoints > 1;
 let heldSizeClass: SizeClass | undefined;
 /** The hold's start: its orientation, the window's size before it. */
 let heldFrom:
@@ -895,6 +918,7 @@ const release = () => {
 
 if (typeof window !== 'undefined') {
   window.addEventListener('orientationchange', () => {
+    if (!isIpadOs()) return;
     const isPortrait = isScreenPortrait();
     if (!isOrientationTheWindows()) {
       if (!isSnapshot) {

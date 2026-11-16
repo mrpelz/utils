@@ -44,6 +44,7 @@ import { gridPages } from './grid.js';
 import { gridPlaygroundPages } from './grid-playground.js';
 import { presentationPages } from './presentation.js';
 import {
+  BackContext,
   LayoutRootContext,
   PopContext,
   PushContext,
@@ -282,7 +283,13 @@ const StackPage: FunctionComponent<{
   const Anchors = page?.Anchors;
 
   // (Bare: its content its own app, see `isBare`.)
-  if (page?.isBare) return <page.Content />;
+  if (page?.isBare) {
+    return (
+      <BackContext.Provider value={back}>
+        <page.Content />
+      </BackContext.Provider>
+    );
+  }
 
   return (
     <Header.Root>

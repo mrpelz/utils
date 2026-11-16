@@ -31,21 +31,15 @@ import {
 import { sfChevronBackward } from '../../tooling/icons.js';
 import { partPropMaps } from '../part-options.js';
 import {
-  BlindsCard,
-  CameraCard,
   type CardTile,
-  DimmerCard,
-  FanCard,
-  HeatingCard,
-  HumidityCard,
-  LampCard,
+  lampCard,
   type Lights,
-  LightsCard,
+  lightsCard,
   lightsInitial,
-  LockCard,
-  TemperatureCard,
+  lockCard,
+  temperatureCard,
 } from './content.js';
-import { CardsStage, stageParts } from './main.js';
+import { cardsStage, stageParts, useCardsStage } from './main.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
@@ -434,12 +428,13 @@ const aloneCode = `// No grid: as large as its box, never in edit mode.
 
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
-/** A phone with some cards in a grid (see `CardsStage`). */
+/** A phone with some cards in a grid (see `cardsStage`). */
 const StageView: FunctionComponent<{
   id: string;
   tiles: readonly CardTile[];
 }> = ({ id, tiles }) => {
   const [log, addLog] = useLog();
+  const stage = useCardsStage(addLog, tiles);
   // (Room around a tile: its area's controls too.)
   const hasArea = tiles.some(({ area }) => area !== undefined);
   const [partControls, partProps, partState] = usePartControls(
@@ -478,11 +473,7 @@ const StageView: FunctionComponent<{
       state={[partState]}
       title="Card"
     >
-      <CardsStage
-        addLog={addLog}
-        partProps={partProps}
-        tiles={tiles}
-      />
+      {cardsStage(stage, partProps)}
     </Component>
   );
 };
@@ -492,13 +483,13 @@ const SwitchView: FunctionComponent = () => (
     id="card-composition-switch"
     tiles={[
       {
-        Card: LampCard,
+        kind: 'lamp',
         name: 'Floor Lamp',
         size: '2x1',
         sizes: cardSizes.binaryControl,
       },
       {
-        Card: FanCard,
+        kind: 'fan',
         name: 'Ceiling Fan',
         size: '1x1',
         sizes: cardSizes.binaryControl,
@@ -512,13 +503,13 @@ const SliderView: FunctionComponent = () => (
     id="card-composition-slider"
     tiles={[
       {
-        Card: DimmerCard,
+        kind: 'dimmer',
         name: 'Dimmer',
         size: '2x1',
         sizes: cardSizes.numericalControl,
       },
       {
-        Card: BlindsCard,
+        kind: 'blinds',
         name: 'Blinds',
         size: '1x2',
         sizes: cardSizes.numericalControl,
@@ -532,19 +523,19 @@ const DisplayView: FunctionComponent = () => (
     id="card-composition-display"
     tiles={[
       {
-        Card: LockCard,
+        kind: 'lock',
         name: 'Front Door',
         size: '2x1',
         sizes: cardSizes.binaryDisplay,
       },
       {
-        Card: HumidityCard,
+        kind: 'humidity',
         name: 'Humidity',
         size: '1x1',
         sizes: cardSizes.numericalDisplay,
       },
       {
-        Card: TemperatureCard,
+        kind: 'temperature',
         name: 'Temperature',
         size: '2x2',
         sizes: cardSizes.numericalDisplay,
@@ -558,26 +549,26 @@ const ExpandView: FunctionComponent = () => (
     id="card-composition-expand"
     tiles={[
       {
-        Card: HeatingCard,
+        kind: 'heating',
         expandedSize: '2x2',
         name: 'Heating',
         size: '1x1',
         sizes: cardSizes.numericalDisplay,
       },
       {
-        Card: HumidityCard,
+        kind: 'humidity',
         name: 'Humidity',
         size: '1x1',
         sizes: cardSizes.numericalDisplay,
       },
       {
-        Card: LampCard,
+        kind: 'lamp',
         name: 'Floor Lamp',
         size: '2x1',
         sizes: cardSizes.binaryControl,
       },
       {
-        Card: LockCard,
+        kind: 'lock',
         name: 'Front Door',
         size: '1x1',
         sizes: cardSizes.binaryDisplay,
@@ -702,7 +693,13 @@ const DrillView: FunctionComponent = () => {
                 {key === 'home' ? (
                   <Page.Root
                     {...partProps['Page.Root']}
-                    className="card-demo-page"
+                    // (With its control's class, if any.)
+                    className={[
+                      'card-demo-page',
+                      partProps['Page.Root']?.className,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
                   >
                     <Viewport.Padding
                       {...partProps['Viewport.Padding']}
@@ -715,21 +712,21 @@ const DrillView: FunctionComponent = () => {
                           size="2x1"
                           supportedSizes={cardSizes.binaryDisplay}
                         >
-                          <LightsCard
-                            lights={lights}
-                            parts={parts}
-                            onDrillIn={() => {
+                          {lightsCard({
+                            lights,
+                            onDrillIn: () => {
                               addLog('push: lights');
                               setKeys(['home', 'lights']);
-                            }}
-                          />
+                            },
+                            parts,
+                          })}
                         </Grid.Item>
                         <Grid.Item
                           {...partProps['Grid.Item']}
                           size="1x1"
                           supportedSizes={cardSizes.binaryDisplay}
                         >
-                          <LockCard parts={parts} />
+                          {lockCard({ parts })}
                         </Grid.Item>
                       </Grid.Root>
                     </div>
@@ -801,26 +798,26 @@ const OverlayView: FunctionComponent = () => (
     id="card-composition-overlay"
     tiles={[
       {
-        Card: CameraCard,
+        kind: 'camera',
         name: 'Front Door Camera',
         openSize: '4x3',
         size: '2x1',
         sizes: cardSizes.binaryDisplay,
       },
       {
-        Card: LockCard,
+        kind: 'lock',
         name: 'Front Door',
         size: '1x1',
         sizes: cardSizes.binaryDisplay,
       },
       {
-        Card: LampCard,
+        kind: 'lamp',
         name: 'Floor Lamp',
         size: '2x1',
         sizes: cardSizes.binaryControl,
       },
       {
-        Card: HumidityCard,
+        kind: 'humidity',
         name: 'Humidity',
         size: '1x1',
         sizes: cardSizes.numericalDisplay,
@@ -835,21 +832,21 @@ const SizeView: FunctionComponent = () => (
     tiles={[
       {
         area: '3x2',
-        Card: HeatingCard,
+        kind: 'heating',
         expandedSize: '2x2',
         name: 'Heating',
         size: '1x1',
         sizes: cardSizes.numericalDisplay,
       },
       {
-        Card: CameraCard,
+        kind: 'camera',
         name: 'Front Door Camera',
         openSize: '4x3',
         size: '2x1',
         sizes: cardSizes.binaryDisplay,
       },
       {
-        Card: LockCard,
+        kind: 'lock',
         name: 'Front Door',
         size: '1x1',
         sizes: cardSizes.binaryDisplay,
@@ -862,6 +859,7 @@ const SizeView: FunctionComponent = () => (
 const AloneView: FunctionComponent = () => {
   const id = 'card-composition-alone';
   const [log, addLog] = useLog();
+  const [isDeskLampOn, setIsDeskLampOn] = useState(true);
   const [partControls, partProps, partState] = usePartControls(
     useMemo(
       () =>
@@ -901,20 +899,25 @@ const AloneView: FunctionComponent = () => {
       <Viewport.Content {...partProps['Viewport.Content']}>
         <Page.Root
           {...partProps['Page.Root']}
-          className="card-demo-page"
+          // (With its control's class, if any.)
+          className={['card-demo-page', partProps['Page.Root']?.className]
+            .filter(Boolean)
+            .join(' ')}
         >
           <Viewport.Padding edge="block-start" />
           <div className="card-demo-content card-demo-alone">
             <div>
-              <LampCard
-                name="Desk Lamp"
-                parts={parts}
-                onChange={(isOn) => addLog(`Desk Lamp: ${isOn ? 'on' : 'off'}`)}
-              />
+              {lampCard({
+                isOn: isDeskLampOn,
+                name: 'Desk Lamp',
+                onChange: (isOn) => {
+                  addLog(`Desk Lamp: ${isOn ? 'on' : 'off'}`);
+                  setIsDeskLampOn(isOn);
+                },
+                parts,
+              })}
             </div>
-            <div>
-              <TemperatureCard parts={parts} />
-            </div>
+            <div>{temperatureCard({ parts })}</div>
           </div>
         </Page.Root>
       </Viewport.Content>

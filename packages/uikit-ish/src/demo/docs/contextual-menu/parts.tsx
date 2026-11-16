@@ -1400,7 +1400,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
       <li>
         What the menu is about, such as a photo’s thumbnail or a message. A
         right click or a held press opens the menu, lifting the trigger above
-        the blurred page. A press stays the trigger’s own (opening the photo).
+        the dimmed page. A press stays the trigger’s own (opening the photo).
       </li>
       <li>
         With <code>openOn=&quot;click&quot;</code>, a press opens it too (on
@@ -1486,8 +1486,7 @@ export const ContextualMenuParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The page, blurred and dimmed behind the lifted trigger and the menu
-        (optional).
+        The page, dimmed behind the lifted trigger and the menu (optional).
       </li>
       <li>
         Here: open the menu (with a long press on its trigger, or a secondary

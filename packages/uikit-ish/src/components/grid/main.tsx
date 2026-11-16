@@ -77,6 +77,7 @@ import type {
   GridSpacerProps,
   GridSpawnProps,
 } from './props.js';
+import { startGridTransition } from './transition.js';
 
 export { type GridReorderCells, GridReorderHandle } from './handle.js';
 export { cardIcons, gridIcons } from './icons.js';
@@ -84,7 +85,7 @@ export { cardIcons, gridIcons } from './icons.js';
 // card resizing itself.)
 export { reflowDuration, reflowEasing } from './layout.js';
 // (What's in an item hears as its grid resizes it, see overlay.tsx.)
-export { gridResizeEvent } from './overlay.js';
+export { startGridTransition } from './transition.js';
 export type {
   GridAreaButtonProps,
   GridAreaProps,
@@ -117,6 +118,9 @@ export type {
   GridSpacerProps,
   GridSpawnProps,
 } from './props.js';
+
+/** A boolean data attribute's value: present, or not. */
+const flagOf = (is: boolean) => (is ? '' : undefined);
 
 // A grid of square units (a home screen's, a control center's): items
 // spanning some columns and rows each (up to its columns and its
@@ -1112,10 +1116,10 @@ const Spawn = forwardRef<HTMLButtonElement, GridSpawnProps>(
             <div
               ref={cell}
               className="uikit-grid-item uikit-grid-spawn"
-              data-grid-full={isFullWidth ? '' : undefined}
+              data-grid-full={flagOf(isFullWidth)}
               data-grid-part="item"
               data-grid-placement={state.placement}
-              data-grid-room={hasRoom ? '' : undefined}
+              data-grid-room={flagOf(hasRoom)}
               data-size={state.area}
               style={{ ...spanStyle, ...bodyStyle }}
               {...entry}
@@ -1543,16 +1547,20 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
       }
       wasOpen.current = isOpen;
     });
+    // (Opened or closed by the library: in a view transition, see
+    // transition.ts.)
     const changeOpen = useCallback(
       (next: boolean, reason: GridOpenChangeReason) => {
-        setOwnOpen(next);
-        latestOpen.current?.(next, { reason });
+        startGridTransition(() => {
+          setOwnOpen(next);
+          latestOpen.current?.(next, { reason });
+        });
       },
       [],
     );
     const [standIn, setStandIn] = useState<HTMLSpanElement | null>(null);
     const [openColumns, openRows] = spanOf(openSize, columns);
-    const [phase, backdrop, underlay] = useOverlay({
+    const [backdrop, underlay] = useOverlay({
       body,
       isOpen,
       onClose: (reason) => changeOpen(false, reason),
@@ -1588,10 +1596,10 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
           <GridAreaHostContext.Provider value={host}>
             <div
               ref={ref}
-              data-grid-full={isFullWidth ? '' : undefined}
+              data-grid-full={flagOf(isFullWidth)}
               data-grid-part="item"
               data-grid-placement={cellState.placement}
-              data-grid-room={hasRoom ? '' : undefined}
+              data-grid-room={flagOf(hasRoom)}
               data-size={cellState.area}
               style={withStyle({ ...spanStyle, ...bodyStyle }, style)}
               {...entry}
@@ -1612,8 +1620,8 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
                 aria-label={isOpen ? openLabel : undefined}
                 aria-modal={isOpen ? true : undefined}
                 className="uikit-grid-item-body"
-                data-grid-movable-body={isPlaceable ? '' : undefined}
-                data-grid-open={phase}
+                data-grid-movable-body={flagOf(isPlaceable)}
+                data-grid-open={flagOf(isOpen)}
                 data-grid-part="body"
                 data-size={cellState.size}
                 role={isOpen ? 'dialog' : undefined}
@@ -1625,7 +1633,7 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
                 {isPlaceable ? moveSignOf(movableMark) : null}
               </div>
               {/* (Open above the page: its place kept, see overlay.tsx.) */}
-              {phase ? (
+              {isOpen ? (
                 <span
                   ref={setStandIn}
                   aria-hidden="true"

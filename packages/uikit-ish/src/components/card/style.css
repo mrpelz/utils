@@ -70,9 +70,7 @@
     }
   }
 
-  /* Its frame: the size its parts are laid out at, what its size queries
-     ask (see below): its own, filling it; resized, the new one at once
-     (see main.tsx, the end). */
+  /* Its frame: what its size queries ask (see below), filling it. */
   .uikit-card-frame {
     position: relative;
     display: grid;
@@ -147,14 +145,6 @@
     font-size: var(--font-ui-title3-size);
     grid-area: symbol;
     line-height: 1;
-
-    /* (Sized anew by its size (see below): over as long as its parts glide
-       there, see main.tsx.) */
-    transition: font-size 300ms cubic-bezier(0.32, 0.72, 0, 1);
-
-    @media (prefers-reduced-motion: reduce) {
-      transition: none;
-    }
   }
 
   /* Its title: two lines at most (its words breaking with a hyphen when
@@ -177,14 +167,6 @@
     -webkit-line-clamp: 2;
     line-height: var(--font-ui-subheadline-line-height);
     overflow-wrap: anywhere;
-
-    /* (Sized anew by its size (see below): over as long as its parts glide
-       there, see main.tsx.) */
-    transition: font-size 300ms cubic-bezier(0.32, 0.72, 0, 1);
-
-    @media (prefers-reduced-motion: reduce) {
-      transition: none;
-    }
   }
 
   /* Its value: below its title, in the glass' secondary color, its digits
@@ -198,15 +180,7 @@
     grid-area: value;
     line-height: var(--font-ui-subheadline-line-height);
     text-overflow: ellipsis;
-
-    /* (Sized anew by its size (see below): over as long as its parts glide
-       there, see main.tsx.) */
-    transition: font-size 300ms cubic-bezier(0.32, 0.72, 0, 1);
     white-space: nowrap;
-
-    @media (prefers-reduced-motion: reduce) {
-      transition: none;
-    }
   }
 
   /* Wide and a row tall (e.g. 2x1): its symbol leading, its title and
@@ -398,13 +372,7 @@
      taken, beside its title and value, as when it's wide.) */
 
   @container uikit-card not ((aspect-ratio > 1.5) and (height < 160px)) {
-    /* (Also while it's lifted above the page, opening or closing (see Grid),
-       with one there shown or not: its symbol not moving away and back as
-       its x goes and its own size's layout comes. Not when it's wide and a
-       row tall: its symbol beside its title anyway, as it's back in its
-       grid.) */
-    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])),
-    .uikit-grid-item-body[data-grid-open] > .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']) {
+    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) {
       align-items: end;
       grid-template:
         '. control' auto
@@ -413,8 +381,7 @@
         'symbol value' auto / auto 1fr;
     }
 
-    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > .uikit-card-symbol,
-    .uikit-grid-item-body[data-grid-open] > .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']) > .uikit-card-symbol {
+    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > .uikit-card-symbol {
       align-self: center;
     }
   }
@@ -431,10 +398,4 @@
     padding-inline-end: var(--uikit-card-corner-room, 18px);
   }
 
-  /* Resized (see main.tsx): above what's around it, out of its tile's
-     bounds for as long, from its leading top corner. */
-  .uikit-card-root[data-card-resizing] {
-    z-index: 1;
-    place-self: start start;
-  }
 }

@@ -628,7 +628,7 @@ export const ContextualMenuComposition: FunctionComponent = () => (
           component="contextual-menu"
           part="ContextualMenu.Preview"
         />
-        ), lifted above the blurred page.
+        ), lifted above the dimmed page.
       </li>
       <li>The preview aligns like the menu, and stays in the viewport.</li>
       <li>
@@ -642,7 +642,7 @@ export const ContextualMenuComposition: FunctionComponent = () => (
           component="contextual-menu"
           part="ContextualMenu.Preview"
         />
-        ) above the blurred backdrop, and keeping it in view.
+        ) above the dimmed backdrop, and keeping it in view.
       </li>
       <li>
         <strong>Demo:</strong> the photos, the thumbnails’ buttons, and what
@@ -715,7 +715,7 @@ export const ContextualMenuComposition: FunctionComponent = () => (
       </li>
       <li>
         Inside a <a href={publicUrl('viewport')}>Viewport</a>’s content layer
-        (its own stacking context), it still shows through the blurred page,
+        (its own stacking context), it still shows through the dimmed page,
         because the backdrop is cut out where it is.
       </li>
       <li>

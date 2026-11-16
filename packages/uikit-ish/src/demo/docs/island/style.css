@@ -45,6 +45,17 @@
   right: var(--uikit-safe-area-inset-right, 0);
 }
 
+/* Regular: the island a panel at the inline start, the controls at the other
+   end not under it: at the bottom (its safe area inset only). */
+.island-demo-map[data-regular]:dir(ltr) .maplibregl-ctrl-bottom-right,
+.island-demo-map[data-regular]:dir(rtl) .maplibregl-ctrl-bottom-left {
+  bottom: max(
+    0px,
+    var(--uikit-safe-area-inset-bottom, 0px) -
+      var(--uikit-viewport-keyboard-inset, 0px)
+  );
+}
+
 .island-demo-map .maplibregl-ctrl-top-left,
 .island-demo-map .maplibregl-ctrl-top-right {
   top: var(--uikit-safe-area-inset-top, 0);

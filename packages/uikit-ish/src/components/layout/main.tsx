@@ -184,6 +184,17 @@ const useOpenTransition = (
   columnRef: { current: HTMLDivElement | null },
   isOpen: boolean,
 ) => {
+  // Marked in the same commit as its change (`data-moving`, see style.css):
+  // its transitions there before anything reads its style (e.g. another
+  // part's layout effect measuring before the one below marks the root:
+  // it would open or close at once), until they've finished.
+  const [wasOpenShown, setWasOpenShown] = useState(isOpen);
+  const [isMoving, setIsMoving] = useState(false);
+  if (wasOpenShown !== isOpen) {
+    setWasOpenShown(isOpen);
+    setIsMoving(true);
+  }
+
   const openSize = useRef<number | undefined>(undefined);
   useLayoutEffect(() => {
     const { current: column } = columnRef;
@@ -220,6 +231,7 @@ const useOpenTransition = (
         if (isOpen) {
           column.style.removeProperty('--uikit-layout-column-closing-size');
         }
+        setIsMoving(false);
         repaintScrollers(root);
       });
     });
@@ -230,6 +242,8 @@ const useOpenTransition = (
       delete root.dataset.transitioning;
     };
   }, [columnRef, isOpen]);
+
+  return isMoving;
 };
 
 /** A column side by side: sized (resizable), or sharing the free space. */
@@ -257,7 +271,7 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
     const [ownOpen] = useState(defaultOpen);
     const isOpen = controlledOpen ?? ownOpen;
     useFloatingSize(ref, floating, isOpen);
-    useOpenTransition(ref, isOpen);
+    const isMoving = useOpenTransition(ref, isOpen);
     const [ownSize, setOwnSize] = useState(defaultSize);
     const size = controlledSize ?? ownSize;
     const dragRef = useRef<
@@ -300,6 +314,7 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
           data-closed={isOpen ? undefined : ''}
           data-floating={floating ? '' : undefined}
           data-layout-part="column"
+          data-moving={isMoving ? '' : undefined}
           data-resizable={resizable ? '' : undefined}
           inert={!isOpen}
           style={columnStyle}

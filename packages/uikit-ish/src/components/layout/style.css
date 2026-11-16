@@ -64,8 +64,9 @@
 
     /* Opening or closing (see main.tsx): sliding, the columns beside it
        following (their margins here; a floating one's neighbours' inset
-       frame by frame, see main.tsx); hidden once out, shown at once. */
-    .uikit-layout-root[data-transitioning] > & {
+       frame by frame, see main.tsx); hidden once out, shown at once. Its
+       own mark too, set as it changes (see main.tsx). */
+    .uikit-layout-root:is([data-transitioning], :has(> [data-moving])) > & {
       transition-duration:
         var(--uikit-layout-duration, 350ms), var(--uikit-layout-duration, 350ms),
         var(--uikit-layout-duration, 350ms), 0s;
@@ -93,7 +94,7 @@
       visibility: hidden;
     }
 
-    .uikit-layout-root[data-transitioning] > &[data-closed] {
+    .uikit-layout-root:is([data-transitioning], :has(> [data-moving])) > &[data-closed] {
       transition-delay: 0s, 0s, 0s, var(--uikit-layout-duration, 350ms);
     }
 

@@ -198,8 +198,8 @@ export const ContextualMenuOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Actions on a piece of content, summoned from the content itself. The
-        content lifts above the blurred page (or turns into a preview of
-        itself), with a <a href={publicUrl('menu')}>Menu</a> below it.
+        content lifts above the dimmed page (or turns into a preview of itself),
+        with a <a href={publicUrl('menu')}>Menu</a> below it.
       </li>
     </ul>
     <LiveView />

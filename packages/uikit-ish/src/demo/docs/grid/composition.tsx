@@ -202,7 +202,7 @@ const Rooms: FunctionComponent = () => {
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
               editing={editing}
-              style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+              style={gridSigns(partProps['Grid.Root']?.style)}
             >
               {rooms.map((room) => (
                 <Grid.Section
@@ -542,7 +542,7 @@ const Holes: FunctionComponent = () => {
               {...partProps['Grid.Root']}
               editing={draft !== undefined}
               reorderHandle={handle}
-              style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+              style={gridSigns(partProps['Grid.Root']?.style)}
             >
               {cells.map((cell) => {
                 if (cell.kind === 'break') {
@@ -787,7 +787,7 @@ const Adding: FunctionComponent = () => {
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
               editing={editing}
-              style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+              style={gridSigns(partProps['Grid.Root']?.style)}
             >
               {tiles.map(({ name, size }) => (
                 <Grid.Item
@@ -1040,7 +1040,7 @@ const Room: FunctionComponent = () => {
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
               editing={editing}
-              style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+              style={gridSigns(partProps['Grid.Root']?.style)}
             >
               {tiles.map(({ area, name, placement, size }) => (
                 <Grid.Item

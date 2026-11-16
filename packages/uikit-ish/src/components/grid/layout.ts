@@ -1,5 +1,7 @@
 import { RefObject, useLayoutEffect, useRef } from 'react';
 
+import { isMovedByTransition } from './transition.js';
+
 // A grid's layout (see main.tsx): its columns and unit for a width, its
 // breaks placed while editing, its items gliding as it changes.
 
@@ -1254,8 +1256,19 @@ const grownAreas = (
  * spacers) wholly inside what it grows over (a break's: its fillers too).
  * Items are never taken in: they reflow as usual. An item or a spacer
  * grows right and down from its top leading corner; a break by rows,
- * each a whole row below it.
+ * each a whole row below it. Only what the app can be told of and remove
+ * (named, its `dropName`; a remove button in it, see `Grid.RemoveButton`):
+ * the app removes what's taken in (told by name), the rest reflows as
+ * items do.
  */
+/**
+ * Whether a cell can be taken in: named (its `dropName`, as the app's
+ * told of it) and removable (a remove button in it).
+ */
+const isRemovable = (cell: HTMLElement) =>
+  Object.hasOwn(cell.dataset, 'gridName') &&
+  cell.querySelector(':scope > [data-grid-part="remove-button"]') !== null;
+
 export const mergedBy = (
   cell: HTMLElement,
   columns: number,
@@ -1304,7 +1317,7 @@ export const mergedBy = (
           rects.every((rect) => isIn(rect));
     if (isTaken) merged.add(each);
   }
-  return [...merged];
+  return [...merged].filter((each) => isRemovable(each));
 };
 
 /** An element's position in its grid's layout (not its `translate`). */
@@ -1383,6 +1396,22 @@ const glide = (element: HTMLElement, dx: number, dy: number) => {
   } as const;
   element.animate(fromOffset(dx, dy), timing);
 };
+
+/**
+ * Whether a cell stays where it's laid out, not gliding there: the one
+ * dragged, one dropped in its area (gliding from where it was let go, see
+ * main.tsx); none with reduced motion; nor one a view transition moves
+ * (see transition.ts).
+ */
+const isStill = (
+  element: HTMLElement,
+  dragged: HTMLElement | null,
+  isReduced: boolean,
+) =>
+  element === dragged ||
+  Object.hasOwn(element.dataset, 'gridPlaced') ||
+  isReduced ||
+  isMovedByTransition(element);
 
 /**
  * Its sections and cells gliding from where they were to where they are, as
@@ -1577,14 +1606,7 @@ export const useReflow = (
             : ([element.offsetLeft, element.offsetTop] as const);
         const before = last.get(element);
         last.set(element, position);
-        // (Not one dropped in its area: gliding from where it was let go,
-        // see main.tsx.)
-        if (
-          !before ||
-          element === dragged.current ||
-          Object.hasOwn(element.dataset, 'gridPlaced') ||
-          reduce.matches
-        ) {
+        if (!before || isStill(element, dragged.current, reduce.matches)) {
           continue;
         }
         const dx = before[0] - position[0];

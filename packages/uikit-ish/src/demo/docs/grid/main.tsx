@@ -131,7 +131,7 @@ export const GridDemo: FunctionComponent = () => {
               key={defaultsKey(props, ...Object.values(partProps))}
               {...props}
               editing={editing}
-              style={{ ...gridSigns(), ...props.style }}
+              style={gridSigns(props.style)}
             >
               {rooms.map((room) => (
                 <Grid.Section

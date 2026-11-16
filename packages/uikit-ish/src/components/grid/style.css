@@ -1,5 +1,17 @@
 /* Grid (see main.tsx). */
 @layer uikit-ish {
+  /* While a view transition of tiles runs (see transition.ts): what's
+     blended into glass (labels, symbols) drawn plainly, as the flat glass
+     draws it (see Glass). In a view transition's snapshots, WebKit draws
+     the page isolated: a blend has nothing to blend with, its labels
+     gone. */
+  :where(:root[data-grid-transition]) * {
+    --uikit-glass-content-blend: normal !important;
+    --uikit-glass-content-prominent-blend: normal !important;
+    --uikit-symbol-blend: normal !important;
+    --uikit-toolbar-content-blend: normal !important;
+  }
+
   /* Square units: its columns and unit measured (see main.tsx), its rows
      as tall as a column is wide; placed by CSS grid, in order (`dense`:
      earlier holes filled). The containing block of its items' positions
@@ -1172,11 +1184,10 @@
   }
 
   /* Open above the page (see overlay.tsx): its tile's body out of the grid
-     (from its stand-in's place, `--uikit-grid-open-left`/`-top`), moved
-     to the screen's middle (`--uikit-grid-open-x`/`-y`) and grown
-     (`--uikit-grid-open-width`/`-height`), above the backdrop; back again
-     closing. Each frame, by its script (no transition: its backdrop's
-     cutout moving with it). By its position and size only. */
+     (from its stand-in's place, `--uikit-grid-open-left`/`-top`), in the
+     screen's middle (`--uikit-grid-open-x`/`-y`) at its open size
+     (`--uikit-grid-open-width`/`-height`), above the backdrop. Getting
+     there and back: a view transition's (see transition.ts, below). */
   .uikit-grid-root .uikit-grid-item > .uikit-grid-item-body[data-grid-open] {
     position: absolute;
     z-index: 1001;
@@ -1201,16 +1212,9 @@
       color-mix(in srgb, var(--color-ui-label) 8%, transparent)
     );
     pointer-events: none;
-
-    /* (Closing: gone as its item's back over it, as its underlay fades (see
-       below): nothing under its glass to leave at the end.) */
-    &[data-grid-closing] {
-      background-color: transparent;
-      transition: background-color 380ms 200ms;
-    }
   }
 
-  /* The page behind an open item, blurred (see overlay.tsx): a contextual
+  /* The page behind an open item, dimmed (see overlay.tsx): a contextual
      menu's backdrop (see ContextualMenu), over its screen (its portal
      container), cut out where the item is. A press on it closes the item.
      Its underlay (in the item's grid, under it): only where it is, see
@@ -1219,29 +1223,17 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* (Its underlay: opaque while it's open (`--uikit-grid-open-background`):
-     what it shows through its glass, whatever's under it; gone, its glass
-     again, as it's back in the grid.) */
+  /* (Its underlay: opaque (`--uikit-grid-open-background`): what it shows
+     through its glass, whatever's under it.) */
   .uikit-grid-underlay {
     position: fixed;
     z-index: 1000;
-    background-color: transparent;
+    background-color: var(
+      --uikit-grid-open-background,
+      var(--color-ui-system-background)
+    );
     inset: 0;
     pointer-events: none;
-
-    /* (Closing: its glass again only as it's nearly back, slowly, through
-       the end of its move (350ms; gone at 600ms); opening, opaque at
-       once, see below: nothing bright beside it shows through as it grows
-       or shrinks.) */
-    transition: background-color 380ms 200ms;
-
-    &[data-grid-open] {
-      background-color: var(
-        --uikit-grid-open-background,
-        var(--color-ui-system-background)
-      );
-      transition: background-color 80ms;
-    }
   }
 
   /* (Its grid above what's beside it on its page while it's open, closing
@@ -1253,17 +1245,205 @@
     z-index: 1;
   }
 
-  /* (Its corner buttons, open or closing: faded quickly, as its underlay
-     is (see above): hidden, at the start of its move; shown, at its end
-     (350ms): opening, the button that opened it out first, an x in last;
-     closing, the other way around.) */
-  .uikit-grid-item-body[data-grid-open] .uikit-grid-corner-button {
-    transition-delay: 230ms;
-    transition-duration: 120ms;
+  /* A view transition of tiles (see transition.ts): the page beneath as it
+     is now (live: not its old snapshot cross-faded), the tiles and their
+     cards' parts moving from where they were to where they are, with the
+     grid's reflow timing. */
 
-    &[data-grid-hidden] {
-      transition-delay: 0s;
-      transition-duration: 80ms;
-    }
+  :root[data-grid-transition]::view-transition-old(root) {
+    display: none;
+  }
+
+  :root[data-grid-transition]::view-transition-new(root) {
+    animation: none;
+  }
+
+  ::view-transition-group(.uikit-grid-tile),
+  ::view-transition-group(.uikit-grid-rim),
+  ::view-transition-group(.uikit-card-part) {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  /* (A tile: its glass at its own size, from its top leading corner (not
+     stretched: its corners kept), its blur and its rounding its group's
+     (see transition.ts); resized, clipped to its group as it grows or
+     shrinks, its shadow the group's. One snapshot at a time (its glass
+     translucent: both would show both): growing or moving, its new one;
+     shrinking (`uikit-grid-shrinking`), its old one, the larger, faded
+     into its new one at the end (added up: never more opaque). Its parts
+     are named apart.) */
+  ::view-transition-old(.uikit-grid-tile),
+  ::view-transition-new(.uikit-grid-tile) {
+    width: auto;
+    height: auto;
+    animation: none;
+    inset-inline-start: 0;
+  }
+
+  ::view-transition-old(.uikit-grid-tile) {
+    display: none;
+  }
+
+  ::view-transition-old(.uikit-grid-tile.uikit-grid-shrinking) {
+    display: block;
+    animation: 300ms uikit-grid-fade-out-late;
+    mix-blend-mode: plus-lighter;
+    opacity: 0;
+  }
+
+  ::view-transition-new(.uikit-grid-tile.uikit-grid-shrinking) {
+    animation: 300ms uikit-grid-fade-in-late;
+    mix-blend-mode: plus-lighter;
+  }
+
+  ::view-transition-image-pair(.uikit-grid-tile) {
+    isolation: isolate;
+  }
+
+  /* (A tile's rim (see transition.ts): its group alone, its inner shadow,
+     over its glass.) */
+  ::view-transition-old(.uikit-grid-rim),
+  ::view-transition-new(.uikit-grid-rim) {
+    display: none;
+  }
+
+  /* (A part: its new snapshot moved there, resized with its group (e.g.
+     its font's size); one only before, fading out quickly, one only after
+     fading in once it's nearly there.) */
+  ::view-transition-old(.uikit-card-part) {
+    display: none;
+  }
+
+  ::view-transition-new(.uikit-card-part) {
+    animation: none;
+  }
+
+  ::view-transition-old(.uikit-card-part):only-child {
+    display: block;
+    animation: 120ms ease-out uikit-grid-fade-out;
+    opacity: 0;
+  }
+
+  ::view-transition-new(.uikit-card-part):only-child {
+    animation: 300ms uikit-grid-fade-in-late;
+  }
+
+  /* (Opened above the page, closed: above everything else, the backdrop
+     beneath fading; its underlay not shown meanwhile (opaque at once
+     wherever it ends). Its glass opaque at once as it opens (its new
+     snapshot alone), its own again at the end as it closes (see above).) */
+  ::view-transition-group(.uikit-grid-backdrop) {
+    z-index: 1;
+  }
+
+  /* (Faded in or out as a whole, its group: what it draws is its group's,
+     e.g. a backdrop filter (live, not its snapshot's: fading its snapshot
+     alone, that would stay until the transition's done).) */
+  ::view-transition-old(.uikit-grid-backdrop),
+  ::view-transition-new(.uikit-grid-backdrop) {
+    animation: none;
+  }
+
+  :root[data-grid-transition='open']::view-transition-group(.uikit-grid-backdrop) {
+    animation: 250ms uikit-grid-fade-in;
+  }
+
+  :root[data-grid-transition='close']::view-transition-group(.uikit-grid-backdrop) {
+    animation: 250ms uikit-grid-fade-out;
+    opacity: 0;
+  }
+
+  ::view-transition-group(.uikit-grid-lifted) {
+    z-index: 2;
+  }
+
+  /* (Its fill, as its underlay's (not shown meanwhile, nor in its
+     snapshots: each drawn alone, its glass over nothing): fading in as it
+     grows open, out as it shrinks back, through the whole move.) */
+  :root[data-grid-transition='open']::view-transition-image-pair(.uikit-grid-tile.uikit-grid-lifted) {
+    animation: 300ms cubic-bezier(0.32, 0.72, 0, 1) uikit-grid-fill-in;
+    background-color: var(
+      --uikit-grid-open-background,
+      var(--color-ui-system-background)
+    );
+  }
+
+  :root[data-grid-transition='close']::view-transition-image-pair(.uikit-grid-tile.uikit-grid-lifted) {
+    animation: 300ms cubic-bezier(0.32, 0.72, 0, 1) uikit-grid-fill-out;
+  }
+
+  ::view-transition-group(.uikit-grid-underlay) {
+    display: none;
+  }
+
+  /* (Its corner buttons, a lifted tile's: the one going out at once, the
+     one coming in at the end.) */
+  ::view-transition-new(.uikit-card-corner.uikit-grid-lifted) {
+    animation: 350ms uikit-grid-fade-in-late;
+  }
+
+  ::view-transition-old(.uikit-card-corner.uikit-grid-lifted) {
+    display: block;
+    animation: 80ms uikit-grid-fade-out;
+    opacity: 0;
+  }
+}
+
+/* The view transitions' fades (see transition.ts): their ends by their
+   pseudo-elements' own opacity (a fade-out's 0), not by a fill (not held on
+   a view transition's pseudo-elements once done, in Chrome); a late one's
+   wait part of it, not a delay (filled backwards, the same). */
+@keyframes uikit-grid-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes uikit-grid-fade-out {
+  from {
+    opacity: 1;
+  }
+}
+
+@keyframes uikit-grid-fade-in-late {
+  0%,
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes uikit-grid-fade-out-late {
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* (A lifted tile's fill, see above: the underlay's, from and to none.) */
+@keyframes uikit-grid-fill-in {
+  from {
+    background-color: transparent;
+  }
+}
+
+@keyframes uikit-grid-fill-out {
+  from {
+    background-color: var(
+      --uikit-grid-open-background,
+      var(--color-ui-system-background)
+    );
+  }
+
+  to {
+    background-color: transparent;
   }
 }

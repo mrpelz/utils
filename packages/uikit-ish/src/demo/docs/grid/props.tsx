@@ -13,7 +13,18 @@ import {
   commonPropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
+import { codeLabel } from '../../tooling/frame/render-code.js';
 import { sfICircle } from '../../tooling/icons.js';
+
+// The corner icons shown by their names in the demos' code (not their
+// paths): the grid's, then the card's (its x the grid's, named as the
+// grid's).
+for (const [name, icon] of Object.entries(gridIcons)) {
+  codeLabel(icon, `gridIcons.${name}`);
+}
+for (const [name, icon] of Object.entries(cardIcons)) {
+  if (icon !== gridIcons.remove) codeLabel(icon, `cardIcons.${name}`);
+}
 
 // Every part's options (its parts page's, see part-options.ts for the other
 // demos). The reorder handles and names are the app's wiring, set by each

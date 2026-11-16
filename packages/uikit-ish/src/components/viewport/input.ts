@@ -162,13 +162,30 @@ export const fixedBottom = (): number => {
 };
 
 /**
+ * Whether something the keyboard is for has focus (a text field, or a
+ * select: its picker shown where the keyboard is), in shadow roots too.
+ * Without one, no software keyboard shows: e.g. an app resumed from the
+ * Home Screen, its visual viewport read as shrunk for a while, as if one
+ * did.
+ */
+export const hasKeyboardFocus = (): boolean => {
+  let active = document.activeElement;
+  while (active?.shadowRoot?.activeElement) {
+    active = active.shadowRoot.activeElement;
+  }
+  return active?.matches(`${textField}, select`) === true;
+};
+
+/**
  * Whether the software keyboard is shown (the visual viewport ending above
- * the fixed layers' box, see `fixedBottom`, by more than a bar's height).
+ * the fixed layers' box, see `fixedBottom`, by more than a bar's height;
+ * something it's for focused, see `hasKeyboardFocus`).
  */
 export const isKeyboardShown = (): boolean => {
   const { visualViewport: viewport } = window;
   return viewport
-    ? fixedBottom() - (viewport.offsetTop + viewport.height) > 100
+    ? hasKeyboardFocus() &&
+        fixedBottom() - (viewport.offsetTop + viewport.height) > 100
     : false;
 };
 

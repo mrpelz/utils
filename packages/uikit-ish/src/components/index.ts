@@ -309,6 +309,7 @@ export {
   type GridSizeChangeDetails,
   type GridSpacerProps,
   type GridSpawnProps,
+  startGridTransition,
   useGridArea,
   useGridItem,
 } from './grid/main.js';

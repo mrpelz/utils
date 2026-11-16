@@ -1,6 +1,7 @@
 import { FunctionComponent, useMemo } from 'react';
 
 import { cardSizes } from '../../../components/index.js';
+import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
 import {
@@ -12,7 +13,6 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { partPropMaps } from '../part-options.js';
-import { BlindsCard, DimmerCard } from './content.js';
 import {
   cardCornerButtonRows,
   cardIconsRows,
@@ -23,7 +23,7 @@ import {
   cardUseCardOrientationRows,
   cardValueRows,
 } from './docs.js';
-import { CardsStage, stageParts } from './main.js';
+import { cardsStage, stageParts, useCardsStage } from './main.js';
 import {
   getPropOptionsCornerButton,
   propOptionsRoot,
@@ -31,6 +31,39 @@ import {
   propOptionsTitle,
   propOptionsValue,
 } from './props.js';
+
+/* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
+const useCardOrientationCode = `import { Card, Slider, useCardOrientation } from '@mrpelz/uikit-ish';
+import { useState } from 'react';
+
+// Rendered inside its Grid.Item: the slider across a wide tile, upright
+// in a tall one.
+const DimmerCard = () => {
+  const orientation = useCardOrientation();
+  const [value, setValue] = useState(0.6);
+
+  return (
+    <Card.Root>
+      <Slider.Root
+        max={1}
+        min={0}
+        orientation={orientation}
+        value={value}
+        onValueChange={(next) => setValue(next as number)}
+      >
+        <Slider.Control>
+          <Slider.Track>
+            <Slider.Indicator />
+            <Slider.Thumb aria-label="Dimmer" />
+          </Slider.Track>
+        </Slider.Control>
+        <Slider.Label>Dimmer</Slider.Label>
+        <Slider.Value />
+      </Slider.Root>
+    </Card.Root>
+  );
+};`;
+/* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 /** The card's parts, beside the one a view features (see `PartView`). */
 const cardParts = {
@@ -42,15 +75,18 @@ const cardParts = {
 } as const;
 
 /**
- * A part's view: the cards in a grid (see `CardsStage`), the part's own
- * props outlined on each, every other part's in a group of its own.
+ * A part's view: the cards in a grid (see `cardsStage`), the part's own
+ * props outlined on those they suit (`on`, by their tiles' names; unset,
+ * all), every other part's in a group of its own.
  */
 const PartView: FunctionComponent<{
   id: string;
+  on?: readonly string[];
   options: PropMap | ((addLog: AddLog) => PropMap);
   part: keyof typeof cardParts;
-}> = ({ id, options, part }) => {
+}> = ({ id, on, options, part }) => {
   const [log, addLog] = useLog();
+  const stage = useCardsStage(addLog);
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(
     useMemo(
@@ -82,10 +118,11 @@ const PartView: FunctionComponent<{
       state={[state, partState]}
       title={part}
     >
-      <CardsStage
-        addLog={addLog}
-        partProps={{ ...partProps, [part]: props }}
-      />
+      {cardsStage(stage, partProps, (name) =>
+        on === undefined || on.includes(name)
+          ? { ...partProps, [part]: props }
+          : partProps,
+      )}
     </Component>
   );
 };
@@ -117,6 +154,8 @@ const TitlePart: FunctionComponent = () => (
 const CornerButtonPart: FunctionComponent = () => (
   <PartView
     id="card-parts-corner-button"
+    // (The temperature's: the only card with one here.)
+    on={['Temperature']}
     options={getPropOptionsCornerButton}
     part="Card.CornerButton"
   />
@@ -125,6 +164,9 @@ const CornerButtonPart: FunctionComponent = () => (
 const ValuePart: FunctionComponent = () => (
   <PartView
     id="card-parts-value"
+    // (A number: on the temperature alone, not on the cards showing a
+    // state in words, nor the humidity's percentage.)
+    on={['Temperature']}
     options={propOptionsValue}
     part="Card.Value"
   />
@@ -137,6 +179,20 @@ const ValuePart: FunctionComponent = () => (
 const OrientationPart: FunctionComponent = () => {
   const id = 'card-parts-use-card-orientation';
   const [log, addLog] = useLog();
+  const stage = useCardsStage(addLog, [
+    {
+      kind: 'dimmer',
+      name: 'Dimmer',
+      size: '3x1',
+      sizes: cardSizes.numericalControl,
+    },
+    {
+      kind: 'blinds',
+      name: 'Blinds',
+      size: '1x3',
+      sizes: cardSizes.numericalControl,
+    },
+  ]);
   const [partControls, partProps, partState] = usePartControls(
     useMemo(
       () => partPropMaps({ ...stageParts, ...cardParts }, addLog),
@@ -155,24 +211,7 @@ const OrientationPart: FunctionComponent = () => {
       state={[partState]}
       title="useCardOrientation"
     >
-      <CardsStage
-        addLog={addLog}
-        partProps={partProps}
-        tiles={[
-          {
-            Card: DimmerCard,
-            name: 'Dimmer',
-            size: '3x1',
-            sizes: cardSizes.numericalControl,
-          },
-          {
-            Card: BlindsCard,
-            name: 'Blinds',
-            size: '1x3',
-            sizes: cardSizes.numericalControl,
-          },
-        ]}
-      />
+      {cardsStage(stage, partProps)}
     </Component>
   );
 };
@@ -476,6 +515,7 @@ export const CardParts: FunctionComponent = () => (
         ). Resized from wide to tall, the slider turns.
       </li>
     </ul>
+    <CodeView code={useCardOrientationCode} />
     <OrientationPart />
     <h3>Returns</h3>
     <PropsTable rows={cardUseCardOrientationRows} />

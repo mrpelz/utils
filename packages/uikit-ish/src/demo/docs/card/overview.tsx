@@ -14,12 +14,13 @@ import {
 import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
 import { cardRootRows, cardValueRows } from './docs.js';
-import { CardsStage, stageParts } from './main.js';
+import { cardsStage, stageParts, useCardsStage } from './main.js';
 
 /** A phone: one card of each kind in a grid, edited with Edit. */
 const LiveView: FunctionComponent = () => {
   const id = 'card-overview';
   const [log, addLog] = useLog();
+  const stage = useCardsStage(addLog);
   const [partControls, partProps, partState] = usePartControls(
     useMemo(
       () =>
@@ -47,10 +48,7 @@ const LiveView: FunctionComponent = () => {
       state={[partState]}
       title="Card"
     >
-      <CardsStage
-        addLog={addLog}
-        partProps={partProps}
-      />
+      {cardsStage(stage, partProps)}
     </Component>
   );
 };

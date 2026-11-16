@@ -5,6 +5,7 @@ import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
 import {
   Button,
   Grid,
+  type GridReorderHandle,
   type GridSize,
   Page,
   Viewport,
@@ -16,161 +17,237 @@ import {
   usePartControls,
   usePropControl,
 } from '../../tooling/frame/prop-control.js';
+import { codeLabel } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { gridSigns } from '../../tooling/grid-signs.js';
 import { partPropMaps } from '../part-options.js';
-import { type CardTile, cardTiles } from './content.js';
+import {
+  type CardContext,
+  cardOf,
+  type CardStates,
+  cardStatesInitial,
+  type CardTile,
+  cardTiles,
+} from './content.js';
 import { propOptionsRoot } from './props.js';
 
 /**
- * A phone's page on a picture: Edit and Done, a grid of cards (`tiles`, one
- * of each kind by default; each its kind's sizes, its own size stored),
- * moved and resized in edit mode. Its parts' props from `partProps`.
+ * A phone's page of cards (see `cardsStage`): its tiles (one of each kind
+ * by default; each its kind's sizes, its own size stored), edit mode, the
+ * expanded ones (the app's state, not stored; none while editing), the
+ * opened one, the cards' own state. The demo's, as an app keeps it.
  */
-export const CardsStage: FunctionComponent<{
-  addLog: AddLog;
-  children?: ReactNode;
-  partProps: PartProps;
-  tiles?: readonly CardTile[];
-}> = ({ addLog, children, partProps, tiles: tilesInitial = cardTiles }) => {
+export type CardsStageState = {
+  editing: boolean;
+  expanded: ReadonlySet<string>;
+  handle: GridReorderHandle;
+  opened: string | undefined;
+  /** A tile resized in edit mode (made small again). */
+  resize: (name: string, size: GridSize) => void;
+  /** Sets a card's state (see `CardContext`). */
+  set: CardContext['set'];
+  /** Opens a tile above the page, or closes it. */
+  setOpen: (name: string, open: boolean, reason?: string) => void;
+  states: CardStates;
+  tiles: readonly CardTile[];
+  /** Edit and Done (edited as stored: expanded ones small again). */
+  toggleEditing: () => void;
+  /** A tile expanded, or made small again. */
+  toggleExpanded: (name: string) => void;
+};
+
+export const useCardsStage = (
+  addLog: AddLog,
+  tilesInitial: readonly CardTile[] = cardTiles,
+): CardsStageState => {
   const [editing, setEditing] = useState(false);
   const [tiles, setTiles] = useState(tilesInitial);
-  // (Which are expanded: the app's state, not stored; none while editing.)
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
-  const toggle = (name: string) => {
-    const isExpanded = !expanded.has(name);
-    addLog(`${name}: ${isExpanded ? 'expand' : 'collapse'}`);
-    const next = new Set(expanded);
-    if (isExpanded) next.add(name);
-    else next.delete(name);
-    setExpanded(next);
-  };
+  const [opened, setOpened] = useState<string | undefined>(undefined);
+  const [states, setStates] = useState(cardStatesInitial);
   const handle = Grid.useCreateReorderHandle({
     onReorder: (change) => {
       addLog(`move ${String(change.items[0]?.name)}`);
       setTiles((current) => Grid.reorder(current, change, ({ name }) => name));
     },
   });
-  const resize = (name: string, size: GridSize) => {
-    addLog(`${name} size: ${size}`);
-    setExpanded((current) => {
-      const next = new Set(current);
-      next.delete(name);
-      return next;
-    });
-    setTiles((current) =>
-      current.map((tile) => (tile.name === name ? { ...tile, size } : tile)),
-    );
-  };
-
-  return (
-    <>
-      <Viewport.Background>
-        <div
-          aria-hidden="true"
-          className="demo-picture"
-        />
-      </Viewport.Background>
-      <Viewport.Content {...partProps['Viewport.Content']}>
-        <Page.Root
-          {...partProps['Page.Root']}
-          className="card-demo-page"
-        >
-          <Viewport.Padding edge="block-start" />
-          <div className="card-demo-content">
-            <div className="card-demo-actions">
-              <Button.Root
-                {...partProps['Button.Root']}
-                variant="bordered"
-                onClick={() => {
-                  addLog(editing ? 'done' : 'edit');
-                  // (Edited as stored: expanded ones small again.)
-                  if (!editing) setExpanded(new Set());
-                  setEditing(!editing);
-                }}
-              >
-                <Button.Label {...partProps['Button.Label']}>
-                  {editing ? 'Done' : 'Edit'}
-                </Button.Label>
-              </Button.Root>
-            </div>
-            <Grid.Root
-              {...partProps['Grid.Root']}
-              editing={editing}
-              reorderHandle={handle}
-              style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
-            >
-              {tiles.map(
-                ({
-                  area,
-                  Card: CardOf,
-                  expandedSize,
-                  name,
-                  openSize,
-                  size,
-                  sizes,
-                }) => {
-                  const isExpanded = expanded.has(name);
-                  // (Expanding only where that's larger than it is.)
-                  const canExpand =
-                    expandedSize !== undefined && expandedSize !== size;
-                  return (
-                    <Grid.Item
-                      key={name}
-                      {...partProps['Grid.Item']}
-                      dropName={name}
-                      openLabel={openSize ? name : undefined}
-                      openSize={openSize}
-                      reorderHandle={handle}
-                      size={isExpanded && expandedSize ? expandedSize : size}
-                      supportedSizes={sizes}
-                      onSizeChange={(next) => resize(name, next)}
-                      onOpenChange={(open, { reason }) =>
-                        addLog(
-                          `${name}: ${open ? 'open' : 'close'} (${reason})`,
-                        )
-                      }
-                    >
-                      <CardOf
-                        parts={partProps}
-                        expansion={
-                          canExpand
-                            ? { isExpanded, onToggle: () => toggle(name) }
-                            : undefined
-                        }
-                      />
-                      <Grid.ResizeHandle {...partProps['Grid.ResizeHandle']} />
-                      {/* (Room around it: expanded, it grows in there.) */}
-                      {area ? (
-                        <Grid.Area defaultSize={area}>
-                          <Grid.ResizeHandle
-                            {...partProps['Grid.ResizeHandle']}
-                          />
-                        </Grid.Area>
-                      ) : null}
-                    </Grid.Item>
-                  );
-                },
-              )}
-            </Grid.Root>
-            {children}
-          </div>
-          <Viewport.Padding edge="block-end" />
-        </Page.Root>
-      </Viewport.Content>
-    </>
+  // (Shown by name in the code, as an app defines it.)
+  codeLabel(
+    handle,
+    'handle',
+    `const handle = Grid.useCreateReorderHandle({
+  onReorder: (change) =>
+    setTiles((current) => Grid.reorder(current, change, ({ name }) => name)),
+});`,
   );
+
+  return {
+    editing,
+    expanded,
+    handle,
+    opened,
+    set: (key, value) => {
+      addLog(`${key}: ${String(value)}`);
+      setStates((current) => ({ ...current, [key]: value }));
+    },
+    setOpen: (name: string, open: boolean, reason?: string) => {
+      addLog(
+        `${name}: ${open ? 'open' : 'close'}${reason ? ` (${reason})` : ''}`,
+      );
+      setOpened(open ? name : undefined);
+    },
+    resize: (name: string, size: GridSize) => {
+      addLog(`${name} size: ${size}`);
+      setExpanded((current) => {
+        const next = new Set(current);
+        next.delete(name);
+        return next;
+      });
+      setTiles((current) =>
+        current.map((tile) => (tile.name === name ? { ...tile, size } : tile)),
+      );
+    },
+    states,
+    tiles,
+    toggleEditing: () => {
+      addLog(editing ? 'done' : 'edit');
+      if (!editing) setExpanded(new Set());
+      setEditing(!editing);
+    },
+    toggleExpanded: (name: string) => {
+      const isExpanded = !expanded.has(name);
+      addLog(`${name}: ${isExpanded ? 'expand' : 'collapse'}`);
+      const next = new Set(expanded);
+      if (isExpanded) next.add(name);
+      else next.delete(name);
+      setExpanded(next);
+    },
+  };
 };
 
-/** The parts the stage shows (see `CardsStage`), and the props it sets. */
+/**
+ * A phone's page on a picture: Edit and Done, a grid of cards, moved and
+ * resized in edit mode (see `useCardsStage`). Its parts' props from
+ * `partProps`. A function returning its JSX, called in the demo (not a
+ * component): the demo's code shows the parts as written.
+ */
+export const cardsStage = (
+  stage: CardsStageState,
+  partProps: PartProps,
+  /** A tile's card's parts' props, if not `partProps` (by its name). */
+  partsOf: (name: string) => PartProps = () => partProps,
+): ReactNode => (
+  <>
+    <Viewport.Background>
+      <div
+        aria-hidden="true"
+        className="demo-picture"
+      />
+    </Viewport.Background>
+    <Viewport.Content {...partProps['Viewport.Content']}>
+      <Page.Root
+        {...partProps['Page.Root']}
+        // (With its control's class, if any.)
+        className={['card-demo-page', partProps['Page.Root']?.className]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <Viewport.Padding edge="block-start" />
+        <div className="card-demo-content">
+          <div className="card-demo-actions">
+            <Button.Root
+              {...partProps['Button.Root']}
+              variant="bordered"
+              onClick={stage.toggleEditing}
+            >
+              <Button.Label {...partProps['Button.Label']}>
+                {stage.editing ? 'Done' : 'Edit'}
+              </Button.Label>
+            </Button.Root>
+          </div>
+          <Grid.Root
+            {...partProps['Grid.Root']}
+            editing={stage.editing}
+            reorderHandle={stage.handle}
+            style={gridSigns(partProps['Grid.Root']?.style)}
+          >
+            {stage.tiles.map(
+              ({ area, expandedSize, kind, name, openSize, size, sizes }) => {
+                const isExpanded = stage.expanded.has(name);
+                // (Expanding only where that's larger than it is.)
+                const canExpand =
+                  expandedSize !== undefined && expandedSize !== size;
+                const shown = isExpanded && expandedSize ? expandedSize : size;
+                const isOpen = stage.opened === name;
+                return (
+                  <Grid.Item
+                    key={name}
+                    {...partProps['Grid.Item']}
+                    dropName={name}
+                    // (Opening only where it has a size for that: the
+                    // others' as their controls set them.)
+                    {...(openSize && {
+                      open: isOpen,
+                      openLabel: name,
+                      openSize,
+                    })}
+                    reorderHandle={stage.handle}
+                    size={shown}
+                    supportedSizes={sizes}
+                    onSizeChange={(next) => stage.resize(name, next)}
+                    onOpenChange={(open, { reason }) =>
+                      stage.setOpen(name, open, reason)
+                    }
+                  >
+                    {cardOf(kind, {
+                      expansion: canExpand
+                        ? {
+                            isExpanded,
+                            onToggle: () => stage.toggleExpanded(name),
+                          }
+                        : undefined,
+                      isOpen,
+                      onOpenChange: (open) => stage.setOpen(name, open),
+                      parts: partsOf(name),
+                      set: stage.set,
+                      size: shown,
+                      states: stage.states,
+                    })}
+                    <Grid.ResizeHandle {...partProps['Grid.ResizeHandle']} />
+                    {/* (Room around it: expanded, it grows in there.) */}
+                    {area ? (
+                      <Grid.Area
+                        {...partProps['Grid.Area']}
+                        defaultSize={area}
+                      >
+                        <Grid.ResizeHandle
+                          {...partProps['Grid.ResizeHandle']}
+                        />
+                      </Grid.Area>
+                    ) : null}
+                  </Grid.Item>
+                );
+              },
+            )}
+          </Grid.Root>
+        </div>
+        <Viewport.Padding edge="block-end" />
+      </Page.Root>
+    </Viewport.Content>
+  </>
+);
+
+/** The parts the stage shows (see `cardsStage`), and the props it sets. */
 export const stageParts = {
   'Button.Label': [],
   'Button.Root': ['onClick', 'variant'],
   'Grid.Item': [
+    'defaultOpen',
     'defaultSize',
     'dropName',
     'onOpenChange',
     'onSizeChange',
+    'open',
     'openLabel',
     'openSize',
     'reorderHandle',
@@ -187,6 +264,7 @@ export const stageParts = {
 export const CardDemo: FunctionComponent = () => {
   const id = 'card';
   const [log, addLog] = useLog();
+  const stage = useCardsStage(addLog);
   const [external] = useProvidedState(id);
   const [control, props, state] = usePropControl(propOptionsRoot, {
     external,
@@ -220,10 +298,7 @@ export const CardDemo: FunctionComponent = () => {
       state={[state, partState]}
       title="Card"
     >
-      <CardsStage
-        addLog={addLog}
-        partProps={{ ...partProps, 'Card.Root': props }}
-      />
+      {cardsStage(stage, { ...partProps, 'Card.Root': props })}
     </Component>
   );
 };

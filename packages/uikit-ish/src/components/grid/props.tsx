@@ -202,7 +202,9 @@ export type GridSizeChangeDetails = {
    * What it took in (their `dropName`s), growing over them: an item or a
    * spacer, the spacers it reached; a break, the breaks right before and
    * after it; either, the breaks (a break: also the spacers) wholly
-   * inside its new size. The app removes them.
+   * inside its new size. Only those named (their `dropName`) and
+   * removable (a `Grid.RemoveButton` in them; the others reflow, as
+   * items do), marked while it's resized. The app removes them.
    */
   merged: readonly string[];
 };
