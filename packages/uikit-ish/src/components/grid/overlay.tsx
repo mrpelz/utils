@@ -17,7 +17,8 @@ import { whenGridTransitioned } from './transition.js';
 // An item opened above the page (see `Grid.Item`'s `open`): its tile's
 // body lifted out of the grid (its stand-in keeping its place, nothing
 // below reflowing), in the middle of the screen (its portal container's:
-// a device's screen in a page of demos, else the window) at its open size,
+// a device's screen in a page of demos, else the window; beside a sidebar,
+// see `roomOf`) at its open size,
 // above the page dimmed (a contextual menu's backdrop, the same); the
 // live body, never remounted (what's in it keeps its state). Placed once
 // as it opens, again as the screen or its place changes; getting there
@@ -28,8 +29,8 @@ import { whenGridTransitioned } from './transition.js';
 // and a clip path: what's lifted takes presses there, even where its
 // ancestors' stacking contexts keep it below the backdrop; what covers it
 // in its page too, e.g. a sidebar floating over its column): cut out once
-// it's there (not in the transition's snapshots: a hole in the dim
-// as the tile moves; nor as it closes, see transition.ts). Under it, in
+// it's there, opening (not before: a hole in the dim as the tile moves
+// there); closing, its snapshot fading out with its hole. Under it, in
 // its grid (its stacking context), an underlay: opaque (nothing bright
 // beside it showing through its glass).
 //
@@ -129,14 +130,43 @@ const coversOf = (element: HTMLElement) =>
     document.querySelectorAll<HTMLElement>(
       '[data-layout-part="column"][data-floating]',
     ),
-  ).filter((column) => !column.contains(element));
+  ).filter(
+    (column) =>
+      !column.contains(element) && !Object.hasOwn(column.dataset, 'closed'),
+  );
+
+/**
+ * The room it's centered in: its screen, less what covers it at either
+ * side (see `coversOf`, e.g. a sidebar): opened beside it, not under it
+ * (its cutout there would make it its glass's backdrop root, its blur
+ * seeing nothing behind it); all of the screen, if that's too narrow.
+ */
+const roomOf = (screen: DOMRect, covers: readonly HTMLElement[]): Box => {
+  let { left, right } = screen;
+  for (const cover of covers) {
+    const rect = cover.getBoundingClientRect();
+    if (rect.right <= left || rect.left >= right) continue;
+    if (rect.left <= left + 1) left = Math.max(left, rect.right);
+    else if (rect.right >= right - 1) right = Math.min(right, rect.left);
+  }
+  return right - left < screen.width / 2
+    ? screen
+    : { height: screen.height, left, top: screen.top, width: right - left };
+};
+
+/** Whether two boxes overlap. */
+const isOverlapping = (a: Box, b: DOMRect) =>
+  a.left < b.right &&
+  b.left < a.left + a.width &&
+  a.top < b.bottom &&
+  b.top < a.top + a.height;
 
 /**
  * Where it's lifted to: its open size (fitted to the screen, less its
  * margins), in the screen's middle.
  */
 const targetOf = (
-  screen: DOMRect,
+  screen: Box,
   [width, height]: readonly [number, number],
 ): Box => {
   const w = Math.min(width, screen.width - 2 * margin);
@@ -177,9 +207,9 @@ export const useOverlay = ({
     latest.current = { onClose, size };
   });
 
-  // (Placed: the screen's middle, from its place (its stand-in's), as the
-  // screen or its place changes; the underlay's clip there, the backdrop's
-  // cutout once the transition's done.)
+  // (Placed: its room's middle (see `roomOf`), from its place (its
+  // stand-in's), as the screen or its place changes; the underlay's clip
+  // there, the backdrop's cutout once the transition's done.)
   useLayoutEffect(() => {
     const element = body.current;
     const place = standIn;
@@ -196,7 +226,7 @@ export const useOverlay = ({
     const draw = () => {
       const home = place.getBoundingClientRect();
       const box = targetOf(
-        backdrop.getBoundingClientRect(),
+        roomOf(backdrop.getBoundingClientRect(), covers),
         latest.current.size,
       );
       set('left', place.offsetLeft);
@@ -208,9 +238,19 @@ export const useOverlay = ({
       const radius = radiusOf(element);
       underlay.style.clipPath = clipOf(underlay, box, radius, false);
       if (!isCut) return;
+      // (What covers it cut out only where it overlaps it: too wide for the
+      // room beside it.)
       for (const layer of [backdrop, ...covers]) {
-        cutOut(layer, box, radius);
-        layer.style.clipPath = clipOf(layer, box, radius, true);
+        if (
+          layer === backdrop ||
+          isOverlapping(box, layer.getBoundingClientRect())
+        ) {
+          cutOut(layer, box, radius);
+          layer.style.clipPath = clipOf(layer, box, radius, true);
+        } else {
+          fillIn(layer);
+          layer.style.removeProperty('clip-path');
+        }
       }
     };
     draw();

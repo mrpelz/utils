@@ -41,6 +41,7 @@ import {
   gridSectionRows,
   gridSpacerRows,
   gridSpawnRows,
+  gridStartGridTransitionRows,
   gridUseGridAreaRows,
   gridUseGridItemRows,
 } from './docs.js';
@@ -122,6 +123,36 @@ export const Home = ({ editing }: { editing: boolean }) => (
     </Grid.Item>
   </Grid.Root>
 );`;
+const startGridTransitionCode = `import { Grid, startGridTransition } from '@mrpelz/uikit-ish';
+import { useState } from 'react';
+
+export const Lamp = ({ isLarge }: { isLarge: boolean }) => (
+  <Grid.Root>
+    <Grid.Item
+      size={isLarge ? '2x2' : '1x1'}
+      supportedSizes={['1x1', '2x2']}
+    >
+      Lamp
+    </Grid.Item>
+  </Grid.Root>
+);
+
+export const Home = () => {
+  const [isLarge, setIsLarge] = useState(false);
+
+  return (
+    <>
+      {/* (A button outside the grid: its change in a transition.) */}
+      <button
+        type="button"
+        onClick={() => startGridTransition(() => setIsLarge(!isLarge))}
+      >
+        {isLarge ? 'Smaller' : 'Larger'}
+      </button>
+      <Lamp isLarge={isLarge} />
+    </>
+  );
+};`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 // Each part's view: a few of a home's devices as tiles (see content.ts),
@@ -1574,6 +1605,8 @@ export const GridParts: FunctionComponent = () => (
         <PartLink part="useGridItem" />
         <span> and </span>
         <PartLink part="useGridArea" />
+        <span>; around changes of its own, </span>
+        <PartLink part="startGridTransition" />
       </li>
     </ul>
 
@@ -2165,6 +2198,44 @@ export const GridParts: FunctionComponent = () => (
     <CodeView code={useGridAreaCode} />
     <h3>Returns</h3>
     <PropsTable rows={gridUseGridAreaRows} />
+
+    <Heading
+      id="startgridtransition"
+      level={2}
+    >
+      <code>startGridTransition</code>
+    </Heading>
+    <ul>
+      <li>
+        Makes a change to the grid in the browser’s view transition: the tiles,
+        and the parts of the cards in them, move and resize from where they were
+        to where they are, instead of changing at once. Use it around a change
+        your own code makes, such as an item’s <code>size</code> or{' '}
+        <code>open</code> set from a list elsewhere.
+      </li>
+      <li>
+        The library uses it itself: around what a card’s{' '}
+        <PartLink
+          component="card"
+          part="Card.CornerButton"
+        />{' '}
+        does, and around opening and closing an item above the page. Inside one
+        of those, it makes the change in that transition.
+      </li>
+      <li>
+        Only tiles clear of the screen’s bars are moved by it; those under the
+        bars move by the grid’s own reflow, under them. A change that moves no
+        tile ends it at once, so what else the change does (such as a page
+        sliding in) shows as usual.
+      </li>
+      <li>
+        Without view transitions, or with reduced motion, the change is made at
+        once.
+      </li>
+    </ul>
+    <CodeView code={startGridTransitionCode} />
+    <h3>Arguments</h3>
+    <PropsTable rows={gridStartGridTransitionRows} />
   </>
 );
 

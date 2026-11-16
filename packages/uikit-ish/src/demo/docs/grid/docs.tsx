@@ -604,6 +604,15 @@ export const gridReorderRows: readonly PropRow[] = [
   ],
 ];
 
+export const gridStartGridTransitionRows: readonly PropRow[] = [
+  [
+    'update',
+    '() => void',
+    undefined,
+    'Makes the change, e.g. sets the app’s state for an item’s size or open. It runs inside the transition, after the page as it was is captured.',
+  ],
+];
+
 export const gridUseGridItemRows: readonly PropRow[] = [
   [
     'size',

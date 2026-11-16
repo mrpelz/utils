@@ -12,6 +12,7 @@ import {
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
 import {
   cardCornerButtonRows,
@@ -335,11 +336,13 @@ export const CardParts: FunctionComponent = () => (
         example for a group of lights with at least one of them on.
       </li>
       <li>
-        When its tile changes size outside edit mode, for example as it expands,
-        it resizes itself in step with the grid: its glass grows or shrinks from
-        the old size to the new, above its neighbors for that moment. Its parts
-        are laid out at the new size at once and glide there from where they
-        were. Opened above the page, they glide the same way.
+        When its tile changes size by a corner button, for example as it expands
+        or opens above the page, the change is shown in a view transition: its
+        glass grows or shrinks, and its parts slide from where they were (see{' '}
+        <a href={publicUrl('card/composition#building-for-changing-sizes')}>
+          Building for changing sizes
+        </a>
+        ).
       </li>
       <li>
         Renders a <code>div</code>.
@@ -427,6 +430,19 @@ export const CardParts: FunctionComponent = () => (
         A button in a corner of the card, for what’s more to it: going to a page
         of its own, expanding the card in place, opening it above the page. What
         it does is up to its <code>onClick</code>.
+      </li>
+      <li>
+        Its <code>onClick</code> runs in a view transition (see{' '}
+        <PartLink
+          component="grid"
+          part="startGridTransition"
+        />
+        ): what it changes in the grid, such as the card’s size, is shown moving
+        there. A press that changes nothing there shows no transition, so going
+        to another page slides as usual. It runs after the browser has captured
+        the page as it was, not in the click itself, so{' '}
+        <code>preventDefault()</code> and <code>currentTarget</code> are of no
+        use there.
       </li>
       <li>
         It’s a{' '}

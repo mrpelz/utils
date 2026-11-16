@@ -1,7 +1,5 @@
 import { flushSync } from 'react-dom';
 
-import { fillIn } from '../utils/main.js';
-
 // Tiles changing size or place by the app's or the user's doing (a card
 // expanded, collapsed, opened above the page, closed again): animated by
 // a view transition (the browser's: the page captured before and after,
@@ -241,8 +239,10 @@ const rimOf = (surface: HTMLElement, shadow: string) => {
 };
 
 /**
- * A tile before its change (see `nameAll`): its size, its shadow (left out
- * of its snapshots, its rim made, see `groupRules`).
+ * A tile before its change (see `nameAll`): its size, its place, its
+ * shadow (its rim made, see `groupRules`). Nothing it shows changed: the
+ * page as captured before the change is drawn on screen as it's captured
+ * (a change, e.g. its shadow taken away, would flicker).
  */
 const prepare = (
   body: HTMLElement,
@@ -255,7 +255,6 @@ const prepare = (
   places.set(body, [left, top]);
   const shadow = getComputedStyle(surface).boxShadow;
   shadows.set(body, shadow);
-  surface.style.setProperty('box-shadow', 'none');
   const rim = rimOf(surface, shadow);
   if (rim) rims.set(body, rim);
 };
@@ -328,7 +327,10 @@ const nameAll = (naming: Naming, isAfter: boolean): string[] => {
     // (Its size before, and whether it's resized, smaller: its old
     // snapshot then the one shown, see the CSS.)
     const size = [surface.offsetWidth, surface.offsetHeight] as const;
-    if (!isAfter) prepare(body, surface, size, naming);
+    // (After its change, its shadow its groups' (see `groupRules`): left out
+    // of its new snapshot, the page hidden behind the transition by then.)
+    if (isAfter) surface.style.setProperty('box-shadow', 'none');
+    else prepare(body, surface, size, naming);
     const [isResized, isShrinking] = isAfter
       ? changeOf(sizes.get(body), size)
       : [false, false];
@@ -399,13 +401,6 @@ export const startGridTransition = (update: () => void): void => {
   // (One at a time: a running one finished at once.)
   current?.skipTransition();
   const root = document.documentElement;
-  // (An open item's backdrop whole again: captured without its hole, fading
-  // out closing; cut out again once it's done, see overlay.tsx.)
-  for (const backdrop of document.querySelectorAll<HTMLElement>(
-    '[data-grid-part="backdrop"]',
-  )) {
-    fillIn(backdrop);
-  }
   const naming: Naming = {
     bodies: new Set(),
     lifted: new Set(),

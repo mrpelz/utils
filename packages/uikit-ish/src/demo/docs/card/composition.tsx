@@ -351,7 +351,7 @@ const CameraCard = () => {
 </Grid.Item>`;
 
 const sizeCode = `// A card showing more the larger it is. Its parts are the card's own, so
-// they glide as it changes size; what it shows depends on its state.
+// they slide as it changes size; what it shows depends on its state.
 const celsius = {
   maximumFractionDigits: 1,
   minimumFractionDigits: 1,
@@ -367,7 +367,7 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
         isExpanded ? undefined : forwardClick('[data-card-part=corner-button]')
       }
     >
-      {/* In both forms: it glides to its new place, never pops. */}
+      {/* In both forms: it slides to its new place, never pops. */}
       <Card.Symbol>
         <Symbol icon={sfThermometerMedium} />
       </Card.Symbol>
@@ -1248,53 +1248,57 @@ export const CardComposition: FunctionComponent = () => (
       <li>
         A card changes size when it expands in place, when it opens above the
         page, and when it’s resized in edit mode. The first two are animated,
-        and the card does that part itself. Your content only has to lay itself
-        out well at every size and keep its parts recognizable.
+        and the library does that part itself. Your content only has to lay
+        itself out well at every size and keep its parts recognizable.
       </li>
       <li>
-        <strong>What the card does.</strong> Expanding in place, its glass grows
-        or shrinks from the old size to the new one, in step with the grid’s
-        other tiles moving. For that moment it sits above its neighbors and may
-        leave its tile’s bounds. Opening above the page, its size changes every
-        frame on the way to the middle of the screen and back. Either way, its
-        content is laid out at the new size at once.{' '}
-        <PartLink part="Card.Symbol" />, <PartLink part="Card.Title" /> and{' '}
-        <PartLink part="Card.Value" /> then glide from where they were to where
-        they are, keeping their distance to the nearer edges, and their text
-        sizes change over the same time. With reduced motion, everything changes
-        at once.
+        <strong>What the library does.</strong> The change is made at once: the
+        card is laid out at its new size, and the grid at its new layout. The
+        browser’s view transition then shows it getting there. The card’s glass
+        grows or shrinks to its new size, keeping its rounded corners, its rim
+        and its shadow. The tiles around it move to their new places.{' '}
+        <PartLink part="Card.Symbol" />, <PartLink part="Card.Title" />,{' '}
+        <PartLink part="Card.Value" /> and its corner buttons slide from where
+        they were to where they are. Without view transitions, or with reduced
+        motion, everything changes at once.
       </li>
       <li>
-        <strong>Use the card’s parts.</strong> Only the symbol, the title and
-        the value glide. They’re matched between the old and the new layout by
-        what they are, so keep the same part in both forms where it means the
-        same, like the heating card’s symbol. Your own elements, like a slider,
-        aren’t moved: they’re laid out at the new size, and the card’s moving
-        edge shows or hides them.
+        <strong>Use the card’s parts.</strong> Only the card’s parts move on
+        their own. They’re matched between the old and the new layout by what
+        they are, so keep the same part in both forms where it means the same,
+        like the heating card’s symbol. A part that’s only in one form fades out
+        or in. Your own elements, like a slider, belong to the glass: the card’s
+        moving edge shows or hides them.
       </li>
       <li>
         <strong>Choose detail by size, show state by content.</strong> The
         card’s layout already follows its size: side by side when it’s wide and
-        one row tall, its value large from about 180px. Open above the page, it
-        passes through every size in between, so don’t depend on reaching a
-        particular one. Switch what it shows when its state changes (expanded,
-        or open with{' '}
+        one row tall, its value large from about 180px. Switch what it shows
+        when its state changes (expanded, or open with{' '}
         <PartLink
           component="grid"
           part="useGridItem"
         />
-        ’s <code>open</code>), not in the middle of the move.
+        ’s <code>open</code>), in the same change as its size.
       </li>
       <li>
-        <strong>Keep text short.</strong> A title shows two lines at most, and
-        the in-between sizes are narrower than either end. Long words break with
-        a hyphen, but a short title reads better as the card moves.
+        <strong>Keep text short.</strong> A title shows two lines at most. Long
+        words break with a hyphen, but a short title reads better at every size.
       </li>
       <li>
-        <strong>Leave moving to the card.</strong> Don’t animate the parts
-        yourself: your animation and the card’s glide would fight. Don’t fade
-        content in or out with opacity either; in a scrolling page that costs
-        smoothness on iOS. Let the card’s edge show and hide it.
+        <strong>Leave moving to the library.</strong> Don’t animate the parts or
+        the card’s size yourself: the view transition shows the change as a
+        whole, and your animation would run underneath it.
+      </li>
+      <li>
+        <strong>Changes from your own code:</strong> a card’s corner button
+        already makes its change in a transition. Changing an item’s size or{' '}
+        <code>open</code> from anywhere else, wrap it in{' '}
+        <PartLink
+          component="grid"
+          part="startGridTransition"
+        />
+        , or it changes at once.
       </li>
       <li>
         <strong>Expanding in place:</strong> the expanded size must be in the
@@ -1315,8 +1319,8 @@ export const CardComposition: FunctionComponent = () => (
         closes it in the top leading corner and the button that opens it
         elsewhere, each <code>visible</code> in its own state: one fades out at
         the start of the move and the other fades in at its end. While the x is
-        there, the symbol stays beside the title, so it doesn’t move away and
-        back (see <a href="#opening-above-the-page">Opening above the page</a>).
+        there, the symbol moves beside the title, clear of it (see{' '}
+        <a href="#opening-above-the-page">Opening above the page</a>).
       </li>
       <li>
         <strong>Pressing the card:</strong> a card whose corner button and body
@@ -1329,9 +1333,9 @@ export const CardComposition: FunctionComponent = () => (
         card’s slider takes presses, so only its button collapses it.
       </li>
       <li>
-        <strong>Library:</strong> resizing the glass with the grid, laying out
-        at the new size, gliding the parts, text sizes, lifting above the page,
-        the corner buttons’ fades.
+        <strong>Library:</strong> the view transition (the glass resized, the
+        parts sliding and fading, the tiles around it moving), lifting above the
+        page, the corner buttons’ fades.
       </li>
       <li>
         <strong>Demo:</strong> the heating card’s two forms and its room, the

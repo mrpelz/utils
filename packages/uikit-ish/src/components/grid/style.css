@@ -1,17 +1,5 @@
 /* Grid (see main.tsx). */
 @layer uikit-ish {
-  /* While a view transition of tiles runs (see transition.ts): what's
-     blended into glass (labels, symbols) drawn plainly, as the flat glass
-     draws it (see Glass). In a view transition's snapshots, WebKit draws
-     the page isolated: a blend has nothing to blend with, its labels
-     gone. */
-  :where(:root[data-grid-transition]) * {
-    --uikit-glass-content-blend: normal !important;
-    --uikit-glass-content-prominent-blend: normal !important;
-    --uikit-symbol-blend: normal !important;
-    --uikit-toolbar-content-blend: normal !important;
-  }
-
   /* Square units: its columns and unit measured (see main.tsx), its rows
      as tall as a column is wide; placed by CSS grid, in order (`dense`:
      earlier holes filled). The containing block of its items' positions
@@ -1191,7 +1179,6 @@
   .uikit-grid-root .uikit-grid-item > .uikit-grid-item-body[data-grid-open] {
     position: absolute;
     z-index: 1001;
-    overflow: hidden;
     width: var(--uikit-grid-open-width, auto);
     height: var(--uikit-grid-open-height, auto);
     border-radius: var(--uikit-grid-item-radius, 24px);

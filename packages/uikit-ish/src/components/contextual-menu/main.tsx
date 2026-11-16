@@ -11,6 +11,7 @@ import {
   Ref,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -92,6 +93,19 @@ const Root = <Payload,>({
   // The preview's slot in the positioned stack (see `Positioner`), shown.
   const [slot, setSlot] = useState<HTMLElement | undefined>(undefined);
   const [backdrop, setBackdrop] = useState<HTMLElement | undefined>(undefined);
+  // (Open: the browser's own context menu nowhere. A touch held to open
+  // it fires one too (Android, a desktop browser's touch emulation) as it
+  // lifts, where the finger is: the trigger lifted away from under it, on
+  // the backdrop (Base UI's trigger cancels only its own).)
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const onContextMenu = (event: MouseEvent) => event.preventDefault();
+    document.addEventListener('contextmenu', onContextMenu, { capture: true });
+    return () =>
+      document.removeEventListener('contextmenu', onContextMenu, {
+        capture: true,
+      });
+  }, [isOpen]);
 
   const value = useMemo<ContextualMenuContextValue>(
     () => ({
