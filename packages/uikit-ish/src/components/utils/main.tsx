@@ -974,3 +974,52 @@ export const MovingHighlight: FunctionComponent<{
     />
   );
 };
+
+/** A cut-out backdrop's properties (see `cutOut`, the CSS). */
+const cutOutProperties = ['x', 'y', 'width', 'height', 'radius'] as const;
+
+/**
+ * A backdrop with a hole where an element is (its box, its corners'
+ * radius: its own, or `radius`; or a box, where one's drawn this frame),
+ * so it shows through (a contextual menu's
+ * lifted trigger, a grid's opened item): a mask (also its blur's, which a
+ * clip path leaves whole), drawn by the backdrop's CSS from these
+ * properties (`--uikit-cut-out-*`, see ContextualMenu's): gradients, no
+ * image to decode (a new one each frame would show a frame late).
+ */
+export const cutOut = (
+  backdrop: HTMLElement,
+  element:
+    Element | { height: number; left: number; top: number; width: number },
+  radius?: number,
+): void => {
+  const outer = backdrop.getBoundingClientRect();
+  const isElement = element instanceof Element;
+  const { height, left, top, width } = isElement
+    ? element.getBoundingClientRect()
+    : element;
+  const own = isElement
+    ? Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0
+    : 0;
+  const r = Math.min(radius ?? own, width / 2, height / 2);
+  const values = {
+    height,
+    radius: r,
+    width,
+    x: left - outer.left,
+    y: top - outer.top,
+  };
+  const { style } = backdrop;
+  for (const name of cutOutProperties) {
+    style.setProperty(`--uikit-cut-out-${name}`, `${String(values[name])}px`);
+  }
+  backdrop.dataset.cutOut = '';
+};
+
+/** The backdrop whole again (see `cutOut`). */
+export const fillIn = (backdrop: HTMLElement): void => {
+  for (const name of cutOutProperties) {
+    backdrop.style.removeProperty(`--uikit-cut-out-${name}`);
+  }
+  delete backdrop.dataset.cutOut;
+};

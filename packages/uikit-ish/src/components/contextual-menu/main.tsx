@@ -19,7 +19,7 @@ import {
 import { createPortal } from 'react-dom';
 
 import { Menu, MenuTrigger, openMenuByTrigger } from '../menu/main.js';
-import { cn, useForwardedRef } from '../utils/main.js';
+import { cn, cutOut, fillIn, useForwardedRef } from '../utils/main.js';
 import type {
   ContextualMenuContextValue,
   ContextualMenuHandle,
@@ -125,48 +125,6 @@ const Root = <Payload,>({
       />
     </ContextualMenuContext.Provider>
   );
-};
-
-/**
- * The backdrop with a hole where an element is (its box, its corners'
- * radii), so it shows through: a mask (also its blur's, which a clip path
- * leaves whole), an even-odd path of the backdrop's box, then the
- * element's.
- */
-const cutOut = (backdrop: HTMLElement, element: Element) => {
-  const outer = backdrop.getBoundingClientRect();
-  const { height, left, top, width } = element.getBoundingClientRect();
-  const x = left - outer.left;
-  const y = top - outer.top;
-  const radius = Math.min(
-    Number.parseFloat(getComputedStyle(element).borderTopLeftRadius) || 0,
-    width / 2,
-    height / 2,
-  );
-  const n = (value: number) => String(Math.round(value * 100) / 100);
-  const r = n(radius);
-  const path = [
-    `M0 0H${n(outer.width)}V${n(outer.height)}H0Z`,
-    `M${n(x + radius)} ${n(y)}H${n(x + width - radius)}`,
-    `A${r} ${r} 0 0 1 ${n(x + width)} ${n(y + radius)}`,
-    `V${n(y + height - radius)}`,
-    `A${r} ${r} 0 0 1 ${n(x + width - radius)} ${n(y + height)}`,
-    `H${n(x + radius)}`,
-    `A${r} ${r} 0 0 1 ${n(x)} ${n(y + height - radius)}`,
-    `V${n(y + radius)}`,
-    `A${r} ${r} 0 0 1 ${n(x + radius)} ${n(y)}Z`,
-  ].join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${n(outer.width)}" height="${n(outer.height)}"><path fill-rule="evenodd" d="${path}"/></svg>`;
-  const mask = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-  const { style } = backdrop;
-  style.setProperty('mask', `${mask} 0 0 / 100% 100% no-repeat`);
-  style.setProperty('-webkit-mask', `${mask} 0 0 / 100% 100% no-repeat`);
-};
-
-/** The backdrop whole again (see `cutOut`). */
-const fillIn = (backdrop: HTMLElement) => {
-  backdrop.style.removeProperty('mask');
-  backdrop.style.removeProperty('-webkit-mask');
 };
 
 /**

@@ -48,6 +48,13 @@ import {
   propOptionsPart as propOptionsPartButton,
 } from './button/props.js';
 import {
+  getPropOptionsCornerButton as getPropOptionsCornerButtonCard,
+  propOptionsRoot as propOptionsRootCard,
+  propOptionsSymbol as propOptionsSymbolCard,
+  propOptionsTitle as propOptionsTitleCard,
+  propOptionsValue as propOptionsValueCard,
+} from './card/props.js';
+import {
   getPropOptionsCheckbox as getPropOptionsCheckboxCheckbox,
   getPropOptionsCheckboxGroup as getPropOptionsCheckboxGroupCheckbox,
   getPropOptionsRadioGroup as getPropOptionsRadioGroupCheckbox,
@@ -115,6 +122,7 @@ import {
   getPropOptionsArea as getPropOptionsAreaGrid,
   getPropOptionsAreaButton as getPropOptionsAreaButtonGrid,
   getPropOptionsBreak as getPropOptionsBreakGrid,
+  getPropOptionsCornerButton as getPropOptionsCornerButtonGrid,
   getPropOptionsItem as getPropOptionsItemGrid,
   getPropOptionsRemoveButton as getPropOptionsRemoveButtonGrid,
   getPropOptionsResizeHandle as getPropOptionsResizeHandleGrid,
@@ -377,6 +385,11 @@ export const partOptions: Record<string, PartOptions> = {
   'ColorPicker.NamedColor': propOptionsNamedColorColorPicker,
   'ColorPicker.Opacity': propOptionsPartColorPicker,
   'ColorPicker.Panel': propOptionsPanelColorPicker,
+  'Card.CornerButton': getPropOptionsCornerButtonCard,
+  'Card.Root': propOptionsRootCard,
+  'Card.Symbol': propOptionsSymbolCard,
+  'Card.Title': propOptionsTitleCard,
+  'Card.Value': propOptionsValueCard,
   'ColorPicker.Root': getPropOptionsRootColorPicker,
   'ColorPicker.Sliders': propOptionsSlidersColorPicker,
   'ColorPicker.Spectrum': propOptionsPartColorPicker,
@@ -422,6 +435,7 @@ export const partOptions: Record<string, PartOptions> = {
   'Grid.Area': getPropOptionsAreaGrid('area'),
   'Grid.AreaButton': getPropOptionsAreaButtonGrid,
   'Grid.Break': getPropOptionsBreakGrid('break'),
+  'Grid.CornerButton': getPropOptionsCornerButtonGrid,
   'Grid.Header': propOptionsHeaderGrid,
   'Grid.Item': getPropOptionsItemGrid('item'),
   'Grid.RemoveButton': getPropOptionsRemoveButtonGrid,

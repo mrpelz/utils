@@ -19,6 +19,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import type { SymbolIcon } from '../symbol/main.js';
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import { dashCountOf, dashRadius } from './dashes.js';
 import { slop, touchHold, useEditing } from './edit.js';
@@ -30,12 +31,14 @@ import {
   type GridReorderHandle,
   handlesOf,
   isFull,
+  measureOf,
   reorder,
   sizesUpTo,
   sortSizes,
   spanOf,
   useCreateReorderHandle,
 } from './handle.js';
+import { gridIcons } from './icons.js';
 import {
   breakOutlineOf,
   fullOutlineOf,
@@ -49,6 +52,7 @@ import {
   unitRangeOf,
   useReflow,
 } from './layout.js';
+import { useOverlay } from './overlay.js';
 import { type At, landingOf, type Unit } from './plan.js';
 import type {
   GridAreaButtonProps,
@@ -56,10 +60,12 @@ import type {
   GridAreaState,
   GridBreakProps,
   GridBreakRows,
+  GridCornerButtonProps,
   GridDropGroupProps,
   GridHeaderProps,
   GridItemProps,
   GridItemState,
+  GridOpenChangeReason,
   GridPlacement,
   GridRemoveButtonProps,
   GridReorderPart,
@@ -73,16 +79,26 @@ import type {
 } from './props.js';
 
 export { type GridReorderCells, GridReorderHandle } from './handle.js';
+export { cardIcons, gridIcons } from './icons.js';
+// (The reflow's timing, for what moves with it inside the library, e.g. a
+// card resizing itself.)
+export { reflowDuration, reflowEasing } from './layout.js';
+// (What's in an item hears as its grid resizes it, see overlay.tsx.)
+export { gridResizeEvent } from './overlay.js';
 export type {
   GridAreaButtonProps,
   GridAreaProps,
   GridAreaState,
+  GridCorner,
+  GridCornerButtonProps,
   GridBreakProps,
   GridBreakRows,
   GridDropGroupProps,
   GridHeaderProps,
   GridItemProps,
   GridItemState,
+  GridOpenChangeDetails,
+  GridOpenChangeReason,
   GridPlacement,
   GridReorderChange,
   GridReorderEventDetails,
@@ -172,6 +188,10 @@ type CellState = GridItemState & {
   area: GridSize;
   /** Whether it has an area (a `Grid.Area` in it). */
   hasArea: boolean;
+  /** Whether its area's sizes are free (no list given: any size). */
+  isFreeArea: boolean;
+  /** Whether its sizes are free (no list given: any size). */
+  isFreeSize: boolean;
   movable: boolean;
   placement: GridPlacement;
   requestArea: (area: GridSize, details?: GridSizeChangeDetails) => void;
@@ -587,7 +607,7 @@ const supportedOf = (
 ) => {
   if (given === undefined) return sizesUpTo(columns, maxTileRows);
   const held = given.filter((size) => spanOf(size, columns)[1] <= maxTileRows);
-  return sortSizes(held.length > 0 ? held : given);
+  return sortSizes(held.length > 0 ? held : given, columns);
 };
 
 /**
@@ -639,17 +659,21 @@ const cornerInsetOf = (cell: HTMLElement) =>
 /**
  * How much of its end-of-line column (and a gap) a tile in a full-width
  * area moves on by, editing (its area running through it, see the CSS):
- * inset off its trailing edge, all of it; truly centered, half; a full
- * width's own tile, none (it runs through it too); elsewhere, none.
+ * truly centered with a column's room across, half (clear of the column's
+ * cut-away part, see layout.ts); elsewhere none (a trailing one inset off
+ * its last column, where its area's shape is cut; a full width's own
+ * tile kept to its columns too).
  */
 const stripShareOf = (
   placement: GridPlacement,
-  ix: number,
-  { isFullArea, isFullBody }: { isFullArea: boolean; isFullBody: boolean },
+  {
+    across,
+    isFullArea,
+    isFullBody,
+  }: { across: number; isFullArea: boolean; isFullBody: boolean },
 ) => {
   if (!isFullArea || isFullBody) return 0;
-  if (placement === 'center') return 0.5;
-  return ix < 0 ? 1 : 0;
+  return placement === 'center' && across >= 1 ? 0.5 : 0;
 };
 
 /**
@@ -692,6 +716,9 @@ const toldSizes = new Set<string>();
  * the leading side winning the rounding); asked to change; for
  * `useGridItem`.
  */
+/** Never open (a spacer, a break; an item's own, see `Item`). */
+const noOpen = () => undefined;
+
 const useCell = ({
   area: spec,
   defaultSize = '1x1',
@@ -788,7 +815,8 @@ const useCell = ({
     [layoutColumns, layoutRows],
     [sizeColumns, sizeRows],
   );
-  const stripShare = stripShareOf(placement, insetX, {
+  const stripShare = stripShareOf(placement, {
+    across: layoutColumns - sizeColumns,
     isFullArea: isFullWidth && layout !== size,
     isFullBody: isFull(size),
   });
@@ -801,18 +829,25 @@ const useCell = ({
   );
   const requestArea = spec?.requestSize ?? requestSize;
   const hasArea = spec !== undefined;
+  const isFreeArea = supportedAreas === undefined;
+  const isFreeSize = supportedSizes === undefined;
   const state = useMemo(
     (): CellState => ({
       area: layout,
       editing,
       hasArea,
       isFitted: isFitted || free.isFitted,
+      isFreeArea,
+      isFreeSize,
       movable,
+      // (Closed: an item's own, see `Item`.)
+      open: false,
       placement,
       requestArea,
       requested,
       requestPlacement,
       requestSize,
+      setOpen: noOpen,
       size,
       supportedAreas: sortedAreas,
       supportedSizes: sorted,
@@ -822,6 +857,8 @@ const useCell = ({
       free.isFitted,
       hasArea,
       isFitted,
+      isFreeArea,
+      isFreeSize,
       layout,
       movable,
       placement,
@@ -876,9 +913,6 @@ const useCell = ({
       // (Trailing in a full-width area: off its end-of-line column's end.)
       '--uikit-grid-inset-strip': String(stripShare),
       '--uikit-grid-inset-y': String(insetY),
-      // (A full width in a full-width area: on through its end-of-line
-      // column, its hatch's cutout too.)
-      '--uikit-grid-body-strip': isFull(size) && isFullWidth ? '1' : '0',
     },
     // (Hatched while editing: room around its tile.)
     hasRoom: layout !== size,
@@ -891,60 +925,88 @@ const useCell = ({
 };
 
 /**
- * A resize handle's arc (see `ResizeHandle`): on a circle around (20, 20)
- * in its 44px box (concentric with a 24px corner), radius 16, between its
- * ends' angles; a moat of dots on the same angles, 4px outside (it can't
- * grow) or inside (it can't shrink), the first and last exactly at the
- * arc's ends, the rest evenly between (computed here: drawn as given, not
- * as a browser spaces dashes).
+ * A resize handle's icon, by where its tile can go (see `ResizeHandle`):
+ * the arc, a chevron inside it; free (any size), the arc alone.
  */
-const arcFrom = Math.atan2(6.1, 14.8);
-const arcTo = Math.atan2(14.8, 6.1);
-const arcPoint = (radius: number, angle: number) =>
-  [
-    Math.round((20 + radius * Math.cos(angle)) * 100) / 100,
-    Math.round((20 + radius * Math.sin(angle)) * 100) / 100,
-  ] as const;
-const arcPath = `M${arcPoint(16, arcFrom).join(' ')}A16 16 0 0 1 ${arcPoint(16, arcTo).join(' ')}`;
-const moatOf = (radius: number, count: number) =>
-  Array.from({ length: count }, (_, index) =>
-    arcPoint(radius, arcFrom + ((arcTo - arcFrom) * index) / (count - 1)),
-  );
-const moats: Readonly<
-  Record<'both' | 'grow' | 'shrink', readonly (readonly [number, number])[]>
-> = {
-  both: [],
-  // (Growing only: it can't get smaller, guarded inside.)
-  grow: moatOf(12, 4),
-  // (Shrinking only: it can't get bigger, guarded outside.)
-  shrink: moatOf(20, 5),
+type ResizeDirection = 'both' | 'fixed' | 'free' | 'grow' | 'shrink';
+const resizeIcons: Readonly<Record<ResizeDirection, SymbolIcon>> = {
+  both: gridIcons.resizeBoth,
+  fixed: gridIcons.resize,
+  free: gridIcons.resize,
+  grow: gridIcons.resizeGrow,
+  shrink: gridIcons.resizeShrink,
 };
 
 /**
- * A handle's backing (see the CSS): one shape, filled, under its arc and
- * its moat (none overlapping another's, as strokes would): the arc's
- * band, 1.5px around its line, round ended; each dot's disc, 1px around
- * it. All drawn clockwise, so they join.
+ * A corner icon (see `CornerButton`): its outlines, filled, at its size
+ * (its view box in its units, by the button's font size); each with a
+ * stroke under it, its backing (shown where there's no fill under it,
+ * see the CSS).
  */
-const backingOf = (moat: readonly (readonly [number, number])[]) => {
-  const band = [
-    `M${arcPoint(18.5, arcFrom).join(' ')}`,
-    `A18.5 18.5 0 0 1 ${arcPoint(18.5, arcTo).join(' ')}`,
-    `A2.5 2.5 0 0 1 ${arcPoint(13.5, arcTo).join(' ')}`,
-    `A13.5 13.5 0 0 0 ${arcPoint(13.5, arcFrom).join(' ')}`,
-    `A2.5 2.5 0 0 1 ${arcPoint(18.5, arcFrom).join(' ')}Z`,
-  ].join('');
-  const discs = moat.map(
-    ([cx, cy]) =>
-      `M${String(cx + 2)} ${String(cy)}A2 2 0 1 1 ${String(cx - 2)} ${String(cy)}A2 2 0 1 1 ${String(cx + 2)} ${String(cy)}Z`,
+const CornerIcon = ({ icon }: { icon: SymbolIcon }) => {
+  const [width = 0, height = 0] = icon.viewBox.split(' ').slice(2).map(Number);
+  const units = icon.unitsPerEm ?? 20;
+  const opacity = Math.max(
+    ...icon.svgPathData.map(({ fillOpacity = 1 }) => fillOpacity),
   );
-  return [band, ...discs].join('');
+  return (
+    <svg
+      aria-hidden
+      className="uikit-grid-corner-icon"
+      data-symbol={icon.sourceName}
+      height={`${String(height / units)}em`}
+      viewBox={icon.viewBox}
+      width={`${String(width / units)}em`}
+    >
+      {icon.svgPathData.map(({ d, fillOpacity = 1 }, index) => (
+        <path
+          key={index}
+          d={d}
+          fillOpacity={
+            fillOpacity === opacity ? undefined : fillOpacity / opacity
+          }
+        />
+      ))}
+    </svg>
+  );
 };
-const backings = {
-  both: backingOf(moats.both),
-  grow: backingOf(moats.grow),
-  shrink: backingOf(moats.shrink),
-};
+
+/**
+ * A button in its cell's corner (see the CSS): a 44px target there, its
+ * icon 16.5px in from both of the corner's edges (`gridIcons`,
+ * `cardIcons`, or the app's). Hidden (`visible` false): faded out by its
+ * color, inert. The grid's own controls are ones (shown while editing); a
+ * card's (`Card.CornerButton`) shown while it isn't.
+ */
+const CornerButton = forwardRef<HTMLButtonElement, GridCornerButtonProps>(
+  (
+    {
+      className,
+      corner = 'bottom-trailing',
+      icon,
+      mirrored = false,
+      render,
+      visible = true,
+      ...props
+    },
+    ref,
+  ) =>
+    useRender({
+      defaultTagName: 'button',
+      props: {
+        className: cn('uikit-grid-corner-button', className),
+        'data-grid-corner': corner,
+        'data-grid-hidden': visible ? undefined : '',
+        'data-grid-mirrored': mirrored ? '' : undefined,
+        inert: !visible,
+        type: 'button',
+        ...props,
+        children: <CornerIcon icon={icon} />,
+      },
+      ref,
+      render,
+    }),
+);
 
 /** A movable tile's mark (see `moveSignOf`: its sign on it). */
 const movableMark = { 'data-grid-movable': '' };
@@ -955,24 +1017,14 @@ const movableMark = { 'data-grid-movable': '' };
  */
 const moveSignOf = (entry: { 'data-grid-movable'?: string }) =>
   entry['data-grid-movable'] === undefined ? null : (
-    <svg
+    <span
       aria-hidden
       className="uikit-grid-move-sign"
-      viewBox="0 0 44 44"
+      data-grid-corner="top-trailing"
+      data-grid-mirrored=""
     >
-      {/* (A ring, as far in as a remove button's x: its backing first.) */}
-      <circle
-        className="uikit-grid-move-sign-backing"
-        cx={27.5}
-        cy={16.5}
-        r={4}
-      />
-      <circle
-        cx={27.5}
-        cy={16.5}
-        r={4}
-      />
-    </svg>
+      <CornerIcon icon={gridIcons.move} />
+    </span>
   );
 
 /** A tile's dashed outline (see dashes.ts), by its size. */
@@ -1182,6 +1234,7 @@ const nearestPlacement = (cell: HTMLElement, at: readonly [number, number]) => {
     value('--uikit-grid-body-rows'),
   ] as const;
   const fulls = {
+    across: area[0] - size[0],
     isFullArea: isFullAreaOf(cell),
     isFullBody:
       cell
@@ -1195,11 +1248,7 @@ const nearestPlacement = (cell: HTMLElement, at: readonly [number, number]) => {
     const [x, y] = placementOffset(placement, area, size);
     // (Inset off its corner there, as it'd be, see `insetOf`.)
     const inset = insetOf(placement, area, size);
-    const [ex, ey] = insetPxOf(
-      cell,
-      inset,
-      stripShareOf(placement, inset[0], fulls),
-    );
+    const [ex, ey] = insetPxOf(cell, inset, stripShareOf(placement, fulls));
     const px: [number, number] = [
       x * (metrics.column + metrics.gap) + ex,
       y * (metrics.unit + metrics.gap) + ey,
@@ -1438,9 +1487,14 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     {
       children,
       className,
+      defaultOpen = false,
       defaultSize,
       dropName,
+      onOpenChange,
       onSizeChange,
+      open: controlledOpen,
+      openLabel,
+      openSize = '4x3',
       reorderHandle,
       size: controlledSize,
       style,
@@ -1458,7 +1512,7 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
       hasRoom,
       isFull: isFullWidth,
       spanStyle,
-      state,
+      state: cellState,
     } = useCell({
       area: spec,
       defaultSize,
@@ -1468,12 +1522,64 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     });
 
     const body = useRef<HTMLDivElement>(null);
+    // (Open above the page (see overlay.tsx): never while editing, which
+    // closes it.)
+    const { columns, gap, unit } = useContext(GridContext);
+    const [ownOpen, setOwnOpen] = useState(defaultOpen);
+    // (Editing started: closed (its own state too, as it renders).)
+    const [wasEditing, setWasEditing] = useState(cellState.editing);
+    if (wasEditing !== cellState.editing) {
+      setWasEditing(cellState.editing);
+      if (cellState.editing) setOwnOpen(false);
+    }
+    const isOpen = (controlledOpen ?? ownOpen) && !cellState.editing;
+    const latestOpen = useRef(onOpenChange);
+    const wasOpen = useRef(isOpen);
+    useLayoutEffect(() => {
+      latestOpen.current = onOpenChange;
+      // (Closed by editing: told, as any other way.)
+      if (wasOpen.current && !isOpen && cellState.editing) {
+        onOpenChange?.(false, { reason: 'edit' });
+      }
+      wasOpen.current = isOpen;
+    });
+    const changeOpen = useCallback(
+      (next: boolean, reason: GridOpenChangeReason) => {
+        setOwnOpen(next);
+        latestOpen.current?.(next, { reason });
+      },
+      [],
+    );
+    const [standIn, setStandIn] = useState<HTMLSpanElement | null>(null);
+    const [openColumns, openRows] = spanOf(openSize, columns);
+    const [phase, backdrop, underlay] = useOverlay({
+      body,
+      isOpen,
+      onClose: (reason) => changeOpen(false, reason),
+      size: [
+        openColumns * unit + (openColumns - 1) * gap,
+        openRows * unit + (openRows - 1) * gap,
+      ],
+      standIn,
+    });
+    const state = useMemo(
+      (): CellState => ({
+        ...cellState,
+        open: isOpen,
+        setOpen: (next: boolean) => changeOpen(next, 'none'),
+      }),
+      [cellState, changeOpen, isOpen],
+    );
     // (Filling its area: nowhere to go in it; held, its area moves (the
-    // item, its cell), its ring the area's, see the CSS.)
-    const isPlaceable = state.editing && state.movable && hasRoom;
+    // item, its cell), its crosshairs the area's, see the CSS.)
+    const isPlaceable = cellState.editing && cellState.movable && hasRoom;
+    // (Focused: moved in its area by keys; open, as a dialog.)
+    let bodyTabIndex: number | undefined;
+    if (isPlaceable) bodyTabIndex = 0;
+    else if (isOpen) bodyTabIndex = -1;
     const onBodyKeyDown = usePlacing(ref, body, isPlaceable, {
-      placement: state.placement,
-      request: state.requestPlacement,
+      placement: cellState.placement,
+      request: cellState.requestPlacement,
     });
 
     return (
@@ -1484,27 +1590,52 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
               ref={ref}
               data-grid-full={isFullWidth ? '' : undefined}
               data-grid-part="item"
-              data-grid-placement={state.placement}
+              data-grid-placement={cellState.placement}
               data-grid-room={hasRoom ? '' : undefined}
-              data-size={state.area}
+              data-size={cellState.area}
               style={withStyle({ ...spanStyle, ...bodyStyle }, style)}
               {...entry}
               {...props}
               className={cn('uikit-grid-item', className)}
             >
+              {/* (Its room's edge, editing: the area told from the rows
+                  around it, see the CSS.) */}
+              {hasRoom ? (
+                <span
+                  aria-hidden="true"
+                  className="uikit-grid-room-edge"
+                  data-grid-part="room-edge"
+                />
+              ) : null}
               <div
                 ref={body}
+                aria-label={isOpen ? openLabel : undefined}
+                aria-modal={isOpen ? true : undefined}
                 className="uikit-grid-item-body"
                 data-grid-movable-body={isPlaceable ? '' : undefined}
+                data-grid-open={phase}
                 data-grid-part="body"
-                data-size={state.size}
-                tabIndex={isPlaceable ? 0 : undefined}
+                data-size={cellState.size}
+                role={isOpen ? 'dialog' : undefined}
+                tabIndex={bodyTabIndex}
                 onKeyDown={onBodyKeyDown}
               >
                 {children}
                 {/* (Movable in its area: its own sign, on it.) */}
                 {isPlaceable ? moveSignOf(movableMark) : null}
               </div>
+              {/* (Open above the page: its place kept, see overlay.tsx.) */}
+              {phase ? (
+                <span
+                  ref={setStandIn}
+                  aria-hidden="true"
+                  className="uikit-grid-stand-in"
+                  data-grid-part="stand-in"
+                  data-size={cellState.size}
+                />
+              ) : null}
+              {backdrop}
+              {underlay}
               <div
                 ref={setSlot}
                 className="uikit-grid-item-slot"
@@ -1617,6 +1748,91 @@ const limitOf = (reach: Reach | undefined, most: number, columns: number) => {
 const tapTime = 350;
 
 /**
+ * A resize's row change shown in its row's end-of-line column (see
+ * `showWrap`): grown into the next row, an outline from the tile to that
+ * column, as tall as it, a return sign in it (a break's); shrunk back into
+ * the row before, the opposite sign there, as tall as it'll be (px, from
+ * the cell's top leading corner).
+ */
+type Wrap = {
+  box: readonly [x: number, y: number, width: number, height: number];
+  direction: 'next' | 'previous';
+  /** Shrunk back: the same again at the start of its own row, over it. */
+  echo?: readonly [x: number, y: number, width: number, height: number];
+  from?: readonly [x: number, y: number, width: number, height: number];
+};
+
+const wrapOf = (
+  cell: HTMLElement,
+  { metrics, own }: Reach,
+  [, rows]: readonly [number, number],
+  [, dy]: readonly [number, number],
+): Wrap | undefined => {
+  if (dy === 0 || metrics.end <= 0) return undefined;
+  const x = (metrics.columns - own.column) * (metrics.column + metrics.gap);
+  if (dy > 0) {
+    return {
+      box: [x, 0, metrics.end, cell.offsetHeight],
+      direction: 'next',
+      from: [0, 0, cell.offsetWidth, cell.offsetHeight],
+    };
+  }
+  const height = rows * (metrics.unit + metrics.gap) - metrics.gap;
+  return {
+    box: [x, dy, metrics.end, height],
+    direction: 'previous',
+    // (The second as tall as the tile is now, before the resize: what it
+    // leaves, however its new size grows or shrinks.)
+    echo: [0, 0, metrics.end, cell.offsetHeight],
+  };
+};
+
+/** Cells' row-change outlines (see `showWrap`). */
+const wraps = new WeakMap<HTMLElement, HTMLElement[]>();
+
+/**
+ * A resize's row change shown (see `Wrap`), or not: elements of their own
+ * in the cell, beside its resize outline; animated there from the tile
+ * (growing), faded in (shrinking: also at the start of its own row), see
+ * the CSS.
+ */
+const showWrap = (cell: HTMLElement, wrap: Wrap | undefined) => {
+  const elements = wraps.get(cell) ?? [];
+  const boxes = wrap ? [wrap.box, ...(wrap.echo ? [wrap.echo] : [])] : [];
+  while (elements.length > boxes.length) elements.pop()?.remove();
+  for (const [index, box] of boxes.entries()) {
+    let element = elements[index];
+    const isNew = !element || element.dataset.direction !== wrap?.direction;
+    if (!element) {
+      element = document.createElement('div');
+      element.className = 'uikit-grid-resize-wrap';
+      element.dataset.gridPart = 'resize-wrap';
+      element.setAttribute('aria-hidden', 'true');
+      cell.append(element);
+      elements.push(element);
+    }
+    const target = element;
+    const place = ([x, y, width, height]: Wrap['box']) => {
+      target.style.setProperty('inset-inline-start', `${String(x)}px`);
+      target.style.setProperty('inset-block-start', `${String(y)}px`);
+      target.style.setProperty('width', `${String(width)}px`);
+      target.style.setProperty('height', `${String(height)}px`);
+    };
+    target.dataset.direction = wrap?.direction;
+    if (isNew) {
+      delete target.dataset.shown;
+      place((index === 0 && wrap?.from) || box);
+      // (Laid out where it starts, then on: its transition, see the CSS.)
+      target.getBoundingClientRect();
+    }
+    place(box);
+    target.dataset.shown = '';
+  }
+  if (elements.length > 0) wraps.set(cell, elements);
+  else wraps.delete(cell);
+};
+
+/**
  * A cell's size to be while its handle's held (see `ResizeHandle`):
  * outlined over it (see the CSS), nothing moving yet; none, none.
  */
@@ -1627,6 +1843,7 @@ const showResize = (
   offset?: readonly [number, number],
 ) => {
   if (!size) {
+    showWrap(cell, undefined);
     delete cell.dataset.gridResizing;
     delete cell.dataset.gridResizeFull;
     delete cell.dataset.gridResizeShaped;
@@ -1847,9 +2064,10 @@ const spanDragged = (
   size: GridSize,
   reach: Reach | undefined,
   columns: number,
+  canFull = false,
 ): [number, number] => {
   const [c, r] = spanOf(size, columns);
-  return [reach && isFull(size) ? columns + 1 : c, r];
+  return [(reach || canFull) && isFull(size) ? columns + 1 : c, r];
 };
 
 /**
@@ -1986,15 +2204,19 @@ const draggedSize = (
   resized: GridSize,
   span: readonly [number, number],
   {
+    canFull = false,
     columns,
     isPast,
     reach,
-  }: { columns: number; isPast: boolean; reach?: Reach },
+  }: { canFull?: boolean; columns: number; isPast: boolean; reach?: Reach },
 ) => {
-  const isFullSpan = reach !== undefined && span[0] > columns;
-  const pool = reach
-    ? sizes.filter((each) => isFull(each) === isFullSpan)
-    : sizes;
+  // (Past its row's end, or into a full-width area's end-of-line column
+  // (`canFull`): a full width; else as wide as the columns at most.)
+  const isFullSpan = (reach !== undefined || canFull) && span[0] > columns;
+  const pool =
+    reach || canFull
+      ? sizes.filter((each) => isFull(each) === isFullSpan)
+      : sizes;
   const closest = closestSize(
     pool.length > 0 ? pool : [resized],
     isFullSpan ? columns : span[0],
@@ -2005,6 +2227,29 @@ const draggedSize = (
   return isPast && closest && was !== -1 && sizes.indexOf(closest) <= was
     ? (sizes[was + 1] ?? closest)
     : closest;
+};
+
+/**
+ * Its grid's root marked while a cell's resized by a drag (see the CSS;
+ * e.g. a card's content unveiled, see Card).
+ */
+const markResizing = (cell: HTMLElement | null, isResizing: boolean) => {
+  const root = cell?.closest<HTMLElement>('[data-grid-part="root"]');
+  if (isResizing) root?.setAttribute('data-grid-drag', 'resize');
+  else root?.removeAttribute('data-grid-drag');
+};
+
+/**
+ * Whether a tile resized in its area is dragged past it (see
+ * `isPastBounds`): in a full-width area that may be a full width
+ * (`canFull`), only past its bottom (its end-of-line column a full width).
+ */
+const pastOf = (
+  { bounds, canFull }: { bounds?: Bounds; canFull: boolean },
+  at: readonly [number, number],
+) => {
+  if (!bounds) return false;
+  return canFull ? at[1] > bounds.bottom : isPastBounds(bounds, at);
 };
 
 /** Cells to be taken in by a resize (see `mergedBy`), marked (see the CSS). */
@@ -2040,7 +2285,8 @@ const placedOffset = (
   const to = insetPxOf(
     cell,
     inset,
-    stripShareOf(placement, inset[0], {
+    stripShareOf(placement, {
+      across: area[0] - columns,
       isFullArea: isFullAreaOf(cell),
       isFullBody,
     }),
@@ -2081,6 +2327,10 @@ const outlineResize = (
     ? landingOffset(reach, grown)
     : placedOffset(cell, grown, isFull(next));
   showResize(cell, next, columns, offset);
+  showWrap(
+    cell,
+    reach && offset ? wrapOf(cell, reach, grown, offset) : undefined,
+  );
   markMerged(current.merged, false);
   current.merged =
     isTaking && !offset ? mergedBy(cell, grown[0], grown[1]) : [];
@@ -2154,6 +2404,7 @@ const resizeTarget = (
   if (!item) {
     return {
       isBounded: false,
+      isFree: false,
       most: [columns, maxTileRows] as const,
       request: undefined,
       resized: undefined,
@@ -2177,6 +2428,7 @@ const resizeTarget = (
   if (isFilling) request = growingArea(item, columns, [areaColumns, areaRows]);
   return {
     isBounded,
+    isFree: isAreaHandle ? item.isFreeArea : item.isFreeSize,
     most,
     request,
     resized: isAreaHandle ? item.area : item.size,
@@ -2205,7 +2457,7 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
     const item = useContext(GridItemContext);
     // (In a `Grid.Area`: the area's, in its cell (see `Area`).)
     const isAreaHandle = useContext(GridAreaScopeContext);
-    const { isBounded, most, request, resized, sizes } = resizeTarget(
+    const { isBounded, isFree, most, request, resized, sizes } = resizeTarget(
       item,
       isAreaHandle,
       { columns, maxTileRows },
@@ -2214,6 +2466,8 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
       | {
           /** Its area's edges (a tile in its area, see `Bounds`). */
           bounds?: Bounds;
+          /** A full width reached in its full-width area's end-of-line column. */
+          canFull: boolean;
           cell: HTMLElement | null;
           from: readonly [number, number];
           id: number;
@@ -2247,11 +2501,17 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
     // (The next size, round to the first.)
     const following =
       resized && (sizes[(sizeIndex + 1) % sizes.length] ?? resized);
-    // (Only larger: grows; only smaller: shrinks.)
-    let direction: 'both' | 'grow' | 'shrink' = 'both';
-    if (sizeIndex <= 0) direction = 'grow';
-    else if (sizeIndex >= sizes.length - 1) direction = 'shrink';
-    const moat = moats[direction];
+    // (Only larger: grows; only smaller: shrinks; by their measures, a full
+    // width larger than as wide as the columns, see `measureOf`.)
+    const own = resized ? measureOf(resized, columns) : 0;
+    const canGrow = sizes.some((each) => measureOf(each, columns) > own);
+    const canShrink = sizes.some((each) => measureOf(each, columns) < own);
+    // (No list given, either way to go: free, the arc alone; at an end of
+    // what it can be (e.g. a full width, its most rows), one way only.)
+    let direction: ResizeDirection = isFree ? 'free' : 'both';
+    if (!canGrow && !canShrink) direction = 'fixed';
+    else if (!canShrink) direction = 'grow';
+    else if (!canGrow) direction = 'shrink';
 
     const onPointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
       if (!item?.editing || !resized || !event.isPrimary) return;
@@ -2268,15 +2528,23 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
         cell && !isBounded && cell.dataset.gridPart !== 'break'
           ? reachOf(cell, resized, sizes, event.clientX)
           : undefined;
+      // (A tile in a full-width area that may be a full width: its area's
+      // end-of-line column one column more, a full width; see
+      // `onPointerMove`.)
+      const canFull =
+        isBounded &&
+        Object.hasOwn(cell?.parentElement?.dataset ?? {}, 'gridFull') &&
+        sizes.some((each) => isFull(each));
       drag.current = {
         bounds: cell && isBounded ? boundsOf(cell) : undefined,
+        canFull,
         cell,
-        from: spanDragged(resized, reach, columns),
+        from: spanDragged(resized, reach, columns, canFull),
         id: event.pointerId,
         isDragging: false,
         merged: [],
         reach,
-        span: spanDragged(resized, reach, columns),
+        span: spanDragged(resized, reach, columns, canFull),
         start: [event.clientX, event.clientY],
         time: event.timeStamp,
       };
@@ -2298,15 +2566,24 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
       ) {
         return;
       }
+      // (Its root too, once it's dragged (not at the touch's start): what's
+      // in the grid may show itself while one's resized, see Card.)
+      if (!current.isDragging) markResizing(current.cell, true);
       current.isDragging = true;
       const { reach } = current;
+      // (Its area's end-of-line column a full width (see `onPointerDown`);
+      // past its bottom only, its next size up.)
+      const { canFull } = current;
       const span = draggedSpan(
         current,
         at,
         reach?.metrics ?? metricsOf(event.currentTarget),
-        [limitOf(reach, most[0] ?? columns, columns), most[1] ?? maxTileRows],
+        [
+          canFull ? columns + 1 : limitOf(reach, most[0] ?? columns, columns),
+          most[1] ?? maxTileRows,
+        ],
       );
-      const isPast = current.bounds ? isPastBounds(current.bounds, at) : false;
+      const isPast = pastOf(current, at);
       if (
         span[0] === current.span[0] &&
         span[1] === current.span[1] &&
@@ -2317,6 +2594,7 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
       current.span = span;
       current.isPast = isPast;
       const next = draggedSize(sizes, resized, span, {
+        canFull,
         columns,
         isPast,
         reach,
@@ -2339,6 +2617,7 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
       // changes nothing, see `onClick`.)
       swallowClick(event.pointerType);
       if (current.cell) showResize(current.cell, undefined);
+      if (current.isDragging) markResizing(current.cell, false);
       markMerged(current.merged, false);
       // (Tapped, not dragged: the next size, as by a key; also where
       // there's no room to drag it. Held, not dragged: nothing.)
@@ -2365,42 +2644,29 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
       }
     };
 
-    const element = useRender({
-      defaultTagName: 'button',
-      props: {
-        'aria-label': 'Resize',
-        children: (
-          <svg
-            aria-hidden
-            className="uikit-grid-resize-handle-arc"
-            viewBox="0 0 44 44"
-          >
-            {/* (Concentric with a 24px corner, 8px in; its middle only.
-                Backings first, under every line.) */}
-            <path
-              className="uikit-grid-resize-handle-backing"
-              d={backings[direction]}
-            />
-            <path d={arcPath} />
-            {moat.map(([cx, cy]) => (
-              <circle
-                key={`${String(cx)},${String(cy)}`}
-                className="uikit-grid-resize-handle-moat"
-                cx={cx}
-                cy={cy}
-                r={1}
-              />
-            ))}
-          </svg>
-        ),
-        className: cn('uikit-grid-resize-handle', className),
-        'data-direction': direction,
-        'data-grid-area-handle': isAreaHandle ? '' : undefined,
-        'data-grid-edit-control': '',
-        'data-grid-part': 'resize-handle',
-        type: 'button',
-        ...props,
-        onClick: (event: ReactMouseEvent<HTMLButtonElement>) => {
+    // (Only with another size to be; shown while editing.)
+    if (sizes.length < 2) return null;
+    return (
+      <CornerButton
+        ref={ref}
+        mirrored
+        aria-label="Resize"
+        className={cn('uikit-grid-resize-handle', className)}
+        corner="bottom-trailing"
+        data-direction={direction}
+        data-grid-area-handle={isAreaHandle ? '' : undefined}
+        data-grid-edit-control=""
+        data-grid-part="resize-handle"
+        icon={resizeIcons[direction]}
+        render={render}
+        visible={item?.editing ?? false}
+        {...props}
+        onLostPointerCapture={onPointerEnd}
+        onPointerCancel={onPointerEnd}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerEnd}
+        onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
           onClick?.(event);
           // (Pressed by a key: the next size fitting the columns. By a
           // pointer: see `onPointerEnd`.)
@@ -2408,18 +2674,9 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
             return;
           }
           request?.(following);
-        },
-        onLostPointerCapture: onPointerEnd,
-        onPointerCancel: onPointerEnd,
-        onPointerDown,
-        onPointerMove,
-        onPointerUp: onPointerEnd,
-      },
-      ref,
-      render,
-    });
-    // (Editing only, and only with another size to be.)
-    return item?.editing && sizes.length > 1 ? element : null;
+        }}
+      />
+    );
   },
 );
 
@@ -2435,38 +2692,24 @@ const RemoveButton = forwardRef<HTMLButtonElement, GridRemoveButtonProps>(
   ({ className, render, ...props }, ref) => {
     const item = useContext(GridItemContext);
     const isArea = useContext(GridAreaScopeContext);
-    const element = useRender({
-      defaultTagName: 'button',
-      props: {
-        'aria-label': 'Remove',
-        children: (
-          <svg
-            aria-hidden
-            className="uikit-grid-remove-button-x"
-            viewBox="0 0 44 44"
-          >
-            {/* (In its corner as the arc is in its own.) */}
-            <path
-              className="uikit-grid-remove-button-backing"
-              d="M13 13l7 7M20 13l-7 7"
-            />
-            <path d="M13 13l7 7M20 13l-7 7" />
-          </svg>
-        ),
-        className: cn('uikit-grid-remove-button', className),
-        'data-grid-area-button': isArea ? '' : undefined,
+    return (
+      <CornerButton
+        ref={ref}
+        aria-label="Remove"
+        className={cn('uikit-grid-remove-button', className)}
+        corner="top-leading"
+        data-grid-area-button={isArea ? '' : undefined}
         // (Dragged from, as its cell: a finger meant for the cell; see
         // edit.ts. Tapped, its `onClick`.)
-        'data-grid-drag-through': '',
-        'data-grid-edit-control': '',
-        'data-grid-part': 'remove-button',
-        type: 'button',
-        ...props,
-      },
-      ref,
-      render,
-    });
-    return item?.editing ? element : null;
+        data-grid-drag-through=""
+        data-grid-edit-control=""
+        data-grid-part="remove-button"
+        icon={gridIcons.remove}
+        render={render}
+        visible={item?.editing ?? false}
+        {...props}
+      />
+    );
   },
 );
 
@@ -2501,9 +2744,6 @@ const addedAreaOf = (
   });
 };
 
-/** An add-an-area button's symbol (see `AreaButton`): the hatching's. */
-const areaSign = 'M11 26L15 22M11 33L22 22M18 33L22 29';
-
 /**
  * Adding an area to its item, editing (an edit control): three diagonal
  * strokes (the hatching's) in its tile's bottom leading corner, drawn as
@@ -2524,39 +2764,29 @@ const AreaButton = forwardRef<HTMLButtonElement, GridAreaButtonProps>(
       item && !item.hasArea
         ? addedAreaOf(item.size, supported, { columns, maxTileRows })
         : undefined;
-    const element = useRender({
-      defaultTagName: 'button',
-      props: {
-        'aria-label': 'Add area',
-        children: (
-          <svg
-            aria-hidden
-            className="uikit-grid-area-button-sign"
-            viewBox="0 0 44 44"
-          >
-            <path
-              className="uikit-grid-area-button-backing"
-              d={areaSign}
-            />
-            <path d={areaSign} />
-          </svg>
-        ),
-        className: cn('uikit-grid-area-button', className),
-        'data-grid-drag-through': '',
-        'data-grid-edit-control': '',
-        'data-grid-part': 'area-button',
-        type: 'button',
-        ...props,
-        onClick: (event: ReactMouseEvent<HTMLButtonElement>) => {
+    // (Only with an area to add; shown while editing.)
+    if (!added) return null;
+    return (
+      <CornerButton
+        ref={ref}
+        mirrored
+        aria-label="Add area"
+        className={cn('uikit-grid-area-button', className)}
+        corner="bottom-leading"
+        data-grid-drag-through=""
+        data-grid-edit-control=""
+        data-grid-part="area-button"
+        icon={gridIcons.addArea}
+        render={render}
+        visible={item?.editing ?? false}
+        {...props}
+        onClick={(event: ReactMouseEvent<HTMLButtonElement>) => {
           onClick?.(event);
-          if (event.defaultPrevented || !added) return;
+          if (event.defaultPrevented) return;
           onAdd?.(added);
-        },
-      },
-      ref,
-      render,
-    });
-    return item?.editing && added ? element : null;
+        }}
+      />
+    );
   },
 );
 
@@ -2614,12 +2844,17 @@ const Break = forwardRef<HTMLDivElement, GridBreakProps>(
         editing,
         hasArea: false,
         isFitted: false,
+        // (Any of its rows: free.)
+        isFreeArea: true,
+        isFreeSize: true,
         movable: false,
+        open: false,
         placement: 'center',
         requestArea: requestSize,
         requested: size,
         requestPlacement: noPlacement,
         requestSize,
+        setOpen: noOpen,
         size,
         supportedAreas: breakSizes,
         supportedSizes: breakSizes,
@@ -2659,6 +2894,7 @@ export const Grid = {
   Spacer,
   Spawn,
   Break,
+  CornerButton,
   ResizeHandle,
   RemoveButton,
   Area,

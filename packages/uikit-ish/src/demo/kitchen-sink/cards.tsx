@@ -1,0 +1,759 @@
+import { FunctionComponent, useState, useSyncExternalStore } from 'react';
+
+import {
+  Button,
+  Card,
+  cardIcons,
+  cardSizes,
+  forwardClick,
+  Grid,
+  type GridSize,
+  Header,
+  List,
+  Page,
+  Slider,
+  Switch,
+  Symbol,
+  type SymbolIcon,
+  Toolbar,
+  useCardOrientation,
+  useGridItem,
+  Viewport,
+} from '../../components/index.js';
+import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
+import {
+  sfDoorLeftHandClosed,
+  sfDoorLeftHandOpen,
+  sfFanFill,
+  sfHumidityFill,
+  sfLightbulb,
+  sfLightbulbFill,
+  sfLockFill,
+  sfLockOpenFill,
+  sfPhoto,
+  sfThermometerMedium,
+  sfWindowShadeClosed,
+} from '../tooling/icons.js';
+import { SectionHeader } from './grid-shared.js';
+import { BackButton, type SinkPages, usePush } from './shared.js';
+
+// Cards: a home's devices as cards in a grid on a picture, every kind in
+// each of its sizes: binary displays (a door, a lock), binary controls
+// (switches), numerical displays (a temperature, the humidity) and
+// numerical controls (sliders, continuous and stepped, horizontal and
+// vertical). Edit in the bar starts edit mode: the cards are veiled and
+// inert, moved and resized as tiles. More to It: cards with a corner
+// button (expanding in place, also within room around it; drilling into a
+// page of their own; opening above the page). Below the grid, two on their
+// own.
+
+/**
+ * A card's expansion (see `CardsApp`): whether it's expanded (the app's
+ * state, not stored), and asking for the other.
+ */
+type Expansion = { isExpanded: boolean; onToggle: () => void };
+
+/** A temperature, one decimal place. */
+const celsius: Intl.NumberFormatOptions = {
+  maximumFractionDigits: 1,
+  minimumFractionDigits: 1,
+  style: 'unit',
+  unit: 'celsius',
+};
+
+/**
+ * Heating: small, the room's temperature; expanded, a slider setting what
+ * it heats to. Its corner button expands it and makes it small again.
+ */
+const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
+  expansion,
+}) => {
+  const [target, setTarget] = useState(22);
+  const isExpanded = expansion?.isExpanded === true;
+  return (
+    <Card.Root
+      // (Small, a press anywhere on it as on its button; expanded, its
+      // slider's, the button alone expanding it no more.)
+      onClick={
+        expansion && !isExpanded
+          ? forwardClick('[data-card-part=corner-button]')
+          : undefined
+      }
+    >
+      <Card.Symbol>
+        <Symbol icon={sfThermometerMedium} />
+      </Card.Symbol>
+      {isExpanded ? (
+        <Slider.Root
+          format={celsius}
+          max={26}
+          min={16}
+          step={0.5}
+          tint="var(--color-ui-system-orange)"
+          value={target}
+          onValueChange={(next) => setTarget(next as number)}
+        >
+          <Slider.Control>
+            <Slider.Track>
+              <Slider.Indicator />
+              <Slider.Thumb aria-label="Heat to" />
+            </Slider.Track>
+          </Slider.Control>
+          <Slider.Label>Heat to</Slider.Label>
+          <Slider.Value />
+        </Slider.Root>
+      ) : (
+        <>
+          <Card.Title>Heating</Card.Title>
+          <Card.Value
+            format={celsius}
+            value={21.5}
+          />
+        </>
+      )}
+      {expansion ? (
+        <Card.CornerButton
+          mirrored
+          aria-expanded={isExpanded}
+          aria-label="Heating details"
+          icon={isExpanded ? cardIcons.collapse : cardIcons.expand}
+          onClick={expansion.onToggle}
+        />
+      ) : null}
+    </Card.Root>
+  );
+};
+
+/** A binary display: a state, shown by its symbol and its words. */
+const StateCard: FunctionComponent<{
+  icons: readonly [on: SymbolIcon, off: SymbolIcon];
+  isOn: boolean;
+  name: string;
+  words: readonly [on: string, off: string];
+}> = ({ icons, isOn, name, words }) => (
+  <Card.Root active={isOn}>
+    <Card.Symbol>
+      <Symbol icon={isOn ? icons[0] : icons[1]} />
+    </Card.Symbol>
+    <Card.Title>{name}</Card.Title>
+    <Card.Value>{isOn ? words[0] : words[1]}</Card.Value>
+  </Card.Root>
+);
+
+/** A binary control: a switch, the whole card toggling it. */
+const SwitchCard: FunctionComponent<{
+  defaultOn?: boolean;
+  icons: readonly [on: SymbolIcon, off: SymbolIcon];
+  name: string;
+}> = ({ defaultOn = false, icons, name }) => {
+  const [isOn, setIsOn] = useState(defaultOn);
+  return (
+    <Card.Root
+      active={isOn}
+      onClick={forwardClick('[role=switch]')}
+    >
+      <Card.Symbol>
+        <Symbol icon={isOn ? icons[0] : icons[1]} />
+      </Card.Symbol>
+      <Card.Title>{name}</Card.Title>
+      <Card.Value>{isOn ? 'On' : 'Off'}</Card.Value>
+      <Switch.Root
+        aria-label={name}
+        checked={isOn}
+        onCheckedChange={setIsOn}
+      >
+        <Switch.Thumb />
+      </Switch.Root>
+    </Card.Root>
+  );
+};
+
+/** A numerical display: a value, formatted as the app says. */
+const ValueCard: FunctionComponent<{
+  format: Intl.NumberFormatOptions;
+  icon: SymbolIcon;
+  name: string;
+  value: number;
+}> = ({ format, icon, name, value }) => (
+  <Card.Root>
+    <Card.Symbol>
+      <Symbol icon={icon} />
+    </Card.Symbol>
+    <Card.Title>{name}</Card.Title>
+    <Card.Value
+      format={format}
+      value={value}
+    />
+  </Card.Root>
+);
+
+/**
+ * A numerical control: a slider, the card its track, across or upright
+ * by its tile's shape; stepped (`step`), with ticks.
+ */
+const SliderCard: FunctionComponent<{
+  defaultValue: number;
+  format: Intl.NumberFormatOptions;
+  icon: SymbolIcon;
+  max: number;
+  min: number;
+  name: string;
+  step?: number;
+  tint?: string;
+}> = ({ defaultValue, format, icon, max, min, name, step, tint }) => {
+  const orientation = useCardOrientation();
+  const [value, setValue] = useState(defaultValue);
+  return (
+    <Card.Root>
+      <Card.Symbol>
+        <Symbol icon={icon} />
+      </Card.Symbol>
+      <Slider.Root
+        format={format}
+        max={max}
+        min={min}
+        orientation={orientation}
+        step={step ?? 0.01}
+        tint={tint}
+        value={value}
+        onValueChange={(next) => setValue(next as number)}
+      >
+        <Slider.Control>
+          <Slider.Track>
+            <Slider.Indicator />
+            {step === undefined ? null : (
+              <Slider.Ticks count={Math.round((max - min) / step) + 1} />
+            )}
+            <Slider.Thumb aria-label={name} />
+          </Slider.Track>
+        </Slider.Control>
+        <Slider.Label>{name}</Slider.Label>
+        <Slider.Value />
+      </Slider.Root>
+    </Card.Root>
+  );
+};
+
+/**
+ * The lights, on or off: the app's state, shared by their card and their
+ * page (two pages of the kitchen sink's, so kept outside both).
+ */
+type Lights = Readonly<Record<string, boolean>>;
+const lightsStore = (() => {
+  let lights: Lights = {
+    'Ceiling Light': true,
+    'Desk Lamp': false,
+    'Floor Lamp': true,
+  };
+  const listeners = new Set<() => void>();
+  return {
+    get: () => lights,
+    set: (name: string, isOn: boolean) => {
+      lights = { ...lights, [name]: isOn };
+      for (const listener of listeners) listener();
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+})();
+const useLights = () =>
+  useSyncExternalStore(lightsStore.subscribe, lightsStore.get);
+
+/**
+ * The lights: how many are on, bright while any is (`active`); its corner
+ * button goes to their page (`card/lights`), a switch per light; a press
+ * anywhere on it as on that button (it has no control of its own).
+ */
+const LightsCard: FunctionComponent = () => {
+  const push = usePush();
+  const onCount = Object.values(useLights()).filter(Boolean).length;
+  return (
+    <Card.Root
+      active={onCount > 0}
+      onClick={forwardClick('[data-card-part=corner-button]')}
+    >
+      <Card.Symbol>
+        <Symbol icon={onCount > 0 ? sfLightbulbFill : sfLightbulb} />
+      </Card.Symbol>
+      <Card.Title>Lights</Card.Title>
+      <Card.Value>{onCount > 0 ? `${String(onCount)} On` : 'Off'}</Card.Value>
+      <Card.CornerButton
+        aria-label="Lights"
+        icon={cardIcons.drillIn}
+        onClick={() => push('card/lights')}
+      />
+    </Card.Root>
+  );
+};
+
+/** The lights' page: a switch per light, a press on its row as on it. */
+const LightsPage: FunctionComponent = () => {
+  const lights = useLights();
+  return (
+    <List.Root>
+      <List.Section>
+        <List.Group>
+          {Object.entries(lights).map(([name, isOn]) => (
+            <List.Item
+              key={name}
+              onClick={forwardClick('[role=switch]')}
+            >
+              <List.Content>
+                <List.Title>{name}</List.Title>
+              </List.Content>
+              <List.Trailing>
+                <Switch.Root
+                  aria-label={name}
+                  checked={isOn}
+                  onCheckedChange={(next) => lightsStore.set(name, next)}
+                >
+                  <Switch.Thumb />
+                </Switch.Root>
+              </List.Trailing>
+            </List.Item>
+          ))}
+        </List.Group>
+      </List.Section>
+    </List.Root>
+  );
+};
+
+/**
+ * A camera: opened above the page (its item's `open`, see `CardsApp`) by
+ * its corner button or a press anywhere on it; open, larger, its x (top
+ * leading) closing it (as a press beside it, or Escape).
+ */
+const CameraCard: FunctionComponent = () => {
+  const item = useGridItem();
+  const isOpen = item?.open === true;
+  return (
+    <Card.Root
+      onClick={
+        isOpen
+          ? undefined
+          : forwardClick(
+              '[data-card-part=corner-button]:not([data-grid-hidden])',
+            )
+      }
+    >
+      <Card.Symbol>
+        <Symbol icon={sfPhoto} />
+      </Card.Symbol>
+      <Card.Title>Front Door Camera</Card.Title>
+      <Card.Value>{isOpen ? 'Live, recording' : 'Live'}</Card.Value>
+      {/* (Opening it, closed; its x, open, where the others' are: each
+          fading as it grows and shrinks.) */}
+      <Card.CornerButton
+        aria-label="Front Door Camera"
+        icon={cardIcons.overlay}
+        visible={!isOpen}
+        onClick={() => item?.setOpen(true)}
+      />
+      <Card.CornerButton
+        aria-label="Close"
+        corner="top-leading"
+        icon={cardIcons.close}
+        visible={isOpen}
+        onClick={() => item?.setOpen(false)}
+      />
+    </Card.Root>
+  );
+};
+
+/**
+ * A tile: a card's kind (its sizes), its size, the card in it; its size
+ * expanded, if it expands (see `Expansion`).
+ */
+type Tile = {
+  /** Room around its tile (a `Grid.Area`), its tile centered in it. */
+  area?: GridSize;
+  card: FunctionComponent<{ expansion?: Expansion }>;
+  expandedSize?: GridSize;
+  kind: keyof typeof cardSizes;
+  name: string;
+  /** Its size opened above the page (see `CameraCard`). */
+  openSize?: GridSize;
+  size: GridSize;
+};
+
+const percent: Intl.NumberFormatOptions = {
+  maximumFractionDigits: 0,
+  style: 'percent',
+};
+
+const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
+  'Living Room': [
+    {
+      card: () => (
+        <SwitchCard
+          defaultOn
+          icons={[sfLightbulbFill, sfLightbulb]}
+          name="Floor Lamp"
+        />
+      ),
+      kind: 'binaryControl',
+      name: 'Floor Lamp',
+      size: '2x1',
+    },
+    {
+      card: () => (
+        <SwitchCard
+          icons={[sfFanFill, sfFanFill]}
+          name="Ceiling Fan"
+        />
+      ),
+      kind: 'binaryControl',
+      name: 'Ceiling Fan',
+      size: '1x1',
+    },
+    {
+      card: () => (
+        <SliderCard
+          defaultValue={0.6}
+          format={percent}
+          icon={sfLightbulbFill}
+          max={1}
+          min={0}
+          name="Dimmer"
+          tint="var(--color-ui-system-yellow)"
+        />
+      ),
+      kind: 'numericalControl',
+      name: 'Dimmer',
+      size: '2x1',
+    },
+    {
+      card: () => (
+        <SliderCard
+          defaultValue={0.5}
+          format={percent}
+          icon={sfWindowShadeClosed}
+          max={1}
+          min={0}
+          name="Blinds"
+          step={0.25}
+        />
+      ),
+      kind: 'numericalControl',
+      name: 'Blinds',
+      size: '1x2',
+    },
+  ],
+  Climate: [
+    {
+      card: () => (
+        <ValueCard
+          icon={sfThermometerMedium}
+          name="Living Room Temperature"
+          value={21.5}
+          format={{
+            maximumFractionDigits: 1,
+            minimumFractionDigits: 1,
+            style: 'unit',
+            unit: 'celsius',
+          }}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Temperature',
+      size: '2x2',
+    },
+    {
+      card: () => (
+        <ValueCard
+          format={percent}
+          icon={sfHumidityFill}
+          name="Humidity"
+          value={0.46}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Humidity',
+      size: '1x1',
+    },
+    {
+      card: () => (
+        <SliderCard
+          defaultValue={21}
+          icon={sfThermometerMedium}
+          max={25}
+          min={15}
+          name="Thermostat"
+          step={0.5}
+          tint="var(--color-ui-system-orange)"
+          format={{
+            maximumFractionDigits: 1,
+            style: 'unit',
+            unit: 'celsius',
+          }}
+        />
+      ),
+      kind: 'numericalControl',
+      name: 'Thermostat',
+      size: '1x3',
+    },
+    {
+      card: () => (
+        <ValueCard
+          icon={sfFanFill}
+          name="Wind"
+          value={12.5}
+          format={{
+            maximumFractionDigits: 1,
+            style: 'unit',
+            unit: 'kilometer-per-hour',
+          }}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Wind',
+      size: '2x1',
+    },
+  ],
+  'More to It': [
+    {
+      card: HeatingCard,
+      expandedSize: '2x2',
+      kind: 'numericalDisplay',
+      name: 'Heating',
+      size: '1x1',
+    },
+    {
+      card: HeatingCard,
+      expandedSize: '2x2',
+      kind: 'numericalDisplay',
+      name: 'Heating (2x2 already)',
+      size: '2x2',
+    },
+    {
+      area: '3x2',
+      card: HeatingCard,
+      expandedSize: '2x2',
+      kind: 'numericalDisplay',
+      name: 'Heating (in its area)',
+      size: '1x1',
+    },
+    {
+      card: LightsCard,
+      kind: 'binaryDisplay',
+      name: 'Lights',
+      size: '2x1',
+    },
+    {
+      card: CameraCard,
+      kind: 'binaryDisplay',
+      name: 'Front Door Camera',
+      openSize: '4x3',
+      size: '2x1',
+    },
+  ],
+  Security: [
+    {
+      card: () => (
+        <StateCard
+          isOn
+          icons={[sfLockFill, sfLockOpenFill]}
+          name="Front Door"
+          words={['Locked', 'Unlocked']}
+        />
+      ),
+      kind: 'binaryDisplay',
+      name: 'Front Door',
+      size: '2x1',
+    },
+    {
+      card: () => (
+        <StateCard
+          icons={[sfDoorLeftHandOpen, sfDoorLeftHandClosed]}
+          isOn={false}
+          name="Back Door"
+          words={['Open', 'Closed']}
+        />
+      ),
+      kind: 'binaryDisplay',
+      name: 'Back Door',
+      size: '1x1',
+    },
+  ],
+};
+
+/** The heading above the cards on their own (as a section's, no grid). */
+const SectionHeaderAlone: FunctionComponent = () => (
+  <div className="kitchen-sink-grid-header">
+    <span className="kitchen-sink-grid-heading">
+      <span className="kitchen-sink-grid-title">On Their Own</span>
+      <span className="kitchen-sink-grid-hint">
+        Cards work outside a grid too, sized by their boxes.
+      </span>
+    </span>
+  </div>
+);
+
+/** The page: a bar with Back and Edit, the rooms below it. */
+const CardsApp: FunctionComponent = () => {
+  const [editing, setEditing] = useState(false);
+  const [rooms, setRooms] = useState(roomsInitial);
+  // (Which are expanded: the app's state, not stored; none while editing.)
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const toggle = (name: string) =>
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  const [gridSigns] = useState(gridSignsOf);
+  const handle = Grid.useCreateReorderHandle({
+    onReorder: (change) =>
+      setRooms((current) => Grid.reorder(current, change, ({ name }) => name)),
+  });
+  const resize = (name: string, size: GridSize) => {
+    // (Resized: as stored, small.)
+    setExpanded((current) => {
+      const next = new Set(current);
+      next.delete(name);
+      return next;
+    });
+    setRooms((current) =>
+      Object.fromEntries(
+        Object.entries(current).map(([room, tiles]) => [
+          room,
+          tiles.map((tile) => (tile.name === name ? { ...tile, size } : tile)),
+        ]),
+      ),
+    );
+  };
+
+  return (
+    <>
+      <Viewport.Background>
+        <div
+          aria-hidden="true"
+          className="demo-picture"
+        />
+      </Viewport.Background>
+      <Header.Root>
+        <Viewport.BlockStart>
+          <Toolbar.Root placement="block-start">
+            <Toolbar.Leading>
+              <BackButton />
+            </Toolbar.Leading>
+            <Toolbar.Title>
+              <span>Cards</span>
+            </Toolbar.Title>
+            <Toolbar.Trailing>
+              <Toolbar.Button
+                prominent={editing}
+                onClick={() => {
+                  // (Edited as stored: expanded ones small again.)
+                  if (!editing) setExpanded(new Set());
+                  setEditing(!editing);
+                }}
+              >
+                <Button.Label>{editing ? 'Done' : 'Edit'}</Button.Label>
+              </Toolbar.Button>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+        <Page.Root
+          className="kitchen-sink-grid-page"
+          style={gridSigns}
+        >
+          <Viewport.Padding edge="block-start" />
+          <Header.LargeTitle>
+            <span>Cards</span>
+          </Header.LargeTitle>
+          <Grid.Root
+            className="kitchen-sink-grid"
+            editing={editing}
+            reorderHandle={handle}
+          >
+            {Object.entries(rooms).map(([room, tiles]) => (
+              <Grid.Section
+                key={room}
+                dropName={room}
+                reorderHandle={handle}
+              >
+                <SectionHeader title={room} />
+                {tiles.map(
+                  ({
+                    area,
+                    card: CardOf,
+                    expandedSize,
+                    kind,
+                    name,
+                    openSize,
+                    size,
+                  }) => {
+                    const isExpanded = expanded.has(name);
+                    // (Expanding only where that's larger than it is.)
+                    const canExpand =
+                      expandedSize !== undefined && expandedSize !== size;
+                    return (
+                      <Grid.Item
+                        key={name}
+                        dropName={name}
+                        openLabel={openSize ? name : undefined}
+                        openSize={openSize}
+                        reorderHandle={handle}
+                        size={isExpanded && expandedSize ? expandedSize : size}
+                        supportedSizes={cardSizes[kind]}
+                        onSizeChange={(next) => resize(name, next)}
+                      >
+                        <CardOf
+                          expansion={
+                            canExpand
+                              ? { isExpanded, onToggle: () => toggle(name) }
+                              : undefined
+                          }
+                        />
+                        <Grid.ResizeHandle />
+                        {/* (Room around it: expanded, it grows in there,
+                            nothing around it moving.) */}
+                        {area ? (
+                          <Grid.Area defaultSize={area}>
+                            <Grid.ResizeHandle />
+                          </Grid.Area>
+                        ) : null}
+                      </Grid.Item>
+                    );
+                  },
+                )}
+              </Grid.Section>
+            ))}
+          </Grid.Root>
+          {/* (Cards on their own: no grid, sized by their boxes.) */}
+          <div className="kitchen-sink-cards-alone">
+            <SectionHeaderAlone />
+            <div className="kitchen-sink-cards-alone-row">
+              <div>
+                <SwitchCard
+                  icons={[sfLightbulbFill, sfLightbulb]}
+                  name="Desk Lamp"
+                />
+              </div>
+              <div>
+                <ValueCard
+                  format={percent}
+                  icon={sfHumidityFill}
+                  name="Humidity"
+                  value={0.52}
+                />
+              </div>
+            </div>
+          </div>
+          <Viewport.Padding edge="block-end" />
+        </Page.Root>
+      </Header.Root>
+    </>
+  );
+};
+
+export const cardsPages: SinkPages = {
+  card: { Content: CardsApp, isBare: true, title: 'Cards' },
+  'card/lights': { Content: LightsPage, title: 'Lights' },
+};

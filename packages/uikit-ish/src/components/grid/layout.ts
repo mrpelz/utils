@@ -484,12 +484,14 @@ const breakPlace = (
     rows > stem ? freeRuns(y + stem * pitch, 0, before, metrics) : [];
   if (!next) {
     keptRows.set(element, y + (stem - 1) * pitch);
+    // (First in its container (keeping nothing: one row): shown in its
+    // first row's end-of-line column, not above it.)
     return {
       head,
       height: rows * pitch - metrics.gap - head,
       kind: 'none',
       stem,
-      top: y - metrics.unit / 2 + head,
+      top: (previous ? y : y + pitch) - metrics.unit / 2 + head,
     };
   }
   return {
@@ -738,8 +740,80 @@ const fullClipOf = (
 };
 
 /**
+ * A full width's shape, editing (see `fullClipOf`), as a closed SVG path
+ * (px) of its box at a height: its columns, and its end-of-line column's
+ * part, every corner rounded (the inner one too). Mirrored when right to
+ * left.
+ */
+const fullPathOf = (
+  metrics: Metrics & { isRtl: boolean; radius: number },
+  width: number,
+  height: number,
+  // (Its edge `inset` px in: the same shape, its outer corners less round,
+  // its inner one rounder.)
+  inset = 0,
+) => {
+  const { isRtl } = metrics;
+  const half = fullHalfOf(metrics);
+  const last = width - metrics.end - metrics.gap;
+  const outer = Math.min(metrics.radius, (width - last) / 2, half / 2);
+  const r = Math.max(0, outer - inset);
+  const ri = outer + inset;
+  const [left, top, right, bottom] = [
+    inset,
+    inset,
+    width - inset,
+    height - inset,
+  ];
+  const [notch, column] = [half - inset, last - inset];
+  const x = (value: number) => String(isRtl ? width - value : value);
+  const arc = (radius: number, sweep: 0 | 1, ax: number, ay: number) =>
+    `A${String(radius)} ${String(radius)} 0 0 ${String(isRtl ? 1 - sweep : sweep)} ${x(ax)} ${String(ay)}`;
+  return [
+    `M${x(left + r)} ${String(top)}H${x(right - r)}`,
+    arc(r, 1, right, top + r),
+    `V${String(notch - r)}`,
+    arc(r, 1, right - r, notch),
+    `H${x(column + ri)}`,
+    arc(ri, 0, column, notch + ri),
+    `V${String(bottom - r)}`,
+    arc(r, 1, column - r, bottom),
+    `H${x(left + r)}`,
+    arc(r, 1, left, bottom - r),
+    `V${String(top + r)}`,
+    arc(r, 1, left + r, top),
+    'Z',
+  ].join('');
+};
+
+/** A cell's metrics for its full width's shape (see `fullPathOf`). */
+const shapeMetricsOf = (cell: HTMLElement) => {
+  const styles = getComputedStyle(cell);
+  return {
+    ...metricsOf(cell),
+    isRtl: styles.direction === 'rtl',
+    radius:
+      Number.parseFloat(styles.getPropertyValue('--uikit-grid-item-radius')) ||
+      24,
+  };
+};
+
+/**
+ * A path's edge, inside it, as a mask (a CSS `url()`; `width` px wide, in
+ * a box as big), filled faintly too (`fill`, 0: not).
+ */
+const edgeMaskOf = (
+  path: string,
+  [width, height]: readonly [number, number],
+  { fill = 0, line }: { fill?: number; line: number },
+) => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}"><clipPath id="c"><path d="${path}"/></clipPath>${fill > 0 ? `<path d="${path}" fill="#000" fill-opacity="${String(fill)}"/>` : ''}<path d="${path}" fill="none" stroke="#000" stroke-width="${String(line * 2)}" clip-path="url(#c)"/></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+};
+
+/**
  * A full width's resize outline at some rows (see main.tsx, the CSS): its
- * shape as it'd be (see `fullClipOf`; a break's, see `breakOutlineOf`),
+ * shape as it'd be (see `fullPathOf`; a break's, see `breakOutlineOf`),
  * filled faintly and edged inside (a mask), from its top left (px); none
  * while there's no end-of-line column.
  */
@@ -747,40 +821,14 @@ export const fullOutlineOf = (
   cell: HTMLElement,
   rows: number,
 ): { height: number; mask: string; width: number } | undefined => {
-  const metrics = metricsOf(cell);
+  const metrics = shapeMetricsOf(cell);
   if (metrics.end < 1) return undefined;
-  const styles = getComputedStyle(cell);
-  const isRtl = styles.direction === 'rtl';
-  const radius =
-    Number.parseFloat(styles.getPropertyValue('--uikit-grid-item-radius')) ||
-    24;
   const width = cell.offsetWidth;
   const height = rows * (metrics.unit + metrics.gap) - metrics.gap;
-  const half = fullHalfOf(metrics);
-  const last = width - metrics.end - metrics.gap;
-  const r = Math.min(radius, (width - last) / 2, half / 2);
-  const x = (value: number) => String(isRtl ? width - value : value);
-  const arc = (sweep: 0 | 1, ax: number, ay: number) =>
-    `A${String(r)} ${String(r)} 0 0 ${String(isRtl ? 1 - sweep : sweep)} ${x(ax)} ${String(ay)}`;
-  const path = [
-    `M${x(r)} 0H${x(width - r)}`,
-    arc(1, width, r),
-    `V${String(half - r)}`,
-    arc(1, width - r, half),
-    `H${x(last + r)}`,
-    arc(0, last, half + r),
-    `V${String(height - r)}`,
-    arc(1, last - r, height),
-    `H${x(r)}`,
-    arc(1, 0, height - r),
-    `V${String(r)}`,
-    arc(1, r, 0),
-    'Z',
-  ].join('');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}"><clipPath id="c"><path d="${path}"/></clipPath><path d="${path}" fill="#000" fill-opacity="0.15"/><path d="${path}" fill="none" stroke="#000" stroke-width="4" clip-path="url(#c)"/></svg>`;
+  const path = fullPathOf(metrics, width, height);
   return {
     height,
-    mask: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+    mask: edgeMaskOf(path, [width, height], { fill: 0.15, line: 2 }),
     width,
   };
 };
@@ -797,6 +845,18 @@ const shapeCell = (
     cell,
     '--uikit-grid-full-shape',
     metrics ? fullClipOf(cell, metrics) : undefined,
+  );
+  // (An area's room's edge (see main.tsx, the CSS): in its shape.)
+  const size = [cell.offsetWidth, cell.offsetHeight] as const;
+  // (Set before it's shown: a full width's, whether it has room or not
+  // yet, so an area's edge is in its shape from its first frame.)
+  setStyle(
+    cell,
+    '--uikit-grid-full-edge',
+    // (A clip, as the shape's: drawn at once, no image to decode.)
+    metrics
+      ? `path(evenodd, "${fullPathOf(metrics, ...size)}${fullPathOf(metrics, ...size, 1.5)}")`
+      : undefined,
   );
   const body = cell.querySelector<HTMLElement>(
     ':scope > [data-grid-part="body"]',
@@ -1217,11 +1277,18 @@ export const mergedBy = (
   const merged = new Set<HTMLElement>(
     isBreakResized ? adjacentBreaks(cells, cell) : [],
   );
+  // (The break right after it: still ending its row after it, grown or
+  // not (in its end-of-line column, then); never taken in.)
+  const following = cells[cells.indexOf(cell) + 1];
+  const kept =
+    !isBreakResized && following?.dataset.gridPart === 'break'
+      ? following
+      : undefined;
   const isIn = (rect: Rect) => areas.some((area) => isWithin(rect, area));
   const touches = (rect: Rect) =>
     areas.some((area) => isOverlapping(rect, area));
   for (const each of cells) {
-    if (each === cell || merged.has(each)) continue;
+    if (each === cell || each === kept || merged.has(each)) continue;
     const part = each.dataset.gridPart;
     const rects = [
       rectOf(each),

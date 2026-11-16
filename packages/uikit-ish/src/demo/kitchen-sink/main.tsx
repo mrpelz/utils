@@ -36,6 +36,7 @@ import { publicUrl } from '../tooling/public-url.js';
 import { ClientOnly } from '../tooling/shared/client-only.js';
 import { useRawDocument } from '../tooling/shared/raw-document.js';
 import { actionsPages } from './actions.js';
+import { cardsPages } from './cards.js';
 import { choicesPages } from './choices.js';
 import { contentPages } from './content.js';
 import { foundationsPages } from './foundations.js';
@@ -72,6 +73,7 @@ const pages: SinkPages = {
   ...structurePages,
   ...gridPages,
   ...gridPlaygroundPages,
+  ...cardsPages,
   ...viewportPages,
   ...statusPages,
 };

@@ -406,8 +406,8 @@ export const GridOverview: FunctionComponent = () => (
         <PartLink part="Grid.Area" /> in it. The tile sits in its middle by
         default or in a corner (its <code>placement</code>), and the room is
         hatched in edit mode, with the area’s own controls in its corners. A{' '}
-        <code>movable</code> tile shows a ring and can be dragged to another of
-        those places. In edit mode, a tile in a corner sits 24px in from it (
+        <code>movable</code> tile shows crosshairs and can be dragged to another
+        of those places. In edit mode, a tile in a corner sits 24px in from it (
         <code>--uikit-grid-corner-inset</code>), off the area’s own controls.
         Dragging the tile’s handle out of the area steps it to its next size up,
         even when its placement keeps it at that edge; dragging further grows it
@@ -423,12 +423,16 @@ export const GridOverview: FunctionComponent = () => (
       </li>
       <li>
         In edit mode, the grid draws its own corner symbols as plain lines: an x
-        to remove, a ring on tiles that can be moved, and the resize arc, with a
-        moat of dots outside it when a tile can only shrink and inside when it
-        can only grow. Where there’s no fill under them (spacers, add tiles, the
-        hatched room), they get a faint backing. The signs on offered and
-        merging spacers and breaks, and on <PartLink part="Grid.Spawn" />, are
-        the app’s: masks in <code>--uikit-grid-offer-sign</code>,{' '}
+        to remove, crosshairs on tiles that can be moved, and the resize arc.
+        Inside the arc, a chevron shows where the tile can go: towards the top
+        leading corner when it can only shrink, towards the bottom trailing one
+        when it can only grow, both ways when it has sizes either side. A tile
+        that takes any size shows the arc alone, unless it’s at the smallest or
+        largest size, for example a full width with the most rows: then one way.
+        Where there’s no fill under them (spacers, add tiles, the hatched room),
+        they get a faint backing. The signs on offered and merging spacers and
+        breaks, and on <PartLink part="Grid.Spawn" />, are the app’s: masks in{' '}
+        <code>--uikit-grid-offer-sign</code>,{' '}
         <code>--uikit-grid-merge-sign</code> and{' '}
         <code>--uikit-grid-spawn-sign</code>. Without them, nothing is drawn
         (see{' '}

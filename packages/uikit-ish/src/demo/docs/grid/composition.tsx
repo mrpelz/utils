@@ -1255,12 +1255,12 @@ export const GridComposition: FunctionComponent = () => (
         the area (for this full-width area, into the end-of-line column) steps
         it to its next size up, even where its placement keeps it at that edge.
         In edit mode, a tile in a corner sits a little in from it, so the area’s
-        ring and arc stay free. Shrinking the area below the tile shows the tile
-        smaller too, and its stored size stays.
+        crosshairs and arc stay free. Shrinking the area below the tile shows
+        the tile smaller too, and its stored size stays.
       </li>
       <li>
-        The clock’s area is <code>movable</code>, shown by the ring on it: in
-        edit mode, hold it and drag it to the middle or a corner of its area.
+        The clock’s area is <code>movable</code>, shown by the crosshairs on it:
+        in edit mode, hold it and drag it to the middle or a corner of its area.
         Where it would land is outlined in its shape. Holding the hatched room
         instead moves the whole item. With the clock focused, the arrow keys
         step it through the five places.

@@ -67,6 +67,10 @@ import {
 import { ButtonDemo, ButtonMatrixDemo } from './button/main.js';
 import { ButtonOverview, buttonOverviewDemos } from './button/overview.js';
 import { ButtonParts, buttonPartsDemos } from './button/parts.js';
+import { CardComposition, cardCompositionDemos } from './card/composition.js';
+import { CardDemo } from './card/main.js';
+import { CardOverview, cardOverviewDemos } from './card/overview.js';
+import { CardParts, cardPartsDemos } from './card/parts.js';
 import {
   CheckboxComposition,
   checkboxCompositionDemos,
@@ -497,6 +501,22 @@ export const catalog: readonly CatalogEntry[] = [
     summary:
       'Tiles on square units, in the app’s order, each item spanning some columns and rows, like a home screen or a control center. Rearranged by dragging and resizing.',
     title: 'Grid',
+  },
+  {
+    category: 'structure',
+    demos: [
+      CardDemo,
+      ...cardOverviewDemos,
+      ...cardPartsDemos,
+      ...cardCompositionDemos,
+    ],
+    id: 'card',
+    Composition: CardComposition,
+    Overview: CardOverview,
+    Parts: CardParts,
+    summary:
+      'A glass surface for something an app shows or controls, in a grid’s tile: a state, a switch, a number or a level, laid out by its size.',
+    title: 'Card',
   },
   {
     category: 'structure',

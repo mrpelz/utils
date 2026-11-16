@@ -1,6 +1,7 @@
 import type { useRender } from '@base-ui/react/use-render';
 import type { ComponentProps, ReactNode } from 'react';
 
+import type { SymbolIcon } from '../symbol/main.js';
 import type { GridReorderHandle } from './handle.js';
 
 /**
@@ -206,6 +207,17 @@ export type GridSizeChangeDetails = {
   merged: readonly string[];
 };
 
+/**
+ * Why an item opened above the page closed (see `GridItemProps.open`): a
+ * press on the backdrop, Escape, its grid starting edit mode, or the app
+ * (`setOpen`, e.g. a close button).
+ */
+export type GridOpenChangeReason =
+  'edit' | 'escape-key' | 'none' | 'outside-press';
+
+/** What an item's open change was (see `GridItemProps.onOpenChange`). */
+export type GridOpenChangeDetails = { reason: GridOpenChangeReason };
+
 export type GridItemProps = ComponentProps<'div'> &
   GridDraggableProps & {
     /**
@@ -214,13 +226,36 @@ export type GridItemProps = ComponentProps<'div'> &
      * for room around its tile, its own controls in it.
      */
     children?: ReactNode;
+    /** Whether it's open initially (uncontrolled, see `open`). @default false */
+    defaultOpen?: boolean;
     /** Its initial size (uncontrolled). @default '1x1' */
     defaultSize?: GridSize;
+    /**
+     * Called as it's opened or closed (see `open`): by the app (e.g. its
+     * card's corner button, through `useGridItem`'s `setOpen`), or closed
+     * by a press on the backdrop, Escape, or edit mode starting.
+     */
+    onOpenChange?: (open: boolean, details: GridOpenChangeDetails) => void;
     /**
      * Called as its size is changed (e.g. by its card's resize corner),
      * with what it took in (see `GridSizeChangeDetails`).
      */
     onSizeChange?: (size: GridSize, details: GridSizeChangeDetails) => void;
+    /**
+     * Whether it's open above the page (controlled): its tile lifted out
+     * of the grid (a stand-in keeping its place, nothing reflowing), in
+     * the middle of the screen at `openSize`, over a dimmed backdrop; a
+     * modal dialog (`openLabel`) until it's closed. Never while editing.
+     */
+    open?: boolean;
+    /** Its name while it's open (a dialog's), e.g. its card's title. */
+    openLabel?: string;
+    /**
+     * Its size open (see `open`): in the grid's units, fitted to the
+     * screen.
+     * @default '4x3'
+     */
+    openSize?: GridSize;
     /** Its size (controlled): as the user chose it, stored by the app. */
     size?: GridSize;
     /**
@@ -246,7 +281,7 @@ export type GridAreaProps = {
   /** Its initial size (uncontrolled, see `size`). */
   defaultSize?: GridSize;
   /**
-   * Its tile can be moved within it while editing (a ring in the tile's
+   * Its tile can be moved within it while editing (crosshairs in the tile's
    * top trailing corner): held and dragged (the hatched room around it
    * moves the whole item), or by the arrow keys while it has focus.
    * @default false
@@ -317,6 +352,38 @@ export type GridSpawnProps = useRender.ComponentProps<'button'> &
  * Resizing its item (see `Grid.ResizeHandle`): an arc by default; `render`,
  * e.g. a card's corner. In a `Grid.Area`, the area.
  */
+/** A cell's corner (see `Grid.CornerButton`), as a placement's. */
+export type GridCorner =
+  'bottom-leading' | 'bottom-trailing' | 'top-leading' | 'top-trailing';
+
+export type GridCornerButtonProps = useRender.ComponentProps<'button'> & {
+  /**
+   * The corner it's in: a 44px target there, its icon 16.5px in from both
+   * of the corner's edges.
+   * @default 'bottom-trailing'
+   */
+  corner?: GridCorner;
+  /**
+   * Its icon: one of `gridIcons` or `cardIcons`, or the app's own (e.g. an
+   * SF Symbol), centered at the same place, at the same size.
+   */
+  icon: SymbolIcon;
+  /**
+   * Whether it's flipped in a right-to-left layout: for an icon that
+   * points somewhere (e.g. `cardIcons.expand`), not for one that reads as
+   * it is.
+   * @default false
+   */
+  mirrored?: boolean;
+  /**
+   * Whether it's shown: hidden, it fades out (by its color) and can't be
+   * pressed or focused. The grid's own show while it's editing; a card's
+   * while it isn't (see `Card.CornerButton`).
+   * @default true
+   */
+  visible?: boolean;
+};
+
 export type GridResizeHandleProps = useRender.ComponentProps<'button'>;
 
 export type GridRemoveButtonProps = useRender.ComponentProps<'button'>;
@@ -366,6 +433,8 @@ export type GridItemState = {
   editing: boolean;
   /** Whether it's narrower than snapped, to fit the columns. */
   isFitted: boolean;
+  /** Whether it's open above the page (see `GridItemProps.open`). */
+  open: boolean;
   /**
    * Asks for another size (its `onSizeChange`, or its own), with what it
    * takes in (none by default).
@@ -373,6 +442,8 @@ export type GridItemState = {
   requestSize: (size: GridSize, details?: GridSizeChangeDetails) => void;
   /** Its size as the user chose it. */
   requested: GridSize;
+  /** Opens or closes it above the page (its `onOpenChange`, reason none). */
+  setOpen: (open: boolean) => void;
   /**
    * Its effective size: requested, snapped to supported, then the widest
    * supported that fits if that's too wide (or than its area).

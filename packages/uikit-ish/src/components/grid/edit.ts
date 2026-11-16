@@ -94,6 +94,29 @@ const membersOf = (range: GridRange, without?: HTMLElement) =>
     .filter((element) => element !== without && element.isConnected)
     .toSorted(byDocument);
 
+/**
+ * Whether a slot's at its container's start (before its first cell, a
+ * section's header aside): where a break would end no row, drawn above
+ * its first (see layout.ts); so no break's put there.
+ */
+const isAtContainerStart = (
+  { index, range }: { index?: number; range?: GridRange },
+  item: HTMLElement,
+) => {
+  const container = range?.container();
+  if (index !== 0 || !range || !container) return false;
+  const first = membersOf(range, item)[0];
+  const cell = Array.from(container.children).find(
+    (child): child is HTMLElement =>
+      child instanceof HTMLElement &&
+      child !== item &&
+      ['break', 'item', 'spacer', 'spawn'].includes(
+        child.dataset.gridPart ?? '',
+      ),
+  );
+  return !first || cell === first;
+};
+
 /** Ranges in document order (by their first cell, else their container). */
 const inDocumentOrder = (ranges: readonly GridRange[]) =>
   ranges
@@ -880,8 +903,15 @@ export const useEditing = (
       drag.at = at;
       follow(at);
       const { home, movedAt, slot, unit } = drag;
-      // (Where it can't go: home, where a release there puts it.)
-      const next = hit(anchorOf(drag.item)) ?? home.slot;
+      // (Where it can't go: home, where a release there puts it; a break at
+      // its container's start, too, see `isAtContainerStart`.)
+      const hitSlot = hit(anchorOf(drag.item));
+      const next =
+        !hitSlot ||
+        (drag.item.dataset.gridPart === 'break' &&
+          isAtContainerStart(hitSlot, drag.item))
+          ? home.slot
+          : hitSlot;
       const isAway =
         !movedAt ||
         Math.hypot(at[0] - movedAt[0], at[1] - movedAt[1]) >=
@@ -1005,6 +1035,9 @@ export const useEditing = (
         width: `${String(isBreak ? metrics.column : offsetWidth)}px`,
       });
       item.dataset.gridDragging = '';
+      // (Its root too: what's in the grid may show itself while one's
+      // moved, e.g. a card's content unveiled, see Card.)
+      root.dataset.gridDrag = 'move';
       show(home.slot);
       drag.frame = requestAnimationFrame(tick);
       if (!isBreak) return;
@@ -1066,6 +1099,7 @@ export const useEditing = (
         item.style.removeProperty(property);
       }
       delete item.dataset.gridDragging;
+      delete root.dataset.gridDrag;
       placeBreaks(root);
       if (moved && event && !isSameSlot(slot, home.slot)) {
         moved.handle.onReorder?.(moved.change, { event, reason: 'drag' });

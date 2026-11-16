@@ -1,0 +1,440 @@
+/* Card (see main.tsx). */
+@layer uikit-ish {
+  /* The card: glass (see the glass' `uikit-glass-medium`), the item's
+     radius, its parts on a grid of its own, laid out by its size (see
+     below): its symbol and a switch at its top, its title and value at
+     its bottom. */
+  .uikit-card-root {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    color: var(--uikit-glass-content);
+
+    /* (Its veil (see below) stacked within it: under the grid's corner
+       symbols beside it, in its tile.) */
+    isolation: isolate;
+    text-align: start;
+    transition: background-color 200ms;
+
+    /* Its veil (editing, see main.tsx): over all of it, under the grid's
+       corner symbols (beside it, in its tile); lifted while the grid's
+       tiles are dragged or resized, as they fade (see below). */
+    &::after {
+      position: absolute;
+      z-index: 2;
+      border-radius: inherit;
+      background-color: transparent;
+      content: '';
+      inset: 0;
+      pointer-events: none;
+      transition: background-color 200ms;
+    }
+
+    /* (Darker in dark mode: a bright card (a switch on) mid gray under
+       it, its tile's light symbols legible on it.) */
+
+    /* (Pressable (an `onClick`, see main.tsx): hovered, a tint of its
+       text's color; pressed, more; by its color, no layer changing.) */
+    &[data-pressable] {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (hover: hover) {
+      &[data-pressable]:hover::after {
+        background-color: color-mix(in srgb, currentcolor 6%, transparent);
+      }
+    }
+
+    &[data-pressable]:active::after {
+      background-color: color-mix(in srgb, currentcolor 12%, transparent);
+      transition-duration: 0s;
+    }
+
+    &[data-editing]::after {
+      background-color: var(
+        --uikit-card-veil,
+        light-dark(
+          color-mix(in srgb, var(--color-ui-system-background) 45%, transparent),
+          color-mix(in srgb, var(--color-ui-system-background) 58%, transparent)
+        )
+      );
+    }
+
+    .uikit-grid-root[data-grid-drag] &[data-editing]::after {
+      background-color: transparent;
+    }
+  }
+
+  /* Its frame: the size its parts are laid out at, what its size queries
+     ask (see below): its own, filling it; resized, the new one at once
+     (see main.tsx, the end). */
+  .uikit-card-frame {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    min-height: 0;
+    border-radius: inherit;
+    container: uikit-card / size;
+  }
+
+  /* Its parts' layout (inside its frame, for its size queries, see
+     below). */
+  .uikit-card-layout {
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border-radius: inherit;
+    column-gap: 10px;
+    grid-template:
+      'symbol control' auto
+      '. .' 1fr
+      'title title' auto
+      'value value' auto / 1fr auto;
+  }
+
+  /* (Its tile's corner symbols in its text's color: its glass's content,
+     as the medium glass sets it on it (see Glass), beside it (in its tile's
+     body; its move sign on its item, without an area's room); veiled while
+     editing, legible on it whatever its state. Hidden, as Grid hides them;
+     fading while the grid's tiles are dragged, below.) */
+  .uikit-grid-item-body:where(:has(> .uikit-card-root))
+    > :is(.uikit-grid-corner-button, .uikit-grid-move-sign):not([data-grid-hidden]),
+  .uikit-grid-item:where(
+      :not([data-grid-room]):has(> .uikit-grid-item-body > .uikit-card-root)
+    )
+    > .uikit-grid-move-sign:not([data-grid-hidden]) {
+    color: light-dark(
+      var(--glass-ui-medium-light-content),
+      var(--glass-ui-medium-dark-content)
+    );
+  }
+
+  /* (Its tile's corner symbols fading as its veil lifts, see above: in
+     their color (as they fade, see Grid), no layer changing.) */
+  .uikit-grid-root[data-grid-drag]
+    .uikit-grid-item:has(> .uikit-grid-item-body > .uikit-card-root)
+    :is(.uikit-grid-corner-button, .uikit-grid-move-sign) {
+    color: transparent;
+
+    > .uikit-grid-corner-icon {
+      stroke: transparent;
+    }
+  }
+
+  /* A corner button (see main.tsx, Grid's): in its text's color, above
+     all of its content (a slider filling it, see below): a press there is
+     its own, wherever it's rendered in it; its parts off its icon, see the
+     end. */
+  .uikit-card-corner-button {
+    z-index: 3;
+    color: inherit;
+  }
+
+  /* Its symbol: at its top leading corner, a little larger than its text. */
+  .uikit-card-symbol {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    font-size: var(--font-ui-title3-size);
+    grid-area: symbol;
+    line-height: 1;
+
+    /* (Sized anew by its size (see below): over as long as its parts glide
+       there, see main.tsx.) */
+    transition: font-size 300ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  /* Its title: two lines at most (its words breaking with a hyphen when
+     they don't fit), emphasized. */
+  .uikit-card-title {
+    display: -webkit-box;
+    overflow: hidden;
+    min-width: 0;
+    -webkit-box-orient: vertical;
+    font-size: var(--font-ui-subheadline-size);
+    font-variation-settings: 'wght'
+      var(--font-ui-subheadline-weight-emphasized);
+    font-weight: round(
+      down,
+      var(--font-ui-subheadline-weight-emphasized),
+      100
+    );
+    grid-area: title;
+    hyphens: auto;
+    -webkit-line-clamp: 2;
+    line-height: var(--font-ui-subheadline-line-height);
+    overflow-wrap: anywhere;
+
+    /* (Sized anew by its size (see below): over as long as its parts glide
+       there, see main.tsx.) */
+    transition: font-size 300ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  /* Its value: below its title, in the glass' secondary color, its digits
+     lined up (tabular). */
+  .uikit-card-value {
+    overflow: hidden;
+    min-width: 0;
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-subheadline-size);
+    font-variant-numeric: tabular-nums;
+    grid-area: value;
+    line-height: var(--font-ui-subheadline-line-height);
+    text-overflow: ellipsis;
+
+    /* (Sized anew by its size (see below): over as long as its parts glide
+       there, see main.tsx.) */
+    transition: font-size 300ms cubic-bezier(0.32, 0.72, 0, 1);
+    white-space: nowrap;
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  /* Wide and a row tall (e.g. 2x1): its symbol leading, its title and
+     value beside it, a switch trailing. (Not a slider's: its label and
+     value over its fill, its symbol at its top.) */
+  @container uikit-card (aspect-ratio > 1.5) and (height < 160px) {
+    .uikit-card-layout:not(:has(> .uikit-slider-root)) {
+      align-content: center;
+      grid-template:
+        'symbol title control' auto
+        'symbol value control' auto / auto 1fr auto;
+    }
+
+    .uikit-card-symbol {
+      font-size: var(--font-ui-title2-size);
+    }
+
+    .uikit-card-layout > .uikit-switch-root {
+      align-self: center;
+    }
+  }
+
+  /* Large (e.g. 2x2): its value large. */
+  @container uikit-card (width >= 180px) and (height >= 180px) {
+    .uikit-card-value {
+      color: inherit;
+      font-size: var(--font-ui-large-title-size);
+      font-variation-settings: 'wght'
+        var(--font-ui-large-title-weight-emphasized, 700);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+  }
+
+  /* A slider in it (see main.tsx): its control the whole card, the fill
+     its background (from its leading edge, or from its bottom upright), no
+     knob; its ticks lines across it; its label and value laid out as its
+     title and value, over it, as its symbol is (they don't take presses:
+     the slider does). */
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-slider-root) {
+    overflow: hidden;
+
+    /* (Not a corner button: its own presses, see above.) */
+    .uikit-card-layout > :not(.uikit-slider-root, .uikit-card-corner-button) {
+      z-index: 1;
+      pointer-events: none;
+    }
+  }
+
+  .uikit-card-layout > .uikit-slider-root {
+    position: absolute;
+    display: grid;
+    width: auto;
+    height: auto;
+    box-sizing: border-box;
+    padding: inherit;
+    border-radius: inherit;
+    grid-template:
+      '.' 1fr
+      'title' auto
+      'value' auto / 1fr;
+    inset: 0;
+    place-self: stretch stretch;
+
+    > .uikit-slider-control {
+      position: absolute;
+      min-width: 0;
+      min-height: 0;
+      border-radius: inherit;
+      inset: 0;
+    }
+
+    .uikit-slider-track {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      background-color: transparent;
+    }
+
+    /* (Straight at its end, the card's corners rounding it.) */
+    .uikit-slider-indicator {
+      border-radius: 0;
+      background-color: color-mix(
+        in srgb,
+        var(--uikit-slider-tint) 70%,
+        transparent
+      );
+    }
+
+    /* (Its thumb only for its input (keyboard, assistive technology):
+       nothing drawn.) */
+    .uikit-slider-thumb {
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+
+    .uikit-slider-ticks {
+      width: auto;
+      height: auto;
+      inset: 0;
+
+      > * {
+        width: 1px;
+        height: 100%;
+        border-radius: 0;
+        background-color: var(--uikit-glass-separator);
+      }
+    }
+
+    &[data-orientation='vertical'] .uikit-slider-ticks > * {
+      width: 100%;
+      height: 1px;
+    }
+
+    > .uikit-slider-label {
+      z-index: 1;
+      overflow: hidden;
+      color: inherit;
+      font-size: var(--font-ui-subheadline-size);
+      font-variation-settings: 'wght'
+        var(--font-ui-subheadline-weight-emphasized);
+      font-weight: round(
+        down,
+        var(--font-ui-subheadline-weight-emphasized),
+        100
+      );
+      grid-area: title;
+      line-height: var(--font-ui-subheadline-line-height);
+      pointer-events: none;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* (In its text's color, legible on the fill too.) */
+    > .uikit-slider-value {
+      z-index: 1;
+      color: inherit;
+      font-size: var(--font-ui-subheadline-size);
+      grid-area: value;
+      justify-items: start;
+      line-height: var(--font-ui-subheadline-line-height);
+      pointer-events: none;
+    }
+  }
+
+  /* A switch in it (see main.tsx): smaller, its top trailing corner; its
+     state the card's: on, bright, its text dark (in both color schemes),
+     its symbol in the switch's tint. */
+  .uikit-card-layout > .uikit-switch-root {
+    --uikit-switch-min-width: 44px;
+    --uikit-switch-min-height: 24px;
+    --uikit-switch-knob-width: 28px;
+
+    align-self: start;
+    grid-area: control;
+  }
+
+  /* (Active (see main.tsx), as with a switch on, without one.) */
+  .uikit-card-root:is(
+      [data-active],
+      :has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root[data-checked])
+    ) {
+    --uikit-glass-content: #000;
+    --uikit-glass-content-secondary: rgb(0 0 0 / 55%);
+    --uikit-glass-background: var(
+      --uikit-card-on-background,
+      rgb(255 255 255 / 92%)
+    );
+
+    .uikit-card-symbol {
+      color: var(--uikit-switch-on-color, var(--color-ui-system-green));
+    }
+  }
+
+  /* (A slider's, focused by keyboard: its ring, the knob's (see Slider),
+     on the card.) */
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-slider-root):has(
+      .uikit-slider-thumb input:focus-visible
+    ) {
+    outline: 2px solid var(--uikit-slider-tint, var(--color-ui-primary));
+    outline-offset: 2px;
+  }
+
+  /* (Its parts off a corner button's icon (in from the corner as its
+     padding is): a switch at the top, its value at the bottom, by the
+     icon's width and a little more; its symbol, the top leading corner
+     taken, beside its title and value, as when it's wide.) */
+
+  @container uikit-card not ((aspect-ratio > 1.5) and (height < 160px)) {
+    /* (Also while it's lifted above the page, opening or closing (see Grid),
+       with one there shown or not: its symbol not moving away and back as
+       its x goes and its own size's layout comes. Not when it's wide and a
+       row tall: its symbol beside its title anyway, as it's back in its
+       grid.) */
+    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])),
+    .uikit-grid-item-body[data-grid-open] > .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']) {
+      align-items: end;
+      grid-template:
+        '. control' auto
+        '. .' 1fr
+        'symbol title' auto
+        'symbol value' auto / auto 1fr;
+    }
+
+    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > .uikit-card-symbol,
+    .uikit-grid-item-body[data-grid-open] > .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']) > .uikit-card-symbol {
+      align-self: center;
+    }
+  }
+
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-trailing']) > .uikit-switch-root {
+    margin-inline-end: var(--uikit-card-corner-room, 18px);
+  }
+
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='bottom-leading']) > .uikit-card-value {
+    padding-inline-start: var(--uikit-card-corner-room, 18px);
+  }
+
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='bottom-trailing']) > .uikit-card-value {
+    padding-inline-end: var(--uikit-card-corner-room, 18px);
+  }
+
+  /* Resized (see main.tsx): above what's around it, out of its tile's
+     bounds for as long, from its leading top corner. */
+  .uikit-card-root[data-card-resizing] {
+    z-index: 1;
+    place-self: start start;
+  }
+}

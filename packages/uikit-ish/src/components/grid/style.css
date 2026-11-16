@@ -91,7 +91,11 @@
     padding-inline-end: var(--uikit-grid-strip, 0);
   }
 
-  .uikit-grid-item[data-grid-full] > .uikit-grid-item-body[data-size^='*'] {
+  /* (A full-width tile, through the end-of-line column too; in an area
+     with room around it, kept to its columns, its resize outline only
+     reaching into that column, see main.tsx.) */
+  .uikit-grid-item[data-grid-full]:not([data-grid-room])
+    > :is(.uikit-grid-item-body, .uikit-grid-stand-in)[data-size^='*'] {
     margin-inline-end: calc(-1 * var(--uikit-grid-strip, 0px));
   }
 
@@ -99,23 +103,30 @@
      (see layout.ts): its first from the grid's start on off its page's
      trailing edge, the rows between in from its leading edge and on off
      it, its last in from the leading edge to the grid's end; behind what's
-     in them. */
+     in them. Shown only while a tile's dragged to move it (the root's
+     `data-grid-drag`, see edit.ts), fading in and out by its color (no
+     layer changing). */
   .uikit-grid-root[data-editing],
   .uikit-grid-root[data-editing] .uikit-grid-section {
     &::before {
       position: absolute;
       z-index: -1;
       height: var(--uikit-grid-bands-height, 0);
-      background-color: var(
-        --uikit-grid-band-color,
-        color-mix(in srgb, var(--color-ui-label) 40%, transparent)
-      );
+      background-color: var(--uikit-grid-bands-shown, transparent);
       content: '';
       inset-block-start: var(--uikit-grid-bands-top, 0);
       inset-inline: calc(-1 * var(--uikit-grid-bands-start, 0px)) calc(-1 * var(--uikit-grid-bands-end, 0px));
       mask: var(--uikit-grid-bands, none) 0 0 / 100% 100% no-repeat;
       pointer-events: none;
+      transition: background-color 200ms;
     }
+  }
+
+  .uikit-grid-root[data-editing][data-grid-drag='move'] {
+    --uikit-grid-bands-shown: var(
+      --uikit-grid-band-color,
+      color-mix(in srgb, var(--color-ui-label) 15%, transparent)
+    );
   }
 
   /* An item (a spacer, a dragged cell's placeholder): its effective size's
@@ -149,7 +160,10 @@
   }
 
   /* Its tile: what's in it filling it, its corner controls on it. */
-  .uikit-grid-item-body {
+
+  /* (Its stand-in, open (see main.tsx, below): placed as it is.) */
+  .uikit-grid-item-body,
+  .uikit-grid-stand-in {
     position: relative;
     display: grid;
     min-width: 0;
@@ -181,8 +195,7 @@
     );
     --uikit-grid-room-width: calc(
       var(--uikit-grid-body-columns, 1) * var(--uikit-grid-column-pitch) -
-        var(--uikit-grid-gap) + var(--uikit-grid-body-strip, 0) *
-        var(--uikit-grid-strip, 0px)
+        var(--uikit-grid-gap)
     );
     --uikit-grid-room-height: calc(
       var(--uikit-grid-body-rows, 1) * var(--uikit-grid-pitch) -
@@ -265,6 +278,41 @@
         right var(--uikit-grid-room-x) top var(--uikit-grid-room-y),
         0 0;
     }
+  }
+
+  /* Editing, an area bigger than its tile: its edge (as its hatching,
+     see above, a little stronger), so its room isn't taken for the row
+     it's in; a full width's in its shape (see layout.ts). Not editing,
+     none. */
+  .uikit-grid-room-edge {
+    display: none;
+  }
+
+  .uikit-grid-root[data-editing] .uikit-grid-item[data-grid-room] > .uikit-grid-room-edge {
+    position: absolute;
+    display: block;
+    box-sizing: border-box;
+    border: 1.5px solid
+      var(
+        --uikit-grid-room-edge-color,
+        color-mix(in srgb, var(--color-ui-label) 30%, transparent)
+      );
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .uikit-grid-root[data-editing] .uikit-grid-item[data-grid-full][data-grid-room] > .uikit-grid-room-edge {
+    border: none;
+    border-radius: 0;
+    background-color: var(
+      --uikit-grid-room-edge-color,
+      color-mix(in srgb, var(--color-ui-label) 30%, transparent)
+    );
+
+    /* (Its edge, in its shape (see layout.ts); not shaped yet: nothing,
+       not a block.) */
+    clip-path: var(--uikit-grid-full-edge, inset(50%));
   }
 
   /* A full width (`*` columns, see props.tsx): from the first column to
@@ -705,6 +753,80 @@
   }
 
 
+  /* A resize's row change (see main.tsx): grown into the next row, an
+     outline as the resize's, from the tile to its row's end-of-line
+     column, as tall as it, a return sign (a break's) in its middle;
+     shrunk back into the row before, the same there, fading in (by its
+     colors), its sign turned around and mirrored (from the bottom
+     trailing corner up, pointing to the top leading). */
+  .uikit-grid-resize-wrap {
+    position: absolute;
+    z-index: 3;
+    box-sizing: border-box;
+    border: 2px solid var(--color-ui-primary);
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    background-color: color-mix(in srgb, var(--color-ui-primary) 15%, transparent);
+    pointer-events: none;
+    transition:
+      inset-inline-start 300ms cubic-bezier(0.32, 0.72, 0, 1),
+      inset-block-start 300ms cubic-bezier(0.32, 0.72, 0, 1),
+      width 300ms cubic-bezier(0.32, 0.72, 0, 1),
+      height 300ms cubic-bezier(0.32, 0.72, 0, 1);
+
+    &::after {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      margin: auto;
+      background-color: var(--color-ui-primary);
+      content: '';
+      inset: 0;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M16 4v6a3 3 0 0 1-3 3H5M8.5 9.5 5 13l3.5 3.5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+        center / contain no-repeat;
+      transition: background-color 200ms;
+    }
+
+    &:dir(rtl)::after {
+      scale: -1 1;
+    }
+
+    /* (Shrunk back: as it is, fading in (by its colors); its sign turned
+       around and mirrored: flipped upright.) */
+    &[data-direction='previous'] {
+      border-color: transparent;
+      background-color: transparent;
+      transition:
+        border-color 200ms,
+        background-color 200ms;
+
+      &::after {
+        background-color: transparent;
+        scale: 1 -1;
+      }
+
+      &[data-shown] {
+        border-color: var(--color-ui-primary);
+        background-color: color-mix(
+          in srgb,
+          var(--color-ui-primary) 15%,
+          transparent
+        );
+
+        &::after {
+          background-color: var(--color-ui-primary);
+        }
+      }
+    }
+
+    &[data-direction='previous']:dir(rtl)::after {
+      scale: -1 -1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
   /* (A full width's, still one: its shape as it'd be (see main.tsx,
      layout.ts), filled and edged by its mask, as a break's below.) */
   .uikit-grid-root[data-editing] .uikit-grid-item[data-grid-resize-shaped]::after {
@@ -734,22 +856,74 @@
   }
 
 
-  /* A cell's corner controls (a resize handle, a remove button): a 44px
-     target in its corner, its line drawn in the label's color. */
-  .uikit-grid-resize-handle,
-  .uikit-grid-remove-button,
-  .uikit-grid-area-button {
+  /* A corner button's icon (see below): its outlines filled; under each, a 3px stroke, its backing
+     (1.5px around it), faint, where it's on no fill (a spacer, a spawn,
+     an area's room; `--uikit-grid-corner-backing`, see below): legible on
+     whatever's behind it; an item's own fill is its backing. */
+  .uikit-grid-corner-icon {
+    display: block;
+    overflow: visible;
+    fill: currentcolor;
+    paint-order: stroke;
+    stroke: var(--uikit-grid-corner-backing, transparent);
+    stroke-linejoin: round;
+    stroke-width: 3px;
+    transition: stroke 200ms;
+  }
+
+  /* A corner button (see main.tsx; the grid's controls, a card's): a 44px
+     target in its cell's corner, its icon 16.5px in from both of the
+     corner's edges (its content box a 33px square there), at the corner
+     icons' size, in the label's color. A movable cell's sign is placed as
+     one is. Hidden, see the end. */
+  .uikit-grid-corner-button,
+  .uikit-grid-move-sign {
     position: absolute;
     z-index: 1;
-    display: block;
+    display: grid;
     width: 44px;
     height: 44px;
+    box-sizing: border-box;
     padding: 0;
     border: none;
     margin: 0;
     background: none;
     color: var(--color-ui-label);
+    font-size: var(--uikit-grid-corner-icon-size, 15px);
+    line-height: 0;
+    place-items: center;
+    transition: color 200ms;
+
+    &[data-grid-corner^='top'] {
+      inset-block-start: 0;
+      padding-block-end: 11px;
+    }
+
+    &[data-grid-corner^='bottom'] {
+      inset-block-end: 0;
+      padding-block-start: 11px;
+    }
+
+    &[data-grid-corner$='leading'] {
+      inset-inline-start: 0;
+      padding-inline-end: 11px;
+    }
+
+    &[data-grid-corner$='trailing'] {
+      inset-inline-end: 0;
+      padding-inline-start: 11px;
+    }
+
+    /* (Pointing somewhere: flipped around its own middle.) */
+    &[data-grid-mirrored]:dir(rtl) > .uikit-grid-corner-icon {
+      scale: -1 1;
+    }
+  }
+
+  .uikit-grid-corner-button {
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
     -webkit-touch-callout: none;
 
     &:focus-visible {
@@ -758,63 +932,17 @@
     }
   }
 
-  /* (Their symbols: one family of 2px lines, round ends; see main.tsx.) */
-  .uikit-grid-resize-handle-arc,
-  .uikit-grid-remove-button-x,
-  .uikit-grid-area-button-sign,
-  .uikit-grid-move-sign {
-    display: block;
-    width: 100%;
-    height: 100%;
-    fill: none;
-    stroke: currentcolor;
-    stroke-linecap: round;
-    stroke-width: 2px;
-
-    /* (Its own backing, faint, where it's on no fill (a spacer, a spawn,
-       an area's room; see below): legible on whatever's behind it; an
-       item's own fill is its backing. 1.5px around its line; a handle's
-       one filled shape, see main.tsx.) */
-    .uikit-grid-resize-handle-backing,
-    .uikit-grid-remove-button-backing,
-    .uikit-grid-area-button-backing,
-    .uikit-grid-move-sign-backing {
-      --uikit-grid-backing: color-mix(
-        in srgb,
-        var(--color-ui-system-background) 45%,
-        transparent
-      );
-
-      display: none;
-      stroke: var(--uikit-grid-backing);
-      stroke-width: 5px;
-    }
-
-    .uikit-grid-resize-handle-backing {
-      fill: var(--uikit-grid-backing);
-      stroke: none;
-    }
-  }
-
-  /* A resize handle: an arc in its cell's corner (bottom trailing,
-     concentric with its radius); a moat of dots beside it when it only
-     grows (inside) or shrinks (outside).
+  /* A resize handle: the arc in its cell's corner (bottom trailing,
+     concentric with its radius); inside it, a chevron where the tile can
+     go (grow, shrink, both; none when it's free, see main.tsx).
      Dragged, not scrolling (see main.tsx). */
   .uikit-grid-resize-handle {
     cursor: nwse-resize;
-    inset-block-end: 0;
-    inset-inline-end: 0;
     touch-action: none;
 
     &:dir(rtl) {
       cursor: nesw-resize;
-      scale: -1 1;
     }
-  }
-
-  .uikit-grid-resize-handle-arc .uikit-grid-resize-handle-moat {
-    fill: currentcolor;
-    stroke: none;
   }
 
   /* In an item: in its text's color (its own fill its backing; a card's
@@ -823,45 +951,12 @@
     color: inherit;
   }
 
-  /* A remove button: an x in its cell's top leading corner, drawn as a
-     resize handle is (see above). */
-  .uikit-grid-remove-button {
-    cursor: pointer;
-    inset-block-start: 0;
-    inset-inline-start: 0;
-    touch-action: manipulation;
-  }
-
-  /* An add-an-area button: the hatching in small, in its tile's bottom
-     leading corner, drawn as a remove button is (see above). */
-  .uikit-grid-area-button {
-    cursor: pointer;
-    inset-block-end: 0;
-    inset-inline-start: 0;
-    touch-action: manipulation;
-
-    &:dir(rtl) {
-      scale: -1 1;
-    }
-  }
-
-  /* Movable, editing (see main.tsx): a ring in its top trailing corner,
-     as far in as a remove button's x, in its controls' color (an area's:
-     its handle's); a break's at its rows' end, in its return sign's. Not
-     a control: it's dragged from anywhere. */
+  /* Movable, editing (see main.tsx): crosshairs in its top trailing corner,
+     where a remove button's x is in its own, in its controls' color (an
+     area's: its handle's); a break's at its rows' end, in its return
+     sign's. Not a control: it's dragged from anywhere. */
   .uikit-grid-move-sign {
-    position: absolute;
-    z-index: 1;
-    width: 44px;
-    height: 44px;
-    color: var(--color-ui-label);
-    inset-block-start: 0;
-    inset-inline-end: 0;
     pointer-events: none;
-
-    &:dir(rtl) {
-      scale: -1 1;
-    }
   }
 
   .uikit-grid-break > .uikit-grid-move-sign {
@@ -903,9 +998,13 @@
 
   /* (On no fill, their own backing: in a spacer, a spawn (only outlined),
      an area's room (its sign, its handle, see below); a break's filled.) */
-  :is(.uikit-grid-spacer, .uikit-grid-spawn) :is(.uikit-grid-resize-handle-backing, .uikit-grid-remove-button-backing, .uikit-grid-move-sign-backing),
-  .uikit-grid-item[data-grid-room] > .uikit-grid-move-sign .uikit-grid-move-sign-backing {
-    display: inline;
+  :is(.uikit-grid-spacer, .uikit-grid-spawn) :is(.uikit-grid-corner-button, .uikit-grid-move-sign),
+  .uikit-grid-item[data-grid-room] > .uikit-grid-move-sign {
+    --uikit-grid-corner-backing: color-mix(
+      in srgb,
+      var(--color-ui-system-background) 45%,
+      transparent
+    );
   }
 
   /* In a break: its rows only; at its last row's last free unit (past
@@ -930,11 +1029,13 @@
      tile's remove button too; held, the area moves (see main.tsx). */
   .uikit-grid-resize-handle[data-grid-area-handle],
   .uikit-grid-remove-button[data-grid-area-button] {
-    color: var(--uikit-grid-area-handle-color, var(--color-ui-label));
+    --uikit-grid-corner-backing: color-mix(
+      in srgb,
+      var(--color-ui-system-background) 45%,
+      transparent
+    );
 
-    :is(.uikit-grid-resize-handle-backing, .uikit-grid-remove-button-backing) {
-      display: inline;
-    }
+    color: var(--uikit-grid-area-handle-color, var(--color-ui-label));
   }
 
   .uikit-grid-item:not([data-grid-room]):has(
@@ -1007,7 +1108,8 @@
   /* Truly centered in its area (see main.tsx): across all of it, as wide
      and tall as its units, in its middle (off the unit lines if need be);
      without room around it, simply filling its cell. */
-  .uikit-grid-item[data-grid-room][data-grid-placement='center'] > .uikit-grid-item-body {
+  .uikit-grid-item[data-grid-room][data-grid-placement='center']
+    > :is(.uikit-grid-item-body, .uikit-grid-stand-in) {
     width: calc(
       (100% + var(--uikit-grid-gap)) * var(--uikit-grid-body-columns, 1) /
         var(--uikit-grid-item-columns, 1) - var(--uikit-grid-gap)
@@ -1019,12 +1121,6 @@
     grid-column: 1 / -1;
     grid-row: 1 / -1;
     place-self: center;
-  }
-
-  /* (A full width's, through the end-of-line column, see above.) */
-  .uikit-grid-item[data-grid-full][data-grid-room][data-grid-placement='center']
-    > .uikit-grid-item-body[data-size^='*'] {
-    width: calc(100% + var(--uikit-grid-strip, 0px));
   }
 
   /* Movable in its area (see main.tsx): held and dragged, above what's
@@ -1061,6 +1157,113 @@
       inset-block-start: var(--uikit-grid-landing-y, 0);
       inset-inline-start: var(--uikit-grid-landing-x, 0);
       pointer-events: none;
+    }
+  }
+
+  /* A corner button hidden (see main.tsx; inert): faded out by its color,
+     its backing with it (over whatever colored it). */
+  .uikit-grid-corner-button[data-grid-corner][data-grid-hidden] {
+    color: transparent;
+    pointer-events: none;
+
+    > .uikit-grid-corner-icon {
+      stroke: transparent;
+    }
+  }
+
+  /* Open above the page (see overlay.tsx): its tile's body out of the grid
+     (from its stand-in's place, `--uikit-grid-open-left`/`-top`), moved
+     to the screen's middle (`--uikit-grid-open-x`/`-y`) and grown
+     (`--uikit-grid-open-width`/`-height`), above the backdrop; back again
+     closing. Each frame, by its script (no transition: its backdrop's
+     cutout moving with it). By its position and size only. */
+  .uikit-grid-root .uikit-grid-item > .uikit-grid-item-body[data-grid-open] {
+    position: absolute;
+    z-index: 1001;
+    overflow: hidden;
+    width: var(--uikit-grid-open-width, auto);
+    height: var(--uikit-grid-open-height, auto);
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    margin: 0;
+    grid-area: auto;
+    inset: var(--uikit-grid-open-top, 0) auto auto
+      var(--uikit-grid-open-left, 0);
+    outline: none;
+    translate: var(--uikit-grid-open-x, 0) var(--uikit-grid-open-y, 0);
+  }
+
+  /* Its stand-in, open: where it was, faintly (its place in the grid,
+     nothing reflowing). */
+  .uikit-grid-stand-in {
+    border-radius: var(--uikit-grid-item-radius, 24px);
+    background-color: var(
+      --uikit-grid-stand-in-color,
+      color-mix(in srgb, var(--color-ui-label) 8%, transparent)
+    );
+    pointer-events: none;
+
+    /* (Closing: gone as its item's back over it, as its underlay fades (see
+       below): nothing under its glass to leave at the end.) */
+    &[data-grid-closing] {
+      background-color: transparent;
+      transition: background-color 380ms 200ms;
+    }
+  }
+
+  /* The page behind an open item, blurred (see overlay.tsx): a contextual
+     menu's backdrop (see ContextualMenu), over its screen (its portal
+     container), cut out where the item is. A press on it closes the item.
+     Its underlay (in the item's grid, under it): only where it is, see
+     below. */
+  .uikit-grid-backdrop {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* (Its underlay: opaque while it's open (`--uikit-grid-open-background`):
+     what it shows through its glass, whatever's under it; gone, its glass
+     again, as it's back in the grid.) */
+  .uikit-grid-underlay {
+    position: fixed;
+    z-index: 1000;
+    background-color: transparent;
+    inset: 0;
+    pointer-events: none;
+
+    /* (Closing: its glass again only as it's nearly back, slowly, through
+       the end of its move (350ms; gone at 600ms); opening, opaque at
+       once, see below: nothing bright beside it shows through as it grows
+       or shrinks.) */
+    transition: background-color 380ms 200ms;
+
+    &[data-grid-open] {
+      background-color: var(
+        --uikit-grid-open-background,
+        var(--color-ui-system-background)
+      );
+      transition: background-color 80ms;
+    }
+  }
+
+  /* (Its grid above what's beside it on its page while it's open, closing
+  (e.g. cards outside it), as the backdrop is; just above: below the
+  page's bars (a `Viewport` anchor's layer), which cover it where they
+  meet, as they cover the page.) */
+  .uikit-grid-root:has(.uikit-grid-item-body[data-grid-open]) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* (Its corner buttons, open or closing: faded quickly, as its underlay
+     is (see above): hidden, at the start of its move; shown, at its end
+     (350ms): opening, the button that opened it out first, an x in last;
+     closing, the other way around.) */
+  .uikit-grid-item-body[data-grid-open] .uikit-grid-corner-button {
+    transition-delay: 230ms;
+    transition-duration: 120ms;
+
+    &[data-grid-hidden] {
+      transition-delay: 0s;
+      transition-duration: 80ms;
     }
   }
 }

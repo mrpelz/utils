@@ -36,6 +36,55 @@
     &[data-ending-style] {
       opacity: 0;
     }
+
+    /* Cut out where its lifted element is (see `cutOut`): all of it, less
+       that element's shape, a rounded rect (two rects across, its four
+       corners' circles); by gradients, set as they move. */
+    &[data-cut-out] {
+      --uikit-cut-out-solid: linear-gradient(#000 0 0);
+      --uikit-cut-out-round: radial-gradient(
+        closest-side,
+        #000 calc(100% - 0.5px),
+        transparent
+      );
+      --uikit-cut-out-x2: calc(
+        var(--uikit-cut-out-x) + var(--uikit-cut-out-width) - 2 *
+          var(--uikit-cut-out-radius)
+      );
+      --uikit-cut-out-y2: calc(
+        var(--uikit-cut-out-y) + var(--uikit-cut-out-height) - 2 *
+          var(--uikit-cut-out-radius)
+      );
+      --uikit-cut-out-corner: calc(2 * var(--uikit-cut-out-radius));
+
+      mask-composite: subtract, add, add, add, add, add, add;
+      mask-image:
+        var(--uikit-cut-out-solid), var(--uikit-cut-out-solid),
+        var(--uikit-cut-out-solid), var(--uikit-cut-out-round),
+        var(--uikit-cut-out-round), var(--uikit-cut-out-round),
+        var(--uikit-cut-out-round);
+      mask-position:
+        0 0,
+        var(--uikit-cut-out-x)
+          calc(var(--uikit-cut-out-y) + var(--uikit-cut-out-radius)),
+        calc(var(--uikit-cut-out-x) + var(--uikit-cut-out-radius))
+          var(--uikit-cut-out-y),
+        var(--uikit-cut-out-x) var(--uikit-cut-out-y),
+        var(--uikit-cut-out-x2) var(--uikit-cut-out-y),
+        var(--uikit-cut-out-x) var(--uikit-cut-out-y2),
+        var(--uikit-cut-out-x2) var(--uikit-cut-out-y2);
+      mask-repeat: no-repeat;
+      mask-size:
+        100% 100%,
+        var(--uikit-cut-out-width)
+          calc(var(--uikit-cut-out-height) - var(--uikit-cut-out-corner)),
+        calc(var(--uikit-cut-out-width) - var(--uikit-cut-out-corner))
+          var(--uikit-cut-out-height),
+        var(--uikit-cut-out-corner) var(--uikit-cut-out-corner),
+        var(--uikit-cut-out-corner) var(--uikit-cut-out-corner),
+        var(--uikit-cut-out-corner) var(--uikit-cut-out-corner),
+        var(--uikit-cut-out-corner) var(--uikit-cut-out-corner);
+    }
   }
 
   /* The stack (see main.tsx): the preview's slot, then the menu, aligned

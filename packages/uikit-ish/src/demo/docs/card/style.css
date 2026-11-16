@@ -1,0 +1,39 @@
+/* Card demos (see main.tsx). */
+
+/* A page on a picture (see `Viewport.Background`): no background of its
+   own, the cards' glass over the picture. */
+.card-demo-page {
+  background-color: transparent;
+}
+
+/* A grid on a page: clear of the screen's sides; a button above it. */
+.card-demo-content {
+  display: grid;
+  padding: 16px;
+  gap: 16px;
+}
+
+/* The buttons above a grid, at its end. */
+.card-demo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+
+/* Cards on their own (no grid): boxes of their own sizes, in a row. */
+.card-demo-alone {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  > * {
+    width: 150px;
+    height: 150px;
+  }
+
+  > :first-child {
+    width: 220px;
+    height: 100px;
+  }
+}

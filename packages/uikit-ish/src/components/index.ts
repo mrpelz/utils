@@ -284,7 +284,13 @@ export {
   type GridHeaderProps,
   type GridItemProps,
   type GridItemState,
+  type GridOpenChangeDetails,
+  type GridOpenChangeReason,
   type GridPlacement,
+  cardIcons,
+  type GridCorner,
+  type GridCornerButtonProps,
+  gridIcons,
   type GridReorderChange,
   type GridReorderEventDetails,
   GridReorderHandle,
@@ -306,6 +312,18 @@ export {
   useGridArea,
   useGridItem,
 } from './grid/main.js';
+export {
+  Card,
+  type CardCornerButtonProps,
+  type CardOrientation,
+  type CardRootProps,
+  type CardSizes,
+  cardSizes,
+  type CardSymbolProps,
+  type CardTitleProps,
+  type CardValueProps,
+  useCardOrientation,
+} from './card/main.js';
 export {
   Layout,
   type LayoutColumnProps,

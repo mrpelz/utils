@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
-import type {
-  GridBreakRows,
+import {
+  cardIcons,
+  type GridBreakRows,
+  gridIcons,
   GridPlacement,
   GridSize,
   GridSizeChangeDetails,
@@ -11,6 +13,7 @@ import {
   commonPropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
+import { sfICircle } from '../../tooling/icons.js';
 
 // Every part's options (its parts page's, see part-options.ts for the other
 // demos). The reorder handles and names are the app's wiring, set by each
@@ -139,6 +142,18 @@ export const getPropOptionsItem =
       ),
     ] as const,
     onSizeChange: [logSize(addLog, name), undefined] as const,
+    open: [undefined, true, false] as const,
+    defaultOpen: [undefined, true] as const,
+    onOpenChange: [
+      new MappedProp(
+        (open: boolean, { reason }: { reason: string }) =>
+          addLog(`${name}: ${open ? 'open' : 'close'} (${reason})`),
+        '[log]',
+      ),
+      undefined,
+    ] as const,
+    openSize: [undefined, '2x2', '3x2'] as const,
+    openLabel: [name, undefined] as const,
   });
 
 export const getPropOptionsSpacer =
@@ -182,6 +197,39 @@ export const getPropOptionsResizeHandle = (addLog: AddLog) => ({
   onClick: [
     undefined,
     new MappedProp(() => addLog('resize handle: click'), '[log click]'),
+  ] as const,
+});
+
+export const getPropOptionsCornerButton = (addLog: AddLog) => ({
+  ...commonPropOptions,
+  icon: [
+    new MappedProp(cardIcons.drillIn, '[cardIcons.drillIn]'),
+    new MappedProp(cardIcons.expand, '[cardIcons.expand]'),
+    new MappedProp(cardIcons.collapse, '[cardIcons.collapse]'),
+    new MappedProp(cardIcons.overlay, '[cardIcons.overlay]'),
+    new MappedProp(cardIcons.close, '[cardIcons.close]'),
+    new MappedProp(gridIcons.remove, '[gridIcons.remove]'),
+    new MappedProp(gridIcons.move, '[gridIcons.move]'),
+    new MappedProp(gridIcons.addArea, '[gridIcons.addArea]'),
+    new MappedProp(gridIcons.resize, '[gridIcons.resize]'),
+    new MappedProp(gridIcons.resizeGrow, '[gridIcons.resizeGrow]'),
+    new MappedProp(gridIcons.resizeShrink, '[gridIcons.resizeShrink]'),
+    new MappedProp(gridIcons.resizeBoth, '[gridIcons.resizeBoth]'),
+    new MappedProp(sfICircle, '[info.circle (SF Symbol)]'),
+  ] as const,
+  corner: [
+    undefined,
+    'bottom-leading',
+    'top-leading',
+    'top-trailing',
+    'bottom-trailing',
+  ] as const,
+  mirrored: [undefined, true] as const,
+  visible: [undefined, false] as const,
+  'aria-label': ['Details', undefined] as const,
+  onClick: [
+    undefined,
+    new MappedProp(() => addLog('corner button: click'), '[log click]'),
   ] as const,
 });
 

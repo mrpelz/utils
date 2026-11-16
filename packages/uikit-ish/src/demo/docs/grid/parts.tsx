@@ -27,9 +27,11 @@ import {
   gridAreaButtonRows,
   gridAreaRows,
   gridBreakRows,
+  gridCornerButtonRows,
   gridCreateReorderHandleRows,
   gridDropGroupRows,
   gridHeaderRows,
+  gridIconsRows,
   gridItemRows,
   gridRemoveButtonRows,
   gridReorderRows,
@@ -46,6 +48,7 @@ import {
   getPropOptionsArea,
   getPropOptionsAreaButton,
   getPropOptionsBreak,
+  getPropOptionsCornerButton,
   getPropOptionsItem,
   getPropOptionsRemoveButton,
   getPropOptionsResizeHandle,
@@ -796,6 +799,87 @@ const ResizeHandlePart: FunctionComponent = () => {
   );
 };
 
+/**
+ * `Grid.CornerButton`, outlined (the lamp's): not editing, shown (as an
+ * app's, hidden while editing unless `visible` says otherwise).
+ */
+const CornerButtonPart: FunctionComponent = () => {
+  const id = 'grid-parts-corner-button';
+  const [log, addLog] = useLog();
+  const [external] = useProvidedState(id);
+  const [control, props, state, elementKey] = usePropControl(
+    useMemo(() => getPropOptionsCornerButton(addLog), [addLog]),
+    {
+      emphasize: 'outline',
+      external,
+      isOpen: true,
+      title: 'Grid.CornerButton',
+    },
+  );
+  const [editing, setEditing] = useState(false);
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            ...sharedParts,
+            ...buttonParts,
+            'Grid.Root': ['editing'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  return (
+    <Component
+      isInline
+      isStretched
+      controls={[control, partControls]}
+      id={id}
+      log={log}
+      state={[state, partState]}
+      title="Grid.CornerButton"
+    >
+      <div className="grid-demo-content">
+        <div className="grid-demo-actions">
+          {editButton(editing, setEditing, partProps, addLog)}
+        </div>
+        <Grid.Root
+          {...partProps['Grid.Root']}
+          editing={editing}
+          style={{ ...gridSigns(), ...partProps['Grid.Root']?.style }}
+        >
+          {livingRoom.map((device) =>
+            device.name === 'Lamp' ? (
+              <Grid.Item
+                key={device.name}
+                {...partProps['Grid.Item']}
+                defaultSize={device.size}
+                dropName={device.name}
+                supportedSizes={deviceSizes}
+              >
+                <div className="grid-demo-tile">{device.name}</div>
+                <Grid.CornerButton
+                  key={elementKey}
+                  {...props}
+                  // (An app's: shown while the grid isn't editing.)
+                  visible={props.visible ?? !editing}
+                />
+                <Grid.ResizeHandle {...partProps['Grid.ResizeHandle']} />
+              </Grid.Item>
+            ) : (
+              deviceItem(device, partProps)
+            ),
+          )}
+        </Grid.Root>
+      </div>
+    </Component>
+  );
+};
+
 /** `Grid.RemoveButton`, outlined (the lamp's), editing; Reset. */
 const RemoveButtonPart: FunctionComponent = () => {
   const id = 'grid-parts-remove-button';
@@ -1381,6 +1465,10 @@ export const GridParts: FunctionComponent = () => (
                         <PartLink part="Grid.AreaButton" /> (optional)
                       </li>
                       <li>
+                        <PartLink part="Grid.CornerButton" /> (optional,
+                        several)
+                      </li>
+                      <li>
                         <PartLink part="Grid.Area" /> (optional, no element)
                         <ul>
                           <li>
@@ -1555,10 +1643,19 @@ export const GridParts: FunctionComponent = () => (
         tile shows, and its tile sits in that room.
       </li>
       <li>
-        In edit mode, with a <code>reorderHandle</code>, it shows a ring in its
-        top trailing corner and can be dragged after holding it for a moment (a
-        quick swipe still scrolls), or moved with Alt and an arrow key. A
+        In edit mode, with a <code>reorderHandle</code>, it shows crosshairs in
+        its top trailing corner and can be dragged after holding it for a moment
+        (a quick swipe still scrolls), or moved with Alt and an arrow key. A
         placeholder shows where it’ll land.
+      </li>
+      <li>
+        Opened (<code>open</code>, or <PartLink part="useGridItem" />
+        ’s <code>setOpen</code>), its tile moves to the middle of the screen and
+        grows to <code>openSize</code>, over the dimmed page, without being
+        mounted anew. A faint stand-in keeps its place, so nothing in the grid
+        moves. It’s a modal dialog named <code>openLabel</code>: focus moves
+        into it and stays there, and a press beside it or Escape closes it.
+        Starting edit mode closes it too.
       </li>
       <li>
         Renders a <code>div</code>.
@@ -1663,6 +1760,77 @@ export const GridParts: FunctionComponent = () => (
     <PropsTable rows={gridSpawnRows} />
 
     <Heading
+      id="grid-cornerbutton"
+      level={2}
+    >
+      <code>Grid.CornerButton</code>
+    </Heading>
+    <ul>
+      <li>
+        A button in a corner of its tile, a 44px target there. Its icon sits
+        16.5px in from both of the corner’s edges, in the tile’s text color.
+      </li>
+      <li>
+        The grid’s own controls are corner buttons:{' '}
+        <PartLink part="Grid.RemoveButton" />,{' '}
+        <PartLink part="Grid.ResizeHandle" /> and{' '}
+        <PartLink part="Grid.AreaButton" />, shown while the grid is in edit
+        mode. An app’s, for example a card’s{' '}
+        <PartLink
+          component="card"
+          part="Card.CornerButton"
+        />
+        , are shown while it isn’t, so the two never share a corner.
+      </li>
+      <li>
+        Its icon is a <code>SymbolIcon</code>: one of{' '}
+        <PartLink part="gridIcons" /> or{' '}
+        <PartLink
+          component="card"
+          part="cardIcons"
+        />
+        , or an app’s own, for example an SF Symbol.
+      </li>
+      <li>
+        Hidden (<code>visible</code> off), it fades out by its color and can’t
+        be pressed or focused.
+      </li>
+      <li>
+        Where there’s no fill under it (a spacer, an area’s hatched room), its
+        icon gets a faint backing.
+      </li>
+      <li>
+        Renders a <code>button</code>. Give it a name that says what it does.
+      </li>
+    </ul>
+    <CornerButtonPart />
+    <h3>Props</h3>
+    <PropsTable rows={gridCornerButtonRows} />
+
+    <Heading
+      id="gridicons"
+      level={2}
+    >
+      <code>gridIcons</code>
+    </Heading>
+    <ul>
+      <li>
+        The grid’s edit-mode icons, as <code>SymbolIcon</code>s for a{' '}
+        <PartLink part="Grid.CornerButton" /> or a{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />
+        . Plain 2px lines with round ends, drawn as filled outlines.
+      </li>
+      <li>
+        Each is drawn in a 22px square around where a corner button puts its
+        icon, at the corner icons’ size (15px).
+      </li>
+    </ul>
+    <PropsTable rows={gridIconsRows} />
+
+    <Heading
       id="grid-resizehandle"
       level={2}
     >
@@ -1671,8 +1839,12 @@ export const GridParts: FunctionComponent = () => (
     <ul>
       <li>
         An arc in its tile’s bottom trailing corner, in edit mode only, and only
-        with another size to go to. A moat of dots inside it says the tile can
-        only grow, outside it that it can only shrink.
+        with another size to go to. A chevron inside it points to the top
+        leading corner when the tile can only shrink, to the bottom trailing one
+        when it can only grow, and both ways when it has sizes either side. With
+        no <code>supportedSizes</code> (any size), the arc is alone, unless the
+        tile is at the smallest or largest size it can be, for example a full
+        width with the most rows: then it shows the one way it can go.
       </li>
       <li>
         Dragged, it outlines the new size from the start. Nothing moves until
@@ -1791,10 +1963,10 @@ export const GridParts: FunctionComponent = () => (
         off the area’s own controls.
       </li>
       <li>
-        A <code>movable</code> tile shows a ring in its top trailing corner in
-        edit mode, and is held and dragged to the middle or a corner, or stepped
-        there with the arrow keys while it has focus. A hold on the hatched room
-        moves the whole item.
+        A <code>movable</code> tile shows crosshairs in its top trailing corner
+        in edit mode, and is held and dragged to the middle or a corner, or
+        stepped there with the arrow keys while it has focus. A hold on the
+        hatched room moves the whole item.
       </li>
       <li>
         Its controls go in it: a <PartLink part="Grid.ResizeHandle" /> resizes
@@ -1902,6 +2074,7 @@ export const gridPartsDemos = [
   SpacerPart,
   BreakPart,
   SpawnPart,
+  CornerButtonPart,
   ResizeHandlePart,
   RemoveButtonPart,
   AreaPart,

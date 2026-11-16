@@ -198,6 +198,43 @@ export const gridItemRows: readonly PropRow[] = [
     'The sizes its content can be, usually a constant of the card component. Its size snaps to them (the same shape first, then the closest area). If that’s wider than the columns, the widest that fits is shown, with the nearest rows. One of them must fit the grid’s minColumns.',
   ],
   onSizeChangeRow('by its resize handle'),
+  [
+    'open',
+    'boolean',
+    undefined,
+    'Whether it’s open above the page (controlled): its tile in the middle of the screen at openSize, over the dimmed page, while a stand-in keeps its place in the grid. It’s a modal dialog until it’s closed, and never open in edit mode.',
+  ],
+  [
+    'defaultOpen',
+    'boolean',
+    code('false'),
+    'Whether it’s open initially (uncontrolled).',
+  ],
+  [
+    'onOpenChange',
+    '(open: boolean, details: GridOpenChangeDetails) => void',
+    undefined,
+    <>
+      Called as it’s opened or closed. The reason (<code>details.reason</code>)
+      is <code>outside-press</code> for a press beside it,{' '}
+      <code>escape-key</code>, <code>edit</code> when edit mode starts, or{' '}
+      <code>none</code> when the app asked, through{' '}
+      <PartLink part="useGridItem" />
+      ’s <code>setOpen</code>.
+    </>,
+  ],
+  [
+    'openSize',
+    'GridSize',
+    code(union('4x3')),
+    'Its size while it’s open, in the grid’s units, fitted to the screen with a margin.',
+  ],
+  [
+    'openLabel',
+    'string',
+    undefined,
+    'Its name while it’s open (a dialog’s), for example its card’s title.',
+  ],
   ...cellRows,
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -353,7 +390,105 @@ export const gridAreaRows: readonly PropRow[] = [
     'movable',
     'boolean',
     code('false'),
-    'Its tile can be moved within it in edit mode, shown by a ring in the tile’s top trailing corner: held and dragged to the middle or a corner, or stepped there with the arrow keys while it has focus. A hold on the hatched room around it moves the whole item instead.',
+    'Its tile can be moved within it in edit mode, shown by crosshairs in the tile’s top trailing corner: held and dragged to the middle or a corner, or stepped there with the arrow keys while it has focus. A hold on the hatched room around it moves the whole item instead.',
+  ],
+];
+
+export const gridCornerButtonRows: readonly PropRow[] = [
+  [
+    'icon',
+    'SymbolIcon',
+    undefined,
+    <>
+      Its icon: one of <PartLink part="gridIcons" /> or{' '}
+      <PartLink
+        component="card"
+        part="cardIcons"
+      />
+      , or the app’s own (for example an SF Symbol), drawn at the same place and
+      size.
+    </>,
+  ],
+  [
+    'corner',
+    'GridCorner',
+    code(union('bottom-trailing')),
+    'The corner it’s in: top-leading, top-trailing, bottom-leading or bottom-trailing. Its icon sits 16.5px in from both of that corner’s edges.',
+  ],
+  [
+    'visible',
+    'boolean',
+    code('true'),
+    'Whether it’s shown. Hidden, it fades out and can’t be pressed or focused.',
+  ],
+  [
+    'mirrored',
+    'boolean',
+    code('false'),
+    'Whether its icon is flipped in a right-to-left layout. Set it for an icon that points somewhere, such as the expand triangle.',
+  ],
+  ['onClick', '(event) => void', undefined, 'What a press does.'],
+  [
+    'aria-label',
+    'string',
+    undefined,
+    'Its accessible name, for example “Show details”. It has no default.',
+  ],
+  ...renderRows('button', 'HTMLButtonElement'),
+];
+
+export const gridIconsRows: readonly PropRow[] = [
+  [
+    'remove',
+    'SymbolIcon',
+    undefined,
+    <>
+      An x. <PartLink part="Grid.RemoveButton" />
+      ’s.
+    </>,
+  ],
+  [
+    'move',
+    'SymbolIcon',
+    undefined,
+    'Crosshairs: four short lines around an empty middle, on a tile that can be moved.',
+  ],
+  [
+    'addArea',
+    'SymbolIcon',
+    undefined,
+    <>
+      Three diagonal lines, the hatching in small.{' '}
+      <PartLink part="Grid.AreaButton" />
+      ’s.
+    </>,
+  ],
+  [
+    'resize',
+    'SymbolIcon',
+    undefined,
+    <>
+      The arc alone, for any size. <PartLink part="Grid.ResizeHandle" />
+      ’s, as are the next three. Drawn for the bottom trailing corner.
+    </>,
+  ],
+  [
+    'resizeGrow',
+    'SymbolIcon',
+    undefined,
+    'The arc with a chevron pointing to the bottom trailing corner: it can only grow.',
+  ],
+  [
+    'resizeShrink',
+    'SymbolIcon',
+    undefined,
+    'The arc with a chevron pointing to the top leading corner: it can only shrink.',
+  ],
+  [
+    'resizeBoth',
+    'SymbolIcon',
+    undefined,
+    'The arc with chevrons both ways: it has sizes either side.',
   ],
 ];
 
@@ -490,6 +625,18 @@ export const gridUseGridItemRows: readonly PropRow[] = [
     'The sizes it can be, smallest area first.',
   ],
   ['editing', 'boolean', undefined, 'Whether its grid is in edit mode.'],
+  [
+    'open',
+    'boolean',
+    undefined,
+    'Whether it’s open above the page (its item’s open). Use it to show more, and a button that closes it.',
+  ],
+  [
+    'setOpen',
+    '(open: boolean) => void',
+    undefined,
+    'Opens or closes it above the page, for example from its card’s corner button.',
+  ],
   [
     'requestSize',
     '(size: GridSize, details?: GridSizeChangeDetails) => void',

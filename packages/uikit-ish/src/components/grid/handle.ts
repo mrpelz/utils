@@ -215,10 +215,28 @@ const area = (size: GridSize, columns?: number) => {
   return width * rows;
 };
 
-/** Sizes in order: smallest area first, then the narrower. */
-export const sortSizes = (sizes: readonly GridSize[]): GridSize[] =>
+/**
+ * A size's measure for ordering (see `sortSizes`): its area, a full width
+ * a little wider than the grid's `columns` (larger than a size as wide as
+ * them: it reaches further, into the end-of-line column while editing).
+ */
+export const measureOf = (size: GridSize, columns = 6): number => {
+  const [width, rows] = spanOf(size, columns);
+  return (isFull(size) ? width + 0.5 : width) * rows;
+};
+
+/**
+ * Sizes in order: smallest first (see `measureOf`, at `columns`), then the
+ * narrower.
+ */
+export const sortSizes = (
+  sizes: readonly GridSize[],
+  columns = 6,
+): GridSize[] =>
   [...new Set(sizes)].toSorted(
-    (a, b) => area(a) - area(b) || spanOf(a)[0] - spanOf(b)[0],
+    (a, b) =>
+      measureOf(a, columns) - measureOf(b, columns) ||
+      spanOf(a, columns)[0] - spanOf(b, columns)[0],
   );
 
 /**
@@ -238,6 +256,7 @@ export const sizesUpTo = (columns: number, rows: number): GridSize[] =>
         (_, index) => `${width}x${String(index + 1)}` as GridSize,
       ),
     ),
+    columns,
   );
 
 /**
@@ -290,6 +309,7 @@ export const effectiveSize = (
     supported.length > 0
       ? supported
       : sizesUpTo(gridColumns, Number.isFinite(rowsMost) ? rowsMost : 3),
+    gridColumns,
   );
   const size = isOpen ? requested : snapped(requested, sorted, gridColumns);
   const fits = (each: GridSize) => {

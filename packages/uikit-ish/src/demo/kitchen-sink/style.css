@@ -274,8 +274,9 @@
     --uikit-grid-area-handle-color: #fff;
     --uikit-grid-hole-color: rgb(255 255 255 / 45%);
     --uikit-grid-landing-color: rgb(255 255 255 / 25%);
-    --uikit-grid-band-color: rgb(255 255 255 / 80%);
+    --uikit-grid-band-color: rgb(255 255 255 / 25%);
     --uikit-grid-room-color: rgb(255 255 255 / 30%);
+    --uikit-grid-room-edge-color: rgb(255 255 255 / 55%);
   }
 
   .uikit-grid-placeholder {
@@ -296,6 +297,29 @@
 @layer demo {
   .kitchen-sink-grid {
     margin-inline: 16px;
+  }
+
+  /* Cards on their own (see cards.tsx): below the grid, in boxes of
+     their own sizes. */
+  .kitchen-sink-cards-alone {
+    margin-inline: 16px;
+  }
+
+  .kitchen-sink-cards-alone-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-block: 12px;
+
+    > :first-child {
+      width: 220px;
+      height: 100px;
+    }
+
+    > :last-child {
+      width: 150px;
+      height: 150px;
+    }
   }
 
   /* (The row drilling into the playground, below the grid: on the

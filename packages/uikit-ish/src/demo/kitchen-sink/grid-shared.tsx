@@ -37,7 +37,9 @@ export const Tile: FunctionComponent<{ label: string; place: number }> = ({
         <span className="kitchen-sink-grid-tile-size">
           {item?.size}
           {item && item.size !== item.requested ? ` (${item.requested})` : ''}
-          {area ? ` in ${area.size}, ${area.placement}` : ''}
+          {area
+            ? ` in ${area.size}${area.size === area.requested ? '' : ` (${area.requested})`}, ${area.placement}`
+            : ''}
         </span>
         <span className="kitchen-sink-grid-tile-size">#{place + 1}</span>
       </div>
