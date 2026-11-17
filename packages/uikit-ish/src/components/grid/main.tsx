@@ -77,15 +77,18 @@ import type {
   GridSpacerProps,
   GridSpawnProps,
 } from './props.js';
-import { startGridTransition } from './transition.js';
+import {
+  GridItemLayoutProvider,
+  ShapeSnapshot,
+  useReshape,
+} from './reshape.js';
 
 export { type GridReorderCells, GridReorderHandle } from './handle.js';
-export { cardIcons, gridIcons } from './icons.js';
-// (The reflow's timing, for what moves with it inside the library, e.g. a
-// card resizing itself.)
+export { gridIcons } from './icons.js';
+// (The reflow's timing: what moves with it, e.g. what's in a tile as it
+// changes its box, see reshape.ts.)
 export { reflowDuration, reflowEasing } from './layout.js';
-// (What's in an item hears as its grid resizes it, see overlay.tsx.)
-export { startGridTransition } from './transition.js';
+export { startWithFrame, useGridItemLayout } from './reshape.js';
 export type {
   GridAreaButtonProps,
   GridAreaProps,
@@ -96,6 +99,8 @@ export type {
   GridBreakRows,
   GridDropGroupProps,
   GridHeaderProps,
+  GridItemLayoutChange,
+  GridItemLayoutHandlers,
   GridItemProps,
   GridItemState,
   GridOpenChangeDetails,
@@ -846,6 +851,7 @@ const useCell = ({
       movable,
       // (Closed: an item's own, see `Item`.)
       open: false,
+      openSize: size,
       placement,
       requestArea,
       requested,
@@ -978,7 +984,7 @@ const CornerIcon = ({ icon }: { icon: SymbolIcon }) => {
 /**
  * A button in its cell's corner (see the CSS): a 44px target there, its
  * icon 16.5px in from both of the corner's edges (`gridIcons`,
- * `cardIcons`, or the app's). Hidden (`visible` false): faded out by its
+ * or the app's). Hidden (`visible` false): faded out by its
  * color, inert. The grid's own controls are ones (shown while editing); a
  * card's (`Card.CornerButton`) shown while it isn't.
  */
@@ -1547,20 +1553,16 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
       }
       wasOpen.current = isOpen;
     });
-    // (Opened or closed by the library: in a view transition, see
-    // transition.ts.)
     const changeOpen = useCallback(
       (next: boolean, reason: GridOpenChangeReason) => {
-        startGridTransition(() => {
-          setOwnOpen(next);
-          latestOpen.current?.(next, { reason });
-        });
+        setOwnOpen(next);
+        latestOpen.current?.(next, { reason });
       },
       [],
     );
-    const [standIn, setStandIn] = useState<HTMLSpanElement | null>(null);
+    const standIn = useRef<HTMLSpanElement>(null);
     const [openColumns, openRows] = spanOf(openSize, columns);
-    const [backdrop, underlay] = useOverlay({
+    const { backdrop, phase, settle, underlay } = useOverlay({
       body,
       isOpen,
       onClose: (reason) => changeOpen(false, reason),
@@ -1570,13 +1572,21 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
       ],
       standIn,
     });
+    // (Its tile getting to a new box, what's in it told: after its overlay
+    // placed it, see reshape.ts.)
+    const [onShapeChange, layoutRegistry] = useReshape({
+      body,
+      cell: ref,
+      onSettled: settle,
+    });
     const state = useMemo(
       (): CellState => ({
         ...cellState,
         open: isOpen,
+        openSize,
         setOpen: (next: boolean) => changeOpen(next, 'none'),
       }),
-      [cellState, changeOpen, isOpen],
+      [cellState, changeOpen, isOpen, openSize],
     );
     // (Filling its area: nowhere to go in it; held, its area moves (the
     // item, its cell), its crosshairs the area's, see the CSS.)
@@ -1591,69 +1601,82 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     });
 
     return (
-      <GridItemContext.Provider value={state}>
-        <GridAreaStateContext.Provider value={areaState}>
-          <GridAreaHostContext.Provider value={host}>
-            <div
-              ref={ref}
-              data-grid-full={flagOf(isFullWidth)}
-              data-grid-part="item"
-              data-grid-placement={cellState.placement}
-              data-grid-room={flagOf(hasRoom)}
-              data-size={cellState.area}
-              style={withStyle({ ...spanStyle, ...bodyStyle }, style)}
-              {...entry}
-              {...props}
-              className={cn('uikit-grid-item', className)}
-            >
-              {/* (Its room's edge, editing: the area told from the rows
+      <ShapeSnapshot
+        shape={{
+          area: cellState.area,
+          editing: cellState.editing,
+          open: isOpen,
+          placement: cellState.placement,
+          size: cellState.size,
+        }}
+        onChange={onShapeChange}
+      >
+        <GridItemLayoutProvider value={layoutRegistry}>
+          <GridItemContext.Provider value={state}>
+            <GridAreaStateContext.Provider value={areaState}>
+              <GridAreaHostContext.Provider value={host}>
+                <div
+                  ref={ref}
+                  data-grid-full={flagOf(isFullWidth)}
+                  data-grid-part="item"
+                  data-grid-placement={cellState.placement}
+                  data-grid-room={flagOf(hasRoom)}
+                  data-size={cellState.area}
+                  style={withStyle({ ...spanStyle, ...bodyStyle }, style)}
+                  {...entry}
+                  {...props}
+                  className={cn('uikit-grid-item', className)}
+                >
+                  {/* (Its room's edge, editing: the area told from the rows
                   around it, see the CSS.) */}
-              {hasRoom ? (
-                <span
-                  aria-hidden="true"
-                  className="uikit-grid-room-edge"
-                  data-grid-part="room-edge"
-                />
-              ) : null}
-              <div
-                ref={body}
-                aria-label={isOpen ? openLabel : undefined}
-                aria-modal={isOpen ? true : undefined}
-                className="uikit-grid-item-body"
-                data-grid-movable-body={flagOf(isPlaceable)}
-                data-grid-open={flagOf(isOpen)}
-                data-grid-part="body"
-                data-size={cellState.size}
-                role={isOpen ? 'dialog' : undefined}
-                tabIndex={bodyTabIndex}
-                onKeyDown={onBodyKeyDown}
-              >
-                {children}
-                {/* (Movable in its area: its own sign, on it.) */}
-                {isPlaceable ? moveSignOf(movableMark) : null}
-              </div>
-              {/* (Open above the page: its place kept, see overlay.tsx.) */}
-              {isOpen ? (
-                <span
-                  ref={setStandIn}
-                  aria-hidden="true"
-                  className="uikit-grid-stand-in"
-                  data-grid-part="stand-in"
-                  data-size={cellState.size}
-                />
-              ) : null}
-              {backdrop}
-              {underlay}
-              <div
-                ref={setSlot}
-                className="uikit-grid-item-slot"
-              />
-              {/* (Its area's, in its corner.) */}
-              {moveSignOf(entry)}
-            </div>
-          </GridAreaHostContext.Provider>
-        </GridAreaStateContext.Provider>
-      </GridItemContext.Provider>
+                  {hasRoom ? (
+                    <span
+                      aria-hidden="true"
+                      className="uikit-grid-room-edge"
+                      data-grid-part="room-edge"
+                    />
+                  ) : null}
+                  <div
+                    ref={body}
+                    aria-label={isOpen ? openLabel : undefined}
+                    aria-modal={isOpen ? true : undefined}
+                    className="uikit-grid-item-body"
+                    data-grid-movable-body={flagOf(isPlaceable)}
+                    data-grid-open={phase}
+                    data-grid-part="body"
+                    data-size={cellState.size}
+                    role={isOpen ? 'dialog' : undefined}
+                    tabIndex={bodyTabIndex}
+                    onKeyDown={onBodyKeyDown}
+                  >
+                    {children}
+                    {/* (Movable in its area: its own sign, on it.) */}
+                    {isPlaceable ? moveSignOf(movableMark) : null}
+                  </div>
+                  {/* (Open above the page: its place kept, see overlay.tsx.) */}
+                  {phase ? (
+                    <span
+                      ref={standIn}
+                      aria-hidden="true"
+                      className="uikit-grid-stand-in"
+                      data-grid-part="stand-in"
+                      data-size={cellState.size}
+                    />
+                  ) : null}
+                  {backdrop}
+                  {underlay}
+                  <div
+                    ref={setSlot}
+                    className="uikit-grid-item-slot"
+                  />
+                  {/* (Its area's, in its corner.) */}
+                  {moveSignOf(entry)}
+                </div>
+              </GridAreaHostContext.Provider>
+            </GridAreaStateContext.Provider>
+          </GridItemContext.Provider>
+        </GridItemLayoutProvider>
+      </ShapeSnapshot>
     );
   },
 );
@@ -2857,6 +2880,7 @@ const Break = forwardRef<HTMLDivElement, GridBreakProps>(
         isFreeSize: true,
         movable: false,
         open: false,
+        openSize: size,
         placement: 'center',
         requestArea: requestSize,
         requested: size,

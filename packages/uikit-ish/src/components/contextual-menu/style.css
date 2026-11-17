@@ -24,10 +24,9 @@
     }
   }
 
-  /* The page dimmed behind it (as an alert's, see Alert): not blurred
-     (WebKit's view transitions, e.g. a grid's item opened above the page,
-     see Grid, draw a blur's backdrop as nothing, and a blur behind a
-     lifted element shows its cutout as it moves). */
+  /* The page dimmed behind it (as an alert's, see Alert): not blurred (a
+     blur behind a lifted element shows its cutout as it moves, e.g. a
+     grid's item opened above the page, see Grid). */
   .uikit-contextual-menu-backdrop {
     --uikit-contextual-menu-dim: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 40%));
 

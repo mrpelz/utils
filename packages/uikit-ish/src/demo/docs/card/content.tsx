@@ -2,16 +2,17 @@ import { ReactNode } from 'react';
 
 import {
   Card,
-  cardIcons,
   type CardOrientation,
   cardSizes,
   forwardClick,
+  gridIcons,
   type GridSize,
   Slider,
   Switch,
   Symbol,
   type SymbolIcon,
 } from '../../../components/index.js';
+import { FlipParts } from '../../tooling/flip.js';
 import type { PartProps } from '../../tooling/frame/prop-control.js';
 import {
   sfHumidityFill,
@@ -104,7 +105,7 @@ export const lightsCard = ({
       </Card.Value>
       <Card.CornerButton
         aria-label="Lights"
-        icon={cardIcons.drillIn}
+        icon={gridIcons.drillIn}
         onClick={onDrillIn}
         {...parts['Card.CornerButton']}
       />
@@ -133,6 +134,9 @@ export const cameraCard = ({
     }
     {...parts['Card.Root']}
   >
+    {/* (Its parts moved from where they were as it opens, with GSAP: the
+        demos' helper, see Building for changing sizes.) */}
+    <FlipParts />
     <Card.Symbol {...parts['Card.Symbol']}>
       <Symbol icon={sfPhoto} />
     </Card.Symbol>
@@ -144,7 +148,7 @@ export const cameraCard = ({
         fading as it grows and shrinks.) */}
     <Card.CornerButton
       aria-label="Front Door Camera"
-      icon={cardIcons.overlay}
+      icon={gridIcons.open}
       visible={!isOpen}
       onClick={() => onOpenChange(true)}
       {...parts['Card.CornerButton']}
@@ -152,7 +156,7 @@ export const cameraCard = ({
     <Card.CornerButton
       aria-label="Close"
       corner="top-leading"
-      icon={cardIcons.close}
+      icon={gridIcons.close}
       visible={isOpen}
       onClick={() => onOpenChange(false)}
       {...parts['Card.CornerButton']}
@@ -212,7 +216,7 @@ export const temperatureCard = ({ parts = {} }: Parts): ReactNode => (
   >
     <Card.CornerButton
       aria-label="Living Room details"
-      icon={cardIcons.drillIn}
+      icon={gridIcons.drillIn}
       {...parts['Card.CornerButton']}
     />
     <Card.Symbol {...parts['Card.Symbol']}>
@@ -270,6 +274,9 @@ export const heatingCard = ({
       }
       {...parts['Card.Root']}
     >
+      {/* (Its parts moved from where they were as it expands, with GSAP:
+          the demos' helper, see Building for changing sizes.) */}
+      <FlipParts />
       <Card.Symbol {...parts['Card.Symbol']}>
         <Symbol icon={sfThermometerMedium} />
       </Card.Symbol>
@@ -308,7 +315,7 @@ export const heatingCard = ({
           mirrored
           aria-expanded={isExpanded}
           aria-label="Heating details"
-          icon={isExpanded ? cardIcons.collapse : cardIcons.expand}
+          icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
           onClick={expansion.onToggle}
           {...parts['Card.CornerButton']}
         />

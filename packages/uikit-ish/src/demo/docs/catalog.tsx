@@ -841,6 +841,22 @@ export const catalog: readonly CatalogEntry[] = [
   {
     category: 'content',
     demos: [
+      CardDemo,
+      ...cardOverviewDemos,
+      ...cardPartsDemos,
+      ...cardCompositionDemos,
+    ],
+    id: 'card',
+    Composition: CardComposition,
+    Overview: CardOverview,
+    Parts: CardParts,
+    summary:
+      'A glass surface for something an app shows or controls, in a grid’s tile: a state, a switch, a number or a level, laid out by its size.',
+    title: 'Card',
+  },
+  {
+    category: 'content',
+    demos: [
       TypographyDemo,
       TypographyMatrixDemo,
       TypographySizesDemo,
@@ -889,22 +905,6 @@ export const catalog: readonly CatalogEntry[] = [
     summary:
       'An icon sized, weighted and colored like the text around it, for a button, a tab or a row’s image. A badge can sit on it.',
     title: 'Symbol',
-  },
-  {
-    category: 'content',
-    demos: [
-      CardDemo,
-      ...cardOverviewDemos,
-      ...cardPartsDemos,
-      ...cardCompositionDemos,
-    ],
-    id: 'card',
-    Composition: CardComposition,
-    Overview: CardOverview,
-    Parts: CardParts,
-    summary:
-      'A glass surface for something an app shows or controls, in a grid’s tile: a state, a switch, a number or a level, laid out by its size.',
-    title: 'Card',
   },
   {
     category: 'actions',

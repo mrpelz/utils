@@ -1,7 +1,5 @@
 import { RefObject, useLayoutEffect, useRef } from 'react';
 
-import { isMovedByTransition } from './transition.js';
-
 // A grid's layout (see main.tsx): its columns and unit for a width, its
 // breaks placed while editing, its items gliding as it changes.
 
@@ -1378,6 +1376,13 @@ export const visibleEdgesOf = (
 const topOf = (element: HTMLElement, root: HTMLElement) =>
   root.getBoundingClientRect().top + layoutPosition(element, root)[1];
 
+/**
+ * Whether an element's getting to a new box by itself (a tile, its cell,
+ * see reshape.ts): not glided by the reflow meanwhile.
+ */
+export const isReshaping = (element: HTMLElement): boolean =>
+  Object.hasOwn(element.dataset, 'gridReshaping');
+
 /** Keyframes from an offset to none. */
 const fromOffset = (x: number, y: number) => [
   { translate: `${String(x)}px ${String(y)}px` },
@@ -1400,8 +1405,8 @@ const glide = (element: HTMLElement, dx: number, dy: number) => {
 /**
  * Whether a cell stays where it's laid out, not gliding there: the one
  * dragged, one dropped in its area (gliding from where it was let go, see
- * main.tsx); none with reduced motion; nor one a view transition moves
- * (see transition.ts).
+ * main.tsx); none with reduced motion; nor a tile getting to a new box,
+ * nor its cell (drawn there by itself, see reshape.ts).
  */
 const isStill = (
   element: HTMLElement,
@@ -1411,7 +1416,7 @@ const isStill = (
   element === dragged ||
   Object.hasOwn(element.dataset, 'gridPlaced') ||
   isReduced ||
-  isMovedByTransition(element);
+  isReshaping(element);
 
 /**
  * Its sections and cells gliding from where they were to where they are, as

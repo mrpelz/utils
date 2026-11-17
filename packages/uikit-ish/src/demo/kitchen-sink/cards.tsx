@@ -3,10 +3,10 @@ import { FunctionComponent, useState, useSyncExternalStore } from 'react';
 import {
   Button,
   Card,
-  cardIcons,
   cardSizes,
   forwardClick,
   Grid,
+  gridIcons,
   type GridSize,
   Header,
   List,
@@ -20,6 +20,7 @@ import {
   useGridItem,
   Viewport,
 } from '../../components/index.js';
+import { FlipParts } from '../tooling/flip.js';
 import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
 import {
   sfDoorLeftHandClosed,
@@ -44,8 +45,10 @@ import { BackButton, type SinkPages, usePush } from './shared.js';
 // vertical). Edit in the bar starts edit mode: the cards are veiled and
 // inert, moved and resized as tiles. More to It: cards with a corner
 // button (expanding in place, also within room around it; drilling into a
-// page of their own; opening above the page). Below the grid, two on their
-// own.
+// page of their own; opening above the page), their parts moved with GSAP
+// as they change (see tooling/flip.ts); Empty: cards with nothing but such
+// a button, the tile's own motion alone (no GSAP). Below the grid, two on
+// their own.
 
 /**
  * A card's expansion (see `CardsApp`): whether it's expanded (the app's
@@ -80,6 +83,8 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
           : undefined
       }
     >
+      {/* (Its parts moved from where they were as it expands, with GSAP.) */}
+      <FlipParts />
       <Card.Symbol>
         <Symbol icon={sfThermometerMedium} />
       </Card.Symbol>
@@ -116,7 +121,7 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
           mirrored
           aria-expanded={isExpanded}
           aria-label="Heating details"
-          icon={isExpanded ? cardIcons.collapse : cardIcons.expand}
+          icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
           onClick={expansion.onToggle}
         />
       ) : null}
@@ -283,7 +288,7 @@ const LightsCard: FunctionComponent = () => {
       <Card.Value>{onCount > 0 ? `${String(onCount)} On` : 'Off'}</Card.Value>
       <Card.CornerButton
         aria-label="Lights"
-        icon={cardIcons.drillIn}
+        icon={gridIcons.drillIn}
         onClick={() => push('card/lights')}
       />
     </Card.Root>
@@ -340,6 +345,8 @@ const CameraCard: FunctionComponent = () => {
             )
       }
     >
+      {/* (Its parts moved from where they were as it opens, with GSAP.) */}
+      <FlipParts />
       <Card.Symbol>
         <Symbol icon={sfPhoto} />
       </Card.Symbol>
@@ -349,14 +356,62 @@ const CameraCard: FunctionComponent = () => {
           fading as it grows and shrinks.) */}
       <Card.CornerButton
         aria-label="Front Door Camera"
-        icon={cardIcons.overlay}
+        icon={gridIcons.open}
         visible={!isOpen}
         onClick={() => item?.setOpen(true)}
       />
       <Card.CornerButton
         aria-label="Close"
         corner="top-leading"
-        icon={cardIcons.close}
+        icon={gridIcons.close}
+        visible={isOpen}
+        onClick={() => item?.setOpen(false)}
+      />
+    </Card.Root>
+  );
+};
+
+/**
+ * An empty card that expands: its corner button alone (expanding it and
+ * making it small again), nothing in it moving but that, with its corner:
+ * the tile's own motion.
+ */
+const EmptyExpandingCard: FunctionComponent<{
+  expansion?: Expansion;
+  name: string;
+}> = ({ expansion, name }) => (
+  <Card.Root>
+    {expansion ? (
+      <Card.CornerButton
+        mirrored
+        aria-expanded={expansion.isExpanded}
+        aria-label={name}
+        icon={expansion.isExpanded ? gridIcons.collapse : gridIcons.expand}
+        onClick={expansion.onToggle}
+      />
+    ) : null}
+  </Card.Root>
+);
+
+/**
+ * An empty card that opens above the page: its corner button opening it,
+ * open, its x closing it (as a press beside it, or Escape).
+ */
+const EmptyOpeningCard: FunctionComponent<{ name: string }> = ({ name }) => {
+  const item = useGridItem();
+  const isOpen = item?.open === true;
+  return (
+    <Card.Root>
+      <Card.CornerButton
+        aria-label={name}
+        icon={gridIcons.open}
+        visible={!isOpen}
+        onClick={() => item?.setOpen(true)}
+      />
+      <Card.CornerButton
+        aria-label="Close"
+        corner="top-leading"
+        icon={gridIcons.close}
         visible={isOpen}
         onClick={() => item?.setOpen(false)}
       />
@@ -511,6 +566,40 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       ),
       kind: 'numericalDisplay',
       name: 'Wind',
+      size: '2x1',
+    },
+  ],
+  Empty: [
+    {
+      card: ({ expansion }) => (
+        <EmptyExpandingCard
+          expansion={expansion}
+          name="Expand in place"
+        />
+      ),
+      expandedSize: '2x2',
+      kind: 'numericalDisplay',
+      name: 'Empty, expanding',
+      size: '1x1',
+    },
+    {
+      area: '3x2',
+      card: ({ expansion }) => (
+        <EmptyExpandingCard
+          expansion={expansion}
+          name="Expand in its area"
+        />
+      ),
+      expandedSize: '2x2',
+      kind: 'numericalDisplay',
+      name: 'Empty, expanding in its area',
+      size: '1x1',
+    },
+    {
+      card: () => <EmptyOpeningCard name="Open above the page" />,
+      kind: 'binaryDisplay',
+      name: 'Empty, opening',
+      openSize: '4x3',
       size: '2x1',
     },
   ],

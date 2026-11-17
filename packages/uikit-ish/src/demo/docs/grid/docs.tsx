@@ -400,13 +400,8 @@ export const gridCornerButtonRows: readonly PropRow[] = [
     'SymbolIcon',
     undefined,
     <>
-      Its icon: one of <PartLink part="gridIcons" /> or{' '}
-      <PartLink
-        component="card"
-        part="cardIcons"
-      />
-      , or the app’s own (for example an SF Symbol), drawn at the same place and
-      size.
+      Its icon: one of <PartLink part="gridIcons" />, or the app’s own (for
+      example an SF Symbol), drawn at the same place and size.
     </>,
   ],
   [
@@ -489,6 +484,36 @@ export const gridIconsRows: readonly PropRow[] = [
     'SymbolIcon',
     undefined,
     'The arc with chevrons both ways: it has sizes either side.',
+  ],
+  [
+    'expand',
+    'SymbolIcon',
+    undefined,
+    'A filled triangle pointing to the bottom trailing corner: a press makes the tile larger in place.',
+  ],
+  [
+    'collapse',
+    'SymbolIcon',
+    undefined,
+    'The same triangle pointing to the top leading corner: on an expanded tile, a press makes it small again.',
+  ],
+  [
+    'open',
+    'SymbolIcon',
+    undefined,
+    'A filled rounded square: a press opens the tile above the page.',
+  ],
+  [
+    'close',
+    'SymbolIcon',
+    undefined,
+    'An x, as remove’s: a press closes the tile opened above the page.',
+  ],
+  [
+    'drillIn',
+    'SymbolIcon',
+    undefined,
+    'A ring: a press goes to a page of its own.',
   ],
 ];
 
@@ -604,13 +629,46 @@ export const gridReorderRows: readonly PropRow[] = [
   ],
 ];
 
-export const gridStartGridTransitionRows: readonly PropRow[] = [
+export const gridUseGridItemLayoutRows: readonly PropRow[] = [
   [
-    'update',
-    '() => void',
+    'onBeforeChange',
+    '(change: GridItemLayoutChange) => void',
     undefined,
-    'Makes the change, e.g. sets the app’s state for an item’s size or open. It runs inside the transition, after the page as it was is captured.',
+    'Called before the change reaches the page: what’s in the tile is still laid out as it was. The place to record where things are. Its change’s to is its from.',
   ],
+  [
+    'onAfterChange',
+    '(change: GridItemLayoutChange) => void',
+    undefined,
+    'Called once the change is in the page: what’s in the tile is laid out at its new size, and the tile is still drawn at its old box. The place to move things from where they were.',
+  ],
+];
+
+export const gridItemLayoutChangeRows: readonly PropRow[] = [
+  ['from', 'DOMRectReadOnly', undefined, 'The tile’s box before the change.'],
+  ['to', 'DOMRectReadOnly', undefined, 'The tile’s box once it’s there.'],
+  [
+    'duration',
+    'number',
+    undefined,
+    'How long the tile takes to get there, in milliseconds.',
+  ],
+  ['easing', 'string', undefined, 'The tile’s easing, a CSS easing function.'],
+  [
+    'elapsed',
+    '() => number',
+    undefined,
+    'How far the tile has got, in milliseconds: 0 until its first frame is drawn. Read it each frame to keep what moves in step with the tile, however long the first frame takes.',
+  ],
+  ['size', 'GridSize', undefined, 'The item’s size after the change.'],
+  ['previousSize', 'GridSize', undefined, 'Its size before the change.'],
+  [
+    'open',
+    'boolean',
+    undefined,
+    'Whether it’s open above the page after the change.',
+  ],
+  ['previousOpen', 'boolean', undefined, 'Whether it was open before.'],
 ];
 
 export const gridUseGridItemRows: readonly PropRow[] = [
@@ -639,6 +697,12 @@ export const gridUseGridItemRows: readonly PropRow[] = [
     'boolean',
     undefined,
     'Whether it’s open above the page (its item’s open). Use it to show more, and a button that closes it.',
+  ],
+  [
+    'openSize',
+    'GridSize',
+    undefined,
+    'Its size open above the page (its item’s openSize). On a screen too small for it, it’s shown smaller.',
   ],
   [
     'setOpen',

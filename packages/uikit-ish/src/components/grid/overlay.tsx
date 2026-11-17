@@ -3,43 +3,43 @@ import '../contextual-menu/style.css';
 import {
   type ReactNode,
   type RefObject,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react';
 import { createPortal } from 'react-dom';
 
 import { cutOut, fillIn, usePortalContainer } from '../utils/main.js';
 import type { PortalContainer } from '../utils/props.js';
 import type { GridOpenChangeReason } from './props.js';
-import { whenGridTransitioned } from './transition.js';
 
 // An item opened above the page (see `Grid.Item`'s `open`): its tile's
 // body lifted out of the grid (its stand-in keeping its place, nothing
 // below reflowing), in the middle of the screen (its portal container's:
 // a device's screen in a page of demos, else the window; beside a sidebar,
-// see `roomOf`) at its open size,
-// above the page dimmed (a contextual menu's backdrop, the same); the
-// live body, never remounted (what's in it keeps its state). Placed once
-// as it opens, again as the screen or its place changes; getting there
-// (and back) is a view transition's (see transition.ts).
+// see `roomOf`) at its open size, above the page dimmed (a contextual
+// menu's backdrop, the same); the live body, never remounted (what's in
+// it keeps its state). Placed as it opens, again as the screen or its
+// place changes; getting there (and back, still lifted, closing) as any
+// change of its tile's box (see reshape.ts).
 //
 // As a contextual menu's trigger is lifted (see ContextualMenu), above
-// the backdrop cut out where it is (a mask, as the menu's;
-// and a clip path: what's lifted takes presses there, even where its
-// ancestors' stacking contexts keep it below the backdrop; what covers it
-// in its page too, e.g. a sidebar floating over its column): cut out once
-// it's there, opening (not before: a hole in the dim as the tile moves
-// there); closing, its snapshot fading out with its hole. Under it, in
-// its grid (its stacking context), an underlay: opaque (nothing bright
-// beside it showing through its glass).
+// the backdrop cut out where it is (a mask, as the menu's; and a clip
+// path: what's lifted takes presses there, even where its ancestors'
+// stacking contexts keep it below the backdrop; what covers it in its
+// page too, e.g. a sidebar floating over its column, where it overlaps
+// it): where it's drawn, each frame as it moves. Under it, in its grid
+// (its stacking context), an underlay: opaque (nothing bright beside it
+// showing through its glass), its glass again only as it's nearly back.
 //
 // Also:
 // - Modal: focus moved onto it (back where it was, closed), Tab kept in
 //   it; Escape, a press on the backdrop close it (`onOpenChange`'s
 //   reason). A dialog, labeled (`openLabel`).
-// - Its backdrop fading in as the menu's (its starting style, as Base
-//   UI's).
+// - Its backdrop fading in and out as the menu's (its starting and ending
+//   styles, as Base UI's).
 
 /** Its margin from the screen's edges, open. */
 const margin = 16;
@@ -179,10 +179,19 @@ const targetOf = (
   };
 };
 
+/** A rect as a box. */
+const boxOf = ({ height, left, top, width }: DOMRectReadOnly): Box => ({
+  height,
+  left,
+  top,
+  width,
+});
+
 /**
- * An item's overlay (see the top): its backdrop (a portal) and its
- * underlay, both rendered by the item while it's open; its stand-in, the
- * item's, given once it's rendered.
+ * An item's overlay (see the top): its phase (open, or closing back to its
+ * place, still lifted; none: in the grid), its backdrop (a portal) and its
+ * underlay, both rendered by the item while it's shown; `settle`, for the
+ * item to call once it's back (closing ends); its stand-in, the item's.
  */
 export const useOverlay = ({
   body,
@@ -196,9 +205,23 @@ export const useOverlay = ({
   onClose: (reason: GridOpenChangeReason) => void;
   /** Its open size, in pixels. */
   size: readonly [number, number];
-  /** Its stand-in, once it's rendered (see `Item`). */
-  standIn: HTMLSpanElement | null;
-}): readonly [backdrop: ReactNode, underlay: ReactNode] => {
+  /** Its stand-in (see `Item`): rendered while it's shown. */
+  standIn: RefObject<HTMLSpanElement | null>;
+}): {
+  backdrop: ReactNode;
+  phase: 'closing' | 'open' | undefined;
+  settle: () => void;
+  underlay: ReactNode;
+} => {
+  // (Closed: closing at once, in the same render (still lifted, getting
+  // back to its place), then in the grid, settled.)
+  const [isClosing, setIsClosing] = useState(false);
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (wasOpen !== isOpen) {
+    setWasOpen(isOpen);
+    setIsClosing(!isOpen);
+  }
+  const isShown = isOpen || isClosing;
   const backdropRef = useRef<HTMLDivElement | null>(null);
   const underlayRef = useRef<HTMLDivElement | null>(null);
   const container = elementOf(usePortalContainer(undefined));
@@ -207,37 +230,26 @@ export const useOverlay = ({
     latest.current = { onClose, size };
   });
 
-  // (Placed: its room's middle (see `roomOf`), from its place (its
-  // stand-in's), as the screen or its place changes; the underlay's clip
-  // there, the backdrop's cutout once the transition's done.)
+  // (Placed: open, its room's middle (see `roomOf`); closing, its place
+  // (its stand-in's); again as the screen or its place changes. The
+  // backdrop's cutout, the underlay's clip where it's drawn, each frame
+  // while it's moving.)
   useLayoutEffect(() => {
     const element = body.current;
-    const place = standIn;
+    const place = standIn.current;
     const backdrop = backdropRef.current;
     const underlay = underlayRef.current;
-    if (!isOpen || !element || !place || !backdrop || !underlay) {
+    if (!isShown || !element || !place || !backdrop || !underlay) {
       return undefined;
     }
     const { style } = element;
     const set = (name: string, value: number) =>
       style.setProperty(`--uikit-grid-open-${name}`, `${String(value)}px`);
-    let isCut = false;
     const covers = coversOf(element);
-    const draw = () => {
-      const home = place.getBoundingClientRect();
-      const box = targetOf(
-        roomOf(backdrop.getBoundingClientRect(), covers),
-        latest.current.size,
-      );
-      set('left', place.offsetLeft);
-      set('top', place.offsetTop);
-      set('width', box.width);
-      set('height', box.height);
-      set('x', box.left - home.left);
-      set('y', box.top - home.top);
+    const cut = () => {
+      const box = boxOf(element.getBoundingClientRect());
       const radius = radiusOf(element);
       underlay.style.clipPath = clipOf(underlay, box, radius, false);
-      if (!isCut) return;
       // (What covers it cut out only where it overlaps it: too wide for the
       // room beside it.)
       for (const layer of [backdrop, ...covers]) {
@@ -253,26 +265,52 @@ export const useOverlay = ({
         }
       }
     };
-    draw();
-    let isGone = false;
-    whenGridTransitioned()
-      .then(() => {
-        if (isGone) return;
-        isCut = true;
-        draw();
-      })
-      .catch(() => undefined);
-    // (Faded in once it's shown: as Base UI's.)
-    const frame = requestAnimationFrame(() => {
+    const locate = () => {
+      const home = place.getBoundingClientRect();
+      const box = isOpen
+        ? targetOf(
+            roomOf(backdrop.getBoundingClientRect(), covers),
+            latest.current.size,
+          )
+        : boxOf(home);
+      set('left', place.offsetLeft);
+      set('top', place.offsetTop);
+      set('width', box.width);
+      set('height', box.height);
+      set('x', box.left - home.left);
+      set('y', box.top - home.top);
+    };
+    locate();
+    cut();
+    // (Moving (see reshape.ts): cut where it's drawn, each frame, until
+    // it's there.)
+    let frame = requestAnimationFrame(function follow() {
+      cut();
+      // (Faded in once it's shown, out as it closes: as Base UI's.)
       delete backdrop.dataset.startingStyle;
+      if (isOpen) {
+        delete backdrop.dataset.endingStyle;
+        underlay.dataset.gridOpen = '';
+        delete place.dataset.gridClosing;
+      } else {
+        backdrop.dataset.endingStyle = '';
+        delete underlay.dataset.gridOpen;
+        place.dataset.gridClosing = '';
+      }
+      frame = Object.hasOwn(element.dataset, 'gridReshaping')
+        ? requestAnimationFrame(follow)
+        : 0;
     });
+    const draw = () => {
+      locate();
+      cut();
+    };
     const observer = new ResizeObserver(draw);
     observer.observe(backdrop);
     // (Its place scrolled (it's in the page, lifted): placed anew.)
-    // eslint-disable-next-line unicorn/prefer-observer-apis -- following its place as the page scrolls, not its visibility
+
     addEventListener('scroll', draw, { capture: true, passive: true });
     return () => {
-      isGone = true;
       cancelAnimationFrame(frame);
       observer.disconnect();
       removeEventListener('scroll', draw, { capture: true });
@@ -280,11 +318,17 @@ export const useOverlay = ({
         fillIn(layer);
         layer.style.removeProperty('clip-path');
       }
-      for (const name of ['left', 'top', 'width', 'height', 'x', 'y']) {
-        style.removeProperty(`--uikit-grid-open-${name}`);
-      }
     };
-  }, [body, isOpen, standIn]);
+  }, [body, isOpen, isShown, standIn]);
+
+  // (Back in the grid: its values gone.)
+  useLayoutEffect(() => {
+    const element = body.current;
+    if (isShown || !element) return;
+    for (const name of ['left', 'top', 'width', 'height', 'x', 'y']) {
+      element.style.removeProperty(`--uikit-grid-open-${name}`);
+    }
+  }, [body, isShown]);
 
   // (Modal: focus onto it, back where it was once closed; Tab kept in it,
   // Escape closing it.)
@@ -329,21 +373,28 @@ export const useOverlay = ({
     };
   }, [body, isOpen]);
 
-  return [
-    isOpen && container
-      ? createPortal(
-          <div
-            ref={backdropRef}
-            aria-hidden="true"
-            className="uikit-contextual-menu-backdrop uikit-grid-backdrop"
-            data-grid-part="backdrop"
-            data-starting-style=""
-            onClick={() => latest.current.onClose('outside-press')}
-          />,
-          container,
-        )
-      : null,
-    isOpen ? (
+  let phase: 'closing' | 'open' | undefined;
+  if (isOpen) phase = 'open';
+  else if (isClosing) phase = 'closing';
+  const settle = useCallback(() => setIsClosing(false), []);
+  return {
+    backdrop:
+      isShown && container
+        ? createPortal(
+            <div
+              ref={backdropRef}
+              aria-hidden="true"
+              className="uikit-contextual-menu-backdrop uikit-grid-backdrop"
+              data-grid-part="backdrop"
+              data-starting-style=""
+              onClick={() => latest.current.onClose('outside-press')}
+            />,
+            container,
+          )
+        : null,
+    phase,
+    settle,
+    underlay: isShown ? (
       <div
         ref={underlayRef}
         aria-hidden="true"
@@ -351,5 +402,5 @@ export const useOverlay = ({
         data-grid-part="underlay"
       />
     ) : null,
-  ] as const;
+  };
 };

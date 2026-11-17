@@ -4,6 +4,7 @@ import {
   Button,
   Grid,
   type GridBreakRows,
+  gridIcons,
   type GridPlacement,
   type GridReorderChange,
   type GridSize,
@@ -13,6 +14,7 @@ import {
   Menu,
   Page,
   Toolbar,
+  useGridItem,
   Viewport,
 } from '../../components/index.js';
 import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
@@ -22,7 +24,9 @@ import { BackButton, DrillRow, Rows, type SinkPages } from './shared.js';
 // Grid: a home screen of tiles on a picture. Edit in the bar starts edit
 // mode: tiles can be dragged within a section and between sections that
 // accept them, and resized from their corner. Spacers and breaks can be
-// added, moved and removed.
+// added, moved and removed. Expanding and Opening: tiles changing their
+// box by a corner button (larger in place, larger in their area, opened
+// above the page), nothing but the grid moving them.
 
 /** A device: its name, size and supported sizes. */
 type Device = {
@@ -183,6 +187,202 @@ const every: readonly GridSize[] = [
 ];
 
 /** The page: a bar with Back and Edit, and the sections below it. */
+/**
+ * A tile expanding by its corner button (the app's state: its size, see
+ * `ChangingTiles`), hidden while editing (the grid's own controls take
+ * the corners then).
+ */
+const ExpandButton: FunctionComponent<{
+  isExpanded: boolean;
+  /** Whether it's smaller expanded (its icon the other way around). */
+  isShrinking?: boolean;
+  label: string;
+  onToggle: () => void;
+}> = ({ isExpanded, isShrinking = false, label, onToggle }) => {
+  const item = useGridItem();
+  return (
+    <Grid.CornerButton
+      mirrored
+      aria-expanded={isExpanded}
+      aria-label={label}
+      icon={isExpanded === isShrinking ? gridIcons.expand : gridIcons.collapse}
+      visible={item?.editing !== true}
+      onClick={onToggle}
+    />
+  );
+};
+
+/**
+ * A tile's buttons opening it above the page and, open, closing it (as a
+ * press beside it, or Escape).
+ */
+const OpenButtons: FunctionComponent<{ label: string }> = ({ label }) => {
+  const item = useGridItem();
+  const isOpen = item?.open === true;
+  return (
+    <>
+      <Grid.CornerButton
+        aria-label={label}
+        icon={gridIcons.open}
+        visible={!isOpen && item?.editing !== true}
+        onClick={() => item?.setOpen(true)}
+      />
+      <Grid.CornerButton
+        aria-label="Close"
+        corner="top-leading"
+        icon={gridIcons.close}
+        visible={isOpen}
+        onClick={() => item?.setOpen(false)}
+      />
+    </>
+  );
+};
+
+/** A tile that expands: its size and its size expanded (see `ChangingTiles`). */
+type Expanding = {
+  /** Room around it (`Grid.Area`): its size and where it sits in it. */
+  area?: readonly [size: GridSize, placement: GridPlacement];
+  expanded: GridSize;
+  size: GridSize;
+};
+
+const expandingTiles: readonly Expanding[] = [
+  { expanded: '2x2', size: '1x1' },
+  { expanded: '2x1', size: '1x1' },
+  { expanded: '4x2', size: '2x1' },
+  { expanded: '2x3', size: '1x2' },
+  { expanded: '1x1', size: '3x2' },
+];
+
+const areaTiles: readonly Expanding[] = [
+  { area: ['3x2', 'center'], expanded: '2x2', size: '1x1' },
+  { area: ['4x3', 'top-leading'], expanded: '3x2', size: '1x1' },
+  { area: ['4x2', 'bottom-trailing'], expanded: '3x2', size: '2x1' },
+  { area: ['3x3', 'top-trailing'], expanded: '2x3', size: '1x2' },
+  { area: ['3x3', 'bottom-leading'], expanded: '1x1', size: '3x2' },
+  { area: ['2x2', 'center'], expanded: '2x2', size: '1x1' },
+];
+
+/** A tile that opens above the page: its size and its open size. */
+const openingTiles: readonly { open: GridSize; size: GridSize }[] = [
+  { open: '2x2', size: '1x1' },
+  { open: '4x3', size: '2x1' },
+  { open: '3x4', size: '1x2' },
+  { open: '6x4', size: '2x2' },
+  { open: '4x2', size: '*x1' },
+];
+
+/** A size's units (columns times rows). */
+const unitsOf = (size: GridSize) =>
+  size
+    .split('x')
+    .map(Number)
+    .reduce((product, each) => product * each, 1);
+
+/** A tile's name by its sizes (unique on the page: its buttons' names too). */
+const nameOf = (
+  verb: string,
+  from: GridSize,
+  to: GridSize,
+  area?: Expanding['area'],
+) => `${verb} ${from} to ${to}${area ? ` in ${area[0]}, ${area[1]}` : ''}`;
+
+/**
+ * Tiles changing their box by a corner button: expanding from and to
+ * different sizes, in place (their neighbors reflowing) and in areas of
+ * different sizes from each of an area's anchors (nothing around them
+ * moving), and opening above the page from and to different sizes.
+ */
+const ChangingTiles: FunctionComponent = () => {
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const toggle = (name: string) =>
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      return next;
+    });
+  const expandingTile = (
+    { area, expanded: larger, size }: Expanding,
+    place: number,
+  ) => {
+    const isShrinking = unitsOf(larger) < unitsOf(size);
+    const name = nameOf(
+      isShrinking ? 'Shrinks' : 'Expands',
+      size,
+      larger,
+      area,
+    );
+    const isExpanded = expanded.has(name);
+    return (
+      <Grid.Item
+        key={name}
+        size={isExpanded ? larger : size}
+        supportedSizes={[size, larger]}
+      >
+        <Tile
+          label={name}
+          place={place}
+        />
+        <ExpandButton
+          isExpanded={isExpanded}
+          isShrinking={isShrinking}
+          label={name}
+          onToggle={() => toggle(name)}
+        />
+        {area ? (
+          <Grid.Area
+            defaultPlacement={area[1]}
+            defaultSize={area[0]}
+          />
+        ) : null}
+      </Grid.Item>
+    );
+  };
+  return (
+    <>
+      <Grid.Section>
+        <SectionHeader
+          hint="The corner button makes a tile larger in place, or smaller, and back again. The tiles after it reflow. The grid moves the tile; what's in it is laid out at the new size from the start."
+          title="Expanding"
+        />
+        {expandingTiles.map((tile, place) => expandingTile(tile, place))}
+      </Grid.Section>
+      <Grid.Section>
+        <SectionHeader
+          hint="These tiles grow within room around them, from the area's middle or one of its corners. Nothing around them moves. Edit mode shows each area hatched."
+          title="Expanding in Areas"
+        />
+        {areaTiles.map((tile, place) => expandingTile(tile, place))}
+      </Grid.Section>
+      <Grid.Section>
+        <SectionHeader
+          hint="The corner button opens a tile above the page at its open size, or as much of it as the screen has room for. Its place stays empty meanwhile. The x, a press beside it, or Escape closes it."
+          title="Opening"
+        />
+        {openingTiles.map(({ open, size }, place) => {
+          const name = nameOf('Opens', size, open);
+          return (
+            <Grid.Item
+              key={name}
+              defaultSize={size}
+              openLabel={name}
+              openSize={open}
+              supportedSizes={[size]}
+            >
+              <Tile
+                label={name}
+                place={place}
+              />
+              <OpenButtons label={name} />
+            </Grid.Item>
+          );
+        })}
+      </Grid.Section>
+    </>
+  );
+};
+
 const GridApp: FunctionComponent = () => {
   const [editing, setEditing] = useState(false);
   const [devices, setDevices] = useState(devicesInitial);
@@ -471,6 +671,7 @@ const GridApp: FunctionComponent = () => {
                 )}
               </Grid.Section>
             ))}
+            <ChangingTiles />
             <Grid.Section
               dense={dense.security}
               dropName="security"

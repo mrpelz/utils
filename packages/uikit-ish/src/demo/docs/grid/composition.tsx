@@ -4,11 +4,13 @@ import {
   Button,
   Grid,
   type GridBreakRows,
+  gridIcons,
   type GridPlacement,
   type GridSize,
   type GridSizeChangeDetails,
   Menu,
   Page,
+  useGridItem,
   Viewport,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -1097,12 +1099,342 @@ const Room: FunctionComponent = () => {
   );
 };
 
+// Expanding in place.
+
+const expandingCode = `// The app's card (here just the device's name).
+const DeviceCard = ({ name }) => <div className="device-card">{name}</div>;
+
+// Which tiles are expanded: the app's state.
+const [expanded, setExpanded] = useState([]);
+const toggle = (name) =>
+  setExpanded((current) =>
+    current.includes(name)
+      ? current.filter((each) => each !== name)
+      : [...current, name],
+  );
+
+<Grid.Root>
+  {tiles.map(({ area, expandedSize, name, size }) => {
+    const isExpanded = expanded.includes(name);
+    return (
+      <Grid.Item
+        key={name}
+        size={isExpanded ? expandedSize : size}
+        supportedSizes={[size, expandedSize]}
+      >
+        <DeviceCard name={name} />
+        <Grid.CornerButton
+          mirrored
+          aria-expanded={isExpanded}
+          aria-label={\`\${name} details\`}
+          icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
+          onClick={() => toggle(name)}
+        />
+        {/* Room around it: it grows in there, nothing else moving. */}
+        {area ? <Grid.Area size={area} /> : null}
+      </Grid.Item>
+    );
+  })}
+</Grid.Root>`;
+
+/** The tiles that expand (see `Expanding`): their sizes, an area. */
+const expandingTiles: readonly {
+  area?: GridSize;
+  expandedSize: GridSize;
+  name: string;
+  size: GridSize;
+}[] = [
+  { expandedSize: '2x2', name: 'Heating', size: '1x1' },
+  { expandedSize: '2x1', name: 'Lamp', size: '1x1' },
+  { area: '3x2', expandedSize: '2x2', name: 'Clock', size: '1x1' },
+  { expandedSize: '4x2', name: 'Speaker', size: '2x1' },
+];
+
+/**
+ * A tablet: tiles expanding in place by a corner button (the app's state:
+ * their sizes), their neighbors reflowing; one in an area, growing in it.
+ */
+const Expanding: FunctionComponent = () => {
+  const id = 'grid-composition-expanding';
+  const [log, addLog] = useLog();
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  const toggle = (name: string) =>
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(name)) next.delete(name);
+      else next.add(name);
+      addLog(`${name} ${next.has(name) ? 'expanded' : 'small again'}`);
+      return next;
+    });
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Grid.Area': ['size'],
+            'Grid.CornerButton': [
+              'aria-expanded',
+              'aria-label',
+              'icon',
+              'mirrored',
+              'onClick',
+            ],
+            'Grid.Item': ['size', 'supportedSizes'],
+            'Grid.Root': [],
+            'Page.Root': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  return (
+    <Component
+      isExpanded
+      isInline
+      controls={[partControls]}
+      id={id}
+      log={log}
+      stage="tablet"
+      state={[partState]}
+      title="Grid"
+    >
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Page.Root {...partProps['Page.Root']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <div className="grid-demo-content">
+            <Grid.Root
+              key={defaultsKey(...Object.values(partProps))}
+              {...partProps['Grid.Root']}
+              style={gridSigns(partProps['Grid.Root']?.style)}
+            >
+              {expandingTiles.map(({ area, expandedSize, name, size }) => {
+                const isExpanded = expanded.has(name);
+                return (
+                  <Grid.Item
+                    key={name}
+                    {...partProps['Grid.Item']}
+                    size={isExpanded ? expandedSize : size}
+                    supportedSizes={[size, expandedSize]}
+                  >
+                    <div className="grid-demo-tile">{name}</div>
+                    <Grid.CornerButton
+                      {...partProps['Grid.CornerButton']}
+                      mirrored
+                      aria-expanded={isExpanded}
+                      aria-label={`${name} details`}
+                      icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
+                      onClick={() => toggle(name)}
+                    />
+                    {area ? (
+                      <Grid.Area
+                        {...partProps['Grid.Area']}
+                        size={area}
+                      />
+                    ) : null}
+                  </Grid.Item>
+                );
+              })}
+            </Grid.Root>
+          </div>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
+        </Page.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
+// Opening above the page.
+
+const openingCode = `// The app's card: its own buttons open and close it.
+const CameraCard = ({ name }) => {
+  const item = useGridItem();
+  return (
+    <div className="device-card">
+      {name}
+      <Grid.CornerButton
+        aria-label={name}
+        icon={gridIcons.open}
+        visible={!item.open}
+        onClick={() => item.setOpen(true)}
+      />
+      <Grid.CornerButton
+        aria-label="Close"
+        corner="top-leading"
+        icon={gridIcons.close}
+        visible={item.open}
+        onClick={() => item.setOpen(false)}
+      />
+    </div>
+  );
+};
+
+<Grid.Root>
+  <Grid.Item defaultSize="1x1">
+    <DeviceCard name="Lamp" />
+  </Grid.Item>
+  {/* Open state its own (uncontrolled), told as it changes. */}
+  <Grid.Item
+    defaultSize="2x1"
+    openLabel="Front Door Camera"
+    openSize="4x3"
+    onOpenChange={(open, { reason }) => console.log(open, reason)}
+  >
+    <CameraCard name="Front Door Camera" />
+  </Grid.Item>
+  <Grid.Item defaultSize="1x1">
+    <DeviceCard name="Blinds" />
+  </Grid.Item>
+</Grid.Root>`;
+
+/**
+ * Its buttons opening its tile above the page and closing it, by its
+ * item's state (`useGridItem`).
+ */
+const OpenButtons: FunctionComponent<{
+  cornerProps?: Record<string, unknown>;
+  name: string;
+}> = ({ cornerProps, name }) => {
+  const item = useGridItem();
+  const isOpen = item?.open === true;
+  return (
+    <>
+      <Grid.CornerButton
+        {...cornerProps}
+        aria-label={name}
+        icon={gridIcons.open}
+        visible={!isOpen}
+        onClick={() => item?.setOpen(true)}
+      />
+      <Grid.CornerButton
+        {...cornerProps}
+        aria-label="Close"
+        corner="top-leading"
+        icon={gridIcons.close}
+        visible={isOpen}
+        onClick={() => item?.setOpen(false)}
+      />
+    </>
+  );
+};
+
+/**
+ * A tablet: a camera's tile opening above the page by its corner button,
+ * at its open size, its own state (uncontrolled); closed by its x, a press
+ * beside it, or Escape (the log says how).
+ */
+const Opening: FunctionComponent = () => {
+  const id = 'grid-composition-opening';
+  const [log, addLog] = useLog();
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            'Grid.CornerButton': [
+              'aria-label',
+              'corner',
+              'icon',
+              'onClick',
+              'visible',
+            ],
+            'Grid.Item': [
+              'defaultOpen',
+              'defaultSize',
+              'onOpenChange',
+              'open',
+              'openLabel',
+              'openSize',
+            ],
+            'Grid.Root': [],
+            'Page.Root': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  return (
+    <Component
+      isExpanded
+      isInline
+      controls={[partControls]}
+      id={id}
+      log={log}
+      stage="tablet"
+      state={[partState]}
+      title="Grid"
+    >
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Page.Root {...partProps['Page.Root']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <div className="grid-demo-content">
+            <Grid.Root
+              key={defaultsKey(...Object.values(partProps))}
+              {...partProps['Grid.Root']}
+              style={gridSigns(partProps['Grid.Root']?.style)}
+            >
+              <Grid.Item defaultSize="1x1">
+                <div className="grid-demo-tile">Lamp</div>
+              </Grid.Item>
+              <Grid.Item
+                defaultSize="2x1"
+                openLabel="Front Door Camera"
+                openSize="4x3"
+                {...partProps['Grid.Item']}
+                onOpenChange={(open, details) => {
+                  addLog(`${open ? 'opened' : 'closed'} (${details.reason})`);
+                  partProps['Grid.Item']?.onOpenChange?.(open, details);
+                }}
+              >
+                <div className="grid-demo-tile">Front Door Camera</div>
+                <OpenButtons
+                  cornerProps={partProps['Grid.CornerButton']}
+                  name="Front Door Camera"
+                />
+              </Grid.Item>
+              <Grid.Item defaultSize="1x1">
+                <div className="grid-demo-tile">Blinds</div>
+              </Grid.Item>
+            </Grid.Root>
+          </div>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
+        </Page.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['rooms-on-a-tablet', 'Rooms on a tablet'],
   ['holes-and-line-breaks', 'Holes and line breaks'],
   ['adding-and-removing-tiles', 'Adding and removing tiles'],
   ['room-around-a-tile', 'Room around a tile'],
+  ['expanding-in-place', 'Expanding in place'],
+  ['opening-above-the-page', 'Opening above the page'],
 ];
 
 /** `/grid/composition`: rooms, holes and breaks, adding and removing. */
@@ -1296,8 +1628,99 @@ export const GridComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={roomCode} />
     <Room />
+
+    <Heading
+      id="expanding-in-place"
+      level={2}
+    >
+      Expanding in place
+    </Heading>
+    <ul>
+      <li>
+        Expanding a tile is the app changing its size. A{' '}
+        <PartLink part="Grid.CornerButton" /> asks for the other size, and the
+        app keeps which tiles are expanded in its own state, apart from the
+        sizes the user chose. Here that state isn’t stored, so tiles are small
+        again after a reload.
+      </li>
+      <li>
+        The button’s icon comes from the same state:{' '}
+        <PartLink part="gridIcons" />
+        ’s <code>expand</code> while it’s small, <code>collapse</code> while
+        it’s expanded. It’s <code>mirrored</code>, since the triangle points to
+        a corner, and says its state with <code>aria-expanded</code>.
+      </li>
+      <li>
+        The tile moves and resizes to its new box, and the tiles after it
+        reflow. What’s in the tile is laid out at its new size from the start;
+        moving what’s in it from where it was is the app’s (see{' '}
+        <PartLink part="useGridItemLayout" />
+        ).
+      </li>
+      <li>
+        The clock has room around it (a <PartLink part="Grid.Area" />
+        ), so it grows from the middle of its area and nothing around it moves.
+      </li>
+      <li>
+        <strong>Library:</strong> the tile getting to its new box, the reflow,
+        the corner button and its icons.
+      </li>
+      <li>
+        <strong>Demo:</strong> which tiles are expanded and their sizes.
+      </li>
+    </ul>
+    <CodeView code={expandingCode} />
+    <Expanding />
+
+    <Heading
+      id="opening-above-the-page"
+      level={2}
+    >
+      Opening above the page
+    </Heading>
+    <ul>
+      <li>
+        An item opens above the page (its <code>open</code>), its tile lifted to
+        the middle of the screen at its <code>openSize</code>, or as much of it
+        as the screen has room for. Its place in the grid stays empty and
+        nothing reflows.
+      </li>
+      <li>
+        The tile’s own buttons open and close it, through{' '}
+        <PartLink part="useGridItem" />
+        ’s <code>open</code> and <code>setOpen</code>: <code>gridIcons</code>’s{' '}
+        <code>open</code> while it’s closed, its x (<code>close</code>) in the
+        top leading corner while it’s open. Each is hidden while the other
+        shows.
+      </li>
+      <li>
+        Open, it’s a modal dialog named by <code>openLabel</code>. A press
+        beside it or Escape closes it too, and so does edit mode starting.{' '}
+        <code>onOpenChange</code> says why, shown in the log.
+      </li>
+      <li>
+        Here the open state is the item’s own (<code>defaultOpen</code>); the
+        app can control it with <code>open</code> instead.
+      </li>
+      <li>
+        <strong>Library:</strong> lifting the tile and putting it back, the
+        dimmed page, focus and Escape, the reasons.
+      </li>
+      <li>
+        <strong>Demo:</strong> the buttons and what’s logged.
+      </li>
+    </ul>
+    <CodeView code={openingCode} />
+    <Opening />
   </>
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const gridCompositionDemos = [Rooms, Holes, Adding, Room];
+export const gridCompositionDemos = [
+  Rooms,
+  Holes,
+  Adding,
+  Room,
+  Expanding,
+  Opening,
+];

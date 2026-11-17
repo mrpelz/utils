@@ -982,7 +982,29 @@ export const GlossaryPage: FunctionComponent = () => (
         A spacer or break shown while a tile is dragged, which the drop would
         add so the tile lands right there. It shows the app’s offer sign. When a
         resize would take a spacer in (merge it), that spacer shows the merge
-        sign.
+        sign. A tile opened above the page also leaves one, faint, where it was
+        (see <See term="Opening above the page" />
+        ).
+      </Term>
+      <Term term="Expanding">
+        A tile made larger in place by the app, usually from a corner button:
+        the app changes its size and keeps which tiles are expanded. The tile
+        moves and resizes to its new box, the tiles after it reflow, and in an{' '}
+        <See term="Area" /> it grows within its room. What’s in it is laid out
+        at the new size from the start; moving it from where it was is the app’s
+        (
+        <PartLink
+          component="grid"
+          part="useGridItemLayout"
+        />
+        ).
+      </Term>
+      <Term term="Opening above the page">
+        A tile lifted out of its grid to the middle of the screen, at its item’s{' '}
+        <code>openSize</code>, over the page dimmed (an item’s <code>open</code>
+        ). Its place stays empty, nothing reflows, and it’s a modal dialog until
+        it’s closed by its own button, a press beside it, Escape, or{' '}
+        <See term="Edit mode" /> starting.
       </Term>
       <Term term="Row bands">
         The outlines a grid draws around each section’s rows in{' '}

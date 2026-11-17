@@ -24,7 +24,8 @@ MITM_URL := https://$(MITM_SLUG).localhost
 	transform_icons \
 	util_clear_demo \
 	util_mitmproxy \
-	watch_dev_proxy
+	watch_dev_proxy \
+	watch_screens
 
 # Headless browser tests of the demo (needs Chrome, see scripts/browser-tests).
 # Optional: make -s check_browser ARGS='[<filter>] [--changed] [--screenshots <dir>]'
@@ -85,3 +86,20 @@ watch_build_demo: util_clear_demo
 
 watch_dev_proxy:
 	scripts/watch-dev-proxy.sh
+
+# The watchers in named, detached screen sessions (make-demo, make-lint,
+# make-stylelint), each quit first if it's running; attach with
+# `screen -r <name>`. Optional: make watch_screens SCREENS='demo lint'
+SCREENS ?= demo lint stylelint
+watch_screens:
+	@for name in $(SCREENS); do \
+		case "$$name" in \
+			demo) target=watch_build_demo ;; \
+			lint) target=watch_lint ;; \
+			stylelint) target=watch_stylelint ;; \
+			*) echo "unknown screen: $$name" >&2; exit 1 ;; \
+		esac; \
+		screen -S "make-$$name" -X quit >/dev/null 2>&1; \
+		screen -dmS "make-$$name" sh -c "make $$target; exec $$SHELL"; \
+		echo "make-$$name: make $$target"; \
+	done

@@ -366,13 +366,13 @@ export type GridCornerButtonProps = useRender.ComponentProps<'button'> & {
    */
   corner?: GridCorner;
   /**
-   * Its icon: one of `gridIcons` or `cardIcons`, or the app's own (e.g. an
+   * Its icon: one of `gridIcons`, or the app's own (e.g. an
    * SF Symbol), centered at the same place, at the same size.
    */
   icon: SymbolIcon;
   /**
    * Whether it's flipped in a right-to-left layout: for an icon that
-   * points somewhere (e.g. `cardIcons.expand`), not for one that reads as
+   * points somewhere (e.g. `gridIcons.expand`), not for one that reads as
    * it is.
    * @default false
    */
@@ -438,6 +438,11 @@ export type GridItemState = {
   /** Whether it's open above the page (see `GridItemProps.open`). */
   open: boolean;
   /**
+   * Its size open above the page (its `openSize`; smaller there if the
+   * screen is).
+   */
+  openSize: GridSize;
+  /**
    * Asks for another size (its `onSizeChange`, or its own), with what it
    * takes in (none by default).
    */
@@ -474,4 +479,50 @@ export type GridAreaState = {
   size: GridSize;
   /** The sizes it can be, in order (smallest area first). */
   supportedSizes: readonly GridSize[];
+};
+
+/**
+ * An item's tile changing its box (see `useGridItemLayout`): its size, its
+ * place in its area, opened above the page or closed.
+ */
+export type GridItemLayoutChange = {
+  /** How long its tile takes to get there, in milliseconds. */
+  duration: number;
+  /** Its tile's easing (a CSS easing function). */
+  easing: string;
+  /**
+   * How far its tile has got, in milliseconds (0 until its first frame is
+   * drawn, and before the change; `duration` once it's there): what moves
+   * with it can follow it, frame by frame, however long a frame takes.
+   */
+  elapsed: () => number;
+  /** Its tile's box on screen before the change. */
+  from: DOMRectReadOnly;
+  /** Whether it's open above the page, after the change. */
+  open: boolean;
+  /** Whether it was open above the page, before the change. */
+  previousOpen: boolean;
+  /** Its effective size before the change. */
+  previousSize: GridSize;
+  /** Its effective size, after the change. */
+  size: GridSize;
+  /** Its tile's box on screen once it's there. */
+  to: DOMRectReadOnly;
+};
+
+/** What to call as an item's tile changes its box (see `useGridItemLayout`). */
+export type GridItemLayoutHandlers = {
+  /**
+   * Called after the change is in the DOM: what's in the tile laid out at
+   * its new size already, the tile still drawn at its old box (`from`),
+   * about to move and resize to its new one (`to`) over `duration`. E.g.
+   * where an animation library moves what's in it from where it was.
+   */
+  onAfterChange?: (change: GridItemLayoutChange) => void;
+  /**
+   * Called before the change reaches the DOM: what's in the tile still laid
+   * out as it was (`to` is `from` then). E.g. where an animation library
+   * records where things are.
+   */
+  onBeforeChange?: (change: GridItemLayoutChange) => void;
 };

@@ -82,6 +82,18 @@
     container: uikit-card / size;
   }
 
+  /* (Its tile getting to a new box (see Grid's reshape.ts): its frame at
+     the size it's getting to (its parts laid out there at once), from its
+     glass's top leading corner; what's beyond its glass clipped.) */
+  .uikit-grid-item-body[data-grid-reshaping] > .uikit-card-root {
+    overflow: clip;
+
+    > .uikit-card-frame {
+      width: var(--uikit-grid-tile-width, 100%);
+      height: var(--uikit-grid-tile-height, 100%);
+    }
+  }
+
   /* Its parts' layout (inside its frame, for its size queries, see
      below). */
   .uikit-card-layout {

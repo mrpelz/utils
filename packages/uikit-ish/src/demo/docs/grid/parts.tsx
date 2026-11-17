@@ -33,6 +33,7 @@ import {
   gridDropGroupRows,
   gridHeaderRows,
   gridIconsRows,
+  gridItemLayoutChangeRows,
   gridItemRows,
   gridRemoveButtonRows,
   gridReorderRows,
@@ -41,8 +42,8 @@ import {
   gridSectionRows,
   gridSpacerRows,
   gridSpawnRows,
-  gridStartGridTransitionRows,
   gridUseGridAreaRows,
+  gridUseGridItemLayoutRows,
   gridUseGridItemRows,
 } from './docs.js';
 import {
@@ -123,34 +124,45 @@ export const Home = ({ editing }: { editing: boolean }) => (
     </Grid.Item>
   </Grid.Root>
 );`;
-const startGridTransitionCode = `import { Grid, startGridTransition } from '@mrpelz/uikit-ish';
-import { useState } from 'react';
+const useGridItemLayoutCode = `import { useGridItemLayout } from '@mrpelz/uikit-ish';
+import { gsap } from 'gsap';
+import { Flip } from 'gsap/Flip';
+import { useRef } from 'react';
 
-export const Lamp = ({ isLarge }: { isLarge: boolean }) => (
-  <Grid.Root>
-    <Grid.Item
-      size={isLarge ? '2x2' : '1x1'}
-      supportedSizes={['1x1', '2x2']}
-    >
-      Lamp
-    </Grid.Item>
-  </Grid.Root>
-);
+gsap.registerPlugin(Flip);
 
-export const Home = () => {
-  const [isLarge, setIsLarge] = useState(false);
-
+// What's in a tile, its parts moved from where they were as the tile
+// changes its box (here with GSAP's Flip, the app's own dependency).
+export const DeviceCard = ({ name, value }) => {
+  const ref = useRef(null);
+  const state = useRef();
+  useGridItemLayout({
+    onBeforeChange: () => {
+      state.current = Flip.getState(ref.current.children, {
+        props: 'fontSize',
+        simple: true,
+      });
+    },
+    onAfterChange: ({ duration, elapsed }) => {
+      const timeline = Flip.from(state.current, {
+        duration: duration / 1000,
+        ease: 'power3.out',
+        props: 'fontSize',
+        simple: true,
+      }).pause();
+      // In step with the tile, frame by frame.
+      const follow = () => {
+        timeline.time(Math.min(elapsed(), duration) / 1000);
+        if (elapsed() < duration) requestAnimationFrame(follow);
+      };
+      requestAnimationFrame(follow);
+    },
+  });
   return (
-    <>
-      {/* (A button outside the grid: its change in a transition.) */}
-      <button
-        type="button"
-        onClick={() => startGridTransition(() => setIsLarge(!isLarge))}
-      >
-        {isLarge ? 'Smaller' : 'Larger'}
-      </button>
-      <Lamp isLarge={isLarge} />
-    </>
+    <div ref={ref} className="device-card">
+      <span>{name}</span>
+      <span>{value}</span>
+    </div>
   );
 };`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
@@ -1605,8 +1617,8 @@ export const GridParts: FunctionComponent = () => (
         <PartLink part="useGridItem" />
         <span> and </span>
         <PartLink part="useGridArea" />
-        <span>; around changes of its own, </span>
-        <PartLink part="startGridTransition" />
+        <span>; as its tile changes its box, </span>
+        <PartLink part="useGridItemLayout" />
       </li>
     </ul>
 
@@ -1889,12 +1901,8 @@ export const GridParts: FunctionComponent = () => (
       </li>
       <li>
         Its icon is a <code>SymbolIcon</code>: one of{' '}
-        <PartLink part="gridIcons" /> or{' '}
-        <PartLink
-          component="card"
-          part="cardIcons"
-        />
-        , or an app’s own, for example an SF Symbol.
+        <PartLink part="gridIcons" />, or an app’s own, for example an SF
+        Symbol.
       </li>
       <li>
         Hidden (<code>visible</code> off), it fades out by its color and can’t
@@ -1920,13 +1928,20 @@ export const GridParts: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The grid’s edit-mode icons, as <code>SymbolIcon</code>s for a{' '}
+        The grid’s corner icons, as <code>SymbolIcon</code>s for a{' '}
         <PartLink part="Grid.CornerButton" /> or a{' '}
         <PartLink
           component="symbol"
           part="Symbol"
         />
-        . Plain 2px lines with round ends, drawn as filled outlines.
+        : its edit-mode controls’, and what a tile’s own corner button does.
+      </li>
+      <li>
+        The edit-mode ones are plain 2px lines with round ends. Those for a
+        tile’s own buttons (<code>expand</code>, <code>collapse</code>,{' '}
+        <code>open</code>, <code>drillIn</code>) are filled shapes apart from
+        the ring, so they read apart from the edit-mode ones. All are drawn as
+        filled outlines.
       </li>
       <li>
         Each is drawn in a 22px square around where a corner button puts its
@@ -2200,42 +2215,50 @@ export const GridParts: FunctionComponent = () => (
     <PropsTable rows={gridUseGridAreaRows} />
 
     <Heading
-      id="startgridtransition"
+      id="usegriditemlayout"
       level={2}
     >
-      <code>startGridTransition</code>
+      <code>useGridItemLayout</code>
     </Heading>
     <ul>
       <li>
-        Makes a change to the grid in the browser’s view transition: the tiles,
-        and the parts of the cards in them, move and resize from where they were
-        to where they are, instead of changing at once. Use it around a change
-        your own code makes, such as an item’s <code>size</code> or{' '}
-        <code>open</code> set from a list elsewhere.
+        For what’s inside an item: called as its tile changes its box, when its
+        size changes (for example expanded in place), it moves in its area, or
+        it opens above the page or closes. Not while the grid is editing, nor
+        with reduced motion: nothing moves then.
       </li>
       <li>
-        The library uses it itself: around what a card’s{' '}
+        The grid moves and resizes the tile itself. What’s in it is laid out at
+        its new size from the start, and stays where that puts it. Moving it
+        from where it was is the app’s: record where things are in{' '}
+        <code>onBeforeChange</code>, and move them from there in{' '}
+        <code>onAfterChange</code>, for example with an animation library.
+      </li>
+      <li>
+        Use the change’s <code>duration</code> and <code>easing</code> so they
+        move with the tile, and its <code>elapsed</code> to keep in step with it
+        frame by frame.
+      </li>
+      <li>
+        It works whether the item’s size and <code>open</code> are controlled or
+        its own, and the latest handlers are called, so they don’t need to be
+        kept stable.
+      </li>
+      <li>
+        A card’s corner buttons follow its corners by themselves (see{' '}
         <PartLink
           component="card"
           part="Card.CornerButton"
-        />{' '}
-        does, and around opening and closing an item above the page. Inside one
-        of those, it makes the change in that transition.
-      </li>
-      <li>
-        Only tiles clear of the screen’s bars are moved by it; those under the
-        bars move by the grid’s own reflow, under them. A change that moves no
-        tile ends it at once, so what else the change does (such as a page
-        sliding in) shows as usual.
-      </li>
-      <li>
-        Without view transitions, or with reduced motion, the change is made at
-        once.
+        />
+        ). The example below moves a card’s other parts with GSAP’s Flip; see
+        Card’s composition for it in use.
       </li>
     </ul>
-    <CodeView code={startGridTransitionCode} />
+    <CodeView code={useGridItemLayoutCode} />
     <h3>Arguments</h3>
-    <PropsTable rows={gridStartGridTransitionRows} />
+    <PropsTable rows={gridUseGridItemLayoutRows} />
+    <h3>The change</h3>
+    <PropsTable rows={gridItemLayoutChangeRows} />
   </>
 );
 

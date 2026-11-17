@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
 import {
-  cardIcons,
   type GridBreakRows,
   gridIcons,
   GridPlacement,
@@ -17,13 +16,9 @@ import { codeLabel } from '../../tooling/frame/render-code.js';
 import { sfICircle } from '../../tooling/icons.js';
 
 // The corner icons shown by their names in the demos' code (not their
-// paths): the grid's, then the card's (its x the grid's, named as the
-// grid's).
+// paths).
 for (const [name, icon] of Object.entries(gridIcons)) {
   codeLabel(icon, `gridIcons.${name}`);
-}
-for (const [name, icon] of Object.entries(cardIcons)) {
-  if (icon !== gridIcons.remove) codeLabel(icon, `cardIcons.${name}`);
 }
 
 // Every part's options (its parts page's, see part-options.ts for the other
@@ -214,11 +209,11 @@ export const getPropOptionsResizeHandle = (addLog: AddLog) => ({
 export const getPropOptionsCornerButton = (addLog: AddLog) => ({
   ...commonPropOptions,
   icon: [
-    new MappedProp(cardIcons.drillIn, '[cardIcons.drillIn]'),
-    new MappedProp(cardIcons.expand, '[cardIcons.expand]'),
-    new MappedProp(cardIcons.collapse, '[cardIcons.collapse]'),
-    new MappedProp(cardIcons.overlay, '[cardIcons.overlay]'),
-    new MappedProp(cardIcons.close, '[cardIcons.close]'),
+    new MappedProp(gridIcons.drillIn, '[gridIcons.drillIn]'),
+    new MappedProp(gridIcons.expand, '[gridIcons.expand]'),
+    new MappedProp(gridIcons.collapse, '[gridIcons.collapse]'),
+    new MappedProp(gridIcons.open, '[gridIcons.open]'),
+    new MappedProp(gridIcons.close, '[gridIcons.close]'),
     new MappedProp(gridIcons.remove, '[gridIcons.remove]'),
     new MappedProp(gridIcons.move, '[gridIcons.move]'),
     new MappedProp(gridIcons.addArea, '[gridIcons.addArea]'),

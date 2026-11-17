@@ -228,7 +228,20 @@ export const CardOverview: FunctionComponent = () => (
         <a href={publicUrl('card/composition#expanding-in-place')}>
           Expanding in place
         </a>
+        ), or opening it above the page (see{' '}
+        <a href={publicUrl('card/composition#opening-above-the-page')}>
+          Opening above the page
+        </a>
         ). It’s hidden in edit mode, where the grid’s controls take the corners.
+      </li>
+      <li>
+        As its tile changes size, its glass grows or shrinks with it and its
+        parts are laid out at the new size at once; moving them from where they
+        were is up to the app (see{' '}
+        <a href={publicUrl('card/composition#building-for-changing-sizes')}>
+          Building for changing sizes
+        </a>
+        ).
       </li>
       <li>
         On its own, outside a grid, it’s never in edit mode and is as large as

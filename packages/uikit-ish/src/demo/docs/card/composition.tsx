@@ -29,6 +29,7 @@ import {
   type Section,
 } from '../../tooling/guide/sections.js';
 import { sfChevronBackward } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
 import {
   type CardTile,
@@ -152,6 +153,9 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
         isExpanded ? undefined : forwardClick('[data-card-part=corner-button]')
       }
     >
+      {/* Its parts moved from where they were as it expands (see
+          Building for changing sizes). */}
+      <FlipParts />
       <Card.Symbol>
         <Symbol icon={sfThermometerMedium} />
       </Card.Symbol>
@@ -183,7 +187,7 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
         mirrored
         aria-expanded={isExpanded}
         aria-label="Heating details"
-        icon={isExpanded ? cardIcons.collapse : cardIcons.expand}
+        icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
         onClick={onToggle}
       />
     </Card.Root>
@@ -246,7 +250,7 @@ const LightsCard = ({ onDrillIn }) => (
     <Card.Value>{onCount > 0 ? onCount + ' On' : 'Off'}</Card.Value>
     <Card.CornerButton
       aria-label="Lights"
-      icon={cardIcons.drillIn}
+      icon={gridIcons.drillIn}
       onClick={onDrillIn}
     />
   </Card.Root>
@@ -316,6 +320,9 @@ const CameraCard = () => {
           : forwardClick('[data-card-part=corner-button]:not([data-grid-hidden])')
       }
     >
+      {/* Its parts moved from where they were as it opens (see Building
+          for changing sizes). */}
+      <FlipParts />
       <Card.Symbol>
         <Symbol icon={sfPhoto} />
       </Card.Symbol>
@@ -324,14 +331,14 @@ const CameraCard = () => {
       {/* Opening it while it's closed; its x while it's open. */}
       <Card.CornerButton
         aria-label="Front Door Camera"
-        icon={cardIcons.overlay}
+        icon={gridIcons.open}
         visible={!isOpen}
         onClick={() => item?.setOpen(true)}
       />
       <Card.CornerButton
         aria-label="Close"
         corner="top-leading"
-        icon={cardIcons.close}
+        icon={gridIcons.close}
         visible={isOpen}
         onClick={() => item?.setOpen(false)}
       />
@@ -350,8 +357,50 @@ const CameraCard = () => {
   <Grid.ResizeHandle />
 </Grid.Item>`;
 
-const sizeCode = `// A card showing more the larger it is. Its parts are the card's own, so
-// they slide as it changes size; what it shows depends on its state.
+const sizeCode = `// The app's: its cards' parts moved from where they were as their tile
+// changes its box, with GSAP's Flip (the app's dependency, not the
+// library's). Placed in a card, it shows nothing.
+import { gsap } from 'gsap';
+import { Flip } from 'gsap/Flip';
+
+gsap.registerPlugin(Flip);
+
+const parts =
+  '[data-card-part]:not([data-card-part="root"], [data-card-part="corner-button"])';
+
+const FlipParts = () => {
+  const marker = useRef(null);
+  const state = useRef();
+  const cardOf = () => marker.current.closest('[data-card-part="root"]');
+  useGridItemLayout({
+    // Where they are, before the change.
+    onBeforeChange: () => {
+      state.current = Flip.getState(cardOf().querySelectorAll(parts), {
+        props: 'fontSize',
+        simple: true,
+      });
+    },
+    // Laid out anew, the tile still at its old box: moved from where they
+    // were, in step with the tile.
+    onAfterChange: ({ duration, elapsed }) => {
+      const timeline = Flip.from(state.current, {
+        duration: duration / 1000,
+        ease: 'power3.out',
+        props: 'fontSize',
+        simple: true,
+        targets: cardOf().querySelectorAll(parts),
+      }).pause();
+      const follow = () => {
+        timeline.time(Math.min(elapsed(), duration) / 1000);
+        if (elapsed() < duration) requestAnimationFrame(follow);
+      };
+      requestAnimationFrame(follow);
+    },
+  });
+  return <span ref={marker} hidden />;
+};
+
+// A card showing more the larger it is; what it shows depends on its state.
 const celsius = {
   maximumFractionDigits: 1,
   minimumFractionDigits: 1,
@@ -367,7 +416,8 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
         isExpanded ? undefined : forwardClick('[data-card-part=corner-button]')
       }
     >
-      {/* In both forms: it slides to its new place, never pops. */}
+      <FlipParts />
+      {/* In both forms: it moves to its new place, never pops. */}
       <Card.Symbol>
         <Symbol icon={sfThermometerMedium} />
       </Card.Symbol>
@@ -400,7 +450,7 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
         mirrored
         aria-expanded={isExpanded}
         aria-label="Heating details"
-        icon={isExpanded ? cardIcons.collapse : cardIcons.expand}
+        icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
         onClick={onToggle}
       />
     </Card.Root>
@@ -1090,7 +1140,11 @@ export const CardComposition: FunctionComponent = () => (
       </li>
       <li>
         A <PartLink part="Card.CornerButton" /> asks for the other state. Its
-        icon comes from the same state: <PartLink part="cardIcons" />
+        icon comes from the same state:{' '}
+        <PartLink
+          component="grid"
+          part="gridIcons"
+        />
         ’s <code>expand</code> while it’s small, <code>collapse</code> while
         it’s expanded. It’s <code>mirrored</code>, since the triangle points to
         a corner, and says its state with <code>aria-expanded</code>.
@@ -1112,6 +1166,16 @@ export const CardComposition: FunctionComponent = () => (
       <li>
         A card already as large as its expanded size has nothing to expand: it
         shows no button.
+      </li>
+      <li>
+        Getting there is the grid’s (see Grid’s{' '}
+        <a href={publicUrl('grid/composition#expanding-in-place')}>
+          Expanding in place
+        </a>
+        ). The card’s symbol moves from its old place with GSAP, by the demos’{' '}
+        <code>FlipParts</code> (see{' '}
+        <a href="#building-for-changing-sizes">Building for changing sizes</a>
+        ).
       </li>
       <li>
         <strong>Library:</strong> the corner button and its icons, the grid
@@ -1147,7 +1211,11 @@ export const CardComposition: FunctionComponent = () => (
         ’s stack. Back, or a swipe from the edge, returns to the cards.
       </li>
       <li>
-        Its icon is <PartLink part="cardIcons" />
+        Its icon is{' '}
+        <PartLink
+          component="grid"
+          part="gridIcons"
+        />
         ’s <code>drillIn</code>, a ring, and its name says where it goes:
         “Lights”.
       </li>
@@ -1203,8 +1271,12 @@ export const CardComposition: FunctionComponent = () => (
         ’s <code>open</code> and <code>setOpen</code>.
       </li>
       <li>
-        Its corner button shows <PartLink part="cardIcons" />
-        ’s <code>overlay</code>, a rounded square. A press anywhere on the card
+        Its corner button shows{' '}
+        <PartLink
+          component="grid"
+          part="gridIcons"
+        />
+        ’s <code>open</code>, a rounded square. A press anywhere on the card
         goes there too, with{' '}
         <PartLink
           component="list"
@@ -1219,7 +1291,14 @@ export const CardComposition: FunctionComponent = () => (
       <li>
         The grid lifts the card itself, so what’s in it keeps its state. A faint
         stand-in keeps its place, so nothing else in the grid moves. Closed, it
-        moves and shrinks back into that place.
+        moves and shrinks back into that place (see Grid’s{' '}
+        <a href={publicUrl('grid/composition#opening-above-the-page')}>
+          Opening above the page
+        </a>
+        ). Its parts move along with GSAP, by the demos’ <code>FlipParts</code>{' '}
+        (see{' '}
+        <a href="#building-for-changing-sizes">Building for changing sizes</a>
+        ).
       </li>
       <li>
         It’s a modal dialog: focus moves into it and stays there, and a press
@@ -1247,28 +1326,45 @@ export const CardComposition: FunctionComponent = () => (
     <ul>
       <li>
         A card changes size when it expands in place, when it opens above the
-        page, and when it’s resized in edit mode. The first two are animated,
-        and the library does that part itself. Your content only has to lay
-        itself out well at every size and keep its parts recognizable.
+        page, and when it’s resized in edit mode. The first two are animated.
+        The library moves the card itself; moving what’s in it is up to your
+        content.
       </li>
       <li>
         <strong>What the library does.</strong> The change is made at once: the
-        card is laid out at its new size, and the grid at its new layout. The
-        browser’s view transition then shows it getting there. The card’s glass
-        grows or shrinks to its new size, keeping its rounded corners, its rim
-        and its shadow. The tiles around it move to their new places.{' '}
-        <PartLink part="Card.Symbol" />, <PartLink part="Card.Title" />,{' '}
-        <PartLink part="Card.Value" /> and its corner buttons slide from where
-        they were to where they are. Without view transitions, or with reduced
+        card is laid out at its new size, and the grid at its new layout. Its
+        tile then moves and resizes from its old box to its new one, and the
+        tiles around it move to their new places. The card’s glass grows or
+        shrinks with the tile, keeping its rounded corners, its rim and its
+        shadow, and its corner buttons stay in their corners. With reduced
         motion, everything changes at once.
       </li>
       <li>
-        <strong>Use the card’s parts.</strong> Only the card’s parts move on
-        their own. They’re matched between the old and the new layout by what
-        they are, so keep the same part in both forms where it means the same,
-        like the heating card’s symbol. A part that’s only in one form fades out
-        or in. Your own elements, like a slider, belong to the glass: the card’s
-        moving edge shows or hides them.
+        <strong>What stays with your content.</strong> The card’s parts are laid
+        out at the new size from the start, and stay where that puts them,
+        clipped by the card’s glass as it grows or shrinks. To move them from
+        where they were, use{' '}
+        <PartLink
+          component="grid"
+          part="useGridItemLayout"
+        />
+        : it tells you before the change (record where things are) and once it’s
+        in the page (move them from there), with the tile’s timing.
+      </li>
+      <li>
+        <strong>With an animation library.</strong> The demos use GSAP’s Flip,
+        written as a <code>FlipParts</code> placed in the card (see the code
+        below). GSAP is the app’s choice and dependency, not the library’s. It
+        moves <PartLink part="Card.Symbol" />, <PartLink part="Card.Title" />{' '}
+        and <PartLink part="Card.Value" /> to their new places and their text to
+        its new size, in step with the tile. Parts that are only in one form
+        aren’t faded: they show or go as the card’s edge passes them. The empty
+        cards in the kitchen sink move without any of it.
+      </li>
+      <li>
+        <strong>Keep parts across forms.</strong> A part moves only when it’s in
+        both forms. Keep the same part where it means the same, like the heating
+        card’s symbol.
       </li>
       <li>
         <strong>Choose detail by size, show state by content.</strong> The
@@ -1286,19 +1382,10 @@ export const CardComposition: FunctionComponent = () => (
         words break with a hyphen, but a short title reads better at every size.
       </li>
       <li>
-        <strong>Leave moving to the library.</strong> Don’t animate the parts or
-        the card’s size yourself: the view transition shows the change as a
-        whole, and your animation would run underneath it.
-      </li>
-      <li>
-        <strong>Changes from your own code:</strong> a card’s corner button
-        already makes its change in a transition. Changing an item’s size or{' '}
-        <code>open</code> from anywhere else, wrap it in{' '}
-        <PartLink
-          component="grid"
-          part="startGridTransition"
-        />
-        , or it changes at once.
+        <strong>Changes from anywhere.</strong> Changing an item’s size or{' '}
+        <code>open</code> from a corner button, from elsewhere in your app, or
+        by the grid itself (Escape, a press beside it, edit mode starting) moves
+        the tile the same way, and tells your content the same way.
       </li>
       <li>
         <strong>Expanding in place:</strong> the expanded size must be in the
@@ -1333,13 +1420,19 @@ export const CardComposition: FunctionComponent = () => (
         card’s slider takes presses, so only its button collapses it.
       </li>
       <li>
-        <strong>Library:</strong> the view transition (the glass resized, the
-        parts sliding and fading, the tiles around it moving), lifting above the
-        page, the corner buttons’ fades.
+        <strong>Library:</strong> the tile moving and resizing (the glass with
+        it, the tiles around it moving), the corner buttons following their
+        corners and fading, lifting above the page, telling the content (
+        <PartLink
+          component="grid"
+          part="useGridItemLayout"
+        />
+        ).
       </li>
       <li>
         <strong>Demo:</strong> the heating card’s two forms and its room, the
-        camera’s open state, their corner buttons and presses.
+        camera’s open state, their corner buttons and presses, and moving their
+        parts with GSAP (<code>FlipParts</code>).
       </li>
     </ul>
     <CodeView code={sizeCode} />

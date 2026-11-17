@@ -5,9 +5,15 @@ import '../grid/style.css';
 import './style.css';
 
 import { useRender } from '@base-ui/react/use-render';
-import { forwardRef, type MouseEvent } from 'react';
+import { forwardRef, type MouseEvent, type RefObject } from 'react';
 
-import { Grid, startGridTransition, useGridItem } from '../grid/main.js';
+import {
+  Grid,
+  type GridItemLayoutChange,
+  startWithFrame,
+  useGridItem,
+  useGridItemLayout,
+} from '../grid/main.js';
 import { cn, useForwardedRef } from '../utils/main.js';
 import type {
   CardCornerButtonProps,
@@ -56,16 +62,16 @@ export type {
 // - A corner button (`Card.CornerButton`, a `Grid.CornerButton`) does
 //   what's more to it: expanding it in place (the app's size for it),
 //   opening it above the page, going to a page of its own; its icon one of
-//   `cardIcons` or the app's. Shown outside edit mode only (the grid's own
+//   `gridIcons` or the app's. Shown outside edit mode only (the grid's own
 //   controls take the corners then).
-// - Its size changing by a corner button (expanded, collapsed, opened
-//   above the page, closed), or in the app's `startGridTransition`: laid
-//   out at the new size at once, a view transition showing it get there
-//   (see Grid's transition.ts): its glass grown or shrunk (not
-//   stretched), its parts (`data-card-part`) sliding from their places to
-//   their new ones; those it adds or takes away fading in or out, what
-//   isn't a part (e.g. a slider) showing or going as its edge passes. The
-//   app's content only lays itself out by the card's size.
+// - Its tile getting to a new box (expanded, collapsed, opened above the
+//   page, closed; see Grid's reshape.ts): its glass resized with it (not
+//   stretched, clipping what's in it), its parts laid out at the new size
+//   at once (its frame, at the size it's getting to); its corner buttons
+//   staying in their corners as its edges move (`useCornersFollowing`).
+//   The rest of its parts stay where they're laid out: moving them from
+//   where they were is the app's (e.g. by an animation library, see
+//   `useGridItemLayout`).
 
 /** The tile's shape (its item's effective size): wide, horizontal. */
 export const useCardOrientation = (): CardOrientation => {
@@ -90,6 +96,52 @@ export const cardSizes: CardSizes = {
   numericalDisplay: ['1x1', '2x1', '2x2'],
 };
 
+/** Its corner buttons' animations' id (see `useCornersFollowing`). */
+const cornerId = 'uikit-card-corner';
+
+/**
+ * Its corner buttons following its corners as its tile gets to a new box
+ * (see the top): laid out in its frame, at the size it's getting to, each
+ * at its trailing or bottom edge moved by as much as its glass's edge is
+ * off it, by its tile's timing (a translate added to any of its own).
+ */
+const useCornersFollowing = (rootRef: RefObject<HTMLElement | null>) => {
+  useGridItemLayout({
+    onAfterChange: ({ duration, easing, from, to }: GridItemLayoutChange) => {
+      const root = rootRef.current;
+      if (!root) return;
+      const isRtl = getComputedStyle(root).direction === 'rtl';
+      const across = isRtl ? to.width - from.width : from.width - to.width;
+      const down = from.height - to.height;
+      for (const button of root.querySelectorAll<HTMLElement>(
+        ':scope > .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button',
+      )) {
+        for (const animation of button.getAnimations()) {
+          if (animation.id === cornerId) animation.cancel();
+        }
+        // (Which edge it's at: by where it's laid out, in its frame.)
+        const center = button.offsetLeft + button.offsetWidth / 2;
+        const isAtEnd = center > to.width / 2 !== isRtl;
+        const isAtBottom =
+          button.offsetTop + button.offsetHeight / 2 > to.height / 2;
+        const x = isAtEnd ? across : 0;
+        const y = isAtBottom ? down : 0;
+        if (x === 0 && y === 0) continue;
+        // (With its tile: from the next frame, see Grid's reshape.ts.)
+        startWithFrame(
+          button.animate(
+            [
+              { translate: `${String(x)}px ${String(y)}px` },
+              { translate: '0 0' },
+            ],
+            { composite: 'add', duration, easing, id: cornerId },
+          ),
+        );
+      }
+    },
+  });
+};
+
 /**
  * The card: its glass, its parts on it; bright while `active` (or a switch
  * in it is on); pressable as a whole with an `onClick` (its feedback, see
@@ -104,6 +156,7 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
     const item = useGridItem();
     const isEditing = item?.editing === true;
     const ref = useForwardedRef(forwardedRef);
+    useCornersFollowing(ref);
     return useRender({
       defaultTagName: 'div',
       props: {
@@ -188,8 +241,7 @@ const Value = forwardRef<HTMLSpanElement, CardValueProps>(
  * A button in its corner (see `Grid.CornerButton`): shown while its grid
  * isn't editing (faded out, inert, while it is; and as `visible` says). A
  * press on it is its own, not the card's (e.g. not toggling a switch in
- * it, see `forwardClick`); what it does made in a view transition (e.g.
- * expanding the card, see `startGridTransition`).
+ * it, see `forwardClick`).
  */
 const CornerButton = forwardRef<HTMLButtonElement, CardCornerButtonProps>(
   ({ className, onClick, visible = true, ...props }, ref) => {
@@ -203,7 +255,7 @@ const CornerButton = forwardRef<HTMLButtonElement, CardCornerButtonProps>(
         {...props}
         onClick={(event: MouseEvent<HTMLButtonElement>) => {
           event.stopPropagation();
-          if (onClick) startGridTransition(() => onClick(event));
+          onClick?.(event);
         }}
       />
     );

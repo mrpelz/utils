@@ -118,8 +118,10 @@ const chevron = (along: number, toward: 1 | -1, arm: number) => {
 const chevronTip = arcRadius - 5.5;
 
 /**
- * The grid's edit-mode icons (see `Grid.CornerButton`): in its controls'
- * corners. `SymbolIcon`s, for a corner button or a `Symbol`.
+ * The grid's corner icons (see `Grid.CornerButton`): its edit-mode
+ * controls', and what a tile's own corner button does (expanding it,
+ * opening it above the page, going to a page of its own). `SymbolIcon`s,
+ * for a corner button or a `Symbol`.
  */
 export const gridIcons = {
   /** Adding an area (the hatching, small; bottom leading). */
@@ -129,6 +131,17 @@ export const gridIcons = {
       polyline([-5.5, 5.5], [5.5, -5.5]) +
       polyline([1.5, 5.5], [5.5, 1.5]),
   ),
+  /** Closing (a tile opened above the page): an x, as `remove`. */
+  close: iconOf(
+    'grid.close',
+    polyline([-3.5, -3.5], [3.5, 3.5]) + polyline([3.5, -3.5], [-3.5, 3.5]),
+  ),
+  /** Making it small again (a triangle pointing to the top leading corner). */
+  collapse: iconOf('grid.collapse', rounded([-3, 3], [-3, -3], [3, -3])),
+  /** Going to a page of its own (a ring). */
+  drillIn: iconOf('grid.drill-in', ring([0, 0], 4)),
+  /** Making it larger in place (a triangle pointing to the bottom trailing corner). */
+  expand: iconOf('grid.expand', rounded([3, -3], [3, 3], [-3, 3])),
   /** Movable (crosshairs: four ticks around an empty middle). */
   move: iconOf(
     'grid.move',
@@ -137,6 +150,8 @@ export const gridIcons = {
       polyline([-3.5, 0], [-8, 0]) +
       polyline([3.5, 0], [8, 0]),
   ),
+  /** Opening it above the page (a rounded square). */
+  open: iconOf('grid.open', rounded([-3, -3], [3, -3], [3, 3], [-3, 3])),
   /** Removing (an x). */
   remove: iconOf(
     'grid.remove',
@@ -156,21 +171,4 @@ export const gridIcons = {
     'grid.resize-shrink',
     arc + chevron(chevronTip - 6, -1, 4),
   ),
-} as const;
-
-/**
- * A card's icons outside edit mode (see `Card.CornerButton`): what a press
- * on its corner does. `SymbolIcon`s, as the grid's.
- */
-export const cardIcons = {
-  /** Closing (an overlay): the grid's x. */
-  close: gridIcons.remove,
-  /** Making it small again (a triangle pointing to the top leading corner). */
-  collapse: iconOf('card.collapse', rounded([-3, 3], [-3, -3], [3, -3])),
-  /** Going to a page of its own (a ring). */
-  drillIn: iconOf('card.drill-in', ring([0, 0], 4)),
-  /** Making it larger in place (a triangle pointing to the bottom trailing corner). */
-  expand: iconOf('card.expand', rounded([3, -3], [3, 3], [-3, 3])),
-  /** Opening it above the page (a rounded square). */
-  overlay: iconOf('card.overlay', rounded([-3, -3], [3, -3], [3, 3], [-3, 3])),
 } as const;

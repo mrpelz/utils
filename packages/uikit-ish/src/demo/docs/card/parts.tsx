@@ -16,7 +16,6 @@ import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
 import {
   cardCornerButtonRows,
-  cardIconsRows,
   cardRootRows,
   cardSizesRows,
   cardSymbolRows,
@@ -336,9 +335,9 @@ export const CardParts: FunctionComponent = () => (
         example for a group of lights with at least one of them on.
       </li>
       <li>
-        When its tile changes size by a corner button, for example as it expands
-        or opens above the page, the change is shown in a view transition: its
-        glass grows or shrinks, and its parts slide from where they were (see{' '}
+        When its tile changes size, for example as it expands or opens above the
+        page, its glass grows or shrinks with the tile, its parts laid out at
+        the new size from the start (see{' '}
         <a href={publicUrl('card/composition#building-for-changing-sizes')}>
           Building for changing sizes
         </a>
@@ -432,17 +431,8 @@ export const CardParts: FunctionComponent = () => (
         it does is up to its <code>onClick</code>.
       </li>
       <li>
-        Its <code>onClick</code> runs in a view transition (see{' '}
-        <PartLink
-          component="grid"
-          part="startGridTransition"
-        />
-        ): what it changes in the grid, such as the card’s size, is shown moving
-        there. A press that changes nothing there shows no transition, so going
-        to another page slides as usual. It runs after the browser has captured
-        the page as it was, not in the click itself, so{' '}
-        <code>preventDefault()</code> and <code>currentTarget</code> are of no
-        use there.
+        As its tile changes size, it stays in its corner: it moves with the
+        card’s edge, whatever moves the rest of the card’s parts.
       </li>
       <li>
         It’s a{' '}
@@ -450,8 +440,12 @@ export const CardParts: FunctionComponent = () => (
           component="grid"
           part="Grid.CornerButton"
         />
-        : a 44px target, its icon one of <PartLink part="cardIcons" /> or the
-        app’s own, in the card’s text color.
+        : a 44px target, its icon one of{' '}
+        <PartLink
+          component="grid"
+          part="gridIcons"
+        />{' '}
+        or the app’s own, in the card’s text color.
       </li>
       <li>
         It’s shown outside edit mode only. In edit mode, it fades out and the
@@ -475,26 +469,6 @@ export const CardParts: FunctionComponent = () => (
     <CornerButtonPart />
     <h3>Props</h3>
     <PropsTable rows={cardCornerButtonRows} />
-
-    <Heading
-      id="cardicons"
-      level={2}
-    >
-      <code>cardIcons</code>
-    </Heading>
-    <ul>
-      <li>
-        The icons for a card’s corner buttons, as <code>SymbolIcon</code>s.
-        Filled shapes, apart from the ring, so they read apart from the grid’s
-        edit-mode lines (
-        <PartLink
-          component="grid"
-          part="gridIcons"
-        />
-        ).
-      </li>
-    </ul>
-    <PropsTable rows={cardIconsRows} />
 
     <Heading
       id="cardsizes"

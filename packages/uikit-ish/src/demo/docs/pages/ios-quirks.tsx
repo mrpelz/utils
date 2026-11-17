@@ -1105,5 +1105,21 @@ export const IosQuirksPage: FunctionComponent = () => (
         <a href={publicUrl('viewport')}>Viewport</a>).
       </li>
     </ul>
+    <ul>
+      <li>
+        <strong>No view transitions.</strong> In WebKit, a view transition’s
+        snapshot of the page drops what glass blurs and blends behind it, and
+        its end comes frames late, so lifted and moving parts glitch around it.
+        A <a href={publicUrl('grid')}>Grid</a>’s tile expanding or opening above
+        the page moves and resizes by animations of its own instead, and tells
+        what’s in it (see{' '}
+        <PartLink
+          component="grid"
+          part="useGridItemLayout"
+        />
+        ). Scoped view transitions, for just what’s in a tile, would fit, but
+        only Chromium has them.
+      </li>
+    </ul>
   </PageShell>
 );

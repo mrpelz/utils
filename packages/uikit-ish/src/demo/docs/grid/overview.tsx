@@ -422,6 +422,22 @@ export const GridOverview: FunctionComponent = () => (
         spacers and breaks appear and disappear.
       </li>
       <li>
+        A tile can expand, the app changing its size, or open above the page (an
+        item’s <code>open</code>), usually from a{' '}
+        <PartLink part="Grid.CornerButton" /> in it. Either way it moves and
+        resizes to its new box, what’s in it laid out at the new size from the
+        start; <PartLink part="useGridItemLayout" /> tells what’s in it, to move
+        its own parts along (see{' '}
+        <a href={publicUrl('grid/composition#expanding-in-place')}>
+          Expanding in place
+        </a>{' '}
+        and{' '}
+        <a href={publicUrl('grid/composition#opening-above-the-page')}>
+          Opening above the page
+        </a>
+        ).
+      </li>
+      <li>
         In edit mode, the grid draws its own corner symbols as plain lines: an x
         to remove, crosshairs on tiles that can be moved, and the resize arc.
         Inside the arc, a chevron shows where the tile can go: towards the top

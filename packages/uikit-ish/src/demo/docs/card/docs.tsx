@@ -61,8 +61,12 @@ export const cardCornerButtonRows: readonly PropRow[] = [
     'SymbolIcon',
     undefined,
     <>
-      Its icon: one of <PartLink part="cardIcons" />, or the app’s own (for
-      example an SF Symbol).
+      Its icon: one of{' '}
+      <PartLink
+        component="grid"
+        part="gridIcons"
+      />
+      , or the app’s own (for example an SF Symbol).
     </>,
   ],
   [
@@ -96,46 +100,6 @@ export const cardCornerButtonRows: readonly PropRow[] = [
     'Its accessible name, for example “Living Room details”. It has no default.',
   ],
   ...renderRows('button', 'HTMLButtonElement'),
-];
-
-export const cardIconsRows: readonly PropRow[] = [
-  [
-    'drillIn',
-    'SymbolIcon',
-    undefined,
-    'A ring: a press goes to a page of its own.',
-  ],
-  [
-    'expand',
-    'SymbolIcon',
-    undefined,
-    'A filled triangle pointing to the bottom trailing corner: a press makes the card larger in place.',
-  ],
-  [
-    'collapse',
-    'SymbolIcon',
-    undefined,
-    'The same triangle pointing to the top leading corner: on an expanded card, a press makes it small again.',
-  ],
-  [
-    'overlay',
-    'SymbolIcon',
-    undefined,
-    'A filled rounded square: a press opens the card above the page.',
-  ],
-  [
-    'close',
-    'SymbolIcon',
-    undefined,
-    <>
-      An x, the grid’s (
-      <PartLink
-        component="grid"
-        part="gridIcons"
-      />
-      ’s <code>remove</code>): a press closes the card opened above the page.
-    </>,
-  ],
 ];
 
 export const cardSymbolRows: readonly PropRow[] = [
