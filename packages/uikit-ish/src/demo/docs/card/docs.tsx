@@ -1,6 +1,7 @@
 import {
   code,
   elementRows,
+  glassSurfaceRow,
   PropRow,
   renderRows,
   union,
@@ -12,10 +13,16 @@ import { PartLink } from '../../tooling/guide/sections.js';
 
 export const cardRootRows: readonly PropRow[] = [
   [
+    'actionsRef',
+    'RefObject<CardActions | null>',
+    undefined,
+    'Its actions, for the app to call from anywhere: flash() lights it up as active does, for a moment, and fades it back, for example as the app’s server says a doorbell rang.',
+  ],
+  [
     'active',
     'boolean',
-    code('false'),
-    'Whether it’s bright, as a card whose switch is on. For a card without a switch, for example a group of lights with at least one of them on. A switch in it that’s on makes it bright too.',
+    'not switchable (or by its switch)',
+    'Whether what it switches is on: true lights it up, false draws it in dark glass, in both color schemes, so what’s on can be told at a glance. For a card without a switch, for example a group of lights with at least one of them on. Left out, it isn’t switchable (a sensor, say), and its glass follows the color scheme. A switch in it makes it switchable, by the switch’s state. A switchable card’s state decides its glass; its context only applies while it isn’t switchable.',
   ],
   [
     'children',
@@ -34,8 +41,21 @@ export const cardRootRows: readonly PropRow[] = [
         component="slider"
         part="Slider.Root"
       />
-      , styled by the card.
+      , styled by the card; or a{' '}
+      <PartLink
+        component="list"
+        part="List.Root"
+      />{' '}
+      (inset grouped, its default style), its group between the card’s top and
+      its title.
     </>,
+  ],
+  glassSurfaceRow('the card'),
+  [
+    'momentary',
+    'boolean',
+    code('false'),
+    'Whether it’s a momentary button: a press flashes it (see actionsRef), for a press with no state of its own, for example a chime or “all lights off”. Give it an onClick.',
   ],
   [
     'onClick',

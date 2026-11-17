@@ -7,8 +7,9 @@ import type { SecondaryClickProps } from '../utils/main.js';
 export type ButtonRootProps = BaseButtonProps &
   SecondaryClickProps & {
     /**
-     * Brightness behind glass variants (`adaptive`: by what's behind it).
-     * @default follows the color scheme
+     * How bright the content behind glass variants is (`adaptive`: by
+     * what's behind it, see `useBackdropTone`).
+     * @default the color scheme's
      */
     context?: GlassContextValue;
     /**

@@ -170,12 +170,11 @@
 
   /* A backdrop: shapes and a large letter pair, for the blur and the
      blending to show. */
-  .demo-token-material-stage {
+  .demo-token-material-stage,
+  .demo-token-band {
     position: relative;
     display: grid;
     overflow: hidden;
-    border: 1px dashed #404040;
-    aspect-ratio: 4 / 3;
     place-items: center;
 
     &[data-backdrop='light'] {
@@ -212,6 +211,16 @@
         linear-gradient(135deg, #1c1c4e, #3a0ca3 50%, #000);
     }
 
+    &[data-backdrop='photo'] {
+      --demo-token-letters: rgb(255 255 255 / 80%);
+
+      background:
+        radial-gradient(ellipse at 70% 18%, #fff7d6 0 1.2rem, transparent 3rem),
+        linear-gradient(transparent 55%, rgb(20 40 20 / 85%) 56%),
+        radial-gradient(ellipse at 30% 70%, #6b8f3a 0 4rem, transparent 6rem),
+        linear-gradient(#6fa8dc, #f6c58f 52%, #c97b4a);
+    }
+
     &[data-backdrop='vivid'] {
       --demo-token-letters: rgb(0 0 0 / 55%);
 
@@ -220,6 +229,91 @@
         radial-gradient(circle at 80% 75%, #30d158 0 3rem, transparent 3.1rem),
         linear-gradient(135deg, #ff9500, #af52de 50%, #007aff);
     }
+  }
+
+  .demo-token-material-stage {
+    border: 1px dashed #404040;
+    aspect-ratio: 4 / 3;
+  }
+
+  /* Scrolling under glass: the backdrops as bands in a scroller, glass
+     over it at its top and bottom, staying put. */
+  .demo-token-scroll-stage {
+    position: relative;
+    overflow: hidden;
+    height: 30rem;
+    border: 1px dashed #404040;
+  }
+
+  .demo-token-scroll-bands {
+    position: absolute;
+    overflow: auto;
+    inset: 0;
+    overscroll-behavior: contain;
+  }
+
+  .demo-token-band {
+    height: 18rem;
+  }
+
+  /* (A band's canvas or picture, filling it.) */
+  .demo-token-band-media {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+    object-fit: cover;
+  }
+
+  /* (The adaptive card in the stage's bottom bar: a panel's size, the
+     card filling it.) */
+  .demo-token-adaptive-card {
+    display: grid;
+    width: 9rem;
+    height: 5.5rem;
+  }
+
+  .demo-token-band-label {
+    position: absolute;
+    color: var(--demo-token-letters);
+    font-size: 0.875rem;
+    inset: auto 1rem 1rem auto;
+
+    /* (In the picture's sky, its area's tone, see `PictureBand`.) */
+    &[data-place='sky'] {
+      inset: 22% 1rem auto auto;
+    }
+  }
+
+  .demo-token-scroll-bar {
+    position: absolute;
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 0.75rem;
+    inset: 1rem 1rem auto;
+    pointer-events: none;
+
+    & > * {
+      pointer-events: auto;
+    }
+
+    &[data-edge='end'] {
+      inset: auto 1rem 1rem;
+    }
+  }
+
+  /* (The sun over it, see `ToneSymbol`: centered in its top bar, by its
+     backdrop's tone.) */
+  .demo-token-tone-symbol {
+    align-self: center;
+    order: 1;
+    font-size: 1.75rem;
+    transition: color 200ms;
+  }
+
+  .demo-token-scroll-bar > :last-child {
+    order: 2;
   }
 
   .demo-token-material-letters {
@@ -239,6 +333,37 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.5rem;
+  }
+
+  /* (Buttons over a panel, stacked.) */
+  .demo-token-material-column {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* The medium material as a panel (a card's, a sheet's). */
+  .demo-token-panel {
+    position: relative;
+    display: grid;
+    min-width: 9rem;
+    padding: 0.75rem 1rem;
+    border-radius: 18px;
+    color: var(--uikit-glass-content);
+    gap: 0.125rem 0.75rem;
+    grid-template-columns: auto 1fr;
+
+    /* (Its symbol beside both lines, as a card's.) */
+    & > .uikit-symbol {
+      align-self: center;
+      font-size: 1.5rem;
+      grid-row: span 2;
+    }
+
+    & > .demo-token-panel-detail {
+      color: var(--uikit-glass-content-secondary);
+      font-size: 0.875rem;
+    }
   }
 
   /* The medium material, as a small menu. */

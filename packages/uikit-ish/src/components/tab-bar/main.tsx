@@ -16,7 +16,7 @@ import {
   useState,
 } from 'react';
 
-import { GlassBackground } from '../glass/main.js';
+import { GlassBackground, useGlassContext } from '../glass/main.js';
 import {
   cn,
   type DelayedLens,
@@ -1036,7 +1036,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
       collapsed = false,
       collapsedContent,
       collapsedPosition = 'inline-start',
-      context: glassContext = 'auto',
+      context: contextProp,
       onClickCapture,
       onLostPointerCapture,
       onPointerCancel,
@@ -1051,6 +1051,7 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
     ref,
   ) => {
     const listRef = useForwardedRef(ref);
+    const glassContext = useGlassContext(listRef, contextProp) ?? 'auto';
     const root = useContext(RootContext);
 
     // For its accessory (see `Accessory`).
@@ -1677,7 +1678,7 @@ const Accessory = forwardRef<HTMLDivElement, TabBarAccessoryProps>(
     {
       className,
       children,
-      context = 'auto',
+      context: contextProp,
       style,
       visibleIn = 'both',
       ...props
@@ -1686,6 +1687,7 @@ const Accessory = forwardRef<HTMLDivElement, TabBarAccessoryProps>(
   ) => {
     const ref = useForwardedRef(forwardedRef);
     const { anchor, setAccessory } = useContext(RootContext);
+    const context = useGlassContext(ref, contextProp) ?? 'auto';
 
     // Placed by its list, as its groups change, and when added (or shown in
     // other states).

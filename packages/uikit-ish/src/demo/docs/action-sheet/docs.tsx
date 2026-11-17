@@ -2,6 +2,7 @@ import {
   baseUiRows,
   code,
   elementRows,
+  glassSurfaceRow,
   nativeButtonRow,
   PropRow,
   union,
@@ -208,6 +209,7 @@ export const actionSheetPopupRows: readonly PropRow[] = [
       <code>false</code>: do not move focus.
     </>,
   ],
+  glassSurfaceRow('the action sheet'),
   [
     'children',
     'ReactNode',

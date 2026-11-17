@@ -15,8 +15,13 @@ import {
   useState,
 } from 'react';
 
-import { useGlassMode } from '../glass/main.js';
-import { useSettingsPortalProps } from '../settings/main.js';
+import {
+  colorSchemeStyle,
+  type GlassSurfaceProps,
+  useGlassMode,
+  useGlassScheme,
+} from '../glass/main.js';
+import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
   positionerSide,
@@ -293,43 +298,49 @@ const outlines = Object.fromEntries(
 ) as Record<string, string>;
 
 /** Its panel: the material (see above) behind its content. */
-const Popup = forwardRef<HTMLDivElement, Omit<BasePopover.Popup.Props, 'ref'>>(
-  ({ className, children, initialFocus, style, ...props }, ref) => {
-    const popupRef = useForwardedRef(ref);
-    const focus = useInitialFocus(popupRef);
-    // Its anchors' scope (its header's): fixed to it (see Viewport.Padding).
-    const [scope] = useState(() => ({}));
+const Popup = forwardRef<
+  HTMLDivElement,
+  Omit<BasePopover.Popup.Props, 'ref'> & GlassSurfaceProps
+>(({ className, children, context, initialFocus, style, ...props }, ref) => {
+  const popupRef = useForwardedRef(ref);
+  const focus = useInitialFocus(popupRef);
+  // Its glass's tone, its content's color scheme (see Glass).
+  const scheme = useGlassScheme(popupRef, context);
+  // Its anchors' scope (its header's): fixed to it (see Viewport.Padding).
+  const [scope] = useState(() => ({}));
 
-    return (
-      <BasePopover.Popup
-        ref={popupRef}
-        initialFocus={initialFocus ?? focus}
-        style={withStyle(outlines, style)}
-        {...props}
-        data-popover-part="popup"
-        className={cn(
-          'uikit-popover-popup uikit-glass-medium uikit-popup-transition',
-          className,
-        )}
+  return (
+    <BasePopover.Popup
+      ref={popupRef}
+      data-color-scheme={scheme}
+      initialFocus={initialFocus ?? focus}
+      style={withStyle({ ...outlines, ...colorSchemeStyle(scheme) }, style)}
+      {...props}
+      data-popover-part="popup"
+      className={cn(
+        'uikit-popover-popup uikit-glass-medium uikit-popup-transition',
+        className,
+      )}
+    >
+      <span
+        aria-hidden="true"
+        className="uikit-popover-shape"
+        data-popover-part="shape"
       >
-        <span
-          aria-hidden="true"
-          className="uikit-popover-shape"
-          data-popover-part="shape"
-        >
-          <span data-layer="fill" />
-          <span data-layer="rim" />
-          <span data-layer="highlight" />
-        </span>
-        <ViewportScopeContext.Provider value={scope}>
-          <ViewportInsetContext.Provider value>
+        <span data-layer="fill" />
+        <span data-layer="rim" />
+        <span data-layer="highlight" />
+      </span>
+      <ViewportScopeContext.Provider value={scope}>
+        <ViewportInsetContext.Provider value>
+          <ColorSchemeScope colorScheme={scheme}>
             {children as ReactNode}
-          </ViewportInsetContext.Provider>
-        </ViewportScopeContext.Provider>
-      </BasePopover.Popup>
-    );
-  },
-);
+          </ColorSchemeScope>
+        </ViewportInsetContext.Provider>
+      </ViewportScopeContext.Provider>
+    </BasePopover.Popup>
+  );
+});
 
 /**
  * The arrow's (physical) side of its popup: facing its anchor, away from the

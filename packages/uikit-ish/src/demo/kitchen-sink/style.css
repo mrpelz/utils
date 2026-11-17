@@ -299,6 +299,12 @@
     margin-inline: 16px;
   }
 
+  /* The cards' tone switch (see cards.tsx): under the large title. */
+  .kitchen-sink-tone {
+    display: grid;
+    margin: 4px 16px 20px;
+  }
+
   /* Cards on their own (see cards.tsx): below the grid, in boxes of
      their own sizes. */
   .kitchen-sink-cards-alone {

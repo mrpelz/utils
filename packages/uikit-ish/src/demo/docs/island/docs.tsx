@@ -1,6 +1,7 @@
 import {
   code,
   elementRows,
+  glassSurfaceRow,
   type PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
@@ -45,6 +46,7 @@ export const islandRootRows: readonly PropRow[] = [
       at its current stop.
     </>,
   ],
+  glassSurfaceRow('the island'),
   [
     'children',
     'ReactNode',

@@ -3,7 +3,9 @@ import './style.css';
 
 import { forwardRef, useState } from 'react';
 
-import { cn } from '../utils/main.js';
+import { colorSchemeStyle, useGlassScheme } from '../glass/main.js';
+import { ColorSchemeScope } from '../settings/main.js';
+import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import { useSizeClass, ViewportScopeContext } from '../viewport/main.js';
 import type {
   SidebarRootProps,
@@ -46,7 +48,10 @@ export type {
  * scrolling inside it; in a `Layout` column (see there).
  */
 const Root = forwardRef<HTMLElement, SidebarRootProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, context, style, ...props }, forwardedRef) => {
+    const ref = useForwardedRef(forwardedRef);
+    // (Its glass's tone, its content's color scheme, see Glass.)
+    const scheme = useGlassScheme(ref, context);
     // (Regular: beside the pages' anchored bars and islands, its bottom
     // theirs, see style.css.)
     const isRegular = useSizeClass() === 'regular';
@@ -55,16 +60,20 @@ const Root = forwardRef<HTMLElement, SidebarRootProps>(
     const [scope] = useState(() => ({}));
     return (
       <ViewportScopeContext.Provider value={scope}>
-        <nav
-          ref={ref}
-          data-regular={isRegular ? '' : undefined}
-          data-sidebar-part="root"
-          {...props}
-          className={cn(
-            'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
-            className,
-          )}
-        />
+        <ColorSchemeScope colorScheme={scheme}>
+          <nav
+            ref={ref}
+            data-color-scheme={scheme}
+            data-regular={isRegular ? '' : undefined}
+            data-sidebar-part="root"
+            {...props}
+            style={withStyle(colorSchemeStyle(scheme), style)}
+            className={cn(
+              'uikit-sidebar-root uikit-glass-medium uikit-glass-panel',
+              className,
+            )}
+          />
+        </ColorSchemeScope>
       </ViewportScopeContext.Provider>
     );
   },

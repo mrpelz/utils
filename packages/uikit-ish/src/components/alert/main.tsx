@@ -6,8 +6,14 @@ import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog';
 import { Input as BaseInput } from '@base-ui/react/input';
 import { ComponentProps, forwardRef, useState } from 'react';
 
-import { useSettingsPortalProps } from '../settings/main.js';
-import { cn, usePortalContainer } from '../utils/main.js';
+import { colorSchemeStyle, useGlassScheme } from '../glass/main.js';
+import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
+import {
+  cn,
+  useForwardedRef,
+  usePortalContainer,
+  withStyle,
+} from '../utils/main.js';
 import { Viewport } from '../viewport/main.js';
 import type {
   AlertActionProps,
@@ -47,35 +53,47 @@ export type {
  * of the keyboard while a field in it is typed into.
  */
 const Popup = forwardRef<HTMLDivElement, AlertPopupProps>(
-  ({ className, container, ...props }, ref) => (
-    <BaseAlertDialog.Portal
-      className="uikit-alert-portal"
-      {...useSettingsPortalProps()}
-      container={usePortalContainer(container)}
-    >
-      <BaseAlertDialog.Backdrop
-        className="uikit-alert-backdrop"
-        data-alert-part="backdrop"
-      />
-      {/* Centered, lifted clear of the keyboard (as a whole) while a field
-          in it is typed into (see Viewport's `KeyboardAccessory`). */}
-      <BaseAlertDialog.Viewport
-        className="uikit-alert-viewport"
-        data-alert-part="viewport"
-        render={<Viewport.KeyboardAccessory />}
+  (
+    { children, className, container, context, style, ...props },
+    forwardedRef,
+  ) => {
+    const ref = useForwardedRef(forwardedRef);
+    // Its glass's tone, its content's color scheme (see Glass).
+    const scheme = useGlassScheme(ref, context);
+    return (
+      <BaseAlertDialog.Portal
+        className="uikit-alert-portal"
+        {...useSettingsPortalProps()}
+        container={usePortalContainer(container)}
       >
-        <BaseAlertDialog.Popup
-          ref={ref}
-          {...props}
-          data-alert-part="popup"
-          className={cn(
-            'uikit-alert-popup uikit-alert-panel uikit-glass-medium uikit-alert-centered',
-            className,
-          )}
+        <BaseAlertDialog.Backdrop
+          className="uikit-alert-backdrop"
+          data-alert-part="backdrop"
         />
-      </BaseAlertDialog.Viewport>
-    </BaseAlertDialog.Portal>
-  ),
+        {/* Centered, lifted clear of the keyboard (as a whole) while a field
+          in it is typed into (see Viewport's `KeyboardAccessory`). */}
+        <BaseAlertDialog.Viewport
+          className="uikit-alert-viewport"
+          data-alert-part="viewport"
+          render={<Viewport.KeyboardAccessory />}
+        >
+          <BaseAlertDialog.Popup
+            ref={ref}
+            data-color-scheme={scheme}
+            {...props}
+            data-alert-part="popup"
+            style={withStyle(colorSchemeStyle(scheme), style)}
+            className={cn(
+              'uikit-alert-popup uikit-alert-panel uikit-glass-medium uikit-alert-centered',
+              className,
+            )}
+          >
+            <ColorSchemeScope colorScheme={scheme}>{children}</ColorSchemeScope>
+          </BaseAlertDialog.Popup>
+        </BaseAlertDialog.Viewport>
+      </BaseAlertDialog.Portal>
+    );
+  },
 );
 
 /** Its title and description. */

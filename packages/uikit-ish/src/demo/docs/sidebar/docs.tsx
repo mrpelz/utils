@@ -1,4 +1,8 @@
-import { elementRows, PropRow } from '../../tooling/guide/props-table.js';
+import {
+  elementRows,
+  glassSurfaceRow,
+  PropRow,
+} from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
 
@@ -6,6 +10,7 @@ import { publicUrl } from '../../tooling/public-url.js';
 // ones).
 
 export const sidebarRootRows: readonly PropRow[] = [
+  glassSurfaceRow('the sidebar'),
   [
     'children',
     'ReactNode',

@@ -4,12 +4,14 @@ import { useRender } from '@base-ui/react/use-render';
 import {
   createContext,
   forwardRef,
+  FunctionComponent,
+  ReactNode,
   useContext,
   useMemo,
   useSyncExternalStore,
 } from 'react';
 
-import { cn, withStyle } from '../utils/main.js';
+import { cn, type ColorScheme, withStyle } from '../utils/main.js';
 import type {
   SettingsPortalProps,
   SettingsProviderProps,
@@ -253,6 +255,29 @@ const Provider = forwardRef<HTMLDivElement, SettingsProviderProps>(
     );
   },
 );
+
+/**
+ * Its children in a color scheme of their own (internal: a glass surface's
+ * tone, see Glass' `useGlassScheme`): an override of the nearest
+ * provider's, as a provider's own, for `useSettings` and the portals opened
+ * within; the element showing it sets its CSS (see `colorSchemeProps`).
+ * Without one, as it is.
+ */
+export const ColorSchemeScope: FunctionComponent<{
+  children?: ReactNode;
+  colorScheme: ColorScheme | undefined;
+}> = ({ children, colorScheme }) => {
+  const outer = useContext(SettingsContext);
+  const value = useMemo(
+    () => (colorScheme === undefined ? outer : { ...outer, colorScheme }),
+    [colorScheme, outer],
+  );
+  return (
+    <SettingsContext.Provider value={value}>
+      {children}
+    </SettingsContext.Provider>
+  );
+};
 
 export const Settings = {
   Provider,

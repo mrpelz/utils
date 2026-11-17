@@ -3,6 +3,7 @@ import {
   baseUiRows,
   code,
   elementRows,
+  glassSurfaceRow,
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
@@ -436,6 +437,7 @@ export const menuPopupRows: readonly PropRow[] = [
       closed.
     </>,
   ],
+  glassSurfaceRow('the menu'),
   [
     'children',
     'ReactNode',

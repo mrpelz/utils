@@ -15,7 +15,12 @@ import {
   useState,
 } from 'react';
 
-import { useGlassMode } from '../glass/main.js';
+import {
+  colorSchemeStyle,
+  useGlassMode,
+  useGlassScheme,
+} from '../glass/main.js';
+import { ColorSchemeScope } from '../settings/main.js';
 import {
   stopsOf,
   useContentScrolled,
@@ -483,6 +488,7 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
     {
       children,
       className,
+      context,
       defaultSnapPoint,
       onSnapPointChange,
       snapPoint,
@@ -493,6 +499,9 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
   ) => {
     const ref = useForwardedRef(forwardedRef);
     const scroller = useRef<HTMLDivElement>(null);
+    // Its capsule's glass's tone, its content's color scheme (see Glass).
+    const panel = useRef<HTMLDivElement>(null);
+    const scheme = useGlassScheme(panel, context);
     const isRegular = useSizeClass() === 'regular';
     const maxHeight = useMaxHeight(ref);
     // Its header's scope (see Viewport.Padding): its own.
@@ -643,15 +652,20 @@ const Root = forwardRef<HTMLDivElement, IslandRootProps>(
                   {/* Its capsule: its glass's colors (by class), its glass a
                     layer of its own (a sliver's fading in, see above). */}
                   <div
+                    ref={panel}
                     className="uikit-island-panel uikit-glass-medium uikit-glass-panel"
+                    data-color-scheme={scheme}
                     data-island-part="panel"
+                    style={colorSchemeStyle(scheme)}
                   >
                     <div
                       aria-hidden="true"
                       className="uikit-island-glass"
                       data-island-part="glass"
                     />
-                    {children}
+                    <ColorSchemeScope colorScheme={scheme}>
+                      {children}
+                    </ColorSchemeScope>
                   </div>
                 </div>
               </div>

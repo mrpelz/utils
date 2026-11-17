@@ -15,7 +15,8 @@ import {
   useState,
 } from 'react';
 
-import { useSettingsPortalProps } from '../settings/main.js';
+import { colorSchemeStyle, useGlassScheme } from '../glass/main.js';
+import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
   useCollision,
@@ -23,6 +24,7 @@ import {
   useGrowAvoidance,
   useInitialFocus,
   usePortalContainer,
+  withStyle,
 } from '../utils/main.js';
 import type {
   ActionSheetActionProps,
@@ -115,10 +117,23 @@ const bottomAnchor = (container: ActionSheetPopupProps['container']) => ({
  * behind it, in its portal.
  */
 const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
-  ({ className, container: containerProp, initialFocus, ...props }, ref) => {
+  (
+    {
+      children,
+      className,
+      container: containerProp,
+      context,
+      initialFocus,
+      style,
+      ...props
+    },
+    ref,
+  ) => {
     const container = usePortalContainer(containerProp) ?? undefined;
     const trigger = useContext(ActionSheetContext);
     const popupRef = useForwardedRef(ref);
+    // Its glass's tone, its content's color scheme (see Glass).
+    const scheme = useGlassScheme(popupRef, context);
     const focus = useInitialFocus(popupRef);
     const bottom = useMemo(() => bottomAnchor(container), [container]);
     // Within its container (e.g. the views' frames), clear of its safe area insets;
@@ -147,14 +162,18 @@ const Popup = forwardRef<HTMLDivElement, ActionSheetPopupProps>(
         >
           <BasePopover.Popup
             ref={popupRef}
+            data-color-scheme={scheme}
             initialFocus={initialFocus ?? focus}
             {...props}
             data-action-sheet-part="popup"
+            style={withStyle(colorSchemeStyle(scheme), style)}
             className={cn(
               'uikit-action-sheet-popup uikit-alert-panel uikit-glass-medium uikit-popup-transition',
               className,
             )}
-          />
+          >
+            <ColorSchemeScope colorScheme={scheme}>{children}</ColorSchemeScope>
+          </BasePopover.Popup>
         </BasePopover.Positioner>
       </BasePopover.Portal>
     );

@@ -1,6 +1,7 @@
 import type { Menu as BaseMenu } from '@base-ui/react/menu';
 import type { ComponentProps } from 'react';
 
+import type { GlassSurfaceProps } from '../glass/main.js';
 import type {
   MenuHandle,
   MenuRootProps,
@@ -50,4 +51,5 @@ export type ContextualMenuPositionerProps = Omit<
 
 export type ContextualMenuPortalProps = Omit<BaseMenu.Portal.Props, 'ref'>;
 
-export type ContextualMenuPopupProps = Omit<BaseMenu.Popup.Props, 'ref'>;
+export type ContextualMenuPopupProps = Omit<BaseMenu.Popup.Props, 'ref'> &
+  GlassSurfaceProps;

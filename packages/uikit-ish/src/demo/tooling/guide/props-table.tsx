@@ -1,5 +1,7 @@
 import { FunctionComponent, ReactNode } from 'react';
 
+import { PartLink } from './sections.js';
+
 /** A prop: its name, type (code), default (or `undefined`: none) and use. */
 export type PropRow = readonly [
   name: string,
@@ -274,3 +276,21 @@ export const KeyPropsTable: FunctionComponent<{
     </table>
   </div>
 );
+
+/** A glass surface's `context` row (see Glass' `GlassSurfaceProps`). */
+export const glassSurfaceRow = (what: string): PropRow => [
+  'context',
+  union('bright', 'dim', 'adaptive'),
+  'the color scheme’s',
+  <>
+    How bright the content behind {what} is: <code>bright</code> gives it light
+    glass, <code>dim</code> dark glass, and what’s in it (and menus or popovers
+    opened from it) follows in the matching color scheme. <code>adaptive</code>{' '}
+    follows what’s behind it (see{' '}
+    <PartLink
+      page="tokens"
+      part="useBackdropTone"
+    />
+    ), and holds a moment before it switches.
+  </>,
+];

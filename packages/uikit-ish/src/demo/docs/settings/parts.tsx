@@ -142,6 +142,26 @@ export const SettingsParts: FunctionComponent = () => (
         <code>color-scheme</code> and <code>data-color-scheme</code>.
       </li>
       <li>
+        A glass surface given a <code>context</code> (a{' '}
+        <PartLink
+          component="card"
+          part="Card.Root"
+        />
+        , a{' '}
+        <PartLink
+          component="sheet"
+          part="Sheet.Popup"
+        />
+        , a{' '}
+        <PartLink
+          component="menu"
+          part="Menu.Popup"
+        />
+        ) acts as a provider of the color scheme alone: light on bright glass,
+        dark on dim glass. What’s inside it, <code>useSettings</code> there, and
+        the menus and popovers opened from it follow.
+      </li>
+      <li>
         Renders a <code>div</code> without a box of its own (
         <code>display: contents</code>). With <code>render</code>, it renders
         that element instead, laid out as usual (for example an app’s root, or a

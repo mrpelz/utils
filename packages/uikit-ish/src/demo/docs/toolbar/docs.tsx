@@ -14,13 +14,7 @@ import { publicUrl } from '../../tooling/public-url.js';
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
 
-const glassContexts = union(
-  'bright',
-  'dim',
-  'background-bright',
-  'background-dim',
-  'adaptive',
-);
+const glassContexts = union('bright', 'dim', 'adaptive');
 
 const disabledRow = (what: string): PropRow => [
   'disabled',
@@ -54,13 +48,16 @@ export const toolbarRootRows: readonly PropRow[] = [
   [
     'context',
     glassContexts,
+    <>the color scheme’s</>,
     <>
-      <code>bright</code>, or <code>dim</code> in dark mode
-    </>,
-    <>
-      How bright the content behind the bar’s glass is: a plain page, or a
-      background of the app’s own (for example a picture). <code>adaptive</code>{' '}
-      follows what’s behind it, sampled as it scrolls or resizes.
+      How bright the content behind the bar’s glass is: <code>bright</code>{' '}
+      (light glass) or <code>dim</code> (dark glass). <code>adaptive</code>{' '}
+      follows what’s behind it (see{' '}
+      <PartLink
+        page="tokens"
+        part="useBackdropTone"
+      />
+      ).
     </>,
   ],
   [

@@ -34,13 +34,7 @@ export const propOptionsList = {
   size: [undefined, 'compact', 'regular'] as const,
   activateOnFocus: [undefined, false, true] as const,
   loopFocus: [undefined, false, true] as const,
-  context: [
-    undefined,
-    'bright',
-    'dim',
-    'background-bright',
-    'background-dim',
-  ] as const,
+  context: [undefined, 'bright', 'dim', 'adaptive'] as const,
 };
 
 /** The guide pages' content: how many of Phone's tabs (see phone.tsx). */
@@ -136,11 +130,5 @@ export const propOptionsAccessory = {
   className: commonPropOptions.className,
   style: commonPropOptions.style,
   visibleIn: [undefined, 'both', 'expanded', 'collapsed'] as const,
-  context: [
-    undefined,
-    'bright',
-    'dim',
-    'background-bright',
-    'background-dim',
-  ] as const,
+  context: [undefined, 'bright', 'dim', 'adaptive'] as const,
 };

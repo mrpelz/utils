@@ -1,0 +1,427 @@
+/* The demos' card kit (see card-kit.tsx). */
+
+/* Channel sliders: between a card's top row and its title, as bars, side
+   by side upright or stacked across, each rounded, its fill its tint, its
+   name on it (no knob: the bar is the control). */
+.demo-channels {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  align-self: stretch;
+  gap: 6px;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-block: 8px;
+
+  &[data-orientation='horizontal'] {
+    grid-auto-flow: row;
+    grid-auto-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .uikit-slider-root {
+    position: relative;
+    display: grid;
+    width: auto;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+    place-self: stretch stretch;
+  }
+
+  .uikit-slider-control {
+    position: absolute;
+    min-width: 0;
+    min-height: 0;
+    inset: 0;
+  }
+
+  /* (Each a well set into the card's glass (the card's, see Card), its
+     fill translucent as a card's own slider's, lit along its top.) */
+  .uikit-slider-track {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+  }
+
+  .uikit-slider-indicator {
+    border-radius: 0;
+    background-color: color-mix(
+      in srgb,
+      var(--uikit-slider-tint) 70%,
+      transparent
+    );
+    background-image: linear-gradient(
+      to bottom,
+      rgb(255 255 255 / 22%),
+      transparent 45%
+    );
+    box-shadow: inset 0 0.5px 0 rgb(255 255 255 / 45%);
+  }
+
+  .uikit-slider-thumb {
+    &::before,
+    &::after {
+      display: none;
+    }
+  }
+
+  .uikit-slider-label {
+    position: absolute;
+    z-index: 1;
+    color: inherit;
+    font-size: 11px;
+    font-variation-settings: 'wght' 590;
+    font-weight: 600;
+    inset-block-end: 4px;
+    inset-inline: 0;
+    pointer-events: none;
+    text-align: center;
+  }
+
+  &[data-orientation='horizontal'] .uikit-slider-label {
+    inset-block: 0;
+    inset-inline: 8px auto;
+    place-content: center;
+  }
+}
+
+/* A trend: an arrow after the value, turned by its angle (a transform, not
+   a layer change: it may turn in a scroller). */
+.demo-trend {
+  display: inline-block;
+  font-size: 0.8em;
+  line-height: 0;
+  margin-inline-start: 0.25em;
+  rotate: calc(-1deg * var(--demo-trend-angle, 0));
+  transition: rotate 600ms;
+  vertical-align: middle;
+
+  /* (Mirrored, pointing back: turned the other way to rise.) */
+  &:dir(rtl) {
+    rotate: calc(1deg * var(--demo-trend-angle, 0));
+    scale: -1 1;
+  }
+}
+
+/* A card's own controls (a segmented control, a stepper, a progress bar):
+   between its top row and its title, as the bars are, stacked, centered in
+   their room. */
+.demo-card-controls {
+  /* (A progress bar as long as its room, however short: not its least
+     length, see Progress.) */
+  --uikit-progress-min-length: 0px;
+
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  align-content: center;
+  align-self: stretch;
+  gap: 10px;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-block: 8px 14px;
+}
+
+/* A sparkline: between a card's top row and its title too, its line in the
+   card's text color (2px, round), its last value a dot. */
+.demo-sparkline {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 24px;
+  align-self: stretch;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-block: 8px;
+
+  > svg {
+    position: absolute;
+    overflow: visible;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+  }
+
+  /* (Time running from the reading start: mirrored right to left.) */
+  &:dir(rtl) > svg {
+    scale: -1 1;
+  }
+
+  polyline {
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2px;
+  }
+}
+
+.demo-sparkline-dot {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentcolor;
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentcolor 25%, transparent);
+  inset-inline-end: -3.5px;
+  translate: 0 -50%;
+}
+
+/* (In a wide card one row tall (its title and value beside its symbol,
+   see Card): beside them instead, at its trailing end, as wide as fits.) */
+@container uikit-card (aspect-ratio > 1.5) and (height < 160px) {
+  :is(.demo-card-controls, .demo-sparkline) {
+    width: clamp(48px, 28cqi, 120px);
+    align-self: center;
+    margin: 0;
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    margin-inline-start: 8px;
+  }
+
+  .demo-sparkline {
+    height: 32px;
+  }
+}
+
+/* Artwork (generated): soft color fields by its hue. Filling its card
+   behind its content, rounded as it is, a scrim at its bottom for the text
+   over it; or a small rounded square, a symbol's. */
+.demo-artwork,
+.demo-artwork-thumb {
+  --demo-artwork-a: oklch(70% 0.17 calc(var(--demo-artwork-hue) * 1deg));
+  --demo-artwork-b: oklch(55% 0.2 calc((var(--demo-artwork-hue) + 60) * 1deg));
+  --demo-artwork-c: oklch(82% 0.12 calc((var(--demo-artwork-hue) - 50) * 1deg));
+
+  background:
+    radial-gradient(circle at 25% 20%, var(--demo-artwork-c), transparent 55%),
+    radial-gradient(circle at 80% 75%, var(--demo-artwork-b), transparent 60%),
+    linear-gradient(135deg, var(--demo-artwork-a), var(--demo-artwork-b));
+}
+
+.demo-artwork {
+  position: absolute;
+  z-index: 0;
+  border-radius: inherit;
+  inset: 0;
+
+  &::after {
+    position: absolute;
+    border-radius: inherit;
+    background: linear-gradient(transparent 35%, rgb(0 0 0 / 55%));
+    content: '';
+    inset: 0;
+  }
+}
+
+.demo-artwork-thumb {
+  display: block;
+  width: 1.6em;
+  height: 1.6em;
+  border-radius: 0.35em;
+}
+
+/* A card on its artwork: its text white, over the scrim, and its parts
+   above the artwork. */
+.demo-card-art {
+  --uikit-glass-content: #fff;
+  --uikit-glass-content-secondary: rgb(255 255 255 / 78%);
+
+  color: #fff;
+
+  .uikit-card-layout > :not(.demo-artwork, .uikit-card-corner-button) {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Transport (a now-playing card's, large): under its value, its progress
+   and its buttons, centered. */
+.demo-transport {
+  display: grid;
+  gap: 12px;
+  grid-column: 1 / -1;
+  grid-row: 5;
+  margin-block-start: 14px;
+
+  --uikit-progress-min-length: 0px;
+}
+
+.demo-transport-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* A bar chart: between a card's top row and its title, its bars on a
+   baseline, the current hour's tinted, those to come faint; a few hours
+   under them. */
+.demo-barchart {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  align-self: stretch;
+  gap: 6px;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  grid-template-rows: minmax(0, 1fr) auto;
+  margin-block: 14px 10px;
+}
+
+.demo-barchart-bars {
+  display: flex;
+  min-height: 0;
+  align-items: flex-end;
+  gap: 2px;
+
+  > span {
+    flex: 1 1 0;
+    border-radius: 2px;
+    background-color: color-mix(in srgb, currentcolor 35%, transparent);
+  }
+
+  > [data-future] {
+    background-color: color-mix(in srgb, currentcolor 12%, transparent);
+  }
+
+  > [data-current] {
+    background-color: var(--demo-barchart-tint);
+  }
+}
+
+.demo-barchart-hours {
+  display: flex;
+  justify-content: space-between;
+  color: var(--uikit-glass-content-secondary, currentcolor);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 13px;
+}
+
+/* A dial: square, as large as its room (a card's controls' first row), its
+   track a faint arc, its value in its tint, its knob white; in its middle,
+   what it sets. */
+.demo-dial {
+  position: relative;
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: 1;
+  justify-self: center;
+}
+
+.demo-dial-arcs {
+  position: absolute;
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+}
+
+.demo-dial-track,
+.demo-dial-value {
+  fill: none;
+  stroke-linecap: round;
+  stroke-width: 9px;
+}
+
+.demo-dial-track {
+  stroke: color-mix(in srgb, currentcolor 12%, transparent);
+}
+
+.demo-dial-value {
+  stroke: var(--demo-dial-tint);
+}
+
+.demo-dial-knob {
+  fill: #fff;
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 30%));
+}
+
+.demo-dial-center {
+  position: absolute;
+  display: grid;
+  align-content: center;
+  inset: 0;
+  justify-items: center;
+  text-align: center;
+}
+
+/* A card's controls holding a dial: the dial in all the room, what else
+   (a segmented control) under it; in a card too short for both, the dial
+   alone. */
+.demo-card-controls:has(> .demo-dial) {
+  align-content: stretch;
+  grid-auto-rows: auto;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+@container uikit-card (height < 300px) {
+  .demo-card-controls > .demo-dial ~ * {
+    display: none;
+  }
+}
+
+/* An hourly forecast: a well in the card's glass (the card's, see Card),
+   its hours in columns, each its hour, its sky and its temperature. */
+.demo-hours {
+  display: grid;
+  min-width: 0;
+  align-self: center;
+  padding: 10px 6px;
+  border-radius: 12px;
+  background-color: var(--uikit-card-well);
+  box-shadow: var(--uikit-card-well-shadow);
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-block: 14px;
+
+  > span {
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+  }
+}
+
+.demo-hours-hour {
+  color: var(--uikit-glass-content-secondary, currentcolor);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.demo-hours-temperature {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'wght' 590;
+  font-weight: 600;
+}
+
+/* (In a dial's middle: what it is, small, over its value, large.) */
+.demo-dial-label {
+  color: var(--uikit-glass-content-secondary, currentcolor);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.demo-dial-number {
+  font-size: clamp(22px, 12cqmin, 44px);
+  font-variant-numeric: tabular-nums;
+  font-variation-settings: 'wght' 590;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+/* (Under a dial, a stepper centered as its segmented control is.) */
+.demo-card-controls:has(> .demo-dial) > :has(> .uikit-stepper-group) {
+  justify-self: center;
+}

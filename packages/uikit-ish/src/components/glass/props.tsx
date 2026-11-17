@@ -1,17 +1,26 @@
 /**
- * Brightness of the content behind a glass surface: a plain page (`bright`,
- * `dim`), or a background of the app's, e.g. a picture
- * (`background-bright`, `background-dim`: floating over it).
+ * The tone of glass: for content behind it that's bright (light glass) or
+ * dim (dark glass).
  */
-export type GlassContext =
-  'background-bright' | 'background-dim' | 'bright' | 'dim';
+export type GlassContext = 'bright' | 'dim';
 
 /**
- * A glass context, or `adaptive`: `background-bright` or `background-dim`,
- * by the brightness of what's behind the glass (sampled as it scrolls or
- * resizes; small glass, see `useGlassContext`).
+ * A glass context, or `adaptive`: by the tone of what's behind the glass
+ * (sampled as it scrolls or resizes, see `useBackdropTone`).
  */
 export type GlassContextValue = GlassContext | 'adaptive';
+
+/** A glass surface's props (a sidebar's, a sheet's, a card's, a menu's). */
+export type GlassSurfaceProps = {
+  /**
+   * How bright the content behind it is: bright, light glass; dim, dark
+   * glass (`adaptive`: by what's behind it, held a moment before it flips,
+   * see `useBackdropTone`). Its content follows, in the color scheme of its
+   * glass (light, dark), as do menus and popovers opened from it.
+   * @default the color scheme's
+   */
+  context?: GlassContextValue;
+};
 
 export type GlassBackgroundProps = {
   /**

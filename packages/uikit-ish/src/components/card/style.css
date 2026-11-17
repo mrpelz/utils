@@ -12,6 +12,17 @@
     height: 100%;
     min-height: 0;
     border-radius: var(--uikit-grid-item-radius, 24px);
+
+    /* (Its wells: what's set into its glass (a list's group, see below; an
+       app's own, e.g. a bar), recessed: a translucent tint of its text's
+       color, shaded at its top, a hairline rim, lit at its bottom edge; by
+       its text's color, right on its glass in both schemes and bright.) */
+    --uikit-card-well: color-mix(in srgb, currentcolor 7%, transparent);
+    --uikit-card-well-shadow:
+      inset 0 1px 3px rgb(0 0 0 / 14%),
+      inset 0 0 0 0.5px color-mix(in srgb, currentcolor 12%, transparent),
+      inset 0 -0.5px 0 rgb(255 255 255 / 35%);
+
     color: var(--uikit-glass-content);
 
     /* (Its veil (see below) stacked within it: under the grid's corner
@@ -33,9 +44,6 @@
       pointer-events: none;
       transition: background-color 200ms;
     }
-
-    /* (Darker in dark mode: a bright card (a switch on) mid gray under
-       it, its tile's light symbols legible on it.) */
 
     /* (Pressable (an `onClick`, see main.tsx): hovered, a tint of its
        text's color; pressed, more; by its color, no layer changing.) */
@@ -67,6 +75,28 @@
 
     .uikit-grid-root[data-grid-drag] &[data-editing]::after {
       background-color: transparent;
+    }
+  }
+
+  /* Flashed (a momentary card pressed, or its `flash`, see main.tsx): lit
+     as if active at once (see below), then fading back: a layer of its own
+     in the lit glass's color going clear over its glass, its text going
+     back from the lit one (colors only: its glass may be drawn as an
+     image, which doesn't fade). */
+  .uikit-card-root[data-fading] {
+    animation: 500ms uikit-card-fade-text;
+
+    &::before {
+      position: absolute;
+      border-radius: inherit;
+      animation: 500ms uikit-card-fade-glass forwards;
+      content: '';
+      inset: 0;
+      pointer-events: none;
+    }
+
+    :is(.uikit-card-symbol, .uikit-card-title, .uikit-card-value) {
+      animation: 500ms uikit-card-fade-text;
     }
   }
 
@@ -147,6 +177,16 @@
   .uikit-card-corner-button {
     z-index: 3;
     color: inherit;
+
+    /* (By what's right behind it, sampled (see main.tsx): e.g. over a
+       slider's fill, legible on it.) */
+    &[data-backdrop-tone='bright'] {
+      color: var(--glass-ui-medium-light-content);
+    }
+
+    &[data-backdrop-tone='dim'] {
+      color: var(--glass-ui-medium-dark-content);
+    }
   }
 
   /* Its symbol: at its top leading corner, a little larger than its text. */
@@ -341,32 +381,105 @@
   }
 
   /* A switch in it (see main.tsx): smaller, its top trailing corner; its
-     state the card's: on, bright, its text dark (in both color schemes),
-     its symbol in the switch's tint. */
+     state the card's (on, lit; off, dark glass, see main.tsx), its symbol
+     in the switch's tint while on. */
   .uikit-card-layout > .uikit-switch-root {
     --uikit-switch-min-width: 44px;
     --uikit-switch-min-height: 24px;
     --uikit-switch-knob-width: 28px;
 
-    align-self: start;
     grid-area: control;
+    place-self: start end;
+
+    /* (At its size, at the end: its column may be wider, e.g. with a
+       corner button top leading, see the end.) */
   }
 
-  /* (Active (see main.tsx), as with a switch on, without one.) */
+  /* (On (`data-active`: its `active`, or a switch in it on, see main.tsx;
+     the switch's state, too, for these rules' order); a momentary card for
+     a moment as it's flashed.) */
   .uikit-card-root:is(
       [data-active],
+      [data-flashing],
       :has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root[data-checked])
     ) {
     --uikit-glass-content: #000;
     --uikit-glass-content-secondary: rgb(0 0 0 / 55%);
-    --uikit-glass-background: var(
-      --uikit-card-on-background,
-      rgb(255 255 255 / 92%)
-    );
+
+    /* (Opaque, lifted: apart from light glass, in the light scheme, the
+       backdrop not showing through it.) */
+    --uikit-glass-background: var(--uikit-card-on-background, #fff);
+    --uikit-glass-shadow:
+      inset 0 0 0 0.5px rgb(0 0 0 / 8%), 0 2px 6px rgb(0 0 0 / 12%),
+      0 8px 28px rgb(0 0 0 / 20%);
 
     .uikit-card-symbol {
       color: var(--uikit-switch-on-color, var(--color-ui-system-green));
     }
+  }
+
+  /* (Bright, in the light scheme, whatever the page's: its controls (a
+     segmented control, a stepper) drawn for its bright glass, as within a
+     forced light scheme, see the global styles; its `active` forcing it
+     outright, see main.tsx. Not while editing: its veil, and its grid's
+     controls on it, the page's.) */
+  .uikit-card-root:is(
+      [data-active],
+      [data-flashing],
+      :has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root[data-checked])
+    ):not([data-editing]) {
+    --glass-ui-lens-shadow: var(--glass-ui-bright-lens-shadow);
+
+    color-scheme: light;
+  }
+
+  /* A list in it (List's inset grouped style, its default; as on an
+     island's glass, its groups on the glass's fill, see Glass): across it,
+     between its top row (a symbol, a switch) and its title, its groups
+     rounded within the card's corners (its radius less its padding), its
+     rows compact, in its glass's content colors; filling its row, whatever
+     the card aligns (e.g. to its end, with a corner button top leading).
+     Not a scroller: a card
+     shows a summary, what doesn't fit is clipped (more shows as it expands
+     or opens). */
+  .uikit-card-layout > .uikit-list-root {
+    --color-ui-label: var(--uikit-glass-content);
+    --color-ui-secondary-label: var(--uikit-glass-content-secondary);
+    --uikit-list-inset: 0px;
+    --uikit-list-radius: calc(var(--uikit-grid-item-radius, 24px) - 12px);
+    --uikit-list-section-spacing: 0px;
+    --uikit-list-row-min-height: 36px;
+    --uikit-list-row-padding-block: 0px;
+    --uikit-list-group-background: var(--uikit-card-well);
+
+    overflow: clip;
+    min-width: 0;
+    min-height: 0;
+    align-self: stretch;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-block: 14px 4px;
+  }
+
+  /* (Its groups set into its glass, see its wells above.) */
+  .uikit-card-layout > .uikit-list-root .uikit-list-group {
+    box-shadow: var(--uikit-card-well-shadow);
+  }
+
+  /* (Its rows' symbols in its text's color, as its own symbol is.) */
+  .uikit-card-layout
+    > .uikit-list-root
+    [data-list-part='image'][data-variant='symbol'] {
+    color: inherit;
+  }
+
+  /* (Its rows one line each: their titles and details cut short.) */
+  .uikit-card-layout
+    > .uikit-list-root
+    :is([data-list-part='title'], [data-list-part='detail']) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   /* (A slider's, focused by keyboard: its ring, the knob's (see Slider),
@@ -410,4 +523,54 @@
     padding-inline-end: var(--uikit-card-corner-room, 18px);
   }
 
+  /* With a list in it (see above): its symbol and title at its top, on a
+     line, centered (its value, if any, under the title; a switch beside),
+     the list in all the room
+     below, a little apart from them; whatever corner button it shows,
+     well clear of it: one top leading (an x), its symbol and title in from
+     it (`--uikit-card-header-room`); one at the bottom, the list ending
+     above it. */
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root),
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) {
+    align-items: center;
+    grid-template:
+      'symbol title control' auto
+      '. value .' auto
+      'list list list' 1fr / auto 1fr auto;
+
+    > .uikit-list-root {
+      align-self: stretch;
+      grid-area: list;
+    }
+
+    > .uikit-card-symbol {
+      align-self: center;
+    }
+  }
+
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > :is(.uikit-card-symbol, .uikit-card-title:first-child) {
+    margin-inline-start: var(--uikit-card-header-room, 28px);
+  }
+
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner^='bottom']:not([data-grid-hidden])) > .uikit-list-root {
+    margin-block-end: calc(var(--uikit-card-corner-room, 18px) + 4px);
+  }
+
+}
+
+/* A flashed card's fade (see above): from the lit glass, and its text. */
+@keyframes uikit-card-fade-glass {
+  from {
+    background-color: var(--uikit-card-on-background, #fff);
+  }
+
+  to {
+    background-color: transparent;
+  }
+}
+
+@keyframes uikit-card-fade-text {
+  from {
+    color: #000;
+  }
 }

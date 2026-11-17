@@ -8,14 +8,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 
 export const propOptionsBar = {
   ...commonPropOptions,
-  context: [
-    undefined,
-    'bright',
-    'dim',
-    'background-bright',
-    'background-dim',
-    'adaptive',
-  ] as const,
+  context: [undefined, 'bright', 'dim', 'adaptive'] as const,
   disabled: [undefined, false, true] as const,
   loopFocus: [undefined, false, true] as const,
   orientation: [undefined, 'horizontal', 'vertical'] as const,

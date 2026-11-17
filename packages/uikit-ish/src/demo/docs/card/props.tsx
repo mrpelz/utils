@@ -3,6 +3,7 @@
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 import { getPropOptionsCornerButton as gridCornerButton } from '../grid/props.js';
@@ -17,8 +18,10 @@ const elementOptions = {
 };
 
 export const propOptionsRoot = {
+  ...glassSurfacePropOptions,
   ...commonPropOptions,
-  active: [undefined, true] as const,
+  active: [undefined, true, false] as const,
+  momentary: [undefined, true] as const,
 };
 
 /** A corner button: the grid's options, named as the temperature's is. */

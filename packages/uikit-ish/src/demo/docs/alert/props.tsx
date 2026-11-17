@@ -4,6 +4,7 @@ import { Button } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 
@@ -63,6 +64,7 @@ export const propOptionsTrigger = {
 };
 
 export const propOptionsPopup = {
+  ...glassSurfacePropOptions,
   ...commonPropOptions,
   initialFocus: [undefined, false, true] as const,
   finalFocus: [undefined, false, true] as const,

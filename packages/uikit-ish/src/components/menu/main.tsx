@@ -20,7 +20,12 @@ import {
   useState,
 } from 'react';
 
-import { useSettingsPortalProps } from '../settings/main.js';
+import {
+  colorSchemeStyle,
+  type GlassSurfaceProps,
+  useGlassScheme,
+} from '../glass/main.js';
+import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
 import {
   Checkmark,
   cn,
@@ -34,6 +39,7 @@ import {
   useGrowAvoidance,
   usePortalContainer,
   useSecondaryClick,
+  withStyle,
 } from '../utils/main.js';
 import type {
   Finger,
@@ -1265,56 +1271,64 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
 const highlightSelectors = ['[data-highlighted]', '[data-popup-open]'];
 
 /** The menu's glass popup (the medium glass). */
-const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
-  ({ className, children, ...props }, ref) => {
-    const { size, submenu } = useContext(MenuContext);
-    // A submenu's: its element, for presses outside it (see `OpenSubmenus`).
-    const toggle = useContext(SubmenuToggleContext);
-    const popupRef = useCallback(
-      (element: HTMLDivElement | null) => {
-        if (submenu) toggle?.setPopup(element);
-        assignRef(ref, element);
-      },
-      [ref, submenu, toggle],
-    );
-    // Closed by keys, focus returns to its trigger; otherwise (a pointer:
-    // an item, outside) it doesn't (Chrome would ring it: the popup took
-    // focus by script, e.g. opened through a list row). Submenus: as Base
-    // UI does.
-    const finalFocus = submenu
-      ? undefined
-      : (closeType: string) => closeType === 'keyboard';
-    // Compact submenus cover their parent's items: as wide as its popup.
-    const isOverlay = submenu === 'vertical' && size === 'compact';
+const Popup = forwardRef<
+  HTMLDivElement,
+  Omit<BaseMenu.Popup.Props, 'ref'> & GlassSurfaceProps
+>(({ className, children, context, style, ...props }, ref) => {
+  const { size, submenu } = useContext(MenuContext);
+  // A submenu's: its element, for presses outside it (see `OpenSubmenus`).
+  const toggle = useContext(SubmenuToggleContext);
+  // Its glass's tone, its content's color scheme (see Glass; its
+  // submenus' too, opened within it).
+  const element = useRef<HTMLDivElement | null>(null);
+  const scheme = useGlassScheme(element, context);
+  const popupRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      element.current = node;
+      if (submenu) toggle?.setPopup(node);
+      assignRef(ref, node);
+    },
+    [ref, submenu, toggle],
+  );
+  // Closed by keys, focus returns to its trigger; otherwise (a pointer:
+  // an item, outside) it doesn't (Chrome would ring it: the popup took
+  // focus by script, e.g. opened through a list row). Submenus: as Base
+  // UI does.
+  const finalFocus = submenu
+    ? undefined
+    : (closeType: string) => closeType === 'keyboard';
+  // Compact submenus cover their parent's items: as wide as its popup.
+  const isOverlay = submenu === 'vertical' && size === 'compact';
 
-    return (
-      <BaseMenu.Popup
-        ref={popupRef}
-        data-overlay={isOverlay ? '' : undefined}
-        data-size={size}
-        {...props}
-        data-menu-part="popup"
-        finalFocus={props.finalFocus ?? finalFocus}
-        className={cn(
-          'uikit-menu-popup uikit-glass-medium uikit-popup-transition',
-          className,
-        )}
-      >
-        {children}
-        {/* The selection, moving between items: the highlighted one, or
+  return (
+    <BaseMenu.Popup
+      ref={popupRef}
+      data-color-scheme={scheme}
+      data-overlay={isOverlay ? '' : undefined}
+      data-size={size}
+      {...props}
+      data-menu-part="popup"
+      finalFocus={props.finalFocus ?? finalFocus}
+      style={withStyle(colorSchemeStyle(scheme), style)}
+      className={cn(
+        'uikit-menu-popup uikit-glass-medium uikit-popup-transition',
+        className,
+      )}
+    >
+      <ColorSchemeScope colorScheme={scheme}>{children}</ColorSchemeScope>
+      {/* The selection, moving between items: the highlighted one, or
             (regular) the trigger of the open submenu (compact submenus
             cover it). */}
-        <MovingHighlight
-          selectors={
-            size === 'compact'
-              ? highlightSelectors.slice(0, 1)
-              : highlightSelectors
-          }
-        />
-      </BaseMenu.Popup>
-    );
-  },
-);
+      <MovingHighlight
+        selectors={
+          size === 'compact'
+            ? highlightSelectors.slice(0, 1)
+            : highlightSelectors
+        }
+      />
+    </BaseMenu.Popup>
+  );
+});
 
 // An item: [checkmark] [symbol] label/subtitle [shortcut | chevron]
 // (see style.css).

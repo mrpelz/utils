@@ -272,11 +272,11 @@
     }
   }
 
-  /* Blended and scaled as a whole; with symbols, its parts are (a symbol:
-     its glyph, see Symbol), so the symbols' badges are neither. */
+  /* Blended and scaled as a whole, its symbols (and their badges) with it:
+     the button lifts, its content together, not each part on its own. */
   .uikit-button-content {
-    --uikit-symbol-blend: var(--uikit-button-blend);
-    --uikit-symbol-scale: var(--uikit-button-content-scale, none);
+    --uikit-symbol-blend: normal;
+    --uikit-symbol-scale: none;
 
     position: relative;
     display: inline-flex;
@@ -284,21 +284,10 @@
     align-items: center;
     justify-content: center;
     gap: inherit;
-    mix-blend-mode: var(--uikit-symbol-blend);
-    scale: var(--uikit-symbol-scale);
+    mix-blend-mode: var(--uikit-button-blend);
+    scale: var(--uikit-button-content-scale, none);
     transition-duration: var(--glass-ui-lens-duration);
     transition-property: scale;
-
-    &:has(.uikit-symbol) {
-      mix-blend-mode: normal;
-      scale: none;
-
-      & > :not(:has(.uikit-symbol)) {
-        mix-blend-mode: var(--uikit-symbol-blend);
-        scale: var(--uikit-symbol-scale);
-        transition: scale var(--glass-ui-lens-duration);
-      }
-    }
   }
 
   .uikit-button-icon {

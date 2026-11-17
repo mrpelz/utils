@@ -45,6 +45,15 @@
     -webkit-font-smoothing: antialiased;
 
     /*
+     * No text autosizing (iOS's: text in a block it deems wide made larger,
+     * and kept so; e.g. a card's list rows after the card opened wider):
+     * text sizes are the app's (its text size setting still applies).
+     */
+    /* stylelint-disable-next-line property-no-vendor-prefix -- Safari knows only the prefixed one */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+
+    /*
      * Text styles at the default text size (Large): size, line height and
      * tracking (see components/typography/main.tsx for all sizes), weight
      * and emphasized weight
@@ -264,10 +273,10 @@
      * own, e.g. while transitioning).
      */
     --glass-ui-dim-blur: rgb(255 255 255 / 5%);
-    --glass-ui-dim-fill: rgb(255 255 255 / 4%);
-    --glass-ui-dim-fill-filter: brightness(0.606);
-    --glass-ui-dim-fill-brightness: 0.606;
-    --glass-ui-dim-content: #bfbfbf;
+    --glass-ui-dim-fill: rgb(36 36 38 / 72%);
+    --glass-ui-dim-fill-filter: brightness(1);
+    --glass-ui-dim-fill-brightness: 1;
+    --glass-ui-dim-content: #ebebeb;
     --glass-ui-dim-content-blend: plus-lighter;
     --glass-ui-dim-content-disabled: #262626;
     --glass-ui-dim-content-prominent: #fff;
@@ -299,14 +308,13 @@
      */
     --glass-ui-panel-rim: light-dark(rgb(255 255 255), rgb(255 255 255 / 15%));
     --glass-ui-dim-shadow:
-      inset -2px -2px 0.5px -2.5px rgb(255 255 255 / 40%),
-      inset 3px 3px 0.5px -3.5px rgb(255 255 255 / 40%),
-      inset 2px 2px 0.5px -2px #262626, inset -2px -2px 0.5px -2px #262626,
-      inset 0 0 5px 1px #141414, inset 0 0 0 1px rgb(255 255 255 / 15%),
-      inset 0 0 10px 0 rgb(255 255 255 / 7.5%),
-      inset 0 0 24px 0 rgb(255 255 255 / 5%), 0 0 25px 0 rgb(0 0 0 / 15%);
+      inset 1px 1px 0 -0.5px rgb(255 255 255 / 35%),
+      inset -1px -1px 0 -0.5px rgb(255 255 255 / 20%),
+      inset 0 0 0 0.5px rgb(255 255 255 / 12%),
+      inset 0 0 12px 0 rgb(255 255 255 / 5%), 0 1px 3px rgb(0 0 0 / 20%),
+      0 4px 18px rgb(0 0 0 / 20%);
     --glass-ui-bright-blur: rgb(0 0 0 / 4%);
-    --glass-ui-bright-fill: rgb(247 247 247 / 50%);
+    --glass-ui-bright-fill: rgb(247 247 247 / 78%);
     --glass-ui-bright-fill-filter: brightness(1.25) brightness(0.969);
     --glass-ui-bright-fill-brightness: calc(1.25 * 0.969);
     --glass-ui-bright-content: #404040;
@@ -324,76 +332,10 @@
       inset -3px -3px 10px -2px #eee, inset 0 0 5px 1px #fff;
     --glass-ui-bright-shadow:
       inset -1px -1px 0 -0.5px rgb(255 255 255),
-      inset 1px 1px 0 -0.5px rgb(255 255 255), inset 3px 3px 10px -3px #ddd,
-      inset -3px -3px 10px -3px #ddd, inset 0 0 5px 1px #fff,
-      inset 0 0 0 0.5px rgb(0 0 0 / 25%), inset 0 0 24px 0 rgb(0 0 0 / 10%),
-      0 0 25px 0 rgb(0 0 0 / 20%);
-
-    /*
-     * Glass over a background of the app's (a picture, colors; not a plain
-     * page), bright or dim (user): bright's and dim's content, lenses and
-     * selections, but floating over it: a translucent fill, a thin light rim (brighter at its top
-     * start), and a soft shadow outside, without bright's white halo or
-     * dim's dark inner bands.
-     */
-    --glass-ui-background-bright-blur: rgb(0 0 0 / 4%);
-    --glass-ui-background-bright-fill: rgb(255 255 255 / 30%);
-    --glass-ui-background-bright-fill-filter: brightness(1.1);
-    --glass-ui-background-bright-fill-brightness: 1.1;
-    --glass-ui-background-bright-content: var(--glass-ui-bright-content);
-    --glass-ui-background-bright-content-blend: var(
-      --glass-ui-bright-content-blend
-    );
-    --glass-ui-background-bright-content-disabled: var(
-      --glass-ui-bright-content-disabled
-    );
-    --glass-ui-background-bright-content-prominent: var(
-      --glass-ui-bright-content-prominent
-    );
-    --glass-ui-background-bright-content-prominent-blend: var(
-      --glass-ui-bright-content-prominent-blend
-    );
-    --glass-ui-background-bright-content-prominent-disabled: var(
-      --glass-ui-bright-content-prominent-disabled
-    );
-    --glass-ui-background-bright-selection: var(--glass-ui-bright-selection);
-    --glass-ui-background-bright-lens: var(--glass-ui-bright-lens);
-    --glass-ui-background-bright-lens-shadow: var(
-      --glass-ui-bright-lens-shadow
-    );
-    --glass-ui-background-bright-shadow:
-      inset 0 0 0 0.5px rgb(255 255 255 / 50%),
-      inset 1px 1px 0 -0.5px rgb(255 255 255 / 80%),
-      inset -1px -1px 0 -0.5px rgb(255 255 255 / 40%),
-      0 2px 12px rgb(0 0 0 / 12%);
-    --glass-ui-background-dim-blur: rgb(0 0 0 / 10%);
-    --glass-ui-background-dim-fill: rgb(0 0 0 / 20%);
-    --glass-ui-background-dim-fill-filter: brightness(0.8);
-    --glass-ui-background-dim-fill-brightness: 0.8;
-    --glass-ui-background-dim-content: var(--glass-ui-dim-content);
-    --glass-ui-background-dim-content-blend: var(
-      --glass-ui-dim-content-blend
-    );
-    --glass-ui-background-dim-content-disabled: var(
-      --glass-ui-dim-content-disabled
-    );
-    --glass-ui-background-dim-content-prominent: var(
-      --glass-ui-dim-content-prominent
-    );
-    --glass-ui-background-dim-content-prominent-blend: var(
-      --glass-ui-dim-content-prominent-blend
-    );
-    --glass-ui-background-dim-content-prominent-disabled: var(
-      --glass-ui-dim-content-prominent-disabled
-    );
-    --glass-ui-background-dim-selection: var(--glass-ui-dim-selection);
-    --glass-ui-background-dim-lens: var(--glass-ui-dim-lens);
-    --glass-ui-background-dim-lens-shadow: var(--glass-ui-dim-lens-shadow);
-    --glass-ui-background-dim-shadow:
-      inset 0 0 0 0.5px rgb(255 255 255 / 25%),
-      inset 1px 1px 0 -0.5px rgb(255 255 255 / 50%),
-      inset -1px -1px 0 -0.5px rgb(255 255 255 / 20%),
-      0 2px 12px rgb(0 0 0 / 25%);
+      inset 1px 1px 0 -0.5px rgb(255 255 255),
+      inset 0 0 0 0.5px rgb(0 0 0 / 12%),
+      inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px rgb(0 0 0 / 10%),
+      0 4px 18px rgb(0 0 0 / 14%);
 
     /*
      * The “Medium” glass material (menus, edit menus), by color scheme, for
@@ -416,7 +358,7 @@
      * would need the backdrop, which popups (positioned by a transform,
      * animated) isolate them from.
      */
-    --glass-ui-medium-light-background: rgb(255 255 255 / 75%);
+    --glass-ui-medium-light-background: rgb(255 255 255 / 86%);
     --glass-ui-medium-light-content: #333;
     --glass-ui-medium-light-content-blend: multiply;
     --glass-ui-medium-light-content-secondary: #999;
@@ -424,7 +366,7 @@
     --glass-ui-medium-light-separator: #e6e6e6;
     --glass-ui-medium-light-divider: #ccc;
     --glass-ui-medium-light-selection: rgb(0 0 0 / 7%);
-    --glass-ui-medium-dark-background: rgb(50 50 50 / 50%);
+    --glass-ui-medium-dark-background: rgb(36 36 38 / 72%);
     --glass-ui-medium-dark-content: #fff;
     --glass-ui-medium-dark-content-blend: plus-lighter;
     --glass-ui-medium-dark-content-secondary: #999;
@@ -543,14 +485,6 @@
       --glass-ui-dim-fill: rgb(28 28 30);
       --glass-ui-dim-fill-filter: none;
       --glass-ui-dim-fill-brightness: 1;
-      --glass-ui-background-bright-blur: transparent;
-      --glass-ui-background-bright-fill: rgb(247 247 247);
-      --glass-ui-background-bright-fill-filter: none;
-      --glass-ui-background-bright-fill-brightness: 1;
-      --glass-ui-background-dim-blur: transparent;
-      --glass-ui-background-dim-fill: rgb(28 28 30);
-      --glass-ui-background-dim-fill-filter: none;
-      --glass-ui-background-dim-fill-brightness: 1;
       --glass-ui-medium-light-background: rgb(246 246 246);
       --glass-ui-medium-dark-background: rgb(30 30 30);
     }
@@ -566,14 +500,6 @@
       --glass-ui-dim-fill: rgb(28 28 30);
       --glass-ui-dim-fill-filter: none;
       --glass-ui-dim-fill-brightness: 1;
-      --glass-ui-background-bright-blur: transparent;
-      --glass-ui-background-bright-fill: rgb(247 247 247);
-      --glass-ui-background-bright-fill-filter: none;
-      --glass-ui-background-bright-fill-brightness: 1;
-      --glass-ui-background-dim-blur: transparent;
-      --glass-ui-background-dim-fill: rgb(28 28 30);
-      --glass-ui-background-dim-fill-filter: none;
-      --glass-ui-background-dim-fill-brightness: 1;
       --glass-ui-medium-light-background: rgb(246 246 246);
       --glass-ui-medium-dark-background: rgb(30 30 30);
     }
@@ -589,14 +515,6 @@
       --glass-ui-dim-fill: rgb(28 28 30);
       --glass-ui-dim-fill-filter: none;
       --glass-ui-dim-fill-brightness: 1;
-      --glass-ui-background-bright-blur: transparent;
-      --glass-ui-background-bright-fill: rgb(247 247 247);
-      --glass-ui-background-bright-fill-filter: none;
-      --glass-ui-background-bright-fill-brightness: 1;
-      --glass-ui-background-dim-blur: transparent;
-      --glass-ui-background-dim-fill: rgb(28 28 30);
-      --glass-ui-background-dim-fill-filter: none;
-      --glass-ui-background-dim-fill-brightness: 1;
       --glass-ui-medium-light-background: rgb(246 246 246);
       --glass-ui-medium-dark-background: rgb(30 30 30);
     }

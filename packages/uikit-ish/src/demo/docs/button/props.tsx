@@ -57,25 +57,12 @@ export const propOptionsRoot = {
     '#000',
   ] as const,
   fill: [undefined, false, true] as const,
-  context: [
-    undefined,
-    'bright',
-    'dim',
-    'background-bright',
-    'background-dim',
-    'adaptive',
-  ] as const,
+  context: [undefined, 'bright', 'dim', 'adaptive'] as const,
 };
 
 export const propOptionsMatrix = {
   destructive: [false, true] as const,
-  context: [
-    undefined,
-    'bright',
-    'dim',
-    'background-bright',
-    'background-dim',
-  ] as const,
+  context: [undefined, 'bright', 'dim'] as const,
 };
 
 export const getPropOptionsRoot = (addLog: AddLog) => ({

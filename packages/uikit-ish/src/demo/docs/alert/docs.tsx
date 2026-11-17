@@ -2,6 +2,7 @@ import {
   baseUiRows,
   code,
   elementRows,
+  glassSurfaceRow,
   nativeButtonRow,
   PropRow,
   union,
@@ -194,6 +195,7 @@ export const alertPopupRows: readonly PropRow[] = [
       <code>false</code>: do not move focus.
     </>,
   ],
+  glassSurfaceRow('the alert'),
   [
     'children',
     'ReactNode',

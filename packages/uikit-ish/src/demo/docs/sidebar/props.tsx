@@ -3,6 +3,7 @@
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 
@@ -15,6 +16,7 @@ export const propOptionsContent = {
 };
 
 export const propOptionsRoot = {
+  ...glassSurfacePropOptions,
   ...commonPropOptions,
 };
 
@@ -59,6 +61,7 @@ export const propOptionsPart = {
 };
 
 export const propOptionsGuideRoot = {
+  ...glassSurfacePropOptions,
   ...propOptionsPart,
   'aria-label': ['Mailboxes', 'Folders'] as const,
 };

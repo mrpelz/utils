@@ -21,14 +21,7 @@ export const propOptionsRoot = {
   ...commonPropOptions,
   placement: [undefined, 'block-end', 'block-start'] as const,
   orientation: [undefined, 'horizontal', 'vertical'] as const,
-  context: [
-    undefined,
-    'bright',
-    'dim',
-    'background-bright',
-    'background-dim',
-    'adaptive',
-  ] as const,
+  context: [undefined, 'bright', 'dim', 'adaptive'] as const,
   disabled: [undefined, false, true] as const,
   loopFocus: [undefined, false, true] as const,
 };
@@ -99,14 +92,7 @@ export const getPropOptionsPageControl = (addLog: AddLog) => ({
   defaultValue: [undefined, 0, 2] as const,
   value: [undefined, 0, 1, 4] as const,
   disabled: [undefined, false, true] as const,
-  context: [
-    undefined,
-    'bright',
-    'dim',
-    'background-bright',
-    'background-dim',
-    'adaptive',
-  ] as const,
+  context: [undefined, 'bright', 'dim', 'adaptive'] as const,
   onValueChange: [
     new MappedProp(
       (page: number, { reason }: PageControlChangeEventDetails) =>

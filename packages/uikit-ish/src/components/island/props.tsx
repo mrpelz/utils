@@ -1,5 +1,6 @@
 import type { ComponentProps } from 'react';
 
+import type { GlassSurfaceProps } from '../glass/main.js';
 import type { GlassModeProps } from '../glass/props.js';
 import type { ViewportEdgeEffect } from '../viewport/main.js';
 
@@ -10,23 +11,24 @@ export type IslandSnapPointChangeDetails = {
   readonly isCanceled: boolean;
 };
 
-export type IslandRootProps = ComponentProps<'div'> & {
-  /**
-   * The stop it shows at first (a snap group's `value`, see
-   * `Island.SnapGroup`), uncontrolled; left out, its lowest.
-   */
-  defaultSnapPoint?: string;
-  /** A stop chosen by the user (swiped to it), by its group's `value`. */
-  onSnapPointChange?: (
-    snapPoint: string,
-    details: IslandSnapPointChangeDetails,
-  ) => void;
-  /**
-   * The stop it shows (a snap group's `value`), controlled: set by the app,
-   * scrolled to.
-   */
-  snapPoint?: string;
-};
+export type IslandRootProps = ComponentProps<'div'> &
+  GlassSurfaceProps & {
+    /**
+     * The stop it shows at first (a snap group's `value`, see
+     * `Island.SnapGroup`), uncontrolled; left out, its lowest.
+     */
+    defaultSnapPoint?: string;
+    /** A stop chosen by the user (swiped to it), by its group's `value`. */
+    onSnapPointChange?: (
+      snapPoint: string,
+      details: IslandSnapPointChangeDetails,
+    ) => void;
+    /**
+     * The stop it shows (a snap group's `value`), controlled: set by the app,
+     * scrolled to.
+     */
+    snapPoint?: string;
+  };
 
 export type IslandHeaderProps = ComponentProps<'div'> & {
   /**

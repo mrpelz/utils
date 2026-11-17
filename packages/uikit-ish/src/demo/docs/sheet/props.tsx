@@ -3,6 +3,7 @@
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 
@@ -19,6 +20,7 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
 });
 
 export const propOptionsPopup = {
+  ...glassSurfacePropOptions,
   ...commonPropOptions,
   detent: [undefined, 'large', 'medium'] as const,
   // Its lists are grouped: on the grouped background.
@@ -88,6 +90,7 @@ export const getPropOptionsGuideRoot = (addLog: AddLog) => ({
 });
 
 export const propOptionsGuidePopup = {
+  ...glassSurfacePropOptions,
   ...commonPropOptions,
   detent: [undefined, 'large', 'medium'] as const,
   // Its lists are grouped: on the grouped background.

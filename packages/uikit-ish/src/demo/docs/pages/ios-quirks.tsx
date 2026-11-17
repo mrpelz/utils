@@ -1107,6 +1107,17 @@ export const IosQuirksPage: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
+        <strong>No text autosizing.</strong> iOS enlarges text in a block it
+        deems wide, judging it as each piece of text is laid out, and keeps that
+        size: rows of a card’s list laid out as the card opened above the page
+        came out taller than the others, and stayed so after it closed, until
+        each was laid out again. The library turns it off for the whole page (
+        <code>-webkit-text-size-adjust: 100%</code> on <code>:root</code>); the
+        user’s own text size still applies.
+      </li>
+    </ul>
+    <ul>
+      <li>
         <strong>No view transitions.</strong> In WebKit, a view transition’s
         snapshot of the page drops what glass blurs and blends behind it, and
         its end comes frames late, so lifted and moving parts glitch around it.

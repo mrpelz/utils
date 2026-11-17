@@ -16,13 +16,19 @@ import {
   useState,
 } from 'react';
 
-import { useSettingsPortalProps } from '../settings/main.js';
+import {
+  colorSchemeStyle,
+  type GlassSurfaceProps,
+  useGlassScheme,
+} from '../glass/main.js';
+import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
   positionerSide,
   useCollision,
   useForwardedRef,
   usePortalContainer,
+  withStyle,
 } from '../utils/main.js';
 import type {
   TooltipHandle,
@@ -224,18 +230,27 @@ const Positioner = forwardRef<HTMLDivElement, TooltipPositionerProps>(
 
 const Popup = forwardRef<
   HTMLDivElement,
-  Omit<ComponentProps<typeof BaseTooltip.Popup>, 'ref'>
->(({ className, ...props }, ref) => (
-  <BaseTooltip.Popup
-    ref={ref}
-    data-tooltip-part="popup"
-    className={cn(
-      'uikit-tooltip-popup uikit-tooltip-surface uikit-glass-medium uikit-popup-transition',
-      className,
-    )}
-    {...props}
-  />
-));
+  Omit<ComponentProps<typeof BaseTooltip.Popup>, 'ref'> & GlassSurfaceProps
+>(({ children, className, context, style, ...props }, forwardedRef) => {
+  const ref = useForwardedRef(forwardedRef);
+  // Its glass's tone, its content's color scheme (see Glass).
+  const scheme = useGlassScheme(ref, context);
+  return (
+    <BaseTooltip.Popup
+      ref={ref}
+      data-color-scheme={scheme}
+      data-tooltip-part="popup"
+      className={cn(
+        'uikit-tooltip-popup uikit-tooltip-surface uikit-glass-medium uikit-popup-transition',
+        className,
+      )}
+      {...props}
+      style={withStyle(colorSchemeStyle(scheme), style)}
+    >
+      <ColorSchemeScope colorScheme={scheme}>{children}</ColorSchemeScope>
+    </BaseTooltip.Popup>
+  );
+});
 
 /**
  * A handle linking a tooltip to its triggers outside it, and opening or

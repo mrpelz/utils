@@ -1,14 +1,17 @@
 import type { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog';
 import type { ComponentProps } from 'react';
 
-export type AlertPopupProps = Omit<BaseAlertDialog.Popup.Props, 'ref'> & {
-  /**
-   * Where its portal renders it (Base UI's `AlertDialog.Portal`), e.g. a
-   * frame of the app's, centered in it if it's a containing block.
-   * @default document.body
-   */
-  container?: BaseAlertDialog.Portal.Props['container'];
-};
+import type { GlassSurfaceProps } from '../glass/main.js';
+
+export type AlertPopupProps = Omit<BaseAlertDialog.Popup.Props, 'ref'> &
+  GlassSurfaceProps & {
+    /**
+     * Where its portal renders it (Base UI's `AlertDialog.Portal`), e.g. a
+     * frame of the app's, centered in it if it's a containing block.
+     * @default document.body
+     */
+    container?: BaseAlertDialog.Portal.Props['container'];
+  };
 
 /** A handle linking an alert to its triggers outside it. */
 export type AlertHandle<Payload = unknown> = BaseAlertDialog.Handle<Payload>;

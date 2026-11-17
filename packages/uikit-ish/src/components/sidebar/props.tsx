@@ -1,6 +1,8 @@
 import type { ComponentProps } from 'react';
 
-export type SidebarRootProps = ComponentProps<'nav'>;
+import type { GlassSurfaceProps } from '../glass/main.js';
+
+export type SidebarRootProps = ComponentProps<'nav'> & GlassSurfaceProps;
 
 export type SidebarToolbarProps = ComponentProps<'div'>;
 

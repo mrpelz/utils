@@ -1,14 +1,17 @@
 import type { Popover as BasePopover } from '@base-ui/react/popover';
 
-export type ActionSheetPopupProps = Omit<BasePopover.Popup.Props, 'ref'> & {
-  /**
-   * Where its portal renders it (Base UI's `Popover.Portal`), e.g. a frame
-   * of the app's: its dimmed backdrop filling it if it's a containing
-   * block; without a trigger, the sheet at its bottom.
-   * @default document.body
-   */
-  container?: BasePopover.Portal.Props['container'];
-};
+import type { GlassSurfaceProps } from '../glass/main.js';
+
+export type ActionSheetPopupProps = Omit<BasePopover.Popup.Props, 'ref'> &
+  GlassSurfaceProps & {
+    /**
+     * Where its portal renders it (Base UI's `Popover.Portal`), e.g. a frame
+     * of the app's: its dimmed backdrop filling it if it's a containing
+     * block; without a trigger, the sheet at its bottom.
+     * @default document.body
+     */
+    container?: BasePopover.Portal.Props['container'];
+  };
 
 /** A handle linking an action sheet to its triggers outside it. */
 export type ActionSheetHandle<Payload = unknown> = BasePopover.Handle<Payload>;

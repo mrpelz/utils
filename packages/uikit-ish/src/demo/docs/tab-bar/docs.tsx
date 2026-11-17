@@ -14,20 +14,22 @@ import { PartLink } from '../../tooling/guide/sections.js';
 const collapsedContents = union('symbol', 'label', 'symbolAndLabel');
 const collapsedPositions = union('inline-start', 'center', 'inline-end');
 const shapes = union('capsule', 'circle');
-const glassContexts = union(
-  'bright',
-  'dim',
-  'background-bright',
-  'background-dim',
-);
+const glassContexts = union('bright', 'dim', 'adaptive');
 
 const glassContext = (of: string): PropRow => [
   'context',
   glassContexts,
+  'the color scheme’s',
   <>
-    <code>bright</code>, or <code>dim</code> in dark mode
+    How bright the content behind the glass{of} is: <code>bright</code> (light
+    glass) or <code>dim</code> (dark glass). <code>adaptive</code> follows
+    what’s behind it (see{' '}
+    <PartLink
+      page="tokens"
+      part="useBackdropTone"
+    />
+    ).
   </>,
-  `How bright the content behind the glass${of} is: a plain page, or a background of the app’s own (for example a picture).`,
 ];
 
 export const tabBarRootRows: readonly PropRow[] = [

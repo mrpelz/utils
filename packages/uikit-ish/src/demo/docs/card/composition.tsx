@@ -358,38 +358,65 @@ const CameraCard = () => {
 </Grid.Item>`;
 
 const sizeCode = `// The app's: its cards' parts moved from where they were as their tile
-// changes its box, with GSAP's Flip (the app's dependency, not the
-// library's). Placed in a card, it shows nothing.
+// changes its box, with GSAP (the app's dependency, not the library's): a
+// translate and one scale each (its text's size), never their sizes (a
+// card's parts are laid out on a grid: tweening a part's width moves the
+// others). Placed in a card, it shows nothing.
 import { gsap } from 'gsap';
-import { Flip } from 'gsap/Flip';
-
-gsap.registerPlugin(Flip);
 
 const parts =
   '[data-card-part]:not([data-card-part="root"], [data-card-part="corner-button"])';
 
+// Where each part is in its card, its text's size, its text.
+const placesOf = (card) => {
+  const box = card.getBoundingClientRect();
+  return new Map(
+    [...card.querySelectorAll(parts)].map((part) => {
+      const at = part.getBoundingClientRect();
+      return [
+        part.dataset.cardPart,
+        {
+          size: parseFloat(getComputedStyle(part).fontSize),
+          text: part.textContent,
+          x: at.left - box.left,
+          y: at.top - box.top,
+        },
+      ];
+    }),
+  );
+};
+
 const FlipParts = () => {
   const marker = useRef(null);
-  const state = useRef();
+  const before = useRef();
   const cardOf = () => marker.current.closest('[data-card-part="root"]');
   useGridItemLayout({
     // Where they are, before the change.
     onBeforeChange: () => {
-      state.current = Flip.getState(cardOf().querySelectorAll(parts), {
-        props: 'fontSize',
-        simple: true,
-      });
+      before.current = placesOf(cardOf());
     },
     // Laid out anew, the tile still at its old box: moved from where they
     // were, in step with the tile.
     onAfterChange: ({ duration, elapsed }) => {
-      const timeline = Flip.from(state.current, {
-        duration: duration / 1000,
-        ease: 'power3.out',
-        props: 'fontSize',
-        simple: true,
-        targets: cardOf().querySelectorAll(parts),
-      }).pause();
+      const card = cardOf();
+      const after = placesOf(card);
+      const timeline = gsap.timeline({ paused: true });
+      for (const part of card.querySelectorAll(parts)) {
+        const from = before.current.get(part.dataset.cardPart);
+        const to = after.get(part.dataset.cardPart);
+        if (!from || !to) continue;
+        timeline.fromTo(
+          part,
+          {
+            scale: from.text === to.text ? from.size / to.size : 1,
+            transformOrigin: 'left top',
+            x: from.x - to.x,
+            y: from.y - to.y,
+          },
+          { clearProps: 'transform', duration: duration / 1000, ease: 'power3.out', scale: 1, x: 0, y: 0 },
+          0,
+        );
+      }
       const follow = () => {
         timeline.time(Math.min(elapsed(), duration) / 1000);
         if (elapsed() < duration) requestAnimationFrame(follow);
@@ -471,6 +498,140 @@ const [isExpanded, setIsExpanded] = useState(false);
   <Grid.Area defaultSize="3x2" />
 </Grid.Item>`;
 
+const momentaryCode = `// The doorbell's actions: the app flashes it as it rings at the door.
+const doorbell = useRef(null);
+const [rang, setRang] = useState();
+
+// A momentary card: a press rings the chime (it lights up, fades back).
+<Card.Root momentary actionsRef={doorbell} onClick={() => setRang(Date.now())}>
+  <Card.Symbol>
+    <Symbol icon={sfBellFill} />
+  </Card.Symbol>
+  <Card.Title>Doorbell</Card.Title>
+  <Card.Value>{rang ? \`Rang \${timeOf(rang)}\` : 'Quiet'}</Card.Value>
+</Card.Root>
+
+// As the app's server says someone rang (here, the door button's card):
+// doorbell.current?.flash();`;
+
+const rowsCode = `// A room's summary in rows: a list (inset grouped) in the card.
+const RoomCard = ({ rows }) => {
+  const isOpen = useGridItem()?.open === true;
+  return (
+    <Card.Root>
+      <Card.Symbol>
+        <Symbol icon={sfHouseFill} />
+      </Card.Symbol>
+      <List.Root>
+        <List.Section>
+          <List.Group>
+            {/* As many as fit whole: four on its tile, all open. */}
+            {(isOpen ? rows : rows.slice(0, 4)).map(([icon, label, value]) => (
+              <List.Item key={label}>
+                <List.Leading>
+                  <List.Image variant="symbol">
+                    <Symbol icon={icon} />
+                  </List.Image>
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{label}</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail>{value}</List.Detail>
+                </List.Trailing>
+              </List.Item>
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+      <Card.Title>Living Room</Card.Title>
+      {/* Opening it, and its x, as the camera's (see above). */}
+    </Card.Root>
+  );
+};`;
+
+const channelsCode = `// The app's: a card's sliders as bars, one per channel (side by side in a
+// tile taller than a row, else stacked), between its top and its title.
+const ChannelSliders = ({ channels, onChange }) => {
+  const [, rows = '1'] = (useGridItem()?.size ?? '2x2').split('x');
+  const orientation = rows === '1' ? 'horizontal' : 'vertical';
+  return (
+    <div className="channels" data-orientation={orientation}>
+      {channels.map(({ label, name, tint, value }, index) => (
+        <Slider.Root
+          key={name}
+          max={1}
+          min={0}
+          step={0.01}
+          orientation={orientation}
+          tint={tint}
+          value={value}
+          onValueChange={(next) => onChange(index, next)}
+        >
+          <Slider.Control>
+            <Slider.Track>
+              <Slider.Indicator />
+              <Slider.Thumb aria-label={name} />
+            </Slider.Track>
+          </Slider.Control>
+          <Slider.Label aria-hidden="true">{label}</Slider.Label>
+        </Slider.Root>
+      ))}
+    </div>
+  );
+};
+
+/* Its styles: the card's layout's middle row, bars filling it.
+.channels {
+  display: grid;
+  grid-row: 2;
+  grid-column: 1 / -1;
+  align-self: stretch;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+.channels[data-orientation='horizontal'] {
+  grid-auto-flow: row;
+  grid-auto-rows: minmax(0, 1fr);
+}
+.channels .uikit-slider-root { align-self: stretch; justify-self: stretch; }
+.channels .uikit-slider-track { border-radius: 10px; overflow: hidden; }
+.channels .uikit-slider-thumb::before { display: none; }
+*/
+
+// Expanded, the light strip shows a bar per channel.
+{isExpanded ? (
+  <ChannelSliders channels={channels} onChange={setChannel} />
+) : null}`;
+
+const trendCode = `// The app's: an arrow after a value, turned by how steeply it changes
+// (-90 to 90 degrees), named for assistive technology.
+const Trend = ({ angle }) => (
+  <span
+    role="img"
+    aria-label={angle > 10 ? 'rising' : angle < -10 ? 'falling' : 'steady'}
+    className="trend"
+    style={{ '--trend-angle': angle }}
+  >
+    <Symbol icon={sfArrowRight} />
+  </span>
+);
+
+/* Its styles: turned by a transform (fine in a scroller).
+.trend {
+  display: inline-block;
+  rotate: calc(-1deg * var(--trend-angle));
+  transition: rotate 600ms;
+}
+.trend:dir(rtl) { rotate: calc(1deg * var(--trend-angle)); scale: -1 1; }
+*/
+
+<Card.Value>
+  12.4 °C
+  <Trend angle={30} />
+</Card.Value>`;
+
 const aloneCode = `// No grid: as large as its box, never in edit mode.
 <div style={{ height: 100, width: 220 }}>
   <LampCard name="Desk Lamp" />
@@ -481,8 +642,10 @@ const aloneCode = `// No grid: as large as its box, never in edit mode.
 /** A phone with some cards in a grid (see `cardsStage`). */
 const StageView: FunctionComponent<{
   id: string;
+  /** Its cards' roots' props with controls (e.g. `momentary`). */
+  root?: readonly 'momentary'[];
   tiles: readonly CardTile[];
-}> = ({ id, tiles }) => {
+}> = ({ id, root = [], tiles }) => {
   const [log, addLog] = useLog();
   const stage = useCardsStage(addLog, tiles);
   // (Room around a tile: its area's controls too.)
@@ -501,14 +664,14 @@ const StageView: FunctionComponent<{
               'mirrored',
               'onClick',
             ],
-            'Card.Root': [],
+            'Card.Root': root,
             'Card.Symbol': [],
             'Card.Title': [],
             'Card.Value': ['children', 'format', 'value'],
           },
           addLog,
         ),
-      [addLog, hasArea],
+      [addLog, hasArea, root],
     ),
     { provided: useProvidedState(id) },
   );
@@ -906,6 +1069,77 @@ const SizeView: FunctionComponent = () => (
 );
 
 /** Cards on their own: no grid, in boxes of their own sizes. */
+const MomentaryView: FunctionComponent = () => (
+  <StageView
+    id="card-composition-momentary"
+    root={['momentary']}
+    tiles={[
+      {
+        kind: 'doorbell',
+        name: 'Doorbell',
+        size: '2x1',
+        sizes: cardSizes.binaryDisplay,
+      },
+      {
+        kind: 'doorButton',
+        name: 'Door Button',
+        size: '2x1',
+        sizes: cardSizes.binaryDisplay,
+      },
+    ]}
+  />
+);
+
+const RowsView: FunctionComponent = () => (
+  <StageView
+    id="card-composition-rows"
+    tiles={[
+      {
+        kind: 'room',
+        name: 'Living Room',
+        openSize: '4x4',
+        size: '2x2',
+        sizes: ['2x2'],
+      },
+      {
+        kind: 'lamp',
+        name: 'Floor Lamp',
+        size: '2x1',
+        sizes: cardSizes.binaryControl,
+      },
+    ]}
+  />
+);
+
+const ChannelsView: FunctionComponent = () => (
+  <StageView
+    id="card-composition-channels"
+    tiles={[
+      {
+        expandedSize: '2x2',
+        kind: 'strip',
+        name: 'Light Strip',
+        size: '2x1',
+        sizes: ['1x1', '2x1', '2x2'],
+      },
+    ]}
+  />
+);
+
+const TrendView: FunctionComponent = () => (
+  <StageView
+    id="card-composition-trend"
+    tiles={[
+      {
+        kind: 'outside',
+        name: 'Outside',
+        size: '2x1',
+        sizes: cardSizes.numericalDisplay,
+      },
+    ]}
+  />
+);
+
 const AloneView: FunctionComponent = () => {
   const id = 'card-composition-alone';
   const [log, addLog] = useLog();
@@ -983,6 +1217,10 @@ const sections: readonly Section[] = [
   ['expanding-in-place', 'Expanding in place'],
   ['drilling-in', 'Drilling in'],
   ['opening-above-the-page', 'Opening above the page'],
+  ['momentary-buttons', 'Momentary buttons'],
+  ['rows-in-a-card', 'Rows in a card'],
+  ['several-sliders', 'Several sliders (the app’s)'],
+  ['a-value-with-its-trend', 'A value with its trend (the app’s)'],
   ['building-for-changing-sizes', 'Building for changing sizes'],
   ['on-its-own', 'On its own'],
 ];
@@ -1229,8 +1467,8 @@ export const CardComposition: FunctionComponent = () => (
         , as the rows on the lights’ page pass theirs on to their switches.
       </li>
       <li>
-        It’s <code>active</code> while any light is on: bright, as a card whose
-        switch is on.
+        It’s <code>active</code> while any light is on, lit as a card whose
+        switch is on, and dark while they’re all off.
       </li>
       <li>
         <strong>Library:</strong> the corner button and its icon, the
@@ -1318,6 +1556,125 @@ export const CardComposition: FunctionComponent = () => (
     <OverlayView />
 
     <Heading
+      id="momentary-buttons"
+      level={2}
+    >
+      Momentary buttons
+    </Heading>
+    <ul>
+      <li>
+        A doorbell has no state of its own: a press rings its chime. The card is{' '}
+        <code>momentary</code>, so a press lights it up as an active card, for a
+        moment, and it fades back.
+      </li>
+      <li>
+        Its <code>actionsRef</code> gives the app <code>flash()</code>, to do
+        the same from anywhere: here the door button’s card rings it, as the
+        app’s server would tell it someone did.
+      </li>
+      <li>
+        <strong>Library:</strong> the flash and its fade, on a press and by its
+        actions.
+      </li>
+      <li>
+        <strong>Demo:</strong> when it rang, the door button.
+      </li>
+    </ul>
+    <CodeView code={momentaryCode} />
+    <MomentaryView />
+
+    <Heading
+      id="rows-in-a-card"
+      level={2}
+    >
+      Rows in a card
+    </Heading>
+    <ul>
+      <li>
+        A room’s summary shows what its other cards say, in rows: a{' '}
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        in its default inset grouped style, between the card’s symbol and its
+        title, its group on the card’s glass as on an island’s. The rows follow
+        the floor lamp’s switch beside it.
+      </li>
+      <li>
+        The list doesn’t scroll in a card, and each row stays on one line. Show
+        as many rows as fit whole: four on its tile, all of them when it’s open
+        above the page.
+      </li>
+      <li>
+        <strong>Library:</strong> the list placed and colored in the card,
+        opening above the page.
+      </li>
+      <li>
+        <strong>Demo:</strong> the rows and how many are shown.
+      </li>
+    </ul>
+    <CodeView code={rowsCode} />
+    <RowsView />
+
+    <Heading
+      id="several-sliders"
+      level={2}
+    >
+      Several sliders (the app’s)
+    </Heading>
+    <ul>
+      <li>
+        A light strip of three channels: small, its switch and its symbol in the
+        color they make; expanded, a bar per channel. The bars are the app’s
+        own, built from{' '}
+        <PartLink
+          component="slider"
+          part="Slider.Root"
+        />{' '}
+        and a few styles: too particular for the library, which styles one
+        slider filling a card.
+      </li>
+      <li>
+        They sit in the card’s layout between its top and its title, side by
+        side in a tile taller than a row, stacked across in a row.
+      </li>
+      <li>
+        <strong>Library:</strong> the card’s layout, the switch, expanding.
+      </li>
+      <li>
+        <strong>Demo:</strong> the bars, the mixed color.
+      </li>
+    </ul>
+    <CodeView code={channelsCode} />
+    <ChannelsView />
+
+    <Heading
+      id="a-value-with-its-trend"
+      level={2}
+    >
+      A value with its trend (the app’s)
+    </Heading>
+    <ul>
+      <li>
+        A temperature with an arrow after it, pointing up or down as steeply as
+        it changes. The arrow is the app’s own: a{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        turned by a transform, named rising, falling or steady.
+      </li>
+      <li>
+        <strong>Library:</strong> the card and its value.
+      </li>
+      <li>
+        <strong>Demo:</strong> the arrow and its angle.
+      </li>
+    </ul>
+    <CodeView code={trendCode} />
+    <TrendView />
+
+    <Heading
       id="building-for-changing-sizes"
       level={2}
     >
@@ -1352,12 +1709,15 @@ export const CardComposition: FunctionComponent = () => (
         in the page (move them from there), with the tile’s timing.
       </li>
       <li>
-        <strong>With an animation library.</strong> The demos use GSAP’s Flip,
-        written as a <code>FlipParts</code> placed in the card (see the code
-        below). GSAP is the app’s choice and dependency, not the library’s. It
-        moves <PartLink part="Card.Symbol" />, <PartLink part="Card.Title" />{' '}
-        and <PartLink part="Card.Value" /> to their new places and their text to
-        its new size, in step with the tile. Parts that are only in one form
+        <strong>With an animation library.</strong> The demos use GSAP, written
+        as a <code>FlipParts</code> placed in the card (see the code below).
+        GSAP is the app’s choice and dependency, not the library’s. It moves{' '}
+        <PartLink part="Card.Symbol" />, <PartLink part="Card.Title" /> and{' '}
+        <PartLink part="Card.Value" /> to their new places by a translate, and
+        their text to its new size by one scale (only moved when its text
+        changes), in step with the tile. Never their sizes: the card’s parts are
+        laid out on a grid, so tweening one part’s width or height (as GSAP’s
+        Flip plugin does) moves the others. Parts that are only in one form
         aren’t faded: they show or go as the card’s edge passes them. The empty
         cards in the kitchen sink move without any of it.
       </li>
@@ -1469,6 +1829,10 @@ export const cardCompositionDemos = [
   ExpandView,
   DrillView,
   OverlayView,
+  MomentaryView,
+  RowsView,
+  ChannelsView,
+  TrendView,
   SizeView,
   AloneView,
 ];

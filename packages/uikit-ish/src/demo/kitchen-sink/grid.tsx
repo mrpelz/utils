@@ -19,7 +19,13 @@ import {
 } from '../../components/index.js';
 import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
 import { DenseSwitch, SectionHeader, Tile } from './grid-shared.js';
-import { BackButton, DrillRow, Rows, type SinkPages } from './shared.js';
+import {
+  AdaptiveBarTitle,
+  BackButton,
+  DrillRow,
+  Rows,
+  type SinkPages,
+} from './shared.js';
 
 // Grid: a home screen of tiles on a picture. Edit in the bar starts edit
 // mode: tiles can be dragged within a section and between sections that
@@ -628,9 +634,9 @@ const GridApp: FunctionComponent = () => {
             <Toolbar.Leading>
               <BackButton />
             </Toolbar.Leading>
-            <Toolbar.Title>
+            <AdaptiveBarTitle>
               <span>Home</span>
-            </Toolbar.Title>
+            </AdaptiveBarTitle>
             <Toolbar.Trailing>
               <Toolbar.Button
                 prominent={editing}

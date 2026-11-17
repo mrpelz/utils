@@ -76,14 +76,17 @@ export const buttonRootRows: readonly PropRow[] = [
   ],
   [
     'context',
-    union('bright', 'dim', 'background-bright', 'background-dim', 'adaptive'),
+    union('bright', 'dim', 'adaptive'),
+    'the color scheme’s',
     <>
-      <code>bright</code>, or <code>dim</code> in dark mode
-    </>,
-    <>
-      For glass variants, how bright it is behind the glass (a plain page, or a
-      background of the app’s own). <code>adaptive</code> follows what’s behind
-      it, sampled as it scrolls or resizes.
+      For glass variants, how bright it is behind the glass: <code>bright</code>{' '}
+      (light glass) or <code>dim</code> (dark glass). <code>adaptive</code>{' '}
+      follows what’s behind it (see{' '}
+      <PartLink
+        page="tokens"
+        part="useBackdropTone"
+      />
+      ).
     </>,
   ],
   [

@@ -316,6 +316,7 @@ export {
 } from './grid/main.js';
 export {
   Card,
+  type CardActions,
   type CardCornerButtonProps,
   type CardOrientation,
   type CardRootProps,
@@ -430,9 +431,24 @@ export {
   type TypographyProps,
 } from './typography/main.js';
 
+export {
+  type BackdropArea,
+  backdropGridOf,
+  type BackdropMarkerValue,
+  type BackdropTone,
+  type BackdropToneOptions,
+  type ImageBackdropMarkerOptions,
+  resampleBackdrops,
+  useBackdropMarker,
+  useBackdropTone,
+  useImageBackdropMarker,
+} from './glass/main.js';
+
 // Types the components' props refer to
 export type {
+  GlassContext,
   GlassContextValue,
+  GlassSurfaceProps,
   GlassMode,
   GlassModeProps,
 } from './glass/main.js';

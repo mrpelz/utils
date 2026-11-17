@@ -77,16 +77,21 @@ export const PartLink: FunctionComponent<{
   children?: string;
   /** Another component's (its id: its route), e.g. `toolbar`. */
   component?: string;
+  /**
+   * A page's instead (its route, e.g. `tokens`): its section there, on a
+   * page without parts.
+   */
+  page?: string;
   part: string;
-}> = ({ children, component, part }) => {
+}> = ({ children, component, page, part }) => {
   const entry = useContext(EntryContext);
+  const path =
+    page === undefined
+      ? `${component ?? entry?.id ?? ''}/parts#${sectionId(part)}`
+      : `${page}#${sectionId(part)}`;
 
   return (
-    <a
-      href={publicUrl(
-        `${component ?? entry?.id ?? ''}/parts#${sectionId(part)}`,
-      )}
-    >
+    <a href={publicUrl(path)}>
       <code>{children ?? part}</code>
     </a>
   );

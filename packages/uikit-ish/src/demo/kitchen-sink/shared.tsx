@@ -1,19 +1,23 @@
 import {
   ComponentProps,
   createContext,
+  CSSProperties,
   FunctionComponent,
   ReactNode,
   useContext,
+  useRef,
 } from 'react';
 import { createPortal } from 'react-dom';
 
 import {
+  type BackdropTone,
   Button,
   List,
   Navigation,
   type SettingsValues,
   Symbol,
   Toolbar,
+  useBackdropTone,
   type Viewport,
 } from '../../components/index.js';
 import {
@@ -275,6 +279,32 @@ export const ShowSidebarButton: FunctionComponent = () => {
  * stack's root (see `BackContext`): compact, the index below a component's
  * page; regular, a page pushed from one (e.g. the grid's playground).
  */
+/**
+ * A title's color scheme by what's behind it (its labels' colors following,
+ * see the title below): dark text on a bright backdrop, light on a dim one.
+ */
+const schemeStyle = (tone: BackdropTone | undefined): CSSProperties =>
+  tone === undefined ? {} : { colorScheme: tone === 'dim' ? 'dark' : 'light' };
+
+/**
+ * A page's bar title over a picture (the grid pages'): its color by what's
+ * behind it (`useBackdropTone`), as the page scrolls under it.
+ */
+export const AdaptiveBarTitle: FunctionComponent<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const ref = useRef<HTMLElement>(null);
+  const tone = useBackdropTone(ref);
+  return (
+    <Toolbar.Title
+      ref={ref}
+      style={schemeStyle(tone)}
+    >
+      {children}
+    </Toolbar.Title>
+  );
+};
+
 export const BackButton: FunctionComponent = () => {
   const back = useContext(BackContext);
 

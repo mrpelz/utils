@@ -13,9 +13,9 @@ export type PageControlProps = Omit<
   'defaultValue' | 'onChange'
 > & {
   /**
-   * Brightness of the content behind the glass (`adaptive`: by what's
-   * behind it).
-   * @default the toolbar's, or 'bright' (or 'dim' in dark mode)
+   * How bright the content behind the glass is (`adaptive`: by what's
+   * behind it, see `useBackdropTone`).
+   * @default the toolbar's, or the color scheme's
    */
   context?: GlassContextValue;
   /** The pages. */

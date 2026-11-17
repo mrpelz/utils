@@ -1,26 +1,33 @@
-import { ReactNode } from 'react';
+import { ReactNode, type RefObject } from 'react';
 
 import {
   Card,
+  type CardActions,
   type CardOrientation,
   cardSizes,
   forwardClick,
   gridIcons,
   type GridSize,
+  List,
   Slider,
   Switch,
   Symbol,
   type SymbolIcon,
 } from '../../../components/index.js';
+import { ChannelSliders, mixColor, Trend } from '../../tooling/card-kit.js';
 import { FlipParts } from '../../tooling/flip.js';
 import type { PartProps } from '../../tooling/frame/prop-control.js';
 import {
+  sfBellFill,
+  sfHouseFill,
   sfHumidityFill,
   sfLightbulb,
   sfLightbulbFill,
+  sfLightStrip2,
   sfLockFill,
   sfLockOpenFill,
   sfPhoto,
+  sfPower,
   sfThermometerMedium,
   sfWindowShadeClosed,
 } from '../../tooling/icons.js';
@@ -39,6 +46,15 @@ type Parts = { parts?: PartProps };
  * it's expanded, and asking for the other.
  */
 export type Expansion = { isExpanded: boolean; onToggle: () => void };
+
+/**
+ * Whether a card shows its large layout: its tile at least 2x2, however it
+ * got there (expanded, or resized in edit mode).
+ */
+const isLargeOf = (size: GridSize = '1x1') => {
+  const [columns = '1', rows = '1'] = size.split('x');
+  return (columns === '*' || Number(columns) >= 2) && Number(rows) >= 2;
+};
 
 /**
  * A slider's orientation by its tile's shape (as `useCardOrientation`
@@ -256,13 +272,16 @@ export const heatingCard = ({
   expansion,
   onTargetChange,
   parts = {},
+  size,
   target,
 }: Parts & {
   expansion?: Expansion;
   onTargetChange: (target: number) => void;
+  /** Its tile's size: large (expanded, or resized so), its slider. */
+  size?: GridSize;
   target: number;
 }): ReactNode => {
-  const isExpanded = expansion?.isExpanded === true;
+  const isExpanded = isLargeOf(size);
   return (
     <Card.Root
       // (Small, a press anywhere on it as on its button; expanded, its
@@ -377,6 +396,236 @@ export const dimmerCard = ({
   </Card.Root>
 );
 
+/** A time of day, short (e.g. “2:34 PM”), by the document's language. */
+const timeOf = (time: number) =>
+  new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(time);
+
+/**
+ * A doorbell: momentary (pressed, its chime rings; it lights up and fades
+ * back), and flashed by the app (`actionsRef`) as someone rings at the
+ * door, as the app's server would tell it (here, the door button's card).
+ */
+export const doorbellCard = ({
+  actionsRef,
+  onRing,
+  parts = {},
+  rang,
+}: Parts & {
+  actionsRef: RefObject<CardActions | null>;
+  onRing: () => void;
+  rang: number | undefined;
+}): ReactNode => (
+  <Card.Root
+    momentary
+    actionsRef={actionsRef}
+    onClick={onRing}
+    {...parts['Card.Root']}
+  >
+    <Card.Symbol {...parts['Card.Symbol']}>
+      <Symbol icon={sfBellFill} />
+    </Card.Symbol>
+    <Card.Title {...parts['Card.Title']}>Doorbell</Card.Title>
+    <Card.Value {...parts['Card.Value']}>
+      {rang === undefined ? 'Quiet' : `Rang ${timeOf(rang)}`}
+    </Card.Value>
+  </Card.Root>
+);
+
+/**
+ * The door's button, outside: as if someone pressed it (momentary), the
+ * doorbell's card is flashed by its actions, as a server's message would.
+ */
+export const doorButtonCard = ({
+  doorbell,
+  onRing,
+  parts = {},
+}: Parts & {
+  doorbell: RefObject<CardActions | null>;
+  onRing: () => void;
+}): ReactNode => (
+  <Card.Root
+    momentary
+    onClick={() => {
+      onRing();
+      doorbell.current?.flash();
+    }}
+    {...parts['Card.Root']}
+  >
+    <Card.Symbol {...parts['Card.Symbol']}>
+      <Symbol icon={sfPower} />
+    </Card.Symbol>
+    <Card.Title {...parts['Card.Title']}>Door Button</Card.Title>
+    <Card.Value {...parts['Card.Value']}>Ring from outside</Card.Value>
+  </Card.Root>
+);
+
+/** A percentage, no decimals. */
+const percent = (value: number) =>
+  new Intl.NumberFormat(undefined, {
+    maximumFractionDigits: 0,
+    style: 'percent',
+  }).format(value);
+
+/**
+ * A room's summary: what its other cards say, in rows (a glass list in
+ * the card), as many as fit whole; opened above the page, all of them.
+ */
+export const roomCard = ({
+  isOpen,
+  onOpenChange,
+  parts = {},
+  states,
+}: Parts & {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  states: CardStates;
+}): ReactNode => {
+  const rows: readonly (readonly [SymbolIcon, string, string])[] = [
+    [sfLightbulbFill, 'Floor Lamp', states.lamp ? 'On' : 'Off'],
+    [sfLightbulbFill, 'Dimmer', percent(states.dimmer)],
+    [sfWindowShadeClosed, 'Blinds', percent(states.blinds)],
+    [sfThermometerMedium, 'Heating to', `${String(states.heating)} °C`],
+    [sfHumidityFill, 'Humidity', percent(0.46)],
+  ];
+  return (
+    <Card.Root {...parts['Card.Root']}>
+      <FlipParts />
+      <Card.Symbol {...parts['Card.Symbol']}>
+        <Symbol icon={sfHouseFill} />
+      </Card.Symbol>
+      <List.Root>
+        <List.Section>
+          <List.Group>
+            {(isOpen ? rows : rows.slice(0, 4)).map(([icon, label, value]) => (
+              <List.Item key={label}>
+                <List.Leading>
+                  <List.Image variant="symbol">
+                    <Symbol icon={icon} />
+                  </List.Image>
+                </List.Leading>
+                <List.Content>
+                  <List.Title>{label}</List.Title>
+                </List.Content>
+                <List.Trailing>
+                  <List.Detail>{value}</List.Detail>
+                </List.Trailing>
+              </List.Item>
+            ))}
+          </List.Group>
+        </List.Section>
+      </List.Root>
+      <Card.Title {...parts['Card.Title']}>Living Room</Card.Title>
+      <Card.CornerButton
+        aria-label="Living Room details"
+        icon={gridIcons.open}
+        visible={!isOpen}
+        onClick={() => onOpenChange(true)}
+        {...parts['Card.CornerButton']}
+      />
+      <Card.CornerButton
+        aria-label="Close"
+        corner="top-leading"
+        icon={gridIcons.close}
+        visible={isOpen}
+        onClick={() => onOpenChange(false)}
+        {...parts['Card.CornerButton']}
+      />
+    </Card.Root>
+  );
+};
+
+/** A light strip's channels (see `stripCard`). */
+const stripChannels = [
+  { label: 'R', name: 'Red', tint: '#ff3b30' },
+  { label: 'G', name: 'Green', tint: '#34c759' },
+  { label: 'B', name: 'Blue', tint: '#0a84ff' },
+] as const;
+
+/**
+ * A light strip of three channels: small, its switch, its symbol in the
+ * color they make; expanded, a bar per channel (the demos' channel
+ * sliders, see `ChannelSliders`).
+ */
+export const stripCard = ({
+  expansion,
+  isOn,
+  onChannelChange,
+  onToggle,
+  parts = {},
+  size,
+  values,
+}: Parts & {
+  expansion?: Expansion;
+  isOn: boolean;
+  onChannelChange: (index: number, value: number) => void;
+  onToggle: (isOn: boolean) => void;
+  /** Its tile's size: large (expanded, or resized so), its bars. */
+  size?: GridSize;
+  values: readonly number[];
+}): ReactNode => {
+  const channels = stripChannels.map((channel, index) => ({
+    ...channel,
+    value: values[index] ?? 0,
+  }));
+  const color = isOn ? mixColor(channels) : undefined;
+  const isExpanded = isLargeOf(size);
+  return (
+    <Card.Root
+      onClick={isExpanded ? undefined : forwardClick('[role=switch]')}
+      {...parts['Card.Root']}
+    >
+      <FlipParts />
+      <Card.Symbol
+        style={color ? { color } : undefined}
+        {...parts['Card.Symbol']}
+      >
+        <Symbol icon={sfLightStrip2} />
+      </Card.Symbol>
+      <Switch.Root
+        aria-label="Light Strip"
+        checked={isOn}
+        onCheckedChange={onToggle}
+      >
+        <Switch.Thumb />
+      </Switch.Root>
+      {isExpanded ? (
+        <ChannelSliders
+          channels={channels}
+          onChange={onChannelChange}
+        />
+      ) : null}
+      <Card.Title {...parts['Card.Title']}>Light Strip</Card.Title>
+      <Card.Value {...parts['Card.Value']}>
+        {isOn ? percent(Math.max(...values)) : 'Off'}
+      </Card.Value>
+      {expansion ? (
+        <Card.CornerButton
+          mirrored
+          aria-expanded={isExpanded}
+          aria-label="Light Strip details"
+          icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
+          onClick={expansion.onToggle}
+          {...parts['Card.CornerButton']}
+        />
+      ) : null}
+    </Card.Root>
+  );
+};
+
+/** The temperature outside, with its trend (the demos' `Trend`). */
+export const outsideCard = ({ parts = {} }: Parts): ReactNode => (
+  <Card.Root {...parts['Card.Root']}>
+    <Card.Symbol {...parts['Card.Symbol']}>
+      <Symbol icon={sfThermometerMedium} />
+    </Card.Symbol>
+    <Card.Title {...parts['Card.Title']}>Outside</Card.Title>
+    <Card.Value {...parts['Card.Value']}>
+      12.4 °C
+      <Trend angle={30} />
+    </Card.Value>
+  </Card.Root>
+);
+
 /** The cards' state, as the app keeps it (see `useCardsStage`). */
 export type CardStates = {
   /** The blinds' level, the dimmer's. */
@@ -387,6 +636,11 @@ export type CardStates = {
   /** What the heating heats to. */
   heating: number;
   lamp: boolean;
+  /** When the doorbell last rang. */
+  rang: number | undefined;
+  /** The light strip's switch and its channels. */
+  strip: boolean;
+  stripChannels: readonly number[];
 };
 
 export const cardStatesInitial: CardStates = {
@@ -395,10 +649,15 @@ export const cardStatesInitial: CardStates = {
   fan: false,
   heating: 22,
   lamp: true,
+  rang: undefined,
+  strip: true,
+  stripChannels: [0.9, 0.3, 0.6],
 };
 
 /** What a tile's card is shown with (see `cardOf`). */
 export type CardContext = Required<Parts> & {
+  /** The doorbell's actions (see `doorbellCard`). */
+  doorbell: RefObject<CardActions | null>;
   expansion: Expansion | undefined;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -414,11 +673,16 @@ export type CardKind =
   | 'blinds'
   | 'camera'
   | 'dimmer'
+  | 'doorbell'
+  | 'doorButton'
   | 'fan'
   | 'heating'
   | 'humidity'
   | 'lamp'
   | 'lock'
+  | 'outside'
+  | 'room'
+  | 'strip'
   | 'temperature';
 
 /** Each kind's card, with its state (see `cardOf`). */
@@ -436,6 +700,19 @@ const cards: Readonly<Record<CardKind, (context: CardContext) => ReactNode>> = {
     }),
   camera: ({ isOpen, onOpenChange, parts }) =>
     cameraCard({ isOpen, onOpenChange, parts }),
+  doorbell: ({ doorbell, parts, set, states }) =>
+    doorbellCard({
+      actionsRef: doorbell,
+      onRing: () => set('rang', Date.now()),
+      parts,
+      rang: states.rang,
+    }),
+  doorButton: ({ doorbell, parts, set }) =>
+    doorButtonCard({
+      doorbell,
+      onRing: () => set('rang', Date.now()),
+      parts,
+    }),
   dimmer: ({ parts, set, size, states }) =>
     dimmerCard({
       onChange: (value) => set('dimmer', value),
@@ -450,11 +727,12 @@ const cards: Readonly<Record<CardKind, (context: CardContext) => ReactNode>> = {
       onChange: (isOn) => set('fan', isOn),
       parts,
     }),
-  heating: ({ expansion, parts, set, states }) =>
+  heating: ({ expansion, parts, set, size, states }) =>
     heatingCard({
       expansion,
       onTargetChange: (target) => set('heating', target),
       parts,
+      size,
       target: states.heating,
     }),
   humidity: ({ parts }) => humidityCard({ parts }),
@@ -465,6 +743,23 @@ const cards: Readonly<Record<CardKind, (context: CardContext) => ReactNode>> = {
       parts,
     }),
   lock: ({ parts }) => lockCard({ parts }),
+  outside: ({ parts }) => outsideCard({ parts }),
+  room: ({ isOpen, onOpenChange, parts, states }) =>
+    roomCard({ isOpen, onOpenChange, parts, states }),
+  strip: ({ expansion, parts, set, size, states }) =>
+    stripCard({
+      size,
+      expansion,
+      isOn: states.strip,
+      onChannelChange: (index, value) =>
+        set(
+          'stripChannels',
+          states.stripChannels.map((each, at) => (at === index ? value : each)),
+        ),
+      onToggle: (isOn) => set('strip', isOn),
+      parts,
+      values: states.stripChannels,
+    }),
   temperature: ({ parts }) => temperatureCard({ parts }),
 };
 

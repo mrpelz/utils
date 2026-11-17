@@ -17,9 +17,18 @@ import {
   useState,
 } from 'react';
 
-import { useGlassMode } from '../glass/main.js';
-import { useSettingsPortalProps } from '../settings/main.js';
-import { cn, useForwardedRef, usePortalContainer } from '../utils/main.js';
+import {
+  colorSchemeStyle,
+  useGlassMode,
+  useGlassScheme,
+} from '../glass/main.js';
+import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
+import {
+  cn,
+  useForwardedRef,
+  usePortalContainer,
+  withStyle,
+} from '../utils/main.js';
 import {
   EdgeEffects,
   useAnchorRegistration,
@@ -512,6 +521,18 @@ const snapKindOf = (isSnapping: boolean, detent: SheetDetent) => {
   return detent === 'medium' ? 'capsule' : 'sheet';
 };
 
+/**
+ * Its glass's tone, its content's color scheme (see Glass): the panel's,
+ * snapping (the popup its scroller), else the popup's; glass only.
+ */
+const useSheetScheme = (
+  ref: RefObject<HTMLDivElement | null>,
+  panelRef: RefObject<HTMLDivElement | null>,
+  isSnapping: boolean,
+  isGlass: boolean,
+  context: SheetPopupProps['context'],
+) => useGlassScheme(isSnapping ? panelRef : ref, isGlass ? context : undefined);
+
 /** The sheet, the page dimmed behind it. */
 const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
   (
@@ -521,13 +542,16 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
       className,
       compact: compactProp,
       container,
+      context,
       detent = 'large',
       regular = 'form',
+      style,
       ...props
     },
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
+    const panelRef = useRef<HTMLDivElement>(null);
     const isNotSwiped = useContext(NoSwipeContext);
     const { isBottom, isCard } = usePlacement(compactProp, regular);
     // Snapping by its groups (see `SnapGroup`, snap.ts), natively, from the
@@ -536,6 +560,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
     const snap = useContext(SnapContext);
     const isSnapping = snap !== undefined && snap.stops.length > 0 && isBottom;
     const isGlass = isBottom && detent === 'medium';
+    const scheme = useSheetScheme(ref, panelRef, isSnapping, isGlass, context);
     useSnap(
       ref,
       isSnapping
@@ -600,6 +625,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                 // start, see `Root`.)
                 // (From the bottom, see above: compact, or a card.)
                 data-card={isCard ? '' : undefined}
+                data-color-scheme={scheme}
                 data-compact={isBottom ? '' : undefined}
                 data-detent={detent}
                 data-sheet-part="popup"
@@ -614,6 +640,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                   isNotSwiped || isSnapping ? '' : undefined
                 }
                 {...props}
+                style={withStyle(colorSchemeStyle(scheme), style)}
               >
                 {/* Snapping (see snap.ts): the room it's scrolled up out of
                   (pressed, closed as the backdrop would), its panel, and its
@@ -652,6 +679,7 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                     : null}
                 </div>
                 <div
+                  ref={panelRef}
                   data-sheet-part="panel"
                   className={cn(
                     'uikit-sheet-panel',
@@ -660,7 +688,9 @@ const Popup = forwardRef<HTMLDivElement, SheetPopupProps>(
                       : undefined,
                   )}
                 >
-                  {children as ReactNode}
+                  <ColorSchemeScope colorScheme={scheme}>
+                    {children as ReactNode}
+                  </ColorSchemeScope>
                 </div>
               </BaseDrawer.Popup>
             </BaseDrawer.Viewport>

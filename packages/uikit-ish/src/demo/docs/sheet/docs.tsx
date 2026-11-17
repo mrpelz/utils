@@ -2,6 +2,7 @@ import {
   baseUiRows,
   code,
   elementRows,
+  glassSurfaceRow,
   nativeButtonRow,
   PropRow,
   union,
@@ -338,6 +339,7 @@ export const sheetPopupRows: readonly PropRow[] = [
       move focus.
     </>,
   ],
+  glassSurfaceRow('its glass (the medium detent’s, from the bottom)'),
   [
     'children',
     'ReactNode',

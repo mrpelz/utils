@@ -314,8 +314,9 @@ export const CardParts: FunctionComponent = () => (
           component="switch"
           part="Switch.Root"
         />{' '}
-        in it, it’s bright while the switch is on. Its <code>onClick</code>{' '}
-        passes presses on to the switch with{' '}
+        in it, it’s lit while the switch is on and dark while it’s off, in both
+        color schemes. Its <code>onClick</code> passes presses on to the switch
+        with{' '}
         <PartLink
           component="list"
           part="forwardClick"
@@ -333,6 +334,32 @@ export const CardParts: FunctionComponent = () => (
       <li>
         Without a switch, <code>active</code> makes it bright the same way, for
         example for a group of lights with at least one of them on.
+      </li>
+      <li>
+        <code>momentary</code> makes it a button without a state of its own: a
+        press lights it up the same way for a moment, and it fades back. Its{' '}
+        <code>actionsRef</code>’s <code>flash()</code> does that from anywhere,
+        for example as the app’s server says something happened (see{' '}
+        <a href={publicUrl('card/composition#momentary-buttons')}>
+          Momentary buttons
+        </a>
+        ).
+      </li>
+      <li>
+        A{' '}
+        <PartLink
+          component="list"
+          part="List.Root"
+        />{' '}
+        (inset grouped, its default style) shows rows in it, between its top and
+        its title: its group on the card’s glass as on an island’s, rounded
+        within the card’s corners, each row on one line, in the card’s colors.
+        It doesn’t scroll: what doesn’t fit is cut off, so show as many rows as
+        fit (see{' '}
+        <a href={publicUrl('card/composition#rows-in-a-card')}>
+          Rows in a card
+        </a>
+        ).
       </li>
       <li>
         When its tile changes size, for example as it expands or opens above the
@@ -445,7 +472,16 @@ export const CardParts: FunctionComponent = () => (
           component="grid"
           part="gridIcons"
         />{' '}
-        or the app’s own, in the card’s text color.
+        or the app’s own.
+      </li>
+      <li>
+        Its icon is dark or light by what’s right behind it (see{' '}
+        <PartLink
+          page="tokens"
+          part="useBackdropTone"
+        />
+        ): the card’s glass, a lit card, or the fill of a slider filling the
+        card, so it stays legible on each.
       </li>
       <li>
         It’s shown outside edit mode only. In edit mode, it fades out and the

@@ -1006,6 +1006,18 @@ export const GlossaryPage: FunctionComponent = () => (
         it’s closed by its own button, a press beside it, Escape, or{' '}
         <See term="Edit mode" /> starting.
       </Term>
+      <Term term="Switchable card">
+        A <Docs to="card">Card</Docs> for something that’s on or off, such as a
+        light (its <code>active</code>, or a switch in it). On, it’s lit: opaque
+        white, lifted off the page. Off, it’s dark glass. Both hold in either
+        color scheme, so what’s on can be told at a glance. A card that isn’t
+        switchable, such as a sensor’s, takes the page’s glass.
+      </Term>
+      <Term term="Momentary card">
+        A <Docs to="card">Card</Docs> for something that happens rather than
+        stays, such as a doorbell (its <code>momentary</code>): a press, or the
+        app, flashes it lit for a moment, and it fades back.
+      </Term>
       <Term term="Row bands">
         The outlines a grid draws around each section’s rows in{' '}
         <See term="Edit mode" />. They run in from the page’s leading edge and
@@ -1037,7 +1049,9 @@ export const GlossaryPage: FunctionComponent = () => (
         A translucent material for surfaces that float above content: bars,
         sidebars, islands, popovers. It blurs and tints what’s behind it. Here
         it comes in materials of different strength, as{' '}
-        <a href={publicUrl('tokens')}>design tokens</a>.
+        <a href={publicUrl('tokens')}>design tokens</a>, each light or dark (see{' '}
+        <See term="Glass context" />
+        ).
       </Term>
       <Term term="Flat glass">
         <See term="Glass" /> drawn without backdrop filters, isolation or blend
@@ -1053,6 +1067,34 @@ export const GlossaryPage: FunctionComponent = () => (
         and the content parts). It’s for glass in content that scrolls: on iOS,
         live glass there ends the page’s glides (see{' '}
         <Docs to="ios-quirks#layers-under-a-scroll">iOS Quirks</Docs>).
+      </Term>
+      <Term term="Glass context">
+        Whether a piece of <See term="Glass" /> is light or dark, for what’s
+        behind it: <code>bright</code> or <code>dim</code>, or{' '}
+        <code>adaptive</code> to pick by its <See term="Backdrop tone" />. Left
+        out, the color scheme picks. A surface, such as a sheet or a card, takes
+        its content along, in the matching color scheme (its{' '}
+        <code>context</code>).
+      </Term>
+      <Term term="Backdrop tone">
+        Whether what’s behind an element is bright or dim, read from the colors
+        the page paints there (
+        <PartLink
+          page="tokens"
+          part="useBackdropTone"
+        />
+        ). Images, videos and canvases can’t be read that way: the app marks
+        them instead (
+        <PartLink
+          page="tokens"
+          part="useBackdropMarker"
+        />
+        ,{' '}
+        <PartLink
+          page="tokens"
+          part="useImageBackdropMarker"
+        />
+        ).
       </Term>
       <Term term="Semantic colors">
         Colors named by their role instead of their hue: <code>label</code> for

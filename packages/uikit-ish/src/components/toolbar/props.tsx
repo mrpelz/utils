@@ -8,9 +8,9 @@ export type Placement = 'block-end' | 'block-start';
 
 export type ToolbarRootProps = Omit<BaseToolbar.Root.Props, 'ref'> & {
   /**
-   * Brightness of the content behind the glass (`adaptive`: by what's
-   * behind the bar).
-   * @default 'bright', or 'dim' in dark mode
+   * How bright the content behind the glass is (`adaptive`: by what's
+   * behind the bar, see `useBackdropTone`).
+   * @default the color scheme's
    */
   context?: GlassContextValue;
   /**

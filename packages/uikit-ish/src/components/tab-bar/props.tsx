@@ -2,7 +2,7 @@ import type { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import type { Properties } from 'csstype';
 import type { ComponentProps } from 'react';
 
-import type { GlassContext } from '../glass/main.js';
+import type { GlassContextValue } from '../glass/main.js';
 import type { SecondaryClickProps } from '../utils/main.js';
 
 export type Size = 'compact' | 'regular';
@@ -69,10 +69,11 @@ export type TabBarListProps = BaseTabs.List.Props & {
    */
   collapsedPosition?: CollapsedPosition;
   /**
-   * Brightness of the content behind the glass.
-   * @default 'bright', or 'dim' in dark mode
+   * How bright the content behind the glass is (`adaptive`: by what's
+   * behind it, see `useBackdropTone`).
+   * @default the color scheme's
    */
-  context?: GlassContext;
+  context?: GlassContextValue;
   /**
    * A size class: `compact` is the phone tab bar (content stacked),
    * `regular` the tablet tab bar (content in a row).
@@ -150,10 +151,11 @@ export type AccessoryVisibility = 'both' | 'collapsed' | 'expanded';
 
 export type TabBarAccessoryProps = ComponentProps<'div'> & {
   /**
-   * Brightness of the content behind the glass (as the list's).
-   * @default 'bright', or 'dim' in dark mode
+   * How bright the content behind the glass is (as the list's;
+   * `adaptive`: by what's behind it).
+   * @default the color scheme's
    */
-  context?: GlassContext;
+  context?: GlassContextValue;
   /**
    * The bar's states it shows in; fading out and in as the bar collapses
    * and expands, unless `both`.

@@ -4,6 +4,7 @@ import {
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
+import { PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
 
 // Its props, for the parts page (all) and the overview (its key ones).
@@ -57,14 +58,17 @@ export const pageControlRows: readonly PropRow[] = [
   ],
   [
     'context',
-    union('bright', 'dim', 'background-bright', 'background-dim', 'adaptive'),
+    union('bright', 'dim', 'adaptive'),
+    <>the toolbar’s, or the color scheme’s</>,
     <>
-      the toolbar’s, or <code>bright</code> (<code>dim</code> in dark mode)
-    </>,
-    <>
-      How bright the content behind its glass is: a plain page, or a background
-      of the app’s own (for example a picture). <code>adaptive</code> follows
-      what’s behind it.
+      How bright the content behind its glass is: <code>bright</code> (light
+      glass) or <code>dim</code> (dark glass). <code>adaptive</code> follows
+      what’s behind it (see{' '}
+      <PartLink
+        page="tokens"
+        part="useBackdropTone"
+      />
+      ).
     </>,
   ],
   [

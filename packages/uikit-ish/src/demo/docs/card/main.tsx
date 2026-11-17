@@ -1,9 +1,16 @@
 import './style.css';
 
-import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
+import {
+  FunctionComponent,
+  ReactNode,
+  type RefObject,
+  useMemo,
+  useState,
+} from 'react';
 
 import {
   Button,
+  type CardActions,
   Grid,
   type GridReorderHandle,
   type GridSize,
@@ -38,6 +45,8 @@ import { propOptionsRoot } from './props.js';
  * opened one, the cards' own state. The demo's, as an app keeps it.
  */
 export type CardsStageState = {
+  /** The doorbell's actions (see `doorbellCard`). */
+  doorbell: RefObject<CardActions | null>;
   editing: boolean;
   expanded: ReadonlySet<string>;
   handle: GridReorderHandle;
@@ -65,6 +74,13 @@ export const useCardsStage = (
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [opened, setOpened] = useState<string | undefined>(undefined);
   const [states, setStates] = useState(cardStatesInitial);
+  // (The doorbell's actions: a ref, made once, shown by name in the code,
+  // as an app defines it.)
+  const [doorbell] = useState(() => {
+    const ref: RefObject<CardActions | null> = { current: null };
+    codeLabel(ref, 'doorbell', 'const doorbell = useRef(null);');
+    return ref;
+  });
   const handle = Grid.useCreateReorderHandle({
     onReorder: (change) => {
       addLog(`move ${String(change.items[0]?.name)}`);
@@ -82,6 +98,7 @@ export const useCardsStage = (
   );
 
   return {
+    doorbell,
     editing,
     expanded,
     handle,
@@ -200,6 +217,7 @@ export const cardsStage = (
                     }
                   >
                     {cardOf(kind, {
+                      doorbell: stage.doorbell,
                       expansion: canExpand
                         ? {
                             isExpanded,

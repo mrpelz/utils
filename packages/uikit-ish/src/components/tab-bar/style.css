@@ -620,17 +620,11 @@
       --uikit-tab-bar-active-color: light-dark(var(--color-ui-primary), #fff);
     }
 
-    &:where([data-size='regular']):where(
-        [data-glass-context='bright'],
-        [data-glass-context='background-bright']
-      ) {
+    &:where([data-size='regular'][data-glass-context='bright']) {
       --uikit-tab-bar-active-color: var(--color-ui-primary);
     }
 
-    &:where([data-size='regular']):where(
-        [data-glass-context='dim'],
-        [data-glass-context='background-dim']
-      ) {
+    &:where([data-size='regular'][data-glass-context='dim']) {
       --uikit-tab-bar-active-color: #fff;
     }
 

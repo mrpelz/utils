@@ -3,6 +3,7 @@
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 
@@ -20,6 +21,7 @@ const logSnapPointChange = (addLog: AddLog) =>
 export const getPropOptionsRoot = (addLog: AddLog) => ({
   className: commonPropOptions.className,
   style: commonPropOptions.style,
+  ...glassSurfacePropOptions,
   defaultSnapPoint: [undefined, 'header', 'peek', 'details', 'all'] as const,
   snapPoint: [undefined, 'header', 'peek', 'details', 'all'] as const,
   onSnapPointChange: logSnapPointChange(addLog),

@@ -4,6 +4,7 @@ import { Button } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 
@@ -129,4 +130,7 @@ export const propOptionsOverviewPositioner = {
   align: [undefined, 'start', 'center', 'end'] as const,
 };
 
-export { commonPropOptions as propOptionsPopup } from '../../tooling/frame/prop-control.js';
+export const propOptionsPopup = {
+  ...commonPropOptions,
+  ...glassSurfacePropOptions,
+};

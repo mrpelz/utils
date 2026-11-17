@@ -1,20 +1,43 @@
 import type { useRender } from '@base-ui/react/use-render';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ComponentProps, ReactNode, RefObject } from 'react';
 
+import type { GlassSurfaceProps } from '../glass/main.js';
 import type { GridCornerButtonProps, GridSize } from '../grid/main.js';
 
 /** A card's corner button: a `Grid.CornerButton` (see `Card.CornerButton`). */
 export type CardCornerButtonProps = GridCornerButtonProps;
 
-export type CardRootProps = useRender.ComponentProps<'div'> & {
+/** A card's actions (see `CardRootProps.actionsRef`). */
+export type CardActions = {
   /**
-   * Whether it's bright, as a card whose switch is on: e.g. a group of
-   * lights, at least one of them on. A switch in it that's on makes it
-   * bright too.
-   * @default false
+   * Lights it up as `active` does, for a moment, and fades it back: for
+   * something that happened, for example a doorbell rung, told by the app's
+   * server.
    */
-  active?: boolean;
+  flash: () => void;
 };
+
+export type CardRootProps = useRender.ComponentProps<'div'> &
+  GlassSurfaceProps & {
+    /** Its actions (`flash`), for the app to call from anywhere. */
+    actionsRef?: RefObject<CardActions | null>;
+    /**
+     * Whether what it switches is on (`true`, lit) or off (`false`, dark
+     * glass, in both color schemes), so it can be told at a glance: e.g. a
+     * group of lights, at least one of them on. Left out, it isn't
+     * switchable (e.g. a sensor's): its glass by the color scheme (or its
+     * `context`). A switch in it makes it switchable, by its state.
+     * @default not switchable (or by its switch)
+     */
+    active?: boolean;
+    /**
+     * Whether it's a momentary button: a press flashes it (see `actionsRef`),
+     * for a press with no state of its own, for example a chime or “all
+     * lights off”. Needs an `onClick`.
+     * @default false
+     */
+    momentary?: boolean;
+  };
 
 export type CardSymbolProps = ComponentProps<'span'>;
 

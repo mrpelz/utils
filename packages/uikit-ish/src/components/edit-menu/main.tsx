@@ -14,6 +14,11 @@ import {
 } from 'react';
 
 import {
+  colorSchemeStyle,
+  type GlassSurfaceProps,
+  useGlassScheme,
+} from '../glass/main.js';
+import {
   createOpenSubmenus,
   dragOverItems,
   Menu,
@@ -25,6 +30,7 @@ import {
   useSubmenuOutsidePress,
   useSubmenuToggle,
 } from '../menu/main.js';
+import { ColorSchemeScope } from '../settings/main.js';
 import {
   cn,
   MovingHighlight,
@@ -32,6 +38,7 @@ import {
   useCollision,
   useForwardedRef,
   useGrowAvoidance,
+  withStyle,
 } from '../utils/main.js';
 import type {
   EditMenuPositionerProps,
@@ -340,52 +347,57 @@ const useTouchDrag = (
 const highlightSelectors = [':scope > [data-highlighted]:not([aria-haspopup])'];
 
 /** The edit menu's glass capsule (the medium glass). */
-const Popup = forwardRef<HTMLDivElement, Omit<BaseMenu.Popup.Props, 'ref'>>(
-  ({ className, children, ...props }, forwardedRef) => {
-    const ref = useForwardedRef(forwardedRef);
-    const scrollerRef = useRef<HTMLDivElement>(null);
-    useKeepSelection(ref);
-    useOverflow(scrollerRef);
-    useTouchDrag(ref, scrollerRef);
+const Popup = forwardRef<
+  HTMLDivElement,
+  Omit<BaseMenu.Popup.Props, 'ref'> & GlassSurfaceProps
+>(({ className, children, context, style, ...props }, forwardedRef) => {
+  const ref = useForwardedRef(forwardedRef);
+  // Its glass's tone, its content's color scheme (see Glass).
+  const scheme = useGlassScheme(ref, context);
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  useKeepSelection(ref);
+  useOverflow(scrollerRef);
+  useTouchDrag(ref, scrollerRef);
 
-    return (
-      // 42px high, actions from 20px, the “more” button 4px
-      // from the end; at most as wide as the space Base UI's positioner finds.
-      <BaseMenu.Popup
-        ref={ref}
-        {...props}
-        data-edit-menu-part="popup"
-        className={cn(
-          'uikit-edit-menu-popup uikit-glass-medium uikit-popup-transition',
-          className,
-        )}
-      >
-        {/* The actions, faded at the ends with more actions beyond (see
+  return (
+    // 42px high, actions from 20px, the “more” button 4px
+    // from the end; at most as wide as the space Base UI's positioner finds.
+    <BaseMenu.Popup
+      ref={ref}
+      data-color-scheme={scheme}
+      {...props}
+      data-edit-menu-part="popup"
+      style={withStyle(colorSchemeStyle(scheme), style)}
+      className={cn(
+        'uikit-edit-menu-popup uikit-glass-medium uikit-popup-transition',
+        className,
+      )}
+    >
+      {/* The actions, faded at the ends with more actions beyond (see
            useOverflow), the space at the end kept for the “more” button: it's
            positioned by the popup (beyond the scroller's clipping and
            scrolling), so actions never scroll beneath it, but the fades' mask
            covers it, too. */}
-        <div
-          className="uikit-edit-menu-actions"
-          data-edit-menu-part="actions"
-        >
-          {/* The actions' row; too narrow for them, a scroll container (only
+      <div
+        className="uikit-edit-menu-actions"
+        data-edit-menu-part="actions"
+      >
+        {/* The actions' row; too narrow for them, a scroll container (only
              then: its content blends with the glass otherwise, see Popup). */}
-          <div
-            ref={scrollerRef}
-            className="uikit-edit-menu-scroller"
-            data-menu-part="scroller"
-          >
-            {children}
-            {/* The selection, moving between actions (not the “more”
+        <div
+          ref={scrollerRef}
+          className="uikit-edit-menu-scroller"
+          data-menu-part="scroller"
+        >
+          <ColorSchemeScope colorScheme={scheme}>{children}</ColorSchemeScope>
+          {/* The selection, moving between actions (not the “more”
                 circle, which shows its own). */}
-            <MovingHighlight selectors={highlightSelectors} />
-          </div>
+          <MovingHighlight selectors={highlightSelectors} />
         </div>
-      </BaseMenu.Popup>
-    );
-  },
-);
+      </div>
+    </BaseMenu.Popup>
+  );
+});
 
 const Item = forwardRef<
   HTMLElement,

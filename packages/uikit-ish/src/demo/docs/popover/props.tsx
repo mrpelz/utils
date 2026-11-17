@@ -4,6 +4,7 @@ import { Button, Toolbar } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 
@@ -128,6 +129,7 @@ export const propOptionsPortal = {
 
 /** `Popover.Popup`: its width the demo's class. */
 export const propOptionsPopup = {
+  ...glassSurfacePropOptions,
   ...commonPropOptions,
   className: [
     'popover-demo-popup',

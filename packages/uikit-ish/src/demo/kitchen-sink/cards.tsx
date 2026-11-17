@@ -1,16 +1,18 @@
-import { FunctionComponent, useState, useSyncExternalStore } from 'react';
+import { FunctionComponent, useState } from 'react';
 
 import {
   Button,
   Card,
   cardSizes,
   forwardClick,
+  type GlassContextValue,
   Grid,
   gridIcons,
   type GridSize,
   Header,
   List,
   Page,
+  Segmented,
   Slider,
   Switch,
   Symbol,
@@ -35,8 +37,23 @@ import {
   sfThermometerMedium,
   sfWindowShadeClosed,
 } from '../tooling/icons.js';
+import {
+  CardToneContext,
+  type Expansion,
+  lightsStore,
+  type Tile,
+  TonedCard,
+  useIsLarge,
+  useLights,
+} from './cards-shared.js';
 import { SectionHeader } from './grid-shared.js';
-import { BackButton, type SinkPages, usePush } from './shared.js';
+import { moreTiles } from './more-cards.js';
+import {
+  AdaptiveBarTitle,
+  BackButton,
+  type SinkPages,
+  usePush,
+} from './shared.js';
 
 // Cards: a home's devices as cards in a grid on a picture, every kind in
 // each of its sizes: binary displays (a door, a lock), binary controls
@@ -49,12 +66,6 @@ import { BackButton, type SinkPages, usePush } from './shared.js';
 // as they change (see tooling/flip.ts); Empty: cards with nothing but such
 // a button, the tile's own motion alone (no GSAP). Below the grid, two on
 // their own.
-
-/**
- * A card's expansion (see `CardsApp`): whether it's expanded (the app's
- * state, not stored), and asking for the other.
- */
-type Expansion = { isExpanded: boolean; onToggle: () => void };
 
 /** A temperature, one decimal place. */
 const celsius: Intl.NumberFormatOptions = {
@@ -72,9 +83,10 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
   expansion,
 }) => {
   const [target, setTarget] = useState(22);
-  const isExpanded = expansion?.isExpanded === true;
+  // (Large (expanded, or resized so): its slider.)
+  const isExpanded = useIsLarge();
   return (
-    <Card.Root
+    <TonedCard
       // (Small, a press anywhere on it as on its button; expanded, its
       // slider's, the button alone expanding it no more.)
       onClick={
@@ -125,7 +137,7 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
           onClick={expansion.onToggle}
         />
       ) : null}
-    </Card.Root>
+    </TonedCard>
   );
 };
 
@@ -136,13 +148,13 @@ const StateCard: FunctionComponent<{
   name: string;
   words: readonly [on: string, off: string];
 }> = ({ icons, isOn, name, words }) => (
-  <Card.Root active={isOn}>
+  <TonedCard active={isOn}>
     <Card.Symbol>
       <Symbol icon={isOn ? icons[0] : icons[1]} />
     </Card.Symbol>
     <Card.Title>{name}</Card.Title>
     <Card.Value>{isOn ? words[0] : words[1]}</Card.Value>
-  </Card.Root>
+  </TonedCard>
 );
 
 /** A binary control: a switch, the whole card toggling it. */
@@ -153,7 +165,7 @@ const SwitchCard: FunctionComponent<{
 }> = ({ defaultOn = false, icons, name }) => {
   const [isOn, setIsOn] = useState(defaultOn);
   return (
-    <Card.Root
+    <TonedCard
       active={isOn}
       onClick={forwardClick('[role=switch]')}
     >
@@ -169,7 +181,7 @@ const SwitchCard: FunctionComponent<{
       >
         <Switch.Thumb />
       </Switch.Root>
-    </Card.Root>
+    </TonedCard>
   );
 };
 
@@ -180,7 +192,7 @@ const ValueCard: FunctionComponent<{
   name: string;
   value: number;
 }> = ({ format, icon, name, value }) => (
-  <Card.Root>
+  <TonedCard>
     <Card.Symbol>
       <Symbol icon={icon} />
     </Card.Symbol>
@@ -189,7 +201,7 @@ const ValueCard: FunctionComponent<{
       format={format}
       value={value}
     />
-  </Card.Root>
+  </TonedCard>
 );
 
 /**
@@ -204,12 +216,24 @@ const SliderCard: FunctionComponent<{
   min: number;
   name: string;
   step?: number;
+  /** Switchable: on above its minimum (e.g. a dimmer; not blinds). */
+  switchable?: boolean;
   tint?: string;
-}> = ({ defaultValue, format, icon, max, min, name, step, tint }) => {
+}> = ({
+  defaultValue,
+  format,
+  icon,
+  max,
+  min,
+  name,
+  step,
+  switchable = false,
+  tint,
+}) => {
   const orientation = useCardOrientation();
   const [value, setValue] = useState(defaultValue);
   return (
-    <Card.Root>
+    <TonedCard active={switchable ? value > min : undefined}>
       <Card.Symbol>
         <Symbol icon={icon} />
       </Card.Symbol>
@@ -235,7 +259,7 @@ const SliderCard: FunctionComponent<{
         <Slider.Label>{name}</Slider.Label>
         <Slider.Value />
       </Slider.Root>
-    </Card.Root>
+    </TonedCard>
   );
 };
 
@@ -243,30 +267,6 @@ const SliderCard: FunctionComponent<{
  * The lights, on or off: the app's state, shared by their card and their
  * page (two pages of the kitchen sink's, so kept outside both).
  */
-type Lights = Readonly<Record<string, boolean>>;
-const lightsStore = (() => {
-  let lights: Lights = {
-    'Ceiling Light': true,
-    'Desk Lamp': false,
-    'Floor Lamp': true,
-  };
-  const listeners = new Set<() => void>();
-  return {
-    get: () => lights,
-    set: (name: string, isOn: boolean) => {
-      lights = { ...lights, [name]: isOn };
-      for (const listener of listeners) listener();
-    },
-    subscribe: (listener: () => void) => {
-      listeners.add(listener);
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-  };
-})();
-const useLights = () =>
-  useSyncExternalStore(lightsStore.subscribe, lightsStore.get);
 
 /**
  * The lights: how many are on, bright while any is (`active`); its corner
@@ -277,7 +277,7 @@ const LightsCard: FunctionComponent = () => {
   const push = usePush();
   const onCount = Object.values(useLights()).filter(Boolean).length;
   return (
-    <Card.Root
+    <TonedCard
       active={onCount > 0}
       onClick={forwardClick('[data-card-part=corner-button]')}
     >
@@ -291,7 +291,7 @@ const LightsCard: FunctionComponent = () => {
         icon={gridIcons.drillIn}
         onClick={() => push('card/lights')}
       />
-    </Card.Root>
+    </TonedCard>
   );
 };
 
@@ -336,7 +336,7 @@ const CameraCard: FunctionComponent = () => {
   const item = useGridItem();
   const isOpen = item?.open === true;
   return (
-    <Card.Root
+    <TonedCard
       onClick={
         isOpen
           ? undefined
@@ -367,7 +367,7 @@ const CameraCard: FunctionComponent = () => {
         visible={isOpen}
         onClick={() => item?.setOpen(false)}
       />
-    </Card.Root>
+    </TonedCard>
   );
 };
 
@@ -380,7 +380,7 @@ const EmptyExpandingCard: FunctionComponent<{
   expansion?: Expansion;
   name: string;
 }> = ({ expansion, name }) => (
-  <Card.Root>
+  <TonedCard>
     {expansion ? (
       <Card.CornerButton
         mirrored
@@ -390,7 +390,7 @@ const EmptyExpandingCard: FunctionComponent<{
         onClick={expansion.onToggle}
       />
     ) : null}
-  </Card.Root>
+  </TonedCard>
 );
 
 /**
@@ -401,7 +401,7 @@ const EmptyOpeningCard: FunctionComponent<{ name: string }> = ({ name }) => {
   const item = useGridItem();
   const isOpen = item?.open === true;
   return (
-    <Card.Root>
+    <TonedCard>
       <Card.CornerButton
         aria-label={name}
         icon={gridIcons.open}
@@ -415,24 +415,8 @@ const EmptyOpeningCard: FunctionComponent<{ name: string }> = ({ name }) => {
         visible={isOpen}
         onClick={() => item?.setOpen(false)}
       />
-    </Card.Root>
+    </TonedCard>
   );
-};
-
-/**
- * A tile: a card's kind (its sizes), its size, the card in it; its size
- * expanded, if it expands (see `Expansion`).
- */
-type Tile = {
-  /** Room around its tile (a `Grid.Area`), its tile centered in it. */
-  area?: GridSize;
-  card: FunctionComponent<{ expansion?: Expansion }>;
-  expandedSize?: GridSize;
-  kind: keyof typeof cardSizes;
-  name: string;
-  /** Its size opened above the page (see `CameraCard`). */
-  openSize?: GridSize;
-  size: GridSize;
 };
 
 const percent: Intl.NumberFormatOptions = {
@@ -468,6 +452,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <SliderCard
+          switchable
           defaultValue={0.6}
           format={percent}
           icon={sfLightbulbFill}
@@ -640,6 +625,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       size: '2x1',
     },
   ],
+  'More Kinds': moreTiles,
   Security: [
     {
       card: () => (
@@ -685,6 +671,8 @@ const SectionHeaderAlone: FunctionComponent = () => (
 /** The page: a bar with Back and Edit, the rooms below it. */
 const CardsApp: FunctionComponent = () => {
   const [editing, setEditing] = useState(false);
+  // (The cards' glass context, to compare: the scheme's, forced, adaptive.)
+  const [tone, setTone] = useState<string>('scheme');
   const [rooms, setRooms] = useState(roomsInitial);
   // (Which are expanded: the app's state, not stored; none while editing.)
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
@@ -731,9 +719,9 @@ const CardsApp: FunctionComponent = () => {
             <Toolbar.Leading>
               <BackButton />
             </Toolbar.Leading>
-            <Toolbar.Title>
+            <AdaptiveBarTitle>
               <span>Cards</span>
-            </Toolbar.Title>
+            </AdaptiveBarTitle>
             <Toolbar.Trailing>
               <Toolbar.Button
                 prominent={editing}
@@ -756,65 +744,85 @@ const CardsApp: FunctionComponent = () => {
           <Header.LargeTitle>
             <span>Cards</span>
           </Header.LargeTitle>
-          <Grid.Root
-            className="kitchen-sink-grid"
-            editing={editing}
-            reorderHandle={handle}
+          <div className="kitchen-sink-tone">
+            <Segmented.Root
+              aria-label="Cards’ glass"
+              value={tone}
+              onValueChange={(next) => setTone(String(next))}
+            >
+              <Segmented.Item value="scheme">Scheme</Segmented.Item>
+              <Segmented.Item value="bright">Light</Segmented.Item>
+              <Segmented.Item value="dim">Dark</Segmented.Item>
+              <Segmented.Item value="adaptive">Adaptive</Segmented.Item>
+              <Segmented.Highlight />
+            </Segmented.Root>
+          </div>
+          <CardToneContext.Provider
+            value={tone === 'scheme' ? undefined : (tone as GlassContextValue)}
           >
-            {Object.entries(rooms).map(([room, tiles]) => (
-              <Grid.Section
-                key={room}
-                dropName={room}
-                reorderHandle={handle}
-              >
-                <SectionHeader title={room} />
-                {tiles.map(
-                  ({
-                    area,
-                    card: CardOf,
-                    expandedSize,
-                    kind,
-                    name,
-                    openSize,
-                    size,
-                  }) => {
-                    const isExpanded = expanded.has(name);
-                    // (Expanding only where that's larger than it is.)
-                    const canExpand =
-                      expandedSize !== undefined && expandedSize !== size;
-                    return (
-                      <Grid.Item
-                        key={name}
-                        dropName={name}
-                        openLabel={openSize ? name : undefined}
-                        openSize={openSize}
-                        reorderHandle={handle}
-                        size={isExpanded && expandedSize ? expandedSize : size}
-                        supportedSizes={cardSizes[kind]}
-                        onSizeChange={(next) => resize(name, next)}
-                      >
-                        <CardOf
-                          expansion={
-                            canExpand
-                              ? { isExpanded, onToggle: () => toggle(name) }
-                              : undefined
+            <Grid.Root
+              className="kitchen-sink-grid"
+              editing={editing}
+              reorderHandle={handle}
+            >
+              {Object.entries(rooms).map(([room, tiles]) => (
+                <Grid.Section
+                  key={room}
+                  dropName={room}
+                  reorderHandle={handle}
+                >
+                  <SectionHeader title={room} />
+                  {tiles.map(
+                    ({
+                      area,
+                      card: CardOf,
+                      expandedSize,
+                      kind,
+                      name,
+                      openSize,
+                      size,
+                      sizes,
+                    }) => {
+                      const isExpanded = expanded.has(name);
+                      // (Expanding only where that's larger than it is.)
+                      const canExpand =
+                        expandedSize !== undefined && expandedSize !== size;
+                      return (
+                        <Grid.Item
+                          key={name}
+                          dropName={name}
+                          openLabel={openSize ? name : undefined}
+                          openSize={openSize}
+                          reorderHandle={handle}
+                          supportedSizes={sizes ?? cardSizes[kind]}
+                          size={
+                            isExpanded && expandedSize ? expandedSize : size
                           }
-                        />
-                        <Grid.ResizeHandle />
-                        {/* (Room around it: expanded, it grows in there,
+                          onSizeChange={(next) => resize(name, next)}
+                        >
+                          <CardOf
+                            expansion={
+                              canExpand
+                                ? { isExpanded, onToggle: () => toggle(name) }
+                                : undefined
+                            }
+                          />
+                          <Grid.ResizeHandle />
+                          {/* (Room around it: expanded, it grows in there,
                             nothing around it moving.) */}
-                        {area ? (
-                          <Grid.Area defaultSize={area}>
-                            <Grid.ResizeHandle />
-                          </Grid.Area>
-                        ) : null}
-                      </Grid.Item>
-                    );
-                  },
-                )}
-              </Grid.Section>
-            ))}
-          </Grid.Root>
+                          {area ? (
+                            <Grid.Area defaultSize={area}>
+                              <Grid.ResizeHandle />
+                            </Grid.Area>
+                          ) : null}
+                        </Grid.Item>
+                      );
+                    },
+                  )}
+                </Grid.Section>
+              ))}
+            </Grid.Root>
+          </CardToneContext.Provider>
           {/* (Cards on their own: no grid, sized by their boxes.) */}
           <div className="kitchen-sink-cards-alone">
             <SectionHeaderAlone />

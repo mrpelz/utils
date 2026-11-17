@@ -724,6 +724,11 @@ export const usePartControls = (
   return [controls, props, toExternalState];
 };
 
+/** A glass surface's `context` (see Glass): forced, adaptive. */
+export const glassSurfacePropOptions = {
+  context: [undefined, 'bright', 'dim', 'adaptive'] as const,
+};
+
 export const commonPropOptions = {
   className: [undefined, 'some-custom--class'] as const,
   style: [

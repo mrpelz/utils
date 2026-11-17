@@ -8,6 +8,9 @@ import {
   useState,
 } from 'react';
 
+import { useSettings } from '../settings/main.js';
+import type { ColorScheme } from '../utils/main.js';
+import { useBackdropTone } from './backdrop.js';
 import type {
   GlassBackgroundProps,
   GlassContext,
@@ -15,12 +18,27 @@ import type {
   GlassMode,
 } from './props.js';
 
+export {
+  type BackdropTone,
+  type BackdropToneOptions,
+  resampleBackdrops,
+  useBackdropTone,
+} from './backdrop.js';
+export {
+  type BackdropArea,
+  backdropGridOf,
+  type BackdropMarkerValue,
+  type ImageBackdropMarkerOptions,
+  useBackdropMarker,
+  useImageBackdropMarker,
+} from './marker.js';
 export type {
   GlassBackgroundProps,
   GlassContext,
   GlassContextValue,
   GlassMode,
   GlassModeProps,
+  GlassSurfaceProps,
 } from './props.js';
 
 // Glass building blocks shared by components: glass materials behind
@@ -28,144 +46,52 @@ export type {
 // and selections), styled by style.css. Tokens and their sources are in
 // `styles.css` (`--glass-ui-*`).
 
-// What's behind: its luminance below this, the glass turns dim; above the
-// other, bright; between, it stays (Puppertino's).
-const toDim = 0.35;
-const toBright = 0.85;
-
-let colorCanvas: CanvasRenderingContext2D | null | undefined;
-
-// An sRGB channel (0 to 255), linear.
-const linear = (channel: number) => {
-  const value = channel / 255;
-  return value <= 0.040_45 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-};
-
-// The context for what's behind (its luminance), from the last one.
-const nextContext = (
-  luminance: number,
-  last: GlassContext | undefined,
-): GlassContext => {
-  if (luminance < toDim) return 'background-dim';
-  if (luminance > toBright) return 'background-bright';
-  return last ?? (luminance < 0.6 ? 'background-dim' : 'background-bright');
-};
-
-/** A CSS color's relative luminance (0 to 1) and alpha. */
-const luminanceOf = (color: string) => {
-  colorCanvas ??= document.createElement('canvas').getContext('2d');
-  if (!colorCanvas) return undefined;
-  colorCanvas.fillStyle = '#000';
-  colorCanvas.fillStyle = color;
-  const normalized = colorCanvas.fillStyle;
-  const channels = normalized.startsWith('#')
-    ? [1, 3, 5].map((index) =>
-        Number.parseInt(normalized.slice(index, index + 2), 16),
-      )
-    : (normalized.match(/[\d.]+/gu) ?? []).map(Number);
-  const [red = 0, green = 0, blue = 0, alpha = 1] = channels;
-  return {
-    alpha,
-    luminance:
-      0.2126 * linear(red) + 0.7152 * linear(green) + 0.0722 * linear(blue),
-  };
-};
-
-const colorPattern =
-  /(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\([^)]*\)|#[\da-f]{3,8}\b/giu;
-
-// The colors an element's background shows: its color, or its gradients'
-// (undefined: an image, unknown; empty: none).
-const backgroundColorsOf = (element: Element): string[] | undefined => {
-  const { backgroundColor, backgroundImage } = getComputedStyle(element);
-  if (backgroundImage.includes('url(')) return undefined;
-  return [
-    ...(backgroundImage === 'none'
-      ? []
-      : (backgroundImage.match(colorPattern) ?? [])),
-    backgroundColor,
-  ].filter((color) => (luminanceOf(color)?.alpha ?? 0) >= 0.3);
-};
-
-/** The luminance of what's behind an element (its center and corners). */
-const luminanceBehind = (element: Element) => {
-  const { bottom, left, right, top } = element.getBoundingClientRect();
-  const inset = 4;
-  const points = [
-    [(left + right) / 2, (top + bottom) / 2],
-    [left + inset, top + inset],
-    [right - inset, top + inset],
-    [left + inset, bottom - inset],
-    [right - inset, bottom - inset],
-  ];
-  const values: number[] = [];
-  for (const [x = 0, y = 0] of points) {
-    const stack = document.elementsFromPoint(x, y);
-    // Below the element (not what's over it, nor the element itself), in
-    // paint order (the page's layers, not only its ancestors): the first
-    // with a background.
-    const at = stack.findIndex((candidate) => element.contains(candidate));
-    let colors: string[] | undefined = [];
-    for (const candidate of stack.slice(at === -1 ? 0 : at)) {
-      if (element.contains(candidate)) continue;
-      colors = backgroundColorsOf(candidate);
-      if (colors?.length !== 0) break;
-    }
-    if (!colors) continue;
-    for (const color of colors) {
-      const value = luminanceOf(color)?.luminance;
-      if (value !== undefined) values.push(value);
-    }
-  }
-  return values.length === 0
-    ? undefined
-    : values.reduce((sum, value) => sum + value, 0) / values.length;
-};
-
 /**
- * The glass context to draw with: the given one, or (`adaptive`) one by
- * what's behind the element, sampled as the page scrolls or resizes.
+ * The glass context to draw with: the given one, or (`adaptive`) the tone of
+ * what's behind the element (see `useBackdropTone`), held for `dwell` ms
+ * before it flips (large surfaces); none given, `undefined` (by the color
+ * scheme). Reduced transparency (opaque glass), never sampled.
  */
 export const useGlassContext = (
   ref: { current: Element | null },
   context: GlassContextValue | undefined,
+  dwell = 0,
 ): GlassContext | undefined => {
-  const [sampled, setSampled] = useState<GlassContext | undefined>(undefined);
-
-  useLayoutEffect(() => {
-    const { current: element } = ref;
-    if (context !== 'adaptive' || !element) return undefined;
-
-    let frame = 0;
-    let last: GlassContext | undefined;
-    const update = () => {
-      frame = 0;
-      const luminance = luminanceBehind(element);
-      if (luminance === undefined) return;
-      const next = nextContext(luminance, last);
-      if (next === last) return;
-      last = next;
-      setSampled(next);
-    };
-    const schedule = () => {
-      frame ||= requestAnimationFrame(update);
-    };
-    update();
-    addEventListener('scroll', schedule, { capture: true, passive: true });
-    addEventListener('resize', schedule);
-    const observer = new ResizeObserver(schedule);
-    observer.observe(element);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      removeEventListener('scroll', schedule, { capture: true });
-      removeEventListener('resize', schedule);
-      observer.disconnect();
-    };
-  }, [context, ref]);
-
+  const { reducedTransparency } = useSettings();
+  const sampled = useBackdropTone(ref, {
+    dwell,
+    enabled: context === 'adaptive' && !reducedTransparency,
+  });
   return context === 'adaptive' ? sampled : context;
 };
+
+/** How long a surface's sampled tone holds before it flips (ms). */
+const surfaceDwell = 150;
+
+/**
+ * A glass surface's color scheme by its `context` (e.g. a sheet's, a
+ * card's): bright, light; dim, dark (sampled, `adaptive`: held a moment,
+ * see `useGlassContext`); none, `undefined` (the page's). Shown with
+ * `data-color-scheme` and `colorSchemeStyle` on its element, and `ColorSchemeScope` around its
+ * content (for `useSettings` and portals opened from it).
+ */
+export const useGlassScheme = (
+  ref: { current: Element | null },
+  context: GlassContextValue | undefined,
+): ColorScheme | undefined => {
+  const tone = useGlassContext(ref, context, surfaceDwell);
+  if (tone === undefined) return undefined;
+  return tone === 'bright' ? 'light' : 'dark';
+};
+
+/**
+ * An element's style showing a color scheme of its own (for `withStyle`,
+ * beside its `data-color-scheme`; none, none).
+ */
+export const colorSchemeStyle = (
+  colorScheme: ColorScheme | undefined,
+): Record<string, string> =>
+  colorScheme === undefined ? {} : { 'color-scheme': colorScheme };
 
 /**
  * The context of the glass bar a component is in (e.g. a `Toolbar`'s), for

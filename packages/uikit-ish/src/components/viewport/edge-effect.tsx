@@ -81,6 +81,9 @@ const useMeasure = (
 
     const measure = () => {
       frame = 0;
+      // (Not rendered, e.g. a hidden tab's page: kept as last measured,
+      // its sizes none, see the observer below.)
+      if (element.getClientRects().length === 0) return;
       const progress = String(progressOf(element, edge));
       // (Also the scroller's, at its start: e.g. a sheet's content masked
       // under its header as far, see Sheet.)
@@ -112,7 +115,12 @@ const useMeasure = (
 
     measure();
     element.addEventListener('scroll', schedule, { passive: true });
-    const observer = new ResizeObserver(schedule);
+    // (Resized, or shown again: measured before it paints, so a page shown
+    // (e.g. a tab's) doesn't paint a frame without its effects first.)
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      measure();
+    });
     observer.observe(element);
     const unsubscribe = subscribeEdgeElements(schedule);
     return () => {

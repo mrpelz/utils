@@ -5,8 +5,24 @@ import '../grid/style.css';
 import './style.css';
 
 import { useRender } from '@base-ui/react/use-render';
-import { forwardRef, type MouseEvent, type RefObject } from 'react';
+import {
+  forwardRef,
+  type MouseEvent,
+  type Ref,
+  type RefObject,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
+import {
+  colorSchemeStyle,
+  useBackdropTone,
+  useGlassScheme,
+} from '../glass/main.js';
 import {
   Grid,
   type GridItemLayoutChange,
@@ -14,8 +30,10 @@ import {
   useGridItem,
   useGridItemLayout,
 } from '../grid/main.js';
-import { cn, useForwardedRef } from '../utils/main.js';
+import { ColorSchemeScope } from '../settings/main.js';
+import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
+  CardActions,
   CardCornerButtonProps,
   CardOrientation,
   CardRootProps,
@@ -26,6 +44,7 @@ import type {
 } from './props.js';
 
 export type {
+  CardActions,
   CardCornerButtonProps,
   CardOrientation,
   CardRootProps,
@@ -143,6 +162,81 @@ const useCornersFollowing = (rootRef: RefObject<HTMLElement | null>) => {
 };
 
 /**
+ * How long a flashed card stays lit, and how long it fades back (see
+ * style.css).
+ */
+const flashTime = 150;
+const fadeTime = 500;
+
+/**
+ * The state of a switch in it (its layout's, see style.css): on, off, or
+ * none (no switch), as it changes (its `data-checked`, Switch's), before it
+ * paints.
+ */
+const useSwitchState = (rootRef: RefObject<HTMLElement | null>) => {
+  const [state, setState] = useState<boolean | undefined>(undefined);
+  useLayoutEffect(() => {
+    const { current: root } = rootRef;
+    if (!root) return undefined;
+    const read = () => {
+      const control = root.querySelector<HTMLElement>(
+        ':scope > .uikit-card-frame > .uikit-card-layout > .uikit-switch-root',
+      );
+      setState(control ? Object.hasOwn(control.dataset, 'checked') : undefined);
+    };
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(root, {
+      attributeFilter: ['data-checked'],
+      childList: true,
+      subtree: true,
+    });
+    return () => observer.disconnect();
+  }, [rootRef]);
+  return state;
+};
+
+/**
+ * A card flashed (by a press on a momentary one, or its `actionsRef`'s
+ * `flash`): lit as if active (`data-flashing`) for a moment, then fading
+ * back (`data-fading`, see style.css); flashed again meanwhile, lit as long
+ * again.
+ */
+const useFlash = (
+  rootRef: RefObject<HTMLElement | null>,
+  actionsRef: RefObject<CardActions | null> | undefined,
+) => {
+  const timers = useRef([0, 0]);
+  const flash = useCallback(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    for (const timer of timers.current) clearTimeout(timer);
+    delete root.dataset.fading;
+    root.dataset.flashing = '';
+    timers.current[0] = window.setTimeout(() => {
+      delete root.dataset.flashing;
+      root.dataset.fading = '';
+      timers.current[1] = window.setTimeout(() => {
+        delete root.dataset.fading;
+      }, fadeTime);
+    }, flashTime);
+  }, [rootRef]);
+  useImperativeHandle(
+    // (None given: nothing set; typed as one for Preact's types.)
+    actionsRef as Ref<CardActions>,
+    () => ({ flash }),
+    [flash],
+  );
+  useEffect(
+    () => () => {
+      for (const timer of timers.current) clearTimeout(timer);
+    },
+    [],
+  );
+  return flash;
+};
+
+/**
  * The card: its glass, its parts on it; bright while `active` (or a switch
  * in it is on); pressable as a whole with an `onClick` (its feedback, see
  * style.css); in a grid's tile (its item's), inert and veiled while
@@ -150,13 +244,35 @@ const useCornersFollowing = (rootRef: RefObject<HTMLElement | null>) => {
  */
 const Root = forwardRef<HTMLDivElement, CardRootProps>(
   (
-    { active = false, children, className, onClick, render, ...props },
+    {
+      actionsRef,
+      active,
+      children,
+      className,
+      context,
+      momentary = false,
+      onClick,
+      render,
+      style,
+      ...props
+    },
     forwardedRef,
   ) => {
     const item = useGridItem();
     const isEditing = item?.editing === true;
     const ref = useForwardedRef(forwardedRef);
     useCornersFollowing(ref);
+    const flash = useFlash(ref, actionsRef);
+    // Switchable (`active` given, or a switch in it): on, lit; off, dark
+    // glass (in both schemes: its luminance telling which); else its
+    // glass's tone's (see Glass); none while editing (its veil, and its
+    // grid's controls on it, the page's, see style.css).
+    const switchState = useSwitchState(ref);
+    const state = active ?? switchState;
+    const toned = useGlassScheme(ref, context);
+    const schemeOfState = state ? 'light' : 'dark';
+    const stated = state === undefined ? toned : schemeOfState;
+    const scheme = isEditing ? undefined : stated;
     return useRender({
       defaultTagName: 'div',
       props: {
@@ -164,21 +280,32 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
         // (Its parts on a layout of its own, in a frame: what its size
         // queries ask, see style.css.)
         children: (
-          <div className="uikit-card-frame">
-            <div className="uikit-card-layout">{children}</div>
-          </div>
+          <ColorSchemeScope colorScheme={scheme}>
+            <div className="uikit-card-frame">
+              <div className="uikit-card-layout">{children}</div>
+            </div>
+          </ColorSchemeScope>
         ),
         className: cn(
           'uikit-card-root uikit-glass-medium uikit-glass-panel',
           className,
         ),
-        'data-active': active ? '' : undefined,
+        'data-active': state === true ? '' : undefined,
         'data-card-part': 'root',
+        'data-color-scheme': scheme,
+        'data-momentary': momentary ? '' : undefined,
         // (Pressed as a whole: its feedback, see style.css.)
         'data-pressable': onClick ? '' : undefined,
         'data-editing': isEditing ? '' : undefined,
         inert: isEditing || undefined,
-        onClick,
+        onClick:
+          momentary && onClick
+            ? (event: MouseEvent<HTMLDivElement>) => {
+                flash();
+                onClick(event);
+              }
+            : onClick,
+        style: withStyle(colorSchemeStyle(scheme), style),
       },
       ref,
       render,
@@ -244,12 +371,17 @@ const Value = forwardRef<HTMLSpanElement, CardValueProps>(
  * it, see `forwardClick`).
  */
 const CornerButton = forwardRef<HTMLButtonElement, CardCornerButtonProps>(
-  ({ className, onClick, visible = true, ...props }, ref) => {
+  ({ className, onClick, visible = true, ...props }, forwardedRef) => {
     const isEditing = useGridItem()?.editing === true;
+    const ref = useForwardedRef(forwardedRef);
+    // (What's right behind it, sampled: its card's glass, a lit card's, a
+    // slider's fill; its symbol dark or light on it, see style.css.)
+    const tone = useBackdropTone(ref, { enabled: visible && !isEditing });
     return (
       <Grid.CornerButton
         ref={ref}
         className={cn('uikit-card-corner-button', className)}
+        data-backdrop-tone={tone}
         data-card-part="corner-button"
         visible={visible && !isEditing}
         {...props}

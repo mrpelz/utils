@@ -5,6 +5,7 @@ import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
+  glassSurfacePropOptions,
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 
@@ -41,6 +42,7 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
 });
 
 export const propOptionsPopup = {
+  ...glassSurfacePropOptions,
   ...commonPropOptions,
   finalFocus: [undefined, false, true] as const,
 };

@@ -2,6 +2,7 @@ import {
   anchorPositioningRows,
   baseUiRows,
   code,
+  glassSurfaceRow,
   PropRow,
   union,
 } from '../../tooling/guide/props-table.js';
@@ -272,6 +273,7 @@ export const tooltipPositionerRows: readonly PropRow[] = [
 ];
 
 export const tooltipPopupRows: readonly PropRow[] = [
+  glassSurfaceRow('the tooltip'),
   [
     'children',
     'ReactNode',

@@ -126,30 +126,25 @@ export const Home = ({ editing }: { editing: boolean }) => (
 );`;
 const useGridItemLayoutCode = `import { useGridItemLayout } from '@mrpelz/uikit-ish';
 import { gsap } from 'gsap';
-import { Flip } from 'gsap/Flip';
 import { useRef } from 'react';
 
-gsap.registerPlugin(Flip);
-
-// What's in a tile, its parts moved from where they were as the tile
-// changes its box (here with GSAP's Flip, the app's own dependency).
-export const DeviceCard = ({ name, value }) => {
+// What's in a tile: its name moved from where it was as the tile changes
+// its box (here with GSAP, the app's own dependency), by a translate only:
+// laid out at its new place already, it's drawn from its old one.
+export const DeviceCard = ({ name }) => {
   const ref = useRef(null);
-  const state = useRef();
+  const before = useRef();
   useGridItemLayout({
     onBeforeChange: () => {
-      state.current = Flip.getState(ref.current.children, {
-        props: 'fontSize',
-        simple: true,
-      });
+      before.current = ref.current.getBoundingClientRect();
     },
     onAfterChange: ({ duration, elapsed }) => {
-      const timeline = Flip.from(state.current, {
-        duration: duration / 1000,
-        ease: 'power3.out',
-        props: 'fontSize',
-        simple: true,
-      }).pause();
+      const now = ref.current.getBoundingClientRect();
+      const timeline = gsap.timeline({ paused: true }).fromTo(
+        ref.current,
+        { x: before.current.left - now.left, y: before.current.top - now.top },
+        { duration: duration / 1000, ease: 'power3.out', x: 0, y: 0 },
+      );
       // In step with the tile, frame by frame.
       const follow = () => {
         timeline.time(Math.min(elapsed(), duration) / 1000);
@@ -159,9 +154,8 @@ export const DeviceCard = ({ name, value }) => {
     },
   });
   return (
-    <div ref={ref} className="device-card">
-      <span>{name}</span>
-      <span>{value}</span>
+    <div className="device-card">
+      <span ref={ref}>{name}</span>
     </div>
   );
 };`;
@@ -2250,8 +2244,8 @@ export const GridParts: FunctionComponent = () => (
           component="card"
           part="Card.CornerButton"
         />
-        ). The example below moves a card’s other parts with GSAP’s Flip; see
-        Card’s composition for it in use.
+        ). The example below moves what’s in a tile with GSAP; see Card’s
+        composition for a card’s parts moved that way.
       </li>
     </ul>
     <CodeView code={useGridItemLayoutCode} />

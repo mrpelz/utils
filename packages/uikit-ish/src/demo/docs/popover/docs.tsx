@@ -3,6 +3,7 @@ import {
   baseUiRows,
   code,
   elementRows,
+  glassSurfaceRow,
   nativeButtonRow,
   PropRow,
   union,
@@ -281,6 +282,7 @@ export const popoverPopupRows: readonly PropRow[] = [
       not move focus.
     </>,
   ],
+  glassSurfaceRow('the popover'),
   [
     'children',
     'ReactNode',

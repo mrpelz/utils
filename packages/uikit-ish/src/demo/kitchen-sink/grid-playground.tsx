@@ -16,7 +16,7 @@ import {
 } from '../../components/index.js';
 import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
 import { DenseSwitch, SectionHeader, Tile } from './grid-shared.js';
-import { BackButton, type SinkPages } from './shared.js';
+import { AdaptiveBarTitle, BackButton, type SinkPages } from './shared.js';
 
 // Grid Playground: every grid feature at once, to try and to show. Five
 // places in four sections, every tile any size, with or without an area
@@ -390,9 +390,9 @@ const GridPlayground: FunctionComponent = () => {
             <Toolbar.Leading>
               <BackButton />
             </Toolbar.Leading>
-            <Toolbar.Title>
+            <AdaptiveBarTitle>
               <span>Grid Playground</span>
-            </Toolbar.Title>
+            </AdaptiveBarTitle>
             <Toolbar.Trailing>
               <Toolbar.Button
                 onClick={() => {
