@@ -18,7 +18,6 @@ import {
   sfBellFill,
   sfHeart,
   sfHeartFill,
-  sfStar,
 } from '../tooling/icons.js';
 import { listPages } from './list.js';
 import {
@@ -348,7 +347,7 @@ const SymbolContent: FunctionComponent = () => (
           Hxg {baselineShift}{' '}
           <Symbol
             baselineShift={baselineShift}
-            icon={sfStar}
+            icon={sfHeart}
           />
         </Typography>
       ))}

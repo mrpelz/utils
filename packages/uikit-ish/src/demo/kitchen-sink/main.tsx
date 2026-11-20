@@ -94,7 +94,12 @@ const sections = (Object.keys(categories) as Category[])
   )
   .filter(([, entries]) => entries.length > 0);
 
-const firstId = sections[0]?.[1][0]?.id ?? '';
+const hashId =
+  typeof window === 'undefined' || location.hash.length <= 1
+    ? undefined
+    : location.hash.slice(1);
+
+const firstId = hashId ?? sections[0]?.[1][0]?.id ?? '';
 
 /**
  * Whether it runs as an app of its own (added to the Home Screen, or

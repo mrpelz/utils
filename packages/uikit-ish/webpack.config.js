@@ -47,8 +47,9 @@ const configDownstream = {
       publicPath,
     },
   },
+  devtool: 'source-map',
   optimization: {
-    minimize: !webpackServe,
+    minimize: false,
   },
   output: {
     assetModuleFilename: 'assets/[name][ext]',

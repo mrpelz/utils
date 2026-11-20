@@ -3,6 +3,7 @@ import './demo/tooling/shared/style.css';
 import './demo/tooling/frame/style.css';
 import './demo/tooling/guide/style.css';
 import './styles.css';
+import 'preact/debug';
 
 import hydrate from 'preact-iso/hydrate';
 
