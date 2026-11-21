@@ -81,6 +81,9 @@ util_mitmproxy:
 util_mitmproxy_0:
 	mitmweb --no-web-open-browser --set block_global=false --set termlog_verbosity=warn --set web_password="$(MITM_SLUG)" --mode "reverse:http://localhost:3000@4443";
 
+util_claude:
+	claude --resume 39433362-8325-4994-aad6-34aa81e3db0e --remote-control
+
 watch_build:
 	tsc --project tsconfig.build.json --watch
 
@@ -93,13 +96,15 @@ watch_dev_proxy:
 # The watchers in named, detached screen sessions (make-demo, make-lint,
 # make-stylelint), each quit first if it's running; attach with
 # `screen -r <name>`. Optional: make watch_screens SCREENS='demo lint'
-SCREENS ?= demo lint stylelint
+SCREENS ?= demo lint stylelint mitmproxy claude
 watch_screens:
 	@for name in $(SCREENS); do \
 		case "$$name" in \
 			demo) target=watch_build_demo ;; \
 			lint) target=watch_lint ;; \
 			stylelint) target=watch_stylelint ;; \
+			mitmproxy) target=util_mitmproxy_0 ;; \
+			claude) target=util_claude ;; \
 			*) echo "unknown screen: $$name" >&2; exit 1 ;; \
 		esac; \
 		screen -S "make-$$name" -X quit >/dev/null 2>&1; \
