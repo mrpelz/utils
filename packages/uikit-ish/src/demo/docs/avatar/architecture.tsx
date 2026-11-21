@@ -33,8 +33,9 @@ export const AvatarArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Avatar is Base UI’s, with a size and a stylesheet, plus a group of its
-        own for several people in one circle. For using it, see its{' '}
+        Avatar is Base UI’s avatar, with a size and a stylesheet. The library
+        adds a group of its own, which shows several people in one circle. To
+        learn how to use it, see its{' '}
         <a href={publicUrl('avatar/parts')}>parts</a>.
       </li>
     </ul>
@@ -49,8 +50,11 @@ export const AvatarArchitecture: FunctionComponent = () => (
       <li>
         <PartLink part="Avatar.Root" />, <PartLink part="Avatar.Image" /> and{' '}
         <PartLink part="Avatar.Fallback" /> are Base UI’s, each with a part
-        attribute and a class. Base UI decides what shows: the image once it has
-        loaded, the fallback until then or if it fails.
+        attribute and a class.
+      </li>
+      <li>
+        Base UI decides what shows. The image shows once it has loaded. The
+        fallback shows until then, or when the image fails.
       </li>
       <li>
         The root doesn’t clip, so a{' '}
@@ -58,8 +62,8 @@ export const AvatarArchitecture: FunctionComponent = () => (
           component="badge"
           part="Badge"
         />{' '}
-        placed in it can overhang its corner. The image and the fallback are
-        round themselves. The root is positioned, so it’s the badge’s containing
+        inside it can overhang its corner. The image and the fallback are round
+        by themselves. The root is positioned, so it’s the badge’s containing
         block.
       </li>
     </ul>
@@ -72,14 +76,14 @@ export const AvatarArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <code>size</code> becomes <code>--uikit-avatar-size</code>. Every
-        other measure derives from it in the stylesheet: the fallback’s text is
-        40% of it, and a group’s avatars are fractions of it. Without a size,
-        it’s 70px.
+        The <code>size</code> prop becomes <code>--uikit-avatar-size</code>.
+        Every other measure comes from it in the stylesheet. For example, the
+        fallback’s text is 40% of it, and a group’s avatars are fractions of it.
       </li>
+      <li>Without a size, an avatar is 70px.</li>
       <li>
-        The app’s <code>style</code> is merged after the size, so it can set the
-        property itself.
+        Your <code>style</code> is merged after the size, so you can set the
+        property yourself.
       </li>
     </ul>
 
@@ -91,17 +95,20 @@ export const AvatarArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Avatar.Group" /> is the library’s own: a span with{' '}
-        <code>role=&quot;group&quot;</code> on the system fill, holding up to
-        three <PartLink part="Avatar.Root" />
-        s. It has no script: the first is large at the top start, the second
-        small at the bottom end, a third smaller at the top end, and any more
-        are hidden.
+        <PartLink part="Avatar.Group" /> is the library’s own part. It’s a span
+        with <code>role=&quot;group&quot;</code> on the system fill, and it
+        holds up to three <PartLink part="Avatar.Root" />
+        s.
       </li>
       <li>
-        They’re picked by their order among avatars only (
-        <code>:nth-child(… of …)</code>), so badges in the group, which are its
-        children too, don’t shift them.
+        The group runs no script. The first avatar is large, at the top start.
+        The second is small, at the bottom end. A third is smaller still, at the
+        top end. Any more are hidden.
+      </li>
+      <li>
+        The avatars are picked by their order among avatars only (
+        <code>:nth-child(… of …)</code>). Badges in the group are its children
+        too, and this way they don’t shift the avatars.
       </li>
     </ul>
     <CodeView code={groupCode} />
@@ -114,12 +121,12 @@ export const AvatarArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> the image’s loading state, and the
-        fallback’s timing.
+        <strong>From Base UI:</strong> the image’s loading state, and when the
+        fallback shows.
       </li>
       <li>
         <strong>From the tokens:</strong> the group’s system fill. The
-        fallback’s gray gradient is fixed, the same in both color schemes.
+        fallback’s gray gradient is fixed, and the same in both color schemes.
       </li>
       <li>
         <strong>Out:</strong> a containing block for badges.

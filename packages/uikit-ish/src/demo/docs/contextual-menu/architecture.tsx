@@ -43,9 +43,9 @@ export const ContextualMenuArchitecture: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A contextual menu is a <a href={publicUrl('menu')}>Menu</a> whose
-        positioner holds a stack: what the menu is about, lifted above a dimmed
-        page, and the menu below it. That’s either a preview of your own or the
-        trigger itself. For using it, see its{' '}
+        positioner holds a stack. On top is what the menu is about, lifted above
+        a dimmed page. The menu sits below it. What’s lifted is either a preview
+        of your own, or the trigger itself. To learn how to use it, see its{' '}
         <a href={publicUrl('contextual-menu/parts')}>parts</a>.
       </li>
     </ul>
@@ -62,22 +62,25 @@ export const ContextualMenuArchitecture: FunctionComponent = () => (
         <PartLink
           component="menu"
           part="Menu.Root"
-        />{' '}
-        and a context the other parts share: whether it’s open, whether a
-        preview is given, the slot where it goes, the backdrop, and the
-        trigger’s element.
+        />
+        . It also provides a context that the other parts share. The context
+        says whether the menu is open and whether there’s a preview, and holds
+        the slot where the preview goes, the backdrop, and the trigger’s
+        element.
       </li>
       <li>
         <PartLink part="ContextualMenu.Popup" /> and{' '}
-        <PartLink part="ContextualMenu.Portal" /> are Menu’s, and its items are
-        Menu’s parts. <PartLink part="ContextualMenu.Backdrop" /> is Base UI’s
-        menu backdrop, registered with the root so the trigger can cut itself
-        out of it.
+        <PartLink part="ContextualMenu.Portal" /> are Menu’s, and so are the
+        items.
       </li>
       <li>
-        While it’s open, the root prevents the browser’s own context menu
-        anywhere, since a held touch that opened it fires one as it lifts, where
-        the trigger was before it moved away.
+        <PartLink part="ContextualMenu.Backdrop" /> is Base UI’s menu backdrop.
+        It registers with the root, so the trigger can cut itself out of it.
+      </li>
+      <li>
+        While the menu is open, the root prevents the browser’s own context menu
+        everywhere. That’s because a held touch that opened the menu fires one
+        as it lifts, at the place where the trigger was before it moved away.
       </li>
     </ul>
 
@@ -89,21 +92,28 @@ export const ContextualMenuArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="ContextualMenu.Positioner" /> is Menu’s positioner with
-        a slot before the popup. It’s placed from the trigger’s top (its side
-        offset is minus the trigger’s height), so the slot starts where the
-        trigger is, and shifts as far as the whole stack needs to fit, also
-        downwards (<code>sticky</code>).
+        <PartLink part="ContextualMenu.Positioner" /> is Menu’s positioner, with
+        a slot before the popup.
       </li>
       <li>
-        Without a preview, the slot takes the trigger’s size, measured when it
-        opens. The stack’s two heights are published as custom properties (
-        <code>useStackSizes</code>), so the stylesheet can let the menu scroll
-        and give the preview what room is left.
+        The positioner is placed from the trigger’s top. Its side offset is
+        minus the trigger’s height, so the slot starts exactly where the trigger
+        is. It shifts as far as the whole stack needs to fit, downward too (
+        <code>sticky</code>).
+      </li>
+      <li>
+        Without a preview, the slot takes the trigger’s size, measured when the
+        menu opens.
+      </li>
+      <li>
+        The heights of the stack’s two parts are published as custom properties
+        (<code>useStackSizes</code>). The stylesheet uses them to let the menu
+        scroll, and to give the preview the room that’s left.
       </li>
       <li>
         <PartLink part="ContextualMenu.Preview" /> portals its content into the
-        slot while the menu is open, and tells the root a preview exists.
+        slot while the menu is open. It also tells the root that a preview
+        exists.
       </li>
     </ul>
     <CodeView code={stackCode} />
@@ -117,21 +127,24 @@ export const ContextualMenuArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         Without a preview, <PartLink part="ContextualMenu.Trigger" /> moves onto
-        the slot: a translation from where it is, written as custom properties,
-        and a <code>z-index</code> above the backdrop. The trigger stays in the
-        page, so it keeps its state, and its wrapper keeps its place as the
-        menu’s anchor.
+        the slot. It’s moved by a translation from where it is, written as
+        custom properties, and raised above the backdrop by a{' '}
+        <code>z-index</code>.
       </li>
       <li>
-        It follows the slot every frame while the menu is open, whether or not
-        anything moves, since the slot can be placed, shifted or scrolled at any
-        time. The same loop cuts the trigger’s shape out of the backdrop, so the
-        page around it stays dimmed and the trigger doesn’t.
+        The trigger stays in the page, so it keeps its state. Its wrapper keeps
+        its place, and stays the menu’s anchor.
       </li>
       <li>
-        A <code>z-index</code> only lifts it outside its ancestors’ stacking
-        contexts. Inside one, such as a Viewport layer, it can’t rise above the
-        backdrop; give it a preview there.
+        While the menu is open, the trigger follows the slot every frame,
+        whether or not anything moves. The slot can be placed, shifted or
+        scrolled at any time. The same loop cuts the trigger’s shape out of the
+        backdrop, so the page around it stays dimmed and the trigger doesn’t.
+      </li>
+      <li>
+        A <code>z-index</code> only lifts the trigger above things outside its
+        ancestors’ stacking contexts. Inside one, such as a Viewport layer, it
+        can’t rise above the backdrop. Give it a preview there.
       </li>
     </ul>
     <CodeView code={liftCode} />
@@ -144,14 +157,15 @@ export const ContextualMenuArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The trigger is Menu’s, opening on a secondary click by default: a right
-        click, or a touch held. With <code>openOn</code> set to click, a press
-        opens it too, and a secondary click still does.
+        The trigger is Menu’s. By default, it opens on a secondary click: a
+        right click, or a held touch. With <code>openOn</code> set to click, a
+        normal press opens it too, and a secondary click still works.
       </li>
       <li>
-        A held touch lifts the trigger away from under the finger, so Base UI
-        sees the pointer released off it and cancels the opening. The root
-        cancels that cancellation, so the menu stays open as the finger lifts.
+        A held touch lifts the trigger away from under the finger. Base UI then
+        sees the pointer released somewhere else, and cancels the opening. The
+        root cancels that cancellation, so the menu stays open when you lift
+        your finger.
       </li>
     </ul>
 
@@ -163,17 +177,17 @@ export const ContextualMenuArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Menu:</strong> the root, trigger, positioner, popup,
-        portal, items, dragging over items, and its growth.
+        <strong>From Menu:</strong> the root, the trigger, the positioner, the
+        popup, the portal, the items, dragging over items, and growing to fit.
       </li>
       <li>
         <strong>From Base UI:</strong> the backdrop.
       </li>
       <li>
-        <strong>Out:</strong> its backdrop’s look to a{' '}
-        <a href={publicUrl('grid')}>Grid</a>’s item opened above the page, which
-        uses its stylesheet’s backdrop class. The cutout itself (
-        <code>cutOut</code>, <code>fillIn</code>) is a shared utility both use.
+        <strong>Out:</strong> its backdrop’s look, to a{' '}
+        <a href={publicUrl('grid')}>Grid</a>’s item opened above the page. That
+        item uses this stylesheet’s backdrop class. Both use the same shared
+        utility for the cutout (<code>cutOut</code>, <code>fillIn</code>).
       </li>
     </ul>
   </>

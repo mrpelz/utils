@@ -44,9 +44,9 @@ export const ButtonArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A button is Base UI’s, styled by attributes, with two kinds of drawing:
-        classic variants are plain CSS, glass variants draw Glass’s material
-        behind their content. For using it, see its{' '}
+        A button is Base UI’s button, styled by attributes. It draws in two
+        ways. Classic variants are plain CSS. Glass variants draw Glass’s
+        material behind their content. To learn how to use it, see its{' '}
         <a href={publicUrl('button/parts')}>parts</a>.
       </li>
     </ul>
@@ -59,9 +59,9 @@ export const ButtonArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Button.Root" /> renders Base UI’s button: focus and
-        keyboard handling, and <code>render</code> for another element, which is
-        how a menu trigger or a toolbar renders it.
+        <PartLink part="Button.Root" /> renders Base UI’s button, which handles
+        focus and the keyboard. Its <code>render</code> prop lets it render
+        another element. That’s how a menu trigger or a toolbar renders it.
       </li>
       <li>
         <PartLink part="Button.Icon" /> and <PartLink part="Button.Label" /> are
@@ -70,7 +70,9 @@ export const ButtonArchitecture: FunctionComponent = () => (
           component="symbol"
           part="Symbol"
         />
-        ; the label truncates when the button is narrower than its content.
+        . The label truncates when the button is narrower than its content.
+      </li>
+      <li>
         Toolbar’s and List’s stylesheets address these parts to style the
         buttons they hold.
       </li>
@@ -86,15 +88,18 @@ export const ButtonArchitecture: FunctionComponent = () => (
       <li>
         <code>variant</code>, <code>size</code>, <code>shape</code>,{' '}
         <code>fill</code> and <code>destructive</code> become attributes, and
-        the stylesheet does the rest: heights from padding and line height, each
-        variant’s fill and press state, a hit area of at least 44px.
+        the stylesheet does the rest. It sets the height through padding and
+        line height, each variant’s fill and pressed state, and a hit area of at
+        least 44px.
       </li>
       <li>
-        <code>tint</code> becomes <code>--uikit-button-tint</code> and{' '}
+        <code>tint</code> becomes both <code>--uikit-button-tint</code> and{' '}
         <code>--uikit-glass-tint</code>, so classic and glass variants take it
-        the same way. <code>destructive</code> wins over it with the system red.{' '}
+        the same way. <code>destructive</code> overrides it with the system red.
+      </li>
+      <li>
         <code>textColor</code> sets the label’s color and turns off its
-        blending. The app’s <code>style</code> is merged last.
+        blending. Your <code>style</code> is merged last.
       </li>
     </ul>
 
@@ -106,23 +111,27 @@ export const ButtonArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The glass variants render Glass’s <code>GlassBackground</code> first:
-        layers for the blur, the fill and the rim, stacked by document order so
-        their backdrop filters and blend modes reach what’s behind the button.
-        The content follows in its own span, drawn above and blended with the
-        glass, for vibrant labels.
+        The glass variants render Glass’s <code>GlassBackground</code> first.
+        It’s a stack of layers for the blur, the fill and the rim, ordered by
+        the document so their backdrop filters and blend modes reach what’s
+        behind the button.
       </li>
       <li>
-        The glass context (bright or dim) is the given <code>context</code>, or
-        with <code>adaptive</code> the tone of what’s behind it (
-        <code>useGlassContext</code>); without one, the color scheme decides.
+        The content comes after, in a span of its own. It’s drawn above the
+        glass and blended with it, which gives vibrant labels.
+      </li>
+      <li>
+        The glass context, bright or dim, is the <code>context</code> you give.
+        With <code>adaptive</code>, it’s the tone of what’s behind the button (
+        <code>useGlassContext</code>). Without either, the color scheme decides.
         It’s set as <code>data-glass-context</code>.
       </li>
       <li>
-        Pressed, a glass button becomes a lens, as a slider’s knob does: the
-        glass scales up and clears, a tinted glow shows behind it, and the
-        content scales up less than the lens. That’s Glass’s lens state, driven
-        by custom properties the button’s stylesheet sets while it’s pressed.
+        When you press a glass button, it becomes a lens, the same way a
+        slider’s knob does. The glass scales up and clears, a tinted glow shows
+        behind it, and the content scales up a little less than the lens. That’s
+        Glass’s lens state. The button’s stylesheet drives it with custom
+        properties while the button is pressed.
       </li>
     </ul>
     <CodeView code={glassCode} />
@@ -135,15 +144,16 @@ export const ButtonArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A button with nothing to do is disabled: without an <code>onClick</code>
-        , an <code>onSecondaryClick</code>, or a submit or reset type, it’s
-        disabled unless <code>disabled</code> is given explicitly. So a button
-        never looks pressable when it isn’t.
+        A button with nothing to do is disabled. If it has no{' '}
+        <code>onClick</code>, no <code>onSecondaryClick</code>, and isn’t a
+        submit or reset button, it’s disabled unless you set{' '}
+        <code>disabled</code> yourself. So a button never looks pressable when
+        it isn’t.
       </li>
       <li>
-        <code>onSecondaryClick</code> (a right click, or a touch held) is turned
-        into event handlers by <code>useSecondaryClick</code>, chained with the
-        button’s own.
+        <code>onSecondaryClick</code> handles a right click or a held touch.{' '}
+        <code>useSecondaryClick</code> turns it into event handlers, chained
+        with the button’s own.
       </li>
     </ul>
     <CodeView code={pressableCode} />
@@ -156,8 +166,8 @@ export const ButtonArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> the button element, focus, keyboard,{' '}
-        <code>render</code>.
+        <strong>From Base UI:</strong> the button element, focus, the keyboard
+        and <code>render</code>.
       </li>
       <li>
         <strong>From Glass:</strong> the material, the context and the lens, for
@@ -165,7 +175,7 @@ export const ButtonArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <strong>From its host:</strong> a toolbar renders it as its own button,
-        with the bar’s variant and shape; a list styles the buttons in its rows.
+        with the bar’s variant and shape. A list styles the buttons in its rows.
       </li>
       <li>
         <strong>Out:</strong> it’s the element behind{' '}
@@ -173,7 +183,7 @@ export const ButtonArchitecture: FunctionComponent = () => (
           component="toolbar"
           part="Toolbar.Button"
         />
-        , menu triggers and many demos’ actions.
+        , menu triggers, and the actions in many demos.
       </li>
     </ul>
   </>

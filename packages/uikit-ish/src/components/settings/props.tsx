@@ -45,5 +45,6 @@ export type SettingsProviderProps = Partial<SettingsValues> &
 /** A portal's props for the settings of where it's opened (see `Portal`s). */
 export type SettingsPortalProps = {
   'data-color-scheme'?: ColorScheme;
+  'data-uikit-settings'?: '';
   style?: Record<string, string>;
 };

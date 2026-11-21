@@ -54,11 +54,11 @@ export const ActionSheetArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        An action sheet is Base UI’s popover, made modal, drawn as an{' '}
-        <a href={publicUrl('alert')}>Alert</a>’s panel. What it adds is where it
-        appears: at the control that presented it, or at the bottom of its
-        container when nothing did. For using it, see its{' '}
-        <a href={publicUrl('action-sheet/parts')}>parts</a>.
+        An action sheet is Base UI’s popover, made modal and drawn like an{' '}
+        <a href={publicUrl('alert')}>Alert</a>’s panel. What the library adds is
+        where it appears. It opens at the control that presented it, or at the
+        bottom of its container when nothing did. To learn how to use it, see
+        its <a href={publicUrl('action-sheet/parts')}>parts</a>.
       </li>
     </ul>
 
@@ -70,23 +70,26 @@ export const ActionSheetArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        It’s a popover rather than a dialog because it’s positioned: Base UI’s
-        popover has a positioner that follows an anchor, flips and shifts, and a
-        dialog doesn’t. <PartLink part="ActionSheet.Root" /> makes it modal by
-        default, so the page is dimmed and locked behind it.
+        It’s a popover rather than a dialog because it needs to be positioned.
+        Base UI’s popover has a positioner that follows an anchor, flips and
+        shifts. A dialog doesn’t have one.
       </li>
       <li>
-        Its parts carry an alert’s classes beside their own (
-        <code>uikit-alert-panel</code>, <code>uikit-alert-header</code>,{' '}
-        <code>uikit-alert-action</code>, …), and it imports the alert’s
-        stylesheet. So the panel, title, description and actions look the same,
-        and only the layout differs: its actions are always stacked.
+        <PartLink part="ActionSheet.Root" /> makes the popover modal by default.
+        The page behind it is dimmed and locked.
       </li>
       <li>
-        <PartLink part="ActionSheet.Popup" />, like the alert’s, renders Base
-        UI’s portal, backdrop, positioner and popup together, with the portal
-        container and the providers’ settings, and its color scheme from its
-        glass.
+        Its parts carry an alert’s classes next to their own, such as{' '}
+        <code>uikit-alert-panel</code>, <code>uikit-alert-header</code> and{' '}
+        <code>uikit-alert-action</code>. It also imports the alert’s stylesheet.
+        So the panel, title, description and actions look the same as an
+        alert’s. Only the layout differs: the actions are always stacked.
+      </li>
+      <li>
+        Like the alert’s popup, <PartLink part="ActionSheet.Popup" /> renders
+        Base UI’s portal, backdrop, positioner and popup together. It uses the
+        library’s portal container and the providers’ settings, and takes its
+        color scheme from its glass.
       </li>
     </ul>
 
@@ -98,28 +101,32 @@ export const ActionSheetArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The root remembers which trigger opened it, from Base UI’s open change
-        details, and forgets it once it has closed. The popup reads it through a
-        context.
+        The root remembers which trigger opened the sheet, from Base UI’s open
+        change details. It forgets the trigger once the sheet has closed. The
+        popup reads it through a context.
       </li>
       <li>
-        With a trigger, the popup is positioned below it, flipping above when
-        there’s no room. Without one, for example opened by its{' '}
-        <code>open</code> prop or a handle, its anchor is a virtual point at the
-        bottom center of its container, just above the container’s bottom safe
-        area inset (read from <code>--uikit-safe-area-inset-bottom</code>
-        ), and the popup sits above it.
+        With a trigger, the popup sits below it, and flips above it when there’s
+        no room.
       </li>
       <li>
-        Taller than the room on its side, it grows over its anchor rather than
-        scrolling (<code>useGrowAvoidance</code>). It stays inside its container
-        and clear of its safe area and the keyboard (<code>useCollision</code>).
+        Without a trigger, for example when it’s opened by its <code>open</code>{' '}
+        prop or a handle, the anchor is a virtual point at the bottom center of
+        the container. That point sits just above the container’s bottom safe
+        area inset, read from <code>--uikit-safe-area-inset-bottom</code>. The
+        popup sits above it.
       </li>
       <li>
-        When it opens, focus goes to its first tabbable element (the popup
-        itself when opened by touch), without scrolling (
-        <code>useInitialFocus</code>): Safari would scroll the content down
-        before the popup is in place.
+        When the sheet is taller than the room on its side, it grows over its
+        anchor instead of scrolling (<code>useGrowAvoidance</code>). It stays
+        inside its container, and clear of the safe area and the keyboard (
+        <code>useCollision</code>).
+      </li>
+      <li>
+        When it opens, focus goes to its first tabbable element without
+        scrolling (<code>useInitialFocus</code>). When it’s opened by touch, the
+        popup itself gets focus. Scrolling is avoided because Safari would
+        scroll the content down before the popup is in place.
       </li>
     </ul>
     <CodeView code={rootCode} />
@@ -134,9 +141,12 @@ export const ActionSheetArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="ActionSheet.Title" /> and{' '}
-        <PartLink part="ActionSheet.Description" /> are Base UI’s, labelling the
-        popup. <PartLink part="ActionSheet.Action" /> is Base UI’s close button,
-        so every action closes the sheet.
+        <PartLink part="ActionSheet.Description" /> are Base UI’s, and they
+        label the popup.
+      </li>
+      <li>
+        <PartLink part="ActionSheet.Action" /> is Base UI’s close button, so
+        every action closes the sheet.
       </li>
       <li>
         <PartLink part="ActionSheet.Header" /> and{' '}
@@ -154,15 +164,16 @@ export const ActionSheetArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> the popover: opening, positioning,
-        modality, focus, labelling, the handle.
+        <strong>From Base UI:</strong> the popover itself, with opening,
+        positioning, modality, focus, labels and the handle.
       </li>
       <li>
-        <strong>From Alert:</strong> its look, by its classes and stylesheet.
+        <strong>From Alert:</strong> its look, through its classes and
+        stylesheet.
       </li>
       <li>
         <strong>From Viewport:</strong> the portal container, the safe area
-        insets and the keyboard’s height, for its collision boundary.
+        insets and the keyboard’s height, which set its collision boundary.
       </li>
       <li>
         <strong>From Settings and Glass:</strong> the providers’ settings on the

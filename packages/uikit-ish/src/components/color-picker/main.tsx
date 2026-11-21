@@ -98,15 +98,19 @@ export type {
 // or sheet (compact), its header the app's (a `Toolbar`: the eyedropper,
 // “Colors”, close; in the popup's header, `Popover.Header` or
 // `Sheet.Header`, the panel scrolling under it, behind its edge effect):
-// - a segmented control (Grid, Spectrum, Sliders), 24px above the view;
+// - a segmented control of the app's modes (e.g. Grid, Spectrum, Sliders,
+//   Named), 24px above the view;
 // - Grid: 12 by 10 swatches (a gray row, then hues by lightness), its
 //   corners 18px, the selected one outlined white (3px);
 // - Spectrum: hues across, light to dark down (white at the top, pure hues
 //   halfway, black at the bottom), its corners 18px, the color ringed;
-// - Sliders: red, green and blue (0 to 255; or 0 to 100%, see `Sliders`),
-//   each a channel's row (see `ChannelRow`): its title (all caps), a slider
+// - Sliders: a color model's channels (red, green and blue, 0 to 255 or 0
+//   to 100%; hue, saturation and lightness; cyan, magenta, yellow and
+//   black; see `Sliders`), each a channel's row (see `ChannelRow`): its title (all caps), a slider
 //   mixing from the color (the channel along its range), and its value,
 //   typed;
+// - Named: a list of named colors (e.g. CSS's), with an index of their
+//   first letters (see `Named`);
 // - Each channel's row kept above the keyboard as its field's typed into
 //   (a `Viewport.KeyboardAccessory`; in a `Viewport.Provider`);
 // - Opacity (optional: its part, `Opacity`), a channel's row too: the
@@ -572,14 +576,6 @@ const trackStops = (colors: readonly string[]) =>
     .join(', ');
 
 /**
- * A channel's row (the sliders', the opacity's): its title (all caps,
- * secondary), a slider (32px high, mixing from the color: its gradient
- * the color with the channel along its range; its knob as high, in the
- * color, ringed white, 3px) and its value (a 75px by 32px field on the system
- * fill, 8px corners, Body emphasized: typed, applied as it's typed, within
- * its range).
- */
-/**
  * A typed field's handlers (a channel's value, the code): focused, all of
  * it selected (to type over); left (or Enter), `onLeave` (its value again,
  * e.g. emptied) and its selection collapsed (kept, the next tap would be on
@@ -614,6 +610,14 @@ const useFieldSelection = (onLeave: () => void) => {
   };
 };
 
+/**
+ * A channel's row (the sliders', the opacity's): its title (all caps,
+ * secondary), a slider (32px high, mixing from the color: its gradient
+ * the color with the channel along its range; its knob as high, in the
+ * color, ringed white, 3px) and its value (a 75px by 32px field on the system
+ * fill, 8px corners, Body emphasized: typed, applied as it's typed, within
+ * its range).
+ */
 const ChannelRow: FunctionComponent<{
   /** Its field's name (e.g. “Opacity percentage”; default: “Red value”). */
   fieldLabel?: string;

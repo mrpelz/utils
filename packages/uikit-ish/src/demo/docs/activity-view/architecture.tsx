@@ -37,8 +37,8 @@ export const ActivityViewArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        An activity view has no root and no state: it’s a set of parts that go
-        into the app’s own sheet or popover. For using it, see its{' '}
+        An activity view has no root and no state. It’s a set of parts that you
+        put into your own sheet or popover. To learn how to use it, see its{' '}
         <a href={publicUrl('activity-view/parts')}>parts</a>.
       </li>
     </ul>
@@ -95,15 +95,15 @@ export const ActivityViewArchitecture: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        Opening, closing, dragging and the choice of sheet or popover belong to
-        those components. The activity view only draws what’s in them: its
-        header stays in the container’s header, and the rest scrolls in its
-        content, under the header’s edge effect.
+        Opening, closing, dragging, and the choice between a sheet and a popover
+        all belong to those components. The activity view only draws what’s
+        inside them. Its header stays in the container’s header. Everything else
+        scrolls in the container’s content, under the header’s edge effect.
       </li>
       <li>
-        Every part is a plain element with a class and a part attribute: header,
-        thumbnail, heading, title, subtitle and message. Layout is the
-        stylesheet’s.
+        Every part is a plain element with a class and a part attribute: the
+        header, thumbnail, heading, title, subtitle and message. The stylesheet
+        does the layout.
       </li>
       <li>
         Further actions are a regular{' '}
@@ -111,7 +111,7 @@ export const ActivityViewArchitecture: FunctionComponent = () => (
           component="list"
           part="List.Root"
         />
-        , and a group is an{' '}
+        , and a group of people is an{' '}
         <PartLink
           component="avatar"
           part="Avatar.Group"
@@ -130,20 +130,24 @@ export const ActivityViewArchitecture: FunctionComponent = () => (
       <li>
         <PartLink part="ActivityView.People" /> and{' '}
         <PartLink part="ActivityView.Actions" /> are lists (
-        <code>role=&quot;list&quot;</code>) that scroll sideways. Each{' '}
-        <PartLink part="ActivityView.Person" /> and{' '}
-        <PartLink part="ActivityView.Action" /> renders a list item holding a
-        button, so each is one press target and one list entry.
+        <code>role=&quot;list&quot;</code>) that scroll sideways.
       </li>
       <li>
-        A row that fits is centered, one that doesn’t starts at its leading
-        edge: <code>justify-content: safe center</code> does both, with nothing
-        measured. Its sideways overscroll is contained, so a fling doesn’t move
-        the sheet.
+        Each <PartLink part="ActivityView.Person" /> and{' '}
+        <PartLink part="ActivityView.Action" /> renders a list item that holds a
+        button. So each one is a single press target and a single list entry.
       </li>
       <li>
-        An action’s <PartLink part="ActivityView.ActionSymbol" /> is hidden from
-        assistive technology; its label names the button.
+        A row that fits is centered. A row that doesn’t fit starts at its
+        leading edge. <code>justify-content: safe center</code> does both,
+        without measuring anything.
+      </li>
+      <li>
+        Sideways overscroll is contained, so a fling doesn’t move the sheet.
+      </li>
+      <li>
+        An action’s <PartLink part="ActivityView.Symbol" /> is hidden from
+        assistive technology. The action’s label names the button.
       </li>
     </ul>
     <CodeView code={itemCode} />
@@ -156,17 +160,18 @@ export const ActivityViewArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From its container:</strong> everything that moves: a{' '}
+        <strong>From its container:</strong> everything that moves. That’s a{' '}
         <PartLink
           component="sheet"
           part="Sheet.Root"
         />{' '}
-        when compact, a{' '}
+        in a compact width, or a{' '}
         <PartLink
           component="popover"
           part="Popover.Root"
         />{' '}
-        in a regular width, as the app decides. Its glass and color scheme too.
+        in a regular width, as your app decides. The container also gives it its
+        glass and color scheme.
       </li>
       <li>
         <strong>From Avatar, Symbol and List:</strong> the people’s pictures,

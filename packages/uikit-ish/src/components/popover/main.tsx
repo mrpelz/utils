@@ -61,11 +61,10 @@ export type {
   PopoverPositionerProps,
 } from './props.js';
 
-// A panel with 13px
-// corners, its arrow a rounded wedge 56px wide, 13px deep, on any side, at
-// its start, center or end (Base UI's `Arrow`, pointing at its anchor's
-// center), its shadow 0 10px 100px at 30%. After the date picker's popover
-// (see `DatePicker`): 8px from its anchor (its arrow's tip, with an arrow)
+// A panel with 13px corners, its arrow a rounded wedge 56px wide, 13px
+// deep, on any side, at its start, center or end (Base UI's `Arrow`,
+// pointing at its anchor's center), a glow along its outline (a drop
+// shadow, see style.css). After the date picker's popover (see `DatePicker`): 8px from its anchor (its arrow's tip, with an arrow)
 // and from the viewport's edges; centered (in a list row, aligned with
 // the row's end: the app's `align`); scaling in from its anchor (as
 // menus). Its bar (`Header`): 16px from its top.
@@ -521,11 +520,6 @@ const Body = forwardRef<HTMLDivElement, PopoverBodyProps>(
 );
 
 /**
- * A popover (Base UI's `Popover`):
- * a panel of the menus' glass at its trigger (or `anchor`), optionally with
- * an arrow pointing at it.
- */
-/**
  * Its portal (Base UI's): no box of its own (\`display: contents\`), so
  * rendered into a container (e.g. a screen laid out as a flex column) it
  * doesn't shift its content.
@@ -543,6 +537,11 @@ const Portal = forwardRef<
   />
 ));
 
+/**
+ * A popover (Base UI's `Popover`):
+ * a panel of the menus' glass at its trigger (or `anchor`), optionally with
+ * an arrow pointing at it.
+ */
 export const Popover = {
   ...BasePopover,
   Root,

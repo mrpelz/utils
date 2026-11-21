@@ -214,7 +214,7 @@
       transition: opacity var(--glass-ui-lens-duration, 300ms) ease-out;
     }
 
-    @media (prefers-reduced-motion: reduce) {
+    @container style(--uikit-settings-reduced-motion: 1) {
       &,
       & > .uikit-text-field-frame-glass {
         transition: none;

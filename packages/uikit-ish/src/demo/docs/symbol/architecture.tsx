@@ -51,10 +51,10 @@ export const SymbolArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A symbol draws an icon’s outlines sized like a letter of the current
-        font, so it can stand in a line of text or a button. It holds no state:
-        its host decides whether it’s emphasized, blended or scaled, through
-        inherited custom properties. For using it, see its{' '}
+        A symbol draws an icon’s outlines, sized like a letter of the current
+        font. So it can sit in a line of text or in a button. It holds no state.
+        Its host decides whether it’s emphasized, blended or scaled, through
+        inherited custom properties. To learn how to use it, see its{' '}
         <a href={publicUrl('symbol/parts')}>parts</a>.
       </li>
     </ul>
@@ -68,21 +68,22 @@ export const SymbolArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         An icon is data: a view box, paths with their opacities, and the units
-        per em it was drawn at (20 for SF Symbols). The library ships no icons;
-        any object of that shape works.
+        per em it was drawn at, such as 20 for SF Symbols. The library ships no
+        icons. Any object of that shape works.
       </li>
       <li>
         <PartLink part="Symbol" /> renders each glyph as an SVG in a span of its
-        own, sized in <code>em</code> from the view box and the units per em. So
-        a symbol follows the font size of wherever it is, as a letter would.
+        own. The glyph is sized in <code>em</code> from the view box and the
+        units per em. So a symbol follows the font size of wherever it sits, as
+        a letter would.
       </li>
       <li>
-        Its paths are filled in the current color. A layered icon’s paths keep
-        their opacities relative to the most opaque one.
+        Its paths are filled in the current color. In a layered icon, the paths
+        keep their opacities relative to the most opaque path.
       </li>
       <li>
         Each glyph sits in its own span because Chrome kept a scaled SVG root’s
-        overflow after it was unscaled, for example in a scroller.
+        overflow after it was scaled back, for example in a scroller.
       </li>
     </ul>
     <CodeView code={treeCode} />
@@ -95,22 +96,25 @@ export const SymbolArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        With an <code>emphasizedIcon</code> (a filled variant, say), both glyphs
-        are rendered, stacked. Which one shows is up to{' '}
-        <code>--uikit-symbol-emphasis</code>, a number from 0 to 1 that the
-        symbol inherits: the regular glyph fades out as it rises, the emphasized
-        one in.
+        With an <code>emphasizedIcon</code>, such as a filled variant, both
+        glyphs are rendered on top of each other.
       </li>
       <li>
-        The symbol never decides this itself. Hosts set the property on their
-        own state: a selected tab, a lit card, a selected segment, a list row.
-        So an app never picks between two icons; it gives both.
+        Which one shows depends on <code>--uikit-symbol-emphasis</code>, a
+        number from 0 to 1 that the symbol inherits. As it rises, the regular
+        glyph fades out and the emphasized one fades in.
       </li>
       <li>
-        The property isn’t registered, so it can’t be transitioned: each host
-        sets it outright when its state changes. (A transitioned inherited
-        property is a layer change on every element below it, which iOS handles
-        badly in scrollers.) Unset, it counts as 0.
+        The symbol never decides this itself. Hosts set the property from their
+        own state: a selected tab, a lit card, a selected segment, or a list
+        row. So your app never picks between two icons. It gives both.
+      </li>
+      <li>
+        The property isn’t registered, so it can’t be transitioned. Each host
+        sets it outright when its state changes. That’s on purpose: a
+        transitioned inherited property is a layer change on every element below
+        it, which iOS handles badly in scrollers. When it isn’t set, it counts
+        as 0.
       </li>
     </ul>
     <CodeView code={emphasisCode} />
@@ -125,8 +129,8 @@ export const SymbolArchitecture: FunctionComponent = () => (
       <li>
         A host can blend and scale a symbol’s glyphs by setting{' '}
         <code>--uikit-symbol-blend</code> and <code>--uikit-symbol-scale</code>.
-        A tab bar’s icons do: their glyphs take the glass’s vibrant blend, and
-        grow with its lens. Only the glyph spans read them.
+        A tab bar’s icons do this. Their glyphs take the glass’s vibrant blend,
+        and grow with its lens. Only the glyph spans read these properties.
       </li>
       <li>
         The symbol’s children, such as a{' '}
@@ -134,9 +138,9 @@ export const SymbolArchitecture: FunctionComponent = () => (
           component="badge"
           part="Badge"
         />
-        , aren’t glyphs, so they stay solid and at their size. The symbol is
-        positioned, so it’s the badge’s containing block.
+        , aren’t glyphs. So they stay solid and keep their size.
       </li>
+      <li>The symbol is positioned, so it’s the badge’s containing block.</li>
     </ul>
 
     <Heading
@@ -147,11 +151,13 @@ export const SymbolArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        With <code>baselineShift</code> optical (the default), the symbol sets
-        its height as <code>--uikit-symbol-height</code>, and the stylesheet
-        aligns its center with the text’s: half the cap height above the
-        baseline. So it lines up with capital letters at any size, with nothing
-        measured in script.
+        With <code>baselineShift</code> set to optical, the default, the symbol
+        sets its height as <code>--uikit-symbol-height</code>.
+      </li>
+      <li>
+        The stylesheet then aligns the symbol’s center with the text’s, at half
+        the cap height above the baseline. So it lines up with capital letters
+        at any size, and nothing is measured in script.
       </li>
     </ul>
 
@@ -170,8 +176,8 @@ export const SymbolArchitecture: FunctionComponent = () => (
         <strong>From the app:</strong> the icons, as data.
       </li>
       <li>
-        <strong>Out:</strong> a glyph every component with an icon uses, and a
-        containing block for badges.
+        <strong>Out:</strong> a glyph that every component with an icon uses,
+        and a containing block for badges.
       </li>
     </ul>
   </>

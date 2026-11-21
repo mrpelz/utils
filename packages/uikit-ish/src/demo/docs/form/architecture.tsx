@@ -52,9 +52,9 @@ export const FormArchitecture: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Form adds almost no code of its own. It’s Base UI’s form, fieldset and
-        field, laid out in a <a href={publicUrl('list')}>List</a>: a fieldset
-        renders as a list section, its legend as the section’s header, and
-        fields as rows. For using it, see its{' '}
+        field, laid out in a <a href={publicUrl('list')}>List</a>. A fieldset
+        renders as a list section, its legend as the section’s header, and its
+        fields as rows. To learn how to use it, see its{' '}
         <a href={publicUrl('form/parts')}>parts</a>.
       </li>
     </ul>
@@ -68,20 +68,20 @@ export const FormArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="Form" /> and <PartLink part="Field" /> are Base UI’s,
-        exported as they are: validation by <code>name</code>, errors shown on
-        their fields, values passed to <code>onFormSubmit</code>.
+        exported as they are. They validate by <code>name</code>, show errors on
+        their fields, and pass the values to <code>onFormSubmit</code>.
       </li>
       <li>
         <PartLink part="Fieldset.Root" /> and{' '}
         <PartLink part="Fieldset.Legend" /> are Base UI’s too, with a default{' '}
         <code>render</code>. The namespace spreads Base UI’s parts and replaces
-        just those two.
+        only those two.
       </li>
       <li>
-        The look is entirely List’s. Form’s stylesheet has one rule: it resets
-        the <code>&lt;fieldset&gt;</code> element’s own border, padding and
-        minimum width, so a section looks the same whether it’s a fieldset or
-        not.
+        The look comes entirely from List. Form’s stylesheet has a single rule.
+        It resets the <code>&lt;fieldset&gt;</code> element’s own border,
+        padding and minimum width, so a section looks the same whether it’s a
+        fieldset or not.
       </li>
     </ul>
     <CodeView code={treeCode} />
@@ -94,30 +94,32 @@ export const FormArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A fieldset renders{' '}
+        A fieldset renders a{' '}
         <PartLink
           component="list"
           part="List.Section"
         />
         , which in turn renders a <code>&lt;fieldset&gt;</code>. Base UI’s props
-        and state attributes end up on that element. Its <code>disabled</code>{' '}
-        reaches the fields in it through Base UI’s fieldset context (nested
-        fieldsets too), not the element’s own attribute.
+        and state attributes end up on that element.
       </li>
       <li>
-        Its legend renders{' '}
+        The fieldset’s <code>disabled</code> reaches the fields inside it
+        through Base UI’s fieldset context, nested fieldsets included. It
+        doesn’t rely on the element’s own attribute.
+      </li>
+      <li>
+        The legend renders a{' '}
         <PartLink
           component="list"
           part="List.Header"
         />
         . Base UI gives it an id and labels the fieldset with it (
-        <code>aria-labelledby</code>), so the section’s header names the group
-        for assistive technology. Another header, for example a nested one, is a{' '}
-        <code>render</code> away.
+        <code>aria-labelledby</code>). So the section’s header names the group
+        for assistive technology. To use another header, such as a nested one,
+        pass it as <code>render</code>.
       </li>
       <li>
-        Passing your own <code>render</code> replaces the default, as in Base
-        UI.
+        Your own <code>render</code> replaces the default, as in Base UI.
       </li>
     </ul>
     <CodeView code={fieldsetCode} />
@@ -135,15 +137,18 @@ export const FormArchitecture: FunctionComponent = () => (
           component="text-field"
           part="TextField.Root"
         />{' '}
-        is a field; given <code>render=&#123;&lt;List.Item /&gt;&#125;</code>,
-        it’s a list row, its label the row’s title. Other controls (a switch, a
-        stepper, a date picker) sit in a{' '}
+        is a field. When you give it{' '}
+        <code>render=&#123;&lt;List.Item /&gt;&#125;</code>, it becomes a list
+        row, and its label becomes the row’s title.
+      </li>
+      <li>
+        Other controls, such as a switch, a stepper or a date picker, sit in a{' '}
         <PartLink
           component="list"
           part="List.Item"
         />
-        , or a <PartLink part="Field" /> rendering one when they need a name, a
-        label or validation.
+        . When they need a name, a label or validation, put them in a{' '}
+        <PartLink part="Field" /> that renders a row.
       </li>
       <li>
         A form submits with a{' '}
@@ -151,7 +156,7 @@ export const FormArchitecture: FunctionComponent = () => (
           component="button"
           part="Button.Root"
         />{' '}
-        of <code>type=&quot;submit&quot;</code>; Base UI collects the values by
+        of <code>type=&quot;submit&quot;</code>. Base UI collects the values by
         name.
       </li>
     </ul>
@@ -164,15 +169,16 @@ export const FormArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> all of the form’s behavior: validation,
-        errors, values, disabling.
+        <strong>From Base UI:</strong> all of the form’s behavior, including
+        validation, errors, values and disabling.
       </li>
       <li>
-        <strong>From List:</strong> all of its look: sections, headers, rows.
+        <strong>From List:</strong> all of its look, including sections, headers
+        and rows.
       </li>
       <li>
-        <strong>From the controls:</strong> each registers with its field
-        through Base UI’s field context, as it would anywhere.
+        <strong>From the controls:</strong> each control registers with its
+        field through Base UI’s field context, as it would anywhere else.
       </li>
       <li>
         <strong>Out:</strong> nothing beyond what Base UI provides.

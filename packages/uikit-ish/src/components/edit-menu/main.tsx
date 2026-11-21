@@ -148,7 +148,7 @@ const Positioner = forwardRef<HTMLDivElement, EditMenuPositionerProps>(
     const [grow, growRef] = useGrowAvoidance({}, ref);
 
     return (
-      // Positions the capsule above its anchor (e.g. a text selection). */
+      // Positions the capsule above its anchor (e.g. a text selection).
       // Above the page's own stacking (e.g. list rows' and segmented items'
       // z-indexes, bars at 10), which would otherwise show through it.
       <BaseMenu.Positioner

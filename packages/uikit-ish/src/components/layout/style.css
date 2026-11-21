@@ -74,7 +74,7 @@
         margin-inline-start, margin-inline-end, translate, visibility;
       transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
 
-      @media (prefers-reduced-motion: reduce) {
+      @container style(--uikit-settings-reduced-motion: 1) {
         transition: none;
       }
     }

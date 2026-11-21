@@ -45,9 +45,9 @@ export const SwitchArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A switch is Base UI’s, with a drag of its own: the knob follows the
-        finger, the state flips as it crosses the middle, and a press shows a
-        glass lens. For using it, see its{' '}
+        A switch is Base UI’s switch, with a drag of its own. The knob follows
+        your finger, the state flips as it crosses the middle, and a press shows
+        a glass lens. To learn how to use it, see its{' '}
         <a href={publicUrl('switch/parts')}>parts</a>.
       </li>
     </ul>
@@ -60,25 +60,28 @@ export const SwitchArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Switch.Root" /> renders Base UI’s root: its state, its
-        hidden input for forms, keyboard handling, and <code>data-checked</code>
-        . <PartLink part="Switch.Thumb" /> is Base UI’s thumb, the knob.
+        <PartLink part="Switch.Root" /> renders Base UI’s root. Base UI handles
+        the state, the hidden input for forms, the keyboard, and{' '}
+        <code>data-checked</code>. <PartLink part="Switch.Thumb" /> is Base UI’s
+        thumb, which is the knob.
       </li>
       <li>
-        Every state change goes through Base UI: a tap is Base UI’s click, and a
+        Every state change goes through Base UI. A tap is Base UI’s own click. A
         drag flips the state by clicking the root. So controlled and
-        uncontrolled switches, forms and <code>onCheckedChange</code> behave as
-        they do in Base UI.
+        uncontrolled switches, forms and <code>onCheckedChange</code> all behave
+        as they do in Base UI.
       </li>
       <li>
-        Its <code>tint</code> becomes <code>--uikit-switch-on-color</code>. The
-        track’s size is a minimum, and the knob is placed with{' '}
-        <code>inset-inline-start</code>, so it follows the track’s actual width
-        and right-to-left layouts.
+        The <code>tint</code> becomes <code>--uikit-switch-on-color</code>.
       </li>
       <li>
-        The root carries <code>data-base-ui-swipe-ignore</code>, so dragging it
-        doesn’t swipe a sheet or drawer away.
+        The track’s size is a minimum. The knob is placed with{' '}
+        <code>inset-inline-start</code>, so it follows the track’s actual width,
+        and works in right-to-left layouts.
+      </li>
+      <li>
+        The root carries <code>data-base-ui-swipe-ignore</code>, so dragging the
+        switch doesn’t swipe a sheet or a drawer away.
       </li>
     </ul>
 
@@ -90,21 +93,28 @@ export const SwitchArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A pointer press starts a drag (<code>usePointerDrag</code>, shared by
-        the library’s controls): the pointer is captured, and moves are handled
-        once a frame.
+        A pointer press starts a drag (<code>usePointerDrag</code>, which the
+        library’s controls share). The pointer is captured, and moves are
+        handled once a frame.
       </li>
       <li>
-        While dragging, the knob’s place is written as{' '}
-        <code>--uikit-switch-knob-start</code>, with its move duration set to 0,
-        so it follows the finger exactly. When its center crosses the middle,
-        the root is clicked, and Base UI flips the state.
+        While you drag, the knob’s position is written as{' '}
+        <code>--uikit-switch-knob-start</code>, with its move duration set to 0.
+        So the knob follows your finger exactly.
       </li>
       <li>
-        On release, the written properties are removed and the knob settles by
-        its transition. The release’s own click would toggle once more, so it’s
-        suppressed in the capture phase, unless the release acts as a tap:
-        quick, not flipped, and not flicked towards the side it’s on.
+        When the knob’s center crosses the middle, the root is clicked, and Base
+        UI flips the state.
+      </li>
+      <li>
+        When you release, the written properties are removed, and the knob
+        settles by its transition.
+      </li>
+      <li>
+        The release’s own click would toggle the switch once more. So that click
+        is suppressed in the capture phase. The exception is a release that acts
+        as a tap: quick, without a flip, and not flicked toward the side the
+        knob is already on.
       </li>
     </ul>
     <CodeView code={dragCode} />
@@ -117,15 +127,19 @@ export const SwitchArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Pressed, the knob becomes a glass lens and the track shrinks. That’s
-        driven by <code>--uikit-switch-pressed</code> (0 to 1), which the thumb
-        inherits, set in script rather than by <code>:active</code>:{' '}
-        <code>:active</code> is lost when the state flips mid-drag.
+        When you press the switch, the knob becomes a glass lens and the track
+        shrinks.
       </li>
       <li>
-        A quick tap shows no lens. The lens shows once the press has lasted a
-        moment or the pointer has moved (<code>delayLens</code>), so a tap only
-        toggles. While the lens shows, the touch doesn’t scroll.
+        That’s driven by <code>--uikit-switch-pressed</code>, a number from 0 to
+        1 that the thumb inherits. It’s set in script, not by{' '}
+        <code>:active</code>, because <code>:active</code> is lost when the
+        state flips in the middle of a drag.
+      </li>
+      <li>
+        A quick tap shows no lens. The lens only shows once the press has lasted
+        a moment, or the pointer has moved (<code>delayLens</code>). So a tap
+        just toggles. While the lens shows, the touch doesn’t scroll.
       </li>
     </ul>
 
@@ -138,8 +152,8 @@ export const SwitchArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <code>indeterminate</code> places the knob in the middle, on the off
-        color, and sets the hidden input’s <code>indeterminate</code> too, as a
-        checkbox’s, for forms and assistive technology.
+        color. It also sets the hidden input’s <code>indeterminate</code>, as a
+        checkbox does, for forms and assistive technology.
       </li>
       <li>
         <code>onOffLabels</code> adds two decorative spans, an on bar and an off
@@ -156,8 +170,8 @@ export const SwitchArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> state, the hidden input, keyboard, swipe
-        handling’s opt-out attribute.
+        <strong>From Base UI:</strong> the state, the hidden input, the
+        keyboard, and the attribute that opts out of swipe handling.
       </li>
       <li>
         <strong>From the library’s utilities:</strong> the drag, and the lens’s
@@ -168,10 +182,10 @@ export const SwitchArchitecture: FunctionComponent = () => (
         the lens’s glass.
       </li>
       <li>
-        <strong>Out:</strong> its <code>data-checked</code> is read by a{' '}
-        <a href={publicUrl('card/architecture#the-roots-state')}>Card</a>{' '}
-        holding it, to light the card; a card or a list row passes its presses
-        on to it with{' '}
+        <strong>Out:</strong> a{' '}
+        <a href={publicUrl('card/architecture#the-roots-state')}>Card</a> that
+        holds the switch reads its <code>data-checked</code> to light up. A card
+        or a list row passes its presses on to the switch with{' '}
         <PartLink
           component="list"
           part="forwardClick"

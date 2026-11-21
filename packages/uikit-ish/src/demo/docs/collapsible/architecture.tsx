@@ -52,9 +52,9 @@ export const CollapsibleArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Collapsible is Base UI’s, with one part of its own: a panel that opens
-        and closes in place. For using it, see its{' '}
-        <a href={publicUrl('collapsible/parts')}>parts</a>.
+        Collapsible is Base UI’s collapsible, with one part of the library’s
+        own: a panel that opens and closes in place. To learn how to use it, see
+        its <a href={publicUrl('collapsible/parts')}>parts</a>.
       </li>
     </ul>
 
@@ -81,14 +81,14 @@ export const CollapsibleArchitecture: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        Every part but the panel is Base UI’s, passed through unchanged: the
-        namespace spreads Base UI’s and replaces only{' '}
-        <PartLink part="Collapsible.Panel" />. State, keyboard handling and{' '}
-        <code>aria-expanded</code> are Base UI’s.
+        Every part except the panel comes straight from Base UI, unchanged. The
+        namespace spreads Base UI’s parts and replaces only{' '}
+        <PartLink part="Collapsible.Panel" />. Base UI handles the state, the
+        keyboard and <code>aria-expanded</code>.
       </li>
       <li>
-        The panel adds a class and a part attribute, nothing in script. What it
-        looks like comes from its stylesheet.
+        The panel only adds a class and a part attribute. It runs no script of
+        its own. Its look comes from its stylesheet.
       </li>
     </ul>
     <CodeView code={panelCode} />
@@ -101,18 +101,20 @@ export const CollapsibleArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Base UI measures the panel’s content and sets it as{' '}
-        <code>--collapsible-panel-height</code>. While it opens or closes, it
-        marks the panel <code>data-starting-style</code> or{' '}
-        <code>data-ending-style</code>, and it keeps a closing panel mounted
-        until its transition ends.
+        Base UI measures the panel’s content and sets the height as{' '}
+        <code>--collapsible-panel-height</code>.
       </li>
       <li>
-        The stylesheet transitions the height between that measurement and
-        nothing, and the opacity with it, over 300ms, the same as a list’s
-        collapsible rows. The panel clips what overflows while it moves. With
-        reduced motion, there’s no transition.
+        While the panel opens or closes, Base UI marks it with{' '}
+        <code>data-starting-style</code> or <code>data-ending-style</code>. It
+        keeps a closing panel mounted until its transition ends.
       </li>
+      <li>
+        The stylesheet transitions the height between that measurement and zero,
+        and the opacity along with it. This takes 300ms, the same as a list’s
+        collapsible rows. While it moves, the panel clips whatever overflows.
+      </li>
+      <li>With reduced motion, there’s no transition.</li>
     </ul>
     <CodeView code={styleCode} />
 
@@ -124,19 +126,20 @@ export const CollapsibleArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A list’s rows that open and close don’t use these parts. A list group’s
-        rows must stay its children, so{' '}
+        Rows in a list that open and close don’t use these parts. A list group’s
+        rows have to stay its direct children. So{' '}
         <PartLink
           component="list"
           part="List.CollapsibleRoot"
         />{' '}
-        and its trigger and panel are List’s own: they keep the same names and
-        state as Base UI’s, but render no elements. Their timing matches this
-        panel’s.
+        and its trigger and panel are List’s own parts. They have the same names
+        and the same state as Base UI’s, but they render no elements. Their
+        timing matches this panel’s.
       </li>
       <li>
-        This component is for what isn’t rows: for example a sidebar’s section,
-        its header the trigger and its group the panel.
+        This component is for content that isn’t rows. One example is a
+        sidebar’s section, where the header is the trigger and the group is the
+        panel.
       </li>
     </ul>
 
@@ -148,16 +151,17 @@ export const CollapsibleArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> everything but the panel’s look: state,
-        the trigger, measuring, mounting.
+        <strong>From Base UI:</strong> everything except the panel’s look. That
+        includes the state, the trigger, measuring and mounting.
       </li>
       <li>
-        <strong>From the system:</strong> reduced motion, by the stylesheet’s
-        media query.
+        <strong>From Settings:</strong> reduced motion, read by a style query in
+        the stylesheet.
       </li>
       <li>
-        <strong>Out:</strong> nothing. No other component renders it; apps put
-        its parts around their own, as the demos do for a sidebar’s sections.
+        <strong>Out:</strong> nothing. No other component renders it. Apps put
+        its parts around their own content, as the demos do for a sidebar’s
+        sections.
       </li>
     </ul>
   </>

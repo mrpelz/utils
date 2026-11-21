@@ -42,10 +42,10 @@ export const SidebarArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A sidebar is a floating glass panel that behaves like a small screen:
-        what’s inside it is built from the same parts as a page, a header with a
-        bar and a scrolling page. The sidebar itself adds the panel, its colors
-        and its own scope for bars. For using it, see its{' '}
+        A sidebar is a floating glass panel that behaves like a small screen.
+        Its content is built from the same parts as a page: a header with a bar,
+        and a page that scrolls. The sidebar itself adds the panel, its colors,
+        and its own scope for bars. To learn how to use it, see its{' '}
         <a href={publicUrl('sidebar/parts')}>parts</a>.
       </li>
     </ul>
@@ -108,22 +108,24 @@ export const SidebarArchitecture: FunctionComponent = () => (
     </ul>
     <ul>
       <li>
-        The sidebar provides its own Viewport scope. Bars anchored inside it (
+        The sidebar provides its own Viewport scope. Bars anchored inside it,
+        such as a{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockStart"
         />
-        ) belong to it, not to the column or the screen: they’re fixed to the
-        panel, and the room they take is the panel’s alone.
+        , belong to the sidebar, not to the column or the screen. They’re fixed
+        to the panel, and the room they take is the panel’s alone.
       </li>
       <li>
-        The panel is the containing block for what’s inside, and its padding is
-        what they take as their safe area insets. That’s why a header and a page
-        inside it work as they do on a screen: the toolbar stays at the top and
-        the list scrolls under it.
+        The panel is the containing block for its content, and its padding is
+        what that content takes as its safe area insets. That’s why a header and
+        a page inside it work the way they do on a screen. The toolbar stays at
+        the top, and the list scrolls under it.
       </li>
       <li>
-        The panel is a <code>&lt;nav&gt;</code>, a navigation landmark.
+        The panel is a <code>&lt;nav&gt;</code>, which makes it a navigation
+        landmark.
       </li>
     </ul>
     <CodeView code={rootCode} />
@@ -135,12 +137,13 @@ export const SidebarArchitecture: FunctionComponent = () => (
       Its glass and colors
     </Heading>
     <ul>
+      <li>The panel uses the medium glass, the same material as menus.</li>
       <li>
-        The panel is the medium glass, the menus’ material. Its color scheme
-        comes from what’s behind it (<code>useGlassScheme</code>, the{' '}
-        <a href={publicUrl('glossary#backdrop-tone')}>backdrop tone</a>), set on
-        the panel and passed to what’s inside it, so its rows, toolbar and
-        search field follow the panel, not the page.
+        Its color scheme comes from what’s behind it (
+        <code>useGlassScheme</code>, the{' '}
+        <a href={publicUrl('glossary#backdrop-tone')}>backdrop tone</a>). The
+        scheme is set on the panel and passed to its content. So the rows, the
+        toolbar and the search field follow the panel, not the page.
       </li>
     </ul>
 
@@ -152,23 +155,23 @@ export const SidebarArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The sidebar doesn’t place or size itself.{' '}
+        The sidebar doesn’t place or size itself. A{' '}
         <PartLink
           component="layout"
           part="Layout.Column"
         />{' '}
-        does: floating over the other columns in a regular width, or as a drawer
-        swiped in when compact.
+        does that. In a regular width, the column floats over the other columns.
+        In a compact width, the sidebar is a drawer that you swipe in.
       </li>
       <li>
-        It only reads the size class (
+        The sidebar only reads the size class (
         <PartLink
           component="viewport"
           part="useSizeClass"
         />
-        ). In a regular width it marks itself <code>data-regular</code>, and its
-        stylesheet lines its bottom up with the pages’ anchored bars and islands
-        beside it, a little off the screen’s edges.
+        ). In a regular width, it marks itself <code>data-regular</code>. Its
+        stylesheet then lines its bottom up with the anchored bars and islands
+        of the pages beside it, a little in from the screen’s edges.
       </li>
     </ul>
 
@@ -182,7 +185,7 @@ export const SidebarArchitecture: FunctionComponent = () => (
       <li>
         <PartLink part="Sidebar.Toolbar" /> and{' '}
         <PartLink part="Sidebar.ToolbarGroup" /> are plain elements. Their
-        stylesheet places a group at each end and spaces its buttons so their
+        stylesheet places a group at each end, and spaces the buttons so their
         highlights sit evenly in from the panel’s corners.
       </li>
     </ul>
@@ -195,23 +198,24 @@ export const SidebarArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Layout:</strong> its place and size, floating or a drawer.
+        <strong>From Layout:</strong> its place and size, floating or as a
+        drawer.
       </li>
       <li>
-        <strong>From Viewport:</strong> the size class; and its own scope, which
-        Header, Page and the anchors inside use as their screen.
+        <strong>From Viewport:</strong> the size class, and its own scope, which
+        the header, the page and the anchors inside use as their screen.
       </li>
       <li>
         <strong>From Glass:</strong> its material and color scheme.
       </li>
       <li>
-        <strong>Out:</strong> its color scheme and scope to what’s inside it. A
-        list in it takes the sidebar style from{' '}
+        <strong>Out:</strong> its color scheme and scope, to its content. A list
+        inside it takes the sidebar style from{' '}
         <PartLink
           component="list"
           part="List.Root"
         />
-        ’s own prop; the sidebar doesn’t set it.
+        ’s own prop. The sidebar doesn’t set it.
       </li>
     </ul>
   </>

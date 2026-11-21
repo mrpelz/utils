@@ -355,6 +355,28 @@
   }
 
   /*
+   * Opaque glass (Settings' reduced transparency or more contrast, the
+   * system's or a provider's): the materials, without blur, at full
+   * opacity, on the elements reading them (a context's, medium glass's),
+   * so a style query asks what's around each.
+   */
+  @container style(--uikit-settings-reduced-transparency: 1) or style(--uikit-settings-contrast: 1) {
+    [data-glass-context],
+    .uikit-glass-medium {
+      --glass-ui-bright-blur: transparent;
+      --glass-ui-bright-fill: rgb(247 247 247);
+      --glass-ui-bright-fill-filter: none;
+      --glass-ui-bright-fill-brightness: 1;
+      --glass-ui-dim-blur: transparent;
+      --glass-ui-dim-fill: rgb(28 28 30);
+      --glass-ui-dim-fill-filter: none;
+      --glass-ui-dim-fill-brightness: 1;
+      --glass-ui-medium-light-background: rgb(246 246 246);
+      --glass-ui-medium-dark-background: rgb(30 30 30);
+    }
+  }
+
+  /*
    * The “Medium” glass material (`uikit-glass-medium`): menus, edit menus,
    * popovers, large floating panels (see `uikit-glass-panel`, below); background, backdrop blur and glass effect on the element
    * itself, its content's `--uikit-glass-*` properties, and the colors of

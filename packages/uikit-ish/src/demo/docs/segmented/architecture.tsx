@@ -54,8 +54,8 @@ export const SegmentedArchitecture: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         A segmented control is Base UI’s radio group, laid out as a track of
-        equal columns, with a highlight under the checked item and a glass lens
-        while it’s pressed. For using it, see its{' '}
+        equal columns. A highlight sits under the checked item, and a glass lens
+        shows while you press it. To learn how to use it, see its{' '}
         <a href={publicUrl('segmented/parts')}>parts</a>.
       </li>
     </ul>
@@ -68,20 +68,23 @@ export const SegmentedArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Segmented.Root" /> is Base UI’s radio group: the value,
-        keyboard handling and forms. It renders a scroller and a track around
-        its items, and the lens beside them.
+        <PartLink part="Segmented.Root" /> is Base UI’s radio group. Base UI
+        handles the value, the keyboard and forms. The root renders a scroller
+        and a track around its items, and the lens next to them.
       </li>
       <li>
         <PartLink part="Segmented.Item" /> is Base UI’s radio. Its label sits in
-        a span that clips it, so the rounded item doesn’t clip the separator
-        drawn at its start. A hidden copy of the label at the checked weight
-        shares its grid cell, so the columns don’t widen when the widest label
-        gets checked.
+        a span that clips it. That way, the rounded item doesn’t clip the
+        separator drawn at its start.
       </li>
       <li>
-        The items are equal grid columns, so every column fits the widest label
-        when the control sizes to its content.
+        A hidden copy of the label, at the checked weight, shares the label’s
+        grid cell. So the columns don’t get wider when the widest label is
+        checked.
+      </li>
+      <li>
+        The items are equal grid columns. When the control sizes to its content,
+        every column fits the widest label.
       </li>
     </ul>
     <CodeView code={treeCode} />
@@ -94,11 +97,12 @@ export const SegmentedArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Segmented.Highlight" /> is a plain element in the track.
-        It has no script: the stylesheet places it under the checked item by
-        counting the items before it with chained sibling combinators, up to ten
-        items. It’s hidden while nothing is checked.
+        <PartLink part="Segmented.Highlight" /> is a plain element in the track,
+        with no script. The stylesheet places it under the checked item by
+        counting the items before it with chained sibling combinators. That
+        works for up to ten items.
       </li>
+      <li>The highlight is hidden while nothing is checked.</li>
       <li>
         It clips itself and its shadow to the track, so it never shows past the
         ends.
@@ -116,21 +120,25 @@ export const SegmentedArchitecture: FunctionComponent = () => (
       <li>
         A press on an item starts a drag (<code>usePointerDrag</code>). The lens
         follows the pointer, clamped to the items, and the closest enabled item
-        is marked. Released, that item is clicked (Base UI checks it) and
-        focused, and the lens settles on it as it fades.
+        is marked.
       </li>
       <li>
-        A quick tap shows no lens: it shows after a moment or a move (
-        <code>delayLens</code>), so a tap only checks. While it shows, the touch
-        doesn’t scroll.
+        When you release, that item is clicked, so Base UI checks it, and
+        focused. The lens settles on it as it fades out.
       </li>
       <li>
-        The lens’s place and size are custom properties on the root; it’s drawn
-        above the items and outside the track, so the track doesn’t clip it.
+        A quick tap shows no lens. The lens only shows after a moment or a move
+        (<code>delayLens</code>), so a tap just checks the item. While the lens
+        shows, the touch doesn’t scroll.
       </li>
       <li>
-        A ring shows only on keyboard focus: focused by a press, the root marks
-        itself <code>data-pointer-focus</code>.
+        The lens’s position and size are custom properties on the root. It’s
+        drawn above the items and outside the track, so the track doesn’t clip
+        it.
+      </li>
+      <li>
+        A focus ring only shows for keyboard focus. When a press focuses the
+        control, the root marks itself <code>data-pointer-focus</code>.
       </li>
     </ul>
 
@@ -143,16 +151,25 @@ export const SegmentedArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         With <code>overflow</code> set to scroll, the items snap by their start,
-        with a peek of the previous one. The checked item is scrolled into view
-        when it mounts, and again whenever it changes, however: the root watches
-        for <code>data-checked</code> changes. It scrolls to the nearest snap
-        position that shows it, so snapping doesn’t move it out again, and
-        instantly with reduced motion.
+        with a peek of the previous item.
+      </li>
+      <li>
+        The checked item is scrolled into view when the control mounts, and
+        again whenever it changes, however that happens. For that, the root
+        watches for <code>data-checked</code> changes.
+      </li>
+      <li>
+        It scrolls to the nearest snap position that shows the checked item, so
+        snapping doesn’t move it out of view again. With reduced motion, it
+        scrolls instantly.
       </li>
       <li>
         On touch, a finger that moves before the lens shows scrolls the items
-        instead. Held near an end with the lens shown, the lens scrolls them, a
-        little more each frame, as menus do.
+        instead.
+      </li>
+      <li>
+        When the lens shows and you hold it near an end, the lens scrolls the
+        items, a little more each frame, as menus do.
       </li>
     </ul>
 
@@ -164,7 +181,7 @@ export const SegmentedArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> the value, keyboard and forms.
+        <strong>From Base UI:</strong> the value, the keyboard and forms.
       </li>
       <li>
         <strong>From the library’s utilities:</strong> the drag, the lens’s

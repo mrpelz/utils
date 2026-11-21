@@ -46,9 +46,9 @@ export const StepperArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A stepper is Base UI’s number field with its value hidden: two halves
-        that step it, and an input nobody sees but keyboards and screen readers
-        use. For using it, see its{' '}
+        A stepper is Base UI’s number field with its value hidden. It shows two
+        halves that step the value. Its input stays hidden, but keyboards and
+        screen readers use it. To learn how to use it, see its{' '}
         <a href={publicUrl('stepper/parts')}>parts</a>.
       </li>
     </ul>
@@ -61,18 +61,19 @@ export const StepperArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Stepper.Root" /> is Base UI’s number field root: the
-        value, its limits and step, controlled or not. All other number field
-        parts are Base UI’s as well; the library styles four of them.
+        <PartLink part="Stepper.Root" /> is Base UI’s number field root. It
+        holds the value, its limits and its step, controlled or not. All the
+        other number field parts are Base UI’s too. The library styles four of
+        them.
       </li>
       <li>
         <PartLink part="Stepper.Input" /> is the field’s input, visually hidden
         inside the capsule. It takes focus, steps with the arrow keys, and is
-        read as a spin button, so the value is there for assistive technology
-        without being shown. Name it with an <code>aria-label</code>.
+        read as a spin button. So assistive technology gets the value without it
+        being shown. Give it a name with an <code>aria-label</code>.
       </li>
       <li>
-        A stepper shows no number by design. When an app shows the value, it
+        A stepper shows no number, on purpose. When your app shows the value, it
         does so itself, for example in a list row’s detail.
       </li>
     </ul>
@@ -87,14 +88,14 @@ export const StepperArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="Stepper.Decrement" /> and{' '}
-        <PartLink part="Stepper.Increment" /> are Base UI’s buttons, which
-        repeat while held and disable themselves at the limits. Without
+        <PartLink part="Stepper.Increment" /> are Base UI’s buttons. They repeat
+        while you hold them, and disable themselves at the limits. Without
         children, each draws its sign as SVG strokes.
       </li>
       <li>
         <PartLink part="Stepper.Group" /> is the capsule: two halves with a
         separator between them. Their size is a minimum, so larger text or your
-        own content can widen them.
+        own content can make them wider.
       </li>
     </ul>
 
@@ -107,10 +108,13 @@ export const StepperArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         A press on a half moves focus into the field. That shouldn’t show a
-        keyboard focus ring, so the group marks itself{' '}
-        <code>data-pointer-focus</code> on a pointer press and drops the mark on
-        a key press or when focus leaves the group. Its ring, in the tint around
-        the whole capsule, shows only without the mark.
+        keyboard focus ring.
+      </li>
+      <li>
+        So the group marks itself <code>data-pointer-focus</code> when a pointer
+        presses it. It drops the mark on a key press, or when focus leaves the
+        group. The ring, drawn in the tint around the whole capsule, only shows
+        without the mark.
       </li>
     </ul>
     <CodeView code={focusCode} />
@@ -123,12 +127,12 @@ export const StepperArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> the value, stepping, holding to repeat,
-        limits, the input and its form name.
+        <strong>From Base UI:</strong> the value, stepping, repeating while
+        held, the limits, the input and its form name.
       </li>
       <li>
-        <strong>From the tokens:</strong> the fills, the separator and the
-        signs’ colors, in both schemes.
+        <strong>From the tokens:</strong> the colors of the fills, the separator
+        and the signs, in both color schemes.
       </li>
       <li>
         <strong>Out:</strong> nothing. In a form, a{' '}

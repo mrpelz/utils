@@ -41,10 +41,11 @@ export const ProgressArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        Progress holds two components, both on Base UI’s progress: a bar for a
-        known amount, and an activity indicator, spinning spokes for an unknown
-        one. Most of the indicator’s code is about stopping well and staying in
-        step with others. For using them, see their{' '}
+        Progress holds two components, both built on Base UI’s progress. One is
+        a bar for a known amount. The other is an activity indicator, a set of
+        spinning spokes for an unknown amount. Most of the indicator’s code is
+        about stopping well and staying in step with other indicators. To learn
+        how to use them, see their{' '}
         <a href={publicUrl('progress/parts')}>parts</a>.
       </li>
     </ul>
@@ -60,20 +61,26 @@ export const ProgressArchitecture: FunctionComponent = () => (
         <PartLink part="Progress.Root" />, <PartLink part="Progress.Track" />,{' '}
         <PartLink part="Progress.Indicator" />,{' '}
         <PartLink part="Progress.Label" /> and{' '}
-        <PartLink part="Progress.Value" /> are Base UI’s: the value, its
-        formatting, the progress bar role and labelling. The root adds a{' '}
-        <code>tint</code> (<code>--uikit-progress-tint</code>).
+        <PartLink part="Progress.Value" /> are Base UI’s. Base UI handles the
+        value, its formatting, the progress bar role and the labels. The root
+        adds a <code>tint</code> (<code>--uikit-progress-tint</code>).
       </li>
       <li>
-        The label and value are placed by <code>placement</code>, an attribute
-        for the stylesheet. As a tooltip, the value gets the tooltip’s surface
-        style and sits on the fill’s end. Momentary, it shows while the bar is
-        hovered or focused, so the value registers with the root through a
-        context, and the root becomes focusable.
+        The label and the value are placed by <code>placement</code>, an
+        attribute for the stylesheet.
       </li>
       <li>
-        Indeterminate (a <code>null</code> value), its fill slides along the
-        track, in step with other sliding bars.
+        As a tooltip, the value gets the tooltip’s surface style, and sits at
+        the end of the fill.
+      </li>
+      <li>
+        As a momentary tooltip, the value only shows while you hover or focus
+        the bar. For that, the value registers with the root through a context,
+        and the root becomes focusable.
+      </li>
+      <li>
+        When the bar is indeterminate, with a <code>null</code> value, its fill
+        slides along the track, in step with other sliding bars.
       </li>
     </ul>
 
@@ -86,20 +93,23 @@ export const ProgressArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="ActivityIndicator" /> is an indeterminate Base UI
-        progress root, so it’s announced as busy, with eight spokes in a span
-        hidden from assistive technology. Each spoke is turned 45° from the
-        last, and carries its phase, a share of a turn behind the brightest, as
-        a custom property.
+        progress root, so it’s announced as busy. It holds eight spokes in a
+        span that’s hidden from assistive technology.
       </li>
       <li>
-        Its <code>movement</code> decides what the CSS animations do: the whole
-        spinner turns a spoke at a time or smoothly, or the spokes stay put and
-        fade in turn, each by its phase.
+        Each spoke is turned 45° from the last. Each one carries its phase as a
+        custom property: a share of a turn behind the brightest spoke.
       </li>
       <li>
-        At rest, each spoke’s opacity is computed for its <code>progress</code>{' '}
-        (turns along), so a stopped spinner shows exactly where it would have
-        been. A spinning one starts from where its progress was when it started.
+        Its <code>movement</code> decides what the CSS animations do. The whole
+        spinner can turn one spoke at a time, or smoothly. Or the spokes can
+        stay in place and fade in turn, each by its phase.
+      </li>
+      <li>
+        At rest, each spoke’s opacity is computed for its <code>progress</code>,
+        measured in turns. So a stopped spinner shows exactly where it would
+        have been. A spinning one starts from where its progress was when it
+        started.
       </li>
     </ul>
 
@@ -111,22 +121,24 @@ export const ProgressArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <code>display</code> says how it stops: at rest at once, frozen where it
-        is, or finishing its turn first, then optionally hidden.{' '}
-        <code>useStopped</code> turns that into a state: spinning, frozen, or at
-        rest.
+        <code>display</code> says how the indicator stops. It can come to rest
+        at once, freeze where it is, or finish its turn first and then
+        optionally hide. <code>useStopped</code> turns that into a state:
+        spinning, frozen, or at rest.
       </li>
       <li>
         Finishing ends the turn’s animation after its current iteration, so it
-        stops at the top, and waits for it to finish. Hiding afterwards, it
-        keeps turning while it fades out.
+        stops at the top. The indicator waits for that animation to finish. When
+        it hides afterwards, it keeps turning while it fades out.
       </li>
       <li>
-        Frozen, its animations are paused in script, not by{' '}
-        <code>animation-play-state</code>: CSS’s pause is ignored once a script
-        has set an animation’s start time, as syncing does, and WebKit can
-        settle a pause on an older time, so the time is put back once the pause
-        has settled.
+        When it freezes, its animations are paused in script, not with{' '}
+        <code>animation-play-state</code>. CSS’s pause is ignored once a script
+        has set an animation’s start time, which syncing does.
+      </li>
+      <li>
+        WebKit can also settle a pause on an older time. So the time is put back
+        once the pause has settled.
       </li>
     </ul>
     <CodeView code={stopCode} />
@@ -139,14 +151,16 @@ export const ProgressArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        With <code>synchronized</code> (the default), every spinning indicator
+        With <code>synchronized</code>, the default, every spinning indicator
         and sliding bar sets its CSS animations’ start time to the page’s
-        origin, so all of them show the same step at the same moment, whenever
-        each appeared. Again whenever its display or movement changes.
+        origin. So all of them show the same step at the same moment, no matter
+        when each appeared. This happens again whenever an indicator’s display
+        or movement changes.
       </li>
       <li>
-        Not for an indicator with its own progress or duration, or while frozen:
-        setting a start time would play a paused animation again.
+        It doesn’t happen for an indicator with its own progress or duration, or
+        while it’s frozen. Setting a start time would make a paused animation
+        play again.
       </li>
     </ul>
     <CodeView code={syncCode} />
@@ -159,15 +173,16 @@ export const ProgressArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> the value, its formatting, roles and
-        labelling.
+        <strong>From Base UI:</strong> the value, its formatting, the roles and
+        the labels.
       </li>
       <li>
-        <strong>From Tooltip and Glass:</strong> the value capsule’s surface.
+        <strong>From Tooltip and Glass:</strong> the surface of the value’s
+        capsule.
       </li>
       <li>
-        <strong>From the system:</strong> reduced motion, by the stylesheet’s
-        media query.
+        <strong>From Settings:</strong> reduced motion, read by a style query in
+        the stylesheet.
       </li>
       <li>
         <strong>Out:</strong>{' '}

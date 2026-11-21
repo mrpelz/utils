@@ -197,45 +197,6 @@
       rgb(242 242 247),
       rgb(44 44 46)
     );
-    --color-ui-system-gray: light-dark(rgb(142 142 147), rgb(142 142 147));
-    --color-ui-system-gray2: light-dark(rgb(174 174 178), rgb(99 99 102));
-    --color-ui-system-gray3: light-dark(rgb(199 199 204), rgb(72 72 74));
-    --color-ui-system-gray4: light-dark(rgb(209 209 214), rgb(58 58 60));
-    --color-ui-system-gray5: light-dark(rgb(229 229 234), rgb(44 44 46));
-    --color-ui-system-gray6: light-dark(rgb(242 242 247), rgb(28 28 30));
-    --color-ui-system-red: light-dark(rgb(255 56 60), rgb(255 66 69));
-    --color-ui-system-orange: light-dark(rgb(255 141 40), rgb(255 146 48));
-    --color-ui-system-yellow: light-dark(rgb(255 204 0), rgb(255 214 0));
-    --color-ui-system-green: light-dark(rgb(52 199 89), rgb(48 209 88));
-    --color-ui-system-mint: light-dark(rgb(0 200 179), rgb(0 218 195));
-    --color-ui-system-teal: light-dark(rgb(0 195 208), rgb(0 210 224));
-    --color-ui-system-cyan: light-dark(rgb(0 192 232), rgb(60 211 254));
-    --color-ui-system-blue: light-dark(rgb(0 136 255), rgb(0 145 255));
-    --color-ui-system-indigo: light-dark(rgb(97 85 245), rgb(109 124 255));
-    --color-ui-system-purple: light-dark(rgb(203 48 224), rgb(219 52 242));
-    --color-ui-system-pink: light-dark(rgb(255 45 85), rgb(255 55 95));
-    --color-ui-system-brown: light-dark(rgb(172 127 94), rgb(183 138 102));
-
-    @media (prefers-contrast: more) {
-      --color-ui-system-gray: light-dark(rgb(108 108 112), rgb(174 174 178));
-      --color-ui-system-gray2: light-dark(rgb(142 142 147), rgb(124 124 128));
-      --color-ui-system-gray3: light-dark(rgb(174 174 178), rgb(84 84 86));
-      --color-ui-system-gray4: light-dark(rgb(188 188 192), rgb(68 68 70));
-      --color-ui-system-gray5: light-dark(rgb(216 216 220), rgb(54 54 56));
-      --color-ui-system-gray6: light-dark(rgb(235 235 240), rgb(36 36 38));
-      --color-ui-system-red: light-dark(rgb(233 21 45), rgb(255 97 101));
-      --color-ui-system-orange: light-dark(rgb(197 83 0), rgb(255 160 86));
-      --color-ui-system-yellow: light-dark(rgb(161 106 0), rgb(254 223 67));
-      --color-ui-system-green: light-dark(rgb(0 137 50), rgb(74 217 104));
-      --color-ui-system-mint: light-dark(rgb(0 133 117), rgb(84 223 203));
-      --color-ui-system-teal: light-dark(rgb(0 129 152), rgb(59 221 236));
-      --color-ui-system-cyan: light-dark(rgb(0 126 174), rgb(109 217 255));
-      --color-ui-system-blue: light-dark(rgb(30 110 244), rgb(92 184 255));
-      --color-ui-system-indigo: light-dark(rgb(86 74 222), rgb(167 170 255));
-      --color-ui-system-purple: light-dark(rgb(176 47 194), rgb(234 141 255));
-      --color-ui-system-pink: light-dark(rgb(231 18 77), rgb(255 138 196));
-      --color-ui-system-brown: light-dark(rgb(149 109 81), rgb(219 166 121));
-    }
 
     /*
      * Glass materials for dim and bright content behind the glass
@@ -434,6 +395,81 @@
     --shadow-ui-list-reorder: 0 2px 8px rgb(0 0 0 / 60%);
   }
 
+  /*
+   * The system colors, and with more contrast (Settings' contrast): the
+   * system's on the root (its media query); within a provider or a portal
+   * overriding it (see Settings), its own (a style query on its custom
+   * property), on what's directly within it (a provider's properties are
+   * on its own element, and a style query asks the parent). The app tint
+   * (`--color-ui-primary`, an app's own) stays the root's.
+   */
+  :where(:root, [data-uikit-settings] > *) {
+    --color-ui-system-gray: light-dark(rgb(142 142 147), rgb(142 142 147));
+    --color-ui-system-gray2: light-dark(rgb(174 174 178), rgb(99 99 102));
+    --color-ui-system-gray3: light-dark(rgb(199 199 204), rgb(72 72 74));
+    --color-ui-system-gray4: light-dark(rgb(209 209 214), rgb(58 58 60));
+    --color-ui-system-gray5: light-dark(rgb(229 229 234), rgb(44 44 46));
+    --color-ui-system-gray6: light-dark(rgb(242 242 247), rgb(28 28 30));
+    --color-ui-system-red: light-dark(rgb(255 56 60), rgb(255 66 69));
+    --color-ui-system-orange: light-dark(rgb(255 141 40), rgb(255 146 48));
+    --color-ui-system-yellow: light-dark(rgb(255 204 0), rgb(255 214 0));
+    --color-ui-system-green: light-dark(rgb(52 199 89), rgb(48 209 88));
+    --color-ui-system-mint: light-dark(rgb(0 200 179), rgb(0 218 195));
+    --color-ui-system-teal: light-dark(rgb(0 195 208), rgb(0 210 224));
+    --color-ui-system-cyan: light-dark(rgb(0 192 232), rgb(60 211 254));
+    --color-ui-system-blue: light-dark(rgb(0 136 255), rgb(0 145 255));
+    --color-ui-system-indigo: light-dark(rgb(97 85 245), rgb(109 124 255));
+    --color-ui-system-purple: light-dark(rgb(203 48 224), rgb(219 52 242));
+    --color-ui-system-pink: light-dark(rgb(255 45 85), rgb(255 55 95));
+    --color-ui-system-brown: light-dark(rgb(172 127 94), rgb(183 138 102));
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --color-ui-system-gray: light-dark(rgb(108 108 112), rgb(174 174 178));
+      --color-ui-system-gray2: light-dark(rgb(142 142 147), rgb(124 124 128));
+      --color-ui-system-gray3: light-dark(rgb(174 174 178), rgb(84 84 86));
+      --color-ui-system-gray4: light-dark(rgb(188 188 192), rgb(68 68 70));
+      --color-ui-system-gray5: light-dark(rgb(216 216 220), rgb(54 54 56));
+      --color-ui-system-gray6: light-dark(rgb(235 235 240), rgb(36 36 38));
+      --color-ui-system-red: light-dark(rgb(233 21 45), rgb(255 97 101));
+      --color-ui-system-orange: light-dark(rgb(197 83 0), rgb(255 160 86));
+      --color-ui-system-yellow: light-dark(rgb(161 106 0), rgb(254 223 67));
+      --color-ui-system-green: light-dark(rgb(0 137 50), rgb(74 217 104));
+      --color-ui-system-mint: light-dark(rgb(0 133 117), rgb(84 223 203));
+      --color-ui-system-teal: light-dark(rgb(0 129 152), rgb(59 221 236));
+      --color-ui-system-cyan: light-dark(rgb(0 126 174), rgb(109 217 255));
+      --color-ui-system-blue: light-dark(rgb(30 110 244), rgb(92 184 255));
+      --color-ui-system-indigo: light-dark(rgb(86 74 222), rgb(167 170 255));
+      --color-ui-system-purple: light-dark(rgb(176 47 194), rgb(234 141 255));
+      --color-ui-system-pink: light-dark(rgb(231 18 77), rgb(255 138 196));
+      --color-ui-system-brown: light-dark(rgb(149 109 81), rgb(219 166 121));
+    }
+  }
+
+  @container style(--uikit-settings-contrast: 1) {
+    :where([data-uikit-settings] > *) {
+      --color-ui-system-gray: light-dark(rgb(108 108 112), rgb(174 174 178));
+      --color-ui-system-gray2: light-dark(rgb(142 142 147), rgb(124 124 128));
+      --color-ui-system-gray3: light-dark(rgb(174 174 178), rgb(84 84 86));
+      --color-ui-system-gray4: light-dark(rgb(188 188 192), rgb(68 68 70));
+      --color-ui-system-gray5: light-dark(rgb(216 216 220), rgb(54 54 56));
+      --color-ui-system-gray6: light-dark(rgb(235 235 240), rgb(36 36 38));
+      --color-ui-system-red: light-dark(rgb(233 21 45), rgb(255 97 101));
+      --color-ui-system-orange: light-dark(rgb(197 83 0), rgb(255 160 86));
+      --color-ui-system-yellow: light-dark(rgb(161 106 0), rgb(254 223 67));
+      --color-ui-system-green: light-dark(rgb(0 137 50), rgb(74 217 104));
+      --color-ui-system-mint: light-dark(rgb(0 133 117), rgb(84 223 203));
+      --color-ui-system-teal: light-dark(rgb(0 129 152), rgb(59 221 236));
+      --color-ui-system-cyan: light-dark(rgb(0 126 174), rgb(109 217 255));
+      --color-ui-system-blue: light-dark(rgb(30 110 244), rgb(92 184 255));
+      --color-ui-system-indigo: light-dark(rgb(86 74 222), rgb(167 170 255));
+      --color-ui-system-purple: light-dark(rgb(176 47 194), rgb(234 141 255));
+      --color-ui-system-pink: light-dark(rgb(231 18 77), rgb(255 138 196));
+      --color-ui-system-brown: light-dark(rgb(149 109 81), rgb(219 166 121));
+    }
+  }
+
   /* A color scheme forced (see `useColorScheme`): on the root element, or
      on any element, for what's within it. (Forced within one forced
      otherwise, the dark one's rules win, not the nearer one's.) */
@@ -471,52 +507,6 @@
   @media (prefers-reduced-transparency: reduce) {
     :root {
       --uikit-settings-reduced-transparency-system: 1;
-    }
-  }
-
-  /* Accessibility: glass made opaque (see opaqueGlass). */
-  @media (prefers-reduced-transparency: reduce) {
-    :root {
-      --glass-ui-bright-blur: transparent;
-      --glass-ui-bright-fill: rgb(247 247 247);
-      --glass-ui-bright-fill-filter: none;
-      --glass-ui-bright-fill-brightness: 1;
-      --glass-ui-dim-blur: transparent;
-      --glass-ui-dim-fill: rgb(28 28 30);
-      --glass-ui-dim-fill-filter: none;
-      --glass-ui-dim-fill-brightness: 1;
-      --glass-ui-medium-light-background: rgb(246 246 246);
-      --glass-ui-medium-dark-background: rgb(30 30 30);
-    }
-  }
-
-  @media (prefers-contrast: more) {
-    :root {
-      --glass-ui-bright-blur: transparent;
-      --glass-ui-bright-fill: rgb(247 247 247);
-      --glass-ui-bright-fill-filter: none;
-      --glass-ui-bright-fill-brightness: 1;
-      --glass-ui-dim-blur: transparent;
-      --glass-ui-dim-fill: rgb(28 28 30);
-      --glass-ui-dim-fill-filter: none;
-      --glass-ui-dim-fill-brightness: 1;
-      --glass-ui-medium-light-background: rgb(246 246 246);
-      --glass-ui-medium-dark-background: rgb(30 30 30);
-    }
-  }
-
-  @media (forced-colors: active) {
-    :root {
-      --glass-ui-bright-blur: transparent;
-      --glass-ui-bright-fill: rgb(247 247 247);
-      --glass-ui-bright-fill-filter: none;
-      --glass-ui-bright-fill-brightness: 1;
-      --glass-ui-dim-blur: transparent;
-      --glass-ui-dim-fill: rgb(28 28 30);
-      --glass-ui-dim-fill-filter: none;
-      --glass-ui-dim-fill-brightness: 1;
-      --glass-ui-medium-light-background: rgb(246 246 246);
-      --glass-ui-medium-dark-background: rgb(30 30 30);
     }
   }
 }

@@ -330,7 +330,7 @@
         visibility: hidden;
       }
 
-      @media (prefers-reduced-motion: reduce) {
+      @container style(--uikit-settings-reduced-motion: 1) {
         transition: none;
       }
     }

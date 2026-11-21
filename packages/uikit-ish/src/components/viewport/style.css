@@ -371,7 +371,7 @@
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
+    @container style(--uikit-settings-reduced-motion: 1) {
       &::before,
       &::after {
         transition: none;
@@ -573,7 +573,7 @@
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
+  @container style(--uikit-settings-reduced-motion: 1) {
     .uikit-viewport-anchor,
     .uikit-viewport-content,
     .uikit-viewport-keyboard-accessory {

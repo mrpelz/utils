@@ -59,10 +59,11 @@ export const LayoutArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A layout is a row of columns, each its own screen for what’s in it. Its
-        sizing is CSS, driven by custom properties; its script handles resizing
-        by a divider, opening and closing with a slide, and a floating column
-        that others keep clear of. For using it, see its{' '}
+        A layout is a row of columns. Each column is its own screen for what’s
+        inside it. CSS does the sizing, driven by custom properties. The script
+        handles three things: resizing a column by its divider, opening and
+        closing a column with a slide, and a floating column that the others
+        keep clear of. To learn how to use it, see its{' '}
         <a href={publicUrl('layout/parts')}>parts</a>.
       </li>
     </ul>
@@ -75,24 +76,26 @@ export const LayoutArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Layout.Root" /> is a flex row filling its container.
-        Each <PartLink part="Layout.Column" /> takes a size or shares the free
-        space; its size, minimum and maximum are custom properties for the
+        <PartLink part="Layout.Root" /> is a flex row that fills its container.
+      </li>
+      <li>
+        Each <PartLink part="Layout.Column" /> takes a size, or shares the free
+        space. Its size, minimum and maximum are custom properties for the
         stylesheet.
       </li>
       <li>
-        Each column provides its own Viewport scope and is the containing block
-        of the fixed layers inside it, so a header’s bar in a column spans that
-        column, not the screen. A{' '}
+        Each column provides its own Viewport scope, and it’s the containing
+        block for the fixed layers inside it. So a header’s bar in a column
+        spans that column, not the whole screen. A{' '}
         <PartLink
           component="page"
           part="Page.Root"
         />{' '}
-        in it scrolls on its own.
+        in a column scrolls on its own.
       </li>
       <li>
-        Where columns have no background, what’s behind the layout shows, for
-        example a{' '}
+        Where columns have no background, what’s behind the layout shows
+        through, for example a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Background"
@@ -109,17 +112,24 @@ export const LayoutArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A <code>resizable</code> column renders a divider at its end: a
-        focusable element with the separator role, its hit area wider than the
-        hairline. Dragging it captures the pointer and resizes the column by the
-        distance moved toward the end, by the layout’s direction. The arrow keys
-        step it (further with Shift), Home and End go to its limits.
+        A <code>resizable</code> column renders a divider at its end. The
+        divider is a focusable element with the separator role. Its hit area is
+        wider than the hairline you see.
       </li>
       <li>
-        Its size is the app’s (<code>size</code>, reported by{' '}
-        <code>onSizeChange</code>) or its own, always clamped to its minimum and
-        maximum. A flexible column’s current size is read from its box when a
-        drag starts.
+        Dragging the divider captures the pointer. The column grows or shrinks
+        by the distance you move toward its end, following the layout’s
+        direction.
+      </li>
+      <li>
+        With the keyboard, the arrow keys step the size, further with Shift.
+        Home and End go to the column’s limits.
+      </li>
+      <li>
+        The size is your app’s (<code>size</code>, reported by{' '}
+        <code>onSizeChange</code>), or the column’s own. Either way, it’s always
+        clamped to the minimum and maximum. For a flexible column, the current
+        size is read from its box when a drag starts.
       </li>
     </ul>
 
@@ -131,23 +141,29 @@ export const LayoutArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A closed column is <code>inert</code> and slides out: a floating one off
-        its edge, others by a negative margin at their size, so the columns
-        beside take their place and its content is never squeezed. It keeps the
-        size it had open, observed while it was open, for the slide.
+        A closed column is <code>inert</code> and slides out. A floating column
+        slides off its edge. Other columns slide out by a negative margin at
+        their size. The columns beside it take its place, and its content is
+        never squeezed.
       </li>
       <li>
-        Transitions run only while a column opens or closes, not when it’s first
-        laid out or resized. The column marks itself moving in the same render
-        as its change, before anything measures it; the layout is marked
-        transitioning until the column’s own animations have finished.
+        A closing column keeps the size it had while open, for the slide. That
+        size is observed while the column is open.
       </li>
       <li>
-        Afterwards, the layout’s scrollers each get a layer for two frames, then
-        lose it: iOS keeps tiles it drew off screen as they were, and this
-        redraws them at rest (see{' '}
-        <a href={publicUrl('ios-quirks#layers-under-a-scroll')}>iOS Quirks</a>
-        ).
+        Transitions only run while a column opens or closes. They don’t run when
+        the column is first laid out, or when it’s resized.
+      </li>
+      <li>
+        The column marks itself as moving in the same render as its change,
+        before anything measures it. The layout is marked as transitioning until
+        the column’s own animations have finished.
+      </li>
+      <li>
+        Afterwards, each of the layout’s scrollers gets a layer for two frames,
+        then loses it again. iOS keeps tiles it drew off screen as they were,
+        and this redraws them at rest (see{' '}
+        <a href={publicUrl('ios-quirks#layers-under-a-scroll')}>iOS Quirks</a>).
       </li>
     </ul>
     <CodeView code={openCode} />
@@ -161,20 +177,23 @@ export const LayoutArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         A <code>floating</code> column sits over the others at the layout’s
-        start; the others span the whole layout under it. It publishes its
-        visible size as <code>--uikit-layout-floating-size</code> on the layout,
-        as it’s resized, and frame by frame while it slides.
+        start. The other columns span the whole layout underneath it.
       </li>
       <li>
-        A <code>clearFloating</code> column turns that into{' '}
-        <code>--uikit-layout-inset-start</code>, which its pages and bars pad
-        by: their content stays clear of the floating column while their
+        The floating column publishes how much of it is visible as{' '}
+        <code>--uikit-layout-floating-size</code> on the layout. It updates that
+        as it’s resized, and on every frame while it slides.
+      </li>
+      <li>
+        A <code>clearFloating</code> column turns that size into{' '}
+        <code>--uikit-layout-inset-start</code>. Its pages and bars pad by it.
+        Their content stays clear of the floating column, while their
         backgrounds run beneath it.
       </li>
       <li>
-        It’s an inherited property changing every frame, which the iOS rules
-        otherwise avoid, but only during a sidebar’s slide, now and then, and it
-        isn’t registered or transitioned.
+        This is an inherited property that changes on every frame, which the iOS
+        rules otherwise avoid. It only happens during a sidebar’s slide, now and
+        then, and the property isn’t registered or transitioned.
       </li>
     </ul>
     <CodeView code={floatingCode} />
@@ -187,25 +206,26 @@ export const LayoutArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From the app:</strong> sizes, open or closed, which columns
-        float. Whether a column is a <a href={publicUrl('drawer')}>Drawer</a>{' '}
-        instead, when compact, is the app’s choice too.
+        <strong>From the app:</strong> the sizes, which columns are open or
+        closed, and which ones float. Whether a column becomes a{' '}
+        <a href={publicUrl('drawer')}>Drawer</a> in a compact width is your
+        app’s choice too.
       </li>
       <li>
-        <strong>From Viewport:</strong> a scope per column.
+        <strong>From Viewport:</strong> a scope for each column.
       </li>
       <li>
-        <strong>Out:</strong> its inset to{' '}
+        <strong>Out:</strong> its inset, to the{' '}
         <PartLink
           component="page"
           part="Page.Root"
         />{' '}
-        and bars in a column clear of a floating one, and the room a{' '}
+        and the bars in a column clear of a floating one. It also gives a{' '}
         <PartLink
           component="sidebar"
           part="Sidebar.Root"
         />{' '}
-        is placed in.
+        the room it’s placed in.
       </li>
     </ul>
   </>

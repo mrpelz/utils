@@ -57,11 +57,11 @@ export const PageArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A page is one element: a scroll container on the page background. What
-        makes it more than a <code>div</code> is how it ties into{' '}
-        <a href={publicUrl('viewport')}>Viewport</a>: it’s registered as a
-        scroller, draws its bars’ edge effects, keeps focused fields in view and
-        handles the safe area insets. For using it, see its{' '}
+        A page is a single element: a scroll container on the page background.
+        What makes it more than a <code>div</code> is how it ties into{' '}
+        <a href={publicUrl('viewport')}>Viewport</a>. It registers as a
+        scroller, draws its bars’ edge effects, keeps focused fields in view,
+        and handles the safe area insets. To learn how to use it, see its{' '}
         <a href={publicUrl('page/parts')}>parts</a>.
       </li>
     </ul>
@@ -74,26 +74,26 @@ export const PageArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Page.Root" /> fills its container (a column, a
-        navigation stack’s page, the content layer) and scrolls its content. Its
-        overscroll is contained, so a fling that reaches its end doesn’t move
-        what’s around it.
+        <PartLink part="Page.Root" /> fills its container and scrolls its
+        content. The container can be a column, a page in a navigation stack, or
+        the content layer. Its overscroll is contained, so a fling that reaches
+        its end doesn’t move what’s around it.
       </li>
       <li>
-        Its <code>background</code> sets <code>--uikit-glass-backdrop</code>,
-        the grouped or plain system background. Flat glass in it is drawn over
-        that color, so it matches without sampling anything.
+        Its <code>background</code> sets <code>--uikit-glass-backdrop</code> to
+        the grouped or the plain system background. Flat glass in the page is
+        drawn over that color, so it matches without sampling anything.
       </li>
       <li>
-        Its glass mode is resolved by Glass (<code>useGlassMode</code>): with{' '}
-        <code>auto</code>, glass in it is flat while it can scroll, measured as
-        it or its content resizes.
+        Glass resolves the page’s glass mode (<code>useGlassMode</code>). With{' '}
+        <code>auto</code>, glass in the page is flat while the page can scroll.
+        That’s measured again whenever the page or its content resizes.
       </li>
       <li>
-        With <code>alwaysBounce</code> (the default), it bounces even when its
-        content fits: a hidden pseudo-element one pixel taller than it gives it
-        something to scroll. That keeps a drag on it its own, so it doesn’t
-        reach the document.
+        With <code>alwaysBounce</code>, the default, the page bounces even when
+        its content fits. A hidden pseudo-element one pixel taller than the page
+        gives it something to scroll. That keeps a drag on the page its own, so
+        it doesn’t reach the document.
       </li>
     </ul>
     <CodeView code={rootCode} />
@@ -107,8 +107,12 @@ export const PageArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         The page pads its ends by the safe area insets it inherits, and sets
-        them to zero for its children: each inset is handled once, by the page.
-        Its content scrolls under the bars; the room under them comes from{' '}
+        them to zero for its children. That way, each inset is handled once, by
+        the page.
+      </li>
+      <li>
+        The page’s content scrolls under the bars. The room under the bars comes
+        from a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Padding"
@@ -116,8 +120,8 @@ export const PageArchitecture: FunctionComponent = () => (
         in the content, not from the page.
       </li>
       <li>
-        A header in it is the exception: its bar is anchored over the page, so
-        the page hands the insets back to the header’s anchor.
+        A header in the page is the exception. Its bar is anchored over the
+        page, so the page hands the insets back to the header’s anchor.
       </li>
       <li>
         In a{' '}
@@ -125,10 +129,10 @@ export const PageArchitecture: FunctionComponent = () => (
           component="layout"
           part="Layout.Column"
         />{' '}
-        beside a floating one, Layout sets{' '}
-        <code>--uikit-layout-inset-start</code>, and the page pads its leading
-        side by it: its content clears the floating column while its background
-        runs beneath it.
+        beside a floating column, Layout sets{' '}
+        <code>--uikit-layout-inset-start</code>. The page pads its leading side
+        by that amount. Its content stays clear of the floating column, while
+        its background runs beneath it.
       </li>
     </ul>
     <CodeView code={insetsCode} />
@@ -141,26 +145,26 @@ export const PageArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>The current scroller.</strong> While mounted, the page is
-        registered with Viewport’s scroller registry. Viewport tracks which
-        registered scroller fills most of the screen (
+        <strong>The current scroller.</strong> While it’s mounted, the page is
+        registered with Viewport’s scrollers. Viewport tracks the registered
+        scroller that fills the screen (
         <PartLink
           component="viewport"
           part="useCurrentScroller"
         />
-        ), for example to scroll it to its top on a status bar tap.
+        ), for example to scroll it to its top when you tap the status bar.
       </li>
       <li>
-        <strong>Edge effects.</strong> It renders <code>EdgeEffects</code>{' '}
-        inside itself: at each end where a bar above it has an edge effect, a
-        fixed layer that shows as content scrolls under the bar, driven by its
-        scroll position.
+        <strong>Edge effects.</strong> The page renders <code>EdgeEffects</code>{' '}
+        inside itself. At each end where a bar above it has an edge effect,
+        there’s a fixed layer. It shows as content scrolls under the bar, driven
+        by the page’s scroll position.
       </li>
       <li>
-        <strong>Focus scroll.</strong> It marks itself as a focus scroll target
-        (<code>data-viewport-focus-scroll</code>), so a text field in it that’s
-        typed into is scrolled into view above the keyboard by the page, and by
-        no other scroller.
+        <strong>Focus scroll.</strong> The page marks itself as a focus scroll
+        target (<code>data-viewport-focus-scroll</code>). When you type into a
+        text field in it, the page scrolls the field into view above the
+        keyboard. No other scroller does.
       </li>
     </ul>
 
@@ -172,14 +176,17 @@ export const PageArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        With <code>fill</code>, the page isn’t a scroller: it isn’t registered,
-        draws no edge effects and takes no focus scroll. It clips its content,
-        has no padding, and passes the safe area insets on to its children,
-        which fill it, under the bars, for example a map.
+        With <code>fill</code>, the page isn’t a scroller. It isn’t registered,
+        draws no edge effects and does no focus scroll. It clips its content and
+        has no padding.
       </li>
       <li>
-        Its glass mode defaults to live then: <code>auto</code> resolves only
-        for a scroller.
+        A filled page passes the safe area insets on to its children. They fill
+        the page and run under the bars, a map for example.
+      </li>
+      <li>
+        Its glass mode defaults to live then, because <code>auto</code> only
+        resolves for a scroller.
       </li>
     </ul>
 
@@ -191,8 +198,9 @@ export const PageArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Viewport:</strong> the safe area insets (as custom
-        properties), the scroller registry, edge effects and focus scroll.
+        <strong>From Viewport:</strong> the safe area insets as custom
+        properties, the scroller registry, the edge effects and the focus
+        scroll.
       </li>
       <li>
         <strong>From Layout:</strong> its leading inset beside a floating
@@ -202,22 +210,23 @@ export const PageArchitecture: FunctionComponent = () => (
         <strong>From Glass:</strong> its glass mode.
       </li>
       <li>
-        <strong>Out:</strong> it’s the scroller for{' '}
+        <strong>Out:</strong> it’s the scroller for a{' '}
         <PartLink
           component="header"
           part="Header.Root"
-        />{' '}
-        (whose large title fades as it scrolls),{' '}
+        />
+        , whose large title fades as it scrolls. It’s also the scroller for the
+        pages of a{' '}
         <PartLink
           component="navigation"
           part="Navigation.Stack"
-        />
-        ’s pages and{' '}
+        />{' '}
+        and for{' '}
         <PartLink
           component="layout"
           part="Layout.Column"
         />
-        s; and the current scroller Viewport reports to the app.
+        s. And it’s the current scroller that Viewport reports to your app.
       </li>
     </ul>
   </>

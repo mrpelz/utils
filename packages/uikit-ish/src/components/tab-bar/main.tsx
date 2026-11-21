@@ -116,8 +116,6 @@ export type {
 // (see `StyledTabs`).
 // (See style.css.)
 
-// Marks a tab's symbol and label, so a tab can lay out by its content, and
-
 const setProperties = (
   element: HTMLElement,
   properties: Record<string, string>,

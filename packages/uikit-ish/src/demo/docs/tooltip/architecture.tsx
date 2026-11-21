@@ -42,9 +42,9 @@ export const TooltipArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A tooltip is Base UI’s, shown on hover and keyboard focus, with one
-        addition: on touch, where nothing hovers, it shows while its trigger is
-        held. For using it, see its{' '}
+        A tooltip is Base UI’s tooltip, shown on hover and on keyboard focus.
+        The library adds one thing. On touch, where nothing hovers, the tooltip
+        shows while you hold its trigger. To learn how to use it, see its{' '}
         <a href={publicUrl('tooltip/parts')}>parts</a>.
       </li>
     </ul>
@@ -57,21 +57,24 @@ export const TooltipArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Opening, closing, delays, positioning and the handle are Base UI’s.{' '}
-        <PartLink part="Tooltip.Trigger" /> waits 300ms instead of Base UI’s
-        600ms, unless it’s inside a <PartLink part="Tooltip.Provider" />, whose
-        delay then applies, so moving between tooltips shows the next at once.
+        Opening, closing, the delays, positioning and the handle are Base UI’s.
       </li>
       <li>
-        <PartLink part="Tooltip.Portal" /> goes to the library’s portal
-        container, with the providers’ settings, and has no box (
+        <PartLink part="Tooltip.Trigger" /> waits 300ms instead of Base UI’s
+        600ms. Inside a <PartLink part="Tooltip.Provider" />, the provider’s
+        delay applies instead. So when you move between tooltips, the next one
+        shows at once.
+      </li>
+      <li>
+        <PartLink part="Tooltip.Portal" /> goes into the library’s portal
+        container, with the providers’ settings. It has no box (
         <code>display: contents</code>), so a container laid out as a flex
         column doesn’t shift.
       </li>
       <li>
-        <PartLink part="Tooltip.Positioner" /> takes a logical side, 8px from
-        its trigger, and stays in its container and clear of the safe area and
-        the keyboard (<code>useCollision</code>).
+        <PartLink part="Tooltip.Positioner" /> takes a logical side, and places
+        the tooltip 8px from its trigger. The tooltip stays in its container,
+        and clear of the safe area and the keyboard (<code>useCollision</code>).
       </li>
     </ul>
 
@@ -83,25 +86,29 @@ export const TooltipArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Tooltip.Root" /> makes a handle of its own when it isn’t
-        given one, and passes it, with whether it’s disabled, to its triggers
-        through a context. A trigger listens for a touch held 500ms within 10px,
-        then opens the tooltip through that handle; lifting the finger closes
-        it.
+        <PartLink part="Tooltip.Root" /> makes a handle of its own when you
+        don’t give it one. It passes that handle, and whether it’s disabled, to
+        its triggers through a context.
       </li>
       <li>
-        A touch that moves or lifts earlier does nothing: the tap is the
-        trigger’s own.
+        A trigger listens for a touch that’s held for 500ms without moving more
+        than 10px. Then it opens the tooltip through the handle. When you lift
+        your finger, the tooltip closes.
       </li>
       <li>
-        After a long press, the touch’s end is cancelled. Otherwise the browser
-        emulates a mouse for it, and Base UI takes its <code>mouseenter</code>{' '}
-        for a hover and reopens the tooltip (see{' '}
+        A touch that moves or lifts earlier does nothing. That tap belongs to
+        the trigger itself.
+      </li>
+      <li>
+        After a long press, the touch’s end is cancelled. Otherwise, the browser
+        would emulate a mouse for it. Base UI would take the emulated{' '}
+        <code>mouseenter</code> for a hover, and open the tooltip again (see{' '}
         <a href={publicUrl('ios-quirks#mouse-events-after-a-long-press')}>
           iOS Quirks
         </a>
-        ). On Android, the long press’s context menu is prevented too.
+        ).
       </li>
+      <li>On Android, the long press’s context menu is prevented too.</li>
     </ul>
     <CodeView code={longPressCode} />
 
@@ -113,14 +120,17 @@ export const TooltipArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Tooltip.Popup" /> is the menus’ glass, its color scheme
-        from what’s behind it, passed to what’s inside. Its surface class (
-        <code>uikit-tooltip-surface</code>) is shared, so a page control’s value
-        tooltip looks the same without being a tooltip.
+        <PartLink part="Tooltip.Popup" /> uses the menus’ glass. It takes its
+        color scheme from what’s behind it, and passes it to its content.
       </li>
       <li>
-        It scales in from its trigger, as menus do, by Base UI’s starting and
-        ending styles.
+        Its surface class (<code>uikit-tooltip-surface</code>) is shared. That
+        way, a page control’s value tooltip looks the same, without being a
+        tooltip.
+      </li>
+      <li>
+        The tooltip scales in from its trigger the way menus do, using Base UI’s
+        starting and ending styles.
       </li>
     </ul>
 
@@ -132,20 +142,21 @@ export const TooltipArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> everything but the long press.
+        <strong>From Base UI:</strong> everything except the long press.
       </li>
       <li>
-        <strong>From Viewport, Settings and Glass:</strong> the portal container
-        and collision boundary, the providers’ settings, and its color scheme.
+        <strong>From Viewport, Settings and Glass:</strong> the portal
+        container, the collision boundary, the providers’ settings and its color
+        scheme.
       </li>
       <li>
-        <strong>Out:</strong> its surface style, to{' '}
+        <strong>Out:</strong> its surface style, to the{' '}
         <PartLink
           component="page-control"
           part="PageControl"
         />
-        . Held open and anchored to an element, it labels things for good, for
-        example a slider’s thumb.
+        . A tooltip that’s held open and anchored to an element can also label
+        it permanently, for example a slider’s thumb.
       </li>
     </ul>
   </>

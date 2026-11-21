@@ -47,9 +47,10 @@ export const DrawerArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A drawer is Base UI’s, opening from a logical side, with its portal,
-        backdrop and viewport folded into one popup part, and a swipe area that
-        keeps the page still while it’s swiped. For using it, see its{' '}
+        A drawer is Base UI’s drawer, opening from a logical side. The library
+        folds its portal, backdrop and viewport into one popup part. It also
+        adds a swipe area that keeps the page still while you swipe the drawer
+        in. To learn how to use it, see its{' '}
         <a href={publicUrl('drawer/parts')}>parts</a>.
       </li>
     </ul>
@@ -64,18 +65,21 @@ export const DrawerArchitecture: FunctionComponent = () => (
       <li>
         Base UI’s drawer is swiped closed in a physical direction.{' '}
         <PartLink part="Drawer.Root" /> takes a logical <code>side</code>{' '}
-        instead, and turns it into Base UI’s <code>swipeDirection</code> by the
-        document’s direction, so a drawer at the inline start is swiped left to
-        close in a left-to-right layout and right in a right-to-left one.
+        instead, and turns it into Base UI’s <code>swipeDirection</code> using
+        the document’s direction. So a drawer at the inline start is swiped left
+        to close in a left-to-right layout, and right in a right-to-left one.
       </li>
       <li>
-        The document’s direction is read once, when the root mounts; a change to
-        it afterwards doesn’t flip the swipe.
+        The root reads the document’s direction once, when it mounts. If the
+        direction changes later, the swipe doesn’t flip.
       </li>
       <li>
-        The side goes into a context, for the popup and the swipe area, which
-        mark themselves with it (<code>data-side</code>) for their stylesheet.
-        Opening and closing, the handle, triggers and closes are Base UI’s.
+        The side goes into a context for the popup and the swipe area. Both mark
+        themselves with it (<code>data-side</code>) for their stylesheet.
+      </li>
+      <li>
+        Opening and closing, the handle, the triggers and the close buttons are
+        Base UI’s.
       </li>
     </ul>
     <CodeView code={rootCode} />
@@ -89,17 +93,17 @@ export const DrawerArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="Drawer.Popup" /> renders Base UI’s portal, backdrop,
-        viewport and popup together, to the library’s portal container and with
+        viewport and popup together. It uses the library’s portal container and
         the providers’ settings. Its <code>size</code> becomes{' '}
         <code>--uikit-drawer-size</code>.
       </li>
       <li>
-        It’s kept mounted while closed, so the pages in it keep their state and
-        scroll positions between openings.
+        The popup stays mounted while the drawer is closed. So the pages in it
+        keep their state and scroll positions between openings.
       </li>
       <li>
-        It provides its own Viewport scope, as a sidebar does: bars anchored
-        inside it are fixed to the drawer, not to the screen behind it.
+        It provides its own Viewport scope, the same way a sidebar does. Bars
+        anchored inside it are fixed to the drawer, not to the screen behind it.
       </li>
     </ul>
 
@@ -111,17 +115,20 @@ export const DrawerArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Drawer.SwipeArea" /> is Base UI’s: a strip at the
-        drawer’s edge, 20px wide by default, that it’s swiped in from. Where
-        it’s rendered decides where it works, for example the app’s root or a
-        layout’s column.
+        <PartLink part="Drawer.SwipeArea" /> is Base UI’s. It’s a strip at the
+        drawer’s edge, 20px wide by default, that you swipe the drawer in from.
+        Where you render it decides where it works, for example at your app’s
+        root or in a layout’s column.
       </li>
       <li>
-        Base UI leaves the strip’s vertical panning to the browser and doesn’t
-        cancel a swipe’s moves, so a swipe’s vertical drift scrolled the page.
-        The library adds a touch listener on the strip: once a touch has moved
-        6px, the larger axis decides, and a sideways one has its moves
-        cancelled, so nothing scrolls while it’s a swipe.
+        Base UI leaves vertical panning on the strip to the browser, and doesn’t
+        cancel a swipe’s moves. Because of that, a swipe that drifted vertically
+        scrolled the page.
+      </li>
+      <li>
+        The library adds a touch listener on the strip. Once a touch has moved
+        6px, the larger axis decides. If it’s sideways, its moves are cancelled,
+        so nothing scrolls while you swipe.
       </li>
     </ul>
     <CodeView code={lockCode} />
@@ -135,7 +142,7 @@ export const DrawerArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <strong>From Base UI:</strong> opening, closing, swiping, the backdrop,
-        modality, the handle.
+        modality and the handle.
       </li>
       <li>
         <strong>From Viewport:</strong> the portal container, and a scope of its
@@ -143,12 +150,13 @@ export const DrawerArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <strong>From the app:</strong> whether content is a drawer at all.
-        Layout doesn’t switch by itself: an app renders a drawer in place of a{' '}
+        Layout doesn’t switch by itself. Your app renders a drawer in place of a{' '}
         <PartLink
           component="layout"
           part="Layout.Column"
         />
-        , for example a sidebar when compact, deciding by the size class (
+        , for example a sidebar in a compact width, and decides by the size
+        class (
         <PartLink
           component="viewport"
           part="useSizeClass"

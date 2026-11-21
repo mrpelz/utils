@@ -1960,7 +1960,8 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
 /**
  * A date picker's pickers in place (see `Root` `handle`): its calendar and
  * time roll, each in collapsible list rows (`List.CollapsiblePanel`),
- * opened by its buttons; placed after the picker's row. In an `List.AccordionItem` (with its row), one of its items.
+ * opened by its buttons; placed after the picker's row. In a
+ * `List.AccordionItem` (with its row), one of its items.
  */
 const Expandable: FunctionComponent<DatePickerExpandableProps> = ({
   handle,

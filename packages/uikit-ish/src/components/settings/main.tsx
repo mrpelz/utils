@@ -179,6 +179,7 @@ export const useSettingsPortalProps = (): SettingsPortalProps => {
     if (overridden.length === 0) return {};
     return {
       'data-color-scheme': overrides.colorScheme,
+      'data-uikit-settings': '',
       style: styleFor(overrides, overridden),
     };
   }, [overrides]);
@@ -242,6 +243,9 @@ const Provider = forwardRef<HTMLDivElement, SettingsProviderProps>(
         'data-color-scheme': own.includes('colorScheme')
           ? props.colorScheme
           : undefined,
+        // (For the stylesheets' style queries on what's directly within
+        // it, see styles.css.)
+        'data-uikit-settings': '',
         style: withStyle(styleFor(overrides, own), style),
       },
       ref,

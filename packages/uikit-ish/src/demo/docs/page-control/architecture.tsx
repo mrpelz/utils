@@ -42,10 +42,10 @@ export const PageControlArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A page control is the library’s own, not Base UI’s: one element with the
-        slider role, its value the current page, drawn as dots. Its state, its
-        window of dots, its pressing, scrubbing and keys are all in one
-        component. For using it, see its{' '}
+        A page control is the library’s own, not Base UI’s. It’s one element
+        with the slider role, whose value is the current page, drawn as dots.
+        Its state, its window of dots, and its handling of presses, scrubbing
+        and keys all live in that one component. To learn how to use it, see its{' '}
         <a href={publicUrl('page-control/parts')}>parts</a>.
       </li>
     </ul>
@@ -58,21 +58,24 @@ export const PageControlArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="PageControl" /> renders a <code>div</code> with{' '}
-        <code>role=&quot;slider&quot;</code>, focusable, its value from 1 to the
-        page count and its value text from <code>format</code> (“3 of 8”).
-        Assistive technology treats it as an adjustable control.
+        <PartLink part="PageControl" /> renders a focusable <code>div</code>{' '}
+        with <code>role=&quot;slider&quot;</code>. Its value runs from 1 to the
+        page count. Its value text comes from <code>format</code>, such as “3 of
+        8”. Assistive technology treats it as an adjustable control.
       </li>
       <li>
-        It’s controlled by <code>value</code> or keeps its own state from{' '}
-        <code>defaultValue</code>. Every change goes through one function that
-        clamps the page, does nothing when disabled or unchanged, and reports
-        the change to <code>onValueChange</code> with what caused it: a press, a
-        drag or a key.
+        You can control it with <code>value</code>, or let it keep its own state
+        from <code>defaultValue</code>.
       </li>
       <li>
-        The dots are spans, hidden from assistive technology, each in a slot
-        with its size as an attribute; the current one is marked{' '}
+        Every change goes through one function. That function clamps the page,
+        and does nothing when the control is disabled or the page is unchanged.
+        It reports the change to <code>onValueChange</code>, along with what
+        caused it: a press, a drag or a key.
+      </li>
+      <li>
+        The dots are spans, hidden from assistive technology. Each sits in a
+        slot with its size as an attribute. The current dot is marked{' '}
         <code>data-current</code>.
       </li>
     </ul>
@@ -85,15 +88,17 @@ export const PageControlArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Up to seven pages, every page is a dot. With more, eight dots show at a
-        time, and the outermost two at an end with more pages beyond it shrink,
-        hinting at them.
+        With up to seven pages, every page gets a dot. With more, eight dots
+        show at a time. At an end with more pages beyond it, the outermost two
+        dots shrink to hint at them.
       </li>
       <li>
-        The window’s start is kept between renders and moves only when the
-        current page would land on a shrunken dot. It’s derived during render,
-        so it never lags a frame behind the value. The dots resize by their
-        transition.
+        The window’s start is kept between renders. It only moves when the
+        current page would land on a shrunken dot.
+      </li>
+      <li>
+        The window is worked out during render, so it never lags a frame behind
+        the value. The dots change size by a transition.
       </li>
     </ul>
     <CodeView code={windowCode} />
@@ -107,17 +112,19 @@ export const PageControlArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <strong>A press</strong> before or after the current dot, in reading
-        order, goes to the previous or next page. It’s decided by the press’s
-        position against the current dot’s center, and the layout’s direction.
+        order, goes to the previous or the next page. Where you press is
+        compared to the current dot’s center, taking the layout’s direction into
+        account.
       </li>
       <li>
-        <strong>A drag</strong> captures the pointer and moves a page for every
-        16px passed (a dot and its gap), once it has moved 4px. A drag’s click
-        afterwards doesn’t page.
+        <strong>A drag</strong> captures the pointer once it has moved 4px.
+        After that, it moves one page for every 16px, which is a dot and its
+        gap. The click at the end of a drag doesn’t change the page.
       </li>
       <li>
-        <strong>Keys:</strong> the arrows step (left and right by direction),
-        Home and End go to the ends.
+        <strong>Keys:</strong> the arrow keys step through the pages, with left
+        and right following the layout’s direction. Home and End go to the first
+        and the last page.
       </li>
     </ul>
 
@@ -130,15 +137,17 @@ export const PageControlArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         The glass variant renders Glass’s background behind the dots, which are
-        its content. Its context is the given one, or inherited from the glass
-        it sits on (a toolbar’s), or automatic.
+        its content. Its context is the one you give. Otherwise, it inherits the
+        context of the glass it sits on, such as a toolbar’s, or it’s automatic.
       </li>
       <li>
-        With <code>momentaryTooltip</code>, a span above it shows the value text
-        while it’s hovered, pressed or focused by keyboard. It isn’t a{' '}
-        <a href={publicUrl('tooltip')}>Tooltip</a>: it reuses the tooltip’s
-        surface class and is shown by the stylesheet, so it needs no portal or
-        positioning.
+        With <code>momentaryTooltip</code>, a span above the control shows the
+        value text while you hover it, press it, or focus it with the keyboard.
+      </li>
+      <li>
+        That span isn’t a <a href={publicUrl('tooltip')}>Tooltip</a>. It reuses
+        the tooltip’s surface class, and the stylesheet shows it. So it needs no
+        portal and no positioning.
       </li>
     </ul>
 
@@ -157,8 +166,8 @@ export const PageControlArchitecture: FunctionComponent = () => (
         <strong>From Tooltip:</strong> the surface style of its value text.
       </li>
       <li>
-        <strong>From the app:</strong> the page count and, controlled, the
-        current page, for example from a paging scroller.
+        <strong>From the app:</strong> the page count and, when controlled, the
+        current page. That might come from a scroller that pages, for example.
       </li>
       <li>
         <strong>Out:</strong> only its value changes. It doesn’t scroll anything

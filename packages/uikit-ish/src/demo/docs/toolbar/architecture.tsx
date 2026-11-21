@@ -48,9 +48,10 @@ export const ToolbarArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A toolbar is Base UI’s, for its keyboard navigation, with glass capsules
-        of buttons, sides that keep the middle centered, and a title. Every
-        button is a <a href={publicUrl('button')}>Button</a>. For using it, see
+        A toolbar is Base UI’s toolbar, used for its keyboard navigation. It
+        holds glass capsules of buttons, sides that keep the middle centered,
+        and a title. Every button in it is a{' '}
+        <a href={publicUrl('button')}>Button</a>. To learn how to use it, see
         its <a href={publicUrl('toolbar/parts')}>parts</a>.
       </li>
     </ul>
@@ -64,14 +65,18 @@ export const ToolbarArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="Toolbar.Root" />, <PartLink part="Toolbar.Group" /> and{' '}
-        <PartLink part="Toolbar.Button" /> are Base UI’s, so the bar is one tab
-        stop and its buttons are moved between with the arrow keys.
+        <PartLink part="Toolbar.Button" /> are Base UI’s. So the bar is a single
+        tab stop, and you move between its buttons with the arrow keys.
       </li>
       <li>
-        The root resolves its glass context (given, adaptive or automatic) and
-        provides it to everything inside through Glass’s inherited context, so
-        capsules and buttons match the bar without being told. Its{' '}
-        <code>placement</code> (top or bottom) sets its height and its insets.
+        The root works out its glass context, whether given, adaptive or
+        automatic. It provides that context to everything inside through Glass’s
+        inherited context. So capsules and buttons match the bar without being
+        told.
+      </li>
+      <li>
+        The root’s <code>placement</code>, top or bottom, sets its height and
+        its insets.
       </li>
       <li>The bar draws no glass itself. Its capsules and its buttons do.</li>
     </ul>
@@ -84,29 +89,33 @@ export const ToolbarArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Toolbar.Group" /> is a glass capsule: it renders Glass’s
-        background, tinted when <code>prominent</code> or given a{' '}
-        <code>tint</code>, and tells its buttons they’re inside it through a
-        context. Its gap and text color are custom properties.
+        <PartLink part="Toolbar.Group" /> is a glass capsule. It renders Glass’s
+        background, tinted when it’s <code>prominent</code> or has a{' '}
+        <code>tint</code>. Through a context, it tells its buttons that they’re
+        inside it. Its gap and text color are custom properties.
       </li>
       <li>
-        <PartLink part="Toolbar.Button" /> renders a{' '}
+        <PartLink part="Toolbar.Button" /> always renders a{' '}
         <PartLink
           component="button"
           part="Button.Root"
-        />{' '}
-        either way. Inside a capsule, it’s the capsule’s content: no glass of
-        its own, blended with the capsule’s, scaled with its lens, showing the
-        selection when pressed. Glass variants are ignored there, since the
-        glass is the capsule’s; classic ones keep their own colors.
+        />
+        .
       </li>
       <li>
-        On its own, it’s a glass button with the bar’s context unless it has its
-        own, as high as the capsules.
+        Inside a capsule, the button is the capsule’s content. It has no glass
+        of its own. It blends with the capsule’s glass, scales with the
+        capsule’s lens, and shows the selection when pressed. Glass variants are
+        ignored there, since the glass belongs to the capsule. Classic variants
+        keep their own colors.
       </li>
       <li>
-        Its stylesheet repeats its class (doubled, tripled) to win over the
-        button’s own styles without <code>!important</code>.
+        On its own, the button is a glass button with the bar’s context, unless
+        it has its own. It’s as tall as the capsules.
+      </li>
+      <li>
+        The toolbar’s stylesheet repeats its class, doubled or tripled, to win
+        over the button’s own styles without <code>!important</code>.
       </li>
     </ul>
     <CodeView code={buttonCode} />
@@ -120,23 +129,27 @@ export const ToolbarArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="Toolbar.Leading" /> and{' '}
-        <PartLink part="Toolbar.Trailing" /> share the free space equally, so
-        whatever is between them stays centered in the bar while they fit. A
-        missing side is held by an empty one in the stylesheet.
+        <PartLink part="Toolbar.Trailing" /> share the free space equally. So
+        whatever sits between them stays centered in the bar, as long as they
+        fit. When one side is missing, the stylesheet holds its place with an
+        empty one.
       </li>
       <li>
-        <PartLink part="Toolbar.Title" /> sits in the middle; aligned to the
-        start, it takes all the free space instead.{' '}
-        <PartLink part="Toolbar.Subtitle" /> goes inside it.{' '}
+        <PartLink part="Toolbar.Title" /> sits in the middle. When it’s aligned
+        to the start, it takes all the free space instead.{' '}
+        <PartLink part="Toolbar.Subtitle" /> goes inside it.
+      </li>
+      <li>
         <PartLink part="Toolbar.Spacer" /> takes free space between parts.
       </li>
       <li>
-        The bottom bar doesn’t pad for the home indicator: its anchor (
+        The bottom bar doesn’t pad for the home indicator. Its anchor handles
+        the safe area inset, whether that’s a{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
-        />
-        , or a sheet’s) handles the safe area inset.
+        />{' '}
+        or a sheet’s.
       </li>
     </ul>
 
@@ -151,23 +164,24 @@ export const ToolbarArchitecture: FunctionComponent = () => (
         <strong>From Base UI:</strong> the toolbar’s keyboard navigation.
       </li>
       <li>
-        <strong>From Button:</strong> every button’s element and press state.
+        <strong>From Button:</strong> every button’s element and pressed state.
       </li>
       <li>
-        <strong>From Glass:</strong> the capsules’ material, the context, the
+        <strong>From Glass:</strong> the capsules’ material, the context and the
         lens.
       </li>
       <li>
-        <strong>From Viewport:</strong> its anchor, its insets.
+        <strong>From Viewport:</strong> its anchor and its insets.
       </li>
       <li>
-        <strong>Out:</strong> it’s the bar a{' '}
+        <strong>Out:</strong> it’s the bar that a{' '}
         <PartLink
           component="header"
           part="Header.Root"
         />{' '}
-        ties to its page, whose title it fades in by its part attribute. Other
-        glass inside it, such as a page control, takes its context.
+        ties to its page. The header fades the bar’s title in, finding it by its
+        part attribute. Other glass inside the bar, such as a page control,
+        takes the bar’s context.
       </li>
     </ul>
   </>

@@ -105,6 +105,10 @@ import {
   collapsiblePartsDemos,
 } from './collapsible/parts.js';
 import {
+  ColorPickerArchitecture,
+  ColorPickerColorsArchitecture,
+} from './color-picker/architecture.js';
+import {
   ColorPickerComposition,
   colorPickerCompositionDemos,
 } from './color-picker/composition.js';
@@ -131,6 +135,7 @@ import {
   ContextualMenuParts,
   contextualMenuPartsDemos,
 } from './contextual-menu/parts.js';
+import { ControlCardsArchitecture } from './control-cards/architecture.js';
 import { ControlCardsDemo } from './control-cards/main.js';
 import {
   ControlCardsOverview,
@@ -140,6 +145,11 @@ import {
   ControlCardsParts,
   controlCardsPartsDemos,
 } from './control-cards/parts.js';
+import {
+  DatePickerArchitecture,
+  DatePickerPagerArchitecture,
+  DatePickerWheelsArchitecture,
+} from './date-picker/architecture.js';
 import {
   DatePickerComposition,
   datePickerCompositionDemos,
@@ -164,6 +174,7 @@ import {
 import { DrawerControlledDemo } from './drawer/main.js';
 import { DrawerOverview, drawerOverviewDemos } from './drawer/overview.js';
 import { DrawerParts, drawerPartsDemos } from './drawer/parts.js';
+import { EditMenuArchitecture } from './edit-menu/architecture.js';
 import {
   EditMenuComposition,
   editMenuCompositionDemos,
@@ -179,6 +190,12 @@ import { FormComposition, formCompositionDemos } from './form/composition.js';
 import { FormDemo } from './form/main.js';
 import { FormOverview, formOverviewDemos } from './form/overview.js';
 import { FormParts, formPartsDemos } from './form/parts.js';
+import {
+  GridArchitecture,
+  GridEditingArchitecture,
+  GridLayoutArchitecture,
+  GridMotionArchitecture,
+} from './grid/architecture.js';
 import { GridComposition, gridCompositionDemos } from './grid/composition.js';
 import { GridDemo } from './grid/main.js';
 import { GridOverview, gridOverviewDemos } from './grid/overview.js';
@@ -191,6 +208,7 @@ import {
 import { HeaderDemo, HeaderTitleDemo } from './header/main.js';
 import { HeaderOverview, headerOverviewDemos } from './header/overview.js';
 import { HeaderParts, headerPartsDemos } from './header/parts.js';
+import { IslandArchitecture } from './island/architecture.js';
 import {
   IslandComposition,
   islandCompositionDemos,
@@ -206,6 +224,12 @@ import {
 import { LayoutDemo } from './layout/main.js';
 import { LayoutOverview, layoutOverviewDemos } from './layout/overview.js';
 import { LayoutParts, layoutPartsDemos } from './layout/parts.js';
+import {
+  ListArchitecture,
+  ListReorderingArchitecture,
+  ListSelectionArchitecture,
+  ListSwipeActionsArchitecture,
+} from './list/architecture.js';
 import { ListComposition, listCompositionDemos } from './list/composition.js';
 import {
   ListCollapsibleDemo,
@@ -224,6 +248,11 @@ import {
 } from './list/main.js';
 import { ListOverview, listOverviewDemos } from './list/overview.js';
 import { ListParts, listPartsDemos } from './list/parts.js';
+import {
+  MenuArchitecture,
+  MenuDraggingArchitecture,
+  MenuSubmenusArchitecture,
+} from './menu/architecture.js';
 import { MenuComposition, menuCompositionDemos } from './menu/composition.js';
 import {
   MenuDemo,
@@ -234,6 +263,7 @@ import {
 } from './menu/main.js';
 import { MenuOverview, menuOverviewDemos } from './menu/overview.js';
 import { MenuParts, menuPartsDemos } from './menu/parts.js';
+import { NavigationArchitecture } from './navigation/architecture.js';
 import {
   NavigationComposition,
   navigationCompositionDemos,
@@ -263,6 +293,7 @@ import {
   PageControlParts,
   pageControlPartsDemos,
 } from './page-control/parts.js';
+import { PopoverArchitecture } from './popover/architecture.js';
 import {
   PopoverComposition,
   popoverCompositionDemos,
@@ -281,6 +312,7 @@ import {
   progressOverviewDemos,
 } from './progress/overview.js';
 import { ProgressParts, progressPartsDemos } from './progress/parts.js';
+import { RollArchitecture } from './roll/architecture.js';
 import { RollComposition, rollCompositionDemos } from './roll/composition.js';
 import { RollDemo } from './roll/main.js';
 import { RollOverview, rollOverviewDemos } from './roll/overview.js';
@@ -302,6 +334,10 @@ import {
   settingsOverviewDemos,
 } from './settings/overview.js';
 import { SettingsParts, settingsPartsDemos } from './settings/parts.js';
+import {
+  SheetArchitecture,
+  SheetSnappingArchitecture,
+} from './sheet/architecture.js';
 import {
   SheetComposition,
   sheetCompositionDemos,
@@ -353,6 +389,10 @@ import {
 import { SymbolDemo } from './symbol/main.js';
 import { SymbolOverview, symbolOverviewDemos } from './symbol/overview.js';
 import { SymbolParts, symbolPartsDemos } from './symbol/parts.js';
+import {
+  TabBarArchitecture,
+  TabBarLensArchitecture,
+} from './tab-bar/architecture.js';
 import {
   TabBarComposition,
   tabBarCompositionDemos,
@@ -415,6 +455,13 @@ import {
   typographyOverviewDemos,
 } from './typography/overview.js';
 import { TypographyParts, typographyPartsDemos } from './typography/parts.js';
+import {
+  ViewportArchitecture,
+  ViewportEdgeEffectsArchitecture,
+  ViewportKeyboardArchitecture,
+  ViewportPaddingArchitecture,
+  ViewportStatusBarArchitecture,
+} from './viewport/architecture.js';
 import {
   ViewportComposition,
   viewportCompositionDemos,
@@ -537,6 +584,27 @@ export const catalog: readonly CatalogEntry[] = [
       ...viewportPartsDemos,
       ...viewportCompositionDemos,
     ],
+    Architecture: {
+      Main: ViewportArchitecture,
+      pages: [
+        { id: 'padding', Page: ViewportPaddingArchitecture, title: 'Padding' },
+        {
+          id: 'edge-effects',
+          Page: ViewportEdgeEffectsArchitecture,
+          title: 'Edge effects',
+        },
+        {
+          id: 'keyboard',
+          Page: ViewportKeyboardArchitecture,
+          title: 'Keyboard',
+        },
+        {
+          id: 'status-bar',
+          Page: ViewportStatusBarArchitecture,
+          title: 'Status bar',
+        },
+      ],
+    },
     id: 'viewport',
     Composition: ViewportComposition,
     Overview: ViewportOverview,
@@ -553,6 +621,14 @@ export const catalog: readonly CatalogEntry[] = [
       ...gridPartsDemos,
       ...gridCompositionDemos,
     ],
+    Architecture: {
+      Main: GridArchitecture,
+      pages: [
+        { id: 'layout', Page: GridLayoutArchitecture, title: 'Layout' },
+        { id: 'editing', Page: GridEditingArchitecture, title: 'Editing' },
+        { id: 'motion', Page: GridMotionArchitecture, title: 'Motion' },
+      ],
+    },
     id: 'grid',
     Composition: GridComposition,
     Overview: GridOverview,
@@ -633,6 +709,10 @@ export const catalog: readonly CatalogEntry[] = [
       ...tabBarCompositionDemos,
     ],
     framework7Id: 'toolbar-tabbar',
+    Architecture: {
+      Main: TabBarArchitecture,
+      pages: [{ id: 'lens', Page: TabBarLensArchitecture, title: 'The lens' }],
+    },
     id: 'tab-bar',
     Composition: TabBarComposition,
     Overview: TabBarOverview,
@@ -650,6 +730,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...navigationCompositionDemos,
     ],
     framework7Id: 'view',
+    Architecture: NavigationArchitecture,
     id: 'navigation',
     Composition: NavigationComposition,
     Overview: NavigationOverview,
@@ -780,6 +861,12 @@ export const catalog: readonly CatalogEntry[] = [
       ...sheetCompositionDemos,
     ],
     framework7Id: 'sheet-modal',
+    Architecture: {
+      Main: SheetArchitecture,
+      pages: [
+        { id: 'snapping', Page: SheetSnappingArchitecture, title: 'Snapping' },
+      ],
+    },
     id: 'sheet',
     Composition: SheetComposition,
     Overview: SheetOverview,
@@ -796,6 +883,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...islandPartsDemos,
       ...islandCompositionDemos,
     ],
+    Architecture: IslandArchitecture,
     id: 'island',
     Composition: IslandComposition,
     Overview: IslandOverview,
@@ -814,6 +902,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...popoverCompositionDemos,
     ],
     framework7Id: 'popover',
+    Architecture: PopoverArchitecture,
     id: 'popover',
     Composition: PopoverComposition,
     Overview: PopoverOverview,
@@ -900,6 +989,26 @@ export const catalog: readonly CatalogEntry[] = [
       ...listCompositionDemos,
     ],
     framework7Id: 'list-view',
+    Architecture: {
+      Main: ListArchitecture,
+      pages: [
+        {
+          id: 'reordering',
+          Page: ListReorderingArchitecture,
+          title: 'Reordering',
+        },
+        {
+          id: 'selection',
+          Page: ListSelectionArchitecture,
+          title: 'Selection',
+        },
+        {
+          id: 'swipe-actions',
+          Page: ListSwipeActionsArchitecture,
+          title: 'Swipe actions',
+        },
+      ],
+    },
     id: 'list',
     Composition: ListComposition,
     Overview: ListOverview,
@@ -932,6 +1041,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...controlCardsOverviewDemos,
       ...controlCardsPartsDemos,
     ],
+    Architecture: ControlCardsArchitecture,
     id: 'control-cards',
     Overview: ControlCardsOverview,
     Parts: ControlCardsParts,
@@ -1043,6 +1153,17 @@ export const catalog: readonly CatalogEntry[] = [
       ...menuPartsDemos,
       ...menuCompositionDemos,
     ],
+    Architecture: {
+      Main: MenuArchitecture,
+      pages: [
+        {
+          id: 'dragging-over-items',
+          Page: MenuDraggingArchitecture,
+          title: 'Dragging over items',
+        },
+        { id: 'submenus', Page: MenuSubmenusArchitecture, title: 'Submenus' },
+      ],
+    },
     id: 'menu',
     Composition: MenuComposition,
     Overview: MenuOverview,
@@ -1060,6 +1181,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...editMenuPartsDemos,
       ...editMenuCompositionDemos,
     ],
+    Architecture: EditMenuArchitecture,
     id: 'edit-menu',
     Composition: EditMenuComposition,
     Overview: EditMenuOverview,
@@ -1121,6 +1243,17 @@ export const catalog: readonly CatalogEntry[] = [
       ...datePickerCompositionDemos,
     ],
     framework7Id: 'calendar',
+    Architecture: {
+      Main: DatePickerArchitecture,
+      pages: [
+        {
+          id: 'calendar-pager',
+          Page: DatePickerPagerArchitecture,
+          title: 'Calendar pager',
+        },
+        { id: 'wheels', Page: DatePickerWheelsArchitecture, title: 'Wheels' },
+      ],
+    },
     id: 'date-picker',
     Composition: DatePickerComposition,
     Overview: DatePickerOverview,
@@ -1138,6 +1271,12 @@ export const catalog: readonly CatalogEntry[] = [
       ...colorPickerCompositionDemos,
     ],
     framework7Id: 'color-picker',
+    Architecture: {
+      Main: ColorPickerArchitecture,
+      pages: [
+        { id: 'colors', Page: ColorPickerColorsArchitecture, title: 'Colors' },
+      ],
+    },
     id: 'color-picker',
     Composition: ColorPickerComposition,
     Overview: ColorPickerOverview,
@@ -1155,6 +1294,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...rollCompositionDemos,
     ],
     framework7Id: 'picker',
+    Architecture: RollArchitecture,
     id: 'roll',
     Composition: RollComposition,
     Overview: RollOverview,

@@ -53,8 +53,9 @@ export const TextFieldArchitecture: FunctionComponent = () => (
     <Contents sections={sections} />
     <ul className="demo-lead">
       <li>
-        A text field is Base UI’s field, styled, with two parts of its own: a
-        clear button and a frame for search-style fields. For using it, see its{' '}
+        A text field is Base UI’s field, styled. It adds two parts of its own: a
+        clear button, and a frame for fields that look like a search field. To
+        learn how to use it, see its{' '}
         <a href={publicUrl('text-field/parts')}>parts</a>.
       </li>
     </ul>
@@ -71,12 +72,15 @@ export const TextFieldArchitecture: FunctionComponent = () => (
         <PartLink part="TextField.Control" />,{' '}
         <PartLink part="TextField.Description" /> and{' '}
         <PartLink part="TextField.Error" /> are Base UI’s, each with a class and
-        a part attribute. Validation, labelling, the error’s timing and the
-        form’s name are Base UI’s.
+        a part attribute.
       </li>
       <li>
-        The control has no box of its own: its row or frame draws one. A
-        textarea is the control’s <code>render</code>.
+        Base UI handles validation, the labels, when the error shows, and the
+        form’s name.
+      </li>
+      <li>
+        The control has no box of its own. Its row or its frame draws one. For a
+        textarea, pass it as the control’s <code>render</code>.
       </li>
     </ul>
 
@@ -88,15 +92,19 @@ export const TextFieldArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        The root has no default <code>render</code>. Rendered as a{' '}
+        The root has no default <code>render</code>.
+      </li>
+      <li>
+        When you render it as a{' '}
         <PartLink
           component="list"
           part="List.Item"
         />
-        , it’s a list row: List’s stylesheet makes the label the row’s title,
-        the control the rest of the row, and the description and error lines
-        below it. Without that, its parts stack.
+        , it becomes a list row. List’s stylesheet makes the label the row’s
+        title, and the control the rest of the row. The description and the
+        error go on lines below it.
       </li>
+      <li>Without that, its parts stack.</li>
     </ul>
     <CodeView code={rowCode} />
 
@@ -108,22 +116,26 @@ export const TextFieldArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="TextField.Clear" /> finds its field’s control by part
-        attribute, empties it through the element’s own value setter and
-        dispatches an input event, so the app’s change handlers and Base UI see
-        what typing would produce.
+        <PartLink part="TextField.Clear" /> finds its field’s control by its
+        part attribute. It empties the control through the element’s own value
+        setter, and dispatches an input event. So your app’s change handlers and
+        Base UI see what typing would produce.
       </li>
       <li>
-        It keeps the field’s focus as it was. It prevents its pointer down, and
-        its mouse down (iOS emulates one after a tap, and that moved focus). If
-        the field had focus and lost it anyway, it gets it back without
-        scrolling; if it hadn’t, no keyboard appears.
+        The clear button keeps the field’s focus as it was. It prevents its own
+        pointer down, and its mouse down too. iOS emulates a mouse down after a
+        tap, and that moved focus.
       </li>
       <li>
-        It shows while the field is filled, and by its <code>mode</code> while
-        focused, while not, or always. That’s the stylesheet’s, from the field’s
-        state attributes. It isn’t in the tab order.
+        If the field had focus and lost it anyway, it gets it back without
+        scrolling. If it didn’t have focus, no keyboard appears.
       </li>
+      <li>
+        The button shows while the field has text. Its <code>mode</code> decides
+        whether it shows while the field is focused, while it isn’t, or always.
+        The stylesheet does this, from the field’s state attributes.
+      </li>
+      <li>The button isn’t in the tab order.</li>
     </ul>
     <CodeView code={clearCode} />
 
@@ -136,20 +148,23 @@ export const TextFieldArchitecture: FunctionComponent = () => (
     <ul>
       <li>
         <PartLink part="TextField.Frame" /> is a <code>&lt;label&gt;</code>{' '}
-        around a symbol, the control and its buttons, so a press anywhere on it
-        focuses the field. Its <code>variant</code> sets its look: a fill, a
-        list row, a tab bar’s, a toolbar’s.
+        around a symbol, the control and its buttons. So a press anywhere on it
+        focuses the field.
       </li>
       <li>
-        It always holds Glass’s background, shown only in the glass looks, so
-        changing the variant transitions its box and fades its glass rather than
-        mounting anything.
+        Its <code>variant</code> sets its look: a fill, a list row, a tab bar’s
+        look, or a toolbar’s.
       </li>
       <li>
-        A text field matches <code>:focus-visible</code> however it’s focused,
-        so the frame decides itself whether focus came from the keyboard (
-        <code>isKeyboardFocus</code>: a key pressed last), marking itself{' '}
-        <code>data-keyboard-focus</code> for its ring.
+        The frame always holds Glass’s background, but only shows it in the
+        glass looks. So changing the variant transitions its box and fades its
+        glass, without mounting anything.
+      </li>
+      <li>
+        A text field matches <code>:focus-visible</code> however it’s focused.
+        So the frame decides for itself whether focus came from the keyboard (
+        <code>isKeyboardFocus</code>, true when a key was pressed last). It
+        marks itself <code>data-keyboard-focus</code> for its ring.
       </li>
     </ul>
 
@@ -161,8 +176,7 @@ export const TextFieldArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <strong>From Base UI:</strong> the field’s state, validation and
-        labelling.
+        <strong>From Base UI:</strong> the field’s state, validation and labels.
       </li>
       <li>
         <strong>From List:</strong> its look as a row.
@@ -172,12 +186,12 @@ export const TextFieldArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <strong>From Viewport:</strong> keeping a field in view above the
-        keyboard, by the scroller around it.
+        keyboard, done by the scroller around it.
       </li>
       <li>
         <strong>Out:</strong> nothing renders the frame for you. Apps put it
-        where a search field goes; Sidebar’s stylesheet sizes it for a sidebar
-        (through the frame’s custom properties), and its <code>variant</code>{' '}
+        wherever a search field goes. Sidebar’s stylesheet sizes it for a
+        sidebar, through the frame’s custom properties. Its <code>variant</code>{' '}
         matches a tab bar’s or a toolbar’s look.
       </li>
     </ul>

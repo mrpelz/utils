@@ -130,7 +130,8 @@ config.plugins = [
     rules: [
       {
         operations: webpackServe
-          ? [new ConcatOperation('start', String.raw`import 'preact/debug';\n`)]
+          ? // eslint-disable-next-line quotes
+            [new ConcatOperation('start', `import 'preact/debug';\n`)]
           : [],
         test: new RegExp(`^${path.resolve(dirSrc, 'demo.tsx')}$`),
       },
