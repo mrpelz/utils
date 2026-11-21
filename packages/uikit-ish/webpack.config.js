@@ -14,6 +14,7 @@ import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import {
+  ConcatOperation,
   ModifySourcePlugin,
   ReplaceOperation,
 } from 'modify-source-webpack-plugin';
@@ -47,9 +48,9 @@ const configDownstream = {
       publicPath,
     },
   },
-  devtool: 'source-map',
+  devtool: webpackServe ? false : 'source-map',
   optimization: {
-    minimize: false,
+    minimize: !webpackServe,
   },
   output: {
     assetModuleFilename: 'assets/[name][ext]',
@@ -127,6 +128,12 @@ config.plugins = [
   // @ts-ignore
   new ModifySourcePlugin({
     rules: [
+      {
+        operations: webpackServe
+          ? [new ConcatOperation('start', String.raw`import 'preact/debug';\n`)]
+          : [],
+        test: new RegExp(`^${path.resolve(dirSrc, 'demo.tsx')}$`),
+      },
       {
         operations: [
           new ReplaceOperation(
