@@ -1,5 +1,7 @@
 import { RefObject, useLayoutEffect, useRef } from 'react';
 
+import { reducedMotionOf } from '../utils/main.js';
+
 // A grid's layout (see main.tsx): its columns and unit for a width, its
 // breaks placed while editing, its items gliding as it changes.
 
@@ -1441,7 +1443,7 @@ export const useReflow = (
     const { current: root } = rootRef;
     if (!root) return undefined;
     const last = new WeakMap<HTMLElement, readonly [number, number]>();
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const reduce = reducedMotionOf(root);
     const scroller = scrollerOf(root);
 
     // (The first item shown whole below the scroller's bars, where it is:

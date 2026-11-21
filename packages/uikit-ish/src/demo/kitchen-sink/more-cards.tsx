@@ -1,68 +1,62 @@
-import {
-  FunctionComponent,
-  type ReactNode,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { FunctionComponent, useEffect, useRef, useState } from 'react';
 
 import {
-  Badge,
   Button,
   Card,
   type CardActions,
-  forwardClick,
-  gridIcons,
-  List,
+  type ControlCardChannel,
+  ControlCards,
   Progress,
   Segmented,
-  Slider,
   Stepper,
   Switch,
   Symbol,
   type SymbolIcon,
-  useGridItem,
 } from '../../components/index.js';
 import {
   Artwork,
   BarChart,
-  type Channel,
-  ChannelSliders,
   Dial,
   HourStrip,
   kelvinColor,
-  mixColor,
   Sparkline,
-  Trend,
-  useRowsThatFit,
 } from '../tooling/card-kit.js';
 import { FlipParts } from '../tooling/flip.js';
 import {
   sfAntennaRadiowavesLeftAndRight,
   sfBackwardFill,
+  sfBell,
   sfBellFill,
   sfBoltFill,
   sfCloudRainFill,
   sfCloudSunFill,
   sfDoorGarageClosed,
+  sfDoorGarageOpen,
   sfDoorLeftHandClosed,
+  sfEnvelope,
   sfEnvelopeFill,
+  sfFlame,
   sfFlameFill,
   sfForwardFill,
   sfHomepodFill,
   sfHouseFill,
   sfHumidityFill,
+  sfLampCeiling,
   sfLampCeilingFill,
+  sfLampFloor,
   sfLampFloorFill,
   sfLightbulbFill,
+  sfLightbulbLed,
   sfLightbulbLedFill,
   sfLightStrip2,
+  sfLightStrip2Fill,
   sfPauseFill,
   sfPlayFill,
   sfPower,
   sfSnowflake,
   sfSunMaxFill,
   sfThermometerMedium,
+  sfWasher,
   sfWasherFill,
   sfWindowShadeClosed,
 } from '../tooling/icons.js';
@@ -70,6 +64,7 @@ import {
   type Expansion,
   lightsStore,
   type Tile,
+  Toned,
   TonedCard,
   useIsLarge,
   useLights,
@@ -97,80 +92,73 @@ const percent = (value: number) =>
 const ExpandButton: FunctionComponent<{
   expansion: Expansion;
   name: string;
-}> = ({ expansion: { isExpanded, onToggle }, name }) => (
-  <Card.CornerButton
-    mirrored
-    aria-expanded={isExpanded}
-    aria-label={`${name} details`}
-    icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
-    onClick={onToggle}
+}> = ({
+  expansion: { collapsedSize, expandedSize, isExpanded, onToggle },
+  name,
+}) => (
+  <ControlCards.ExpandButton
+    collapsedSize={collapsedSize}
+    expanded={isExpanded}
+    expandedSize={expandedSize}
+    label={`${name} details`}
+    onExpandedChange={onToggle}
   />
 );
 
 /** Its corner buttons opening it above the page and closing it. */
-const OpenButtons: FunctionComponent<{ name: string }> = ({ name }) => {
-  const item = useGridItem();
-  const isOpen = item?.open === true;
-  return (
-    <>
-      <Card.CornerButton
-        aria-label={`${name} details`}
-        icon={gridIcons.open}
-        visible={!isOpen}
-        onClick={() => item?.setOpen(true)}
-      />
-      <Card.CornerButton
-        aria-label="Close"
-        corner="top-leading"
-        icon={gridIcons.close}
-        visible={isOpen}
-        onClick={() => item?.setOpen(false)}
-      />
-    </>
-  );
-};
+const OpenButtons: FunctionComponent<{ name: string }> = ({ name }) => (
+  <ControlCards.OpenButtons
+    closeLabel="Close"
+    label={`${name} details`}
+  />
+);
 
 /** A color temperature's range (kelvin), as a slider's 0 to 1. */
 const warmest = 2200;
 const coolest = 6500;
 
 /**
- * A tunable white light: small, one slider (its brightness), in its
- * color's tint; expanded, two bars (brightness and color temperature, from
- * warm to cool), its value saying both.
+ * A tunable white light: small, a slider filling it (its brightness, in
+ * its color's tint), a switch; large (expanded, or resized so), two bars
+ * (brightness and color temperature, from warm to cool), its value saying
+ * both. Never lit, as a dimmer. Its switch and brightness go together
+ * (the app's to decide; here, a light's that dims out): dimmed to nothing,
+ * off; brightened from it, on; switched on at nothing, at full.
  */
 const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
   expansion,
 }) => {
   const [brightness, setBrightness] = useState(0.7);
   const [warmth, setWarmth] = useState(0.2);
+  const [isOn, setIsOn] = useState(true);
+  const switchTo = (next: boolean) => {
+    setIsOn(next);
+    if (next && brightness <= 0) setBrightness(1);
+  };
   const kelvin = Math.round(warmest + warmth * (coolest - warmest));
   const tint = kelvinColor(kelvin);
-  // (Large (expanded, or resized so): its two bars.)
   const isExpanded = useIsLarge();
   const name = 'Desk Light';
   return (
-    <TonedCard active={brightness > 0}>
+    // (Never lit, as a dimmer: its dark glass and its fill telling how
+    // much; its symbol on while it's on at all.)
+    <TonedCard active={false}>
       <FlipParts />
-      {/* (Its light's color, darker: legible on its fill, the same tint.) */}
-      <Card.Symbol
-        style={{ color: `color-mix(in oklab, ${tint} 55%, rgb(80 40 0))` }}
-      >
-        <Symbol icon={sfLightbulbLedFill} />
+      <Card.Symbol active={isOn && brightness > 0}>
+        <Symbol
+          emphasizedIcon={sfLightbulbLedFill}
+          icon={sfLightbulbLed}
+        />
       </Card.Symbol>
       {isExpanded ? (
         <>
-          <ChannelSliders
+          <ControlCards.Channels
+            value={[brightness, warmth]}
             channels={[
-              { label: 'Light', name: 'Brightness', tint, value: brightness },
-              {
-                label: 'Color',
-                name: 'Color temperature',
-                tint,
-                value: warmth,
-              },
+              { label: 'Light', name: 'Brightness', tint },
+              { label: 'Color', name: 'Color temperature', tint },
             ]}
-            onChange={(index, value) =>
+            onValueChange={(index, value) =>
               index === 0 ? setBrightness(value) : setWarmth(value)
             }
           />
@@ -180,25 +168,27 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
           <Card.Value>{percent(brightness)}</Card.Value>
         </>
       ) : (
-        <Slider.Root
+        <ControlCards.SliderFill
           format={{ maximumFractionDigits: 0, style: 'percent' }}
           max={1}
           min={0}
-          step={0.01}
+          name={name}
           tint={tint}
           value={brightness}
-          onValueChange={(next) => setBrightness(next as number)}
-        >
-          <Slider.Control>
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb aria-label={name} />
-            </Slider.Track>
-          </Slider.Control>
-          <Slider.Label>{name}</Slider.Label>
-          <Slider.Value />
-        </Slider.Root>
+          onPress={() => switchTo(!isOn)}
+          onValueChange={(next) => {
+            setBrightness(next);
+            setIsOn(next > 0);
+          }}
+        />
       )}
+      <Switch.Root
+        aria-label={name}
+        checked={isOn}
+        onCheckedChange={switchTo}
+      >
+        <Switch.Thumb />
+      </Switch.Root>
       {expansion ? (
         <ExpandButton
           expansion={expansion}
@@ -220,68 +210,35 @@ const cool = { label: 'CW', name: 'Cool white', tint: '#cfdcff' } as const;
 const warm = { label: 'WW', name: 'Warm white', tint: '#ffd9a0' } as const;
 
 /**
- * A light of several channels (three, four, five): small, a switch, its
- * symbol in the color they make, its brightness (their strongest); larger
- * (expanded, or open above the page), a bar per channel. A press on it,
- * small, toggles its switch.
+ * A light of several channels (three, four, five): a light card; opened
+ * above the page (`opens`) or expanded for its bars.
  */
 const ChannelLightCard: FunctionComponent<{
-  channels: readonly Omit<Channel, 'value'>[];
+  channels: readonly ControlCardChannel[];
+  /** Its symbol's icon while on (e.g. filled). */
+  emphasizedIcon: SymbolIcon;
   expansion?: Expansion;
   icon: SymbolIcon;
   initial: readonly number[];
   name: string;
   /** Opened above the page for its bars (else expanded). */
   opens?: boolean;
-}> = ({ channels, expansion, icon, initial, name, opens = false }) => {
-  const [values, setValues] = useState(initial);
-  const [isOn, setIsOn] = useState(true);
-  const isLarge = useIsLarge();
-  const all = channels.map((channel, index) => ({
-    ...channel,
-    value: values[index] ?? 0,
-  }));
-  const color = isOn ? mixColor(all) : undefined;
-  const brightness = Math.max(...values);
-  return (
-    <TonedCard
-      onClick={
-        isLarge ? undefined : forwardClick('[role=switch]:not([disabled])')
-      }
-    >
-      <FlipParts />
-      <Card.Symbol style={color ? { color } : undefined}>
-        <Symbol icon={icon} />
-      </Card.Symbol>
-      <Switch.Root
-        aria-label={name}
-        checked={isOn}
-        onCheckedChange={setIsOn}
-      >
-        <Switch.Thumb />
-      </Switch.Root>
-      {isLarge ? (
-        <ChannelSliders
-          channels={all}
-          onChange={(index, value) =>
-            setValues((current) =>
-              current.map((each, at) => (at === index ? value : each)),
-            )
-          }
-        />
-      ) : null}
-      <Card.Title>{name}</Card.Title>
-      <Card.Value>{isOn ? percent(brightness) : 'Off'}</Card.Value>
-      {opens ? <OpenButtons name={name} /> : null}
-      {!opens && expansion ? (
-        <ExpandButton
-          expansion={expansion}
-          name={name}
-        />
-      ) : null}
-    </TonedCard>
-  );
-};
+}> = ({ expansion, initial, name, opens = false, ...props }) => (
+  <Toned.Light
+    defaultValue={initial}
+    name={name}
+    {...props}
+  >
+    <FlipParts />
+    {opens ? <OpenButtons name={name} /> : null}
+    {!opens && expansion ? (
+      <ExpandButton
+        expansion={expansion}
+        name={name}
+      />
+    ) : null}
+  </Toned.Light>
+);
 
 /** How long ago, in words (e.g. “2 min ago”), by the document's language. */
 const agoOf = (then: number, now: number) => {
@@ -306,8 +263,8 @@ const useNow = (every: number) => {
 };
 
 /**
- * A device's status: its connection's symbol (static), online and when it
- * was last heard from; expanded, the details in rows (a glass list).
+ * A device's status (a list card): its connection's symbol, online and
+ * when it was last heard from; expanded, the details in rows.
  */
 const DeviceCard: FunctionComponent<{ expansion?: Expansion }> = ({
   expansion,
@@ -316,50 +273,31 @@ const DeviceCard: FunctionComponent<{ expansion?: Expansion }> = ({
   const [heard] = useState(() => Date.now() - 2 * 60_000);
   const isExpanded = useIsLarge();
   const name = 'Hallway Sensor';
-  const rows: readonly (readonly [string, string])[] = [
-    ['Last heard', agoOf(heard, now)],
-    ['Connection', 'Zigbee'],
-    ['Battery', '80 %'],
-    ['Signal', '−62 dBm'],
-    ['Firmware', '1.4.2'],
-  ];
-  // (As many as fit whole.)
-  const [list, fit] = useRowsThatFit();
   return (
-    <TonedCard>
+    <Toned.List
+      icon={sfAntennaRadiowavesLeftAndRight}
+      name={name}
+      status={isExpanded ? 'Online' : `Online · ${agoOf(heard, now)}`}
+      rows={
+        isExpanded
+          ? [
+              { label: 'Last heard', value: agoOf(heard, now) },
+              { label: 'Connection', value: 'Zigbee' },
+              { label: 'Battery', value: '80 %' },
+              { label: 'Signal', value: '−62 dBm' },
+              { label: 'Firmware', value: '1.4.2' },
+            ]
+          : []
+      }
+    >
       <FlipParts />
-      <Card.Symbol>
-        <Symbol icon={sfAntennaRadiowavesLeftAndRight} />
-      </Card.Symbol>
-      {isExpanded ? (
-        <List.Root ref={list}>
-          <List.Section>
-            <List.Group>
-              {rows.slice(0, fit).map(([label, value]) => (
-                <List.Item key={label}>
-                  <List.Content>
-                    <List.Title>{label}</List.Title>
-                  </List.Content>
-                  <List.Trailing>
-                    <List.Detail>{value}</List.Detail>
-                  </List.Trailing>
-                </List.Item>
-              ))}
-            </List.Group>
-          </List.Section>
-        </List.Root>
-      ) : null}
-      <Card.Title>{name}</Card.Title>
-      <Card.Value>
-        {isExpanded ? 'Online' : `Online · ${agoOf(heard, now)}`}
-      </Card.Value>
       {expansion ? (
         <ExpandButton
           expansion={expansion}
           name={name}
         />
       ) : null}
-    </TonedCard>
+    </Toned.List>
   );
 };
 
@@ -382,7 +320,7 @@ const useWalk = (start: number, step: number, every: number) => {
   return [value, angle] as const;
 };
 
-/** A value with its trend: an arrow after it, turned by its slope. */
+/** A value with its trend (a value card): an arrow after it. */
 const TrendCard: FunctionComponent<{
   format: Intl.NumberFormatOptions;
   icon: SymbolIcon;
@@ -392,22 +330,19 @@ const TrendCard: FunctionComponent<{
 }> = ({ format, icon, name, start, step }) => {
   const [value, angle] = useWalk(start, step, 4000);
   return (
-    <TonedCard>
-      <Card.Symbol>
-        <Symbol icon={icon} />
-      </Card.Symbol>
-      <Card.Title>{name}</Card.Title>
-      <Card.Value>
-        {new Intl.NumberFormat(undefined, format).format(value)}
-        <Trend angle={angle} />
-      </Card.Value>
-    </TonedCard>
+    <Toned.Value
+      format={format}
+      icon={icon}
+      name={name}
+      trend={angle}
+      value={value}
+    />
   );
 };
 
 /**
- * A doorbell: momentary (pressed, its chime rings: it lights up and fades
- * back), and flashed by the app as it rings at the door (here every 20
+ * A doorbell (a button card): pressed, its chime rings (it lights up and
+ * fades back); flashed by the app as it rings at the door (here every 20
  * seconds, as its server would tell), saying when it last rang.
  */
 const DoorbellCard: FunctionComponent = () => {
@@ -421,109 +356,85 @@ const DoorbellCard: FunctionComponent = () => {
     return () => clearInterval(timer);
   }, []);
   return (
-    <TonedCard
-      momentary
+    <Toned.Button
       actionsRef={actions}
-      onClick={() => setRang(Date.now())}
-    >
-      <Card.Symbol>
-        <Symbol icon={sfBellFill} />
-      </Card.Symbol>
-      <Card.Title>Doorbell</Card.Title>
-      <Card.Value>
-        {rang === undefined
+      emphasizedIcon={sfBellFill}
+      icon={sfBell}
+      name="Doorbell"
+      status={
+        rang === undefined
           ? 'Quiet'
-          : `Rang ${new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(rang)}`}
-      </Card.Value>
-    </TonedCard>
+          : `Rang ${new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(rang)}`
+      }
+      onPress={() => setRang(Date.now())}
+    />
   );
 };
 
-/** All lights off: momentary, its value how many are still on. */
+/** All lights off (a button card): its value how many are still on. */
 const AllOffCard: FunctionComponent = () => {
   const lights = useLights();
   const onCount = Object.values(lights).filter(Boolean).length;
   return (
-    <TonedCard
-      momentary
-      onClick={() => {
+    <Toned.Button
+      icon={sfPower}
+      name="All Lights Off"
+      status={onCount > 0 ? `${String(onCount)} on` : 'All off'}
+      onPress={() => {
         for (const name of Object.keys(lights)) lightsStore.set(name, false);
       }}
-    >
-      <Card.Symbol>
-        <Symbol icon={sfPower} />
-      </Card.Symbol>
-      <Card.Title>All Lights Off</Card.Title>
-      <Card.Value>
-        {onCount > 0 ? `${String(onCount)} on` : 'All off'}
-      </Card.Value>
-    </TonedCard>
+    />
   );
 };
 
 /**
- * A room's summary: what's going on there, in rows (a glass list), as many
+ * A room's summary (a list card): what's going on there, in rows, as many
  * as fit; opened above the page, all of them.
  */
 const RoomCard: FunctionComponent = () => {
   const lights = useLights();
   const onCount = Object.values(lights).filter(Boolean).length;
   const [temperature, angle] = useWalk(21.5, 0.3, 5000);
-  const rows: readonly (readonly [SymbolIcon, string, ReactNode])[] = [
-    [sfLightbulbFill, 'Lights', onCount > 0 ? `${String(onCount)} on` : 'Off'],
-    [
-      sfThermometerMedium,
-      'Temperature',
-      <>
-        {new Intl.NumberFormat(undefined, {
-          maximumFractionDigits: 1,
-          minimumFractionDigits: 1,
-          style: 'unit',
-          unit: 'celsius',
-        }).format(temperature)}
-        <Trend angle={angle} />
-      </>,
-    ],
-    [sfHumidityFill, 'Humidity', percent(0.46)],
-    [sfWindowShadeClosed, 'Blinds', percent(0.5)],
-    [sfHomepodFill, 'Speaker', 'Paused'],
-    [sfDoorLeftHandClosed, 'Balcony Door', 'Closed'],
-    [sfAntennaRadiowavesLeftAndRight, 'Devices', '12 online'],
-  ];
   const name = 'Living Room';
-  // (As many as fit whole, whatever its size, open or not.)
-  const [list, fit] = useRowsThatFit();
-  const shown = rows.slice(0, fit);
   return (
-    <TonedCard>
+    <Toned.List
+      icon={sfHouseFill}
+      name={name}
+      rows={[
+        {
+          icon: sfLightbulbFill,
+          label: 'Lights',
+          value: onCount > 0 ? `${String(onCount)} on` : 'Off',
+        },
+        {
+          icon: sfThermometerMedium,
+          label: 'Temperature',
+          value: (
+            <>
+              {new Intl.NumberFormat(undefined, {
+                maximumFractionDigits: 1,
+                minimumFractionDigits: 1,
+                style: 'unit',
+                unit: 'celsius',
+              }).format(temperature)}
+              <ControlCards.Trend angle={angle} />
+            </>
+          ),
+        },
+        { icon: sfHumidityFill, label: 'Humidity', value: percent(0.46) },
+        { icon: sfWindowShadeClosed, label: 'Blinds', value: percent(0.5) },
+        { icon: sfHomepodFill, label: 'Speaker', value: 'Paused' },
+        { icon: sfDoorLeftHandClosed, label: 'Balcony Door', value: 'Closed' },
+        {
+          icon: sfAntennaRadiowavesLeftAndRight,
+          label: 'Devices',
+          value: '12 online',
+        },
+      ]}
+    >
       <FlipParts />
-      <Card.Symbol>
-        <Symbol icon={sfHouseFill} />
-      </Card.Symbol>
-      <List.Root ref={list}>
-        <List.Section>
-          <List.Group>
-            {shown.map(([icon, label, value]) => (
-              <List.Item key={label}>
-                <List.Leading>
-                  <List.Image variant="symbol">
-                    <Symbol icon={icon} />
-                  </List.Image>
-                </List.Leading>
-                <List.Content>
-                  <List.Title>{label}</List.Title>
-                </List.Content>
-                <List.Trailing>
-                  <List.Detail>{value}</List.Detail>
-                </List.Trailing>
-              </List.Item>
-            ))}
-          </List.Group>
-        </List.Section>
-      </List.Root>
-      <Card.Title>{name}</Card.Title>
       <OpenButtons name={name} />
-    </TonedCard>
+    </Toned.List>
   );
 };
 
@@ -614,10 +525,13 @@ const SpeakerCard: FunctionComponent = () => {
 
 /** A thermostat's modes (see `ThermostatCard`). */
 type Mode = 'auto' | 'cool' | 'heat';
-const modes: Readonly<Record<Mode, readonly [string, SymbolIcon]>> = {
+/** Each mode's label and icon, and its icon while on (e.g. filled). */
+const modes: Readonly<
+  Record<Mode, readonly [string, SymbolIcon, SymbolIcon?]>
+> = {
   auto: ['Auto', sfThermometerMedium],
   cool: ['Cool', sfSnowflake],
-  heat: ['Heat', sfFlameFill],
+  heat: ['Heat', sfFlame, sfFlameFill],
 };
 const modeTints: Readonly<Record<Mode, string>> = {
   auto: 'var(--color-ui-system-green)',
@@ -637,12 +551,15 @@ const ThermostatCard: FunctionComponent<{ expansion?: Expansion }> = ({
   const [target, setTarget] = useState(21.5);
   const isLarge = useIsLarge();
   const name = 'Thermostat';
-  const [label, icon] = modes[mode];
+  const [label, icon, emphasizedIcon] = modes[mode];
   return (
     <TonedCard active={mode !== 'auto'}>
       <FlipParts />
       <Card.Symbol>
-        <Symbol icon={icon} />
+        <Symbol
+          emphasizedIcon={emphasizedIcon}
+          icon={icon}
+        />
       </Card.Symbol>
       {isLarge ? (
         <div className="demo-card-controls">
@@ -701,8 +618,8 @@ const ThermostatCard: FunctionComponent<{ expansion?: Expansion }> = ({
 };
 
 /**
- * A garage door: a press opens or closes it; moving, a progress bar of
- * how far it's got (large, or on the small card too), its value saying so.
+ * A garage door (a progress card): a press opens or closes it; moving, a
+ * progress bar of how far it's got, its value saying so.
  */
 const GarageCard: FunctionComponent = () => {
   const [position, setPosition] = useState(0);
@@ -721,29 +638,16 @@ const GarageCard: FunctionComponent = () => {
   let state = position === 1 ? 'Open' : 'Closed';
   if (direction !== 0) state = direction > 0 ? 'Opening…' : 'Closing…';
   return (
-    <TonedCard
+    <Toned.Progress
       active={position > 0}
+      emphasizedIcon={sfDoorGarageOpen}
+      icon={sfDoorGarageClosed}
+      name="Garage Door"
+      status={state}
+      tint="var(--color-ui-system-orange)"
+      value={direction === 0 ? undefined : position * 100}
       onClick={() => setDirection(position > 0 ? -1 : 1)}
-    >
-      <Card.Symbol>
-        <Symbol icon={sfDoorGarageClosed} />
-      </Card.Symbol>
-      {direction === 0 ? null : (
-        <div className="demo-card-controls">
-          <Progress.Root
-            aria-label="Garage door"
-            tint="var(--color-ui-system-orange)"
-            value={position * 100}
-          >
-            <Progress.Track>
-              <Progress.Indicator />
-            </Progress.Track>
-          </Progress.Root>
-        </div>
-      )}
-      <Card.Title>Garage Door</Card.Title>
-      <Card.Value>{state}</Card.Value>
-    </TonedCard>
+    />
   );
 };
 
@@ -854,7 +758,7 @@ const EnergyCard: FunctionComponent<{ expansion?: Expansion }> = ({
   );
 };
 
-/** A washing machine: how long it has left, as a progress bar too. */
+/** A washing machine (a progress card): how long it has left. */
 const WasherCard: FunctionComponent = () => {
   const total = 90;
   const [left, setLeft] = useState(42);
@@ -866,47 +770,32 @@ const WasherCard: FunctionComponent = () => {
     return () => clearInterval(timer);
   }, []);
   return (
-    <TonedCard active>
-      <Card.Symbol>
-        <Symbol icon={sfWasherFill} />
-      </Card.Symbol>
-      <div className="demo-card-controls">
-        <Progress.Root
-          aria-label="Washing"
-          value={((total - left) / total) * 100}
-        >
-          <Progress.Track>
-            <Progress.Indicator />
-          </Progress.Track>
-        </Progress.Root>
-      </div>
-      <Card.Title>Washer</Card.Title>
-      <Card.Value>{left} min left</Card.Value>
-    </TonedCard>
+    <Toned.Progress
+      active
+      emphasizedIcon={sfWasherFill}
+      icon={sfWasher}
+      name="Washer"
+      status={`${String(left)} min left`}
+      value={((total - left) / total) * 100}
+    />
   );
 };
 
 /**
- * The mailbox: how many letters are in it, a badge on its symbol;
- * momentary, a press marks them taken out.
+ * The mailbox (a button card): how many letters are in it, a badge on its
+ * symbol; a press marks them taken out.
  */
 const MailboxCard: FunctionComponent = () => {
   const [letters, setLetters] = useState(3);
   return (
-    <TonedCard
-      momentary
-      onClick={() => setLetters(0)}
-    >
-      <Card.Symbol>
-        <Symbol icon={sfEnvelopeFill}>
-          {letters > 0 ? <Badge placement="symbol">{letters}</Badge> : null}
-        </Symbol>
-      </Card.Symbol>
-      <Card.Title>Mailbox</Card.Title>
-      <Card.Value>
-        {letters > 0 ? `${String(letters)} letters` : 'Empty'}
-      </Card.Value>
-    </TonedCard>
+    <Toned.Button
+      badge={letters > 0 ? letters : undefined}
+      emphasizedIcon={sfEnvelopeFill}
+      icon={sfEnvelope}
+      name="Mailbox"
+      status={letters > 0 ? `${String(letters)} letters` : 'Empty'}
+      onPress={() => setLetters(0)}
+    />
   );
 };
 
@@ -924,6 +813,7 @@ export const moreTiles: readonly Tile[] = [
     card: ({ expansion }) => (
       <ChannelLightCard
         channels={rgb}
+        emphasizedIcon={sfLightStrip2Fill}
         expansion={expansion}
         icon={sfLightStrip2}
         initial={[0.9, 0.3, 0.6]}
@@ -941,7 +831,8 @@ export const moreTiles: readonly Tile[] = [
       <ChannelLightCard
         opens
         channels={[...rgb, white]}
-        icon={sfLampCeilingFill}
+        emphasizedIcon={sfLampCeilingFill}
+        icon={sfLampCeiling}
         initial={[0.2, 0.5, 0.9, 0.4]}
         name="Ceiling Light"
       />
@@ -956,8 +847,9 @@ export const moreTiles: readonly Tile[] = [
     card: ({ expansion }) => (
       <ChannelLightCard
         channels={[...rgb, cool, warm]}
+        emphasizedIcon={sfLampFloorFill}
         expansion={expansion}
-        icon={sfLampFloorFill}
+        icon={sfLampFloor}
         initial={[0.6, 0.2, 0.1, 0.3, 0.8]}
         name="Floor Lamp"
       />

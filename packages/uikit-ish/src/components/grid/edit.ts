@@ -1,6 +1,10 @@
 import { RefObject, useLayoutEffect } from 'react';
 
-import { edgeScrollDelta, frameElapsed } from '../utils/main.js';
+import {
+  edgeScrollDelta,
+  frameElapsed,
+  reducedMotionOf,
+} from '../utils/main.js';
 import { dashesOf } from './dashes.js';
 import { cellOf, type GridRange, type GridReorderHandle } from './handle.js';
 import {
@@ -450,7 +454,7 @@ export const useEditing = (
   useLayoutEffect(() => {
     const { current: root } = rootRef;
     if (!root || !editing) return undefined;
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const reduce = reducedMotionOf(root);
 
     let pending:
       | {

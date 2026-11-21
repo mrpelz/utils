@@ -23,6 +23,10 @@
       inset 0 0 0 0.5px color-mix(in srgb, currentcolor 12%, transparent),
       inset 0 -0.5px 0 rgb(255 255 255 / 35%);
 
+    /* (Its layout's padding, also its slider's label's and value's copies'
+       in its fill, see below.) */
+    --uikit-card-padding: 12px 14px;
+
     color: var(--uikit-glass-content);
 
     /* (Its veil (see below) stacked within it: under the grid's corner
@@ -64,6 +68,9 @@
     }
 
     &[data-editing]::after {
+      /* (Over everything in it, its switch and corner buttons too (their
+         own, above a slider's fill: see below); not as its press tint.) */
+      z-index: 4;
       background-color: var(
         --uikit-card-veil,
         light-dark(
@@ -131,7 +138,7 @@
     min-width: 0;
     min-height: 0;
     box-sizing: border-box;
-    padding: 12px 14px;
+    padding: var(--uikit-card-padding);
     border-radius: inherit;
     column-gap: 10px;
     grid-template:
@@ -177,26 +184,31 @@
   .uikit-card-corner-button {
     z-index: 3;
     color: inherit;
-
-    /* (By what's right behind it, sampled (see main.tsx): e.g. over a
-       slider's fill, legible on it.) */
-    &[data-backdrop-tone='bright'] {
-      color: var(--glass-ui-medium-light-content);
-    }
-
-    &[data-backdrop-tone='dim'] {
-      color: var(--glass-ui-medium-dark-content);
-    }
   }
 
-  /* Its symbol: at its top leading corner, a little larger than its text. */
+  /* Its symbol: at its top leading corner, a little larger than its text.
+     (Its parts' colors resolved on them: a copy over a slider's fill, in
+     the fill's color scheme, see below.) */
   .uikit-card-symbol {
     display: flex;
     min-width: 0;
     align-items: center;
+    color: var(--uikit-glass-content);
     font-size: var(--font-ui-title3-size);
     grid-area: symbol;
     line-height: 1;
+
+    /* (On (`active`), though its card isn't lit: in its tint, its
+       `Symbol`'s emphasized icon (e.g. filled) shown, as when lit, see
+       below; not transitioned.) */
+    &[data-active] {
+      --uikit-symbol-emphasis: 1;
+
+      color: var(
+        --uikit-card-symbol-tint,
+        var(--uikit-switch-on-color, var(--color-ui-system-green))
+      );
+    }
   }
 
   /* Its title: two lines at most (its words breaking with a hyphen when
@@ -206,6 +218,7 @@
     overflow: hidden;
     min-width: 0;
     -webkit-box-orient: vertical;
+    color: var(--uikit-glass-content);
     font-size: var(--font-ui-subheadline-size);
     font-variation-settings: 'wght'
       var(--font-ui-subheadline-weight-emphasized);
@@ -235,30 +248,10 @@
     white-space: nowrap;
   }
 
-  /* Wide and a row tall (e.g. 2x1): its symbol leading, its title and
-     value beside it, a switch trailing. (Not a slider's: its label and
-     value over its fill, its symbol at its top.) */
-  @container uikit-card (aspect-ratio > 1.5) and (height < 160px) {
-    .uikit-card-layout:not(:has(> .uikit-slider-root)) {
-      align-content: center;
-      grid-template:
-        'symbol title control' auto
-        'symbol value control' auto / auto 1fr auto;
-    }
-
-    .uikit-card-symbol {
-      font-size: var(--font-ui-title2-size);
-    }
-
-    .uikit-card-layout > .uikit-switch-root {
-      align-self: center;
-    }
-  }
-
   /* Large (e.g. 2x2): its value large. */
   @container uikit-card (width >= 180px) and (height >= 180px) {
     .uikit-card-value {
-      color: inherit;
+      color: var(--uikit-glass-content);
       font-size: var(--font-ui-large-title-size);
       font-variation-settings: 'wght'
         var(--font-ui-large-title-weight-emphasized, 700);
@@ -276,7 +269,7 @@
     overflow: hidden;
 
     /* (Not a corner button: its own presses, see above.) */
-    .uikit-card-layout > :not(.uikit-slider-root, .uikit-card-corner-button) {
+    .uikit-card-layout > :not(.uikit-slider-root, .uikit-card-corner-button, .uikit-switch-root) {
       z-index: 1;
       pointer-events: none;
     }
@@ -290,6 +283,9 @@
     box-sizing: border-box;
     padding: inherit;
     border-radius: inherit;
+
+    /* (Its label right above its value, as a card's title is.) */
+    gap: 0;
     grid-template:
       '.' 1fr
       'title' auto
@@ -312,15 +308,51 @@
       background-color: transparent;
     }
 
-    /* (Straight at its end, the card's corners rounding it.) */
+    /* (Straight at its end, the card's corners rounding it; in its tint,
+       opaque, above what's over it (their copies in it, see below), its
+       content clipped at its edge.) */
     .uikit-slider-indicator {
+      z-index: 1;
+      overflow: hidden;
       border-radius: 0;
-      background-color: color-mix(
-        in srgb,
-        var(--uikit-slider-tint) 70%,
-        transparent
-      );
+      background-color: var(--uikit-slider-tint);
     }
+
+    /* (The copies of what's over it (see `CardBlendScope` and ControlCards' Slider): a
+       layer in the fill, in its color scheme and text color, at the card's
+       size, from where the track starts (the fill's start back from it),
+       laid out as the card is, so each is right over its original; clipped
+       by the fill's edge, meeting them there.) */
+    .uikit-card-blend {
+      position: absolute;
+      top: 0;
+      display: grid;
+      width: 100cqw;
+      height: 100cqh;
+      box-sizing: border-box;
+      padding: var(--uikit-card-padding);
+      color: var(--uikit-glass-content);
+      column-gap: 10px;
+      grid-template:
+        'symbol control' auto
+        '. .' 1fr
+        'title title' auto
+        'value value' auto / 1fr auto;
+      inset-inline-start: 0;
+      pointer-events: none;
+
+      /* (Across it, as in the slider, see above.) */
+      > :is(.uikit-slider-label, .uikit-slider-value) {
+        grid-column: 1 / -1;
+      }
+    }
+
+    &[data-orientation='vertical'] .uikit-card-blend {
+      top: auto;
+      bottom: 0;
+      inset-inline-start: 0;
+    }
+
 
     /* (Its thumb only for its input (keyboard, assistive technology):
        nothing drawn.) */
@@ -331,7 +363,11 @@
       }
     }
 
+    /* (Behind its text, on its glass and in its fill alike: under the
+       card's (its stacking context's) content, over its glass; in the
+       fill, over the fill.) */
     .uikit-slider-ticks {
+      z-index: -1;
       width: auto;
       height: auto;
       inset: 0;
@@ -340,8 +376,16 @@
         width: 1px;
         height: 100%;
         border-radius: 0;
-        background-color: var(--uikit-glass-separator);
+
+        /* (On its glass, faint (decoration): as its border is, dark;
+           a hairline's shade, light.) */
+        background-color: light-dark(rgb(0 0 0 / 10%), var(--glass-ui-panel-rim));
       }
+    }
+
+    /* (Their copy in the fill: in its text color.) */
+    .uikit-card-blend .uikit-slider-ticks > * {
+      background-color: var(--uikit-glass-content);
     }
 
     &[data-orientation='vertical'] .uikit-slider-ticks > * {
@@ -349,10 +393,11 @@
       height: 1px;
     }
 
-    > .uikit-slider-label {
+    > .uikit-slider-label,
+    .uikit-card-blend > .uikit-slider-label {
       z-index: 1;
       overflow: hidden;
-      color: inherit;
+      color: var(--uikit-glass-content);
       font-size: var(--font-ui-subheadline-size);
       font-variation-settings: 'wght'
         var(--font-ui-subheadline-weight-emphasized);
@@ -368,16 +413,34 @@
       white-space: nowrap;
     }
 
-    /* (In its text's color, legible on the fill too.) */
-    > .uikit-slider-value {
+    /* (On its glass, in its secondary color, as a card's value is; its
+       copy in the fill in the fill's text color, see below.) */
+    > .uikit-slider-value,
+    .uikit-card-blend > .uikit-slider-value {
       z-index: 1;
-      color: inherit;
+      color: var(--uikit-glass-content-secondary);
       font-size: var(--font-ui-subheadline-size);
       grid-area: value;
       justify-items: start;
       line-height: var(--font-ui-subheadline-line-height);
       pointer-events: none;
     }
+
+    .uikit-card-blend > .uikit-slider-value {
+      color: var(--uikit-glass-content);
+    }
+  }
+
+  /* (Its switch off, a slider filling it kept where it's set: its fill
+     disabled, gray, darker than a bright tint (at most at the lightness
+     where its text over it stays dark: its tone, as its tint's, unchanged),
+     as dark as a dark one.) */
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root:not([data-checked]))
+    > .uikit-card-frame
+    > .uikit-card-layout
+    > .uikit-slider-root
+    .uikit-slider-indicator {
+    background-color: oklch(from var(--uikit-slider-tint) min(l, 0.62) 0 h);
   }
 
   /* A switch in it (see main.tsx): smaller, its top trailing corner; its
@@ -388,6 +451,9 @@
     --uikit-switch-min-height: 24px;
     --uikit-switch-knob-width: 28px;
 
+    /* (Above a slider filling the card, and its fill: pressed, not the
+       slider, see below.) */
+    z-index: 3;
     grid-area: control;
     place-self: start end;
 
@@ -401,10 +467,18 @@
   .uikit-card-root:is(
       [data-active],
       [data-flashing],
-      :has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root[data-checked])
+      :where(:not([data-active-given])):has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root[data-checked])
     ) {
-    --uikit-glass-content: #000;
-    --uikit-glass-content-secondary: rgb(0 0 0 / 55%);
+    /* (By a part's own color scheme: one over something dark on it, see
+       above, light.) */
+    --uikit-glass-content: light-dark(
+      #000,
+      var(--glass-ui-medium-dark-content)
+    );
+    --uikit-glass-content-secondary: light-dark(
+      rgb(0 0 0 / 55%),
+      var(--glass-ui-medium-dark-content-secondary)
+    );
 
     /* (Opaque, lifted: apart from light glass, in the light scheme, the
        backdrop not showing through it.) */
@@ -413,8 +487,15 @@
       inset 0 0 0 0.5px rgb(0 0 0 / 8%), 0 2px 6px rgb(0 0 0 / 12%),
       0 8px 28px rgb(0 0 0 / 20%);
 
+    /* (Its symbol on: in its tint, its `Symbol`'s emphasized icon (e.g.
+       filled) shown; off or not switchable, its icon (e.g. outlined).) */
     .uikit-card-symbol {
-      color: var(--uikit-switch-on-color, var(--color-ui-system-green));
+      --uikit-symbol-emphasis: 1;
+
+      color: var(
+        --uikit-card-symbol-tint,
+        var(--uikit-switch-on-color, var(--color-ui-system-green))
+      );
     }
   }
 
@@ -426,7 +507,7 @@
   .uikit-card-root:is(
       [data-active],
       [data-flashing],
-      :has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root[data-checked])
+      :where(:not([data-active-given])):has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root[data-checked])
     ):not([data-editing]) {
     --glass-ui-lens-shadow: var(--glass-ui-bright-lens-shadow);
 
@@ -491,26 +572,6 @@
     outline-offset: 2px;
   }
 
-  /* (Its parts off a corner button's icon (in from the corner as its
-     padding is): a switch at the top, its value at the bottom, by the
-     icon's width and a little more; its symbol, the top leading corner
-     taken, beside its title and value, as when it's wide.) */
-
-  @container uikit-card not ((aspect-ratio > 1.5) and (height < 160px)) {
-    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) {
-      align-items: end;
-      grid-template:
-        '. control' auto
-        '. .' 1fr
-        'symbol title' auto
-        'symbol value' auto / auto 1fr;
-    }
-
-    .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > .uikit-card-symbol {
-      align-self: center;
-    }
-  }
-
   .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-trailing']) > .uikit-switch-root {
     margin-inline-end: var(--uikit-card-corner-room, 18px);
   }
@@ -530,8 +591,7 @@
      well clear of it: one top leading (an x), its symbol and title in from
      it (`--uikit-card-header-room`); one at the bottom, the list ending
      above it. */
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root),
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) {
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root) {
     align-items: center;
     grid-template:
       'symbol title control' auto
@@ -542,10 +602,6 @@
       align-self: stretch;
       grid-area: list;
     }
-
-    > .uikit-card-symbol {
-      align-self: center;
-    }
   }
 
   .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > :is(.uikit-card-symbol, .uikit-card-title:first-child) {
@@ -554,6 +610,63 @@
 
   .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner^='bottom']:not([data-grid-hidden])) > .uikit-list-root {
     margin-block-end: calc(var(--uikit-card-corner-room, 18px) + 4px);
+  }
+
+  /* (Its parts over a slider's fill, drawn again in it (see
+     `CardBlendScope`): under the fill, covered where it is; its symbol
+     in its text's color, its emphasis telling whether it's on; a corner
+     button pressed, drawn by its copies (one on its glass, under the fill,
+     one in it), not itself.) */
+  .uikit-card-root[data-card-blend]:has(> .uikit-card-frame > .uikit-card-layout > .uikit-slider-root) > .uikit-card-frame > .uikit-card-layout {
+    > .uikit-card-symbol,
+    > .uikit-slider-root > :is(.uikit-slider-label, .uikit-slider-value) {
+      z-index: auto;
+    }
+
+    .uikit-card-symbol {
+      color: var(--uikit-glass-content);
+    }
+
+    > .uikit-card-corner-button:not([data-card-copy]) {
+      color: transparent;
+
+      > .uikit-grid-corner-icon {
+        stroke: transparent;
+      }
+    }
+
+    .uikit-card-corner-button[data-card-copy] {
+      z-index: auto;
+    }
+  }
+
+  /* (Its parts off a corner button's icon (in from the corner as its
+     padding is): a switch at the top, its value at the bottom, by the
+     icon's width and a little more; its symbol, the top leading corner
+     taken, beside its title and value (a list's card: its own, above).) */
+
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:not(:has(> .uikit-list-root)):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) {
+    align-items: end;
+    grid-template:
+      '. control' auto
+      '. .' 1fr
+      'symbol title' auto
+      'symbol value' auto / auto 1fr;
+
+    /* (Its copies over a slider's fill, laid out as it is, see above.) */
+    .uikit-card-blend {
+      align-items: end;
+      grid-template:
+        '. control' auto
+        '. .' 1fr
+        'symbol title' auto
+        'symbol value' auto / auto 1fr;
+    }
+  }
+
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:not(:has(> .uikit-list-root)):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > .uikit-card-symbol,
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:not(:has(> .uikit-list-root)):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) .uikit-card-blend > .uikit-card-symbol {
+    align-self: center;
   }
 
 }

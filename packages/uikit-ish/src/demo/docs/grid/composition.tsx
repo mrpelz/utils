@@ -16,6 +16,7 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePresentation } from '../../tooling/frame/presentation.js';
 import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { gridSigns } from '../../tooling/grid-signs.js';
@@ -168,15 +169,18 @@ const Rooms: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isExpanded
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="tablet"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Grid"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
@@ -507,14 +511,17 @@ const Holes: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Grid"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
@@ -742,14 +749,17 @@ const Adding: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Grid"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
@@ -996,15 +1006,18 @@ const Room: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isExpanded
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="tablet"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Grid"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
@@ -1193,15 +1206,18 @@ const Expanding: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isExpanded
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="tablet"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Grid"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
@@ -1370,15 +1386,18 @@ const Opening: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isExpanded
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="tablet"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Grid"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>

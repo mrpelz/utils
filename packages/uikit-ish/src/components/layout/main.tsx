@@ -52,9 +52,6 @@ export type { LayoutColumnProps, LayoutRootProps } from './props.js';
 // on the root, until its own have finished), not as it's first laid out,
 // nor resized; then its layout's scrollers are drawn anew
 // (`repaintScrollers`).
-//
-// Also:
-// - Resizable.
 
 /** How far an arrow key resizes (Shift: further). */
 const keyStep = 10;

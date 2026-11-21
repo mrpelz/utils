@@ -300,10 +300,6 @@ const Root = <Payload,>({
 };
 
 /**
- * A tooltip (Base UI's `Tooltip`): a short label in a
- * glass capsule at its trigger, on hover and focus, or held open.
- */
-/**
  * Its portal (Base UI's): no box of its own (`display: contents`), so
  * rendered into a container (e.g. a screen laid out as a flex column) it
  * doesn't shift its content.
@@ -321,6 +317,10 @@ const Portal = forwardRef<
   />
 ));
 
+/**
+ * A tooltip (Base UI's `Tooltip`): a short label in a
+ * glass capsule at its trigger, on hover and focus, or held open.
+ */
 export const Tooltip = {
   ...BaseTooltip,
   Root,

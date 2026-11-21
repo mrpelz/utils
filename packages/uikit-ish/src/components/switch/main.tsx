@@ -29,8 +29,10 @@ export type { SwitchRootProps } from './props.js';
 // - Track size (64×28) is a minimum, not a fixed size; the knob is positioned
 //   with `inset-inline-start` instead of a fixed translation, so it adapts to
 //   the actual width and to right-to-left layouts.
-// - The pressed state is driven by `:active` and custom properties inherited
-//   by the thumb, instead of Framework7's JS-driven `.toggle-active-state`.
+// - The pressed state is set in script (`--uikit-switch-pressed`, inherited
+//   by the thumb, see `Root`), as Framework7's `.toggle-active-state` is:
+//   `:active` is lost when the state flips during a drag, and a quick tap
+//   shows no lens (see `delayLens`).
 // - Dragging (Framework7 `toggle-class.js`) moves the knob with the pointer,
 //   like the tab bar's lens, instead of only flipping the state after a third
 //   of the width: the state flips whenever the knob's center crosses the

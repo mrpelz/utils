@@ -6,23 +6,23 @@ import './style.css';
 
 import { useRender } from '@base-ui/react/use-render';
 import {
+  createContext,
   forwardRef,
   type MouseEvent,
   type Ref,
   type RefObject,
   useCallback,
+  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
+import { createPortal } from 'react-dom';
 
-import {
-  colorSchemeStyle,
-  useBackdropTone,
-  useGlassScheme,
-} from '../glass/main.js';
+import { colorSchemeStyle, useGlassScheme } from '../glass/main.js';
 import {
   Grid,
   type GridItemLayoutChange,
@@ -73,7 +73,10 @@ export type {
 // - A `Slider` in it is styled by it: its whole surface the track, the
 //   fill the background (its ticks across it), no knob; horizontal or
 //   vertical by the tile's shape (see `useCardOrientation`). Its label and
-//   value laid out as a card's title and value.
+//   value laid out as a card's title and value. ControlCards' `SliderFill`
+//   makes that fill opaque and registers a layer inside it (see
+//   `CardBlendScope`), where the card's parts draw copies of themselves in
+//   the fill's colors; Slider itself knows nothing of cards.
 // - A binary card's state also shows as its brightness (`active`: a
 //   display's, e.g. a lock locked; a control's, its switch on). Pressable
 //   as a whole (an `onClick`), it shows it: hovered, pressed. A display
@@ -91,6 +94,22 @@ export type {
 //   The rest of its parts stay where they're laid out: moving them from
 //   where they were is the app's (e.g. by an animation library, see
 //   `useGridItemLayout`).
+
+/** A card's copy layer and its setter (see `CardBlendScope`). */
+type CardBlend = {
+  layer: HTMLElement | null;
+  setLayer: (layer: HTMLElement | null) => void;
+};
+
+/**
+ * A layer over the card's content where its parts draw a copy of
+ * themselves (`Card.Symbol`, `Card.CornerButton`): e.g. inside a slider's
+ * fill filling the card, in the fill's color scheme, clipped by its edge
+ * (see ControlCards' `SliderFill`), registered by it (`setLayer`); the
+ * root marked `data-card-blend` while there is one (its originals under
+ * the fill, see style.css). None: no copies. Internal.
+ */
+export const CardBlendScope = createContext<CardBlend | undefined>(undefined);
 
 /** The tile's shape (its item's effective size): wide, horizontal. */
 export const useCardOrientation = (): CardOrientation => {
@@ -133,7 +152,8 @@ const useCornersFollowing = (rootRef: RefObject<HTMLElement | null>) => {
       const across = isRtl ? to.width - from.width : from.width - to.width;
       const down = from.height - to.height;
       for (const button of root.querySelectorAll<HTMLElement>(
-        ':scope > .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button',
+        // (Its copies too, over a slider's fill: on its glass, in the fill.)
+        ':scope > .uikit-card-frame .uikit-card-corner-button',
       )) {
         for (const animation of button.getAnimations()) {
           if (animation.id === cornerId) animation.cancel();
@@ -273,6 +293,13 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
     const schemeOfState = state ? 'light' : 'dark';
     const stated = state === undefined ? toned : schemeOfState;
     const scheme = isEditing ? undefined : stated;
+    // (A layer its parts draw their copies in, registered by what fills
+    // it, see `CardBlendScope`.)
+    const [blendLayer, setBlendLayer] = useState<HTMLElement | null>(null);
+    const blend = useMemo(
+      () => ({ layer: blendLayer, setLayer: setBlendLayer }),
+      [blendLayer],
+    );
     return useRender({
       defaultTagName: 'div',
       props: {
@@ -281,9 +308,13 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
         // queries ask, see style.css.)
         children: (
           <ColorSchemeScope colorScheme={scheme}>
-            <div className="uikit-card-frame">
-              <div className="uikit-card-layout">{children}</div>
-            </div>
+            {/* (Its colors known (its glass, lit or not): its parts not
+                sampled.) */}
+            <CardBlendScope.Provider value={blend}>
+              <div className="uikit-card-frame">
+                <div className="uikit-card-layout">{children}</div>
+              </div>
+            </CardBlendScope.Provider>
           </ColorSchemeScope>
         ),
         className: cn(
@@ -291,6 +322,10 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
           className,
         ),
         'data-active': state === true ? '' : undefined,
+        // (Its `active` given: its state, whatever a switch in it says
+        // (e.g. a dimmer's, never lit), see style.css.)
+        'data-active-given': active === undefined ? undefined : '',
+        'data-card-blend': blendLayer ? '' : undefined,
         'data-card-part': 'root',
         'data-color-scheme': scheme,
         'data-momentary': momentary ? '' : undefined,
@@ -313,16 +348,43 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
   },
 );
 
-/** Its symbol (e.g. a `Symbol`), at its top leading corner. */
+/**
+ * Its symbol (e.g. a `Symbol`), at its top leading corner: on (its card lit,
+ * or its own `active`), in its tint, its `Symbol`'s emphasized icon (e.g.
+ * filled) shown; else its icon (e.g. outlined). Over a slider's fill (see
+ * `CardBlendScope`): in its text's color, drawn again in the
+ * fill, its emphasis on both.
+ */
 const CardSymbol = forwardRef<HTMLSpanElement, CardSymbolProps>(
-  ({ className, ...props }, ref) => (
-    <span
-      ref={ref}
-      {...props}
-      className={cn('uikit-card-symbol', className)}
-      data-card-part="symbol"
-    />
-  ),
+  ({ active = false, children, className, style, tint, ...props }, ref) => {
+    const blendLayer = useContext(CardBlendScope)?.layer ?? null;
+    return (
+      <>
+        <span
+          ref={ref}
+          {...props}
+          className={cn('uikit-card-symbol', className)}
+          data-active={active ? '' : undefined}
+          data-card-part="symbol"
+          style={withStyle({ '--uikit-card-symbol-tint': tint }, style)}
+        >
+          {children}
+        </span>
+        {blendLayer
+          ? createPortal(
+              <span
+                className={cn('uikit-card-symbol', className)}
+                data-active={active ? '' : undefined}
+                data-card-copy=""
+              >
+                {children}
+              </span>,
+              blendLayer,
+            )
+          : null}
+      </>
+    );
+  },
 );
 
 /** What it is (e.g. a device's name), above its value. */
@@ -371,25 +433,47 @@ const Value = forwardRef<HTMLSpanElement, CardValueProps>(
  * it, see `forwardClick`).
  */
 const CornerButton = forwardRef<HTMLButtonElement, CardCornerButtonProps>(
-  ({ className, onClick, visible = true, ...props }, forwardedRef) => {
+  (
+    { className, corner, icon, mirrored, onClick, visible = true, ...props },
+    ref,
+  ) => {
     const isEditing = useGridItem()?.editing === true;
-    const ref = useForwardedRef(forwardedRef);
-    // (What's right behind it, sampled: its card's glass, a lit card's, a
-    // slider's fill; its symbol dark or light on it, see style.css.)
-    const tone = useBackdropTone(ref, { enabled: visible && !isEditing });
-    return (
+    const isShown = visible && !isEditing;
+    // (Over a slider's fill (see `CardBlendScope`): pressed, but
+    // drawn by its copies, one on its glass, under the fill, one in it.)
+    const blendLayer = useContext(CardBlendScope)?.layer ?? null;
+    const copy = (
       <Grid.CornerButton
-        ref={ref}
+        aria-hidden
+        inert
         className={cn('uikit-card-corner-button', className)}
-        data-backdrop-tone={tone}
-        data-card-part="corner-button"
-        visible={visible && !isEditing}
-        {...props}
-        onClick={(event: MouseEvent<HTMLButtonElement>) => {
-          event.stopPropagation();
-          onClick?.(event);
-        }}
+        corner={corner}
+        data-card-copy=""
+        icon={icon}
+        mirrored={mirrored}
+        render={<span />}
+        visible={isShown}
       />
+    );
+    return (
+      <>
+        <Grid.CornerButton
+          ref={ref}
+          className={cn('uikit-card-corner-button', className)}
+          corner={corner}
+          data-card-part="corner-button"
+          icon={icon}
+          mirrored={mirrored}
+          visible={isShown}
+          {...props}
+          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+            event.stopPropagation();
+            onClick?.(event);
+          }}
+        />
+        {blendLayer ? copy : null}
+        {blendLayer ? createPortal(copy, blendLayer) : null}
+      </>
     );
   },
 );

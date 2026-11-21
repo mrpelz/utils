@@ -429,6 +429,17 @@ export type GridBreakProps = ComponentProps<'div'> &
     rows?: GridBreakRows;
   };
 
+/**
+ * A size as it would be (see `GridItemState.sizeOf`): effective, and
+ * whether it's narrower than snapped, to fit the columns (or its area).
+ */
+export type GridSizeFit = {
+  /** Whether it's narrower than snapped, to fit. */
+  isFitted: boolean;
+  /** Its effective size. */
+  size: GridSize;
+};
+
 /** An item's sizes and state (see `useGridItem`). */
 export type GridItemState = {
   /** Whether its grid is editing. */
@@ -456,6 +467,13 @@ export type GridItemState = {
    * supported that fits if that's too wide (or than its area).
    */
   size: GridSize;
+  /**
+   * What it would be, a size asked for now (e.g. expanded): as its own
+   * is (snapped, fitted to the columns and its area), as it is now; its
+   * effective size, the same as another's, a change to it that changes
+   * nothing (e.g. a button for it hidden).
+   */
+  sizeOf: (size: GridSize) => GridSizeFit;
   /** The sizes it can be, in order (smallest area first). */
   supportedSizes: readonly GridSize[];
 };
@@ -477,6 +495,12 @@ export type GridAreaState = {
    * fitted to the columns; at least its tile's).
    */
   size: GridSize;
+  /**
+   * What it would be, a size asked for now: as its own is (snapped,
+   * fitted to the columns; at least its tile's), its tile as it is now
+   * (see `GridItemState.sizeOf`).
+   */
+  sizeOf: (size: GridSize) => GridSizeFit;
   /** The sizes it can be, in order (smallest area first). */
   supportedSizes: readonly GridSize[];
 };

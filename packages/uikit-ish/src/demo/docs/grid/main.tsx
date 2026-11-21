@@ -11,6 +11,7 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePresentation } from '../../tooling/frame/presentation.js';
 import {
   usePartControls,
   usePropControl,
@@ -97,13 +98,16 @@ export const GridDemo: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
-      controls={[control, partControls]}
+      controls={[presentationControl, control, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[state, partState]}
+      stage={presentation}
+      state={[state, partState, presentationState]}
       title="Grid"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>

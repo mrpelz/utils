@@ -32,8 +32,11 @@ import {
   sfChevronBackward,
   sfChevronUpChevronDown,
   sfEllipsis,
+  sfFolderBadgePlus,
   sfPencil,
+  sfPinFill,
   sfSquareAndArrowUp,
+  sfSquareAndPencil,
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
@@ -141,12 +144,231 @@ const viewOptionsCode = `<Menu.Root>
     </Menu.Positioner>
   </Menu.Portal>
 </Menu.Root>`;
+const nearestCode = `// At the bottom of the screen: no room below, so it opens above, its
+// items the other way round, the first (the most used) nearest the button.
+<Viewport.BlockEnd>
+  <Toolbar.Root>
+    <Toolbar.Trailing>
+      <Menu.Root>
+        <Menu.Trigger
+          aria-label="New"
+          render={<Toolbar.Button shape="circle" />}
+        >
+          <Button.Icon>
+            <Symbol icon={sfSquareAndPencil} />
+          </Button.Icon>
+        </Menu.Trigger>
+        <Menu.Portal>
+          <Menu.Positioner>
+            <Menu.Popup order="nearest">
+              <Menu.Item>…New Note</Menu.Item>
+              <Menu.Item>…New Folder</Menu.Item>
+              <Menu.Separator />
+              {/* Its label stays at its top; its items turn round too. */}
+              <Menu.Group>
+                <Menu.GroupLabel>Sort By</Menu.GroupLabel>
+                <Menu.RadioGroup defaultValue="date">
+                  <Menu.RadioItem value="date">…</Menu.RadioItem>
+                  <Menu.RadioItem value="title">…</Menu.RadioItem>
+                </Menu.RadioGroup>
+              </Menu.Group>
+              <Menu.Separator />
+              <Menu.Item>…Pin Note</Menu.Item>
+              <Menu.Item>…Share Note</Menu.Item>
+            </Menu.Popup>
+          </Menu.Positioner>
+        </Menu.Portal>
+      </Menu.Root>
+    </Toolbar.Trailing>
+  </Toolbar.Root>
+</Viewport.BlockEnd>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
 const sortLabels: Record<string, string> = {
   date: 'Date',
   name: 'Name',
   size: 'Size',
+};
+
+/**
+ * A notes page's “New” button, in its bottom bar: its menu opens above
+ * it (no room below), nearest first.
+ */
+const FromABottomToolbar: FunctionComponent = () => {
+  const id = 'menu-composition-nearest';
+  const [log, addLog] = useLog();
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Subtitle': [],
+            'List.Title': [],
+            'Menu.Group': [],
+            'Menu.GroupLabel': [],
+            'Menu.Icon': [],
+            'Menu.Item': ['onClick'],
+            'Menu.Label': [],
+            'Menu.Popup': ['order'],
+            'Menu.Portal': [],
+            'Menu.Positioner': [],
+            'Menu.RadioGroup': ['defaultValue', 'onValueChange'],
+            'Menu.RadioItem': ['value'],
+            'Menu.RadioItemIndicator': [],
+            'Menu.Root': [],
+            'Menu.Separator': [],
+            'Menu.Trigger': ['aria-label', 'render'],
+            'Page.Root': [],
+            'Toolbar.Button': ['shape'],
+            'Toolbar.Root': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  const item = (label: string, icon: typeof sfPinFill) => (
+    <Menu.Item
+      {...partProps['Menu.Item']}
+      onClick={() => addLog(`${label} clicked`)}
+    >
+      <Menu.Icon {...partProps['Menu.Icon']}>
+        <Symbol
+          {...partProps.Symbol}
+          icon={icon}
+        />
+      </Menu.Icon>
+      <Menu.Label {...partProps['Menu.Label']}>{label}</Menu.Label>
+    </Menu.Item>
+  );
+
+  return (
+    <Component
+      isInline
+      baseUiId="menu"
+      controls={[partControls]}
+      id={id}
+      log={log}
+      stage="phone"
+      state={[partState]}
+      title="Menu from a bottom toolbar"
+    >
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Page.Root {...partProps['Page.Root']}>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-start"
+          />
+          <List.Root {...partProps['List.Root']}>
+            <List.Section {...partProps['List.Section']}>
+              <List.Group {...partProps['List.Group']}>
+                <List.Item {...partProps['List.Item']}>
+                  <List.Content {...partProps['List.Content']}>
+                    <List.Title {...partProps['List.Title']}>
+                      Groceries
+                    </List.Title>
+                    <List.Subtitle {...partProps['List.Subtitle']}>
+                      Milk, eggs, bread
+                    </List.Subtitle>
+                  </List.Content>
+                </List.Item>
+              </List.Group>
+            </List.Section>
+          </List.Root>
+          <Viewport.Padding
+            {...partProps['Viewport.Padding']}
+            edge="block-end"
+          />
+        </Page.Root>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+              <Menu.Root {...partProps['Menu.Root']}>
+                <Menu.Trigger
+                  {...partProps['Menu.Trigger']}
+                  aria-label="New"
+                  render={
+                    <Toolbar.Button
+                      {...partProps['Toolbar.Button']}
+                      shape="circle"
+                    />
+                  }
+                >
+                  <Button.Icon {...partProps['Button.Icon']}>
+                    <Symbol
+                      {...partProps.Symbol}
+                      icon={sfSquareAndPencil}
+                    />
+                  </Button.Icon>
+                </Menu.Trigger>
+                <Menu.Portal {...partProps['Menu.Portal']}>
+                  <Menu.Positioner {...partProps['Menu.Positioner']}>
+                    <Menu.Popup
+                      {...partProps['Menu.Popup']}
+                      order="nearest"
+                    >
+                      {item('New Note', sfSquareAndPencil)}
+                      {item('New Folder', sfFolderBadgePlus)}
+                      <Menu.Separator {...partProps['Menu.Separator']} />
+                      <Menu.Group {...partProps['Menu.Group']}>
+                        <Menu.GroupLabel {...partProps['Menu.GroupLabel']}>
+                          Sort By
+                        </Menu.GroupLabel>
+                        <Menu.RadioGroup
+                          {...partProps['Menu.RadioGroup']}
+                          defaultValue="date"
+                          onValueChange={(value) =>
+                            addLog(`sort: ${String(value)}`)
+                          }
+                        >
+                          {(
+                            [
+                              ['date', 'Date Edited'],
+                              ['title', 'Title'],
+                            ] as const
+                          ).map(([value, label]) => (
+                            <Menu.RadioItem
+                              key={value}
+                              {...partProps['Menu.RadioItem']}
+                              value={value}
+                            >
+                              <Menu.RadioItemIndicator
+                                {...partProps['Menu.RadioItemIndicator']}
+                              />
+                              <Menu.Label {...partProps['Menu.Label']}>
+                                {label}
+                              </Menu.Label>
+                            </Menu.RadioItem>
+                          ))}
+                        </Menu.RadioGroup>
+                      </Menu.Group>
+                      <Menu.Separator {...partProps['Menu.Separator']} />
+                      {item('Pin Note', sfPinFill)}
+                      {item('Share Note', sfSquareAndArrowUp)}
+                    </Menu.Popup>
+                  </Menu.Positioner>
+                </Menu.Portal>
+              </Menu.Root>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+      </Viewport.Content>
+    </Component>
+  );
 };
 
 /** A page's “More” button, in its navigation bar. */
@@ -747,6 +969,7 @@ const ViewOptions: FunctionComponent = () => {
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['from-a-toolbar-button', 'From a toolbar button'],
+  ['nearest-first', 'Nearest first'],
   ['a-pop-up-button', 'A pop-up button'],
   ['on-a-held-press', 'On a held press'],
   ['view-options', 'View options'],
@@ -796,6 +1019,57 @@ export const MenuComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={toolbarCode} />
     <FromAToolbarButton />
+
+    <Heading
+      id="nearest-first"
+      level={2}
+    >
+      Nearest first
+    </Heading>
+    <ul>
+      <li>
+        A notes page’s “New” button sits in its bottom bar. There’s no room
+        below it, so its menu opens above, and with <code>order</code> set to
+        nearest on its{' '}
+        <PartLink
+          component="menu"
+          part="Menu.Popup"
+        />{' '}
+        the items run the other way round. The first, New Note, the one used
+        most, sits nearest the button, where the thumb already is.
+      </li>
+      <li>
+        The order changes in the page itself, so arrow keys and screen readers
+        go through the items as they’re shown, starting at the button.
+      </li>
+      <li>
+        The{' '}
+        <PartLink
+          component="menu"
+          part="Menu.Group"
+        />{' '}
+        turns its items round too, but keeps its{' '}
+        <PartLink
+          component="menu"
+          part="Menu.GroupLabel"
+        />{' '}
+        at its top, above them. The separators stay between the same items.
+      </li>
+      <li>
+        Opened below a button instead, the same menu keeps the order it’s
+        written in. The default order is static, as the other menus on this page
+        are.
+      </li>
+      <li>
+        <strong>Library:</strong> the side the menu lands on, and its items,
+        groups and radio items reversed by it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the actions and sort options, and logging them.
+      </li>
+    </ul>
+    <CodeView code={nearestCode} />
+    <FromABottomToolbar />
 
     <Heading
       id="a-pop-up-button"
@@ -915,6 +1189,7 @@ export const MenuComposition: FunctionComponent = () => (
 /** Its live views, also on the component's page of demos (and `/all`). */
 export const menuCompositionDemos = [
   FromAToolbarButton,
+  FromABottomToolbar,
   APopUpButton,
   AHistory,
   ViewOptions,

@@ -260,7 +260,7 @@ const Provider = forwardRef<HTMLDivElement, SettingsProviderProps>(
  * Its children in a color scheme of their own (internal: a glass surface's
  * tone, see Glass' `useGlassScheme`): an override of the nearest
  * provider's, as a provider's own, for `useSettings` and the portals opened
- * within; the element showing it sets its CSS (see `colorSchemeProps`).
+ * within; the element showing it sets its CSS (see Glass' `colorSchemeStyle`).
  * Without one, as it is.
  */
 export const ColorSchemeScope: FunctionComponent<{

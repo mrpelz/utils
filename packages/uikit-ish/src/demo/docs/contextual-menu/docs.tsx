@@ -144,8 +144,10 @@ export const contextualMenuPositionerRows: readonly PropRow[] = [
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
 
-export const contextualMenuPopupRows: readonly PropRow[] = menuPopupRows.map(
-  (row): PropRow =>
+// (Not `order`: Menu's own, see its popup.)
+export const contextualMenuPopupRows: readonly PropRow[] = menuPopupRows
+  .filter(([prop]) => prop !== 'order')
+  .map((row): PropRow =>
     row[0] === 'children'
       ? [
           row[0],
@@ -162,7 +164,7 @@ export const contextualMenuPopupRows: readonly PropRow[] = menuPopupRows.map(
           </>,
         ]
       : row,
-);
+  );
 
 /** `ContextualMenu.createHandle()`, its hook: what they return. */
 export const contextualMenuHandleRows: readonly PropRow[] = [

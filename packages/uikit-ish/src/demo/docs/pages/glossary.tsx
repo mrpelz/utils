@@ -625,6 +625,17 @@ export const GlossaryPage: FunctionComponent = () => (
         <Docs to="tooltip">Tooltip</Docs>. Popups are rendered through a{' '}
         <See term="Portal" />.
       </Term>
+      <Term term="Nearest first">
+        A menu opened above its trigger listing its items the other way round,
+        so the first sits nearest the trigger (a{' '}
+        <PartLink
+          component="menu"
+          part="Menu.Popup"
+        />
+        ’s <code>order</code>). The order changes in the page itself, so the
+        keyboard and screen readers follow it. Group labels stay at their
+        group’s top.
+      </Term>
       <Term term="Modal">
         A popup that blocks the page behind it until it closes. The page can’t
         be scrolled or focused meanwhile, and a backdrop dims it. Sheets and
@@ -918,7 +929,9 @@ export const GlossaryPage: FunctionComponent = () => (
           part="useGridItem"
         />
         ). The chosen size is what the app stores. A narrower grid never changes
-        it.
+        it. What any other size would come out as, the item can ask too (its{' '}
+        <code>sizeOf</code>), for example to hide a button whose change wouldn’t
+        show.
       </Term>
       <Term term="Area">
         The room an item takes in the layout, which can be bigger than the tile
@@ -997,6 +1010,12 @@ export const GlossaryPage: FunctionComponent = () => (
           component="grid"
           part="useGridItemLayout"
         />
+        ). A button for it hides while expanding would change nothing, for
+        example when the grid has too few columns for the larger size (
+        <PartLink
+          component="control-cards"
+          part="ControlCards.ExpandButton"
+        />
         ).
       </Term>
       <Term term="Opening above the page">
@@ -1009,9 +1028,31 @@ export const GlossaryPage: FunctionComponent = () => (
       <Term term="Switchable card">
         A <Docs to="card">Card</Docs> for something that’s on or off, such as a
         light (its <code>active</code>, or a switch in it). On, it’s lit: opaque
-        white, lifted off the page. Off, it’s dark glass. Both hold in either
-        color scheme, so what’s on can be told at a glance. A card that isn’t
-        switchable, such as a sensor’s, takes the page’s glass.
+        white, lifted off the page, its symbol filled (its{' '}
+        <Docs to="symbol">Symbol</Docs>’s <code>emphasizedIcon</code>). Off,
+        it’s dark glass, its symbol outlined. Both hold in either color scheme,
+        so what’s on can be told at a glance. A card that isn’t switchable, such
+        as a sensor’s, takes the page’s glass. A <See term="Slider card" /> is
+        never lit.
+      </Term>
+      <Term term="Slider card">
+        A card that is a slider: the card is its track and its fill rises across
+        or up the card (
+        <PartLink
+          component="control-cards"
+          part="ControlCards.Slider"
+        />
+        ). Everything over the fill is drawn twice, on the card and inside the
+        fill in the fill’s text color, so it reads with any tint. It’s never
+        lit: for a brightness, its dark glass and its fill tell how much light
+        there is. With a switch, a press toggles it and a drag sets its value.
+      </Term>
+      <Term term="Ready-made card">
+        A card set up for one kind of device, from{' '}
+        <Docs to="control-cards">ControlCards</Docs>: a switch, a state, a
+        value, a slider, a button, a progress, a light, rows. Each is a{' '}
+        <Docs to="card">Card</Docs> with its parts; the pieces they’re built of
+        are there for cards of your own.
       </Term>
       <Term term="Momentary card">
         A <Docs to="card">Card</Docs> for something that happens rather than
@@ -1094,7 +1135,8 @@ export const GlossaryPage: FunctionComponent = () => (
           page="tokens"
           part="useImageBackdropMarker"
         />
-        ).
+        ). Text on a tinted surface can sample it on that surface alone, so it
+        stays legible over the tint.
       </Term>
       <Term term="Semantic colors">
         Colors named by their role instead of their hue: <code>label</code> for

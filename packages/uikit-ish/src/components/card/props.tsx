@@ -39,7 +39,22 @@ export type CardRootProps = useRender.ComponentProps<'div'> &
     momentary?: boolean;
   };
 
-export type CardSymbolProps = ComponentProps<'span'>;
+export type CardSymbolProps = ComponentProps<'span'> & {
+  /**
+   * Whether it shows what it stands for as on, in its tint and its
+   * `Symbol`'s `emphasizedIcon` (e.g. filled): for a card that isn't lit
+   * while on, for example a dimmer's above its minimum (its fill telling how
+   * much). A lit card's symbol shows as on anyway; off, its `icon` (e.g.
+   * outlined).
+   * @default false
+   */
+  active?: boolean;
+  /**
+   * Its color while `active` (a CSS color).
+   * @default the switch's on color (`--uikit-switch-on-color`)
+   */
+  tint?: string;
+};
 
 export type CardTitleProps = ComponentProps<'span'>;
 

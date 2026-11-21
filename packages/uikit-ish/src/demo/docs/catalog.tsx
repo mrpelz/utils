@@ -1,5 +1,6 @@
 import { FunctionComponent } from 'react';
 
+import { AccordionArchitecture } from './accordion/architecture.js';
 import {
   AccordionComposition,
   accordionCompositionDemos,
@@ -10,6 +11,7 @@ import {
   accordionOverviewDemos,
 } from './accordion/overview.js';
 import { AccordionParts, accordionPartsDemos } from './accordion/parts.js';
+import { ActionSheetArchitecture } from './action-sheet/architecture.js';
 import {
   ActionSheetComposition,
   actionSheetCompositionDemos,
@@ -23,6 +25,7 @@ import {
   ActionSheetParts,
   actionSheetPartsDemos,
 } from './action-sheet/parts.js';
+import { ActivityViewArchitecture } from './activity-view/architecture.js';
 import {
   ActivityViewComposition,
   activityViewCompositionDemos,
@@ -39,6 +42,7 @@ import {
   ActivityViewParts,
   activityViewPartsDemos,
 } from './activity-view/parts.js';
+import { AlertArchitecture } from './alert/architecture.js';
 import {
   AlertComposition,
   alertCompositionDemos,
@@ -46,6 +50,7 @@ import {
 import { AlertDemo } from './alert/main.js';
 import { AlertOverview, alertOverviewDemos } from './alert/overview.js';
 import { AlertParts, alertPartsDemos } from './alert/parts.js';
+import { AvatarArchitecture } from './avatar/architecture.js';
 import {
   AvatarComposition,
   avatarCompositionDemos,
@@ -53,6 +58,7 @@ import {
 import { AvatarDemo } from './avatar/main.js';
 import { AvatarOverview, avatarOverviewDemos } from './avatar/overview.js';
 import { AvatarParts, avatarPartsDemos } from './avatar/parts.js';
+import { BadgeArchitecture } from './badge/architecture.js';
 import {
   BadgeComposition,
   badgeCompositionDemos,
@@ -60,6 +66,7 @@ import {
 import { BadgeDemo } from './badge/main.js';
 import { BadgeOverview, badgeOverviewDemos } from './badge/overview.js';
 import { BadgeParts, badgePartsDemos } from './badge/parts.js';
+import { ButtonArchitecture } from './button/architecture.js';
 import {
   ButtonComposition,
   buttonCompositionDemos,
@@ -67,10 +74,12 @@ import {
 import { ButtonDemo, ButtonMatrixDemo } from './button/main.js';
 import { ButtonOverview, buttonOverviewDemos } from './button/overview.js';
 import { ButtonParts, buttonPartsDemos } from './button/parts.js';
+import { CardArchitecture } from './card/architecture.js';
 import { CardComposition, cardCompositionDemos } from './card/composition.js';
 import { CardDemo } from './card/main.js';
 import { CardOverview, cardOverviewDemos } from './card/overview.js';
 import { CardParts, cardPartsDemos } from './card/parts.js';
+import { CheckboxArchitecture } from './checkbox/architecture.js';
 import {
   CheckboxComposition,
   checkboxCompositionDemos,
@@ -81,6 +90,7 @@ import {
   checkboxOverviewDemos,
 } from './checkbox/overview.js';
 import { CheckboxParts, checkboxPartsDemos } from './checkbox/parts.js';
+import { CollapsibleArchitecture } from './collapsible/architecture.js';
 import {
   CollapsibleComposition,
   collapsibleCompositionDemos,
@@ -107,6 +117,7 @@ import {
   ColorPickerParts,
   colorPickerPartsDemos,
 } from './color-picker/parts.js';
+import { ContextualMenuArchitecture } from './contextual-menu/architecture.js';
 import {
   ContextualMenuComposition,
   contextualMenuCompositionDemos,
@@ -120,6 +131,15 @@ import {
   ContextualMenuParts,
   contextualMenuPartsDemos,
 } from './contextual-menu/parts.js';
+import { ControlCardsDemo } from './control-cards/main.js';
+import {
+  ControlCardsOverview,
+  controlCardsOverviewDemos,
+} from './control-cards/overview.js';
+import {
+  ControlCardsParts,
+  controlCardsPartsDemos,
+} from './control-cards/parts.js';
 import {
   DatePickerComposition,
   datePickerCompositionDemos,
@@ -136,6 +156,7 @@ import {
   datePickerOverviewDemos,
 } from './date-picker/overview.js';
 import { DatePickerParts, datePickerPartsDemos } from './date-picker/parts.js';
+import { DrawerArchitecture } from './drawer/architecture.js';
 import {
   DrawerComposition,
   drawerCompositionDemos,
@@ -153,6 +174,7 @@ import {
   editMenuOverviewDemos,
 } from './edit-menu/overview.js';
 import { EditMenuParts, editMenuPartsDemos } from './edit-menu/parts.js';
+import { FormArchitecture } from './form/architecture.js';
 import { FormComposition, formCompositionDemos } from './form/composition.js';
 import { FormDemo } from './form/main.js';
 import { FormOverview, formOverviewDemos } from './form/overview.js';
@@ -161,6 +183,7 @@ import { GridComposition, gridCompositionDemos } from './grid/composition.js';
 import { GridDemo } from './grid/main.js';
 import { GridOverview, gridOverviewDemos } from './grid/overview.js';
 import { GridParts, gridPartsDemos } from './grid/parts.js';
+import { HeaderArchitecture } from './header/architecture.js';
 import {
   HeaderComposition,
   headerCompositionDemos,
@@ -175,6 +198,7 @@ import {
 import { IslandDemo } from './island/main.js';
 import { IslandOverview, islandOverviewDemos } from './island/overview.js';
 import { IslandParts, islandPartsDemos } from './island/parts.js';
+import { LayoutArchitecture } from './layout/architecture.js';
 import {
   LayoutComposition,
   layoutCompositionDemos,
@@ -220,10 +244,12 @@ import {
   navigationOverviewDemos,
 } from './navigation/overview.js';
 import { NavigationParts, navigationPartsDemos } from './navigation/parts.js';
+import { PageArchitecture } from './page/architecture.js';
 import { PageComposition, pageCompositionDemos } from './page/composition.js';
 import { PageDemo } from './page/main.js';
 import { PageOverview, pageOverviewDemos } from './page/overview.js';
 import { PageParts, pagePartsDemos } from './page/parts.js';
+import { PageControlArchitecture } from './page-control/architecture.js';
 import {
   PageControlComposition,
   pageControlCompositionDemos,
@@ -244,6 +270,7 @@ import {
 import { PopoverDemo } from './popover/main.js';
 import { PopoverOverview, popoverOverviewDemos } from './popover/overview.js';
 import { PopoverParts, popoverPartsDemos } from './popover/parts.js';
+import { ProgressArchitecture } from './progress/architecture.js';
 import {
   ProgressComposition,
   progressCompositionDemos,
@@ -258,6 +285,7 @@ import { RollComposition, rollCompositionDemos } from './roll/composition.js';
 import { RollDemo } from './roll/main.js';
 import { RollOverview, rollOverviewDemos } from './roll/overview.js';
 import { RollParts, rollPartsDemos } from './roll/parts.js';
+import { SegmentedArchitecture } from './segmented/architecture.js';
 import {
   SegmentedComposition,
   segmentedCompositionDemos,
@@ -268,6 +296,7 @@ import {
   segmentedOverviewDemos,
 } from './segmented/overview.js';
 import { SegmentedParts, segmentedPartsDemos } from './segmented/parts.js';
+import { SettingsArchitecture } from './settings/architecture.js';
 import {
   SettingsOverview,
   settingsOverviewDemos,
@@ -280,6 +309,7 @@ import {
 import { SheetDemo } from './sheet/main.js';
 import { SheetOverview, sheetOverviewDemos } from './sheet/overview.js';
 import { SheetParts, sheetPartsDemos } from './sheet/parts.js';
+import { SidebarArchitecture } from './sidebar/architecture.js';
 import {
   SidebarComposition,
   sidebarCompositionDemos,
@@ -291,6 +321,7 @@ import {
 } from './sidebar/main.js';
 import { SidebarOverview, sidebarOverviewDemos } from './sidebar/overview.js';
 import { SidebarParts, sidebarPartsDemos } from './sidebar/parts.js';
+import { SliderArchitecture } from './slider/architecture.js';
 import {
   SliderComposition,
   sliderCompositionDemos,
@@ -298,6 +329,7 @@ import {
 import { SliderDemo } from './slider/main.js';
 import { SliderOverview, sliderOverviewDemos } from './slider/overview.js';
 import { SliderParts, sliderPartsDemos } from './slider/parts.js';
+import { StepperArchitecture } from './stepper/architecture.js';
 import {
   StepperComposition,
   stepperCompositionDemos,
@@ -305,6 +337,7 @@ import {
 import { StepperDemo } from './stepper/main.js';
 import { StepperOverview, stepperOverviewDemos } from './stepper/overview.js';
 import { StepperParts, stepperPartsDemos } from './stepper/parts.js';
+import { SwitchArchitecture } from './switch/architecture.js';
 import {
   SwitchComposition,
   switchCompositionDemos,
@@ -312,6 +345,7 @@ import {
 import { SwitchDemo } from './switch/main.js';
 import { SwitchOverview, switchOverviewDemos } from './switch/overview.js';
 import { SwitchParts, switchPartsDemos } from './switch/parts.js';
+import { SymbolArchitecture } from './symbol/architecture.js';
 import {
   SymbolComposition,
   symbolCompositionDemos,
@@ -334,6 +368,7 @@ import {
 } from './tab-bar/main.js';
 import { TabBarOverview, tabBarOverviewDemos } from './tab-bar/overview.js';
 import { TabBarParts, tabBarPartsDemos } from './tab-bar/parts.js';
+import { TextFieldArchitecture } from './text-field/architecture.js';
 import {
   TextFieldComposition,
   textFieldCompositionDemos,
@@ -344,6 +379,7 @@ import {
   textFieldOverviewDemos,
 } from './text-field/overview.js';
 import { TextFieldParts, textFieldPartsDemos } from './text-field/parts.js';
+import { ToolbarArchitecture } from './toolbar/architecture.js';
 import {
   ToolbarComposition,
   toolbarCompositionDemos,
@@ -356,6 +392,7 @@ import {
 } from './toolbar/main.js';
 import { ToolbarOverview, toolbarOverviewDemos } from './toolbar/overview.js';
 import { ToolbarParts, toolbarPartsDemos } from './toolbar/parts.js';
+import { TooltipArchitecture } from './tooltip/architecture.js';
 import {
   TooltipComposition,
   tooltipCompositionDemos,
@@ -363,6 +400,7 @@ import {
 import { TooltipDemo } from './tooltip/main.js';
 import { TooltipOverview, tooltipOverviewDemos } from './tooltip/overview.js';
 import { TooltipParts, tooltipPartsDemos } from './tooltip/parts.js';
+import { TypographyArchitecture } from './typography/architecture.js';
 import {
   TypographyComposition,
   typographyCompositionDemos,
@@ -436,7 +474,26 @@ export const categories = {
 
 export type Category = keyof typeof categories;
 
+/** One of a component's architecture pages (`/:id/architecture/:id`). */
+export type ArchitecturePage = {
+  Page: FunctionComponent;
+  /** Its route's last segment (e.g. `swipe-actions`). */
+  id: string;
+  title: string;
+};
+
 export type CatalogEntry = {
+  /**
+   * How it's built inside, and what flows into it from other components
+   * and hooks: one page (`/:id/architecture`), or pages of their own for
+   * its sub-systems, with a main page or without.
+   */
+  Architecture?:
+    | FunctionComponent
+    | {
+        Main?: FunctionComponent;
+        pages: readonly ArchitecturePage[];
+      };
   /** How it combines with other components (`/:id/composition`). */
   Composition?: FunctionComponent;
   /** Introduction, use and props (`/:id`). */
@@ -462,6 +519,7 @@ export const catalog: readonly CatalogEntry[] = [
   {
     category: 'foundations',
     demos: [...settingsOverviewDemos, ...settingsPartsDemos],
+    Architecture: SettingsArchitecture,
     id: 'settings',
     Overview: SettingsOverview,
     Parts: SettingsParts,
@@ -511,6 +569,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...layoutPartsDemos,
       ...layoutCompositionDemos,
     ],
+    Architecture: LayoutArchitecture,
     id: 'layout',
     Composition: LayoutComposition,
     Overview: LayoutOverview,
@@ -530,6 +589,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...sidebarCompositionDemos,
     ],
     framework7Id: 'panel',
+    Architecture: SidebarArchitecture,
     id: 'sidebar',
     Composition: SidebarComposition,
     Overview: SidebarOverview,
@@ -548,6 +608,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...drawerCompositionDemos,
     ],
     framework7Id: 'panel',
+    Architecture: DrawerArchitecture,
     id: 'drawer',
     Composition: DrawerComposition,
     Overview: DrawerOverview,
@@ -606,6 +667,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...pageCompositionDemos,
     ],
     framework7Id: 'page',
+    Architecture: PageArchitecture,
     id: 'page',
     Composition: PageComposition,
     Overview: PageOverview,
@@ -624,6 +686,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...headerCompositionDemos,
     ],
     framework7Id: 'navbar',
+    Architecture: HeaderArchitecture,
     id: 'header',
     Composition: HeaderComposition,
     Overview: HeaderOverview,
@@ -645,6 +708,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...toolbarCompositionDemos,
     ],
     framework7Id: 'toolbar-tabbar',
+    Architecture: ToolbarArchitecture,
     id: 'toolbar',
     Composition: ToolbarComposition,
     Overview: ToolbarOverview,
@@ -662,6 +726,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...collapsiblePartsDemos,
       ...collapsibleCompositionDemos,
     ],
+    Architecture: CollapsibleArchitecture,
     id: 'collapsible',
     Composition: CollapsibleComposition,
     Overview: CollapsibleOverview,
@@ -679,6 +744,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...accordionPartsDemos,
       ...accordionCompositionDemos,
     ],
+    Architecture: AccordionArchitecture,
     id: 'accordion',
     Composition: AccordionComposition,
     Overview: AccordionOverview,
@@ -695,6 +761,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...pageControlPartsDemos,
       ...pageControlCompositionDemos,
     ],
+    Architecture: PageControlArchitecture,
     id: 'page-control',
     Composition: PageControlComposition,
     Overview: PageControlOverview,
@@ -765,6 +832,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...alertCompositionDemos,
     ],
     framework7Id: 'dialog',
+    Architecture: AlertArchitecture,
     id: 'alert',
     Composition: AlertComposition,
     Overview: AlertOverview,
@@ -783,6 +851,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...actionSheetCompositionDemos,
     ],
     framework7Id: 'action-sheet',
+    Architecture: ActionSheetArchitecture,
     id: 'action-sheet',
     Composition: ActionSheetComposition,
     Overview: ActionSheetOverview,
@@ -801,6 +870,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...tooltipCompositionDemos,
     ],
     framework7Id: 'tooltip',
+    Architecture: TooltipArchitecture,
     id: 'tooltip',
     Composition: TooltipComposition,
     Overview: TooltipOverview,
@@ -848,11 +918,26 @@ export const catalog: readonly CatalogEntry[] = [
     ],
     id: 'card',
     Composition: CardComposition,
+    Architecture: CardArchitecture,
     Overview: CardOverview,
     Parts: CardParts,
     summary:
       'A glass surface for something an app shows or controls, in a grid’s tile: a state, a switch, a number or a level, laid out by its size.',
     title: 'Card',
+  },
+  {
+    category: 'content',
+    demos: [
+      ControlCardsDemo,
+      ...controlCardsOverviewDemos,
+      ...controlCardsPartsDemos,
+    ],
+    id: 'control-cards',
+    Overview: ControlCardsOverview,
+    Parts: ControlCardsParts,
+    summary:
+      'Ready-made cards for what a home’s devices show and control: a state, a switch, a value, a level, a button, a progress, a light, a summary in rows.',
+    title: 'ControlCards',
   },
   {
     category: 'content',
@@ -864,6 +949,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...typographyPartsDemos,
       ...typographyCompositionDemos,
     ],
+    Architecture: TypographyArchitecture,
     id: 'typography',
     Composition: TypographyComposition,
     Overview: TypographyOverview,
@@ -881,6 +967,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...avatarPartsDemos,
       ...avatarCompositionDemos,
     ],
+    Architecture: AvatarArchitecture,
     id: 'avatar',
     Composition: AvatarComposition,
     Overview: AvatarOverview,
@@ -898,6 +985,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...symbolCompositionDemos,
     ],
     framework7Id: 'icon',
+    Architecture: SymbolArchitecture,
     id: 'symbol',
     Composition: SymbolComposition,
     Overview: SymbolOverview,
@@ -915,6 +1003,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...activityViewPartsDemos,
       ...activityViewCompositionDemos,
     ],
+    Architecture: ActivityViewArchitecture,
     id: 'activity-view',
     Composition: ActivityViewComposition,
     Overview: ActivityViewOverview,
@@ -932,6 +1021,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...contextualMenuPartsDemos,
       ...contextualMenuCompositionDemos,
     ],
+    Architecture: ContextualMenuArchitecture,
     id: 'contextual-menu',
     Composition: ContextualMenuComposition,
     Overview: ContextualMenuOverview,
@@ -989,6 +1079,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...buttonCompositionDemos,
     ],
     framework7Id: 'button',
+    Architecture: ButtonArchitecture,
     id: 'button',
     Composition: ButtonComposition,
     Overview: ButtonOverview,
@@ -1007,6 +1098,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...formCompositionDemos,
     ],
     framework7Id: 'form',
+    Architecture: FormArchitecture,
     id: 'form',
     Composition: FormComposition,
     Overview: FormOverview,
@@ -1081,6 +1173,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...textFieldCompositionDemos,
     ],
     framework7Id: 'inputs',
+    Architecture: TextFieldArchitecture,
     id: 'text-field',
     Composition: TextFieldComposition,
     Overview: TextFieldOverview,
@@ -1099,6 +1192,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...segmentedCompositionDemos,
     ],
     framework7Id: 'segmented',
+    Architecture: SegmentedArchitecture,
     id: 'segmented',
     Composition: SegmentedComposition,
     Overview: SegmentedOverview,
@@ -1117,6 +1211,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...sliderCompositionDemos,
     ],
     framework7Id: 'range-slider',
+    Architecture: SliderArchitecture,
     id: 'slider',
     Composition: SliderComposition,
     Overview: SliderOverview,
@@ -1135,6 +1230,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...stepperCompositionDemos,
     ],
     framework7Id: 'stepper',
+    Architecture: StepperArchitecture,
     id: 'stepper',
     Composition: StepperComposition,
     Overview: StepperOverview,
@@ -1153,6 +1249,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...switchCompositionDemos,
     ],
     framework7Id: 'toggle',
+    Architecture: SwitchArchitecture,
     id: 'switch',
     Composition: SwitchComposition,
     Overview: SwitchOverview,
@@ -1172,6 +1269,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...checkboxCompositionDemos,
     ],
     framework7Id: 'checkbox',
+    Architecture: CheckboxArchitecture,
     id: 'checkbox',
     Composition: CheckboxComposition,
     Overview: CheckboxOverview,
@@ -1190,6 +1288,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...progressCompositionDemos,
     ],
     framework7Id: 'progressbar',
+    Architecture: ProgressArchitecture,
     id: 'progress',
     Composition: ProgressComposition,
     Overview: ProgressOverview,
@@ -1207,6 +1306,7 @@ export const catalog: readonly CatalogEntry[] = [
       ...badgeCompositionDemos,
     ],
     framework7Id: 'badge',
+    Architecture: BadgeArchitecture,
     id: 'badge',
     Composition: BadgeComposition,
     Overview: BadgeOverview,

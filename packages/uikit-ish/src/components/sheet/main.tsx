@@ -25,6 +25,7 @@ import {
 import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
 import {
   cn,
+  reducedMotionOf,
   useForwardedRef,
   usePortalContainer,
   withStyle,
@@ -485,7 +486,7 @@ const useKeyboardLift = (
       Object.hasOwn(element.dataset, 'endingStyle') ||
       stop === undefined ||
       Math.abs(distance) < 1 ||
-      matchMedia('(prefers-reduced-motion: reduce)').matches
+      reducedMotionOf(element).matches
     ) {
       return;
     }

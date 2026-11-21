@@ -259,6 +259,15 @@
       height: var(--uikit-slider-knob-width);
     }
 
+    /* Its hidden input (Base UI's, for keyboard and assistive technology):
+       filling the thumb (as Base UI sizes it, for VoiceOver's focus ring),
+       absolute, not fixed (Base UI's inline style): fixed, in a transformed
+       ancestor (e.g. a framed demo's), it's that ancestor's size (Safari on
+       iOS painting an open card holding it black once its move ends). */
+    > input {
+      position: absolute !important;
+    }
+
     &::before {
       position: absolute;
       top: 50%;

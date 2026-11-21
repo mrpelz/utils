@@ -9,6 +9,14 @@ const FRAMEWORK7_DOCS = 'https://framework7.io/react';
 
 /** The component a page or demo is about (see the catalog). */
 export type EntryInfo = {
+  /**
+   * Its architecture pages: a main one (`/:id/architecture`), and those of
+   * its sub-systems (`/:id/architecture/:id`); none, none.
+   */
+  architecture?: {
+    hasMain: boolean;
+    pages: readonly { id: string; title: string }[];
+  };
   baseUiId?: string;
   /** Its category's id: its section on the index (`/#:category`). */
   category: string;
@@ -22,7 +30,7 @@ export type EntryInfo = {
   title: string;
 };
 
-export type Tab = 'all' | 'composition' | 'overview' | 'parts';
+export type Tab = 'all' | 'architecture' | 'composition' | 'overview' | 'parts';
 
 /**
  * The component the demos within are about: their settings (stage,
@@ -55,8 +63,10 @@ export const Tabs: FunctionComponent<{
   /** The Base UI component (default: the component's). */
   baseUiId?: string;
   entry: EntryInfo;
+  /** On an architecture sub-system's page: its id. */
+  page?: string;
   tab: Tab;
-}> = ({ baseUiId = undefined, entry, tab }) => {
+}> = ({ baseUiId = undefined, entry, page, tab }) => {
   const docs = baseUiId ?? entry.baseUiId;
   // (Without an overview, its page is a placeholder pointing to the demos.)
   const tabs: [Tab, string, string][] = [['overview', 'Overview', entry.id]];
@@ -64,7 +74,8 @@ export const Tabs: FunctionComponent<{
   if (entry.hasComposition) {
     tabs.push(['composition', 'Composition', `${entry.id}/composition`]);
   }
-  tabs.push(['all', 'All Demos', `${entry.id}/all`]);
+  const { architecture } = entry;
+  const main = `${entry.id}/architecture`;
 
   return (
     <nav className="demo-page-tabs">
@@ -77,6 +88,66 @@ export const Tabs: FunctionComponent<{
           {label}
         </a>
       ))}
+      {/* (Its architecture: one page, a tab; several, its pages listed
+          under it, the label a link to its main page while elsewhere.) */}
+      {architecture && architecture.pages.length === 0 ? (
+        <a
+          aria-current={tab === 'architecture' ? 'page' : undefined}
+          href={publicUrl(main)}
+        >
+          Architecture
+        </a>
+      ) : null}
+      {architecture && architecture.pages.length > 0 ? (
+        <span className="demo-page-tab-group">
+          {/* (A link to its main page, or its pages' list without one;
+              on its pages, its label.) */}
+          {tab === 'architecture' && (architecture.hasMain || page) ? (
+            <span>Architecture</span>
+          ) : (
+            <a
+              aria-current={tab === 'architecture' ? 'page' : undefined}
+              href={publicUrl(main)}
+            >
+              Architecture
+            </a>
+          )}
+          <ul>
+            {architecture.hasMain ? (
+              <li>
+                <a
+                  href={publicUrl(main)}
+                  aria-current={
+                    tab === 'architecture' && page === undefined
+                      ? 'page'
+                      : undefined
+                  }
+                >
+                  Main
+                </a>
+              </li>
+            ) : null}
+            {architecture.pages.map(({ id, title }) => (
+              <li key={id}>
+                <a
+                  href={publicUrl(`${main}/${id}`)}
+                  aria-current={
+                    tab === 'architecture' && page === id ? 'page' : undefined
+                  }
+                >
+                  {title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </span>
+      ) : null}
+      <a
+        aria-current={tab === 'all' ? 'page' : undefined}
+        href={publicUrl(`${entry.id}/all`)}
+      >
+        All Demos
+      </a>
       <span className="demo-page-links">
         {docs ? (
           <a

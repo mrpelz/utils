@@ -2,6 +2,7 @@ import { FunctionComponent, useMemo } from 'react';
 
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePresentation } from '../../tooling/frame/presentation.js';
 import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { KeyPropsTable, pickRows } from '../../tooling/guide/props-table.js';
@@ -38,14 +39,17 @@ const LiveView: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id, true);
+
   return (
     <Component
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Card"
     >
       {cardsStage(stage, partProps)}

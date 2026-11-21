@@ -370,7 +370,9 @@
       height: var(--uikit-menu-separator-height-section);
     }
 
-    [data-menu-part='quick-actions'] + & {
+    /* (Either side: reversed, see `MenuPopupProps.order`, before them.) */
+    [data-menu-part='quick-actions'] + &,
+    &:has(+ [data-menu-part='quick-actions']) {
       height: var(--uikit-menu-separator-height-quick-actions);
     }
 

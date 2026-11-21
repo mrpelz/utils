@@ -138,8 +138,10 @@ export const editMenuPositionerRows: readonly PropRow[] = [
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
 
-export const editMenuPopupRows: readonly PropRow[] = menuPopupRows.map(
-  (row): PropRow =>
+// (Not `order`: Menu's own, see its popup.)
+export const editMenuPopupRows: readonly PropRow[] = menuPopupRows
+  .filter(([prop]) => prop !== 'order')
+  .map((row): PropRow =>
     row[0] === 'children'
       ? [
           row[0],
@@ -167,7 +169,7 @@ export const editMenuPopupRows: readonly PropRow[] = menuPopupRows.map(
           </>,
         ]
       : row,
-);
+  );
 
 export const editMenuItemRows: readonly PropRow[] = [
   [

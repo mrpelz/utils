@@ -34,8 +34,9 @@ export const symbolRows: readonly PropRow[] = [
       <code>sfBellFill</code> on a selected tab. Both are stacked, and faded by
       the inherited <code>--uikit-symbol-emphasis</code> (0 to 1). It’s set by a
       selected <a href={publicUrl('tab-bar')}>Tab bar</a> tab, a checked{' '}
-      <a href={publicUrl('segmented')}>Segmented</a> item and a selected{' '}
-      <a href={publicUrl('sidebar')}>Sidebar</a> row; set it in your own CSS for
+      <a href={publicUrl('segmented')}>Segmented</a> item, a selected{' '}
+      <a href={publicUrl('sidebar')}>Sidebar</a> row and a{' '}
+      <a href={publicUrl('card')}>Card</a> that’s on; set it in your own CSS for
       others. The app’s state doesn’t pick the icon.
     </>,
   ],

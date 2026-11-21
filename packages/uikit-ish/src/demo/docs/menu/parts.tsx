@@ -73,7 +73,7 @@ import {
   propOptionsGuideSeparator,
   propOptionsGuideSubmenuTrigger,
   propOptionsPart,
-  propOptionsPopup,
+  propOptionsPopupOrdered,
   propOptionsPositioner,
 } from './props.js';
 
@@ -1266,7 +1266,7 @@ const PopupPart: FunctionComponent = () => {
   const id = 'menu-parts-popup';
   const [log, addLog] = useLog();
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(propOptionsPopup, {
+  const [control, props, state] = usePropControl(propOptionsPopupOrdered, {
     external,
     isOpen: true,
     emphasize: 'outline',
@@ -6375,8 +6375,21 @@ export const MenuParts: FunctionComponent = () => (
       </li>
       <li>When it’s taller than the room it has, it scrolls.</li>
       <li>
+        With order set to nearest, a menu placed above its trigger lists its
+        items the other way round, so the first one is nearest the trigger. That
+        happens whether it was flipped for lack of room or asked to open above.
+        The keyboard and screen readers follow the same order. Each{' '}
+        <PartLink part="Menu.Group" /> reverses its items too, keeping its{' '}
+        <PartLink part="Menu.GroupLabel" /> at its top, and{' '}
+        <PartLink part="Menu.QuickActions" /> stay one row in their order. Only
+        the popup’s and the groups’ own children are reversed: a component that
+        renders several items moves as one.
+      </li>
+      <li>
         Here: open the menu with its trigger to see it. One menu opens at a
-        time.
+        time. To see the order change, set order to nearest and the{' '}
+        <PartLink part="Menu.Positioner" />
+        ’s side to block-start.
       </li>
     </ul>
     <PopupPart />

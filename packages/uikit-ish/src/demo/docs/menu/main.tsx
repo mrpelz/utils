@@ -32,6 +32,7 @@ import {
   propOptionsItemDisabled,
   propOptionsOpenRoot,
   propOptionsPopup,
+  propOptionsPopupOrdered,
   propOptionsPositioner,
   propOptionsSubmenuTrigger,
   propOptionsToggleItem,
@@ -74,7 +75,7 @@ export const MenuDemo: FunctionComponent = () => {
     { external: externalPositioner, title: 'positioner' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
-    propOptionsPopup,
+    propOptionsPopupOrdered,
     { external: externalPopup, title: 'popup' },
   );
   const [controlQuickAction, propsQuickAction, stateQuickAction] =
@@ -425,7 +426,7 @@ export const MenuRegularDemo: FunctionComponent = () => {
     { external: externalPositioner, title: 'positioner' },
   );
   const [controlPopup, propsPopup, statePopup] = usePropControl(
-    propOptionsPopup,
+    propOptionsPopupOrdered,
     { external: externalPopup, title: 'popup' },
   );
   const [controlQuickAction, propsQuickAction, stateQuickAction] =
@@ -1107,7 +1108,7 @@ export const MenuOpenDemo: FunctionComponent = () => {
   );
 
   const [controlPopup, propsPopup, statePopup] = usePropControl(
-    propOptionsPopup,
+    propOptionsPopupOrdered,
     { external: externalPopup, title: 'popup' },
   );
 

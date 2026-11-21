@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState } from 'react';
 
+import { parseCssColor } from '../color-picker/color.js';
 import { backgroundColorAt, type Rgba } from './gradient.js';
 
 // What's behind an element: bright or dim (its tone), sampled from what the
@@ -9,7 +10,9 @@ import { backgroundColorAt, type Rgba } from './gradient.js';
 // as the page scrolls (any scroller) or resizes, or an element does, as it
 // changes (attributes, elements added or removed, the color scheme), and
 // every frame while anything transitions or animates; elements off-screen
-// skipped. It reads the backgrounds' colors (their
+// skipped. An element sampled `within` an ancestor (e.g. a card's title, on
+// its card) reads only what's painted in it, and is sampled again only as
+// something in it (or what it's in) changes, not as the page scrolls. It reads the backgrounds' colors (their
 // gradients' too), not pixels: an image, a video or a canvas behind is
 // unknown, and leaves the tone as it was.
 
@@ -30,6 +33,13 @@ export type BackdropToneOptions = {
    * @default true
    */
   enabled?: boolean;
+  /**
+   * An ancestor it's sampled within (e.g. its card): only what's painted in
+   * it read (its own background last), sampled again only as something in
+   * it, or what it's in, changes (not as the page scrolls). E.g. a card's
+   * text over a slider's fill, on the card.
+   */
+  within?: { current: Element | null };
 };
 
 // Its luminance below this, the tone turns dim; above the other, bright;
@@ -50,11 +60,25 @@ const nextTone = (
   return last ?? (luminance < (toDim + toBright) / 2 ? 'dim' : 'bright');
 };
 
+/**
+ * A color's tone (e.g. a slider's fill, opaque: see Card), from the last
+ * one (see `nextTone`); none, unreadable or nearly transparent.
+ */
+export const toneOfColor = (
+  color: string,
+  last?: BackdropTone,
+): BackdropTone | undefined => {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define -- hoisted helpers below
+  const rgba = parseColor(color);
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define -- hoisted helpers below
+  return rgba && rgba[3] >= 0.3 ? nextTone(luminanceOf(rgba), last) : undefined;
+};
+
 /** A luminance's tone, without one before it (e.g. an image's area). */
 export const toneOf = (luminance: number): BackdropTone =>
   nextTone(luminance, undefined);
 
-let colorCanvas: CanvasRenderingContext2D | null | undefined;
+const parsedColors = new Map<string, Rgba | undefined>();
 
 // An sRGB channel (0 to 255), linear.
 const linear = (channel: number) => {
@@ -62,20 +86,24 @@ const linear = (channel: number) => {
   return value <= 0.040_45 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
 };
 
-/** A CSS color's channels (sRGB, 0 to 255) and alpha (0 to 1). */
+/**
+ * A CSS color's channels (sRGB, 0 to 255) and alpha (0 to 1): any computed
+ * color's (e.g. a `color-mix()`'s, as `color(srgb …)`, its channels 0 to 1;
+ * see the color picker's `parseCssColor`), cached.
+ */
 const parseColor = (color: string): Rgba | undefined => {
-  colorCanvas ??= document.createElement('canvas').getContext('2d');
-  if (!colorCanvas) return undefined;
-  colorCanvas.fillStyle = '#000';
-  colorCanvas.fillStyle = color;
-  const normalized = colorCanvas.fillStyle;
-  const channels = normalized.startsWith('#')
-    ? [1, 3, 5].map((index) =>
-        Number.parseInt(normalized.slice(index, index + 2), 16),
-      )
-    : (normalized.match(/[\d.]+/gu) ?? []).map(Number);
-  const [red = 0, green = 0, blue = 0, alpha = 1] = channels;
-  return [red, green, blue, alpha];
+  if (parsedColors.has(color)) return parsedColors.get(color);
+  const parsed = parseCssColor(color);
+  const rgba: Rgba | undefined = parsed && [
+    parsed.r,
+    parsed.g,
+    parsed.b,
+    parsed.a,
+  ];
+  // (Few colors on a page; bounded all the same.)
+  if (parsedColors.size > 256) parsedColors.clear();
+  parsedColors.set(color, rgba);
+  return rgba;
 };
 
 /** A color's relative luminance (0 to 1). */
@@ -149,13 +177,20 @@ const markerLuminanceAt = (
   return Number.isFinite(luminance) ? luminance : undefined;
 };
 
-const luminanceAt = (element: Element, x: number, y: number) => {
+const luminanceAt = (
+  element: Element,
+  within: Element | undefined,
+  x: number,
+  y: number,
+) => {
   const stack = document.elementsFromPoint(x, y);
   // (Below it: not what's over it, nor it or what's in it; its ancestors
-  // count, e.g. the page it's on, painting the background behind it.)
+  // count, e.g. the page it's on, painting the background behind it; within
+  // an ancestor, nothing past it.)
   const at = stack.findIndex((candidate) => element.contains(candidate));
   for (const candidate of stack.slice(Math.max(at, 0))) {
     if (element.contains(candidate)) continue;
+    if (within && !within.contains(candidate)) return undefined;
     // (Marked by the app, it or what it's in (e.g. a map's tiles, in its
     // marked container): its luminance; else its background's.)
     const marked = candidate.closest(`[${CSS.escape(markerAttribute)}]`);
@@ -172,7 +207,7 @@ const luminanceAt = (element: Element, x: number, y: number) => {
  * The luminance of what's behind an element: the average over a 3 by 3
  * grid of points on it (inset from its edges), those unknown left out.
  */
-const luminanceBehind = (element: Element) => {
+const luminanceBehind = (element: Element, within?: Element) => {
   const { bottom, left, right, top } = element.getBoundingClientRect();
   if (right <= left || bottom <= top) return undefined;
   const inset = 4;
@@ -181,7 +216,7 @@ const luminanceBehind = (element: Element) => {
   const values: number[] = [];
   for (const y of ys) {
     for (const x of xs) {
-      const value = luminanceAt(element, x, y);
+      const value = luminanceAt(element, within, x, y);
       if (value !== undefined) values.push(value);
     }
   }
@@ -198,6 +233,9 @@ const luminanceBehind = (element: Element) => {
 let movingUntil = 0;
 const movingFor = 1000;
 
+/** What's transitioning or animating, until when (see `movingUntil`). */
+const moving = new Map<Node, number>();
+
 type Entry = {
   dwell: number;
   element: Element;
@@ -205,28 +243,107 @@ type Entry = {
   last: BackdropTone | undefined;
   onChange: (tone: BackdropTone) => void;
   pending: { since: number; tone: BackdropTone } | undefined;
+  // (Its ancestor's ref, read as it's sampled: set after it registers,
+  // an ancestor's ref attached after its descendants' effects ran.)
+  within: { current: Element | null } | undefined;
 };
 
 const entries = new Map<Element, Entry>();
 let frame = 0;
 let timer = 0;
 
+// What's to be sampled next frame: everything (e.g. the color scheme
+// changed), what's on the page (it scrolled: not those within an ancestor),
+// or those within what changed (`touched`, e.g. a card's slider's fill), or
+// what scrolled in their ancestor (`scrolled`, e.g. a list in a card).
+let isEverything = false;
+let isPage = false;
+const touched = new Set<Node>();
+const scrolled = new Set<Node>();
+
 /** Its sampling (see `sample`), at the next frame. */
-const schedule = () => {
+const request = () => {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define -- each schedules the other
   frame ||= requestAnimationFrame(sample);
+};
+
+/** Every element sampled next frame (see `sample`). */
+const schedule = () => {
+  isEverything = true;
+  request();
+};
+
+/**
+ * Those not within an ancestor sampled next frame, as something scrolled;
+ * those within one, if it's in it.
+ */
+const scheduleScrolled = ({ target }: Event) => {
+  isPage = true;
+  if (target instanceof Node) scrolled.add(target);
+  request();
+};
+
+/**
+ * Those over what changed sampled next frame: those not within an
+ * ancestor, and those within one it's in, or that's in it.
+ */
+const scheduleTouched = (node: Node) => {
+  isPage = true;
+  touched.add(node);
+  request();
+};
+
+/** Whether an element within an ancestor is to be sampled (see above). */
+const isDue = (within: Element, now: number) => {
+  if (isEverything) return true;
+  const isRelated = (node: Node) =>
+    within.contains(node) || node.contains(within);
+  for (const node of touched) if (isRelated(node)) return true;
+  for (const node of scrolled) if (within.contains(node)) return true;
+  for (const [node, until] of moving) {
+    if (until > now && isRelated(node)) return true;
+  }
+  return false;
+};
+
+/**
+ * An entry's luminance, if it's due (see above): none off-screen, or within
+ * an ancestor not there yet.
+ */
+const readingOf = (entry: Entry, now: number, isPageDue: boolean) => {
+  if (!entry.isVisible) return undefined;
+  // (Inert or hidden (e.g. a Navigation stack's pages as they move, or
+  // under its top one): not sampled, its tone kept. What's behind it is
+  // passed by too (ignoring the pointer, as a moving page does; hidden),
+  // so it can't be read right; and it's not taking part, for now.)
+  const { element } = entry;
+  if (
+    element.closest('[inert]') ||
+    !element.checkVisibility({ visibilityProperty: true })
+  ) {
+    return undefined;
+  }
+  const within = entry.within?.current ?? undefined;
+  if (entry.within && !within) return undefined;
+  if (within ? !isDue(within, now) : !isPageDue) return undefined;
+  return luminanceBehind(element, within);
 };
 
 /** Each entry's tone sampled (reads), then those changed told (writes). */
 const sample = () => {
   frame = 0;
   const now = performance.now();
+  const isPageDue = isEverything || isPage || now < movingUntil;
   const readings: [Entry, number][] = [];
   for (const entry of entries.values()) {
-    if (!entry.isVisible) continue;
-    const luminance = luminanceBehind(entry.element);
+    const luminance = readingOf(entry, now, isPageDue);
     if (luminance !== undefined) readings.push([entry, luminance]);
   }
+  isEverything = false;
+  isPage = false;
+  touched.clear();
+  scrolled.clear();
+  for (const [node, until] of moving) if (until <= now) moving.delete(node);
   let wait = Infinity;
   for (const [entry, luminance] of readings) {
     const next = nextTone(luminance, entry.last);
@@ -251,7 +368,7 @@ const sample = () => {
   }
   // (While something transitions or animates (e.g. a card's background
   // as it's switched on): every frame, its colors read as they go.)
-  if (now < movingUntil) schedule();
+  if (now < movingUntil) request();
   // (Held ones looked at again once their dwell's over.)
   if (wait !== Infinity) {
     clearTimeout(timer);
@@ -287,9 +404,16 @@ let resizeObserver: ResizeObserver | undefined;
 let intersectionObserver: IntersectionObserver | undefined;
 let pageObserver: MutationObserver | undefined;
 
-const onMoving = () => {
+const onMoving = ({ target }: Event) => {
   movingUntil = performance.now() + movingFor;
-  schedule();
+  if (target instanceof Node) moving.set(target, movingUntil);
+  request();
+};
+
+/** Something's moving ended (see `onMoving`): what's over it sampled. */
+const onMoved = ({ target }: Event) => {
+  if (target instanceof Node) scheduleTouched(target);
+  else schedule();
 };
 
 const movingStarts = ['transitionrun', 'animationstart'] as const;
@@ -307,21 +431,29 @@ const schemeQueries = [
 ] as const;
 
 const listen = () => {
-  addEventListener('scroll', schedule, { capture: true, passive: true });
+  addEventListener('scroll', scheduleScrolled, {
+    capture: true,
+    passive: true,
+  });
   addEventListener('resize', schedule);
-  resizeObserver = new ResizeObserver(schedule);
+  resizeObserver = new ResizeObserver((records) => {
+    for (const { target } of records) scheduleTouched(target);
+  });
   intersectionObserver = new IntersectionObserver((records) => {
     for (const { isIntersecting, target } of records) {
       const entry = entries.get(target);
       if (entry) entry.isVisible = isIntersecting;
+      // (Scrolled in: sampled, e.g. after its card changed off-screen.)
+      scheduleTouched(target);
     }
-    schedule();
   });
   // (The page changed: a class or a style switching a background (e.g. a
   // card switched on), an element added or removed, a marker (see
   // marker.ts): sampled again, nothing scrolled; once per frame however
   // much changed.)
-  pageObserver = new MutationObserver(schedule);
+  pageObserver = new MutationObserver((records) => {
+    for (const { target } of records) scheduleTouched(target);
+  });
   pageObserver.observe(document.documentElement, {
     attributes: true,
     childList: true,
@@ -331,7 +463,7 @@ const listen = () => {
     addEventListener(type, onMoving, { capture: true, passive: true });
   }
   for (const type of movingEnds) {
-    addEventListener(type, schedule, { capture: true, passive: true });
+    addEventListener(type, onMoved, { capture: true, passive: true });
   }
   for (const query of schemeQueries) {
     matchMedia(query).addEventListener('change', schedule);
@@ -339,7 +471,7 @@ const listen = () => {
 };
 
 const unlisten = () => {
-  removeEventListener('scroll', schedule, { capture: true });
+  removeEventListener('scroll', scheduleScrolled, { capture: true });
   removeEventListener('resize', schedule);
   resizeObserver?.disconnect();
   intersectionObserver?.disconnect();
@@ -351,12 +483,15 @@ const unlisten = () => {
     removeEventListener(type, onMoving, { capture: true });
   }
   for (const type of movingEnds) {
-    removeEventListener(type, schedule, { capture: true });
+    removeEventListener(type, onMoved, { capture: true });
   }
   for (const query of schemeQueries) {
     matchMedia(query).removeEventListener('change', schedule);
   }
   movingUntil = 0;
+  moving.clear();
+  touched.clear();
+  scrolled.clear();
   cancelAnimationFrame(frame);
   clearTimeout(timer);
   frame = 0;
@@ -369,6 +504,7 @@ const unlisten = () => {
  */
 const register = (
   element: Element,
+  within: { current: Element | null } | undefined,
   dwell: number,
   onChange: (tone: BackdropTone) => void,
 ) => {
@@ -380,19 +516,23 @@ const register = (
     last: undefined,
     onChange,
     pending: undefined,
+    within,
   };
   entries.set(element, entry);
   resizeObserver?.observe(element);
   intersectionObserver?.observe(element);
-  const luminance = luminanceBehind(element);
+  const luminance =
+    within && !within.current
+      ? undefined
+      : luminanceBehind(element, within?.current ?? undefined);
   if (luminance !== undefined) {
     entry.last = nextTone(luminance, undefined);
     onChange(entry.last);
   }
   // (Again once placed: e.g. a popup, positioned after it's mounted, by a
   // transform no observer sees, transitioning in.)
-  schedule();
-  const settled = window.setTimeout(schedule, 300);
+  scheduleTouched(element);
+  const settled = window.setTimeout(() => scheduleTouched(element), 300);
   return () => {
     clearTimeout(settled);
     entries.delete(element);
@@ -407,23 +547,24 @@ const register = (
  * the page or the element scrolls or resizes (see above); `undefined` until
  * known (e.g. an image behind it), or while not `enabled`. For glass of the
  * library's (its `context` `adaptive`), and the app's own (e.g. symbols over
- * whatever is behind them).
+ * whatever is behind them); `within` an ancestor, what's painted in it
+ * (e.g. a card's text, on its card).
  */
 export const useBackdropTone = (
   ref: { current: Element | null },
-  { dwell = 0, enabled = true }: BackdropToneOptions = {},
+  { dwell = 0, enabled = true, within }: BackdropToneOptions = {},
 ): BackdropTone | undefined => {
   const [tone, setTone] = useState<BackdropTone | undefined>(undefined);
 
   useLayoutEffect(() => {
     const { current: element } = ref;
     if (!enabled || !element) return undefined;
-    const unregister = register(element, dwell, setTone);
+    const unregister = register(element, within, dwell, setTone);
     return () => {
       unregister();
       setTone(undefined);
     };
-  }, [dwell, enabled, ref]);
+  }, [dwell, enabled, ref, within]);
 
   return enabled ? tone : undefined;
 };

@@ -4,6 +4,7 @@ import { cardSizes } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
+import { usePresentation } from '../../tooling/frame/presentation.js';
 import {
   PropMap,
   usePartControls,
@@ -14,6 +15,7 @@ import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
+import { type CardTile, cardTiles, partsOfTiles } from './content.js';
 import {
   cardCornerButtonRows,
   cardRootRows,
@@ -33,46 +35,32 @@ import {
 } from './props.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
-const useCardOrientationCode = `import { Card, Slider, useCardOrientation } from '@mrpelz/uikit-ish';
-import { useState } from 'react';
+const useCardOrientationCode = `import { Card, useCardOrientation } from '@mrpelz/uikit-ish';
 
-// Rendered inside its Grid.Item: the slider across a wide tile, upright
-// in a tall one.
-const DimmerCard = () => {
+// ControlCards' SliderFill (and so the slider cards) reads it itself: its
+// slider across a wide tile, upright in a tall one. For content of your
+// own, read it in the component rendering the card (inside its Grid.Item):
+// a battery's level, a bar along its tile.
+const BatteryCard = ({ level }) => {
   const orientation = useCardOrientation();
-  const [value, setValue] = useState(0.6);
-
   return (
     <Card.Root>
-      <Slider.Root
-        max={1}
-        min={0}
-        orientation={orientation}
-        value={value}
-        onValueChange={(next) => setValue(next as number)}
-      >
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            <Slider.Thumb aria-label="Dimmer" />
-          </Slider.Track>
-        </Slider.Control>
-        <Slider.Label>Dimmer</Slider.Label>
-        <Slider.Value />
-      </Slider.Root>
+      <Card.Title>Battery</Card.Title>
+      <div
+        className="battery-bar"
+        data-orientation={orientation}
+        style={{ '--level': level }}
+      />
     </Card.Root>
   );
 };`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
-/** The card's parts, beside the one a view features (see `PartView`). */
-const cardParts = {
-  'Card.CornerButton': ['aria-label', 'icon'],
-  'Card.Root': [],
-  'Card.Symbol': [],
-  'Card.Title': [],
-  'Card.Value': ['children', 'format', 'value'],
-} as const;
+/**
+ * The cards' parts, beside the one a view features (see `PartView`):
+ * every part the stage's cards render (see `partsOfTiles`).
+ */
+const cardParts = partsOfTiles(cardTiles);
 
 /**
  * A part's view: the cards in a grid (see `cardsStage`), the part's own
@@ -83,7 +71,7 @@ const PartView: FunctionComponent<{
   id: string;
   on?: readonly string[];
   options: PropMap | ((addLog: AddLog) => PropMap);
-  part: keyof typeof cardParts;
+  part: string;
 }> = ({ id, on, options, part }) => {
   const [log, addLog] = useLog();
   const stage = useCardsStage(addLog);
@@ -102,30 +90,46 @@ const PartView: FunctionComponent<{
   );
   const [partControls, partProps, partState] = usePartControls(
     useMemo(() => {
-      const { [part]: _featured, ...others } = cardParts;
-      return partPropMaps({ ...stageParts, ...others }, addLog);
-    }, [addLog, part]),
+      const { [part]: featured = [], ...others } = cardParts;
+      return partPropMaps(
+        {
+          ...stageParts,
+          ...others,
+          // (On some cards only: its other instances' group.)
+          ...(on && { [`${part} (others)`]: featured }),
+        },
+        addLog,
+      );
+    }, [addLog, on, part]),
     { provided: useProvidedState(id) },
   );
+
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
 
   return (
     <Component
       isInline
-      controls={[control, partControls]}
+      controls={[presentationControl, control, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[state, partState]}
+      stage={presentation}
+      state={[state, partState, presentationState]}
       title={part}
     >
-      {cardsStage(stage, partProps, (name) =>
-        on === undefined || on.includes(name)
-          ? { ...partProps, [part]: props }
-          : partProps,
-      )}
+      {cardsStage(stage, partProps, (name) => ({
+        ...partProps,
+        [part]:
+          on === undefined || on.includes(name)
+            ? props
+            : (partProps[`${part} (others)`] ?? {}),
+      }))}
     </Component>
   );
 };
+
+/** The temperature's card alone (see `PartView`'s `on`): one array. */
+const temperatureOnly = ['Temperature'] as const;
 
 const RootPart: FunctionComponent = () => (
   <PartView
@@ -155,7 +159,7 @@ const CornerButtonPart: FunctionComponent = () => (
   <PartView
     id="card-parts-corner-button"
     // (The temperature's: the only card with one here.)
-    on={['Temperature']}
+    on={temperatureOnly}
     options={getPropOptionsCornerButton}
     part="Card.CornerButton"
   />
@@ -166,11 +170,27 @@ const ValuePart: FunctionComponent = () => (
     id="card-parts-value"
     // (A number: on the temperature alone, not on the cards showing a
     // state in words, nor the humidity's percentage.)
-    on={['Temperature']}
+    on={temperatureOnly}
     options={propOptionsValue}
     part="Card.Value"
   />
 );
+
+/** Two sliders' tiles (see `OrientationPart`): across, and upright. */
+const orientationTiles: readonly CardTile[] = [
+  {
+    kind: 'dimmer',
+    name: 'Dimmer',
+    size: '3x1',
+    sizes: cardSizes.numericalControl,
+  },
+  {
+    kind: 'blinds',
+    name: 'Blinds',
+    size: '1x3',
+    sizes: cardSizes.numericalControl,
+  },
+];
 
 /**
  * `useCardOrientation`: two sliders, one across and one upright; resized
@@ -179,36 +199,30 @@ const ValuePart: FunctionComponent = () => (
 const OrientationPart: FunctionComponent = () => {
   const id = 'card-parts-use-card-orientation';
   const [log, addLog] = useLog();
-  const stage = useCardsStage(addLog, [
-    {
-      kind: 'dimmer',
-      name: 'Dimmer',
-      size: '3x1',
-      sizes: cardSizes.numericalControl,
-    },
-    {
-      kind: 'blinds',
-      name: 'Blinds',
-      size: '1x3',
-      sizes: cardSizes.numericalControl,
-    },
-  ]);
+  const stage = useCardsStage(addLog, orientationTiles);
   const [partControls, partProps, partState] = usePartControls(
     useMemo(
-      () => partPropMaps({ ...stageParts, ...cardParts }, addLog),
+      () =>
+        partPropMaps(
+          { ...stageParts, ...partsOfTiles(orientationTiles) },
+          addLog,
+        ),
       [addLog],
     ),
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="useCardOrientation"
     >
       {cardsStage(stage, partProps)}
@@ -300,9 +314,9 @@ export const CardParts: FunctionComponent = () => (
         corner radius. It fills its tile.
       </li>
       <li>
-        It lays out its parts by its own size: its symbol and a switch at its
-        top, its title and value at its bottom, side by side when it’s wide and
-        one row tall.
+        At every size, its symbol is in the top leading corner and a switch in
+        the top trailing one. Its title sits right above its value in the bottom
+        leading corner, the value in the secondary text color.
       </li>
       <li>
         In a grid in edit mode, it’s inert and veiled. The veil lifts while a
@@ -332,6 +346,18 @@ export const CardParts: FunctionComponent = () => (
         in it, it’s the slider’s track, and the fill is its background.
       </li>
       <li>
+        A slider filling it with{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.SliderFill"
+        />{' '}
+        has an opaque fill, and everything over it is drawn twice: on the card,
+        and inside the fill in the text color for the fill’s tone. The card’s{' '}
+        <PartLink part="Card.Symbol" /> and{' '}
+        <PartLink part="Card.CornerButton" />s take part: the slider registers
+        its fill with the card, and they draw their copies there.
+      </li>
+      <li>
         Without a switch, <code>active</code> makes it bright the same way, for
         example for a group of lights with at least one of them on.
       </li>
@@ -340,10 +366,11 @@ export const CardParts: FunctionComponent = () => (
         press lights it up the same way for a moment, and it fades back. Its{' '}
         <code>actionsRef</code>’s <code>flash()</code> does that from anywhere,
         for example as the app’s server says something happened (see{' '}
-        <a href={publicUrl('card/composition#momentary-buttons')}>
-          Momentary buttons
-        </a>
-        ).
+        <PartLink
+          component="control-cards"
+          part="ControlCards.Button"
+        />
+        , a momentary card ready-made).
       </li>
       <li>
         A{' '}
@@ -391,9 +418,26 @@ export const CardParts: FunctionComponent = () => (
           component="symbol"
           part="Symbol"
         />
-        . A wide card has it beside its title.
+        . With a corner button in that corner, it moves beside its title.
       </li>
-      <li>While a switch in the card is on, it takes the switch’s tint.</li>
+      <li>
+        While the card is on (lit: a switch in it on, or its active), it takes
+        its tint (the switch’s on color by default) and its{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        shows its emphasizedIcon, for example the filled variant. Off, or not
+        switchable, it shows its icon: give a switchable card’s symbol the
+        outlined one. With its own active, it shows as on while the card isn’t
+        lit, for example a dimmer’s symbol above its minimum, its{' '}
+        <PartLink
+          component="slider"
+          part="Slider.Root"
+        />
+        ’s fill telling how much. Over a slider’s fill, it’s in the card’s text
+        color instead of its tint, its icon still telling on from off.
+      </li>
       <li>
         Renders a <code>span</code>.
       </li>
@@ -475,13 +519,9 @@ export const CardParts: FunctionComponent = () => (
         or the app’s own.
       </li>
       <li>
-        Its icon is dark or light by what’s right behind it (see{' '}
-        <PartLink
-          page="tokens"
-          part="useBackdropTone"
-        />
-        ): the card’s glass, a lit card, or the fill of a slider filling the
-        card, so it stays legible on each.
+        Its icon is in the card’s text color. Over a slider filling the card,
+        it’s drawn twice, split at the fill’s edge like the slider’s label; the
+        button itself stays on top to take presses.
       </li>
       <li>
         It’s shown outside edit mode only. In edit mode, it fades out and the
@@ -532,13 +572,21 @@ export const CardParts: FunctionComponent = () => (
         as it’s tall, else vertical.
       </li>
       <li>
-        Pass it to a slider’s <code>orientation</code>, in the component that
-        renders the card (inside its{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.SliderFill"
+        />{' '}
+        reads it itself, so a slider card turns as it’s resized from wide to
+        tall, as these two do in edit mode.
+      </li>
+      <li>
+        For content of your own, read it in the component that renders the card
+        (inside its{' '}
         <PartLink
           component="grid"
           part="Grid.Item"
         />
-        ). Resized from wide to tall, the slider turns.
+        ) and lay the content out by it.
       </li>
     </ul>
     <CodeView code={useCardOrientationCode} />

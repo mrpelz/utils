@@ -1,16 +1,9 @@
 import './style.css';
 
-import {
-  FunctionComponent,
-  ReactNode,
-  type RefObject,
-  useMemo,
-  useState,
-} from 'react';
+import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
 
 import {
   Button,
-  type CardActions,
   Grid,
   type GridReorderHandle,
   type GridSize,
@@ -19,6 +12,7 @@ import {
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { AddLog, useLog } from '../../tooling/frame/log.js';
+import { usePresentation } from '../../tooling/frame/presentation.js';
 import {
   type PartProps,
   usePartControls,
@@ -35,6 +29,7 @@ import {
   cardStatesInitial,
   type CardTile,
   cardTiles,
+  partsOfTiles,
 } from './content.js';
 import { propOptionsRoot } from './props.js';
 
@@ -45,8 +40,6 @@ import { propOptionsRoot } from './props.js';
  * opened one, the cards' own state. The demo's, as an app keeps it.
  */
 export type CardsStageState = {
-  /** The doorbell's actions (see `doorbellCard`). */
-  doorbell: RefObject<CardActions | null>;
   editing: boolean;
   expanded: ReadonlySet<string>;
   handle: GridReorderHandle;
@@ -74,13 +67,6 @@ export const useCardsStage = (
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [opened, setOpened] = useState<string | undefined>(undefined);
   const [states, setStates] = useState(cardStatesInitial);
-  // (The doorbell's actions: a ref, made once, shown by name in the code,
-  // as an app defines it.)
-  const [doorbell] = useState(() => {
-    const ref: RefObject<CardActions | null> = { current: null };
-    codeLabel(ref, 'doorbell', 'const doorbell = useRef(null);');
-    return ref;
-  });
   const handle = Grid.useCreateReorderHandle({
     onReorder: (change) => {
       addLog(`move ${String(change.items[0]?.name)}`);
@@ -98,7 +84,6 @@ export const useCardsStage = (
   );
 
   return {
-    doorbell,
     editing,
     expanded,
     handle,
@@ -191,9 +176,10 @@ export const cardsStage = (
             {stage.tiles.map(
               ({ area, expandedSize, kind, name, openSize, size, sizes }) => {
                 const isExpanded = stage.expanded.has(name);
-                // (Expanding only where that's larger than it is.)
-                const canExpand =
-                  expandedSize !== undefined && expandedSize !== size;
+                // (Expanding, its button shown only where that changes its
+                // size, at these columns too: see ControlCards'
+                // `ExpandButton`.)
+                const canExpand = expandedSize !== undefined;
                 const shown = isExpanded && expandedSize ? expandedSize : size;
                 const isOpen = stage.opened === name;
                 return (
@@ -217,15 +203,15 @@ export const cardsStage = (
                     }
                   >
                     {cardOf(kind, {
-                      doorbell: stage.doorbell,
                       expansion: canExpand
                         ? {
+                            collapsedSize: size,
+                            expandedSize,
                             isExpanded,
                             onToggle: () => stage.toggleExpanded(name),
                           }
                         : undefined,
                       isOpen,
-                      onOpenChange: (open) => stage.setOpen(name, open),
                       parts: partsOf(name),
                       set: stage.set,
                       size: shown,
@@ -278,6 +264,12 @@ export const stageParts = {
   'Viewport.Content': [],
 } as const;
 
+/** Parts' groups but the root's (featured, its own control). */
+const withoutRoot = ({
+  'Card.Root': _root,
+  ...others
+}: Record<string, readonly string[]>) => others;
+
 /** A phone: one card of each kind in a grid (the root's every prop). */
 export const CardDemo: FunctionComponent = () => {
   const id = 'card';
@@ -293,13 +285,8 @@ export const CardDemo: FunctionComponent = () => {
     useMemo(
       () =>
         partPropMaps(
-          {
-            ...stageParts,
-            'Card.Symbol': [],
-            'Card.Title': [],
-            'Card.Value': ['children', 'format', 'value'],
-            'Card.CornerButton': ['aria-label', 'icon'],
-          },
+          // (Every part its cards render; its root's its own control.)
+          { ...stageParts, ...withoutRoot(partsOfTiles(cardTiles)) },
           addLog,
         ),
       [addLog],
@@ -307,13 +294,16 @@ export const CardDemo: FunctionComponent = () => {
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
-      controls={[control, partControls]}
+      controls={[presentationControl, control, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[state, partState]}
+      stage={presentation}
+      state={[state, partState, presentationState]}
       title="Card"
     >
       {cardsStage(stage, { ...partProps, 'Card.Root': props })}

@@ -25,8 +25,8 @@ import type { ClearProps, FrameProps } from './props.js';
 // `input-ios.less`, `input-vars.less`): info (`Description`) and error
 // messages in 12px below, invalid text in `systemRed`, disabled at 55%.
 //
-// A Base UI field: in a list row (`Root` rendering a
-// `List.Item`), the label is the row's title and the control fills the rest
+// A Base UI field: in a list row (`Root` rendering a `List.Item`, by its
+// `render`, the app's), the label is the row's title and the control fills the rest
 // of the row, the description and error below (see `List`); elsewhere, the
 // parts stack. A textarea renders through `Control`'s `render`.
 //
@@ -40,7 +40,10 @@ import type { ClearProps, FrameProps } from './props.js';
 // - The clear button is a circled cross, cut out of the circle, with a 44px
 //   hit area.
 
-/** A field (Base UI); rendering a `List.Item`, a list row. */
+/**
+ * A field (Base UI); a list row when rendering a `List.Item` (its
+ * `render`); standalone, its parts stacked.
+ */
 const Root = forwardRef<HTMLDivElement, Omit<BaseField.Root.Props, 'ref'>>(
   ({ className, ...props }, ref) => (
     // Standalone, the parts stack (not as a list row, see `List`).

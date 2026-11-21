@@ -8,96 +8,23 @@ import {
   useState,
 } from 'react';
 
-import {
-  Slider,
-  Symbol,
-  type SymbolIcon,
-  useGridItem,
-} from '../../components/index.js';
-import { sfArrowRight } from './icons.js';
+import { Symbol, type SymbolIcon } from '../../components/index.js';
 
-// What the demos' cards build from the library's parts (an app's own, not
-// the library's: too specific for it): channel sliders (several in one
-// card, as bars), a trend arrow, the colors a light's channels make, rows
-// that fit, a sparkline, generated artwork, a bar chart, a dial, an
-// hourly forecast.
-
-/** A light channel (see `ChannelSliders`): 0 to 1. */
-export type Channel = {
-  /** Its name, short (e.g. “R”), shown on its bar. */
-  label: string;
-  /** Its accessible name (e.g. “Red”). */
-  name: string;
-  /** Its bar's color. */
-  tint: string;
-  value: number;
-};
+// What the demos' cards build beyond the library's (ControlCards and
+// Card): an app's own, too specific for the library: their tints, a color
+// temperature's color, a sparkline, generated artwork, a bar chart, a
+// dial, an hourly forecast.
 
 /**
- * A card's sliders as bars side by side (upright) in a tile taller than
- * one row, else stacked across: one per channel, each its name on it, in
- * its tint. Between the card's top row and its title (see the CSS).
+ * The demos' slider cards' tints (the fill filling the card, its text
+ * drawn over it in its tone's color, see Card): a lamp's warm amber,
+ * a heater's orange, daylight's blue for blinds.
  */
-export const ChannelSliders: FunctionComponent<{
-  channels: readonly Channel[];
-  onChange: (index: number, value: number) => void;
-}> = ({ channels, onChange }) => {
-  const [, rows = '1'] = (useGridItem()?.size ?? '2x2').split('x');
-  const orientation = rows === '1' ? 'horizontal' : 'vertical';
-  return (
-    <div
-      className="demo-channels"
-      data-orientation={orientation}
-    >
-      {channels.map(({ label, name, tint, value }, index) => (
-        <Slider.Root
-          key={name}
-          format={{ style: 'percent' }}
-          max={1}
-          min={0}
-          orientation={orientation}
-          step={0.01}
-          tint={tint}
-          value={value}
-          onValueChange={(next) => onChange(index, next as number)}
-        >
-          <Slider.Control>
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb aria-label={name} />
-            </Slider.Track>
-          </Slider.Control>
-          <Slider.Label aria-hidden="true">{label}</Slider.Label>
-        </Slider.Root>
-      ))}
-    </div>
-  );
-};
-
-/** A trend's words, by its angle (see `Trend`). */
-const trendOf = (angle: number) => {
-  if (angle > 10) return 'rising';
-  return angle < -10 ? 'falling' : 'steady';
-};
-
-/**
- * A value's trend: an arrow pointing up as steeply as it rises (`angle`,
- * -90 to 90 degrees: 0 steady), named for assistive technology (rising,
- * falling, steady). It turns to a new angle by its own transform.
- */
-export const Trend: FunctionComponent<{ angle: number }> = ({ angle }) => {
-  const clamped = Math.max(-90, Math.min(90, angle));
-  return (
-    <span
-      aria-label={trendOf(clamped)}
-      className="demo-trend"
-      role="img"
-      style={{ '--demo-trend-angle': String(clamped) } as CSSProperties}
-    >
-      <Symbol icon={sfArrowRight} />
-    </span>
-  );
-};
+export const cardTints = {
+  heat: 'oklch(72% 0.17 50)',
+  light: 'oklch(84% 0.15 85)',
+  shade: 'oklch(80% 0.09 230)',
+} as const;
 
 /**
  * A color temperature's color (in kelvin, about 2000 to 6500): warm to
@@ -118,50 +45,6 @@ export const kelvinColor = (kelvin: number): string => {
   const [k1, c1] = stops[upper] ?? [0, ''];
   const share = Math.round(((kelvin - k0) / (k1 - k0)) * 100);
   return `color-mix(in srgb, ${c1} ${String(share)}%, ${c0})`;
-};
-
-/**
- * What a light's channels make together (each 0 to 1, by its tint): the
- * colors mixed by their shares (white ones too), at full strength; none
- * on: none.
- */
-export const mixColor = (channels: readonly Channel[]): string | undefined => {
-  const lit = channels.filter(({ value }) => value > 0);
-  const total = lit.reduce((sum, { value }) => sum + value, 0);
-  if (total === 0) return undefined;
-  // (color-mix of two at a time, each step weighting the next by its share
-  // of what's mixed so far.)
-  let mixed = lit[0]?.tint ?? '';
-  let sum = lit[0]?.value ?? 0;
-  for (const { tint, value } of lit.slice(1)) {
-    sum += value;
-    const share = Math.round((value / sum) * 100);
-    mixed = `color-mix(in oklab, ${tint} ${String(share)}%, ${mixed})`;
-  }
-  return mixed;
-};
-
-/**
- * How many rows of a list in a card fit in it whole (its box fills its
- * room in the card, see Card, whatever's in it): by its height and a row's
- * (36px in a card), at least one; as the card's size changes too. A ref
- * callback for the list (it may appear later, e.g. as the card grows).
- */
-export const useRowsThatFit = (
-  rowHeight = 36,
-): readonly [ref: (list: HTMLElement | null) => void, count: number] => {
-  const [list, setList] = useState<HTMLElement | null>(null);
-  const [count, setCount] = useState(1);
-  useLayoutEffect(() => {
-    if (!list) return undefined;
-    const update = () =>
-      setCount(Math.max(1, Math.floor(list.clientHeight / rowHeight)));
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [list, rowHeight]);
-  return [setList, count];
 };
 
 /**

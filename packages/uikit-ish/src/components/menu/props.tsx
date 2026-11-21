@@ -2,6 +2,7 @@ import type { Menu as BaseMenu } from '@base-ui/react/menu';
 import type { Properties } from 'csstype';
 import type { ComponentProps, RefObject } from 'react';
 
+import type { GlassSurfaceProps } from '../glass/main.js';
 import type { LogicalSide, SecondaryClickProps } from '../utils/main.js';
 
 export type Size = 'compact' | 'regular';
@@ -52,6 +53,21 @@ export type MenuPositionerProps = Omit<
    */
   side?: LogicalSide;
 };
+
+export type MenuPopupProps = Omit<BaseMenu.Popup.Props, 'ref'> &
+  GlassSurfaceProps & {
+    /**
+     * Its items' order: as given, or the nearest first (`nearest`): placed
+     * above its trigger (flipped for room, or its side), its items (and
+     * each `Menu.Group`'s, below its label) in reverse, the first nearest
+     * the trigger, for the keyboard and screen readers too (reversed in
+     * the DOM). A `Menu.QuickActions` row moves as one; only its and its
+     * groups' own children (fragments' too) reverse, not what a component
+     * of yours renders together.
+     * @default 'static'
+     */
+    order?: 'nearest' | 'static';
+  };
 
 export type ItemProps = {
   /**

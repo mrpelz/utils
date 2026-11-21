@@ -13,6 +13,7 @@ import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { sfSunMax, sfSunMin } from '../../tooling/icons.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
 import {
   sliderControlRows,
@@ -913,6 +914,15 @@ export const SliderParts: FunctionComponent = () => (
         It sits where it is among the parts, or where <code>placement</code>{' '}
         puts it: before or after them all, or on a line above or below.
       </li>
+      <li>
+        For a slider filling a card, with its label and value drawn again inside
+        the fill, see{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.SliderFill"
+        />
+        .
+      </li>
     </ul>
     <LabelPart />
     <h3>Props</h3>
@@ -1001,6 +1011,14 @@ export const SliderParts: FunctionComponent = () => (
         focus and keys.
       </li>
       <li>
+        The input fills the knob, placed <code>absolute</code> rather than Base
+        UI’s <code>fixed</code>: inside a transformed ancestor, a fixed input
+        took that ancestor’s size, and Safari on iOS painted a card open above
+        the page black (see{' '}
+        <a href={publicUrl('ios-quirks#dishonorable-mentions')}>iOS Quirks</a>
+        ).
+      </li>
+      <li>
         A range has two, by <code>index</code>, each named (
         <code>aria-label</code>) for what it sets.
       </li>
@@ -1022,6 +1040,14 @@ export const SliderParts: FunctionComponent = () => (
       </li>
       <li>
         The fill ends at them. Match the root’s <code>step</code> to them.
+      </li>
+      <li>
+        In a slider filling a card (
+        <PartLink
+          component="control-cards"
+          part="ControlCards.SliderFill"
+        />
+        ), they’re lines across the card.
       </li>
       <li>Hidden from assistive technology.</li>
     </ul>

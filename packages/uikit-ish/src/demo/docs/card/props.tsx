@@ -31,7 +31,11 @@ export const getPropOptionsCornerButton = (addLog: AddLog) => ({
   visible: [undefined, false] as const,
 });
 
-export const propOptionsSymbol = elementOptions;
+export const propOptionsSymbol = {
+  ...elementOptions,
+  active: [undefined, true] as const,
+  tint: [undefined, 'var(--color-ui-system-yellow)'] as const,
+};
 
 export const propOptionsTitle = elementOptions;
 

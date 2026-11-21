@@ -125,7 +125,7 @@ const Root = forwardRef<HTMLElement, Omit<ButtonRootProps, 'ref'>>(
   },
 );
 
-// (Marked, e.g. for fading a bar's content, see `Header`.)
+// (Marked: a toolbar's and a list's stylesheets address it.)
 const Icon = forwardRef<HTMLSpanElement, ComponentProps<'span'>>(
   ({ className, ...props }, ref) => (
     // A symbol: its glyph (e.g. a `Symbol`, with its badge), in the

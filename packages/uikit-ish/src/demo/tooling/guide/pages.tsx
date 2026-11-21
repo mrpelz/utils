@@ -2,6 +2,7 @@ import { useRoute } from 'preact-iso';
 import { FunctionComponent, ReactNode } from 'react';
 
 import {
+  type ArchitecturePage as ArchitecturePageEntry,
   catalog,
   type CatalogEntry,
   catalogEntry,
@@ -23,8 +24,19 @@ import { Contents, Heading, PagePathContext } from './sections.js';
 
 // (Links under the site's public path: see `publicUrl`, env.ts.)
 
+/** Its architecture pages' outline (see `EntryInfo`). */
+const architectureOf = ({ Architecture }: CatalogEntry) => {
+  if (Architecture === undefined) return undefined;
+  if (typeof Architecture === 'function') return { hasMain: true, pages: [] };
+  return {
+    hasMain: Architecture.Main !== undefined,
+    pages: Architecture.pages.map(({ id, title }) => ({ id, title })),
+  };
+};
+
 const entryInfo = (entry: CatalogEntry): EntryInfo => ({
   baseUiId: entry.baseUiId,
+  architecture: architectureOf(entry),
   category: entry.category,
   categoryTitle: categories[entry.category].title,
   framework7Id: entry.framework7Id,
@@ -64,9 +76,13 @@ const EntryDemos: FunctionComponent<{ entries: readonly CatalogEntry[] }> = ({
 const ComponentShell: FunctionComponent<{
   children: ReactNode;
   entry: CatalogEntry;
+  /** On an architecture sub-system's page: its id. */
+  page?: string;
   tab: Exclude<Tab, 'all'>;
-}> = ({ children, entry, tab }) => {
+}> = ({ children, entry, page, tab }) => {
   const info = entryInfo(entry);
+  let path = tab === 'overview' ? entry.id : `${entry.id}/${tab}`;
+  if (page !== undefined) path += `/${page}`;
   return (
     <EntryContext.Provider value={info}>
       <div className="demo-page">
@@ -74,11 +90,10 @@ const ComponentShell: FunctionComponent<{
         <h1 className="demo-page-title">{entry.title}</h1>
         <Tabs
           entry={info}
+          page={page}
           tab={tab}
         />
-        <PagePathContext.Provider
-          value={tab === 'overview' ? entry.id : `${entry.id}/${tab}`}
-        >
+        <PagePathContext.Provider value={path}>
           <div className="demo-prose">{children}</div>
         </PagePathContext.Provider>
       </div>
@@ -97,25 +112,57 @@ export const NotFound: FunctionComponent = () => (
 
 const useCatalogEntry = () => catalogEntry(useRoute().params.id ?? '');
 
+/**
+ * A component's architecture pages, listed (`/:id/architecture` without a
+ * main page).
+ */
+const ArchitectureIndex: FunctionComponent<{
+  pages: readonly ArchitecturePageEntry[];
+}> = ({ pages }) => {
+  const entry = useCatalogEntry();
+  return (
+    <ul>
+      {pages.map(({ id, title }) => (
+        <li key={id}>
+          <a href={publicUrl(`${entry?.id ?? ''}/architecture/${id}`)}>
+            {title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
 /** A component's page of prose: its catalog entry's, or a pointer to its demos. */
 const GuidePage: FunctionComponent<{
-  content: 'Composition' | 'Overview' | 'Parts';
+  content: 'Architecture' | 'Composition' | 'Overview' | 'Parts';
   /** What the page is (“No … yet”). */
   label: string;
   tab: Exclude<Tab, 'all'>;
 }> = ({ content, label, tab }) => {
   const entry = useCatalogEntry();
   if (!entry) return <NotFound />;
-  const Content = entry[content];
+  const { Architecture } = entry;
+  // (Its architecture: its one page, its main one, or, without one, its
+  // pages listed.)
+  const architecture =
+    typeof Architecture === 'object' ? Architecture.Main : Architecture;
+  const Content = content === 'Architecture' ? architecture : entry[content];
+  const index =
+    content === 'Architecture' &&
+    typeof Architecture === 'object' &&
+    !Architecture.Main ? (
+      <ArchitectureIndex pages={Architecture.pages} />
+    ) : undefined;
 
   return (
     <ComponentShell
       entry={entry}
       tab={tab}
     >
-      {Content ? (
-        <Content />
-      ) : (
+      {index ?? null}
+      {!index && Content ? <Content /> : null}
+      {index || Content ? null : (
         <p>
           No {label} yet: see{' '}
           <a href={publicUrl(`${entry.id}/all`)}>all demos</a>.
@@ -151,6 +198,38 @@ export const CompositionPage: FunctionComponent = () => (
     tab="composition"
   />
 );
+
+/** `/:id/architecture`: how it's built, and what flows into it. */
+export const ArchitecturePage: FunctionComponent = () => (
+  <GuidePage
+    content="Architecture"
+    label="architecture page"
+    tab="architecture"
+  />
+);
+
+/** `/:id/architecture/:page`: how one of its sub-systems is built. */
+export const ArchitectureSubPage: FunctionComponent = () => {
+  const { params } = useRoute();
+  const entry = useCatalogEntry();
+  const { Architecture } = entry ?? {};
+  const page =
+    typeof Architecture === 'object'
+      ? Architecture.pages.find(({ id }) => id === params.page)
+      : undefined;
+  if (!entry || !page) return <NotFound />;
+  const { Page } = page;
+
+  return (
+    <ComponentShell
+      entry={entry}
+      page={page.id}
+      tab="architecture"
+    >
+      <Page />
+    </ComponentShell>
+  );
+};
 
 /** `/:id/all`: the component's comprehensive demos (headed each). */
 export const ComponentDemosPage: FunctionComponent = () => {
@@ -285,6 +364,11 @@ export const IndexPage: FunctionComponent = () => (
                   {entry.Composition ? (
                     <a href={publicUrl(`${entry.id}/composition`)}>
                       Composition
+                    </a>
+                  ) : null}
+                  {entry.Architecture ? (
+                    <a href={publicUrl(`${entry.id}/architecture`)}>
+                      Architecture
                     </a>
                   ) : null}
                   <a href={publicUrl(`${entry.id}/all`)}>

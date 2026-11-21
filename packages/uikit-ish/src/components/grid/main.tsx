@@ -20,7 +20,12 @@ import {
 import { createPortal } from 'react-dom';
 
 import type { SymbolIcon } from '../symbol/main.js';
-import { cn, useForwardedRef, withStyle } from '../utils/main.js';
+import {
+  cn,
+  reducedMotionOf,
+  useForwardedRef,
+  withStyle,
+} from '../utils/main.js';
 import { dashCountOf, dashRadius } from './dashes.js';
 import { slop, touchHold, useEditing } from './edit.js';
 import {
@@ -74,6 +79,7 @@ import type {
   GridSectionProps,
   GridSize,
   GridSizeChangeDetails,
+  GridSizeFit,
   GridSpacerProps,
   GridSpawnProps,
 } from './props.js';
@@ -120,6 +126,7 @@ export type {
   GridSectionProps,
   GridSize,
   GridSizeChangeDetails,
+  GridSizeFit,
   GridSpacerProps,
   GridSpawnProps,
 } from './props.js';
@@ -728,6 +735,74 @@ const toldSizes = new Set<string>();
 /** Never open (a spacer, a break; an item's own, see `Item`). */
 const noOpen = () => undefined;
 
+/**
+ * A cell's sizes, effective (see `useCell`), as requested: its area first,
+ * fitted to the columns; then its size, fitted to the area; the area at
+ * least as big as what it shows. No sizes given (`isFreeSize`,
+ * `isFreeArea`): any supported, fitted as it is, not snapped. Its own, and
+ * what another would be (see `GridItemState.sizeOf`).
+ */
+const fitOf = (
+  requested: GridSize,
+  requestedArea: GridSize | undefined,
+  {
+    columns,
+    isFreeArea,
+    isFreeSize,
+    maxTileRows,
+    sorted,
+    sortedAreas,
+  }: {
+    columns: number;
+    isFreeArea: boolean;
+    isFreeSize: boolean;
+    maxTileRows: number;
+    sorted: readonly GridSize[];
+    sortedAreas: readonly GridSize[];
+  },
+) => {
+  const free = effectiveSize(requested, sorted, columns, {
+    isOpen: isFreeSize,
+    rows: maxTileRows,
+  });
+  const areaFit =
+    requestedArea === undefined
+      ? undefined
+      : effectiveSize(requestedArea, sortedAreas, columns, {
+          isOpen: isFreeArea,
+          rows: maxTileRows,
+        });
+  const area = areaFit?.size;
+  const [areaColumns, areaRows] = area ? spanOf(area, columns) : [0, 0];
+  // (A full width in an area that isn't one: as wide as the area.)
+  const sizeGrid = area && !isFull(area) ? areaColumns : columns;
+  const { isFitted, size } = area
+    ? effectiveSize(free.size, sorted, areaColumns, {
+        gridColumns: sizeGrid,
+        isOpen: isFreeSize,
+        rows: areaRows,
+      })
+    : free;
+  const [sizeColumns, sizeRows] = spanOf(size, sizeGrid);
+  const layoutColumns = Math.max(areaColumns, sizeColumns);
+  const layoutRows = Math.max(areaRows, sizeRows);
+  const isFullWidth = isFull(area ?? size);
+  const layout: GridSize = area
+    ? (`${isFullWidth ? '*' : String(layoutColumns)}x${String(layoutRows)}` as GridSize)
+    : size;
+  return {
+    isAreaFitted: areaFit?.isFitted ?? false,
+    isFitted: isFitted || free.isFitted,
+    isFullWidth,
+    layout,
+    layoutColumns,
+    layoutRows,
+    size,
+    sizeColumns,
+    sizeRows,
+  };
+};
+
 const useCell = ({
   area: spec,
   defaultSize = '1x1',
@@ -782,37 +857,44 @@ const useCell = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- by content
   }, [maxTileRows, minColumns, supportedKey]);
 
-  // (Its area first, fitted to the columns; then its size, fitted to the
-  // area; the area at least as big as what it shows.)
-  // (No sizes given: any is supported, fitted as it is, not snapped.)
-  const free = effectiveSize(requested, sorted, columns, {
-    isOpen: supportedSizes === undefined,
-    rows: maxTileRows,
-  });
-  const area =
-    requestedArea === undefined
-      ? undefined
-      : effectiveSize(requestedArea, sortedAreas, columns, {
-          isOpen: supportedAreas === undefined,
-          rows: maxTileRows,
-        }).size;
-  const [areaColumns, areaRows] = area ? spanOf(area, columns) : [0, 0];
-  // (A full width in an area that isn't one: as wide as the area.)
-  const sizeGrid = area && !isFull(area) ? areaColumns : columns;
-  const { isFitted, size } = area
-    ? effectiveSize(free.size, sorted, areaColumns, {
-        gridColumns: sizeGrid,
-        isOpen: supportedSizes === undefined,
-        rows: areaRows,
-      })
-    : free;
-  const [sizeColumns, sizeRows] = spanOf(size, sizeGrid);
-  const layoutColumns = Math.max(areaColumns, sizeColumns);
-  const layoutRows = Math.max(areaRows, sizeRows);
-  const isFullWidth = isFull(area ?? size);
-  const layout: GridSize = area
-    ? (`${isFullWidth ? '*' : String(layoutColumns)}x${String(layoutRows)}` as GridSize)
-    : size;
+  // (Its sizes, effective (see `fitOf`); and what others would be.)
+  const isFreeArea = supportedAreas === undefined;
+  const isFreeSize = supportedSizes === undefined;
+  const fitting = useMemo(
+    () => ({
+      columns,
+      isFreeArea,
+      isFreeSize,
+      maxTileRows,
+      sorted,
+      sortedAreas,
+    }),
+    [columns, isFreeArea, isFreeSize, maxTileRows, sorted, sortedAreas],
+  );
+  const {
+    isFitted,
+    isFullWidth,
+    layout,
+    layoutColumns,
+    layoutRows,
+    size,
+    sizeColumns,
+    sizeRows,
+  } = fitOf(requested, requestedArea, fitting);
+  const sizeOf = useCallback(
+    (next: GridSize): GridSizeFit => {
+      const fit = fitOf(next, requestedArea, fitting);
+      return { isFitted: fit.isFitted, size: fit.size };
+    },
+    [fitting, requestedArea],
+  );
+  const areaSizeOf = useCallback(
+    (next: GridSize): GridSizeFit => {
+      const fit = fitOf(requested, next, fitting);
+      return { isFitted: fit.isAreaFitted, size: fit.layout };
+    },
+    [fitting, requested],
+  );
   const [x, y] = placementOffset(
     placement,
     [layoutColumns, layoutRows],
@@ -838,14 +920,12 @@ const useCell = ({
   );
   const requestArea = spec?.requestSize ?? requestSize;
   const hasArea = spec !== undefined;
-  const isFreeArea = supportedAreas === undefined;
-  const isFreeSize = supportedSizes === undefined;
   const state = useMemo(
     (): CellState => ({
       area: layout,
       editing,
       hasArea,
-      isFitted: isFitted || free.isFitted,
+      isFitted,
       isFreeArea,
       isFreeSize,
       movable,
@@ -859,12 +939,12 @@ const useCell = ({
       requestSize,
       setOpen: noOpen,
       size,
+      sizeOf,
       supportedAreas: sortedAreas,
       supportedSizes: sorted,
     }),
     [
       editing,
-      free.isFitted,
       hasArea,
       isFitted,
       isFreeArea,
@@ -877,6 +957,7 @@ const useCell = ({
       requestSize,
       requested,
       size,
+      sizeOf,
       sorted,
       sortedAreas,
     ],
@@ -891,9 +972,11 @@ const useCell = ({
         requestPlacement,
         requestSize: requestArea,
         size: layout,
+        sizeOf: areaSizeOf,
         supportedSizes: sortedAreas,
       },
     [
+      areaSizeOf,
       layout,
       movable,
       placement,
@@ -1312,7 +1395,7 @@ const usePlacing = (
           start: readonly [number, number];
         }
       | undefined;
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const reduce = reducedMotionOf(cell);
     const isRtl = () => getComputedStyle(cell).direction === 'rtl';
     // (Where it is in its cell: px from the inline start and top.)
     const originOf = () => {
@@ -1449,7 +1532,7 @@ const usePlacing = (
     letGo.current = undefined;
     if (!body || !from) return;
     const to = body.getBoundingClientRect();
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (!reducedMotionOf(body).matches) {
       body.animate(
         [
           {
@@ -2888,6 +2971,11 @@ const Break = forwardRef<HTMLDivElement, GridBreakProps>(
         requestSize,
         setOpen: noOpen,
         size,
+        // (Its rows, as asked: a unit wide, never fitted.)
+        sizeOf: (next: GridSize) => ({
+          isFitted: false,
+          size: `1x${String(spanOf(next)[1])}` as GridSize,
+        }),
         supportedAreas: breakSizes,
         supportedSizes: breakSizes,
       };

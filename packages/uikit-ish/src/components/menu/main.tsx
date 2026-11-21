@@ -4,27 +4,29 @@ import './style.css';
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 import type { BaseUIEvent } from '@base-ui/react/types';
 import {
+  Children,
+  cloneElement,
   ComponentProps,
   createContext,
   forwardRef,
+  Fragment,
+  isValidElement,
   MouseEvent as ReactMouseEvent,
   PointerEvent,
+  ReactElement,
   ReactNode,
   Ref,
   RefObject,
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 
-import {
-  colorSchemeStyle,
-  type GlassSurfaceProps,
-  useGlassScheme,
-} from '../glass/main.js';
+import { colorSchemeStyle, useGlassScheme } from '../glass/main.js';
 import { ColorSchemeScope, useSettingsPortalProps } from '../settings/main.js';
 import {
   Checkmark,
@@ -46,6 +48,7 @@ import type {
   ItemProps,
   MenuContextValue,
   MenuHandle,
+  MenuPopupProps,
   MenuPositionerProps,
   MenuRootProps,
   SpanProps,
@@ -54,6 +57,7 @@ import type {
 
 export type {
   MenuHandle,
+  MenuPopupProps,
   MenuPositionerProps,
   MenuRootProps,
   Size,
@@ -1270,65 +1274,149 @@ const Positioner = forwardRef<HTMLDivElement, MenuPositionerProps>(
 
 const highlightSelectors = ['[data-highlighted]', '[data-popup-open]'];
 
-/** The menu's glass popup (the medium glass). */
-const Popup = forwardRef<
-  HTMLDivElement,
-  Omit<BaseMenu.Popup.Props, 'ref'> & GlassSurfaceProps
->(({ className, children, context, style, ...props }, ref) => {
-  const { size, submenu } = useContext(MenuContext);
-  // A submenu's: its element, for presses outside it (see `OpenSubmenus`).
-  const toggle = useContext(SubmenuToggleContext);
-  // Its glass's tone, its content's color scheme (see Glass; its
-  // submenus' too, opened within it).
-  const element = useRef<HTMLDivElement | null>(null);
-  const scheme = useGlassScheme(element, context);
-  const popupRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      element.current = node;
-      if (submenu) toggle?.setPopup(node);
-      assignRef(ref, node);
-    },
-    [ref, submenu, toggle],
-  );
-  // Closed by keys, focus returns to its trigger; otherwise (a pointer:
-  // an item, outside) it doesn't (Chrome would ring it: the popup took
-  // focus by script, e.g. opened through a list row). Submenus: as Base
-  // UI does.
-  const finalFocus = submenu
-    ? undefined
-    : (closeType: string) => closeType === 'keyboard';
-  // Compact submenus cover their parent's items: as wide as its popup.
-  const isOverlay = submenu === 'vertical' && size === 'compact';
+/**
+ * Whether its popup's items are reversed (see `MenuPopupProps.order`):
+ * nearest first, placed above its trigger. Each popup its own (a
+ * submenu's, not).
+ */
+const MenuReversedContext = createContext(false);
 
-  return (
-    <BaseMenu.Popup
-      ref={popupRef}
-      data-color-scheme={scheme}
-      data-overlay={isOverlay ? '' : undefined}
-      data-size={size}
-      {...props}
-      data-menu-part="popup"
-      finalFocus={props.finalFocus ?? finalFocus}
-      style={withStyle(colorSchemeStyle(scheme), style)}
-      className={cn(
-        'uikit-menu-popup uikit-glass-medium uikit-popup-transition',
-        className,
-      )}
-    >
-      <ColorSchemeScope colorScheme={scheme}>{children}</ColorSchemeScope>
-      {/* The selection, moving between items: the highlighted one, or
+/**
+ * Children, fragments' too, as one list (keys kept, a fragment's prefixed
+ * by its own): what reverses (see `Ordered`).
+ */
+const flatChildren = (children: ReactNode, prefix = ''): ReactNode[] =>
+  Children.toArray(children).flatMap((child) => {
+    if (!isValidElement(child)) return [child];
+    const key = `${prefix}${String(child.key)}`;
+    if (child.type === Fragment) {
+      const { children: inner } = child.props as { children?: ReactNode };
+      return flatChildren(inner, `${key}/`);
+    }
+    return [prefix === '' ? child : cloneElement(child, { key })];
+  });
+
+/** Its children, reversed while its popup's are (see above). */
+const useOrdered = (
+  children: ReactNode,
+  keepFirst?: (node: ReactNode) => boolean,
+) => {
+  const isReversed = useContext(MenuReversedContext);
+  if (!isReversed) return children;
+  const all = flatChildren(children);
+  // (A group's label: kept first, its heading.)
+  const first = keepFirst ? all.filter((node) => keepFirst(node)) : [];
+  return [
+    ...first,
+    ...all.filter((node) => !first.includes(node)).toReversed(),
+  ];
+};
+
+/**
+ * A popup's items, in order (see `MenuPopupProps.order`); reversed, its
+ * scroller at its end (where its first is, nearest its trigger), once.
+ */
+const Ordered = ({
+  children,
+  popup,
+}: {
+  children: ReactNode;
+  popup: RefObject<HTMLElement | null>;
+}) => {
+  const isReversed = useContext(MenuReversedContext);
+  useLayoutEffect(() => {
+    const { current: element } = popup;
+    if (!isReversed || !element) return;
+    const scroller = scrollerOf(element);
+    scroller.scrollTop = scroller.scrollHeight;
+  }, [isReversed, popup]);
+  return <>{useOrdered(children)}</>;
+};
+
+/** The menu's glass popup (the medium glass). */
+const Popup = forwardRef<HTMLDivElement, MenuPopupProps>(
+  (
+    { className, children, context, order = 'static', render, style, ...props },
+    ref,
+  ) => {
+    const { size, submenu } = useContext(MenuContext);
+    // A submenu's: its element, for presses outside it (see `OpenSubmenus`).
+    const toggle = useContext(SubmenuToggleContext);
+    // Its glass's tone, its content's color scheme (see Glass; its
+    // submenus' too, opened within it).
+    const element = useRef<HTMLDivElement | null>(null);
+    const scheme = useGlassScheme(element, context);
+    const popupRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        element.current = node;
+        if (submenu) toggle?.setPopup(node);
+        assignRef(ref, node);
+      },
+      [ref, submenu, toggle],
+    );
+    // Closed by keys, focus returns to its trigger; otherwise (a pointer:
+    // an item, outside) it doesn't (Chrome would ring it: the popup took
+    // focus by script, e.g. opened through a list row). Submenus: as Base
+    // UI does.
+    const finalFocus = submenu
+      ? undefined
+      : (closeType: string) => closeType === 'keyboard';
+    // Compact submenus cover their parent's items: as wide as its popup.
+    const isOverlay = submenu === 'vertical' && size === 'compact';
+    // Nearest first (see `MenuPopupProps.order`): by the side it's placed
+    // on (Base UI's, flipped or not), its items reversed (its own `render`
+    // as given, the side told to what's in it).
+    const ordered: BaseMenu.Popup.Props['render'] =
+      order === 'nearest'
+        ? (renderProps, state) => {
+            const withSide = {
+              ...renderProps,
+              children: (
+                <MenuReversedContext.Provider value={state.side === 'top'}>
+                  {renderProps.children}
+                </MenuReversedContext.Provider>
+              ),
+            };
+            if (typeof render === 'function') return render(withSide, state);
+            return (
+              render ? cloneElement(render, withSide) : <div {...withSide} />
+            ) as ReactElement<unknown>;
+          }
+        : render;
+
+    return (
+      <BaseMenu.Popup
+        ref={popupRef}
+        data-color-scheme={scheme}
+        data-overlay={isOverlay ? '' : undefined}
+        data-size={size}
+        {...props}
+        data-menu-part="popup"
+        finalFocus={props.finalFocus ?? finalFocus}
+        render={ordered}
+        style={withStyle(colorSchemeStyle(scheme), style)}
+        className={cn(
+          'uikit-menu-popup uikit-glass-medium uikit-popup-transition',
+          className,
+        )}
+      >
+        <ColorSchemeScope colorScheme={scheme}>
+          <Ordered popup={element}>{children}</Ordered>
+        </ColorSchemeScope>
+        {/* The selection, moving between items: the highlighted one, or
             (regular) the trigger of the open submenu (compact submenus
             cover it). */}
-      <MovingHighlight
-        selectors={
-          size === 'compact'
-            ? highlightSelectors.slice(0, 1)
-            : highlightSelectors
-        }
-      />
-    </BaseMenu.Popup>
-  );
-});
+        <MovingHighlight
+          selectors={
+            size === 'compact'
+              ? highlightSelectors.slice(0, 1)
+              : highlightSelectors
+          }
+        />
+      </BaseMenu.Popup>
+    );
+  },
+);
 
 // An item: [checkmark] [symbol] label/subtitle [shortcut | chevron]
 // (see style.css).
@@ -1601,6 +1689,37 @@ const GroupLabel = forwardRef<
   />
 ));
 
+/** Whether it's a group's label (kept first, see `useOrdered`). */
+const isGroupLabel = (node: ReactNode) =>
+  isValidElement(node) && (node as ReactElement).type === GroupLabel;
+
+// A section: its label first, its items (reversed with its popup's, see
+// `MenuPopupProps.order`).
+const Group = forwardRef<HTMLDivElement, Omit<BaseMenu.Group.Props, 'ref'>>(
+  ({ children, ...props }, ref) => (
+    <BaseMenu.Group
+      ref={ref}
+      {...props}
+    >
+      {useOrdered(children, isGroupLabel)}
+    </BaseMenu.Group>
+  ),
+);
+
+// Radio items, as a group's (reversed with its popup's, see
+// `MenuPopupProps.order`).
+const RadioGroup = forwardRef<
+  HTMLDivElement,
+  Omit<BaseMenu.RadioGroup.Props, 'ref'>
+>(({ children, ...props }, ref) => (
+  <BaseMenu.RadioGroup
+    ref={ref}
+    {...props}
+  >
+    {useOrdered(children, isGroupLabel)}
+  </BaseMenu.RadioGroup>
+));
+
 const QuickActions = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => (
     // Quick actions: a row of tiles, inset 10px from the popup's edge.
@@ -1721,10 +1840,12 @@ export const Menu = {
   LinkItem,
   CheckboxItem,
   CheckboxItemIndicator,
+  RadioGroup,
   RadioItem,
   RadioItemIndicator,
   SubmenuTrigger,
   Separator,
+  Group,
   GroupLabel,
   QuickActions,
   QuickAction,

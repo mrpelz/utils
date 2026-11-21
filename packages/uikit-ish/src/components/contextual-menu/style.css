@@ -34,6 +34,12 @@
     z-index: 100;
     background-color: var(--uikit-contextual-menu-dim);
     inset: 0;
+
+    /* (A drag on it never scrolling: nothing to scroll here, else the
+       document's (in a Home Screen app, its 1px, see Viewport's
+       status-bar.ts: moving the whole app, parked back once let go).
+       Presses and swipes still come, as pointer events.) */
+    touch-action: none;
     transition: opacity 300ms;
 
     &[data-starting-style],

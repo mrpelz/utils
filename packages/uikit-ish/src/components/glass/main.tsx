@@ -4,13 +4,14 @@ import {
   createContext,
   FunctionComponent,
   RefObject,
+  useContext,
   useLayoutEffect,
   useState,
 } from 'react';
 
 import { useSettings } from '../settings/main.js';
 import type { ColorScheme } from '../utils/main.js';
-import { useBackdropTone } from './backdrop.js';
+import { type BackdropTone, useBackdropTone } from './backdrop.js';
 import type {
   GlassBackgroundProps,
   GlassContext,
@@ -22,6 +23,7 @@ export {
   type BackdropTone,
   type BackdropToneOptions,
   resampleBackdrops,
+  toneOfColor,
   useBackdropTone,
 } from './backdrop.js';
 export {
@@ -92,6 +94,46 @@ export const colorSchemeStyle = (
   colorScheme: ColorScheme | undefined,
 ): Record<string, string> =>
   colorScheme === undefined ? {} : { 'color-scheme': colorScheme };
+
+/**
+ * A surface its content's tones are sampled within (e.g. a card's glass,
+ * see `useContentTone`): its element; none, not sampled (e.g. while its
+ * card's grid is editing, its veil over it).
+ */
+export const ContentToneScope = createContext<
+  { current: Element | null } | undefined
+>(undefined);
+
+/**
+ * A part's tone on the surface it's on (see `ContentToneScope`): what's
+ * painted right behind it there (the surface's glass, a slider's fill),
+ * sampled within it, as the surface changes. `undefined` outside one.
+ */
+export const useContentTone = (
+  ref: { current: Element | null },
+  enabled = true,
+): BackdropTone | undefined => {
+  const within = useContext(ContentToneScope);
+  return useBackdropTone(ref, {
+    enabled: enabled && within !== undefined,
+    within,
+  });
+};
+
+/**
+ * A content part's props for its tone (see `useContentTone`): its
+ * `data-backdrop-tone` and a color scheme of its own (its text's
+ * `light-dark()` colors by it), for `withStyle`.
+ */
+export const contentToneProps = (
+  tone: BackdropTone | undefined,
+): { 'data-backdrop-tone'?: BackdropTone; style: Record<string, string> } =>
+  tone === undefined
+    ? { style: {} }
+    : {
+        'data-backdrop-tone': tone,
+        style: colorSchemeStyle(tone === 'bright' ? 'light' : 'dark'),
+      };
 
 /**
  * The context of the glass bar a component is in (e.g. a `Toolbar`'s), for

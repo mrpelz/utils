@@ -197,8 +197,9 @@ export const SymbolOverview: FunctionComponent = () => (
         variant) fades in over its icon, as far as its host’s{' '}
         <code>--uikit-symbol-emphasis</code> says (0 to 1, inherited). A
         selected <a href={publicUrl('tab-bar')}>Tab Bar</a> tab, a checked{' '}
-        <a href={publicUrl('segmented')}>Segmented</a> item and a selected{' '}
-        <a href={publicUrl('sidebar')}>Sidebar</a> row set it. Both icons are
+        <a href={publicUrl('segmented')}>Segmented</a> item, a selected{' '}
+        <a href={publicUrl('sidebar')}>Sidebar</a> row and a{' '}
+        <a href={publicUrl('card')}>Card</a> that’s on set it. Both icons are
         given, and the host’s state picks one, so an uncontrolled tab bar’s
         symbols follow it.
       </li>

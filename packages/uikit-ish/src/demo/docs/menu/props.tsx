@@ -38,6 +38,12 @@ export const propOptionsPopup = {
   finalFocus: [undefined, false, true] as const,
 };
 
+/** A menu's popup (`Menu.Popup`): its items' order too. */
+export const propOptionsPopupOrdered = {
+  ...propOptionsPopup,
+  order: [undefined, 'static', 'nearest'] as const,
+};
+
 export const propOptionsItem = {
   ...commonPropOptions,
   disabled: [undefined, false, true] as const,

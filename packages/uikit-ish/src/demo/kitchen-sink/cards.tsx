@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   cardSizes,
+  ControlCards,
   forwardClick,
   type GlassContextValue,
   Grid,
@@ -13,26 +14,25 @@ import {
   List,
   Page,
   Segmented,
-  Slider,
   Switch,
   Symbol,
-  type SymbolIcon,
   Toolbar,
-  useCardOrientation,
   useGridItem,
   Viewport,
 } from '../../components/index.js';
+import { cardTints } from '../tooling/card-kit.js';
 import { FlipParts } from '../tooling/flip.js';
 import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
 import {
   sfDoorLeftHandClosed,
   sfDoorLeftHandOpen,
+  sfFan,
   sfFanFill,
   sfHumidityFill,
   sfLightbulb,
   sfLightbulbFill,
   sfLockFill,
-  sfLockOpenFill,
+  sfLockOpen,
   sfPhoto,
   sfThermometerMedium,
   sfWindowShadeClosed,
@@ -42,6 +42,7 @@ import {
   type Expansion,
   lightsStore,
   type Tile,
+  Toned,
   TonedCard,
   useIsLarge,
   useLights,
@@ -75,9 +76,16 @@ const celsius: Intl.NumberFormatOptions = {
   unit: 'celsius',
 };
 
+/** A share, whole percent. */
+const percent: Intl.NumberFormatOptions = {
+  maximumFractionDigits: 0,
+  style: 'percent',
+};
+
 /**
- * Heating: small, the room's temperature; expanded, a slider setting what
- * it heats to. Its corner button expands it and makes it small again.
+ * Heating: small, the room's temperature; expanded, a slider filling it
+ * (ControlCards' `SliderFill`) setting what it heats to. Its corner button
+ * expands it and makes it small again.
  */
 const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
   expansion,
@@ -87,11 +95,14 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
   const isExpanded = useIsLarge();
   return (
     <TonedCard
-      // (Small, a press anywhere on it as on its button; expanded, its
-      // slider's, the button alone expanding it no more.)
+      // (Small, a press anywhere on it as on its button (shown: expanding
+      // changing it); expanded, its slider's, the button alone expanding
+      // it no more.)
       onClick={
         expansion && !isExpanded
-          ? forwardClick('[data-card-part=corner-button]')
+          ? forwardClick(
+              '[data-card-part=corner-button]:not([data-grid-hidden])',
+            )
           : undefined
       }
     >
@@ -101,24 +112,16 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
         <Symbol icon={sfThermometerMedium} />
       </Card.Symbol>
       {isExpanded ? (
-        <Slider.Root
+        <ControlCards.SliderFill
           format={celsius}
           max={26}
           min={16}
+          name="Heat to"
           step={0.5}
-          tint="var(--color-ui-system-orange)"
+          tint={cardTints.heat}
           value={target}
-          onValueChange={(next) => setTarget(next as number)}
-        >
-          <Slider.Control>
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb aria-label="Heat to" />
-            </Slider.Track>
-          </Slider.Control>
-          <Slider.Label>Heat to</Slider.Label>
-          <Slider.Value />
-        </Slider.Root>
+          onValueChange={setTarget}
+        />
       ) : (
         <>
           <Card.Title>Heating</Card.Title>
@@ -129,137 +132,44 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
         </>
       )}
       {expansion ? (
-        <Card.CornerButton
-          mirrored
-          aria-expanded={isExpanded}
-          aria-label="Heating details"
-          icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
-          onClick={expansion.onToggle}
+        <ControlCards.ExpandButton
+          collapsedSize={expansion.collapsedSize}
+          expanded={expansion.isExpanded}
+          expandedSize={expansion.expandedSize}
+          label="Heating details"
+          onExpandedChange={expansion.onToggle}
         />
       ) : null}
     </TonedCard>
   );
 };
 
-/** A binary display: a state, shown by its symbol and its words. */
-const StateCard: FunctionComponent<{
-  icons: readonly [on: SymbolIcon, off: SymbolIcon];
-  isOn: boolean;
-  name: string;
-  words: readonly [on: string, off: string];
-}> = ({ icons, isOn, name, words }) => (
-  <TonedCard active={isOn}>
-    <Card.Symbol>
-      <Symbol icon={isOn ? icons[0] : icons[1]} />
-    </Card.Symbol>
-    <Card.Title>{name}</Card.Title>
-    <Card.Value>{isOn ? words[0] : words[1]}</Card.Value>
-  </TonedCard>
-);
-
-/** A binary control: a switch, the whole card toggling it. */
-const SwitchCard: FunctionComponent<{
-  defaultOn?: boolean;
-  icons: readonly [on: SymbolIcon, off: SymbolIcon];
-  name: string;
-}> = ({ defaultOn = false, icons, name }) => {
-  const [isOn, setIsOn] = useState(defaultOn);
-  return (
-    <TonedCard
-      active={isOn}
-      onClick={forwardClick('[role=switch]')}
-    >
-      <Card.Symbol>
-        <Symbol icon={isOn ? icons[0] : icons[1]} />
-      </Card.Symbol>
-      <Card.Title>{name}</Card.Title>
-      <Card.Value>{isOn ? 'On' : 'Off'}</Card.Value>
-      <Switch.Root
-        aria-label={name}
-        checked={isOn}
-        onCheckedChange={setIsOn}
-      >
-        <Switch.Thumb />
-      </Switch.Root>
-    </TonedCard>
-  );
-};
-
-/** A numerical display: a value, formatted as the app says. */
-const ValueCard: FunctionComponent<{
-  format: Intl.NumberFormatOptions;
-  icon: SymbolIcon;
-  name: string;
-  value: number;
-}> = ({ format, icon, name, value }) => (
-  <TonedCard>
-    <Card.Symbol>
-      <Symbol icon={icon} />
-    </Card.Symbol>
-    <Card.Title>{name}</Card.Title>
-    <Card.Value
-      format={format}
-      value={value}
-    />
-  </TonedCard>
-);
-
 /**
- * A numerical control: a slider, the card its track, across or upright
- * by its tile's shape; stepped (`step`), with ticks.
+ * A dimmer: a slider card controlling a brightness, with a switch. How the
+ * two go together is the app's (here: its value set while off is where it
+ * comes on; switched on at its minimum, at its maximum).
  */
-const SliderCard: FunctionComponent<{
-  defaultValue: number;
-  format: Intl.NumberFormatOptions;
-  icon: SymbolIcon;
-  max: number;
-  min: number;
-  name: string;
-  step?: number;
-  /** Switchable: on above its minimum (e.g. a dimmer; not blinds). */
-  switchable?: boolean;
-  tint?: string;
-}> = ({
-  defaultValue,
-  format,
-  icon,
-  max,
-  min,
-  name,
-  step,
-  switchable = false,
-  tint,
-}) => {
-  const orientation = useCardOrientation();
-  const [value, setValue] = useState(defaultValue);
+const DimmerCard: FunctionComponent = () => {
+  const [value, setValue] = useState(0.6);
+  const [isOn, setIsOn] = useState(true);
   return (
-    <TonedCard active={switchable ? value > min : undefined}>
-      <Card.Symbol>
-        <Symbol icon={icon} />
-      </Card.Symbol>
-      <Slider.Root
-        format={format}
-        max={max}
-        min={min}
-        orientation={orientation}
-        step={step ?? 0.01}
-        tint={tint}
-        value={value}
-        onValueChange={(next) => setValue(next as number)}
-      >
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            {step === undefined ? null : (
-              <Slider.Ticks count={Math.round((max - min) / step) + 1} />
-            )}
-            <Slider.Thumb aria-label={name} />
-          </Slider.Track>
-        </Slider.Control>
-        <Slider.Label>{name}</Slider.Label>
-        <Slider.Value />
-      </Slider.Root>
-    </TonedCard>
+    <Toned.Slider
+      brightness
+      checked={isOn}
+      emphasizedIcon={sfLightbulbFill}
+      format={percent}
+      icon={sfLightbulb}
+      max={1}
+      min={0}
+      name="Dimmer"
+      tint={cardTints.light}
+      value={value}
+      onValueChange={setValue}
+      onCheckedChange={(next) => {
+        setIsOn(next);
+        if (next && value <= 0) setValue(1);
+      }}
+    />
   );
 };
 
@@ -269,29 +179,28 @@ const SliderCard: FunctionComponent<{
  */
 
 /**
- * The lights: how many are on, bright while any is (`active`); its corner
- * button goes to their page (`card/lights`), a switch per light; a press
- * anywhere on it as on that button (it has no control of its own).
+ * The lights: how many are on, bright while any is (a state card); its
+ * corner button goes to their page (`card/lights`), a switch per light; a
+ * press anywhere on it as on that button (it has no control of its own).
  */
 const LightsCard: FunctionComponent = () => {
   const push = usePush();
   const onCount = Object.values(useLights()).filter(Boolean).length;
   return (
-    <TonedCard
+    <Toned.State
       active={onCount > 0}
+      emphasizedIcon={sfLightbulbFill}
+      icon={sfLightbulb}
+      name="Lights"
+      states={[`${String(onCount)} On`, 'Off']}
       onClick={forwardClick('[data-card-part=corner-button]')}
     >
-      <Card.Symbol>
-        <Symbol icon={onCount > 0 ? sfLightbulbFill : sfLightbulb} />
-      </Card.Symbol>
-      <Card.Title>Lights</Card.Title>
-      <Card.Value>{onCount > 0 ? `${String(onCount)} On` : 'Off'}</Card.Value>
       <Card.CornerButton
         aria-label="Lights"
         icon={gridIcons.drillIn}
         onClick={() => push('card/lights')}
       />
-    </TonedCard>
+    </Toned.State>
   );
 };
 
@@ -354,18 +263,9 @@ const CameraCard: FunctionComponent = () => {
       <Card.Value>{isOpen ? 'Live, recording' : 'Live'}</Card.Value>
       {/* (Opening it, closed; its x, open, where the others' are: each
           fading as it grows and shrinks.) */}
-      <Card.CornerButton
-        aria-label="Front Door Camera"
-        icon={gridIcons.open}
-        visible={!isOpen}
-        onClick={() => item?.setOpen(true)}
-      />
-      <Card.CornerButton
-        aria-label="Close"
-        corner="top-leading"
-        icon={gridIcons.close}
-        visible={isOpen}
-        onClick={() => item?.setOpen(false)}
+      <ControlCards.OpenButtons
+        closeLabel="Close"
+        label="Front Door Camera"
       />
     </TonedCard>
   );
@@ -382,12 +282,12 @@ const EmptyExpandingCard: FunctionComponent<{
 }> = ({ expansion, name }) => (
   <TonedCard>
     {expansion ? (
-      <Card.CornerButton
-        mirrored
-        aria-expanded={expansion.isExpanded}
-        aria-label={name}
-        icon={expansion.isExpanded ? gridIcons.collapse : gridIcons.expand}
-        onClick={expansion.onToggle}
+      <ControlCards.ExpandButton
+        collapsedSize={expansion.collapsedSize}
+        expanded={expansion.isExpanded}
+        expandedSize={expansion.expandedSize}
+        label={name}
+        onExpandedChange={expansion.onToggle}
       />
     ) : null}
   </TonedCard>
@@ -397,40 +297,23 @@ const EmptyExpandingCard: FunctionComponent<{
  * An empty card that opens above the page: its corner button opening it,
  * open, its x closing it (as a press beside it, or Escape).
  */
-const EmptyOpeningCard: FunctionComponent<{ name: string }> = ({ name }) => {
-  const item = useGridItem();
-  const isOpen = item?.open === true;
-  return (
-    <TonedCard>
-      <Card.CornerButton
-        aria-label={name}
-        icon={gridIcons.open}
-        visible={!isOpen}
-        onClick={() => item?.setOpen(true)}
-      />
-      <Card.CornerButton
-        aria-label="Close"
-        corner="top-leading"
-        icon={gridIcons.close}
-        visible={isOpen}
-        onClick={() => item?.setOpen(false)}
-      />
-    </TonedCard>
-  );
-};
-
-const percent: Intl.NumberFormatOptions = {
-  maximumFractionDigits: 0,
-  style: 'percent',
-};
+const EmptyOpeningCard: FunctionComponent<{ name: string }> = ({ name }) => (
+  <TonedCard>
+    <ControlCards.OpenButtons
+      closeLabel="Close"
+      label={name}
+    />
+  </TonedCard>
+);
 
 const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
   'Living Room': [
     {
       card: () => (
-        <SwitchCard
-          defaultOn
-          icons={[sfLightbulbFill, sfLightbulb]}
+        <Toned.Switch
+          defaultChecked
+          emphasizedIcon={sfLightbulbFill}
+          icon={sfLightbulb}
           name="Floor Lamp"
         />
       ),
@@ -440,8 +323,9 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     },
     {
       card: () => (
-        <SwitchCard
-          icons={[sfFanFill, sfFanFill]}
+        <Toned.Switch
+          emphasizedIcon={sfFanFill}
+          icon={sfFan}
           name="Ceiling Fan"
         />
       ),
@@ -450,25 +334,14 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       size: '1x1',
     },
     {
-      card: () => (
-        <SliderCard
-          switchable
-          defaultValue={0.6}
-          format={percent}
-          icon={sfLightbulbFill}
-          max={1}
-          min={0}
-          name="Dimmer"
-          tint="var(--color-ui-system-yellow)"
-        />
-      ),
+      card: DimmerCard,
       kind: 'numericalControl',
       name: 'Dimmer',
       size: '2x1',
     },
     {
       card: () => (
-        <SliderCard
+        <Toned.Slider
           defaultValue={0.5}
           format={percent}
           icon={sfWindowShadeClosed}
@@ -476,6 +349,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           min={0}
           name="Blinds"
           step={0.25}
+          tint={cardTints.shade}
         />
       ),
       kind: 'numericalControl',
@@ -486,7 +360,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
   Climate: [
     {
       card: () => (
-        <ValueCard
+        <Toned.Value
           icon={sfThermometerMedium}
           name="Living Room Temperature"
           value={21.5}
@@ -504,7 +378,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     },
     {
       card: () => (
-        <ValueCard
+        <Toned.Value
           format={percent}
           icon={sfHumidityFill}
           name="Humidity"
@@ -517,14 +391,14 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     },
     {
       card: () => (
-        <SliderCard
+        <Toned.Slider
           defaultValue={21}
           icon={sfThermometerMedium}
           max={25}
           min={15}
           name="Thermostat"
           step={0.5}
-          tint="var(--color-ui-system-orange)"
+          tint={cardTints.heat}
           format={{
             maximumFractionDigits: 1,
             style: 'unit',
@@ -538,7 +412,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     },
     {
       card: () => (
-        <ValueCard
+        <Toned.Value
           icon={sfFanFill}
           name="Wind"
           value={12.5}
@@ -629,11 +503,12 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
   Security: [
     {
       card: () => (
-        <StateCard
-          isOn
-          icons={[sfLockFill, sfLockOpenFill]}
+        <Toned.State
+          active
+          emphasizedIcon={sfLockFill}
+          icon={sfLockOpen}
           name="Front Door"
-          words={['Locked', 'Unlocked']}
+          states={['Locked', 'Unlocked']}
         />
       ),
       kind: 'binaryDisplay',
@@ -642,11 +517,12 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     },
     {
       card: () => (
-        <StateCard
-          icons={[sfDoorLeftHandOpen, sfDoorLeftHandClosed]}
-          isOn={false}
+        <Toned.State
+          active={false}
+          emphasizedIcon={sfDoorLeftHandOpen}
+          icon={sfDoorLeftHandClosed}
           name="Back Door"
-          words={['Open', 'Closed']}
+          states={['Open', 'Closed']}
         />
       ),
       kind: 'binaryDisplay',
@@ -784,9 +660,9 @@ const CardsApp: FunctionComponent = () => {
                       sizes,
                     }) => {
                       const isExpanded = expanded.has(name);
-                      // (Expanding only where that's larger than it is.)
-                      const canExpand =
-                        expandedSize !== undefined && expandedSize !== size;
+                      // (Expanding, its button shown only where that
+                      // changes its size, at these columns too.)
+                      const canExpand = expandedSize !== undefined;
                       return (
                         <Grid.Item
                           key={name}
@@ -803,7 +679,12 @@ const CardsApp: FunctionComponent = () => {
                           <CardOf
                             expansion={
                               canExpand
-                                ? { isExpanded, onToggle: () => toggle(name) }
+                                ? {
+                                    collapsedSize: size,
+                                    expandedSize,
+                                    isExpanded,
+                                    onToggle: () => toggle(name),
+                                  }
                                 : undefined
                             }
                           />
@@ -828,13 +709,14 @@ const CardsApp: FunctionComponent = () => {
             <SectionHeaderAlone />
             <div className="kitchen-sink-cards-alone-row">
               <div>
-                <SwitchCard
-                  icons={[sfLightbulbFill, sfLightbulb]}
+                <ControlCards.Switch
+                  emphasizedIcon={sfLightbulbFill}
+                  icon={sfLightbulb}
                   name="Desk Lamp"
                 />
               </div>
               <div>
-                <ValueCard
+                <ControlCards.Value
                   format={percent}
                   icon={sfHumidityFill}
                   name="Humidity"

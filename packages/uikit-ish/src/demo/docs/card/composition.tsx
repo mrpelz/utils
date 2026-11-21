@@ -17,6 +17,7 @@ import {
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
+import { usePresentation } from '../../tooling/frame/presentation.js';
 import {
   type PartProps,
   usePartControls,
@@ -38,101 +39,12 @@ import {
   lightsCard,
   lightsInitial,
   lockCard,
+  partsOfTiles,
   temperatureCard,
 } from './content.js';
 import { cardsStage, stageParts, useCardsStage } from './main.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
-
-const switchCode = `// A lamp: its switch in the card, a press anywhere on it toggling it.
-const LampCard = ({ name }) => {
-  const [isOn, setIsOn] = useState(true);
-  return (
-    <Card.Root active={isOn} onClick={forwardClick('[role=switch]')}>
-      <Card.Symbol>
-        <Symbol icon={isOn ? sfLightbulbFill : sfLightbulb} />
-      </Card.Symbol>
-      <Card.Title>{name}</Card.Title>
-      <Card.Value>{isOn ? 'On' : 'Off'}</Card.Value>
-      <Switch.Root aria-label={name} checked={isOn} onCheckedChange={setIsOn}>
-        <Switch.Thumb />
-      </Switch.Root>
-    </Card.Root>
-  );
-};
-
-<Grid.Item size="2x1" supportedSizes={cardSizes.binaryControl}>
-  <LampCard name="Floor Lamp" />
-  <Grid.ResizeHandle />
-</Grid.Item>`;
-
-const sliderCode = `// A dimmer: a slider in the card, across or upright by its tile's shape.
-const DimmerCard = ({ name, step }) => {
-  const orientation = useCardOrientation();
-  const [value, setValue] = useState(0.6);
-  return (
-    <Card.Root>
-      <Card.Symbol>
-        <Symbol icon={sfLightbulbFill} />
-      </Card.Symbol>
-      <Slider.Root
-        format={{ maximumFractionDigits: 0, style: 'percent' }}
-        max={1}
-        min={0}
-        orientation={orientation}
-        step={step ?? 0.01}
-        tint="var(--color-ui-system-yellow)"
-        value={value}
-        onValueChange={setValue}
-      >
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator />
-            {step ? <Slider.Ticks count={Math.round(1 / step) + 1} /> : null}
-            <Slider.Thumb aria-label={name} />
-          </Slider.Track>
-        </Slider.Control>
-        <Slider.Label>{name}</Slider.Label>
-        <Slider.Value />
-      </Slider.Root>
-    </Card.Root>
-  );
-};
-
-<Grid.Item size="2x1" supportedSizes={cardSizes.numericalControl}>
-  <DimmerCard name="Dimmer" />
-  <Grid.ResizeHandle />
-</Grid.Item>
-<Grid.Item size="1x2" supportedSizes={cardSizes.numericalControl}>
-  <DimmerCard name="Blinds" step={0.25} />
-  <Grid.ResizeHandle />
-</Grid.Item>`;
-
-const displayCode = `// A lock's state, in words; bright while it's locked.
-<Card.Root active={isLocked}>
-  <Card.Symbol>
-    <Symbol icon={isLocked ? sfLockFill : sfLockOpenFill} />
-  </Card.Symbol>
-  <Card.Title>Front Door</Card.Title>
-  <Card.Value>{isLocked ? 'Locked' : 'Unlocked'}</Card.Value>
-</Card.Root>
-
-// A temperature, with one decimal place, in degrees Celsius.
-<Card.Root>
-  <Card.Symbol>
-    <Symbol icon={sfThermometerMedium} />
-  </Card.Symbol>
-  <Card.Title>Living Room</Card.Title>
-  <Card.Value
-    format={{
-      maximumFractionDigits: 1,
-      minimumFractionDigits: 1,
-      style: 'unit',
-      unit: 'celsius',
-    }}
-    value={21.5}
-  />
-</Card.Root>`;
 
 const expandCode = `// Heating: small, the room's temperature; expanded, a slider setting
 // what it heats to. Its corner button asks for the other.
@@ -143,14 +55,16 @@ const celsius = {
   unit: 'celsius',
 };
 
-const HeatingCard = ({ isExpanded, onToggle }) => {
+const HeatingCard = ({ isExpanded, onToggle, size }) => {
   const [target, setTarget] = useState(22);
   return (
-    // Small, a press anywhere on it as on its button; expanded, the slider
-    // takes it.
+    // Small, a press anywhere on it as on its button (while it's shown);
+    // expanded, the slider takes it.
     <Card.Root
       onClick={
-        isExpanded ? undefined : forwardClick('[data-card-part=corner-button]')
+        isExpanded
+          ? undefined
+          : forwardClick('[data-card-part=corner-button]:not([data-grid-hidden])')
       }
     >
       {/* Its parts moved from where they were as it expands (see
@@ -160,35 +74,31 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
         <Symbol icon={sfThermometerMedium} />
       </Card.Symbol>
       {isExpanded ? (
-        <Slider.Root
+        // A slider filling the card (ControlCards' SliderFill).
+        <ControlCards.SliderFill
           format={celsius}
           max={26}
           min={16}
+          name="Heat to"
           step={0.5}
+          tint="oklch(72% 0.17 50)"
           value={target}
           onValueChange={setTarget}
-        >
-          <Slider.Control>
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb aria-label="Heat to" />
-            </Slider.Track>
-          </Slider.Control>
-          <Slider.Label>Heat to</Slider.Label>
-          <Slider.Value />
-        </Slider.Root>
+        />
       ) : (
         <>
           <Card.Title>Heating</Card.Title>
           <Card.Value format={celsius} value={21.5} />
         </>
       )}
-      <Card.CornerButton
-        mirrored
-        aria-expanded={isExpanded}
-        aria-label="Heating details"
-        icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
-        onClick={onToggle}
+      {/* Hidden while expanding changes nothing (e.g. too few columns);
+          its icon by which way it goes. */}
+      <ControlCards.ExpandButton
+        collapsedSize={size}
+        expanded={isExpanded}
+        expandedSize="2x2"
+        label="Heating details"
+        onExpandedChange={onToggle}
       />
     </Card.Root>
   );
@@ -220,6 +130,7 @@ const [editing, setEditing] = useState(false);
   >
     <HeatingCard
       isExpanded={isExpanded}
+      size={size}
       onToggle={() => setIsExpanded(!isExpanded)}
     />
     <Grid.ResizeHandle />
@@ -244,7 +155,7 @@ const LightsCard = ({ onDrillIn }) => (
     onClick={forwardClick('[data-card-part=corner-button]')}
   >
     <Card.Symbol>
-      <Symbol icon={sfLightbulbFill} />
+      <Symbol icon={sfLightbulb} emphasizedIcon={sfLightbulbFill} />
     </Card.Symbol>
     <Card.Title>Lights</Card.Title>
     <Card.Value>{onCount > 0 ? onCount + ' On' : 'Off'}</Card.Value>
@@ -308,7 +219,8 @@ const LightsCard = ({ onDrillIn }) => (
 </Navigation.Root>`;
 
 const overlayCode = `// A camera: open above the page, it shows more; its corner button opens
-// it (and a press anywhere on it), an x closes it.
+// it (and a press anywhere on it), an x closes it (ControlCards'
+// OpenButtons: its item's open and setOpen).
 const CameraCard = () => {
   const item = useGridItem();
   const isOpen = item?.open === true;
@@ -329,19 +241,7 @@ const CameraCard = () => {
       <Card.Title>Front Door Camera</Card.Title>
       <Card.Value>{isOpen ? 'Live, recording since 8:12' : 'Live'}</Card.Value>
       {/* Opening it while it's closed; its x while it's open. */}
-      <Card.CornerButton
-        aria-label="Front Door Camera"
-        icon={gridIcons.open}
-        visible={!isOpen}
-        onClick={() => item?.setOpen(true)}
-      />
-      <Card.CornerButton
-        aria-label="Close"
-        corner="top-leading"
-        icon={gridIcons.close}
-        visible={isOpen}
-        onClick={() => item?.setOpen(false)}
-      />
+      <ControlCards.OpenButtons closeLabel="Close" label="Front Door Camera" />
     </Card.Root>
   );
 };
@@ -361,67 +261,117 @@ const sizeCode = `// The app's: its cards' parts moved from where they were as t
 // changes its box, with GSAP (the app's dependency, not the library's): a
 // translate and one scale each (its text's size), never their sizes (a
 // card's parts are laid out on a grid: tweening a part's width moves the
-// others). Placed in a card, it shows nothing.
+// others). By the tile's timing: its duration, its easing, its elapsed
+// time. Placed in a card, it shows nothing.
 import { gsap } from 'gsap';
+import { CustomEase } from 'gsap/CustomEase';
 
-const parts =
-  '[data-card-part]:not([data-card-part="root"], [data-card-part="corner-button"])';
+gsap.registerPlugin(CustomEase);
 
-// Where each part is in its card, its text's size, its text.
-const placesOf = (card) => {
-  const box = card.getBoundingClientRect();
-  return new Map(
-    [...card.querySelectorAll(parts)].map((part) => {
-      const at = part.getBoundingClientRect();
-      return [
-        part.dataset.cardPart,
-        {
-          size: parseFloat(getComputedStyle(part).fontSize),
-          text: part.textContent,
-          x: at.left - box.left,
-          y: at.top - box.top,
-        },
-      ];
-    }),
+// The tile's easing (a CSS cubic-bezier) as GSAP's, made once each.
+const eases = new Map();
+const easeOf = (easing) => {
+  const points = /^cubic-bezier\\(([^)]+)\\)$/.exec(easing)?.[1];
+  if (!points) return 'power3.out';
+  if (!eases.has(easing)) {
+    const [x1, y1, x2, y2] = points.split(',').map((each) => each.trim());
+    eases.set(
+      easing,
+      CustomEase.create(\`ease-\${eases.size}\`, \`M0,0 C\${x1},\${y1} \${x2},\${y2} 1,1\`),
+    );
+  }
+  return eases.get(easing);
+};
+
+const partsOf = (card) =>
+  card.querySelectorAll(
+    '[data-card-part]:not([data-card-part="root"], [data-card-part="corner-button"])',
   );
+
+// Where each part is drawn in its card (from its leading top corner), its
+// text's size (a move of its running: at its scale), its text.
+const placesOf = (card) => {
+  const isRtl = getComputedStyle(card).direction === 'rtl';
+  const box = card.getBoundingClientRect();
+  const places = new Map();
+  for (const part of partsOf(card)) {
+    if (part.getClientRects().length === 0) continue;
+    const at = part.getBoundingClientRect();
+    places.set(part.dataset.cardPart, {
+      fontSize:
+        parseFloat(getComputedStyle(part).fontSize) *
+        Number(gsap.getProperty(part, 'scale') || 1),
+      text: part.textContent,
+      x: isRtl ? box.right - at.right : at.left - box.left,
+      y: at.top - box.top,
+    });
+  }
+  return [places, isRtl];
 };
 
 const FlipParts = () => {
   const marker = useRef(null);
   const before = useRef();
-  const cardOf = () => marker.current.closest('[data-card-part="root"]');
+  const running = useRef();
+  const cardOf = () => marker.current?.closest('[data-card-part="root"]');
   useGridItemLayout({
-    // Where they are, before the change.
+    // Where they're drawn, before the change; a move still running let go
+    // (what's measured after is where they're laid out).
     onBeforeChange: () => {
-      before.current = placesOf(cardOf());
+      const card = cardOf();
+      if (!card) return;
+      [before.current] = placesOf(card);
+      running.current?.();
     },
     // Laid out anew, the tile still at its old box: moved from where they
     // were, in step with the tile.
-    onAfterChange: ({ duration, elapsed }) => {
+    onAfterChange: ({ duration, easing, elapsed }) => {
       const card = cardOf();
-      const after = placesOf(card);
+      const from = before.current;
+      before.current = undefined;
+      if (!card || !from) return;
+      const [to, isRtl] = placesOf(card);
       const timeline = gsap.timeline({ paused: true });
-      for (const part of card.querySelectorAll(parts)) {
-        const from = before.current.get(part.dataset.cardPart);
-        const to = after.get(part.dataset.cardPart);
-        if (!from || !to) continue;
+      for (const part of partsOf(card)) {
+        const old = from.get(part.dataset.cardPart);
+        const now = to.get(part.dataset.cardPart);
+        if (!old || !now) continue;
         timeline.fromTo(
           part,
           {
-            scale: from.text === to.text ? from.size / to.size : 1,
-            transformOrigin: 'left top',
-            x: from.x - to.x,
-            y: from.y - to.y,
+            // Its text as large as it was, when it's the same text.
+            scale: old.text === now.text ? old.fontSize / now.fontSize : 1,
+            transformOrigin: isRtl ? 'right top' : 'left top',
+            x: isRtl ? now.x - old.x : old.x - now.x,
+            y: old.y - now.y,
           },
-          { clearProps: 'transform', duration: duration / 1000, ease: 'power3.out', scale: 1, x: 0, y: 0 },
+          {
+            clearProps: 'transform,transformOrigin',
+            duration: duration / 1000,
+            ease: easeOf(easing),
+            scale: 1,
+            x: 0,
+            y: 0,
+          },
           0,
         );
       }
-      const follow = () => {
-        timeline.time(Math.min(elapsed(), duration) / 1000);
-        if (elapsed() < duration) requestAnimationFrame(follow);
+      // Its time set from the tile's each frame; done, killed.
+      let frame = 0;
+      const stop = () => {
+        cancelAnimationFrame(frame);
+        timeline.progress(1).kill();
+        if (running.current === stop) running.current = undefined;
       };
-      requestAnimationFrame(follow);
+      const follow = () => {
+        const time = elapsed();
+        timeline.time(Math.min(time, duration) / 1000);
+        if (time >= duration) stop();
+        else frame = requestAnimationFrame(follow);
+      };
+      running.current = stop;
+      timeline.time(0);
+      frame = requestAnimationFrame(follow);
     },
   });
   return <span ref={marker} hidden />;
@@ -440,7 +390,9 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
   return (
     <Card.Root
       onClick={
-        isExpanded ? undefined : forwardClick('[data-card-part=corner-button]')
+        isExpanded
+          ? undefined
+          : forwardClick('[data-card-part=corner-button]:not([data-grid-hidden])')
       }
     >
       <FlipParts />
@@ -450,35 +402,28 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
       </Card.Symbol>
       {isExpanded ? (
         // Only in the larger form: shown as the card's edge passes it.
-        <Slider.Root
+        <ControlCards.SliderFill
           format={celsius}
           max={26}
           min={16}
+          name="Heat to"
           step={0.5}
+          tint="oklch(72% 0.17 50)"
           value={target}
           onValueChange={setTarget}
-        >
-          <Slider.Control>
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb aria-label="Heat to" />
-            </Slider.Track>
-          </Slider.Control>
-          <Slider.Label>Heat to</Slider.Label>
-          <Slider.Value />
-        </Slider.Root>
+        />
       ) : (
         <>
           <Card.Title>Heating</Card.Title>
           <Card.Value format={celsius} value={21.5} />
         </>
       )}
-      <Card.CornerButton
-        mirrored
-        aria-expanded={isExpanded}
-        aria-label="Heating details"
-        icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
-        onClick={onToggle}
+      <ControlCards.ExpandButton
+        collapsedSize="1x1"
+        expanded={isExpanded}
+        expandedSize="2x2"
+        label="Heating details"
+        onExpandedChange={onToggle}
       />
     </Card.Root>
   );
@@ -498,143 +443,44 @@ const [isExpanded, setIsExpanded] = useState(false);
   <Grid.Area defaultSize="3x2" />
 </Grid.Item>`;
 
-const momentaryCode = `// The doorbell's actions: the app flashes it as it rings at the door.
-const doorbell = useRef(null);
-const [rang, setRang] = useState();
-
-// A momentary card: a press rings the chime (it lights up, fades back).
-<Card.Root momentary actionsRef={doorbell} onClick={() => setRang(Date.now())}>
-  <Card.Symbol>
-    <Symbol icon={sfBellFill} />
-  </Card.Symbol>
-  <Card.Title>Doorbell</Card.Title>
-  <Card.Value>{rang ? \`Rang \${timeOf(rang)}\` : 'Quiet'}</Card.Value>
-</Card.Root>
-
-// As the app's server says someone rang (here, the door button's card):
-// doorbell.current?.flash();`;
-
-const rowsCode = `// A room's summary in rows: a list (inset grouped) in the card.
-const RoomCard = ({ rows }) => {
-  const isOpen = useGridItem()?.open === true;
-  return (
-    <Card.Root>
-      <Card.Symbol>
-        <Symbol icon={sfHouseFill} />
-      </Card.Symbol>
-      <List.Root>
-        <List.Section>
-          <List.Group>
-            {/* As many as fit whole: four on its tile, all open. */}
-            {(isOpen ? rows : rows.slice(0, 4)).map(([icon, label, value]) => (
-              <List.Item key={label}>
-                <List.Leading>
-                  <List.Image variant="symbol">
-                    <Symbol icon={icon} />
-                  </List.Image>
-                </List.Leading>
-                <List.Content>
-                  <List.Title>{label}</List.Title>
-                </List.Content>
-                <List.Trailing>
-                  <List.Detail>{value}</List.Detail>
-                </List.Trailing>
-              </List.Item>
-            ))}
-          </List.Group>
-        </List.Section>
-      </List.Root>
-      <Card.Title>Living Room</Card.Title>
-      {/* Opening it, and its x, as the camera's (see above). */}
-    </Card.Root>
-  );
-};`;
-
-const channelsCode = `// The app's: a card's sliders as bars, one per channel (side by side in a
-// tile taller than a row, else stacked), between its top and its title.
-const ChannelSliders = ({ channels, onChange }) => {
-  const [, rows = '1'] = (useGridItem()?.size ?? '2x2').split('x');
-  const orientation = rows === '1' ? 'horizontal' : 'vertical';
-  return (
-    <div className="channels" data-orientation={orientation}>
-      {channels.map(({ label, name, tint, value }, index) => (
-        <Slider.Root
-          key={name}
-          max={1}
-          min={0}
-          step={0.01}
-          orientation={orientation}
-          tint={tint}
-          value={value}
-          onValueChange={(next) => onChange(index, next)}
-        >
-          <Slider.Control>
-            <Slider.Track>
-              <Slider.Indicator />
-              <Slider.Thumb aria-label={name} />
-            </Slider.Track>
-          </Slider.Control>
-          <Slider.Label aria-hidden="true">{label}</Slider.Label>
-        </Slider.Root>
-      ))}
-    </div>
-  );
-};
-
-/* Its styles: the card's layout's middle row, bars filling it.
-.channels {
-  display: grid;
-  grid-row: 2;
-  grid-column: 1 / -1;
-  align-self: stretch;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  gap: 6px;
-}
-.channels[data-orientation='horizontal'] {
-  grid-auto-flow: row;
-  grid-auto-rows: minmax(0, 1fr);
-}
-.channels .uikit-slider-root { align-self: stretch; justify-self: stretch; }
-.channels .uikit-slider-track { border-radius: 10px; overflow: hidden; }
-.channels .uikit-slider-thumb::before { display: none; }
-*/
-
-// Expanded, the light strip shows a bar per channel.
-{isExpanded ? (
-  <ChannelSliders channels={channels} onChange={setChannel} />
-) : null}`;
-
-const trendCode = `// The app's: an arrow after a value, turned by how steeply it changes
-// (-90 to 90 degrees), named for assistive technology.
-const Trend = ({ angle }) => (
-  <span
-    role="img"
-    aria-label={angle > 10 ? 'rising' : angle < -10 ? 'falling' : 'steady'}
-    className="trend"
-    style={{ '--trend-angle': angle }}
+const rowsCode = `// A room's summary in rows (ControlCards' List): as many as fit whole,
+// four on its tile, all of them open above the page.
+<Grid.Item
+  openLabel="Living Room"
+  openSize="4x4"
+  size="2x2"
+  supportedSizes={['2x2']}
+>
+  <ControlCards.List
+    icon={sfHouseFill}
+    name="Living Room"
+    rows={[
+      { icon: sfLightbulbFill, label: 'Floor Lamp', value: isLampOn ? 'On' : 'Off' },
+      { icon: sfLightbulbFill, label: 'Dimmer', value: '60%' },
+      { icon: sfWindowShadeClosed, label: 'Blinds', value: '50%' },
+      { icon: sfThermometerMedium, label: 'Heating to', value: '22 °C' },
+      { icon: sfHumidityFill, label: 'Humidity', value: '46%' },
+    ]}
   >
-    <Symbol icon={sfArrowRight} />
-  </span>
-);
+    <ControlCards.OpenButtons closeLabel="Close" label="Living Room details" />
+  </ControlCards.List>
+</Grid.Item>`;
 
-/* Its styles: turned by a transform (fine in a scroller).
-.trend {
-  display: inline-block;
-  rotate: calc(-1deg * var(--trend-angle));
-  transition: rotate 600ms;
-}
-.trend:dir(rtl) { rotate: calc(1deg * var(--trend-angle)); scale: -1 1; }
-*/
+const aloneCode = `// No grid: as large as its box, never in edit mode, its parts laid out
+// by that size. A lamp, its switch toggled by a press anywhere on it.
+const [isOn, setIsOn] = useState(true);
 
-<Card.Value>
-  12.4 °C
-  <Trend angle={30} />
-</Card.Value>`;
-
-const aloneCode = `// No grid: as large as its box, never in edit mode.
 <div style={{ height: 100, width: 220 }}>
-  <LampCard name="Desk Lamp" />
+  <Card.Root active={isOn} onClick={forwardClick('[role=switch]')}>
+    <Card.Symbol>
+      <Symbol icon={sfLightbulb} emphasizedIcon={sfLightbulbFill} />
+    </Card.Symbol>
+    <Card.Title>Desk Lamp</Card.Title>
+    <Card.Value>{isOn ? 'On' : 'Off'}</Card.Value>
+    <Switch.Root aria-label="Desk Lamp" checked={isOn} onCheckedChange={setIsOn}>
+      <Switch.Thumb />
+    </Switch.Root>
+  </Card.Root>
 </div>`;
 
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
@@ -642,10 +488,8 @@ const aloneCode = `// No grid: as large as its box, never in edit mode.
 /** A phone with some cards in a grid (see `cardsStage`). */
 const StageView: FunctionComponent<{
   id: string;
-  /** Its cards' roots' props with controls (e.g. `momentary`). */
-  root?: readonly 'momentary'[];
   tiles: readonly CardTile[];
-}> = ({ id, root = [], tiles }) => {
+}> = ({ id, tiles }) => {
   const [log, addLog] = useLog();
   const stage = useCardsStage(addLog, tiles);
   // (Room around a tile: its area's controls too.)
@@ -657,33 +501,28 @@ const StageView: FunctionComponent<{
           {
             ...stageParts,
             ...(hasArea && { 'Grid.Area': ['defaultSize'] as const }),
-            'Card.CornerButton': [
-              'aria-expanded',
-              'aria-label',
-              'icon',
-              'mirrored',
-              'onClick',
-            ],
-            'Card.Root': root,
-            'Card.Symbol': [],
-            'Card.Title': [],
-            'Card.Value': ['children', 'format', 'value'],
+            // (Every part its cards render, see `partsOfTiles`.)
+            ...partsOfTiles(tiles),
           },
           addLog,
         ),
-      [addLog, hasArea, root],
+      // (Its tiles: its view's, one array, never written anew.)
+      [addLog, hasArea, tiles],
     ),
     { provided: useProvidedState(id) },
   );
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Card"
     >
       {cardsStage(stage, partProps)}
@@ -691,102 +530,39 @@ const StageView: FunctionComponent<{
   );
 };
 
-const SwitchView: FunctionComponent = () => (
-  <StageView
-    id="card-composition-switch"
-    tiles={[
-      {
-        kind: 'lamp',
-        name: 'Floor Lamp',
-        size: '2x1',
-        sizes: cardSizes.binaryControl,
-      },
-      {
-        kind: 'fan',
-        name: 'Ceiling Fan',
-        size: '1x1',
-        sizes: cardSizes.binaryControl,
-      },
-    ]}
-  />
-);
-
-const SliderView: FunctionComponent = () => (
-  <StageView
-    id="card-composition-slider"
-    tiles={[
-      {
-        kind: 'dimmer',
-        name: 'Dimmer',
-        size: '2x1',
-        sizes: cardSizes.numericalControl,
-      },
-      {
-        kind: 'blinds',
-        name: 'Blinds',
-        size: '1x2',
-        sizes: cardSizes.numericalControl,
-      },
-    ]}
-  />
-);
-
-const DisplayView: FunctionComponent = () => (
-  <StageView
-    id="card-composition-display"
-    tiles={[
-      {
-        kind: 'lock',
-        name: 'Front Door',
-        size: '2x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-      {
-        kind: 'humidity',
-        name: 'Humidity',
-        size: '1x1',
-        sizes: cardSizes.numericalDisplay,
-      },
-      {
-        kind: 'temperature',
-        name: 'Temperature',
-        size: '2x2',
-        sizes: cardSizes.numericalDisplay,
-      },
-    ]}
-  />
-);
+/** Its tiles (see `ExpandView`): one array, never written anew. */
+const expandTiles: readonly CardTile[] = [
+  {
+    kind: 'heating',
+    expandedSize: '2x2',
+    name: 'Heating',
+    size: '1x1',
+    sizes: cardSizes.numericalDisplay,
+  },
+  {
+    kind: 'humidity',
+    name: 'Humidity',
+    size: '1x1',
+    sizes: cardSizes.numericalDisplay,
+  },
+  {
+    kind: 'lamp',
+    name: 'Floor Lamp',
+    size: '2x1',
+    sizes: cardSizes.binaryControl,
+  },
+  {
+    kind: 'lock',
+    name: 'Front Door',
+    size: '1x1',
+    sizes: cardSizes.binaryDisplay,
+  },
+];
 
 const ExpandView: FunctionComponent = () => (
   <StageView
     id="card-composition-expand"
-    tiles={[
-      {
-        kind: 'heating',
-        expandedSize: '2x2',
-        name: 'Heating',
-        size: '1x1',
-        sizes: cardSizes.numericalDisplay,
-      },
-      {
-        kind: 'humidity',
-        name: 'Humidity',
-        size: '1x1',
-        sizes: cardSizes.numericalDisplay,
-      },
-      {
-        kind: 'lamp',
-        name: 'Floor Lamp',
-        size: '2x1',
-        sizes: cardSizes.binaryControl,
-      },
-      {
-        kind: 'lock',
-        name: 'Front Door',
-        size: '1x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-    ]}
+    tiles={expandTiles}
   />
 );
 
@@ -844,14 +620,17 @@ const DrillView: FunctionComponent = () => {
   );
   const parts: PartProps = partProps;
 
+  const [presentationControl, presentation, presentationState] =
+    usePresentation(id);
+
   return (
     <Component
       isInline
-      controls={[partControls]}
+      controls={[presentationControl, partControls]}
       id={id}
       log={log}
-      stage="phone"
-      state={[partState]}
+      stage={presentation}
+      state={[partState, presentationState]}
       title="Card"
     >
       <Viewport.Background>
@@ -1006,140 +785,102 @@ const DrillView: FunctionComponent = () => {
   );
 };
 
+/** Its tiles (see `OverlayView`): one array, never written anew. */
+const overlayTiles: readonly CardTile[] = [
+  {
+    kind: 'camera',
+    name: 'Front Door Camera',
+    openSize: '4x3',
+    size: '2x1',
+    sizes: cardSizes.binaryDisplay,
+  },
+  {
+    kind: 'lock',
+    name: 'Front Door',
+    size: '1x1',
+    sizes: cardSizes.binaryDisplay,
+  },
+  {
+    kind: 'lamp',
+    name: 'Floor Lamp',
+    size: '2x1',
+    sizes: cardSizes.binaryControl,
+  },
+  {
+    kind: 'humidity',
+    name: 'Humidity',
+    size: '1x1',
+    sizes: cardSizes.numericalDisplay,
+  },
+];
+
 const OverlayView: FunctionComponent = () => (
   <StageView
     id="card-composition-overlay"
-    tiles={[
-      {
-        kind: 'camera',
-        name: 'Front Door Camera',
-        openSize: '4x3',
-        size: '2x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-      {
-        kind: 'lock',
-        name: 'Front Door',
-        size: '1x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-      {
-        kind: 'lamp',
-        name: 'Floor Lamp',
-        size: '2x1',
-        sizes: cardSizes.binaryControl,
-      },
-      {
-        kind: 'humidity',
-        name: 'Humidity',
-        size: '1x1',
-        sizes: cardSizes.numericalDisplay,
-      },
-    ]}
+    tiles={overlayTiles}
   />
 );
+
+/** Its tiles (see `SizeView`): one array, never written anew. */
+const sizeTiles: readonly CardTile[] = [
+  {
+    area: '3x2',
+    kind: 'heating',
+    expandedSize: '2x2',
+    name: 'Heating',
+    size: '1x1',
+    sizes: cardSizes.numericalDisplay,
+  },
+  {
+    kind: 'camera',
+    name: 'Front Door Camera',
+    openSize: '4x3',
+    size: '2x1',
+    sizes: cardSizes.binaryDisplay,
+  },
+  {
+    kind: 'lock',
+    name: 'Front Door',
+    size: '1x1',
+    sizes: cardSizes.binaryDisplay,
+  },
+];
 
 const SizeView: FunctionComponent = () => (
   <StageView
     id="card-composition-changing-size"
-    tiles={[
-      {
-        area: '3x2',
-        kind: 'heating',
-        expandedSize: '2x2',
-        name: 'Heating',
-        size: '1x1',
-        sizes: cardSizes.numericalDisplay,
-      },
-      {
-        kind: 'camera',
-        name: 'Front Door Camera',
-        openSize: '4x3',
-        size: '2x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-      {
-        kind: 'lock',
-        name: 'Front Door',
-        size: '1x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-    ]}
+    tiles={sizeTiles}
   />
 );
 
-/** Cards on their own: no grid, in boxes of their own sizes. */
-const MomentaryView: FunctionComponent = () => (
-  <StageView
-    id="card-composition-momentary"
-    root={['momentary']}
-    tiles={[
-      {
-        kind: 'doorbell',
-        name: 'Doorbell',
-        size: '2x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-      {
-        kind: 'doorButton',
-        name: 'Door Button',
-        size: '2x1',
-        sizes: cardSizes.binaryDisplay,
-      },
-    ]}
-  />
-);
+/** Its tiles (see `RowsView`): one array, never written anew. */
+const rowsTiles: readonly CardTile[] = [
+  {
+    kind: 'room',
+    name: 'Living Room',
+    openSize: '4x4',
+    size: '2x2',
+    sizes: ['2x2'],
+  },
+  {
+    kind: 'lamp',
+    name: 'Floor Lamp',
+    size: '2x1',
+    sizes: cardSizes.binaryControl,
+  },
+];
 
 const RowsView: FunctionComponent = () => (
   <StageView
     id="card-composition-rows"
-    tiles={[
-      {
-        kind: 'room',
-        name: 'Living Room',
-        openSize: '4x4',
-        size: '2x2',
-        sizes: ['2x2'],
-      },
-      {
-        kind: 'lamp',
-        name: 'Floor Lamp',
-        size: '2x1',
-        sizes: cardSizes.binaryControl,
-      },
-    ]}
+    tiles={rowsTiles}
   />
 );
 
-const ChannelsView: FunctionComponent = () => (
-  <StageView
-    id="card-composition-channels"
-    tiles={[
-      {
-        expandedSize: '2x2',
-        kind: 'strip',
-        name: 'Light Strip',
-        size: '2x1',
-        sizes: ['1x1', '2x1', '2x2'],
-      },
-    ]}
-  />
-);
+/** Its cards' kinds (see `AloneView`): one array, never written anew. */
+const aloneKinds = [{ kind: 'lamp' }, { kind: 'temperature' }] as const;
 
-const TrendView: FunctionComponent = () => (
-  <StageView
-    id="card-composition-trend"
-    tiles={[
-      {
-        kind: 'outside',
-        name: 'Outside',
-        size: '2x1',
-        sizes: cardSizes.numericalDisplay,
-      },
-    ]}
-  />
-);
-
+/** Cards on their own: no grid, in boxes of their own sizes. */
 const AloneView: FunctionComponent = () => {
   const id = 'card-composition-alone';
   const [log, addLog] = useLog();
@@ -1149,10 +890,8 @@ const AloneView: FunctionComponent = () => {
       () =>
         partPropMaps(
           {
-            'Card.Root': [],
-            'Card.Symbol': [],
-            'Card.Title': [],
-            'Card.Value': ['children', 'format', 'value'],
+            // (Every part its two cards render, see `partsOfTiles`.)
+            ...partsOfTiles(aloneKinds),
             'Page.Root': [],
             'Viewport.Content': [],
           },
@@ -1211,16 +950,10 @@ const AloneView: FunctionComponent = () => {
 
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
-  ['a-switch-in-a-card', 'A switch in a card'],
-  ['a-slider-in-a-card', 'A slider in a card'],
-  ['displays', 'Displays'],
   ['expanding-in-place', 'Expanding in place'],
   ['drilling-in', 'Drilling in'],
   ['opening-above-the-page', 'Opening above the page'],
-  ['momentary-buttons', 'Momentary buttons'],
   ['rows-in-a-card', 'Rows in a card'],
-  ['several-sliders', 'Several sliders (the app’s)'],
-  ['a-value-with-its-trend', 'A value with its trend (the app’s)'],
   ['building-for-changing-sizes', 'Building for changing sizes'],
   ['on-its-own', 'On its own'],
 ];
@@ -1243,115 +976,13 @@ export const CardComposition: FunctionComponent = () => (
         In edit mode, the cards are veiled and can be moved and resized. While
         one is, the veils lift.
       </li>
-    </ul>
-
-    <Heading
-      id="a-switch-in-a-card"
-      level={2}
-    >
-      A switch in a card
-    </Heading>
-    <ul>
       <li>
-        A lamp: a{' '}
-        <PartLink
-          component="switch"
-          part="Switch.Root"
-        />{' '}
-        in a <PartLink part="Card.Root" />, which passes its presses on to it
-        with{' '}
-        <PartLink
-          component="list"
-          part="forwardClick"
-        />
-        , as a list row does.
-      </li>
-      <li>
-        On, the whole card is bright and its symbol takes the switch’s tint. Its
-        words say it too, so color isn’t the only sign.
-      </li>
-      <li>
-        <strong>Library:</strong> the switch styled by the card, its state as
-        the card’s background, presses passed on.
-      </li>
-      <li>
-        <strong>Demo:</strong> the lamp and the fan, their state, their symbols
-        and words, Edit and Done.
+        This page is about what cards do in a grid: expanding, drilling in,
+        opening above the page, changing size. The ready-made cards (a switch, a
+        state, a value, a slider, a button, a light, rows) are on{' '}
+        <a href={publicUrl('control-cards')}>ControlCards</a>’ pages.
       </li>
     </ul>
-    <CodeView code={switchCode} />
-    <SwitchView />
-
-    <Heading
-      id="a-slider-in-a-card"
-      level={2}
-    >
-      A slider in a card
-    </Heading>
-    <ul>
-      <li>
-        A dimmer: a{' '}
-        <PartLink
-          component="slider"
-          part="Slider.Root"
-        />{' '}
-        in a card, the card its track, the fill its background. It has no knob;
-        the card shows the focus ring.
-      </li>
-      <li>
-        Its orientation is <PartLink part="useCardOrientation" />: across in a
-        wide tile, upright in a tall one. Resize the blinds to 2x1 in edit mode
-        and it turns.
-      </li>
-      <li>
-        Its value is the slider’s own <code>format</code>, passed to{' '}
-        <code>Intl.NumberFormat</code>. With a <code>step</code>, it snaps, and{' '}
-        <PartLink
-          component="slider"
-          part="Slider.Ticks"
-        />{' '}
-        mark the steps across the card.
-      </li>
-      <li>
-        <strong>Library:</strong> the slider styled by the card, the tile’s
-        orientation.
-      </li>
-      <li>
-        <strong>Demo:</strong> the dimmer and the blinds (in quarters), their
-        values and tints.
-      </li>
-    </ul>
-    <CodeView code={sliderCode} />
-    <SliderView />
-
-    <Heading
-      id="displays"
-      level={2}
-    >
-      Displays
-    </Heading>
-    <ul>
-      <li>
-        A lock’s state in words, and numbers in <PartLink part="Card.Value" />.
-        The lock is <code>active</code> while it’s locked, so the card is bright
-        then. Nothing on them can be pressed, so they show no press feedback.
-      </li>
-      <li>
-        The formatting is the app’s: the unit, the decimal places and the locale
-        are options for <code>Intl.NumberFormat</code>. At 2x2, the value is
-        large.
-      </li>
-      <li>
-        <strong>Library:</strong> the layout by size, the value formatted with
-        the app’s options.
-      </li>
-      <li>
-        <strong>Demo:</strong> the lock, the temperature and the humidity, their
-        formats.
-      </li>
-    </ul>
-    <CodeView code={displayCode} />
-    <DisplayView />
 
     <Heading
       id="expanding-in-place"
@@ -1377,24 +1008,38 @@ export const CardComposition: FunctionComponent = () => (
         too. Here it isn’t, so the card is small again after a reload.
       </li>
       <li>
-        A <PartLink part="Card.CornerButton" /> asks for the other state. Its
-        icon comes from the same state:{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.ExpandButton"
+        />
+        , a <PartLink part="Card.CornerButton" />, asks for the other state. It
+        gets both sizes and compares them as its item would be them now (
+        <PartLink
+          component="grid"
+          part="useGridItem"
+        />
+        ’s <code>sizeOf</code>). When they come out the same, for example with
+        too few columns, expanding would change nothing, and it hides.
+      </li>
+      <li>
+        Its icon shows which way the card goes:
         <PartLink
           component="grid"
           part="gridIcons"
         />
-        ’s <code>expand</code> while it’s small, <code>collapse</code> while
-        it’s expanded. It’s <code>mirrored</code>, since the triangle points to
-        a corner, and says its state with <code>aria-expanded</code>.
+        ’s <code>expand</code> when it grows, <code>collapse</code> when it
+        shrinks. It’s mirrored, since the triangle points to a corner, and says
+        whether the card is expanded with <code>aria-expanded</code>.
       </li>
       <li>
         Small, the card has no control of its own, so a press anywhere on it
-        expands it too, passed on to the button with{' '}
+        expands it too, passed on to the button with
         <PartLink
           component="list"
           part="forwardClick"
         />
-        . Expanded, the slider takes presses, so only the button collapses it.
+        while the button is shown. Expanded, the slider takes presses, so only
+        the button collapses it.
       </li>
       <li>
         Edit starts with the card small again, so edit mode moves and resizes
@@ -1402,8 +1047,8 @@ export const CardComposition: FunctionComponent = () => (
         card small.
       </li>
       <li>
-        A card already as large as its expanded size has nothing to expand: it
-        shows no button.
+        A card already as large as its expanded size has nothing to expand, so
+        its button hides, as it does when the grid is too narrow for it.
       </li>
       <li>
         Getting there is the grid’s (see Grid’s{' '}
@@ -1416,8 +1061,8 @@ export const CardComposition: FunctionComponent = () => (
         ).
       </li>
       <li>
-        <strong>Library:</strong> the corner button and its icons, the grid
-        making room for the new size.
+        <strong>Library:</strong> the expand button (its sizes compared, its
+        icon), the grid making room for the new size.
       </li>
       <li>
         <strong>Demo:</strong> the expanded state and size, what the card shows
@@ -1500,8 +1145,12 @@ export const CardComposition: FunctionComponent = () => (
           part="Grid.Item"
         />{' '}
         says how large (<code>openSize</code>, here 4x3, fitted to the screen)
-        and what it’s called as a dialog (<code>openLabel</code>). The card
-        opens and closes it with{' '}
+        and what it’s called as a dialog (<code>openLabel</code>).{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.OpenButtons"
+        />{' '}
+        open and close it with{' '}
         <PartLink
           component="grid"
           part="useGridItem"
@@ -1509,7 +1158,8 @@ export const CardComposition: FunctionComponent = () => (
         ’s <code>open</code> and <code>setOpen</code>.
       </li>
       <li>
-        Its corner button shows{' '}
+        They’re two <PartLink part="Card.CornerButton" />
+        s. Closed, one shows{' '}
         <PartLink
           component="grid"
           part="gridIcons"
@@ -1545,7 +1195,7 @@ export const CardComposition: FunctionComponent = () => (
       </li>
       <li>
         <strong>Library:</strong> the lifting, the dimmed page, the stand-in,
-        focus and closing, the corner button and its icons.
+        focus and closing, the open and close buttons.
       </li>
       <li>
         <strong>Demo:</strong> the camera’s card and what it shows open, its
@@ -1556,34 +1206,6 @@ export const CardComposition: FunctionComponent = () => (
     <OverlayView />
 
     <Heading
-      id="momentary-buttons"
-      level={2}
-    >
-      Momentary buttons
-    </Heading>
-    <ul>
-      <li>
-        A doorbell has no state of its own: a press rings its chime. The card is{' '}
-        <code>momentary</code>, so a press lights it up as an active card, for a
-        moment, and it fades back.
-      </li>
-      <li>
-        Its <code>actionsRef</code> gives the app <code>flash()</code>, to do
-        the same from anywhere: here the door button’s card rings it, as the
-        app’s server would tell it someone did.
-      </li>
-      <li>
-        <strong>Library:</strong> the flash and its fade, on a press and by its
-        actions.
-      </li>
-      <li>
-        <strong>Demo:</strong> when it rang, the door button.
-      </li>
-    </ul>
-    <CodeView code={momentaryCode} />
-    <MomentaryView />
-
-    <Heading
       id="rows-in-a-card"
       level={2}
     >
@@ -1591,88 +1213,43 @@ export const CardComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        A room’s summary shows what its other cards say, in rows: a{' '}
+        A room’s summary shows what its other cards say, in rows:{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.List"
+        />
+        , a{' '}
         <PartLink
           component="list"
           part="List.Root"
         />{' '}
-        in its default inset grouped style, between the card’s symbol and its
-        title, its group on the card’s glass as on an island’s. The rows follow
-        the floor lamp’s switch beside it.
+        between the card’s symbol and its title, its group on the card’s glass
+        as on an island’s. The rows follow the floor lamp’s switch beside it.
       </li>
       <li>
-        The list doesn’t scroll in a card, and each row stays on one line. Show
-        as many rows as fit whole: four on its tile, all of them when it’s open
-        above the page.
+        The list doesn’t scroll in a card, and each row stays on one line. The
+        card shows as many rows as fit whole: four on its tile, all five when
+        it’s open above the page.
       </li>
       <li>
-        <strong>Library:</strong> the list placed and colored in the card,
+        It opens with{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.OpenButtons"
+        />
+        , as the camera’s card does (see{' '}
+        <a href="#opening-above-the-page">Opening above the page</a>).
+      </li>
+      <li>
+        <strong>Library:</strong> the list card, its rows fitted to its size,
         opening above the page.
       </li>
       <li>
-        <strong>Demo:</strong> the rows and how many are shown.
+        <strong>Demo:</strong> the rows, following the other cards’ state.
       </li>
     </ul>
     <CodeView code={rowsCode} />
     <RowsView />
-
-    <Heading
-      id="several-sliders"
-      level={2}
-    >
-      Several sliders (the app’s)
-    </Heading>
-    <ul>
-      <li>
-        A light strip of three channels: small, its switch and its symbol in the
-        color they make; expanded, a bar per channel. The bars are the app’s
-        own, built from{' '}
-        <PartLink
-          component="slider"
-          part="Slider.Root"
-        />{' '}
-        and a few styles: too particular for the library, which styles one
-        slider filling a card.
-      </li>
-      <li>
-        They sit in the card’s layout between its top and its title, side by
-        side in a tile taller than a row, stacked across in a row.
-      </li>
-      <li>
-        <strong>Library:</strong> the card’s layout, the switch, expanding.
-      </li>
-      <li>
-        <strong>Demo:</strong> the bars, the mixed color.
-      </li>
-    </ul>
-    <CodeView code={channelsCode} />
-    <ChannelsView />
-
-    <Heading
-      id="a-value-with-its-trend"
-      level={2}
-    >
-      A value with its trend (the app’s)
-    </Heading>
-    <ul>
-      <li>
-        A temperature with an arrow after it, pointing up or down as steeply as
-        it changes. The arrow is the app’s own: a{' '}
-        <PartLink
-          component="symbol"
-          part="Symbol"
-        />{' '}
-        turned by a transform, named rising, falling or steady.
-      </li>
-      <li>
-        <strong>Library:</strong> the card and its value.
-      </li>
-      <li>
-        <strong>Demo:</strong> the arrow and its angle.
-      </li>
-    </ul>
-    <CodeView code={trendCode} />
-    <TrendView />
 
     <Heading
       id="building-for-changing-sizes"
@@ -1728,9 +1305,9 @@ export const CardComposition: FunctionComponent = () => (
       </li>
       <li>
         <strong>Choose detail by size, show state by content.</strong> The
-        card’s layout already follows its size: side by side when it’s wide and
-        one row tall, its value large from about 180px. Switch what it shows
-        when its state changes (expanded, or open with{' '}
+        card’s layout already follows its size: its value is large from about
+        180px. Switch what it shows when its state changes (expanded, or open
+        with{' '}
         <PartLink
           component="grid"
           part="useGridItem"
@@ -1762,11 +1339,16 @@ export const CardComposition: FunctionComponent = () => (
       </li>
       <li>
         <strong>Opening above the page:</strong> give the item an{' '}
-        <code>openSize</code> and an <code>openLabel</code>. Put the x that
-        closes it in the top leading corner and the button that opens it
-        elsewhere, each <code>visible</code> in its own state: one fades out at
-        the start of the move and the other fades in at its end. While the x is
-        there, the symbol moves beside the title, clear of it (see{' '}
+        <code>openSize</code> and an <code>openLabel</code>.{' '}
+        <PartLink
+          component="control-cards"
+          part="ControlCards.OpenButtons"
+        />{' '}
+        put the x that closes it in the top leading corner and the button that
+        opens it in the bottom trailing one, each <code>visible</code> in its
+        own state: one fades out at the start of the move and the other fades in
+        at its end. While the x is there, the symbol moves beside the title,
+        clear of it (see{' '}
         <a href="#opening-above-the-page">Opening above the page</a>).
       </li>
       <li>
@@ -1823,16 +1405,10 @@ export const CardComposition: FunctionComponent = () => (
 
 /** Its live views, also on the component's page of demos (and `/all`). */
 export const cardCompositionDemos = [
-  SwitchView,
-  SliderView,
-  DisplayView,
   ExpandView,
   DrillView,
   OverlayView,
-  MomentaryView,
   RowsView,
-  ChannelsView,
-  TrendView,
   SizeView,
   AloneView,
 ];

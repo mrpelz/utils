@@ -49,6 +49,22 @@
     }
   }
 
+  /* (A component's architecture pages, listed under their tab.) */
+  .demo-page-tab-group {
+    display: flex;
+    flex-direction: column;
+
+    & ul {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    & li::before {
+      content: '– ';
+    }
+  }
+
   .demo-page-links {
     display: flex;
     flex-wrap: wrap;

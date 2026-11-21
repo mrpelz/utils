@@ -1,4 +1,5 @@
 import {
+  type ComponentType,
   createContext,
   createElement,
   FunctionComponent,
@@ -10,6 +11,7 @@ import {
   Card,
   type CardRootProps,
   cardSizes,
+  ControlCards,
   type GlassContextValue,
   type GridSize,
   useGridItem,
@@ -22,7 +24,14 @@ import {
  * A card's expansion (see `CardsApp`): whether it's expanded (the app's
  * state, not stored), and asking for the other.
  */
-export type Expansion = { isExpanded: boolean; onToggle: () => void };
+export type Expansion = {
+  /** Its size, not expanded (its stored size). */
+  collapsedSize: GridSize;
+  /** Its size, expanded. */
+  expandedSize: GridSize;
+  isExpanded: boolean;
+  onToggle: () => void;
+};
 
 /**
  * A tile: a card's kind (its sizes), its size, the card in it; its size
@@ -99,3 +108,26 @@ export const TonedCard: FunctionComponent<CardRootProps> = (props) =>
     context: useContext(CardToneContext),
     ...props,
   });
+
+/** A component in the page's tone (its `context`, see `CardToneContext`). */
+const toned =
+  <P extends { context?: CardRootProps['context'] }>(
+    component: ComponentType<P>,
+  ): FunctionComponent<P> =>
+  (props) =>
+    createElement(component, {
+      context: useContext(CardToneContext),
+      ...props,
+    });
+
+/** The library's control cards in the page's tone (see `toned`). */
+export const Toned = {
+  Button: toned(ControlCards.Button),
+  Light: toned(ControlCards.Light),
+  List: toned(ControlCards.List),
+  Progress: toned(ControlCards.Progress),
+  Slider: toned(ControlCards.Slider),
+  State: toned(ControlCards.State),
+  Switch: toned(ControlCards.Switch),
+  Value: toned(ControlCards.Value),
+};

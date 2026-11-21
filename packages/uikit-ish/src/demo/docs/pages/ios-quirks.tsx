@@ -946,6 +946,19 @@ export const IosQuirksPage: FunctionComponent = () => (
       <code>click</code>, wherever they land, for a moment (with a mouse, whose
       own <code>mousedown</code> already happened, only the other two).
     </p>
+    <p>
+      The same aim moves a slightly missed tap’s <code>click</code> onto a
+      control near it, while its pointer events stay where the finger was. A tap
+      on a slider card just beside its switch (
+      <PartLink
+        component="control-cards"
+        part="ControlCards.Slider"
+      />
+      ) toggled the card as the finger lifted, and then the switch, which got
+      the click: on and straight off again. The card still toggles as the finger
+      lifts, since a click doesn’t always reach it, and swallows the click that
+      follows if it lands outside the slider.
+    </p>
 
     <Heading
       id="pressed-buttons-and-focus"
@@ -1008,7 +1021,7 @@ export const IosQuirksPage: FunctionComponent = () => (
       </PartLink>{' '}
       is scrolled to its top instead, and the document goes back to its 1px.
     </p>
-    <p>Two things nearly broke it, so they’re handled:</p>
+    <p>These nearly broke it, so they’re handled:</p>
     <ul>
       <li>
         A modal (a sheet, a popover, an alert) locks the document’s scroll while
@@ -1029,6 +1042,14 @@ export const IosQuirksPage: FunctionComponent = () => (
         every turn. The library remembers the window’s size each time it parks
         the document, and a scroll to the top at another size only parks it
         again.
+      </li>
+      <li>
+        A drag that starts on something that doesn’t scroll goes on to the
+        document. On a modal’s backdrop, or the dimmed page behind a card open
+        above it, it moved the document within its 1px: the whole app shifted by
+        a pixel and was parked back once the finger let go. Backdrops take no
+        drags at all now (<code>touch-action: none</code>); presses and swipes
+        still reach them as pointer events.
       </li>
     </ul>
     <p>
@@ -1114,6 +1135,22 @@ export const IosQuirksPage: FunctionComponent = () => (
         each was laid out again. The library turns it off for the whole page (
         <code>-webkit-text-size-adjust: 100%</code> on <code>:root</code>); the
         user’s own text size still applies.
+      </li>
+    </ul>
+    <ul>
+      <li>
+        <strong>Fixed elements in transformed ancestors.</strong> A slider’s
+        hidden input (Base UI’s, for the keyboard and screen readers) is
+        positioned <code>fixed</code>, at its full width and height. Inside a
+        transformed ancestor, fixed means that ancestor’s size, and Safari on
+        iOS then painted a card open above the page black once it had moved into
+        place. The library places the input <code>absolute</code> in its thumb,
+        the size Base UI gives it (see{' '}
+        <PartLink
+          component="slider"
+          part="Slider.Thumb"
+        />
+        ).
       </li>
     </ul>
     <ul>

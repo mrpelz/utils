@@ -1,117 +1,7 @@
 /* The demos' card kit (see card-kit.tsx). */
 
-/* Channel sliders: between a card's top row and its title, as bars, side
-   by side upright or stacked across, each rounded, its fill its tint, its
-   name on it (no knob: the bar is the control). */
-.demo-channels {
-  display: grid;
-  min-width: 0;
-  min-height: 0;
-  align-self: stretch;
-  gap: 6px;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  grid-column: 1 / -1;
-  grid-row: 2;
-  margin-block: 8px;
-
-  &[data-orientation='horizontal'] {
-    grid-auto-flow: row;
-    grid-auto-rows: minmax(0, 1fr);
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .uikit-slider-root {
-    position: relative;
-    display: grid;
-    width: auto;
-    min-width: 0;
-    height: auto;
-    min-height: 0;
-    place-self: stretch stretch;
-  }
-
-  .uikit-slider-control {
-    position: absolute;
-    min-width: 0;
-    min-height: 0;
-    inset: 0;
-  }
-
-  /* (Each a well set into the card's glass (the card's, see Card), its
-     fill translucent as a card's own slider's, lit along its top.) */
-  .uikit-slider-track {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-    border-radius: 12px;
-    background-color: var(--uikit-card-well);
-    box-shadow: var(--uikit-card-well-shadow);
-  }
-
-  .uikit-slider-indicator {
-    border-radius: 0;
-    background-color: color-mix(
-      in srgb,
-      var(--uikit-slider-tint) 70%,
-      transparent
-    );
-    background-image: linear-gradient(
-      to bottom,
-      rgb(255 255 255 / 22%),
-      transparent 45%
-    );
-    box-shadow: inset 0 0.5px 0 rgb(255 255 255 / 45%);
-  }
-
-  .uikit-slider-thumb {
-    &::before,
-    &::after {
-      display: none;
-    }
-  }
-
-  .uikit-slider-label {
-    position: absolute;
-    z-index: 1;
-    color: inherit;
-    font-size: 11px;
-    font-variation-settings: 'wght' 590;
-    font-weight: 600;
-    inset-block-end: 4px;
-    inset-inline: 0;
-    pointer-events: none;
-    text-align: center;
-  }
-
-  &[data-orientation='horizontal'] .uikit-slider-label {
-    inset-block: 0;
-    inset-inline: 8px auto;
-    place-content: center;
-  }
-}
-
-/* A trend: an arrow after the value, turned by its angle (a transform, not
-   a layer change: it may turn in a scroller). */
-.demo-trend {
-  display: inline-block;
-  font-size: 0.8em;
-  line-height: 0;
-  margin-inline-start: 0.25em;
-  rotate: calc(-1deg * var(--demo-trend-angle, 0));
-  transition: rotate 600ms;
-  vertical-align: middle;
-
-  /* (Mirrored, pointing back: turned the other way to rise.) */
-  &:dir(rtl) {
-    rotate: calc(1deg * var(--demo-trend-angle, 0));
-    scale: -1 1;
-  }
-}
-
-/* A card's own controls (a segmented control, a stepper, a progress bar):
-   between its top row and its title, as the bars are, stacked, centered in
-   their room. */
+/* A card's own controls (a segmented control, a stepper, a dial): between
+   its top row and its title, stacked, centered in their room. */
 .demo-card-controls {
   /* (A progress bar as long as its room, however short: not its least
      length, see Progress.) */
@@ -172,20 +62,26 @@
   translate: 0 -50%;
 }
 
-/* (In a wide card one row tall (its title and value beside its symbol,
-   see Card): beside them instead, at its trailing end, as wide as fits.) */
+/* (In a wide card one row tall, no room between its top row and its
+   title: beside its title and value instead, at its trailing end, as wide
+   as fits; they keep to their column.) */
 @container uikit-card (aspect-ratio > 1.5) and (height < 160px) {
   :is(.demo-card-controls, .demo-sparkline) {
     width: clamp(48px, 28cqi, 120px);
     align-self: center;
     margin: 0;
-    grid-column: 3;
-    grid-row: 1 / span 2;
+    grid-column: 2;
+    grid-row: 3 / span 2;
     margin-inline-start: 8px;
   }
 
   .demo-sparkline {
     height: 32px;
+  }
+
+  .uikit-card-layout:has(> :is(.demo-card-controls, .demo-sparkline))
+    > :is(.uikit-card-title, .uikit-card-value) {
+    grid-column: 1;
   }
 }
 

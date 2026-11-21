@@ -94,6 +94,7 @@ const sections = (Object.keys(categories) as Category[])
   )
   .filter(([, entries]) => entries.length > 0);
 
+//  set first route in hash to ease testing
 const hashId =
   typeof window === 'undefined' || location.hash.length <= 1
     ? undefined
@@ -355,7 +356,9 @@ const App: FunctionComponent = () => {
     [settings],
   );
   // The open component's stack, bottom to top (compact, empty: the index).
-  const [stack, setStack] = useState<readonly string[]>([]);
+  const [stack, setStack] = useState<readonly string[]>(
+    hashId ? [firstId] : [],
+  );
   // (Regular: its layout's root, for the swipe area at the screen's edge.)
   const [layoutRoot, setLayoutRoot] = useState<HTMLDivElement | null>(null);
   // (Regular: the sidebar shown, see `SidebarOpenContext`.)

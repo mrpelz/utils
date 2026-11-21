@@ -437,6 +437,42 @@ export const menuPopupRows: readonly PropRow[] = [
       closed.
     </>,
   ],
+  [
+    'order',
+    union('static', 'nearest'),
+    code(union('static')),
+    <>
+      Its items’ order: as given, or nearest first. With{' '}
+      <code>{union('nearest')}</code>, when it’s placed above its trigger
+      (flipped for room, or by its{' '}
+      <PartLink
+        component="menu"
+        part="Menu.Positioner"
+      />
+      ’s side), its items are reversed in the DOM, so the first is nearest the
+      trigger, for the keyboard and screen readers too. Each{' '}
+      <PartLink
+        component="menu"
+        part="Menu.Group"
+      />{' '}
+      and{' '}
+      <PartLink
+        component="menu"
+        part="Menu.RadioGroup"
+      />{' '}
+      reverses its items below its{' '}
+      <PartLink
+        component="menu"
+        part="Menu.GroupLabel"
+      />
+      ;{' '}
+      <PartLink
+        component="menu"
+        part="Menu.QuickActions"
+      />{' '}
+      stay one row. A component rendering several items moves as one.
+    </>,
+  ],
   glassSurfaceRow('the menu'),
   [
     'children',

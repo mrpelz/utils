@@ -15,6 +15,8 @@ import { nameComponents } from './frame/render-code.js';
 import { OptionsProvider } from './frame/state.js';
 import {
   AllDemosPage,
+  ArchitecturePage,
+  ArchitectureSubPage,
   ComponentDemosPage,
   CompositionPage,
   IndexPage,
@@ -174,6 +176,14 @@ export const Demo: FunctionComponent = () => (
           <Route
             component={CompositionPage}
             path={publicUrl('/:id/composition')}
+          />
+          <Route
+            component={ArchitecturePage}
+            path={publicUrl('/:id/architecture')}
+          />
+          <Route
+            component={ArchitectureSubPage}
+            path={publicUrl('/:id/architecture/:page')}
           />
           <Route
             component={ComponentDemosPage}

@@ -28,7 +28,7 @@ const line = ([x1, y1]: Point, [x2, y2]: Point) => {
 };
 
 /** Lines joined at their ends (round, as their ends are). */
-const polyline = (...points: Point[]) =>
+export const polyline = (...points: Point[]): string =>
   points
     .slice(1)
     .map((point, index) => line(points[index] ?? point, point))
@@ -79,7 +79,7 @@ const rounded = (...ordered: Point[]) => {
 };
 
 /** An icon of the family, one layer. */
-const iconOf = (sourceName: string, d: string): SymbolIcon => ({
+export const iconOf = (sourceName: string, d: string): SymbolIcon => ({
   sourceName,
   svgPathData: [{ d }],
   unitsPerEm: 15,

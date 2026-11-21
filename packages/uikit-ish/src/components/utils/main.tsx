@@ -548,6 +548,25 @@ if (typeof window !== 'undefined') {
 }
 
 /**
+ * Whether motion is reduced for an element, as its stylesheets see it (as
+ * a `MediaQueryList`'s `matches`, read anew each time): the settings' (a
+ * `Settings.Provider`'s override, else the system's, see Settings), by its
+ * inherited `--uikit-settings-reduced-motion`. Not the media query itself,
+ * which no provider can override.
+ */
+export const reducedMotionOf = (
+  element: Element,
+): { readonly matches: boolean } => ({
+  get matches() {
+    return (
+      getComputedStyle(element)
+        .getPropertyValue('--uikit-settings-reduced-motion')
+        .trim() === '1'
+    );
+  },
+});
+
+/**
  * Whether a focus now is the keyboard's (a key pressed last, not a
  * pointer): for a ring on keyboard focus only where `:focus-visible` can't
  * tell (a text field matches it however it's focused).

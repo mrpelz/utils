@@ -716,6 +716,12 @@ export const gridUseGridItemRows: readonly PropRow[] = [
     undefined,
     'Asks for another size, as its resize handle does (for example from a menu).',
   ],
+  [
+    'sizeOf',
+    '(size: GridSize) => GridSizeFit',
+    undefined,
+    'What it would be if that size were asked for now: snapped, fitted to the columns and its area, as its own size is, with isFitted. When two sizes come out the same, switching between them changes nothing, so a button for it can hide, for example an expand button with too few columns. It updates as the columns change.',
+  ],
 ];
 
 export const gridUseGridAreaRows: readonly PropRow[] = [
@@ -745,5 +751,11 @@ export const gridUseGridAreaRows: readonly PropRow[] = [
     '(placement: GridPlacement) => void',
     undefined,
     'Asks for another placement, as dragging the tile does.',
+  ],
+  [
+    'sizeOf',
+    '(size: GridSize) => GridSizeFit',
+    undefined,
+    'What it would be if that size were asked for now: snapped, fitted to the columns, at least its tile’s, with isFitted. As the item’s sizeOf, for the room around it.',
   ],
 ];

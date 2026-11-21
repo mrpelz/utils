@@ -12,6 +12,7 @@ import {
   edgeScrollDelta,
   frameElapsed,
   isKeyboardFocus,
+  reducedMotionOf,
   useForwardedRef,
   usePointerDrag,
   useSecondaryClick,
@@ -229,7 +230,7 @@ const reveal = (root: HTMLElement, behavior: ScrollBehavior) => {
 
   // (To a position, not by a distance: Chrome snaps a `scrollBy` by its
   // direction.)
-  const isReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isReduced = reducedMotionOf(root).matches;
   scroller.scrollTo({
     behavior: isReduced ? 'instant' : behavior,
     left: Number.isFinite(snapped) ? snapped : target,

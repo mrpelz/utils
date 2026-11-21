@@ -151,6 +151,12 @@ export const useLayoutControls = (
     undefined,
     false,
   ];
+  // (Its columns' flags by content: a caller's written in place, a new
+  // object each render, would make their controls anew each render, their
+  // states set anew, rendering again: a loop.)
+  const firstFlagsKey = firstFlags && JSON.stringify(firstFlags);
+  const secondFlagsKey = secondFlags && JSON.stringify(secondFlags);
+  const thirdFlagsKey = thirdFlags && JSON.stringify(thirdFlags);
   const options = (part: LayoutPart, isFirst = true) => ({
     emphasize: featured === part && isFirst ? ('outline' as const) : undefined,
     isOpen:
@@ -179,9 +185,9 @@ export const useLayoutControls = (
           firstSize,
           isFirstResizable,
           addLog,
-          firstFlags,
+          firstFlagsKey === undefined ? undefined : JSON.parse(firstFlagsKey),
         ),
-      [addLog, firstFlags, firstName, firstSize, isFirstResizable],
+      [addLog, firstFlagsKey, firstName, firstSize, isFirstResizable],
     ),
     {
       external: externalFirst,
@@ -197,9 +203,9 @@ export const useLayoutControls = (
           secondSize,
           isSecondResizable,
           addLog,
-          secondFlags,
+          secondFlagsKey === undefined ? undefined : JSON.parse(secondFlagsKey),
         ),
-      [addLog, isSecondResizable, secondFlags, secondName, secondSize],
+      [addLog, isSecondResizable, secondFlagsKey, secondName, secondSize],
     ),
     {
       external: externalSecond,
@@ -216,9 +222,9 @@ export const useLayoutControls = (
           thirdSize,
           isThirdResizable,
           addLog,
-          thirdFlags,
+          thirdFlagsKey === undefined ? undefined : JSON.parse(thirdFlagsKey),
         ),
-      [addLog, isThirdResizable, thirdFlags, thirdName, thirdSize],
+      [addLog, isThirdResizable, thirdFlagsKey, thirdName, thirdSize],
     ),
     {
       external: externalThird,

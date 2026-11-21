@@ -124,6 +124,12 @@ export const cardCornerButtonRows: readonly PropRow[] = [
 
 export const cardSymbolRows: readonly PropRow[] = [
   [
+    'active',
+    'boolean',
+    code('false'),
+    'Whether it shows what the card stands for as on, in its tint and its Symbol’s emphasizedIcon (for example the filled variant), while the card itself isn’t lit: for example a dimmer’s symbol above its minimum, the slider’s fill telling how much. A lit card’s symbol shows as on anyway.',
+  ],
+  [
     'children',
     'ReactNode',
     undefined,
@@ -135,6 +141,14 @@ export const cardSymbolRows: readonly PropRow[] = [
       />
       .
     </>,
+  ],
+  [
+    'tint',
+    'string (a CSS color)',
+    <>
+      the switch’s on color (<code>--uikit-switch-on-color</code>)
+    </>,
+    'Its color while it’s on: active, or its card lit.',
   ],
   ...elementRows('span', 'HTMLSpanElement'),
 ];
@@ -215,7 +229,12 @@ export const cardUseCardOrientationRows: readonly PropRow[] = [
     code('"horizontal"'),
     <>
       Its tile’s shape: wider than tall (or square) is horizontal. Outside a
-      grid, horizontal. Pass it to a slider’s <code>orientation</code>.
+      grid, horizontal. Lay out content of your own by it;{' '}
+      <PartLink
+        component="control-cards"
+        part="ControlCards.SliderFill"
+      />{' '}
+      reads it itself.
     </>,
   ],
 ];

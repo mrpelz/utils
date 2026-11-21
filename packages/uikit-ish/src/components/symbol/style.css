@@ -31,9 +31,11 @@
     }
 
     /* Its regular and emphasized glyphs, stacked (the emphasized one
-       centered on the regular one's box), faded by its host's emphasis. */
+       centered on the regular one's box), faded by its host's emphasis
+       (`--uikit-symbol-emphasis`, 0 to 1, none: 0; unregistered: an
+       inherited registered property mustn't transition, for iOS). */
     &[data-variant='regular'] {
-      opacity: calc(1 - var(--uikit-symbol-emphasis));
+      opacity: calc(1 - var(--uikit-symbol-emphasis, 0));
     }
 
     &[data-variant='emphasized'] {
@@ -41,7 +43,7 @@
       align-items: center;
       justify-content: center;
       inset: 0;
-      opacity: var(--uikit-symbol-emphasis);
+      opacity: var(--uikit-symbol-emphasis, 0);
     }
   }
 }

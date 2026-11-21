@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react';
 
+import { reducedMotionOf } from '../utils/main.js';
 import { reflowDuration, reflowEasing } from './layout.js';
 import type {
   GridItemLayoutChange,
@@ -239,7 +240,7 @@ export const useReshape = ({
       !element ||
       !isShown.current ||
       (previous.editing && next.editing) ||
-      matchMedia('(prefers-reduced-motion: reduce)').matches
+      reducedMotionOf(element).matches
     ) {
       pending.current = false;
       return;

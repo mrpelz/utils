@@ -79,7 +79,7 @@ util_mitmproxy:
 	mitmweb --no-web-open-browser --set termlog_verbosity=error --set web_password="$(MITM_SLUG)" --mode "reverse:http://localhost:3000@443";
 
 util_mitmproxy_0:
-	mitmweb --no-web-open-browser --set termlog_verbosity=error --set web_password="$(MITM_SLUG)" --mode "reverse:http://localhost:3000@4443";
+	mitmweb --no-web-open-browser --set block_global=false --set termlog_verbosity=warn --set web_password="$(MITM_SLUG)" --mode "reverse:http://localhost:3000@4443";
 
 watch_build:
 	tsc --project tsconfig.build.json --watch

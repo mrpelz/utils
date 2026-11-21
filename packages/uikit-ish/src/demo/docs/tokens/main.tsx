@@ -197,6 +197,12 @@ const backdropToneRows: readonly PropRow[] = [
   ],
   ['options.enabled', 'boolean', code('true'), 'Whether it samples at all.'],
   [
+    'options.within',
+    '{ current: Element | null }',
+    undefined,
+    'An ancestor to sample within, for example the card a label is on, over a tinted surface in it: only what’s painted inside it counts, its own background last. It samples again only as something in it, or around it, changes, not as the page scrolls.',
+  ],
+  [
     'returns',
     union('bright', 'dim', 'undefined'),
     undefined,
@@ -965,6 +971,27 @@ export const TokensPage: FunctionComponent = () => {
             Between bright and dim, it keeps its last tone, so it doesn’t
             flicker at an edge. With a <code>dwell</code>, a new tone must last
             that long before it’s returned.
+          </li>
+          <li>
+            While a{' '}
+            <PartLink
+              component="navigation"
+              part="Navigation.Stack"
+            />{' '}
+            moves between pages, its pages are inert. An inert or hidden element
+            isn’t sampled and keeps its tone, since what’s behind it can’t be
+            read right, so tones stay put while the pages move.
+          </li>
+          <li>
+            With <code>within</code>, it samples on a surface: only what’s
+            painted inside the given ancestor, for example a card of the app’s
+            own with a tinted surface in it, its text sampled on the card alone.
+            It isn’t needed where the colors are known: a{' '}
+            <PartLink
+              component="card"
+              part="Card.Root"
+            />{' '}
+            doesn’t sample its parts.
           </li>
           <li>
             Above, the sun at the top of the backdrops that scroll under glass
