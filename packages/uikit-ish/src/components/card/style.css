@@ -592,6 +592,14 @@
       var(--glass-ui-medium-dark-content-secondary)
     );
 
+    /* (Editing: its own scheme dropped (its veil the page's, see main.tsx),
+       its glass still bright: its text the light scheme's, whatever the
+       page's.) */
+    &[data-editing] {
+      --uikit-glass-content: #000;
+      --uikit-glass-content-secondary: rgb(0 0 0 / 55%);
+    }
+
     /* (Opaque, lifted: apart from light glass, in the light scheme, the
        backdrop not showing through it.) */
     --uikit-glass-background: var(--uikit-card-on-background, #fff);
