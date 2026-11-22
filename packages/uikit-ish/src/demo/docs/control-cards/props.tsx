@@ -4,6 +4,7 @@ import type {
   ControlCardChannel,
   ControlCardRow,
   ControlCardStates,
+  ControlCardValueTextDetails,
 } from '../../../components/index.js';
 import { cardTints } from '../../tooling/card-kit.js';
 import { AddLog } from '../../tooling/frame/log.js';
@@ -153,6 +154,21 @@ export const getPropOptionsSlider = (addLog: AddLog) => ({
   defaultChecked: [undefined, true, false] as const,
   checked: [undefined, true, false] as const,
   onCheckedChange: [logged(addLog, 'checked'), undefined] as const,
+  states: [
+    undefined,
+    new MappedProp(['Running', 'Stopped'] as const, '["Running", "Stopped"]'),
+  ] as const,
+  getValueText: [
+    undefined,
+    new MappedProp(
+      (
+        formattedValue: string,
+        _value: number,
+        { checked }: ControlCardValueTextDetails,
+      ) => (checked === false ? `${formattedValue} (off)` : formattedValue),
+      '[value, “(off)” after it]',
+    ),
+  ] as const,
   ...rootOptions,
 });
 
@@ -160,6 +176,13 @@ export const getPropOptionsSliderFill = (addLog: AddLog) => ({
   ...sliderOptions(addLog),
   name: ['Heat to', 'Dimmer'] as const,
   onPress: [undefined, logged(addLog, 'press')] as const,
+  getValueText: [
+    undefined,
+    new MappedProp(
+      (formattedValue: string) => `Set to ${formattedValue}`,
+      '[“Set to …”]',
+    ),
+  ] as const,
   className: commonPropOptions.className,
 });
 

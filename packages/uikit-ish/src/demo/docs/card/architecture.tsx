@@ -198,11 +198,11 @@ export const CardArchitecture: FunctionComponent = () => (
       <li>
         A <PartLink part="Card.Switch" /> sets its <code>tint</code> as a custom
         property, and the stylesheet makes it the switch’s on color. Over a
-        slider’s fill, the stylesheet uses darker shades instead, of the tint
-        when on and of the fill’s gray when off, so the switch stays set apart
-        from the fill. A card that’s never lit (<code>active</code> given as{' '}
-        <code>false</code>) uses them at every size, so its switch doesn’t
-        change as the card expands.
+        slider’s fill, the stylesheet uses a darker shade of the tint, so the
+        switch stays set apart from the fill. Off, the fill isn’t drawn, so the
+        switch keeps its own off color. A card that’s never lit (
+        <code>active</code> given as <code>false</code>) uses them at every
+        size, so its switch doesn’t change as the card expands.
       </li>
       <li>
         <strong>Given wins.</strong> When <code>active</code> is given, the root

@@ -347,9 +347,11 @@ export {
   type ControlCardSliderProps,
   type ControlCardStateProps,
   type ControlCardStates,
+  type ControlCardTextStates,
   type ControlCardSwitchProps,
   type ControlCardTrendProps,
   type ControlCardValueProps,
+  type ControlCardValueTextDetails,
 } from './control-cards/main.js';
 export {
   Layout,

@@ -22,6 +22,9 @@ export type RootContextValue = Pick<
   // Its value in tooltips on its thumbs (see `Value`): always, or only
   // while hovered or dragged (momentary).
   setValueTooltip?: (shown: ValueTooltip) => void;
+  // Its value now (controlled, or its own as it changes), for its ticks
+  // (see `Ticks`: the one at it marked).
+  value?: number | readonly number[];
   valueTooltip?: ValueTooltip;
 };
 

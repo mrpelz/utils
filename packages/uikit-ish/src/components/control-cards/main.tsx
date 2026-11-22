@@ -53,6 +53,7 @@ import type {
   ControlCardSwitchProps,
   ControlCardTrendProps,
   ControlCardValueProps,
+  ControlCardValueTextDetails,
 } from './props.js';
 
 export type {
@@ -72,8 +73,10 @@ export type {
   ControlCardStateProps,
   ControlCardStates,
   ControlCardSwitchProps,
+  ControlCardTextStates,
   ControlCardTrendProps,
   ControlCardValueProps,
+  ControlCardValueTextDetails,
 } from './props.js';
 
 // Control cards: ready-made cards (each a `Card.Root` and its parts) for
@@ -400,6 +403,9 @@ const pressProps = (
 /**
  * Its fill's tone (opaque: its color's), as its tint or the color scheme
  * changes (not as it moves), and the color scheme of what's drawn over it.
+ * Its tint's, read where it's drawn (its `light-dark()` resolved there), not
+ * what's painted: off, with a switch, the fill isn't drawn (see Card), and
+ * its tone is still wanted as it's switched on.
  */
 const useFillScheme = (
   indicator: { current: HTMLElement | null },
@@ -410,10 +416,15 @@ const useFillScheme = (
   useLayoutEffect(() => {
     const { current: element } = indicator;
     if (!element) return;
-    // (Read once it's laid out: its color computed, a var's resolved.)
+    // (Read once it's laid out: its color computed, a var's resolved, by a
+    // probe in it, gone again.)
     const read = () => {
-      const { backgroundColor } = getComputedStyle(element);
-      setTone((last) => toneOfColor(backgroundColor, last));
+      const probe = document.createElement('span');
+      probe.style.color = 'var(--uikit-slider-tint)';
+      element.append(probe);
+      const { color } = getComputedStyle(probe);
+      probe.remove();
+      setTone((last) => toneOfColor(color, last));
     };
     read();
   }, [colorScheme, indicator, tint]);
@@ -445,18 +456,35 @@ const useSliderSwitch = (
  * value and its ticks in it; the card's own parts portaled in (see Card's
  * `CardBlendScope`). Hidden from assistive technology, inert.
  */
+/** A slider's value text, as `Slider.Value`'s children (its first value). */
+type ValueText = (
+  formattedValues: readonly string[],
+  values: readonly number[],
+) => string;
+
+/** A value text (see `getValueText`) as `Slider.Value`'s children. */
+const valueTextOf = (
+  getValueText: ((formattedValue: string, value: number) => string) | undefined,
+): ValueText | undefined =>
+  getValueText
+    ? (formattedValues, values) =>
+        getValueText(formattedValues[0] ?? '', values[0] ?? 0)
+    : undefined;
+
 const FillCopies = ({
   layerRef,
   name,
   orientation,
   scheme,
   ticks,
+  valueText,
 }: {
   layerRef: ((layer: HTMLElement | null) => void) | undefined;
   name: string;
   orientation: CardOrientation;
   scheme: 'dark' | 'light';
   ticks: number | undefined;
+  valueText: ValueText | undefined;
 }) => (
   <span
     ref={layerRef}
@@ -473,7 +501,7 @@ const FillCopies = ({
     >
       {name}
     </span>
-    <Slider.Value data-card-copy="" />
+    <Slider.Value data-card-copy="">{valueText}</Slider.Value>
     {ticks === undefined ? null : (
       <Slider.Ticks
         count={ticks}
@@ -500,6 +528,7 @@ const SliderFill = forwardRef<HTMLDivElement, ControlCardSliderFillProps>(
       className,
       defaultValue,
       format,
+      getValueText,
       locale,
       max = 100,
       min = 0,
@@ -521,6 +550,7 @@ const SliderFill = forwardRef<HTMLDivElement, ControlCardSliderFillProps>(
     const setLayer = useContext(CardBlendScope)?.setLayer;
     const ticks =
       step === undefined ? undefined : Math.round((max - min) / step) + 1;
+    const valueText = valueTextOf(getValueText);
     return (
       <Slider.Root
         ref={ref}
@@ -550,19 +580,36 @@ const SliderFill = forwardRef<HTMLDivElement, ControlCardSliderFillProps>(
                   orientation={orientation}
                   scheme={scheme}
                   ticks={ticks}
+                  valueText={valueText}
                 />
               ) : null}
             </Slider.Indicator>
             {ticks === undefined ? null : <Slider.Ticks count={ticks} />}
-            <Slider.Thumb aria-label={name} />
+            <Slider.Thumb
+              aria-label={name}
+              getAriaValueText={getValueText}
+            />
           </Slider.Track>
         </Slider.Control>
         <Slider.Label>{name}</Slider.Label>
-        <Slider.Value />
+        <Slider.Value>{valueText}</Slider.Value>
       </Slider.Root>
     );
   },
 );
+
+/**
+ * A slider card's value text by default (see `getValueText`): with a
+ * switch, its state's word and its number (“On · 60%”); without one, its
+ * number.
+ */
+const defaultValueText = (
+  formattedValue: string,
+  { checked, states: [on, off] }: ControlCardValueTextDetails,
+) =>
+  checked === undefined
+    ? formattedValue
+    : `${checked ? on : off} · ${formattedValue}`;
 
 /**
  * A numerical control: a `SliderFill` in a card, its symbol at its top.
@@ -580,6 +627,7 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
       defaultValue,
       emphasizedIcon,
       format,
+      getValueText,
       icon,
       locale,
       max = 100,
@@ -587,6 +635,7 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
       name,
       onCheckedChange,
       onValueChange,
+      states = ['On', 'Off'],
       step,
       tint,
       value,
@@ -628,6 +677,19 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
           step={step}
           tint={tint}
           value={current}
+          getValueText={(formattedValue, number) => {
+            const isChecked = hasSwitch ? isOn : undefined;
+            if (getValueText) {
+              return getValueText(formattedValue, number, {
+                checked: isChecked,
+                states,
+              });
+            }
+            return defaultValueText(formattedValue, {
+              checked: isChecked,
+              states,
+            });
+          }}
           onPress={hasSwitch ? () => switchTo(!isOn) : undefined}
           onValueChange={(next) => {
             setCurrent(next);

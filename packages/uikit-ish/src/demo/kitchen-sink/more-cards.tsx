@@ -172,6 +172,9 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
       ) : (
         <ControlCards.SliderFill
           format={{ maximumFractionDigits: 0, style: 'percent' }}
+          // (Its state with its value, as a slider card's: the app's, here
+          // as ControlCards.Slider's default.)
+          getValueText={(formatted) => `${isOn ? 'On' : 'Off'} · ${formatted}`}
           max={1}
           min={0}
           name={name}

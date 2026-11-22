@@ -26,6 +26,17 @@ export type ControlCardProps = Omit<CardRootProps, 'children'> & {
 /** Words for a state, on and off (e.g. `['Open', 'Closed']`). */
 export type ControlCardStates = readonly [on: ReactNode, off: ReactNode];
 
+/** Words for on and off, as text (a value's text, see `getValueText`). */
+export type ControlCardTextStates = readonly [on: string, off: string];
+
+/** What a slider card's value text is told (see `getValueText`). */
+export type ControlCardValueTextDetails = {
+  /** Whether it's on; without a switch, `undefined`. */
+  checked: boolean | undefined;
+  /** Its words for on and off (see `states`). */
+  states: ControlCardTextStates;
+};
+
 /** How a number's shown (`Intl.NumberFormat`'s). */
 export type ControlCardFormat = {
   /** Its number's format (e.g. `{ style: 'percent' }`). */
@@ -94,14 +105,26 @@ export type ControlCardSliderProps = ControlCardProps &
      * Whether it's on (controlled): a switch at its top trailing corner,
      * and a click on it (not a drag) toggling it. Its value kept either
      * way (how the two go together is the app's, e.g. on at its minimum,
-     * at its maximum); off, its fill gray. Neither this nor
-     * `defaultChecked`: no switch.
+     * at its maximum); off, its fill not drawn, a dashed line where it'd
+     * end (see `Card`). Neither this nor `defaultChecked`: no switch.
      */
     checked?: boolean;
     /** Whether it's on at first (uncontrolled; a switch, see `checked`). */
     defaultChecked?: boolean;
     /** Its value at first (uncontrolled). */
     defaultValue?: number;
+    /**
+     * Its value's text (its value line, and what assistive technology reads),
+     * from its formatted number (see `format`), its number, and whether it's
+     * on (see `states`).
+     * @default with a switch, its state's word and its number (“On · 60%”,
+     * “Off · 60%”); without one, its number
+     */
+    getValueText?: (
+      formattedValue: string,
+      value: number,
+      details: ControlCardValueTextDetails,
+    ) => string;
     /**
      * Its greatest value.
      * @default 100
@@ -116,6 +139,11 @@ export type ControlCardSliderProps = ControlCardProps &
     onCheckedChange?: (checked: boolean) => void;
     /** As its value changes, dragged (or by keyboard). */
     onValueChange?: (value: number) => void;
+    /**
+     * Its value's words, on and off, with a switch (see `getValueText`).
+     * @default ['On', 'Off']
+     */
+    states?: ControlCardTextStates;
     /**
      * Its values' step: given, a tick at each (none: continuous).
      * @default none (continuous: 1/100 of its range)
@@ -135,6 +163,13 @@ export type ControlCardSliderFillProps = ControlCardFormat & {
   className?: string;
   /** Its value at first (uncontrolled). */
   defaultValue?: number;
+  /**
+   * Its value's text (its value line, and what assistive technology reads),
+   * from its formatted number (see `format`) and its number: e.g. its
+   * card's state with it, the app's.
+   * @default its formatted number
+   */
+  getValueText?: (formattedValue: string, value: number) => string;
   /**
    * Its greatest value.
    * @default 100

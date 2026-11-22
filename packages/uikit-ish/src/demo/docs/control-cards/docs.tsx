@@ -173,7 +173,7 @@ export const controlCardsSliderRows: readonly PropRow[] = [
     'checked',
     'boolean',
     undefined,
-    'Whether it’s on (controlled). With this or defaultChecked, it has a switch in its top trailing corner, and a click on the card toggles it while a drag sets its value. Its value is kept while it’s off; while it’s off, its fill is gray. How the two go together, for example switched on at its minimum, is the app’s.',
+    'Whether it’s on (controlled). With this or defaultChecked, it has a switch in its top trailing corner, and a click on the card toggles it while a drag sets its value. Its value is kept while it’s off; while it’s off, its fill isn’t drawn: the card is plain off glass, with a dashed line where the fill would end (none at its minimum or maximum). How the two go together, for example switched on at its minimum, is the app’s.',
   ],
   [
     'defaultChecked',
@@ -186,6 +186,18 @@ export const controlCardsSliderRows: readonly PropRow[] = [
     '(checked: boolean) => void',
     undefined,
     'As it’s switched.',
+  ],
+  [
+    'states',
+    'readonly [on: string, off: string]',
+    code('["On", "Off"]'),
+    'Its value’s words, on and off, with a switch: its value reads its state’s word and its number, for example “On · 60%” or “Off · 60%”.',
+  ],
+  [
+    'getValueText',
+    '(formattedValue: string, value: number, details: { checked, states }) => string',
+    'by states (see there)',
+    'Its value’s text, shown on the card and read by assistive technology: from its formatted number, its number, and whether it’s on (checked is undefined without a switch). For wording of your own, in any language and order.',
   ],
   ...cardRows,
 ];
@@ -203,6 +215,12 @@ export const controlCardsSliderFillRows: readonly PropRow[] = [
     '() => void',
     undefined,
     'Given, a click on it (released before it moves) calls this instead of setting a value, for example to toggle its card’s switch; a drag sets its value. Without it, a press sets its value.',
+  ],
+  [
+    'getValueText',
+    '(formattedValue: string, value: number) => string',
+    'its formatted number',
+    'Its value’s text, shown and read by assistive technology. It doesn’t know a card’s switch: to show a state with the value, as a slider card does, write it here.',
   ],
   ['className', 'string', undefined, 'Its class, beside its own.'],
   ['ref', 'Ref<HTMLDivElement>', undefined, 'Its slider’s root element.'],

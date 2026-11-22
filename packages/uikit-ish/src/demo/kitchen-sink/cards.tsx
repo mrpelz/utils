@@ -358,6 +358,27 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       name: 'Blinds',
       size: '1x2',
     },
+    {
+      // (Ticked, with a switch: off, its fill not drawn, a dashed line
+      // where it'd end, its value with its off word.)
+      card: () => (
+        <Toned.Slider
+          defaultChecked
+          defaultValue={0.5}
+          emphasizedIcon={sfFanFill}
+          format={percent}
+          icon={sfFan}
+          max={1}
+          min={0}
+          name="Fan Speed"
+          step={0.25}
+          tint={cardTints.air}
+        />
+      ),
+      kind: 'numericalControl',
+      name: 'Fan Speed',
+      size: '2x1',
+    },
   ],
   Climate: [
     {

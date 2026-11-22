@@ -691,8 +691,8 @@ export const ControlCardsParts: FunctionComponent = () => (
           <PartLink part="ControlCards.SliderFill" /> with the card’s symbol.
           Across in a wide tile, upright in a tall one.
         </>,
-        'Its fill is its tint, opaque. Its label, value and ticks, and the card’s symbol and corner buttons, are drawn twice: on the card, and inside the fill in the text color for the fill’s tone. Any tint reads.',
-        'A brightness keeps its glass dark. With a switch, a click toggles it and a drag sets its level; while it’s off, its fill is gray.',
+        'Its fill is its tint, opaque. Its label, value and ticks, and the card’s symbol and corner buttons, are drawn twice: on the card, and inside the fill in the text color for the fill’s tone, the ticks there as faint hairlines. Any tint reads.',
+        'A brightness keeps its glass dark. With a switch, a click toggles it and a drag sets its level; while it’s off, its fill isn’t drawn: the card is plain off glass, with a dashed line where the fill would end (none at its minimum or maximum), and its value says Off with the level.',
         <>
           Here: to show its switch, set <code>defaultChecked</code> to{' '}
           <code>false</code> (or <code>true</code>). A switch appears whenever

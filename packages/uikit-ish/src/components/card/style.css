@@ -27,6 +27,23 @@
        in its fill, see below.) */
     --uikit-card-padding: 12px 14px;
 
+    /* (Its hairline's width: its glass's rim, see Glass: on light glass
+       0.5px, on dark 1px; lit, 0.5px, see below. What a slider's ticks on
+       its glass stop short of, at both ends, see below.) */
+    --uikit-card-rim: 0.5px;
+
+    @media (prefers-color-scheme: dark) {
+      --uikit-card-rim: 1px;
+    }
+
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
+      --uikit-card-rim: 0.5px;
+    }
+
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
+      --uikit-card-rim: 1px;
+    }
+
     color: var(--uikit-glass-content);
 
     /* (Its veil (see below) stacked within it: under the grid's corner
@@ -366,31 +383,54 @@
     /* (Behind its text, on its glass and in its fill alike: under the
        card's (its stacking context's) content, over its glass; in the
        fill, over the fill.) */
+
+    /* (On its glass, faint (decoration): as its border is, dark; a
+       hairline's shade, light. Its ticks', and its fill's end's while its
+       switch is off, see below.) */
+    --uikit-card-tick: light-dark(rgb(0 0 0 / 10%), var(--glass-ui-panel-rim));
+
     .uikit-slider-ticks {
       z-index: -1;
       width: auto;
       height: auto;
       inset: 0;
 
+      /* (On its glass, inside its hairline, meeting it, not across it.) */
       > * {
+        top: var(--uikit-card-rim);
         width: 1px;
-        height: 100%;
+        height: calc(100% - 2 * var(--uikit-card-rim));
         border-radius: 0;
-
-        /* (On its glass, faint (decoration): as its border is, dark;
-           a hairline's shade, light.) */
-        background-color: light-dark(rgb(0 0 0 / 10%), var(--glass-ui-panel-rim));
+        background-color: var(--uikit-card-tick);
       }
     }
 
-    /* (Their copy in the fill: in its text color.) */
-    .uikit-card-blend .uikit-slider-ticks > * {
-      background-color: var(--uikit-glass-content);
+    /* (Upright: placed from its bottom, see Slider; not from its top.) */
+    &[data-orientation='vertical'] .uikit-slider-ticks > * {
+      top: auto;
+      left: var(--uikit-card-rim);
+      width: calc(100% - 2 * var(--uikit-card-rim));
+      height: 1px;
     }
 
-    &[data-orientation='vertical'] .uikit-slider-ticks > * {
+    /* (Their copy in the fill: hairlines, a shade of its text color, edge
+       to edge, as the fill is.) */
+    .uikit-card-blend .uikit-slider-ticks > * {
+      top: 0;
+      width: 0.5px;
+      height: 100%;
+      background-color: color-mix(
+        in srgb,
+        var(--uikit-glass-content) 30%,
+        transparent
+      );
+    }
+
+    &[data-orientation='vertical'] .uikit-card-blend .uikit-slider-ticks > * {
+      top: auto;
+      left: 0;
       width: 100%;
-      height: 1px;
+      height: 0.5px;
     }
 
     > .uikit-slider-label,
@@ -432,15 +472,54 @@
   }
 
   /* (Its switch off, a slider filling it kept where it's set: its fill
-     disabled, gray, darker than a bright tint (at most at the lightness
-     where its text over it stays dark: its tone, as its tint's, unchanged),
-     as dark as a dark one.) */
+     not drawn, nor what's copied into it, the card as off as without one;
+     where it'd end, a dashed line across the card, in its ticks' color,
+     inside its hairline, telling where it's set (a tick there, hidden
+     under it); none at either end of the track (all, or nothing: as off
+     as a switch's card).) */
   .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root:not([data-checked]))
     > .uikit-card-frame
     > .uikit-card-layout
     > .uikit-slider-root
     .uikit-slider-indicator {
-    background-color: oklch(from var(--uikit-slider-tint) min(l, 0.62) 0 h);
+    background-color: transparent;
+
+    > * {
+      visibility: hidden;
+    }
+
+    &:not([data-at-min], [data-at-max])::after {
+      position: absolute;
+      width: 1px;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        var(--uikit-card-tick) 0 8px,
+        transparent 8px 12px
+      );
+      content: '';
+      inset-block: var(--uikit-card-rim);
+      inset-inline-end: 0;
+    }
+
+    [data-orientation='vertical'] &:not([data-at-min], [data-at-max])::after {
+      width: auto;
+      height: 1px;
+      background-image: repeating-linear-gradient(
+        to right,
+        var(--uikit-card-tick) 0 8px,
+        transparent 8px 12px
+      );
+      inset: 0 var(--uikit-card-rim) auto;
+    }
+  }
+
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-switch-root:not([data-checked]))
+    > .uikit-card-frame
+    > .uikit-card-layout
+    > .uikit-slider-root
+    .uikit-slider-ticks
+    > [data-at-value] {
+    visibility: hidden;
   }
 
   /* A switch in it (see main.tsx): smaller, its top trailing corner; its
@@ -464,10 +543,11 @@
   /* Its switch part (`Card.Switch`, see main.tsx): on, in the card's tint
      (`--uikit-card-switch-tint`, its `tint`; else the switch's green). Over
      a slider's fill (its color the same tint, else the app's), set apart
-     from it: on, a darker shade of it; off, a darker shade of the fill's
-     gray (see above). So too in a card never lit (`active` given false,
-     e.g. a dimmer's), however it's laid out (e.g. expanded, its fill a
-     light's channels instead): its switch the same at every size. */
+     from it: on, a darker shade of it (off, no fill under it, see above:
+     the switch's own off color). So too in a card never lit (`active`
+     given false, e.g. a dimmer's), however it's laid out (e.g. expanded,
+     its fill a light's channels instead): its switch the same at every
+     size. */
   .uikit-card-layout > .uikit-card-switch {
     --uikit-switch-on-color: var(
       --uikit-card-switch-tint,
@@ -490,11 +570,6 @@
       in oklab,
       var(--uikit-card-switch-fill),
       #000 28%
-    );
-    --uikit-switch-off-color: color-mix(
-      in oklab,
-      oklch(from var(--uikit-card-switch-fill) min(l, 0.62) 0 h),
-      #000 32%
     );
   }
 
@@ -523,6 +598,7 @@
     --uikit-glass-shadow:
       inset 0 0 0 0.5px rgb(0 0 0 / 8%), 0 2px 6px rgb(0 0 0 / 12%),
       0 8px 28px rgb(0 0 0 / 20%);
+    --uikit-card-rim: 0.5px;
 
     /* (Its symbol on: in its tint, its `Symbol`'s emphasized icon (e.g.
        filled) shown; off or not switchable, its icon (e.g. outlined).) */

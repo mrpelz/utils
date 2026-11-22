@@ -82,6 +82,7 @@ const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
       onPointerDown,
       onPointerUp,
       onTouchMove,
+      onValueChange,
       style,
       thumbAlignment = 'edge',
       tint,
@@ -90,6 +91,9 @@ const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
     ref,
   ) => {
     const { format, locale, max, min, orientation, step } = props;
+    // (Its value now, for its ticks: given, or its own as it changes.)
+    const [ownValue, setOwnValue] = useState(props.defaultValue);
+    const value = props.value ?? ownValue;
     // Held, its touch doesn't scroll (see `useTouchHold`).
     const holdHandlers = useTouchHold<HTMLDivElement>(
       orientation === 'vertical' ? 'y' : 'x',
@@ -97,8 +101,17 @@ const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
     );
     const [valueTooltip, setValueTooltip] = useState<ValueTooltip>(undefined);
     const context = useMemo(
-      () => ({ format, locale, max, min, setValueTooltip, step, valueTooltip }),
-      [format, locale, max, min, step, valueTooltip],
+      () => ({
+        format,
+        locale,
+        max,
+        min,
+        setValueTooltip,
+        step,
+        value,
+        valueTooltip,
+      }),
+      [format, locale, max, min, step, value, valueTooltip],
     );
 
     return (
@@ -115,6 +128,10 @@ const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
           {...holdHandlers}
           {...props}
           className={cn('uikit-slider-root', className)}
+          onValueChange={(next, details) => {
+            setOwnValue(next);
+            onValueChange?.(next, details);
+          }}
         />
       </RootContext.Provider>
     );
@@ -150,15 +167,32 @@ const toPercent = (value: number, min: number, max: number) =>
 
 // Base UI couples the fill to the thumb's center, which (with edge
 // alignment) never reaches the track's ends. The fill is derived from the
-// value instead, so it spans the whole track at the maximum.
+// value instead, so it spans the whole track at the maximum. Its end at the
+// minimum or the maximum, marked (`data-at-min`, `data-at-max`: e.g. for
+// what's drawn at its end, see Card).
 const Indicator = forwardRef<
   HTMLDivElement,
   Omit<BaseSlider.Indicator.Props, 'ref'>
->(({ className, style, ...props }, ref) => (
+>(({ className, render, style, ...props }, ref) => (
   <BaseSlider.Indicator
     ref={ref}
     className={cn('uikit-slider-indicator', className)}
     data-slider-part="indicator"
+    render={
+      // (An element given: as it is, unmarked.)
+      render !== undefined && typeof render !== 'function'
+        ? render
+        : (renderProps, state) => {
+            const { max, min, values } = state;
+            const end = values.at(-1) ?? min;
+            const marked = {
+              ...renderProps,
+              'data-at-max': end >= max ? '' : undefined,
+              'data-at-min': end <= min ? '' : undefined,
+            };
+            return render ? render(marked, state) : <div {...marked} />;
+          }
+    }
     style={(state) => {
       const { max, min, orientation, values } = state;
       const isRange = values.length > 1;
@@ -215,30 +249,45 @@ const Thumb = forwardRef<HTMLDivElement, Omit<BaseSlider.Thumb.Props, 'ref'>>(
   },
 );
 
-/** Tick marks, to be rendered inside `Slider.Track`. */
+/**
+ * Tick marks, to be rendered inside `Slider.Track`; the one at its value
+ * (its last), if any, marked (`data-at-value`: e.g. hidden under what's
+ * drawn there, see Card).
+ */
 const Ticks = forwardRef<HTMLDivElement, SliderTicksProps>(
-  ({ className, count, ...props }, ref) => (
-    // Round. Where the fill ends at their values, across the whole track
-    // (the fill shows through the knob while it's dragged), whatever the thumb's alignment.
-    <div
-      ref={ref}
-      aria-hidden="true"
-      {...props}
-      className={cn('uikit-slider-ticks', className)}
-      data-slider-part="ticks"
-    >
-      {Array.from({ length: Math.max(0, count - 2) }, (_, index) => (
-        <span
-          key={index}
-          style={
-            {
-              '--uikit-slider-tick': `${String(((index + 1) / (count - 1)) * 100)}%`,
-            } as CSSProperties
-          }
-        />
-      ))}
-    </div>
-  ),
+  ({ className, count, ...props }, ref) => {
+    const { max = 100, min = 0, value } = useContext(RootContext);
+    const end = Array.isArray(value) ? value.at(-1) : value;
+    const at =
+      typeof end === 'number' && max !== min ? (end - min) / (max - min) : -1;
+    return (
+      // Round. Where the fill ends at their values, across the whole track
+      // (the fill shows through the knob while it's dragged), whatever the
+      // thumb's alignment.
+      <div
+        ref={ref}
+        aria-hidden="true"
+        {...props}
+        className={cn('uikit-slider-ticks', className)}
+        data-slider-part="ticks"
+      >
+        {Array.from({ length: Math.max(0, count - 2) }, (_, index) => {
+          const position = (index + 1) / (count - 1);
+          return (
+            <span
+              key={index}
+              data-at-value={Math.abs(position - at) < 1e-9 ? '' : undefined}
+              style={
+                {
+                  '--uikit-slider-tick': `${String(position * 100)}%`,
+                } as CSSProperties
+              }
+            />
+          );
+        })}
+      </div>
+    );
+  },
 );
 
 /**

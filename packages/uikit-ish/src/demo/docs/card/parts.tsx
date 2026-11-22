@@ -469,8 +469,9 @@ export const CardParts: FunctionComponent = () => (
       </li>
       <li>
         Over a slider’s fill, it’s set apart from the fill: on, it’s a darker
-        shade of the tint, and off, a darker shade of the fill’s gray. The fill
-        has the same tint, so pass the slider’s tint here too.
+        shade of the tint. The fill has the same tint, so pass the slider’s tint
+        here too. Off, there’s no fill under it, so it has the switch’s own off
+        color.
       </li>
       <li>
         A card that’s never lit (<code>active</code> given as <code>false</code>
