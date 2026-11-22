@@ -1,6 +1,7 @@
 import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
+  Button,
   Header,
   Layout,
   List,
@@ -21,6 +22,7 @@ import {
   PartLink,
   type Section,
 } from '../../tooling/guide/sections.js';
+import { sfInsetFilledLeadingthirdRectangle } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
 import { rowTitles, sidebarSections } from '../sidebar/content.js';
@@ -41,6 +43,45 @@ const threeColumnsCode = `<Layout.Root>
   {/* Flexible: the message (at least minSize, 240px, as all). */}
   <Layout.Column>
     <Page.Root background="plain">…</Page.Root>
+  </Layout.Column>
+</Layout.Root>`;
+
+const closingCode = `// Whether the contacts show: the app's state, closed by a drag too.
+const [isOpen, setIsOpen] = useState(true);
+
+<Layout.Root>
+  {/* Dragged past half its minSize: closed. */}
+  <Layout.Column
+    closeOnDrag
+    resizable
+    defaultSize={320}
+    minSize={240}
+    open={isOpen}
+    onOpenChange={setIsOpen}
+  >
+    <Page.Root>…</Page.Root>
+  </Layout.Column>
+  <Layout.Column>
+    <Header.Root>
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          {/* Closed: a button showing it again. */}
+          {isOpen ? null : (
+            <Toolbar.Leading>
+              <Toolbar.Button aria-label="Show Contacts" shape="circle" onClick={() => setIsOpen(true)}>
+                <Button.Icon>
+                  <Symbol icon={sfInsetFilledLeadingthirdRectangle} />
+                </Button.Icon>
+              </Toolbar.Button>
+            </Toolbar.Leading>
+          )}
+          <Toolbar.Title>
+            <span>Contact</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Page.Root background="plain">…</Page.Root>
+    </Header.Root>
   </Layout.Column>
 </Layout.Root>`;
 
@@ -66,7 +107,7 @@ const backgroundCode = `<Viewport.Background>
 </Viewport.Background>
 <Viewport.Content>
   {/* On the picture: no line between the columns. */}
-  <Layout.Root hideSeparators>
+  <Layout.Root separators={false}>
     <Layout.Column floating aria-label="Sidebar" defaultSize={300}>
       <Sidebar.Root aria-label="Mailboxes">…</Sidebar.Root>
     </Layout.Column>
@@ -464,6 +505,157 @@ const Resizable: FunctionComponent = () => {
   );
 };
 
+/**
+ * A list column closed by dragging its divider past half its smallest
+ * size; shown again by a button in the other column's bar.
+ */
+const ClosingByDrag: FunctionComponent = () => {
+  const id = 'layout-composition-closing';
+  const [log, addLog] = useLog();
+  const [isOpen, setIsOpen] = useState(true);
+  const { controls, keySecond, propsFirst, propsRoot, propsSecond, state } =
+    useLayoutControls(id, addLog, {
+      columns: [
+        [
+          'contacts',
+          320,
+          true,
+          { isClosingOnDrag: true, maxSize: 480, minSize: 240 },
+        ],
+        ['contact', undefined, false],
+      ],
+      isClosed: true,
+    });
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Header.Root': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Item': [],
+            'List.Root': [],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': ['background'],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['placement'],
+            'Toolbar.Title': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Content': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  return (
+    <Component
+      isExpanded
+      isInline
+      controls={[controls, partControls]}
+      diagnostics={`Contacts: ${isOpen ? 'open' : 'closed'}`}
+      id={id}
+      log={log}
+      setup="const [isOpen, setIsOpen] = useState(true);"
+      stage="tablet"
+      state={[...state, partState]}
+      title="Closing a column by dragging"
+    >
+      <Viewport.Content {...partProps['Viewport.Content']}>
+        <Layout.Root {...propsRoot}>
+          <Layout.Column
+            {...propsFirst}
+            open={isOpen}
+            onOpenChange={(next: boolean, { reason }) => {
+              addLog(`contacts open: ${String(next)}/${reason}`);
+              setIsOpen(next);
+            }}
+          >
+            <Page.Root {...partProps['Page.Root']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root {...partProps['List.Root']}>
+                <List.Section {...partProps['List.Section']}>
+                  <List.Group {...partProps['List.Group']}>
+                    {names.map((name) => (
+                      <List.Item
+                        key={name}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {name}
+                          </List.Title>
+                        </List.Content>
+                      </List.Item>
+                    ))}
+                  </List.Group>
+                </List.Section>
+              </List.Root>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
+            </Page.Root>
+          </Layout.Column>
+          <Layout.Column
+            key={keySecond}
+            {...propsSecond}
+          >
+            <Header.Root {...partProps['Header.Root']}>
+              <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+                <Toolbar.Root
+                  {...partProps['Toolbar.Root']}
+                  placement="block-start"
+                >
+                  {isOpen ? null : (
+                    <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+                      <Toolbar.Button
+                        {...partProps['Toolbar.Button']}
+                        aria-label="Show Contacts"
+                        shape="circle"
+                        onClick={() => {
+                          addLog('show contacts');
+                          setIsOpen(true);
+                        }}
+                      >
+                        <Button.Icon {...partProps['Button.Icon']}>
+                          <Symbol
+                            {...partProps.Symbol}
+                            icon={sfInsetFilledLeadingthirdRectangle}
+                          />
+                        </Button.Icon>
+                      </Toolbar.Button>
+                    </Toolbar.Leading>
+                  )}
+                  <Toolbar.Title {...partProps['Toolbar.Title']}>
+                    <span>Contact</span>
+                  </Toolbar.Title>
+                </Toolbar.Root>
+              </Viewport.BlockStart>
+              <Page.Root
+                {...partProps['Page.Root']}
+                background="plain"
+              />
+            </Header.Root>
+          </Layout.Column>
+        </Layout.Root>
+      </Viewport.Content>
+    </Component>
+  );
+};
+
 /** A picture behind a floating sidebar and a transparent page. */
 const BackgroundBehind: FunctionComponent = () => {
   const id = 'layout-composition-background';
@@ -541,7 +733,7 @@ const BackgroundBehind: FunctionComponent = () => {
         <Layout.Root
           {...propsRoot}
           // (On the picture: no line between the columns, unless set.)
-          hideSeparators={propsRoot.hideSeparators ?? true}
+          separators={propsRoot.separators ?? false}
         >
           <Layout.Column
             key={keyFirst}
@@ -672,6 +864,7 @@ const BackgroundBehind: FunctionComponent = () => {
 const sections: readonly Section[] = [
   ['three-columns', 'Three columns'],
   ['resizing-a-column', 'Resizing a column'],
+  ['closing-by-dragging', 'Closing by dragging'],
   ['on-a-phone', 'On a phone'],
   ['a-background-behind', 'A background behind'],
 ];
@@ -755,6 +948,36 @@ export const LayoutComposition: FunctionComponent = () => (
     <Resizable />
 
     <Heading
+      id="closing-by-dragging"
+      level={2}
+    >
+      Closing by dragging
+    </Heading>
+    <ul>
+      <li>
+        With <code>closeOnDrag</code>, dragging the divider below{' '}
+        <code>minSize</code> holds the column at that size at first. Past half
+        of it, the column closes, sliding out while you’re still dragging.
+        Dragging back past that point opens it again.
+      </li>
+      <li>
+        Closed, it keeps the size it had when the drag started. A button in the
+        other column’s bar shows it again, only while it’s closed.
+      </li>
+      <li>
+        <strong>Library:</strong> the hold at <code>minSize</code>, closing and
+        opening again within the drag, <code>onOpenChange</code> with its
+        reason, and the slide.
+      </li>
+      <li>
+        <strong>Demo:</strong> the open state and the button showing the column
+        again.
+      </li>
+    </ul>
+    <CodeView code={closingCode} />
+    <ClosingByDrag />
+
+    <Heading
       id="on-a-phone"
       level={2}
     >
@@ -816,5 +1039,6 @@ export const LayoutComposition: FunctionComponent = () => (
 export const layoutCompositionDemos = [
   ThreeColumns,
   Resizable,
+  ClosingByDrag,
   BackgroundBehind,
 ];

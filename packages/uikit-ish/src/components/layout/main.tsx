@@ -2,6 +2,7 @@ import './style.css';
 
 import {
   forwardRef,
+  FunctionComponent,
   KeyboardEvent,
   PointerEvent,
   useLayoutEffect,
@@ -13,7 +14,11 @@ import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import { ViewportScopeContext } from '../viewport/main.js';
 import type { LayoutColumnProps, LayoutRootProps } from './props.js';
 
-export type { LayoutColumnProps, LayoutRootProps } from './props.js';
+export type {
+  LayoutColumnOpenChangeDetails,
+  LayoutColumnProps,
+  LayoutRootProps,
+} from './props.js';
 
 // Layouts: columns side by
 // side, filling their container (e.g. `Viewport.Content`): a sidebar, a list, a
@@ -243,6 +248,102 @@ const useOpenTransition = (
   return isMoving;
 };
 
+/**
+ * A resizable column's divider, at its end: a 10px hit area over the
+ * hairline (a keyboard-focusable separator), dragged (or its keys) to
+ * resize it; with `closeOnDrag`, dragged past half its smallest size to
+ * close it (see `LayoutColumnProps`).
+ */
+const Divider: FunctionComponent<{
+  closeOnDrag: boolean;
+  isDragging: boolean;
+  maxSize: number;
+  minSize: number;
+  onDraggingChange: (isDragging: boolean) => void;
+  onOpenChange: (open: boolean, event: PointerEvent<HTMLDivElement>) => void;
+  onResize: (size: number) => void;
+  size: number | undefined;
+}> = ({
+  closeOnDrag,
+  isDragging,
+  maxSize,
+  minSize,
+  onDraggingChange,
+  onOpenChange,
+  onResize,
+  size,
+}) => {
+  const dragRef = useRef<
+    | { isClosed: boolean; pointerId: number; size: number; x: number }
+    | undefined
+  >(undefined);
+
+  // Its column's current size: the given one, or (flexible) as laid out.
+  const sizeOf = (divider: HTMLElement) =>
+    size ?? divider.parentElement?.getBoundingClientRect().width ?? minSize;
+
+  return (
+    <div
+      aria-orientation="vertical"
+      aria-valuemax={Number.isFinite(maxSize) ? maxSize : undefined}
+      aria-valuemin={minSize}
+      aria-valuenow={size}
+      className="uikit-layout-divider"
+      data-dragging={isDragging ? '' : undefined}
+      data-layout-part="divider"
+      role="separator"
+      tabIndex={0}
+      onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
+        const step = event.shiftKey ? keyStepLarge : keyStep;
+        const direction = towardsEnd(event.currentTarget);
+        const current = sizeOf(event.currentTarget);
+        const sizes: Record<string, number> = {
+          ArrowLeft: current - step * direction,
+          ArrowRight: current + step * direction,
+          End: maxSize,
+          Home: minSize,
+        };
+        const next = sizes[event.key];
+        if (next === undefined || !Number.isFinite(next)) return;
+        event.preventDefault();
+        onResize(next);
+      }}
+      onLostPointerCapture={() => {
+        dragRef.current = undefined;
+        onDraggingChange(false);
+      }}
+      onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
+        if (event.button !== 0) return;
+        event.preventDefault();
+        event.currentTarget.setPointerCapture(event.pointerId);
+        dragRef.current = {
+          isClosed: false,
+          pointerId: event.pointerId,
+          size: sizeOf(event.currentTarget),
+          x: event.clientX,
+        };
+        onDraggingChange(true);
+      }}
+      onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
+        const { current: drag } = dragRef;
+        if (drag?.pointerId !== event.pointerId) return;
+        const moved =
+          (event.clientX - drag.x) * towardsEnd(event.currentTarget);
+        const next = drag.size + moved;
+        // (Past half its smallest size: closed, its size as the drag
+        // started; back again, open, at its smallest size or more.)
+        const isPast = closeOnDrag && next < minSize / 2;
+        if (isPast !== drag.isClosed) {
+          drag.isClosed = isPast;
+          if (isPast) onResize(drag.size);
+          onOpenChange(!isPast, event);
+        }
+        if (!isPast) onResize(next);
+      }}
+    />
+  );
+};
+
 /** A column side by side: sized (resizable), or sharing the free space. */
 const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
   (
@@ -250,11 +351,13 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
       className,
       children,
       clearFloating = false,
+      closeOnDrag = false,
       defaultOpen = true,
       defaultSize,
       floating = false,
       maxSize = Infinity,
       minSize = 240,
+      onOpenChange,
       onSizeChange,
       open: controlledOpen,
       resizable = false,
@@ -265,15 +368,12 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
     forwardedRef,
   ) => {
     const ref = useForwardedRef(forwardedRef);
-    const [ownOpen] = useState(defaultOpen);
+    const [ownOpen, setOwnOpen] = useState(defaultOpen);
     const isOpen = controlledOpen ?? ownOpen;
     useFloatingSize(ref, floating, isOpen);
     const isMoving = useOpenTransition(ref, isOpen);
     const [ownSize, setOwnSize] = useState(defaultSize);
     const size = controlledSize ?? ownSize;
-    const dragRef = useRef<
-      { pointerId: number; size: number; x: number } | undefined
-    >(undefined);
     const [isDragging, setIsDragging] = useState(false);
 
     const resize = (next: number) => {
@@ -282,9 +382,12 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
       onSizeChange?.(clamped);
     };
 
-    // Its current size: the given one, or (flexible) as laid out.
-    const sizeOf = (divider: HTMLElement) =>
-      size ?? divider.parentElement?.getBoundingClientRect().width ?? minSize;
+    // Opened or closed by its divider (see `closeOnDrag`): told; its own
+    // state, uncontrolled.
+    const setOpen = (next: boolean, event: PointerEvent<HTMLDivElement>) => {
+      onOpenChange?.(next, { event, reason: 'divider-drag' });
+      if (controlledOpen === undefined) setOwnOpen(next);
+    };
 
     const columnStyle = withStyle(
       {
@@ -313,62 +416,24 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
           data-layout-part="column"
           data-moving={isMoving ? '' : undefined}
           data-resizable={resizable ? '' : undefined}
-          inert={!isOpen}
+          // (Closed by a drag still going on: not inert until it ends, its
+          // divider still dragged (and so it may open again).)
+          inert={!isOpen && !isDragging}
           style={columnStyle}
           {...props}
           className={cn('uikit-layout-column', className)}
         >
           {children}
           {resizable ? (
-            // The divider at a resizable column's end: a 10px hit area over the
-            // hairline (a keyboard-focusable separator).
-            <div
-              aria-orientation="vertical"
-              aria-valuemax={Number.isFinite(maxSize) ? maxSize : undefined}
-              aria-valuemin={minSize}
-              aria-valuenow={size}
-              className="uikit-layout-divider"
-              data-dragging={isDragging ? '' : undefined}
-              data-layout-part="divider"
-              role="separator"
-              tabIndex={0}
-              onKeyDown={(event: KeyboardEvent<HTMLDivElement>) => {
-                const step = event.shiftKey ? keyStepLarge : keyStep;
-                const direction = towardsEnd(event.currentTarget);
-                const current = sizeOf(event.currentTarget);
-                const sizes: Record<string, number> = {
-                  ArrowLeft: current - step * direction,
-                  ArrowRight: current + step * direction,
-                  End: maxSize,
-                  Home: minSize,
-                };
-                const next = sizes[event.key];
-                if (next === undefined || !Number.isFinite(next)) return;
-                event.preventDefault();
-                resize(next);
-              }}
-              onLostPointerCapture={() => {
-                dragRef.current = undefined;
-                setIsDragging(false);
-              }}
-              onPointerDown={(event: PointerEvent<HTMLDivElement>) => {
-                if (event.button !== 0) return;
-                event.preventDefault();
-                event.currentTarget.setPointerCapture(event.pointerId);
-                dragRef.current = {
-                  pointerId: event.pointerId,
-                  size: sizeOf(event.currentTarget),
-                  x: event.clientX,
-                };
-                setIsDragging(true);
-              }}
-              onPointerMove={(event: PointerEvent<HTMLDivElement>) => {
-                const { current: drag } = dragRef;
-                if (drag?.pointerId !== event.pointerId) return;
-                const moved =
-                  (event.clientX - drag.x) * towardsEnd(event.currentTarget);
-                resize(drag.size + moved);
-              }}
+            <Divider
+              closeOnDrag={closeOnDrag}
+              isDragging={isDragging}
+              maxSize={maxSize}
+              minSize={minSize}
+              size={size}
+              onDraggingChange={setIsDragging}
+              onOpenChange={setOpen}
+              onResize={resize}
             />
           ) : null}
         </div>
@@ -382,11 +447,11 @@ const Column = forwardRef<HTMLDivElement, LayoutColumnProps>(
  * what's behind it showing where they have no background.
  */
 const Root = forwardRef<HTMLDivElement, LayoutRootProps>(
-  ({ className, hideSeparators = false, ...props }, ref) => (
+  ({ className, separators = true, ...props }, ref) => (
     <div
       ref={ref}
-      data-hide-separators={hideSeparators ? '' : undefined}
       data-layout-part="root"
+      data-separators={separators ? undefined : 'hidden'}
       {...props}
       className={cn('uikit-layout-root', className)}
     />

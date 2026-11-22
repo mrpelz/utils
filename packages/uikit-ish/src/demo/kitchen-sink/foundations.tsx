@@ -29,9 +29,6 @@ type Choice = {
   title: string;
 };
 
-const notYet =
-  'The library doesn’t follow this one yet. Its components follow the system’s setting instead.';
-
 const onOff = [
   ['on', 'On'],
   ['off', 'Off'],
@@ -48,7 +45,6 @@ const choices: readonly Choice[] = [
   },
   {
     key: 'contrast',
-    note: notYet,
     options: [
       ['standard', 'Standard'],
       ['more', 'More'],
@@ -67,19 +63,17 @@ const choices: readonly Choice[] = [
   },
   {
     key: 'reducedMotion',
-    note: notYet,
     options: onOff,
     title: 'Reduce Motion',
   },
   {
     key: 'reducedTransparency',
-    note: notYet,
     options: onOff,
     title: 'Reduce Transparency',
   },
   {
     key: 'differentiateWithoutColor',
-    note: notYet,
+    note: 'The library doesn’t follow this one yet.',
     options: onOff,
     title: 'Differentiate Without Color',
   },

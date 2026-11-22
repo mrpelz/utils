@@ -81,11 +81,12 @@ export const tabBarRootRows: readonly PropRow[] = [
 
 export const tabBarListRows: readonly PropRow[] = [
   [
-    'collapsed',
+    'expanded',
     'boolean',
-    code('false'),
+    code('true'),
     <>
-      Minimizes the bar: only the groups and tabs marked{' '}
+      Whether the bar is at its full size. Set to <code>false</code>, it’s
+      minimized: only the groups and tabs marked{' '}
       <code>visibleWhenCollapsed</code> remain, by default as symbols in
       circles. The bar keeps its width.
     </>,

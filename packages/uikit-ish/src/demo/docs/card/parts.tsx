@@ -20,6 +20,7 @@ import {
   cardCornerButtonRows,
   cardRootRows,
   cardSizesRows,
+  cardSwitchRows,
   cardSymbolRows,
   cardTitleRows,
   cardUseCardOrientationRows,
@@ -28,6 +29,7 @@ import {
 import { cardsStage, stageParts, useCardsStage } from './main.js';
 import {
   getPropOptionsCornerButton,
+  getPropOptionsSwitch,
   propOptionsRoot,
   propOptionsSymbol,
   propOptionsTitle,
@@ -147,6 +149,18 @@ const SymbolPart: FunctionComponent = () => (
   />
 );
 
+/** The lamp's card alone: the only one with a switch of its own here. */
+const lampOnly = ['Floor Lamp'] as const;
+
+const SwitchPart: FunctionComponent = () => (
+  <PartView
+    id="card-parts-switch"
+    on={lampOnly}
+    options={getPropOptionsSwitch}
+    part="Card.Switch"
+  />
+);
+
 const TitlePart: FunctionComponent = () => (
   <PartView
     id="card-parts-title"
@@ -237,12 +251,7 @@ export const CardParts: FunctionComponent = () => (
       <li>Root: the glass surface, in a grid’s tile or on its own.</li>
       <li>Symbol, Title, Value: what it shows.</li>
       <li>
-        A{' '}
-        <PartLink
-          component="switch"
-          part="Switch.Root"
-        />{' '}
-        or a{' '}
+        Switch: its switch, in the card’s tint. Or a{' '}
         <PartLink
           component="slider"
           part="Slider.Root"
@@ -278,11 +287,9 @@ export const CardParts: FunctionComponent = () => (
                 <PartLink part="Card.CornerButton" /> (optional, several)
               </li>
               <li>
-                <PartLink
-                  component="switch"
-                  part="Switch.Root"
-                />{' '}
-                or{' '}
+                <PartLink part="Card.Switch" /> (optional)
+              </li>
+              <li>
                 <PartLink
                   component="slider"
                   part="Slider.Root"
@@ -323,14 +330,9 @@ export const CardParts: FunctionComponent = () => (
         tile is moved or resized, and the tile’s corner symbols fade with it.
       </li>
       <li>
-        With a{' '}
-        <PartLink
-          component="switch"
-          part="Switch.Root"
-        />{' '}
-        in it, it’s lit while the switch is on and dark while it’s off, in both
-        color schemes. Its <code>onClick</code> passes presses on to the switch
-        with{' '}
+        With a <PartLink part="Card.Switch" /> in it, it’s lit while the switch
+        is on and dark while it’s off, in both color schemes. Its{' '}
+        <code>onClick</code> passes presses on to the switch with{' '}
         <PartLink
           component="list"
           part="forwardClick"
@@ -445,6 +447,62 @@ export const CardParts: FunctionComponent = () => (
     <SymbolPart />
     <h3>Props</h3>
     <PropsTable rows={cardSymbolRows} />
+
+    <Heading
+      id="card-switch"
+      level={2}
+    >
+      <code>Card.Switch</code>
+    </Heading>
+    <ul>
+      <li>
+        The card’s switch, in its top trailing corner: a{' '}
+        <PartLink
+          component="switch"
+          part="Switch.Root"
+        />{' '}
+        with its thumb, smaller than a switch on its own.
+      </li>
+      <li>
+        On, it’s drawn in the card’s <code>tint</code>, the same color as its{' '}
+        <PartLink part="Card.Symbol" />. Without one, it’s the switch’s green.
+      </li>
+      <li>
+        Over a slider’s fill, it’s set apart from the fill: on, it’s a darker
+        shade of the tint, and off, a darker shade of the fill’s gray. The fill
+        has the same tint, so pass the slider’s tint here too.
+      </li>
+      <li>
+        A card that’s never lit (<code>active</code> given as <code>false</code>
+        , such as a dimmer’s) draws its switch that way at every size. So it
+        looks the same when the card expands and its fill becomes something
+        else, such as a light’s channels.
+      </li>
+      <li>
+        It’s one of the card’s parts. As the tile changes size, it moves with
+        the card’s other parts (see{' '}
+        <PartLink
+          component="grid"
+          part="useGridItemLayout"
+        />
+        ).
+      </li>
+      <li>
+        A plain{' '}
+        <PartLink
+          component="switch"
+          part="Switch.Root"
+        />{' '}
+        in a card still works and lights the card, but keeps the switch’s own
+        colors.
+      </li>
+      <li>
+        Renders a <code>span</code>, as a switch does.
+      </li>
+    </ul>
+    <SwitchPart />
+    <h3>Props</h3>
+    <PropsTable rows={cardSwitchRows} />
 
     <Heading
       id="card-title"
@@ -600,6 +658,7 @@ export const CardParts: FunctionComponent = () => (
 export const cardPartsDemos = [
   RootPart,
   SymbolPart,
+  SwitchPart,
   TitlePart,
   ValuePart,
   CornerButtonPart,

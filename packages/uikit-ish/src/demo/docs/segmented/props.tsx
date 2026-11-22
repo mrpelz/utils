@@ -21,7 +21,7 @@ const propOptionsRoot = (values: readonly [string, string, string]) => ({
   readOnly: [undefined, false, true] as const,
   required: [undefined, false, true] as const,
   name: [undefined, 'period'] as const,
-  hideSeparators: [undefined, false, true] as const,
+  separators: [undefined, true, false] as const,
   overflow: [undefined, 'truncate', 'scroll'] as const,
 });
 
@@ -29,7 +29,7 @@ const propOptionsRoot = (values: readonly [string, string, string]) => ({
 export const propOptionsOverviewRoot = {
   defaultValue: ['day', 'week', undefined] as const,
   disabled: [undefined, true] as const,
-  hideSeparators: [undefined, true] as const,
+  separators: [undefined, false] as const,
   overflow: [undefined, 'truncate', 'scroll'] as const,
 };
 

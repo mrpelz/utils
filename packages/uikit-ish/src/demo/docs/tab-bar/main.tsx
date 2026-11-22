@@ -162,7 +162,7 @@ export const TabBarDemo: FunctionComponent = () => {
       >
         <TabBar.List
           {...propsList}
-          collapsed={propsList.collapsed ?? isCollapsed}
+          expanded={propsList.expanded ?? !isCollapsed}
         >
           {/* A click on the collapsed group expands the bar. */}
           <TabBar.Group
@@ -418,7 +418,7 @@ export const TabBarSearchDemo: FunctionComponent = () => {
       >
         <TabBar.List
           {...propsList}
-          collapsed={propsList.collapsed ?? isCollapsed}
+          expanded={propsList.expanded ?? !isCollapsed}
         >
           {/* A click on a collapsed group expands the bar. */}
           <TabBar.Group
@@ -802,7 +802,7 @@ const ScrollDemo: FunctionComponent = () => {
       >
         <TabBar.List
           {...partProps['TabBar.List']}
-          collapsed={isCollapsed}
+          expanded={!isCollapsed}
         >
           <TabBar.Group
             {...partProps['TabBar.Group']}
@@ -955,7 +955,7 @@ export const TabBarRegularDemo: FunctionComponent = () => {
       >
         <TabBar.List
           {...propsList}
-          collapsed={propsList.collapsed ?? isCollapsed}
+          expanded={propsList.expanded ?? !isCollapsed}
         >
           <TabBar.Group
             onClickCapture={() => setIsCollapsed(false)}

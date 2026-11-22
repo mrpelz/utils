@@ -33,7 +33,7 @@ import {
 } from './edge.js';
 import { EdgeEffects } from './edge-effect.js';
 import { trackFocusScroll } from './focus-scroll.js';
-import { fixedBottom, hasKeyboardFocus } from './input.js';
+import { fixedBottom, fixedProbe, hasKeyboardFocus } from './input.js';
 import { isIos27, ViewportInsetContext } from './ios27.js';
 import {
   createAnchorHandle,
@@ -571,14 +571,20 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     document.addEventListener('visibilitychange', onVisibility);
     // Its layers' box resized (e.g. their containing block within an app's
     // content layer, resized above the keyboard as it shows): read anew,
-    // what the keyboard covers of it now (none, its box above it).
-    const resizeObserver = box
-      ? new ResizeObserver(() => {
-          isBoxDriven = true;
-          update();
-        })
-      : undefined;
-    if (box) resizeObserver?.observe(box);
+    // what the keyboard covers of it now (none, its box above it). The
+    // window's (no screen): its fixed layers' box, resized without the
+    // visual viewport telling (iOS, after its own scroll to a field, laid
+    // out shorter a frame, then back: the keyboard measured short, the
+    // bars left too low), read anew too.
+    const resizeObserver = new ResizeObserver(
+      box
+        ? () => {
+            isBoxDriven = true;
+            update();
+          }
+        : update,
+    );
+    resizeObserver.observe(box ?? fixedProbe());
     const onViewport = () => {
       isBoxDriven = false;
       update();
@@ -598,7 +604,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
     return () => {
       cancelAnimationFrame(frame);
       document.removeEventListener('visibilitychange', onVisibility);
-      resizeObserver?.disconnect();
+      resizeObserver.disconnect();
       clearTimeout(recheck);
       viewport?.removeEventListener('resize', onViewport);
       viewport?.removeEventListener('scroll', onViewport);

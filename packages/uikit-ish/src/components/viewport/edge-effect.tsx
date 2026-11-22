@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 
+import { useSettings } from '../settings/main.js';
 import { usePortalContainer } from '../utils/main.js';
 import {
   edgeElementsIn,
@@ -40,10 +41,13 @@ import { useEdgeEffectOf } from './padding.js';
 type BlockEdge = 'block-start' | 'block-end';
 
 /**
- * On a scroller: its start's progress (see `progressOf`), for its own
- * styles (its edge effect's on the effect).
+ * On a scroller: its start's and its end's progress (see `progressOf`), for
+ * its own styles (e.g. a mask; its edge effect's on the effect).
  */
-const startProgress = '--uikit-viewport-edge-start-progress';
+const scrollerProgress: Record<BlockEdge, string> = {
+  'block-end': '--uikit-viewport-edge-end-progress',
+  'block-start': '--uikit-viewport-edge-start-progress',
+};
 
 /** How far content scrolls under the bars for the effect to show (px). */
 const ramp = 16;
@@ -85,10 +89,12 @@ const useMeasure = (
       // its sizes none, see the observer below.)
       if (element.getClientRects().length === 0) return;
       const progress = String(progressOf(element, edge));
-      // (Also the scroller's, at its start: e.g. a sheet's content masked
-      // under its header as far, see Sheet.)
-      if (edge === 'block-start') {
-        element.style.setProperty(startProgress, progress);
+      // (Also the scroller's: e.g. a sheet's content masked under its
+      // header as far, see Sheet. Only as it changes: written each frame,
+      // it'd be a change of the page's each frame, for whatever observes
+      // them, e.g. Glass' sampler.)
+      if (element.style.getPropertyValue(scrollerProgress[edge]) !== progress) {
+        element.style.setProperty(scrollerProgress[edge], progress);
       }
       const { current: target } = layer;
       const lineRect = line.current?.getBoundingClientRect();
@@ -116,19 +122,32 @@ const useMeasure = (
     measure();
     element.addEventListener('scroll', schedule, { passive: true });
     // (Resized, or shown again: measured before it paints, so a page shown
-    // (e.g. a tab's) doesn't paint a frame without its effects first.)
+    // (e.g. a tab's) doesn't paint a frame without its effects first. Its
+    // content resized too (its children, as they come and go): its range
+    // changes, the scroller's size not, e.g. its end's padding as its bar's
+    // measured, after it first rendered.)
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(frame);
       measure();
     });
     observer.observe(element);
+    for (const child of element.children) observer.observe(child);
+    const children = new MutationObserver((records) => {
+      for (const { addedNodes } of records) {
+        for (const node of addedNodes) {
+          if (node instanceof Element) observer.observe(node);
+        }
+      }
+    });
+    children.observe(element, { childList: true });
     const unsubscribe = subscribeEdgeElements(schedule);
     return () => {
       cancelAnimationFrame(frame);
       element.removeEventListener('scroll', schedule);
       observer.disconnect();
+      children.disconnect();
       unsubscribe();
-      if (edge === 'block-start') element.style.removeProperty(startProgress);
+      element.style.removeProperty(scrollerProgress[edge]);
     };
   }, [edge, layer, line, scroller]);
 };
@@ -177,7 +196,8 @@ let statusBarColor: string | undefined;
  * the scroller's another, solid at rest (`data-edge-solid`). Read again as
  * the scroller's attributes change (its inline background, not its other
  * styles: written as it scrolls), a color scheme's set within the
- * document, or the system's color scheme or contrast changes.
+ * document, or the color scheme or contrast changes (see `useSettings`:
+ * the system's, or a provider's).
  */
 const useBacking = (
   layer: RefObject<HTMLDivElement | null>,
@@ -185,6 +205,9 @@ const useBacking = (
   isHard: boolean,
   isUnderStatusBar: boolean,
 ) => {
+  // (Read again as the color scheme or contrast changes, the system's or a
+  // provider's: the effect's dependencies.)
+  const { colorScheme, contrast } = useSettings();
   useLayoutEffect(() => {
     const { current: element } = scroller;
     if (element && isUnderStatusBar && !holdsScroller(element)) {
@@ -235,22 +258,14 @@ const useBacking = (
       attributeFilter: ['data-color-scheme'],
       subtree: true,
     });
-    const queries = [
-      matchMedia('(prefers-color-scheme: dark)'),
-      matchMedia('(prefers-contrast: more)'),
-    ];
-    for (const query of queries) query.addEventListener('change', schedule);
     return () => {
       cancelAnimationFrame(frame);
       own.disconnect();
       schemes.disconnect();
-      for (const query of queries) {
-        query.removeEventListener('change', schedule);
-      }
       target.style.removeProperty('--uikit-viewport-edge-backing');
       delete target.dataset.edgeSolid;
     };
-  }, [isHard, isUnderStatusBar, layer, scroller]);
+  }, [colorScheme, contrast, isHard, isUnderStatusBar, layer, scroller]);
 };
 
 const Layer: FunctionComponent<{

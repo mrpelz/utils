@@ -246,7 +246,7 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
     {
       className,
       children,
-      hideSeparators,
+      separators = true,
       onFocus,
       overflow = 'truncate',
       onLostPointerCapture,
@@ -380,8 +380,8 @@ const Root = forwardRef<HTMLDivElement, Omit<SegmentedRootProps, 'ref'>>(
       <BaseRadioGroup
         ref={ref}
         data-glass-context="auto"
-        data-hide-separators={hideSeparators ? '' : undefined}
         data-overflow={overflow}
+        data-separators={separators ? undefined : 'hidden'}
         // Focused by a pointer (its item pressed, see `end`), no ring.
         onFocus={(event) => {
           onFocus?.(event);

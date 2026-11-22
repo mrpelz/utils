@@ -226,6 +226,13 @@ export const IslandArchitecture: FunctionComponent = () => (
         <code>--uikit-island-sliver</code>, read once a frame while the island
         scrolls.
       </li>
+      <li>
+        At rest, a sliver sits 18px from the screen’s bottom, so it stays clear
+        of the home indicator. Without a bottom inset, it sits 8px from the
+        bottom. The extra lift shrinks by the same progress, so at the next stop
+        the island is 8px from the bottom, like every other stop. The lift moves
+        the island without resizing it, so its anchor keeps its height.
+      </li>
     </ul>
 
     <Heading

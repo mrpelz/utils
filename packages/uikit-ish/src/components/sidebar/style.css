@@ -18,6 +18,14 @@
     padding-block-end: 10px;
   }
 
+  /* At its bottom (in a bar, see main.tsx): mirrored, its buttons' shapes
+     8px from the panel's bottom (2px into its 10px inset), 10px from what's
+     above. */
+  .uikit-viewport-anchor[data-edge='block-end'] > .uikit-sidebar-toolbar {
+    margin-block: 0 -2px;
+    padding-block: 10px 0;
+  }
+
   .uikit-sidebar-toolbar-group {
     display: flex;
     align-items: center;
@@ -113,8 +121,12 @@
         --uikit-viewport-edge-veil: 0.75;
       }
 
+      /* (Its blur, then, not drawn at all: transparent, unblurred, it'd
+         draw nothing, but Chrome on macOS, its layer kept (masked, its
+         opacity by the scroll), left a stale band of the glass under it as
+         what's behind the sidebar changed, until it scrolled.) */
       & .uikit-viewport-edge-effect[data-edge-effect='soft']::before {
-        backdrop-filter: none;
+        display: none;
       }
 
       & .uikit-viewport-anchor {
@@ -129,16 +141,25 @@
         /* (Flat glass in it drawn over the panel's glass, see Glass.) */
         --uikit-glass-backdrop: var(--uikit-glass-background);
 
-        /* Under its bar, fading out: hidden under the share of it the veil
-           is, showing past it and its edge effect's reach (16px); only as
-           content scrolls under it, at the top all shown. */
+        /* Under its bars (at its top, and at its bottom if it has one),
+           fading out: hidden under the share of each the veil is, showing
+           past it and its edge effect's reach (16px); only as content
+           scrolls under it, at either end all shown; without a bottom bar
+           (no progress there), none faded. */
         mask-image: linear-gradient(
           rgb(0 0 0 / calc(1 - var(--uikit-viewport-edge-start-progress, 1)))
             calc(
               var(--uikit-viewport-padding-block-start, 0px) *
                 var(--uikit-viewport-edge-veil, 0.75)
             ),
-          #000 calc(var(--uikit-viewport-padding-block-start, 0px) + 16px)
+          #000 calc(var(--uikit-viewport-padding-block-start, 0px) + 16px),
+          #000
+            calc(100% - var(--uikit-viewport-padding-block-end, 0px) - 16px),
+          rgb(0 0 0 / calc(1 - var(--uikit-viewport-edge-end-progress, 0)))
+            calc(
+              100% - var(--uikit-viewport-padding-block-end, 0px) *
+                var(--uikit-viewport-edge-veil, 0.75)
+            )
         );
         padding-inline: 16px;
       }

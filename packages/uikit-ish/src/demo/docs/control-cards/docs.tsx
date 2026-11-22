@@ -105,6 +105,12 @@ export const controlCardsStateRows: readonly PropRow[] = [
 export const controlCardsSwitchRows: readonly PropRow[] = [
   ...checkedRows('false'),
   statesRow,
+  [
+    'tint',
+    'string (a CSS color)',
+    'the switch’s green',
+    'Its tint: its symbol’s and its switch’s color while it’s on.',
+  ],
   ...cardRows,
 ];
 

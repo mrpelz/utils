@@ -49,6 +49,7 @@ import {
 } from './button/props.js';
 import {
   getPropOptionsCornerButton as getPropOptionsCornerButtonCard,
+  getPropOptionsSwitch as getPropOptionsSwitchCard,
   propOptionsRoot as propOptionsRootCard,
   propOptionsSymbol as propOptionsSymbolCard,
   propOptionsTitle as propOptionsTitleCard,
@@ -403,6 +404,7 @@ export const partOptions: Record<string, PartOptions> = {
   'ColorPicker.Panel': propOptionsPanelColorPicker,
   'Card.CornerButton': getPropOptionsCornerButtonCard,
   'Card.Root': propOptionsRootCard,
+  'Card.Switch': getPropOptionsSwitchCard,
   'Card.Symbol': propOptionsSymbolCard,
   'Card.Title': propOptionsTitleCard,
   'Card.Value': propOptionsValueCard,

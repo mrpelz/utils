@@ -186,7 +186,7 @@ export const SegmentedOverview: FunctionComponent = () => (
             'onValueChange',
             'disabled',
             'name',
-            'hideSeparators',
+            'separators',
             'overflow',
           ),
         ],
@@ -244,8 +244,8 @@ export const SegmentedOverview: FunctionComponent = () => (
         chosen label’s bolder weight doesn’t change the control’s width.
       </li>
       <li>
-        Separators show only between unchosen items (or not at all, with{' '}
-        <code>hideSeparators</code>).
+        Separators show only between unchosen items, or not at all with{' '}
+        <code>separators</code> set to <code>false</code>.
       </li>
       <li>
         When it’s too narrow for its items, their labels truncate. Or, with{' '}

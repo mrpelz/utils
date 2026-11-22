@@ -8,7 +8,6 @@ import {
   forwardClick,
   gridIcons,
   type GridSize,
-  Switch,
   Symbol,
   type SymbolIcon,
 } from '../../../components/index.js';
@@ -206,14 +205,12 @@ export const lampCard = ({
     </Card.Symbol>
     <Card.Title {...parts['Card.Title']}>{name}</Card.Title>
     <Card.Value {...parts['Card.Value']}>{isOn ? 'On' : 'Off'}</Card.Value>
-    <Switch.Root
+    <Card.Switch
       aria-label={name}
       checked={isOn}
-      {...parts['Switch.Root']}
+      {...parts['Card.Switch']}
       onCheckedChange={onChange}
-    >
-      <Switch.Thumb {...parts['Switch.Thumb']} />
-    </Switch.Root>
+    />
   </Card.Root>
 );
 
@@ -606,8 +603,7 @@ const kindParts: Readonly<
     'Card.Root': ['active', 'onClick'],
     ...symbolParts,
     ...textParts,
-    'Switch.Root': ['aria-label', 'checked', 'onCheckedChange'],
-    'Switch.Thumb': [],
+    'Card.Switch': ['aria-label', 'checked', 'onCheckedChange'],
   },
   lock: { 'Card.Root': ['active'], ...symbolParts, ...textParts },
   room: {

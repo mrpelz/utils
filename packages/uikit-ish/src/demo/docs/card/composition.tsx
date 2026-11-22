@@ -477,9 +477,7 @@ const [isOn, setIsOn] = useState(true);
     </Card.Symbol>
     <Card.Title>Desk Lamp</Card.Title>
     <Card.Value>{isOn ? 'On' : 'Off'}</Card.Value>
-    <Switch.Root aria-label="Desk Lamp" checked={isOn} onCheckedChange={setIsOn}>
-      <Switch.Thumb />
-    </Switch.Root>
+    <Card.Switch aria-label="Desk Lamp" checked={isOn} onCheckedChange={setIsOn} />
   </Card.Root>
 </div>`;
 

@@ -75,10 +75,10 @@ export const segmentedRootRows: readonly PropRow[] = [
     'A ref to access the hidden input element.',
   ],
   [
-    'hideSeparators',
+    'separators',
     'boolean',
-    code('false'),
-    'Hides the separators between unselected items.',
+    code('true'),
+    'Whether separators show between unselected items.',
   ],
   [
     'overflow',

@@ -185,6 +185,12 @@ export const GettingStartedPage: FunctionComponent = () => (
     </ul>
     <p>And a little CSS of your own, as the library leaves the page to you:</p>
     <CodeView code={cssCode} />
+    <p>
+      To give your app its own tint instead of the system blue, set{' '}
+      <code>--uikit-tint</code>, and optionally{' '}
+      <code>--uikit-tint-more-contrast</code>, on <code>:root</code>. See{' '}
+      <a href={publicUrl('settings#your-apps-tint')}>Your app’s tint</a>.
+    </p>
 
     <Heading
       id="an-apps-structure"

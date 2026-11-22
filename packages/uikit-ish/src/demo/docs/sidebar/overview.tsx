@@ -85,7 +85,7 @@ const LiveView: FunctionComponent = () => {
               'variant',
             ],
             'Header.LargeTitle': [],
-            'Layout.Root': ['between', 'hideSeparators', 'line', 'no', 'the'],
+            'Layout.Root': ['separators'],
             'List.Content': [],
             'List.Detail': [],
             'List.Group': [],
@@ -149,7 +149,7 @@ const LiveView: FunctionComponent = () => {
           key={`${keyColumn}-${keyContentColumn}`}
           {...partProps['Layout.Root']}
           // (On the picture: no line between the columns.)
-          hideSeparators={content.background === 'picture'}
+          separators={content.background !== 'picture'}
         >
           <Layout.Column
             aria-label="Sidebar"

@@ -71,7 +71,8 @@ export const DrawerArchitecture: FunctionComponent = () => (
       </li>
       <li>
         The root reads the document’s direction once, when it mounts. If the
-        direction changes later, the swipe doesn’t flip.
+        direction changes later, the swipe doesn’t flip. To flip it, mount the
+        drawer again, for example with a new <code>key</code>.
       </li>
       <li>
         The side goes into a context for the popup and the swipe area. Both mark

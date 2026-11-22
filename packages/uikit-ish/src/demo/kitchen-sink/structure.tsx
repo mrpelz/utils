@@ -314,7 +314,7 @@ const SampleTabBar: FunctionComponent<{
         }}
       >
         <TabBar.List
-          collapsed={isCollapsed}
+          expanded={!isCollapsed}
           size={size}
         >
           <TabBar.Group
@@ -618,7 +618,7 @@ const TabBarApp: FunctionComponent = () => {
       ))}
       <Viewport.BlockEnd keyboard="cover">
         <TabBar.List
-          collapsed={isCollapsed || isSearching}
+          expanded={!isCollapsed && !isSearching}
           size={choice.isRegular ? 'regular' : undefined}
         >
           {/* (Collapsed, its section's tab alone, beside the search while
@@ -1112,7 +1112,7 @@ const LayoutContent: FunctionComponent = () => (
           className="kitchen-sink-picture kitchen-sink-fill"
         />
         {/* (On the picture: no line between the columns.) */}
-        <Layout.Root hideSeparators>
+        <Layout.Root separators={false}>
           <Layout.Column
             floating
             aria-label="Sidebar"

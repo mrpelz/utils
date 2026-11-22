@@ -131,6 +131,18 @@ export const LayoutArchitecture: FunctionComponent = () => (
         clamped to the minimum and maximum. For a flexible column, the current
         size is read from its box when a drag starts.
       </li>
+      <li>
+        With <code>closeOnDrag</code>, a drag that goes past half the minimum
+        closes the column, and coming back past that point opens it again. The
+        divider reports each change through <code>onOpenChange</code>, with the
+        reason <code>divider-drag</code>. Closing also puts back the size from
+        when the drag started.
+      </li>
+      <li>
+        A closed column is inert, but not while the drag that closed it is still
+        going on. Otherwise its divider would lose the pointer, and the column
+        couldn’t open again within the same drag.
+      </li>
     </ul>
 
     <Heading

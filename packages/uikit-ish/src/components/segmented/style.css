@@ -161,7 +161,7 @@
     background-color: var(--color-ui-tertiary-system-fill);
     touch-action: pan-y;
 
-    &[data-hide-separators] [role='radio']::before {
+    &[data-separators='hidden'] [role='radio']::before {
       display: none;
     }
 

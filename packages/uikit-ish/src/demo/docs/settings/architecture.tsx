@@ -102,8 +102,11 @@ export const SettingsArchitecture: FunctionComponent = () => (
         provider or a portal, which is marked <code>data-uikit-settings</code>.
       </li>
       <li>
-        The app tint stays the root’s, so your own tint isn’t replaced. Glass’s
-        opaque materials are set on the glass elements themselves.
+        The app tint is set again there too, from your <code>--uikit-tint</code>{' '}
+        and <code>--uikit-tint-more-contrast</code>. So it follows a provider’s
+        contrast (see{' '}
+        <a href={publicUrl('settings#your-apps-tint')}>Your app’s tint</a>).
+        Glass’s opaque materials are set on the glass elements themselves.
       </li>
       <li>
         The color scheme is the exception. It’s <code>color-scheme</code>{' '}

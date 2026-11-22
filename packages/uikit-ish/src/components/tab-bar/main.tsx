@@ -1031,10 +1031,10 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
     {
       className,
       children,
-      collapsed = false,
       collapsedContent,
       collapsedPosition = 'inline-start',
       context: contextProp,
+      expanded = true,
       onClickCapture,
       onLostPointerCapture,
       onPointerCancel,
@@ -1048,6 +1048,8 @@ const List = forwardRef<HTMLDivElement, Omit<TabBarListProps, 'ref'>>(
     },
     ref,
   ) => {
+    // (Not expanded: minimized, its marked groups and tabs alone.)
+    const collapsed = !expanded;
     const listRef = useForwardedRef(ref);
     const glassContext = useGlassContext(listRef, contextProp) ?? 'auto';
     const root = useContext(RootContext);

@@ -188,7 +188,7 @@
       }
     }
 
-    /* The hairline between columns (not with `hideSeparators`, e.g. on a
+    /* The hairline between columns (unless `separators` is off, e.g. on a
        picture behind them). */
     & + &::before {
       position: absolute;
@@ -201,7 +201,7 @@
       pointer-events: none;
     }
 
-    .uikit-layout-root[data-hide-separators] > & + &::before {
+    .uikit-layout-root[data-separators='hidden'] > & + &::before {
       content: none;
     }
   }

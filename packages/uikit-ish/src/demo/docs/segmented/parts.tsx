@@ -348,7 +348,7 @@ export const SegmentedParts: FunctionComponent = () => (
         It submits with a form: <code>name</code>, <code>required</code>.
       </li>
       <li>
-        Its separators: <code>hideSeparators</code>.
+        Its separators: <code>separators</code>.
       </li>
       <li>
         When it’s too narrow for its items, their labels truncate, or the items

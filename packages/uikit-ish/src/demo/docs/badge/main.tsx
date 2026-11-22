@@ -122,7 +122,7 @@ export const BadgeDemo: FunctionComponent = () => {
         >
           <TabBar.List
             {...partProps['TabBar.List']}
-            collapsed={propsContent.collapsed}
+            expanded={propsContent.expanded}
           >
             <TabBar.Group
               {...partProps['TabBar.Group']}

@@ -35,7 +35,6 @@ import { forwardClick, List } from '../list/main.js';
 import { Progress } from '../progress/main.js';
 import { useSettings } from '../settings/main.js';
 import { Slider } from '../slider/main.js';
-import { Switch } from '../switch/main.js';
 import { Symbol, type SymbolIcon } from '../symbol/main.js';
 import { cn } from '../utils/main.js';
 import type {
@@ -183,6 +182,7 @@ const SwitchCard = forwardRef<HTMLDivElement, ControlCardSwitchProps>(
       onCheckedChange,
       onClick,
       states = ['On', 'Off'],
+      tint,
       ...props
     },
     ref,
@@ -201,16 +201,17 @@ const SwitchCard = forwardRef<HTMLDivElement, ControlCardSwitchProps>(
         data-control-cards-part="switch"
         onClick={onClick ?? forwardClick('[role=switch]')}
       >
-        <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
+        <Card.Symbol tint={tint}>
+          {symbolOf({ emphasizedIcon, icon })}
+        </Card.Symbol>
         <Card.Title>{name}</Card.Title>
         <Card.Value>{isOn ? states[0] : states[1]}</Card.Value>
-        <Switch.Root
+        <Card.Switch
           aria-label={name}
           checked={isOn}
+          tint={tint}
           onCheckedChange={switchTo}
-        >
-          <Switch.Thumb />
-        </Switch.Root>
+        />
         {children}
       </Card.Root>
     );
@@ -634,13 +635,12 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
           }}
         />
         {hasSwitch ? (
-          <Switch.Root
+          <Card.Switch
             aria-label={name}
             checked={isOn}
+            tint={tint}
             onCheckedChange={switchTo}
-          >
-            <Switch.Thumb />
-          </Switch.Root>
+          />
         ) : null}
         {children}
       </Card.Root>
@@ -867,13 +867,12 @@ const Light = forwardRef<HTMLDivElement, ControlCardLightProps>(
         <Card.Symbol style={color ? { color } : undefined}>
           {symbolOf({ emphasizedIcon, icon })}
         </Card.Symbol>
-        <Switch.Root
+        <Card.Switch
           aria-label={name}
           checked={isOn}
+          tint={color}
           onCheckedChange={switchTo}
-        >
-          <Switch.Thumb />
-        </Switch.Root>
+        />
         {isLarge ? (
           <Channels
             channels={channels}

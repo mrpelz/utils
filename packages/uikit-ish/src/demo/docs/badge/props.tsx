@@ -34,7 +34,7 @@ export const propOptionsOverview = {
 };
 
 export const propOptionsContent = {
-  // The tab bar collapsed: Favorites remains (badged), Recents and Search
-  // go (Search's badge with it).
-  collapsed: [false, true] as const,
+  // The tab bar collapsed (not expanded): Favorites remains (badged),
+  // Recents and Search go (Search's badge with it).
+  expanded: [true, false] as const,
 };

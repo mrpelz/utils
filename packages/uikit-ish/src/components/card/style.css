@@ -461,6 +461,43 @@
        corner button top leading, see the end.) */
   }
 
+  /* Its switch part (`Card.Switch`, see main.tsx): on, in the card's tint
+     (`--uikit-card-switch-tint`, its `tint`; else the switch's green). Over
+     a slider's fill (its color the same tint, else the app's), set apart
+     from it: on, a darker shade of it; off, a darker shade of the fill's
+     gray (see above). So too in a card never lit (`active` given false,
+     e.g. a dimmer's), however it's laid out (e.g. expanded, its fill a
+     light's channels instead): its switch the same at every size. */
+  .uikit-card-layout > .uikit-card-switch {
+    --uikit-switch-on-color: var(
+      --uikit-card-switch-tint,
+      var(--color-ui-system-green)
+    );
+  }
+
+  :is(
+      .uikit-card-layout:has(> .uikit-slider-root),
+      .uikit-card-root[data-active-given]:not([data-active])
+        > .uikit-card-frame
+        > .uikit-card-layout
+    )
+    > .uikit-card-switch {
+    --uikit-card-switch-fill: var(
+      --uikit-card-switch-tint,
+      var(--color-ui-primary)
+    );
+    --uikit-switch-on-color: color-mix(
+      in oklab,
+      var(--uikit-card-switch-fill),
+      #000 28%
+    );
+    --uikit-switch-off-color: color-mix(
+      in oklab,
+      oklch(from var(--uikit-card-switch-fill) min(l, 0.62) 0 h),
+      #000 32%
+    );
+  }
+
   /* (On (`data-active`: its `active`, or a switch in it on, see main.tsx;
      the switch's state, too, for these rules' order); a momentary card for
      a moment as it's flashed.) */

@@ -53,11 +53,6 @@ export type ListState = {
 
 export type TabBarListProps = BaseTabs.List.Props & {
   /**
-   * Minimized: only the groups and tabs
-   * marked `visibleWhenCollapsed` remain, by default as symbols in circles.
-   */
-  collapsed?: boolean;
-  /**
    * What the collapsed bar's tab shows: its symbol in a circle, its label,
    * or both side by side in a capsule.
    * @default its symbol, or, without one, its label
@@ -74,6 +69,13 @@ export type TabBarListProps = BaseTabs.List.Props & {
    * @default the color scheme's
    */
   context?: GlassContextValue;
+  /**
+   * Whether the bar is at its full size. Off, it's minimized (collapsed):
+   * only the groups and tabs marked `visibleWhenCollapsed` remain, by
+   * default as symbols in circles.
+   * @default true
+   */
+  expanded?: boolean;
   /**
    * A size class: `compact` is the phone tab bar (content stacked),
    * `regular` the tablet tab bar (content in a row).

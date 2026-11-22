@@ -142,14 +142,11 @@ const touchedField = (
 let probe: HTMLElement | undefined;
 
 /**
- * Where the window's fixed layers end (px, from its top): a hidden box's
- * bottom, fixed and filling the screen (made once, on the root element).
- * The layout viewport's bottom, `innerHeight`, as a rule; not so where iOS
- * shrinks it to the visual viewport, the keyboard shown (iPadOS: a field's
- * tap left to iOS, see `preventFocusShift`), its fixed layers laid out as
- * tall as before: what the keyboard is measured against.
+ * The hidden box filling the window's fixed layers' box (made once, on the
+ * root element; see `fixedBottom`): also observed, as it resizes without
+ * the visual viewport telling (see Viewport's `Provider`).
  */
-export const fixedBottom = (): number => {
+export const fixedProbe = (): HTMLElement => {
   if (!probe?.isConnected) {
     probe = document.createElement('div');
     probe.setAttribute('aria-hidden', 'true');
@@ -158,8 +155,19 @@ export const fixedBottom = (): number => {
       'position:fixed;inset:0;visibility:hidden;pointer-events:none;contain:strict;z-index:-1';
     document.documentElement.append(probe);
   }
-  return probe.getBoundingClientRect().bottom;
+  return probe;
 };
+
+/**
+ * Where the window's fixed layers end (px, from its top): a hidden box's
+ * bottom, fixed and filling the screen (see `fixedProbe`).
+ * The layout viewport's bottom, `innerHeight`, as a rule; not so where iOS
+ * shrinks it to the visual viewport, the keyboard shown (iPadOS: a field's
+ * tap left to iOS, see `preventFocusShift`), its fixed layers laid out as
+ * tall as before: what the keyboard is measured against.
+ */
+export const fixedBottom = (): number =>
+  fixedProbe().getBoundingClientRect().bottom;
 
 /**
  * Whether something the keyboard is for has focus (a text field, or a

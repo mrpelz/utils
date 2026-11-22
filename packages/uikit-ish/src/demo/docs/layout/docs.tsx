@@ -26,10 +26,10 @@ export const layoutRootRows: readonly PropRow[] = [
     </>,
   ],
   [
-    'hideSeparators',
+    'separators',
     'boolean',
-    code('false'),
-    'Removes the hairline between its columns, for example over a picture behind them, where a line would look out of place.',
+    code('true'),
+    'Whether a hairline shows between its columns. Turn it off, for example over a picture behind them, where a line would look out of place.',
   ],
   ...elementRows('div', 'HTMLDivElement'),
 ];
@@ -91,6 +91,18 @@ export const layoutColumnRows: readonly PropRow[] = [
     '(size: number) => void',
     undefined,
     'Called while it’s resized with its divider.',
+  ],
+  [
+    'closeOnDrag',
+    'boolean',
+    code('false'),
+    'For a resizable column: dragging its divider below minSize holds it there at first; past half of minSize, it closes, and dragging back opens it again. Closed, it keeps the size it had when the drag started. Your app opens it again, for example with a button.',
+  ],
+  [
+    'onOpenChange',
+    '(open: boolean, details: { event, reason: "divider-drag" }) => void',
+    undefined,
+    'Called as its divider closes or opens it (see closeOnDrag). When it’s controlled (open), your app follows it.',
   ],
   [
     'floating',

@@ -47,3 +47,17 @@ export const rowTitles: Readonly<Record<string, string>> = Object.fromEntries(
     rows.map(([value, title]) => [value, title]),
   ),
 );
+
+/** A sidebar's places (see composition.tsx's toolbar at the bottom). */
+export const sidebarLocations: readonly SidebarRow[] = [
+  'Desktop',
+  'Documents',
+  'Downloads',
+  'Music',
+  'Movies',
+  'Pictures',
+  'Projects',
+  'Shared',
+  'Archive',
+  'Backups',
+].map((title) => [title.toLowerCase(), title, sfFolder] as const);

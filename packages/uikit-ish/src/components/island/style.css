@@ -22,9 +22,11 @@
     box-sizing: border-box;
     border-radius: var(--uikit-island-radius);
 
-    /* (Its anchor's bottom inset, kept clear by its padding: moved back
-       into it, to 8px from the edge.) */
-    margin: 0 8px calc(8px - var(--uikit-viewport-safe-bottom, 0px));
+    /* (Its anchor's bottom inset (`--uikit-island-inset`), kept clear by
+       its padding: moved back into it, to 8px from the edge.) */
+    --uikit-island-inset: var(--uikit-viewport-safe-bottom, 0px);
+
+    margin: 0 8px calc(8px - var(--uikit-island-inset));
     color: var(--uikit-glass-content);
 
     /* Its anchor pushed up by the keyboard: its padding there, less what the
@@ -35,10 +37,11 @@
         .uikit-viewport-anchor[data-edge='block-end'][data-keyboard='push']
       )
       > & {
-      margin-bottom: calc(
-        8px - var(--uikit-viewport-safe-bottom-keyboard, 0px)
-      );
-      transition: margin-bottom var(--uikit-viewport-keyboard-transition, 0s);
+      --uikit-island-inset: var(--uikit-viewport-safe-bottom-keyboard, 0px);
+
+      transition:
+        margin-bottom var(--uikit-viewport-keyboard-transition, 0s),
+        top var(--uikit-viewport-keyboard-transition, 0s);
     }
 
     /* Its corners 42px (snapping, following what's shown: see below). */
@@ -59,6 +62,14 @@
     &[data-snap] {
       --uikit-island-reach: 24px;
 
+      /* (Shown shorter than its margin moves it into the inset (e.g. a
+         sliver over a home indicator): its anchor's content none, not
+         less, it'd stop short of the edge by the difference; moved down
+         by it.) */
+      top: max(
+        0px,
+        var(--uikit-island-inset) - 8px - var(--uikit-island-shown, 0px)
+      );
       overflow: visible clip;
       height: calc(var(--uikit-island-shown) + var(--uikit-island-reach));
       padding-top: var(--uikit-island-reach);
@@ -108,8 +119,24 @@
       }
     }
 
+    /* A sliver: clear of the home indicator at rest (its bottom 18px from
+       the edge: the indicator, 5px, ends 13px up), 8px without an inset;
+       lifted less as it's swiped up to its next stop (its progress), none
+       there, as the other stops. (Moved, not resized: its anchor, and the
+       content's padding by it, unchanged.) */
     &[data-snap][data-sliver] {
       --uikit-island-reach: 44px;
+      --uikit-island-sliver-bottom: clamp(
+        8px,
+        var(--uikit-island-inset),
+        18px
+      );
+
+      translate: 0
+        calc(
+          (8px - var(--uikit-island-sliver-bottom)) *
+            (1 - var(--uikit-island-sliver, 1))
+        );
     }
 
     &[data-snap][data-moving] {

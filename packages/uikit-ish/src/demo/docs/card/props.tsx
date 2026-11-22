@@ -7,6 +7,7 @@ import {
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 import { getPropOptionsCornerButton as gridCornerButton } from '../grid/props.js';
+import { getPropOptionsRoot as switchRoot } from '../switch/props.js';
 
 // Every part's options (its parts page's, see part-options.ts for the other
 // demos).
@@ -35,6 +36,19 @@ export const propOptionsSymbol = {
   ...elementOptions,
   active: [undefined, true] as const,
   tint: [undefined, 'var(--color-ui-system-yellow)'] as const,
+};
+
+/** Its switch: a switch's options, its tint a card's. */
+export const getPropOptionsSwitch = (addLog: AddLog) => {
+  const { tint: _tint, ...options } = switchRoot(addLog, () => undefined);
+  return {
+    ...options,
+    tint: [
+      undefined,
+      'var(--color-ui-system-teal)',
+      'var(--color-ui-system-yellow)',
+    ] as const,
+  };
 };
 
 export const propOptionsTitle = elementOptions;

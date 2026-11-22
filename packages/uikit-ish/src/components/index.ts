@@ -324,6 +324,7 @@ export {
   type CardRootProps,
   type CardSizes,
   cardSizes,
+  type CardSwitchProps,
   type CardSymbolProps,
   type CardTitleProps,
   type CardValueProps,
@@ -352,6 +353,7 @@ export {
 } from './control-cards/main.js';
 export {
   Layout,
+  type LayoutColumnOpenChangeDetails,
   type LayoutColumnProps,
   type LayoutRootProps,
 } from './layout/main.js';

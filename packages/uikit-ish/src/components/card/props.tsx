@@ -3,6 +3,7 @@ import type { ComponentProps, ReactNode, RefObject } from 'react';
 
 import type { GlassSurfaceProps } from '../glass/main.js';
 import type { GridCornerButtonProps, GridSize } from '../grid/main.js';
+import type { SwitchRootProps } from '../switch/props.js';
 
 /** A card's corner button: a `Grid.CornerButton` (see `Card.CornerButton`). */
 export type CardCornerButtonProps = GridCornerButtonProps;
@@ -52,6 +53,21 @@ export type CardSymbolProps = ComponentProps<'span'> & {
   /**
    * Its color while `active` (a CSS color).
    * @default the switch's on color (`--uikit-switch-on-color`)
+   */
+  tint?: string;
+};
+
+export type CardSwitchProps = Omit<
+  SwitchRootProps,
+  'children' | 'ref' | 'tint'
+> & {
+  /**
+   * Its color while on (a CSS color): the card's tint, as its symbol's.
+   * Over a slider's fill, and in a card never lit (`active` given false,
+   * e.g. a dimmer's) at every size, a darker shade of it (it's the fill's
+   * color too, see `ControlCards`); off there, a darker shade of the fill's
+   * gray.
+   * @default the system green; over a slider's fill, the app's tint
    */
   tint?: string;
 };

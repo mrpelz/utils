@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 
+import type { LayoutColumnOpenChangeDetails } from '../../../components/index.js';
 import { AddLog } from '../../tooling/frame/log.js';
 import {
   commonPropOptions,
@@ -19,7 +20,7 @@ const elementOptions = {
 
 export const propOptionsGuideRoot = {
   ...elementOptions,
-  hideSeparators: [undefined, false, true] as const,
+  separators: [undefined, true, false] as const,
 };
 
 export const propOptionsGuideBackground = elementOptions;
@@ -30,6 +31,8 @@ export const propOptionsGuideBackground = elementOptions;
  */
 export type LayoutColumnFlags = {
   isClearFloating?: boolean;
+  /** Closed by dragging its divider, its `open` the demo's own. */
+  isClosingOnDrag?: boolean;
   isControlled?: boolean;
   isFloating?: boolean;
   maxSize?: number;
@@ -47,6 +50,7 @@ export const getPropOptionsGuideColumn = (
   addLog: AddLog,
   {
     isClearFloating,
+    isClosingOnDrag,
     isControlled,
     isFloating,
     maxSize,
@@ -73,6 +77,15 @@ export const getPropOptionsGuideColumn = (
     defaultOpen: [undefined, false, true] as const,
     floating: isFloating ? [true, undefined] : [undefined, true],
     clearFloating: isClearFloating ? [true, undefined] : [undefined, true],
+    closeOnDrag: isClosingOnDrag ? [true, undefined] : [undefined, true],
+    onOpenChange: [
+      new MappedProp(
+        (isOpen: boolean, { reason }: LayoutColumnOpenChangeDetails) =>
+          addLog(`${name} open: ${String(isOpen)}/${reason}`),
+        '[log change]',
+      ),
+      undefined,
+    ] as const,
     onSizeChange: [
       new MappedProp(
         (size: number) => addLog(`${name} size: ${String(size)}`),
@@ -81,6 +94,15 @@ export const getPropOptionsGuideColumn = (
       undefined,
     ] as const,
   };
+  if (isClosingOnDrag) {
+    const {
+      defaultOpen: _defaultOpen,
+      onOpenChange: _onOpenChange,
+      open: _open,
+      ...closing
+    } = options;
+    return closing;
+  }
   if (!isControlled) return options;
 
   const {

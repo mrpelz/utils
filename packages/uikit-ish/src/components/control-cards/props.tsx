@@ -62,6 +62,11 @@ export type ControlCardSwitchProps = ControlCardProps & {
    * @default ['On', 'Off']
    */
   states?: ControlCardStates;
+  /**
+   * Its tint (a CSS color): its symbol's and its switch's while on.
+   * @default the switch's on color (green)
+   */
+  tint?: string;
 };
 
 export type ControlCardValueProps = ControlCardProps &

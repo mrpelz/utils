@@ -1175,7 +1175,7 @@ export const TabBarParts: FunctionComponent = () => (
         <code>regular</code> for a tablet.
       </li>
       <li>
-        Collapsing: <code>collapsed</code>, <code>collapsedContent</code> and{' '}
+        Collapsing: <code>expanded</code>, <code>collapsedContent</code> and{' '}
         <code>collapsedPosition</code>.
       </li>
       <li>

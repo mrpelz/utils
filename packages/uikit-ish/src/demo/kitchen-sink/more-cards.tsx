@@ -9,7 +9,6 @@ import {
   Progress,
   Segmented,
   Stepper,
-  Switch,
   Symbol,
   type SymbolIcon,
 } from '../../components/index.js';
@@ -144,7 +143,10 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
     // much; its symbol on while it's on at all.)
     <TonedCard active={false}>
       <FlipParts />
-      <Card.Symbol active={isOn && brightness > 0}>
+      <Card.Symbol
+        active={isOn && brightness > 0}
+        tint={tint}
+      >
         <Symbol
           emphasizedIcon={sfLightbulbLedFill}
           icon={sfLightbulbLed}
@@ -182,13 +184,12 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
           }}
         />
       )}
-      <Switch.Root
+      <Card.Switch
         aria-label={name}
         checked={isOn}
+        tint={tint}
         onCheckedChange={switchTo}
-      >
-        <Switch.Thumb />
-      </Switch.Root>
+      />
       {expansion ? (
         <ExpandButton
           expansion={expansion}

@@ -134,8 +134,8 @@ export const CardOverview: FunctionComponent = () => (
       <li>
         A binary control is a{' '}
         <PartLink
-          component="switch"
-          part="Switch.Root"
+          component="card"
+          part="Card.Switch"
         />{' '}
         in the card: on, the whole card is bright (<code>active</code>). A press
         anywhere on it toggles the switch, and the card shows that it’s hovered

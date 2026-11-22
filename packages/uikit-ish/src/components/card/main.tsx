@@ -31,6 +31,7 @@ import {
   useGridItemLayout,
 } from '../grid/main.js';
 import { ColorSchemeScope } from '../settings/main.js';
+import { Switch } from '../switch/main.js';
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
   CardActions,
@@ -38,6 +39,7 @@ import type {
   CardOrientation,
   CardRootProps,
   CardSizes,
+  CardSwitchProps,
   CardSymbolProps,
   CardTitleProps,
   CardValueProps,
@@ -49,6 +51,7 @@ export type {
   CardOrientation,
   CardRootProps,
   CardSizes,
+  CardSwitchProps,
   CardSymbolProps,
   CardTitleProps,
   CardValueProps,
@@ -387,6 +390,27 @@ const CardSymbol = forwardRef<HTMLSpanElement, CardSymbolProps>(
   },
 );
 
+/**
+ * Its switch (a `Switch.Root` with its thumb): its top trailing corner, the
+ * card's state (on, lit), on in the card's tint (`tint`; see style.css: on
+ * a slider's fill, or in a card never lit, a darker shade of it). A part of
+ * the card's (moved with its other parts as its tile changes, see
+ * `useGridItemLayout`).
+ */
+const CardSwitch = forwardRef<HTMLSpanElement, CardSwitchProps>(
+  ({ className, style, tint, ...props }, ref) => (
+    <Switch.Root
+      ref={ref}
+      {...props}
+      className={cn('uikit-card-switch', className)}
+      data-card-part="switch"
+      style={withStyle({ '--uikit-card-switch-tint': tint }, style)}
+    >
+      <Switch.Thumb />
+    </Switch.Root>
+  ),
+);
+
 /** What it is (e.g. a device's name), above its value. */
 const Title = forwardRef<HTMLSpanElement, CardTitleProps>(
   ({ className, ...props }, ref) => (
@@ -481,6 +505,7 @@ const CornerButton = forwardRef<HTMLButtonElement, CardCornerButtonProps>(
 export const Card = {
   CornerButton,
   Root,
+  Switch: CardSwitch,
   Symbol: CardSymbol,
   Title,
   Value,

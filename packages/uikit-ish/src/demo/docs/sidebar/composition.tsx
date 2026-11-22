@@ -35,15 +35,17 @@ import {
 } from '../../tooling/guide/sections.js';
 import {
   sfFolder,
+  sfGearshape,
   sfInsetFilledLeadinghalfArrowLeadingRectangle,
   sfInsetFilledLeadingthirdRectangle,
   sfListBullet,
   sfMagnifyingglass,
+  sfPlus,
   sfTrash,
 } from '../../tooling/icons.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
-import { rowTitles, sidebarSections } from './content.js';
+import { rowTitles, sidebarLocations, sidebarSections } from './content.js';
 import { propOptionsAdaptiveContent } from './props.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
@@ -284,6 +286,44 @@ const sidebarDrawer = useCreateDrawerHandle();
     </Header.Root>
   </Layout.Column>
 </Layout.Root>`;
+
+const bottomToolbarCode = `<Sidebar.Root aria-label="Locations">
+  {/* Its toolbars in bars (staying at its top and bottom), its list in a page. */}
+  <Header.Root>
+    <Viewport.BlockStart>
+      <Sidebar.Toolbar>
+        <Button.Root tint="var(--uikit-glass-content)" variant="borderless">
+          <Button.Label>Edit</Button.Label>
+        </Button.Root>
+      </Sidebar.Toolbar>
+    </Viewport.BlockStart>
+    <Page.Root>
+      <Viewport.Padding edge="block-start" />
+      <List.Root listStyle="sidebar">…</List.Root>
+      <Viewport.Padding edge="block-end" />
+    </Page.Root>
+  </Header.Root>
+  <Viewport.BlockEnd>
+    <Sidebar.Toolbar>
+      <Button.Root tint="var(--uikit-glass-content)" variant="borderless">
+        <Button.Icon>
+          <Symbol icon={sfPlus} />
+        </Button.Icon>
+        <Button.Label>Add Location</Button.Label>
+      </Button.Root>
+      <Button.Root
+        aria-label="Settings"
+        shape="circle"
+        tint="var(--uikit-glass-content)"
+        variant="borderless"
+      >
+        <Button.Icon>
+          <Symbol icon={sfGearshape} />
+        </Button.Icon>
+      </Button.Root>
+    </Sidebar.Toolbar>
+  </Viewport.BlockEnd>
+</Sidebar.Root>`;
 
 const hidingCode = `// Whether the sidebar shows: the app's state.
 const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -2024,6 +2064,175 @@ const Hiding: FunctionComponent = () => {
   );
 };
 
+/**
+ * A sidebar with a toolbar at its top and one at its bottom (each in a bar,
+ * staying put as its list scrolls between them).
+ */
+const BottomToolbar: FunctionComponent = () => {
+  const id = 'sidebar-composition-bottom-toolbar';
+  const [log, addLog] = useLog();
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Button.Label': [],
+            'Button.Root': [
+              'aria-label',
+              'onClick',
+              'shape',
+              'tint',
+              'variant',
+            ],
+            'Header.Root': [],
+            'List.Content': [],
+            'List.Group': [],
+            'List.Header': ['prominence'],
+            'List.Image': ['variant'],
+            'List.Item': [],
+            'List.Leading': [],
+            'List.Root': ['listStyle'],
+            'List.Section': [],
+            'List.Title': [],
+            'Page.Root': [],
+            'Sidebar.Root': ['aria-label'],
+            'Sidebar.Toolbar': [],
+            'Viewport.BlockEnd': [],
+            'Viewport.BlockStart': [],
+            'Viewport.Padding': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  return (
+    <Component
+      isCentered
+      isInline
+      controls={[partControls]}
+      id={id}
+      log={log}
+      state={[partState]}
+      title="A toolbar at the bottom"
+    >
+      <div className="sidebar-demo-panel demo-picture">
+        <Sidebar.Root
+          {...partProps['Sidebar.Root']}
+          aria-label="Locations"
+        >
+          <Header.Root {...partProps['Header.Root']}>
+            <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+              <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
+                <Button.Root
+                  {...partProps['Button.Root']}
+                  tint="var(--uikit-glass-content)"
+                  variant="borderless"
+                  onClick={() => addLog('edit')}
+                >
+                  <Button.Label {...partProps['Button.Label']}>
+                    Edit
+                  </Button.Label>
+                </Button.Root>
+              </Sidebar.Toolbar>
+            </Viewport.BlockStart>
+            <Page.Root {...partProps['Page.Root']}>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-start"
+              />
+              <List.Root
+                {...partProps['List.Root']}
+                listStyle="sidebar"
+              >
+                <List.Section {...partProps['List.Section']}>
+                  <List.Header
+                    {...partProps['List.Header']}
+                    prominence="nested"
+                  >
+                    <List.Title {...partProps['List.Title']}>
+                      Locations
+                    </List.Title>
+                  </List.Header>
+                  <List.Group {...partProps['List.Group']}>
+                    {sidebarLocations.map(([value, rowTitle, icon]) => (
+                      <List.Item
+                        key={value}
+                        {...partProps['List.Item']}
+                      >
+                        <List.Leading {...partProps['List.Leading']}>
+                          <List.Image
+                            {...partProps['List.Image']}
+                            variant="symbol"
+                          >
+                            <Symbol
+                              {...partProps.Symbol}
+                              icon={icon}
+                            />
+                          </List.Image>
+                        </List.Leading>
+                        <List.Content {...partProps['List.Content']}>
+                          <List.Title {...partProps['List.Title']}>
+                            {rowTitle}
+                          </List.Title>
+                        </List.Content>
+                      </List.Item>
+                    ))}
+                  </List.Group>
+                </List.Section>
+              </List.Root>
+              <Viewport.Padding
+                {...partProps['Viewport.Padding']}
+                edge="block-end"
+              />
+            </Page.Root>
+          </Header.Root>
+          <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+            <Sidebar.Toolbar {...partProps['Sidebar.Toolbar']}>
+              <Button.Root
+                {...partProps['Button.Root']}
+                tint="var(--uikit-glass-content)"
+                variant="borderless"
+                onClick={() => addLog('add location')}
+              >
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfPlus}
+                  />
+                </Button.Icon>
+                <Button.Label {...partProps['Button.Label']}>
+                  Add Location
+                </Button.Label>
+              </Button.Root>
+              <Button.Root
+                {...partProps['Button.Root']}
+                aria-label="Settings"
+                shape="circle"
+                tint="var(--uikit-glass-content)"
+                variant="borderless"
+                onClick={() => addLog('settings')}
+              >
+                <Button.Icon {...partProps['Button.Icon']}>
+                  <Symbol
+                    {...partProps.Symbol}
+                    icon={sfGearshape}
+                  />
+                </Button.Icon>
+              </Button.Root>
+            </Sidebar.Toolbar>
+          </Viewport.BlockEnd>
+        </Sidebar.Root>
+      </div>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['selecting-content', 'Selecting content'],
@@ -2032,6 +2241,7 @@ const sections: readonly Section[] = [
   ['a-drawer', 'A drawer'],
   ['search', 'Search'],
   ['editing', 'Editing'],
+  ['a-toolbar-at-the-bottom', 'A toolbar at the bottom'],
   ['floating-or-a-drawer', 'Floating or a drawer'],
 ];
 
@@ -2403,6 +2613,48 @@ export const SidebarComposition: FunctionComponent = () => (
     <Editing />
 
     <Heading
+      id="a-toolbar-at-the-bottom"
+      level={2}
+    >
+      A toolbar at the bottom
+    </Heading>
+    <ul>
+      <li>
+        A second toolbar sits at the sidebar’s bottom, with Add Location and
+        Settings. Both toolbars stay put while the list scrolls between them,
+        and the list fades out under each.
+      </li>
+      <li>
+        The bottom toolbar is a{' '}
+        <PartLink
+          component="sidebar"
+          part="Sidebar.Toolbar"
+        />{' '}
+        in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.BlockEnd"
+        />
+        , next to the sidebar’s{' '}
+        <PartLink
+          component="header"
+          part="Header.Root"
+        />
+        . It’s the same toolbar as the one at the top. The sidebar sets its
+        spacing by its edge.
+      </li>
+      <li>
+        <strong>Library:</strong> the sidebar as both bars’ screen: where each
+        toolbar sits, the page’s insets at both ends, the fades.
+      </li>
+      <li>
+        <strong>Demo:</strong> the buttons, which only log.
+      </li>
+    </ul>
+    <CodeView code={bottomToolbarCode} />
+    <BottomToolbar />
+
+    <Heading
       id="floating-or-a-drawer"
       level={2}
     >
@@ -2472,5 +2724,6 @@ export const sidebarCompositionDemos = [
   InADrawer,
   Search,
   Editing,
+  BottomToolbar,
   Adaptive,
 ];

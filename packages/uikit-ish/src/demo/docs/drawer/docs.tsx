@@ -16,7 +16,7 @@ export const drawerRootRows: readonly PropRow[] = [
     'side',
     union('inline-start', 'inline-end'),
     code(union('inline-start')),
-    'The side its popup slides in from, above the content. It hides towards that side, and is swiped back towards it to close.',
+    'The side its popup slides in from, above the content. It hides towards that side, and is swiped back towards it to close. The document’s direction is read when the drawer mounts. If your app changes the direction, mount the drawer again, for example with a new key.',
   ],
   ['open', 'boolean', undefined, 'Whether the drawer is currently open.'],
   [

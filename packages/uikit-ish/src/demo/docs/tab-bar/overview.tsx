@@ -242,7 +242,7 @@ export const TabBarOverview: FunctionComponent = () => (
           'TabBar.Root',
           pickRows(tabBarRootRows, 'value', 'defaultValue', 'onValueChange'),
         ],
-        ['TabBar.List', pickRows(tabBarListRows, 'collapsed', 'size')],
+        ['TabBar.List', pickRows(tabBarListRows, 'expanded', 'size')],
         ['TabBar.Group', pickRows(tabBarGroupRows, 'visibleWhenCollapsed')],
         [
           'TabBar.Tab',

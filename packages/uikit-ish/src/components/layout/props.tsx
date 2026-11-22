@@ -1,4 +1,11 @@
-import type { ComponentProps } from 'react';
+import type { ComponentProps, PointerEvent } from 'react';
+
+/** Why a column opened or closed (see `onOpenChange`). */
+export type LayoutColumnOpenChangeDetails = {
+  /** What it was: its divider dragged (see `closeOnDrag`). */
+  event: PointerEvent<HTMLDivElement>;
+  reason: 'divider-drag';
+};
 
 export type LayoutColumnProps = ComponentProps<'div'> & {
   /**
@@ -8,6 +15,14 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
    * it.
    */
   clearFloating?: boolean;
+  /**
+   * Resizable, closed by dragging its divider past half its `minSize` (held
+   * at its `minSize` until then); dragged back within the same drag, open
+   * again. Closed, it keeps the size it had as the drag started. Opened
+   * again by the app (see `open`).
+   * @default false
+   */
+  closeOnDrag?: boolean;
   /**
    * Initially open (uncontrolled, see `open`).
    * @default true
@@ -30,6 +45,14 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
    * @default 240 (a list's)
    */
   minSize?: number;
+  /**
+   * Called as it's opened or closed by its divider (see `closeOnDrag`):
+   * controlled (see `open`), the app's to follow.
+   */
+  onOpenChange?: (
+    open: boolean,
+    details: LayoutColumnOpenChangeDetails,
+  ) => void;
   /** Called while it's resized (by its divider). */
   onSizeChange?: (size: number) => void;
   /**
@@ -50,9 +73,9 @@ export type LayoutColumnProps = ComponentProps<'div'> & {
 
 export type LayoutRootProps = ComponentProps<'div'> & {
   /**
-   * Its columns without the hairline between them (e.g. on a picture
+   * Whether a hairline shows between its columns (off, e.g., on a picture
    * behind them, where a line would look out of place).
-   * @default false
+   * @default true
    */
-  hideSeparators?: boolean;
+  separators?: boolean;
 };

@@ -101,7 +101,7 @@ const [sections] = collapsedSelection([tabValues], value);
 <TabBar.Root value={value} onValueChange={setValue}>
   <Viewport.Content ref={contentRef}>…</Viewport.Content>
   <Viewport.BlockEnd keyboard="cover">
-    <TabBar.List collapsed={!atTop && direction === 'down'}>
+    <TabBar.List expanded={atTop || direction !== 'down'}>
       <TabBar.Group visibleWhenCollapsed>
         <TabBar.Indicator />
         {tabs.map(([tab, label, icon], index) => (
@@ -742,7 +742,7 @@ const CollapseView: FunctionComponent<{
         >
           <TabBar.List
             {...partProps['TabBar.List']}
-            collapsed={!atTop && direction === 'down'}
+            expanded={atTop || direction !== 'down'}
           >
             <TabBar.Group
               {...partProps['TabBar.Group']}

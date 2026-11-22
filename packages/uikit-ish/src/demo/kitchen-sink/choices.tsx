@@ -588,9 +588,9 @@ const SegmentedContent: FunctionComponent = () => (
         <Segmented.Highlight />
       </Segmented.Root>
       <Segmented.Root
-        hideSeparators
         aria-label="Period, no separators"
         defaultValue="m"
+        separators={false}
       >
         {periods.map(([value, label]) => (
           <Segmented.Item

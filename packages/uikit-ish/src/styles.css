@@ -115,19 +115,6 @@
     --font-ui-caption2-weight-emphasized: 590;
 
     /*
-     * App tint, systemBlue unless overridden
-     *
-     * tint/shade: HSL lightness +/- 8% (Konsta UI color-utils/ios-colors.js)
-     */
-    --color-ui-primary: var(--color-ui-system-blue);
-    --color-ui-primary-tint: hsl(
-      from var(--color-ui-primary) h s calc(l + 8)
-    );
-    --color-ui-primary-shade: hsl(
-      from var(--color-ui-primary) h s calc(l - 8)
-    );
-
-    /*
      * Semantic colors
      *
      * - system grays and system colors, incl. increased contrast variants
@@ -401,9 +388,23 @@
    * overriding it (see Settings), its own (a style query on its custom
    * property), on what's directly within it (a provider's properties are
    * on its own element, and a style query asks the parent). The app tint
-   * (`--color-ui-primary`, an app's own) stays the root's.
+   * too, resolved alike (see below).
    */
   :where(:root, [data-uikit-settings] > *) {
+    /*
+     * App tint: an app's (`--uikit-tint`, a color, set anywhere, e.g. on
+     * :root), systemBlue without one; with more contrast, its own
+     * (`--uikit-tint-more-contrast`), if it has one (see below).
+     *
+     * tint/shade: HSL lightness +/- 8% (Konsta UI color-utils/ios-colors.js)
+     */
+    --color-ui-primary: var(--uikit-tint, var(--color-ui-system-blue));
+    --color-ui-primary-tint: hsl(
+      from var(--color-ui-primary) h s calc(l + 8)
+    );
+    --color-ui-primary-shade: hsl(
+      from var(--color-ui-primary) h s calc(l - 8)
+    );
     --color-ui-system-gray: light-dark(rgb(142 142 147), rgb(142 142 147));
     --color-ui-system-gray2: light-dark(rgb(174 174 178), rgb(99 99 102));
     --color-ui-system-gray3: light-dark(rgb(199 199 204), rgb(72 72 74));
@@ -426,6 +427,10 @@
 
   @media (prefers-contrast: more) {
     :root {
+      --color-ui-primary: var(
+        --uikit-tint-more-contrast,
+        var(--uikit-tint, var(--color-ui-system-blue))
+      );
       --color-ui-system-gray: light-dark(rgb(108 108 112), rgb(174 174 178));
       --color-ui-system-gray2: light-dark(rgb(142 142 147), rgb(124 124 128));
       --color-ui-system-gray3: light-dark(rgb(174 174 178), rgb(84 84 86));
@@ -449,6 +454,10 @@
 
   @container style(--uikit-settings-contrast: 1) {
     :where([data-uikit-settings] > *) {
+      --color-ui-primary: var(
+        --uikit-tint-more-contrast,
+        var(--uikit-tint, var(--color-ui-system-blue))
+      );
       --color-ui-system-gray: light-dark(rgb(108 108 112), rgb(174 174 178));
       --color-ui-system-gray2: light-dark(rgb(142 142 147), rgb(124 124 128));
       --color-ui-system-gray3: light-dark(rgb(174 174 178), rgb(84 84 86));

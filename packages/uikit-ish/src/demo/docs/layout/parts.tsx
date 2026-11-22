@@ -321,9 +321,9 @@ export const LayoutParts: FunctionComponent = () => (
         column.
       </li>
       <li>
-        Draws a hairline between columns, except after a floating one.{' '}
-        <code>hideSeparators</code> removes it, for example over a picture
-        behind them (a{' '}
+        Draws a hairline between columns, except after a floating one. Setting{' '}
+        <code>separators</code> to <code>false</code> removes it, for example
+        over a picture behind them (a{' '}
         <PartLink
           component="viewport"
           part="Viewport.Background"

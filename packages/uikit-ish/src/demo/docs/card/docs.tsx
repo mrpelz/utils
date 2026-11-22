@@ -30,13 +30,8 @@ export const cardRootRows: readonly PropRow[] = [
     undefined,
     <>
       Its parts (<PartLink part="Card.Symbol" />, <PartLink part="Card.Title" />
-      , <PartLink part="Card.Value" />
+      , <PartLink part="Card.Value" />, <PartLink part="Card.Switch" />
       ), and a control filling it: a{' '}
-      <PartLink
-        component="switch"
-        part="Switch.Root"
-      />{' '}
-      or a{' '}
       <PartLink
         component="slider"
         part="Slider.Root"
@@ -151,6 +146,32 @@ export const cardSymbolRows: readonly PropRow[] = [
     'Its color while it’s on: active, or its card lit.',
   ],
   ...elementRows('span', 'HTMLSpanElement'),
+];
+
+export const cardSwitchRows: readonly PropRow[] = [
+  [
+    'tint',
+    'string (a CSS color)',
+    <>
+      the switch’s green; over a slider’s fill, the app’s tint (
+      <code>--color-ui-primary</code>)
+    </>,
+    'Its color while it’s on: the card’s tint, the same as its symbol’s. Over a slider’s fill, and in a card that’s never lit (active false, such as a dimmer’s) at every size, it’s drawn in a darker shade of that tint, so pass the fill’s tint here too. Off there, it’s a darker shade of the fill’s gray.',
+  ],
+  [
+    'checked, defaultChecked, onCheckedChange, …',
+    'Switch.Root’s props',
+    undefined,
+    <>
+      The props of a{' '}
+      <PartLink
+        component="switch"
+        part="Switch.Root"
+      />
+      , except its own <code>tint</code> and its children: it renders its thumb
+      itself.
+    </>,
+  ],
 ];
 
 export const cardTitleRows: readonly PropRow[] = [

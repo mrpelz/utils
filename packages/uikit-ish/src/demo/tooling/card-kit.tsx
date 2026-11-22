@@ -21,6 +21,7 @@ import { Symbol, type SymbolIcon } from '../../components/index.js';
  * a heater's orange, daylight's blue for blinds.
  */
 export const cardTints = {
+  air: 'oklch(76% 0.12 195)',
   heat: 'oklch(72% 0.17 50)',
   light: 'oklch(84% 0.15 85)',
   shade: 'oklch(80% 0.09 230)',

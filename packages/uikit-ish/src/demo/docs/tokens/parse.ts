@@ -15,8 +15,15 @@ export type TokenGroup = {
   tokens: Token[];
 };
 
+// The root's selectors: its own, and the one setting tokens again within a
+// settings provider (see styles.css: the root's all the same).
+const rootPreludes = new Set([
+  ':root',
+  ':where(:root, [data-uikit-settings] > *)',
+]);
+
 // The blocks that don't make a condition: the library's layer, the root.
-const plainPreludes = new Set([':root', '@layer uikit-ish']);
+const plainPreludes = new Set([...rootPreludes, '@layer uikit-ish']);
 
 /** A comment's text, without its delimiters and leading asterisks. */
 const commentText = (comment: string) =>
@@ -64,7 +71,7 @@ export const parseTokens = (css: string): TokenGroup[] => {
       variants.push([name, { condition, value }]);
       return;
     }
-    if (!stack.includes(':root')) return;
+    if (stack.every((prelude) => !rootPreludes.has(prelude))) return;
 
     const token: Token = { name, value, variants: [] };
     byName.set(name, token);

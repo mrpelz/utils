@@ -122,15 +122,11 @@ export const CardArchitecture: FunctionComponent = () => (
                   <li>
                     <PartLink part="Card.Symbol" />,{' '}
                     <PartLink part="Card.Title" />,{' '}
-                    <PartLink part="Card.Value" />
+                    <PartLink part="Card.Value" />,{' '}
+                    <PartLink part="Card.Switch" />
                   </li>
                   <li>
                     <span>a</span>{' '}
-                    <PartLink
-                      component="switch"
-                      part="Switch.Root"
-                    />
-                    <span>, a</span>{' '}
                     <PartLink
                       component="slider"
                       part="Slider.Root"
@@ -198,6 +194,15 @@ export const CardArchitecture: FunctionComponent = () => (
         and its <code>data-checked</code> with a <code>MutationObserver</code>.
         It reads the switch before the card paints. With neither, the card isn’t
         switchable.
+      </li>
+      <li>
+        A <PartLink part="Card.Switch" /> sets its <code>tint</code> as a custom
+        property, and the stylesheet makes it the switch’s on color. Over a
+        slider’s fill, the stylesheet uses darker shades instead, of the tint
+        when on and of the fill’s gray when off, so the switch stays set apart
+        from the fill. A card that’s never lit (<code>active</code> given as{' '}
+        <code>false</code>) uses them at every size, so its switch doesn’t
+        change as the card expands.
       </li>
       <li>
         <strong>Given wins.</strong> When <code>active</code> is given, the root

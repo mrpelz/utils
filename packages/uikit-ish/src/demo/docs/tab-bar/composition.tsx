@@ -101,7 +101,7 @@ const field = useRef(null);
   }}
 >
   {/* Searching, the bar collapses: its section remains. */}
-  <TabBar.List collapsed={value === 'search'}>
+  <TabBar.List expanded={value !== 'search'}>
     <TabBar.Group visibleWhenCollapsed>
       <TabBar.Indicator />
       <TabBar.Tab
@@ -196,7 +196,7 @@ useViewportScroll(({ atTop, direction }) =>
   setIsCollapsed(!atTop && direction === 'down'),
 );
 
-<TabBar.List collapsed={isCollapsed}>…</TabBar.List>`;
+<TabBar.List expanded={!isCollapsed}>…</TabBar.List>`;
 
 const accessoryCode = `const [value, setValue] = useState('favorites');
 // The section last chosen, returned to from searching.
@@ -209,7 +209,7 @@ const [section, setSection] = useState('favorites');
     if (next !== 'search') setSection(next);
   }}
 >
-  <TabBar.List collapsed={value === 'search'}>
+  <TabBar.List expanded={value !== 'search'}>
     …
     <TabBar.Group visibleWhenCollapsed={value === 'search'}>
       <TabBar.Indicator />
@@ -504,7 +504,7 @@ const Search: FunctionComponent = () => {
           <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
             <TabBar.List
               {...partProps['TabBar.List']}
-              collapsed={value === 'search'}
+              expanded={value !== 'search'}
             >
               <TabBar.Group
                 {...partProps['TabBar.Group']}
@@ -899,7 +899,7 @@ const OnScrollView: FunctionComponent<{
         <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
           <TabBar.List
             {...partProps['TabBar.List']}
-            collapsed={isCollapsed}
+            expanded={!isCollapsed}
           >
             <TabBar.Group
               {...partProps['TabBar.Group']}
@@ -1024,7 +1024,7 @@ const MiniPlayer: FunctionComponent = () => {
         <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
           <TabBar.List
             {...partProps['TabBar.List']}
-            collapsed={value === 'search'}
+            expanded={value !== 'search'}
           >
             <TabBar.Group
               {...partProps['TabBar.Group']}
@@ -1330,8 +1330,8 @@ export const TabBarComposition: FunctionComponent = () => (
       </li>
       <li>Scroll the screen’s list to see it.</li>
       <li>
-        <strong>Library:</strong> collapsing the bar (<code>collapsed</code>)
-        and the viewport’s scroll hook (
+        <strong>Library:</strong> collapsing the bar (<code>expanded</code>) and
+        the viewport’s scroll hook (
         <PartLink
           component="viewport"
           part="useViewportScroll"

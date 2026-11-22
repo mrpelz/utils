@@ -487,6 +487,12 @@ export const ViewportEdgeEffectsArchitecture: FunctionComponent = () => (
         there would end the scroller’s fling in Chrome.
       </li>
       <li>
+        The scroller gets each edge’s progress as a custom property too (
+        <code>--uikit-viewport-edge-start-progress</code> and{' '}
+        <code>--uikit-viewport-edge-end-progress</code>). A sheet or a sidebar
+        uses them to fade its content out under its bars.
+      </li>
+      <li>
         An anchor’s <code>edgeTint</code> shows at rest too.
       </li>
     </ul>

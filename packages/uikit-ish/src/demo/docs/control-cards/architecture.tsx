@@ -19,12 +19,10 @@ const switchCode = `// ControlCards.Switch, in short: a Card.Root and its parts,
   active={isOn}                              // lit while on
   onClick={onClick ?? forwardClick('[role=switch]')}
 >
-  <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
+  <Card.Symbol tint={tint}>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
   <Card.Title>{name}</Card.Title>
   <Card.Value>{isOn ? states[0] : states[1]}</Card.Value>
-  <Switch.Root aria-label={name} checked={isOn} onCheckedChange={switchTo}>
-    <Switch.Thumb />
-  </Switch.Root>
+  <Card.Switch aria-label={name} checked={isOn} tint={tint} onCheckedChange={switchTo} />
   {children}                                 // e.g. a corner button
 </Card.Root>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
@@ -92,11 +90,12 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
       <li>
         <PartLink part="ControlCards.Switch" /> holds a{' '}
         <PartLink
-          component="switch"
-          part="Switch.Root"
+          component="card"
+          part="Card.Switch"
         />
-        . The card is lit while the switch is on. A press anywhere on the card
-        is passed on to the switch (<code>forwardClick</code>, from List).
+        . Its <code>tint</code> colors both the symbol and the switch. The card
+        is lit while the switch is on. A press anywhere on the card is passed on
+        to the switch (<code>forwardClick</code>, from List).
       </li>
       <li>
         <PartLink part="ControlCards.Button" /> is momentary. It lights up for a

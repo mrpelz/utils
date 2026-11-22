@@ -164,8 +164,8 @@ export const TabBarArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        When it’s <code>collapsed</code>, the bar gets lower, around the same
-        center line.
+        When <code>expanded</code> is <code>false</code>, the bar collapses: it
+        gets lower, around the same center line.
       </li>
       <li>
         Only the groups and tabs marked <code>visibleWhenCollapsed</code>{' '}

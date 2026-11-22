@@ -23,7 +23,7 @@ export const propOptionsRoot = {
 
 export const propOptionsList = {
   ...commonPropOptions,
-  collapsed: [undefined, false, true] as const,
+  expanded: [undefined, true, false] as const,
   collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
   collapsedPosition: [
     undefined,
@@ -46,7 +46,7 @@ export const propOptionsPhoneContent = {
 
 /** The overview's few: its look and states, not its plumbing. */
 export const propOptionsOverviewList = {
-  collapsed: [false, true] as const,
+  expanded: [true, false] as const,
   collapsedContent: [undefined, 'symbol', 'label', 'symbolAndLabel'] as const,
   collapsedPosition: [
     undefined,

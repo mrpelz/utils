@@ -315,6 +315,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           emphasizedIcon={sfLightbulbFill}
           icon={sfLightbulb}
           name="Floor Lamp"
+          tint={cardTints.light}
         />
       ),
       kind: 'binaryControl',
@@ -327,6 +328,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           emphasizedIcon={sfFanFill}
           icon={sfFan}
           name="Ceiling Fan"
+          tint={cardTints.air}
         />
       ),
       kind: 'binaryControl',
@@ -713,6 +715,7 @@ const CardsApp: FunctionComponent = () => {
                   emphasizedIcon={sfLightbulbFill}
                   icon={sfLightbulb}
                   name="Desk Lamp"
+                  tint={cardTints.light}
                 />
               </div>
               <div>

@@ -5,8 +5,6 @@ import type { Properties } from 'csstype';
 import type { SecondaryClickProps } from '../utils/main.js';
 
 export type SegmentedRootProps = BaseRadioGroup.Props & {
-  /** Hides the separators between unselected items. */
-  hideSeparators?: boolean;
   /**
    * Too narrow for its items: their labels truncated (`truncate`), or the
    * items scrolled sideways (`scroll`, their labels whole: swiped; the
@@ -14,6 +12,11 @@ export type SegmentedRootProps = BaseRadioGroup.Props & {
    * @default 'truncate'
    */
   overflow?: 'scroll' | 'truncate';
+  /**
+   * Whether separators show between unselected items.
+   * @default true
+   */
+  separators?: boolean;
 };
 
 export type SegmentedItemProps = BaseRadio.Root.Props &

@@ -27,7 +27,7 @@ const settingRows: readonly PropRow[] = [
       the system’s (<code>prefers-contrast: more</code>,{' '}
       <code>forced-colors: active</code>)
     </>,
-    'The contrast: standard, or increased.',
+    'The contrast: standard, or increased. More contrast also makes materials opaque, as reduced transparency does, and uses your app’s --uikit-tint-more-contrast, if you set one.',
   ],
   [
     'differentiateWithoutColor',

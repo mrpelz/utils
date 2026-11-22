@@ -112,8 +112,12 @@ export const FlipParts: FunctionComponent = () => {
           part,
           {
             // (Its text as large as it was, when it's the same text; other
-            // text (e.g. a longer value) only moved: scaled, it'd spill.)
-            scale: old.text === now.text ? old.fontSize / now.fontSize : 1,
+            // text (e.g. a longer value) only moved: scaled, it'd spill.
+            // None (e.g. its switch): only moved, its size its own.)
+            scale:
+              old.text !== '' && old.text === now.text
+                ? old.fontSize / now.fontSize
+                : 1,
             transformOrigin: isRtl ? 'right top' : 'left top',
             x: dx,
             y: old.y - now.y,

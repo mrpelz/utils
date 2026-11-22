@@ -170,7 +170,20 @@ const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
       }
       if (isPreview || (!isLifted && !backdrop)) return undefined;
       let frame = 0;
+      // (What moves it: the slot's positioner (placed, shifted), the
+      // wrapper's lift, the backdrop, as they transition or animate.)
+      const positioner = slot?.parentElement ?? undefined;
+      const movers = [wrapper, positioner, backdrop].filter(
+        (element): element is HTMLElement => element !== undefined,
+      );
+      const isMoving = () =>
+        movers.some((element) =>
+          element
+            .getAnimations({ subtree: true })
+            .some(({ playState }) => playState === 'running'),
+        );
       const follow = () => {
+        frame = 0;
         const from = wrapper.getBoundingClientRect();
         // (Once placed: until then, Base UI's positioner is hidden at a
         // provisional place.)
@@ -187,11 +200,41 @@ const Trigger = forwardRef<HTMLElement, ContextualMenuTriggerProps>(
         }
         const { current: trigger } = ref;
         if (backdrop && trigger) cutOut(backdrop, trigger);
-        frame = requestAnimationFrame(follow);
+        // (Followed each frame only while something moves; else, as
+        // something changes, below.)
+        if (isMoving()) frame = requestAnimationFrame(follow);
+      };
+      const schedule = () => {
+        if (frame === 0) frame = requestAnimationFrame(follow);
       };
       follow();
+      // Something changed: scrolled, resized, the positioner placed
+      // (Base UI's inline style), a transition or an animation started.
+      addEventListener('scroll', schedule, { capture: true, passive: true });
+      addEventListener('resize', schedule);
+      const starts = ['transitionrun', 'animationstart'] as const;
+      for (const type of starts) {
+        addEventListener(type, schedule, { capture: true, passive: true });
+      }
+      const resizes = new ResizeObserver(schedule);
+      for (const element of movers) resizes.observe(element);
+      if (slot) resizes.observe(slot);
+      const placed = new MutationObserver(schedule);
+      if (positioner) {
+        placed.observe(positioner, {
+          attributeFilter: ['style'],
+          attributes: true,
+        });
+      }
       return () => {
         cancelAnimationFrame(frame);
+        removeEventListener('scroll', schedule, { capture: true });
+        removeEventListener('resize', schedule);
+        for (const type of starts) {
+          removeEventListener(type, schedule, { capture: true });
+        }
+        resizes.disconnect();
+        placed.disconnect();
         if (backdrop) fillIn(backdrop);
       };
     }, [backdrop, isOpen, isPreview, ref, slot]);
