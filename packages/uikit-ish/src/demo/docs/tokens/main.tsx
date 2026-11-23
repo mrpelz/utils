@@ -903,7 +903,10 @@ export const TokensPage: FunctionComponent = () => {
               <div className="demo-token-adaptive-card">
                 <Card.Root context="adaptive">
                   <Card.Symbol>
-                    <Symbol icon={sfLightbulbLedFill} />
+                    <Symbol
+                      box="square"
+                      icon={sfLightbulbLedFill}
+                    />
                   </Card.Symbol>
                   <Card.Title>Card</Card.Title>
                   <Card.Value>Adaptive</Card.Value>

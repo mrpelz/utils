@@ -490,7 +490,9 @@ export const ViewportEdgeEffectsArchitecture: FunctionComponent = () => (
         The scroller gets each edge’s progress as a custom property too (
         <code>--uikit-viewport-edge-start-progress</code> and{' '}
         <code>--uikit-viewport-edge-end-progress</code>). A sheet or a sidebar
-        uses them to fade its content out under its bars.
+        uses them to fade its content out under its bars. They aren’t inherited,
+        so only the scroller’s own styles can read them, and a change doesn’t
+        restyle everything in it.
       </li>
       <li>
         An anchor’s <code>edgeTint</code> shows at rest too.

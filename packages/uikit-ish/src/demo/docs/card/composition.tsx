@@ -71,7 +71,7 @@ const HeatingCard = ({ isExpanded, onToggle, size }) => {
           Building for changing sizes). */}
       <FlipParts />
       <Card.Symbol>
-        <Symbol icon={sfThermometerMedium} />
+        <Symbol box="square" icon={sfThermometerMedium} />
       </Card.Symbol>
       {isExpanded ? (
         // A slider filling the card (ControlCards' SliderFill).
@@ -155,7 +155,7 @@ const LightsCard = ({ onDrillIn }) => (
     onClick={forwardClick('[data-card-part=corner-button]')}
   >
     <Card.Symbol>
-      <Symbol icon={sfLightbulb} emphasizedIcon={sfLightbulbFill} />
+      <Symbol box="square" icon={sfLightbulb} emphasizedIcon={sfLightbulbFill} />
     </Card.Symbol>
     <Card.Title>Lights</Card.Title>
     <Card.Value>{onCount > 0 ? onCount + ' On' : 'Off'}</Card.Value>
@@ -236,7 +236,7 @@ const CameraCard = () => {
           for changing sizes). */}
       <FlipParts />
       <Card.Symbol>
-        <Symbol icon={sfPhoto} />
+        <Symbol box="square" icon={sfPhoto} />
       </Card.Symbol>
       <Card.Title>Front Door Camera</Card.Title>
       <Card.Value>{isOpen ? 'Live, recording since 8:12' : 'Live'}</Card.Value>
@@ -398,7 +398,7 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
       <FlipParts />
       {/* In both forms: it moves to its new place, never pops. */}
       <Card.Symbol>
-        <Symbol icon={sfThermometerMedium} />
+        <Symbol box="square" icon={sfThermometerMedium} />
       </Card.Symbol>
       {isExpanded ? (
         // Only in the larger form: shown as the card's edge passes it.
@@ -473,7 +473,7 @@ const [isOn, setIsOn] = useState(true);
 <div style={{ height: 100, width: 220 }}>
   <Card.Root active={isOn} onClick={forwardClick('[role=switch]')}>
     <Card.Symbol>
-      <Symbol icon={sfLightbulb} emphasizedIcon={sfLightbulbFill} />
+      <Symbol box="square" icon={sfLightbulb} emphasizedIcon={sfLightbulbFill} />
     </Card.Symbol>
     <Card.Title>Desk Lamp</Card.Title>
     <Card.Value>{isOn ? 'On' : 'Off'}</Card.Value>

@@ -146,6 +146,7 @@ export const SymbolOverview: FunctionComponent = () => (
             'icon',
             'emphasizedIcon',
             'baselineShift',
+            'box',
             'children',
           ),
         ],
@@ -185,6 +186,10 @@ export const SymbolOverview: FunctionComponent = () => (
       <li>
         In a line of text, its ink is centered on the text’s: half the cap
         height up from the baseline (<code>baselineShift</code>).
+      </li>
+      <li>
+        With a square box (<code>box</code>), every icon takes the same room,
+        centered in it at its own size, so symbols of different shapes line up.
       </li>
       <li>
         It has one weight, its outlines’ (Regular, for SF Symbols), whatever the

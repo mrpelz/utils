@@ -53,6 +53,20 @@ export const symbolRows: readonly PropRow[] = [
     </>,
   ],
   [
+    'box',
+    union('glyph', 'square'),
+    code(union('glyph')),
+    <>
+      Its box: the glyph’s own (as large as its ink, with its side bearings), or
+      a square that’s the same for every icon. In the square, the glyph is
+      centered at its own size, and a larger one reaches past the square’s
+      edges. Symbols of different shapes then line up, for example a{' '}
+      <a href={publicUrl('card')}>Card</a>’s. What sits on it, for example a{' '}
+      <a href={publicUrl('badge')}>Badge</a>, is placed on the square. Its side
+      is <code>--uikit-symbol-square-size</code> (1.25em by default).
+    </>,
+  ],
+  [
     'children',
     'ReactNode',
     undefined,

@@ -33,6 +33,16 @@ export type SymbolProps = ComponentProps<'span'> & {
    */
   baselineShift?: 'none' | 'optical';
   /**
+   * Its box: the glyph's own (as wide and tall as its ink, with its side
+   * bearings), or a square the same for every icon, the glyph centered in
+   * it and drawn at its own size (a larger one past its edges), so
+   * symbols of different shapes line up (e.g. a card's). Its children
+   * (e.g. a `Badge`) are placed on that box. The square's side is
+   * `--uikit-symbol-square-size`.
+   * @default 'glyph'
+   */
+  box?: 'glyph' | 'square';
+  /**
    * The icon shown emphasized (e.g. `sfBellFill`), in place of `icon`: as
    * much as its host emphasizes it (`--uikit-symbol-emphasis`, 0 to 1, e.g.
    * a selected tab's), with no state of its own.

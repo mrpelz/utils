@@ -581,3 +581,16 @@
     }
   }
 }
+
+/* A scroller's edges' progress (see edge-effect.tsx): its own styles' only
+   (e.g. a sheet's mask), not inherited, so a change (as it leaves its top)
+   doesn't restyle everything in it. Unset, each use's fallback. */
+@property --uikit-viewport-edge-start-progress {
+  inherits: false;
+  syntax: '*';
+}
+
+@property --uikit-viewport-edge-end-progress {
+  inherits: false;
+  syntax: '*';
+}

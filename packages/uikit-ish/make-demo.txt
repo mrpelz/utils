@@ -1,0 +1,24 @@
+ry name: monaco) (auxiliary id hint: vendors)
++ 5 assets
+Entrypoint main 9.44 MiB (507 KiB) = main.css 640 KiB main.js 8.76 MiB 792.72f34
+e70507e9db40c08.hot-update.js 62.5 KiB 1 auxiliary asset
+orphan modules 18.9 MiB (javascript) 150 KiB (asset) 2.54 MiB (runtime) [orphan]
+ 3819 modules
+runtime modules 35.3 KiB 16 modules
+cacheable modules 19.1 MiB (javascript) 882 KiB (css/mini-extract) 508 KiB (asse
+t)
+  modules by path ../../node_modules/ 11.2 MiB (javascript) 313 KiB (css/mini-ex
+tract) 508 KiB (asset) 223 modules
+  modules by path ./src/ 7.93 MiB (javascript) 569 KiB (css/mini-extract)
+    javascript modules 7.93 MiB
+      modules by path ./src/components/ 31.5 KiB 45 modules
+      modules by path ./src/demo/ 7.9 MiB 43 modules
+      ./src/demo.tsx 629 bytes [built] [code generated]
+      ./src/styles.css 710 bytes [built] [code generated]
+    css modules 569 KiB
+      modules by path ./src/components/ 458 KiB 45 modules
+      modules by path ./src/demo/ 86.9 KiB 41 modules
+      css ../../node_modules/css-loader/dist/cjs.js!./src/styles.css 23.7 KiB [b
+uilt] [code generated]
+webpack 5.112.0 compiled successfully in 13055 ms
+

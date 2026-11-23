@@ -258,6 +258,7 @@ const SliderFillPart: FunctionComponent = () => (
           <Card.Root {...partProps['Card.Root']}>
             <Card.Symbol {...partProps['Card.Symbol']}>
               <Symbol
+                box="square"
                 {...partProps.Symbol}
                 icon={sfThermometerMedium}
               />
@@ -527,6 +528,7 @@ const ChannelsPart: FunctionComponent = () => (
           <Card.Root {...partProps['Card.Root']}>
             <Card.Symbol {...partProps['Card.Symbol']}>
               <Symbol
+                box="square"
                 {...partProps.Symbol}
                 icon={sfLightStrip2Fill}
               />
@@ -574,6 +576,7 @@ const TrendPart: FunctionComponent = () => (
           <Card.Root {...partProps['Card.Root']}>
             <Card.Symbol {...partProps['Card.Symbol']}>
               <Symbol
+                box="square"
                 {...partProps.Symbol}
                 icon={sfThermometerMedium}
               />
@@ -609,6 +612,7 @@ const ExpandButtonPart: FunctionComponent = () => (
             <Card.Root {...partProps['Card.Root']}>
               <Card.Symbol {...partProps['Card.Symbol']}>
                 <Symbol
+                  box="square"
                   {...partProps.Symbol}
                   icon={sfThermometerMedium}
                 />
@@ -642,6 +646,7 @@ const OpenButtonsPart: FunctionComponent = () => (
           <Card.Root {...partProps['Card.Root']}>
             <Card.Symbol {...partProps['Card.Symbol']}>
               <Symbol
+                box="square"
                 {...partProps.Symbol}
                 icon={sfSpeakerFill}
               />

@@ -39,6 +39,7 @@ export const propOptionsSymbol = {
     new MappedProp(sfTrayFill, '[tray.fill]'),
   ] as const,
   baselineShift: [undefined, 'none', 'optical'] as const,
+  box: [undefined, 'glyph', 'square'] as const,
   // On the symbol: a badge (a count, or a dot).
   children: [
     undefined,

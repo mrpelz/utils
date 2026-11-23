@@ -1452,35 +1452,50 @@ export const useReflow = (
     // same one kept through a run of layout changes, so it doesn't drift
     // by being swapped for another.)
     let kept = Number.NaN;
+    // (Its items shown, where they're laid out in it (their tops, their
+    // heights): measured as a choice needs them, once per layout (its
+    // changes unsetting them, see `record`), so a scroll measures nothing
+    // in it but its own top.)
+    type LaidOut = { element: HTMLElement; height: number; y: number };
+    let laidOut: LaidOut[] | undefined;
+    const laidOutNow = () =>
+      (laidOut ??= Array.from(
+        root.querySelectorAll<HTMLElement>('[data-grid-part="item"]'),
+      )
+        .filter((each) => each.offsetParent !== null)
+        .map((each) => ({
+          element: each,
+          height: each.offsetHeight,
+          y: layoutPosition(each, root)[1],
+        })));
     const record = (isChosen = false) => {
+      // (Not chosen by a scroll: its layout changed, or may have.)
+      if (!isChosen) laidOut = undefined;
+      const rootTop = root.getBoundingClientRect().top;
       const held = anchor.current?.element;
-      let element =
-        !isChosen && held?.isConnected && held.offsetParent !== null
-          ? held
-          : undefined;
-      if (!element) {
+      let element: HTMLElement | undefined;
+      let y: number | undefined;
+      if (isChosen || !held?.isConnected || held.offsetParent === null) {
         const { top } = visibleEdgesOf(scroller, root);
-        const shown = Array.from(
-          root.querySelectorAll<HTMLElement>('[data-grid-part="item"]'),
-        ).filter((each) => each.offsetParent !== null);
         // (The highest seen whole below the bars (the leading one of a
         // row): what's looked at, not one mostly under them; else the first
         // seen at all.)
-        const whole = shown
-          .map((each) => ({ each, top: topOf(each, root) }))
-          .filter((each) => each.top >= top - 1);
-        let first: (typeof whole)[number] | undefined;
-        for (const each of whole) {
-          if (!first || each.top < first.top - 1) first = each;
+        const items = laidOutNow();
+        let chosen: LaidOut | undefined;
+        for (const each of items) {
+          if (rootTop + each.y < top - 1) continue;
+          if (!chosen || each.y < chosen.y - 1) chosen = each;
         }
-        element =
-          first?.each ??
-          shown.find((each) => topOf(each, root) + each.offsetHeight > top);
+        chosen ??= items.find((each) => rootTop + each.y + each.height > top);
+        element = chosen?.element;
+        y = chosen?.y;
+      } else {
+        element = held;
       }
       anchor.current = element && {
         element,
         scrolled: scroller.scrollTop,
-        top: topOf(element, root),
+        top: y === undefined ? topOf(element, root) : rootTop + y,
       };
     };
 

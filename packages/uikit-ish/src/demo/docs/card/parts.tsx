@@ -444,6 +444,15 @@ export const CardParts: FunctionComponent = () => (
         color instead of its tint, its icon still telling on from off.
       </li>
       <li>
+        Give its{' '}
+        <PartLink
+          component="symbol"
+          part="Symbol"
+        />{' '}
+        a square box (<code>box=&quot;square&quot;</code>), as the ready-made
+        cards do. Icons of different shapes then line up from card to card.
+      </li>
+      <li>
         Renders a <code>span</code>.
       </li>
     </ul>

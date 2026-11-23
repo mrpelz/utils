@@ -137,6 +137,7 @@ const symbolOf = (
   children?: ReactNode,
 ) => (
   <Symbol
+    box="square"
     emphasizedIcon={emphasizedIcon}
     icon={icon}
   >
@@ -1622,8 +1623,13 @@ const SegmentedChoice = ({
       root.dataset.placed = '';
     });
     // (Its box changing (e.g. its card resized, opened): there at once, as
-    // its options are; moved only as another's chosen.)
+    // its options are; moved only as another's chosen. Its first report
+    // (as it's observed, each choice: this effect's again) no change.)
+    let size = `${String(root.offsetWidth)}x${String(root.offsetHeight)}`;
     const observer = new ResizeObserver(() => {
+      const next = `${String(root.offsetWidth)}x${String(root.offsetHeight)}`;
+      if (next === size) return;
+      size = next;
       cancelAnimationFrame(frame);
       delete root.dataset.placed;
       place();
@@ -1632,9 +1638,15 @@ const SegmentedChoice = ({
       });
     });
     observer.observe(root);
-    // (Its options changing (added, removed, laid out anew): placed again.)
+    // (Its options changing (added, removed, laid out anew), or another
+    // marked chosen (Base UI's radios a render after its value): placed
+    // again.)
     const mutations = new MutationObserver(place);
-    mutations.observe(root, { childList: true });
+    mutations.observe(root, {
+      attributeFilter: ['data-checked'],
+      childList: true,
+      subtree: true,
+    });
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
@@ -1782,7 +1794,10 @@ const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
       >
         <Card.Symbol tint={chosen?.tint ?? tint}>
           {chosen?.icon ? (
-            <Symbol icon={chosen.icon} />
+            <Symbol
+              box="square"
+              icon={chosen.icon}
+            />
           ) : (
             symbolOf({ emphasizedIcon, icon })
           )}

@@ -7,12 +7,15 @@ import { backgroundColorAt, type Rgba } from './gradient.js';
 // page paints behind it, for glass (see `useGlassContext`) and the app's own
 // (`useBackdropTone`). One sampler for all of them: a frame's reads first
 // (what's behind each element), then its writes (the tones that changed),
-// as the page scrolls (any scroller) or resizes, or an element does, as it
-// changes (attributes, elements added or removed, the color scheme), and
-// every frame while anything transitions or animates; elements off-screen
-// skipped. An element sampled `within` an ancestor (e.g. a card's title, on
-// its card) reads only what's painted in it, and is sampled again only as
-// something in it (or what it's in) changes, not as the page scrolls. It reads the backgrounds' colors (their
+// as the page scrolls (any scroller) or resizes, or an element does, as
+// what's over it changes (attributes, elements added or removed; the color
+// scheme, all), and every frame while what's over it transitions or
+// animates; elements off-screen skipped. Each reads 9 points on it, all at
+// once as something changes, one a frame as it (or what's behind it) moves:
+// each a hit test of the page, costly on a large one. An element sampled
+// `within` an ancestor (e.g. a card's title, on its card) reads only what's
+// painted in it, and is sampled again only as something in it (or what it's
+// in) changes, not as the page scrolls. It reads the backgrounds' colors (their
 // gradients' too), not pixels: an image, a video or a canvas behind is
 // unknown, and leaves the tone as it was.
 
@@ -203,23 +206,47 @@ const luminanceAt = (
   return undefined;
 };
 
+/** The points read on an element (see `pointOf`): 3 by 3. */
+const pointCount = 9;
+
 /**
- * The luminance of what's behind an element: the average over a 3 by 3
- * grid of points on it (inset from its edges), those unknown left out.
+ * One of the points read on an element, of a 3 by 3 grid on it (inset
+ * from its edges), row by row; none while it has no box.
  */
-const luminanceBehind = (element: Element, within?: Element) => {
-  const { bottom, left, right, top } = element.getBoundingClientRect();
+const pointOf = (box: DOMRect, index: number) => {
+  const { bottom, left, right, top } = box;
   if (right <= left || bottom <= top) return undefined;
   const inset = 4;
-  const xs = [left + inset, (left + right) / 2, right - inset];
-  const ys = [top + inset, (top + bottom) / 2, bottom - inset];
-  const values: number[] = [];
-  for (const y of ys) {
-    for (const x of xs) {
-      const value = luminanceAt(element, within, x, y);
-      if (value !== undefined) values.push(value);
-    }
-  }
+  const xs = [left + inset, (left + right) / 2, right - inset] as const;
+  const ys = [top + inset, (top + bottom) / 2, bottom - inset] as const;
+  return [xs[index % 3] ?? left, ys[Math.floor(index / 3)] ?? top] as const;
+};
+
+/** The luminance behind an element at one of its points (see `pointOf`). */
+const luminanceAtPoint = (
+  element: Element,
+  within: Element | undefined,
+  box: DOMRect,
+  index: number,
+) => {
+  const point = pointOf(box, index);
+  return point ? luminanceAt(element, within, ...point) : undefined;
+};
+
+/** The luminance at every point behind an element (see `pointOf`). */
+const readingsBehind = (element: Element, within?: Element) => {
+  const box = element.getBoundingClientRect();
+  return Array.from({ length: pointCount }, (_, index) =>
+    luminanceAtPoint(element, within, box, index),
+  );
+};
+
+/**
+ * The luminance of what's behind an element: its points' average (see
+ * `readingsBehind`), those unknown left out.
+ */
+const averageOf = (readings: readonly (number | undefined)[]) => {
+  const values = readings.filter((value) => value !== undefined);
   return values.length === 0
     ? undefined
     : values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -237,12 +264,18 @@ const movingFor = 1000;
 const moving = new Map<Node, number>();
 
 type Entry = {
+  /** Its point read next, read one a frame (see `readingOf`). */
+  cursor: number;
   dwell: number;
   element: Element;
   isVisible: boolean;
   last: BackdropTone | undefined;
   onChange: (tone: BackdropTone) => void;
   pending: { since: number; tone: BackdropTone } | undefined;
+  /** Its points' latest luminances (see `pointOf`); none yet, undefined. */
+  readings: (number | undefined)[] | undefined;
+  /** Its points still to read one a frame, all read since it last moved. */
+  unread: number;
   // (Its ancestor's ref, read as it's sampled: set after it registers,
   // an ancestor's ref attached after its descendants' effects ran.)
   within: { current: Element | null } | undefined;
@@ -254,10 +287,15 @@ let timer = 0;
 
 // What's to be sampled next frame: everything (e.g. the color scheme
 // changed), what's on the page (it scrolled: not those within an ancestor),
-// or those within what changed (`touched`, e.g. a card's slider's fill), or
-// what scrolled in their ancestor (`scrolled`, e.g. a list in a card).
+// or those over what changed (`touched`, e.g. a card's slider's fill; those
+// within an ancestor, within it), or what scrolled in their ancestor
+// (`scrolled`, e.g. a list in a card).
 let isEverything = false;
 let isPage = false;
+/** Changes in a frame past which everything's sampled (not each looked at). */
+const touchedLimit = 64;
+/** Some element's points still to be read, one a frame (see `readingOf`). */
+let isReading = false;
 const touched = new Set<Node>();
 const scrolled = new Set<Node>();
 
@@ -285,59 +323,157 @@ const scheduleScrolled = ({ target }: Event) => {
 
 /**
  * Those over what changed sampled next frame: those not within an
- * ancestor, and those within one it's in, or that's in it.
+ * ancestor, over it, and those within one it's in, or that's in it.
  */
 const scheduleTouched = (node: Node) => {
-  isPage = true;
   touched.add(node);
   request();
 };
 
-/** Whether an element within an ancestor is to be sampled (see above). */
-const isDue = (within: Element, now: number) => {
-  if (isEverything) return true;
-  const isRelated = (node: Node) =>
-    within.contains(node) || node.contains(within);
-  for (const node of touched) if (isRelated(node)) return true;
-  for (const node of scrolled) if (within.contains(node)) return true;
-  for (const [node, until] of moving) {
-    if (until > now && isRelated(node)) return true;
+/**
+ * A node's box: its element's, or its nearest ancestor's with one (e.g. as
+ * it's hidden, what it was in); none, unknown (e.g. removed).
+ */
+const boxOfNode = (node: Node) => {
+  for (
+    let element = node instanceof Element ? node : node.parentElement;
+    element;
+    element = element.parentElement
+  ) {
+    const box = element.getBoundingClientRect();
+    if (box.width > 0 || box.height > 0) return box;
   }
-  return false;
+  return undefined;
+};
+
+/** Whether a node is over a box, or might be (its own unknown). */
+const isOver = (node: Node, box: DOMRect) => {
+  const other = boxOfNode(node);
+  return (
+    !other ||
+    (other.left < box.right &&
+      box.left < other.right &&
+      other.top < box.bottom &&
+      box.top < other.bottom)
+  );
 };
 
 /**
- * An entry's luminance, if it's due (see above): none off-screen, or within
- * an ancestor not there yet.
+ * How an element's to be sampled, if it is (see above): all its points
+ * (e.g. something over it, or in what it's within, changed: once), or one
+ * more (it, or what's behind it, moving: one a frame, see `readingOf`; a
+ * change meanwhile too, its points all read again that way). Those not
+ * within an ancestor as the page scrolls, or as what's over them changes or
+ * moves; those within one as something in it (or what it's in) changes,
+ * moves or scrolls.
  */
-const readingOf = (entry: Entry, now: number, isPageDue: boolean) => {
+const dueOf = (
+  entry: Entry,
+  within: Element | undefined,
+  box: DOMRect,
+  now: number,
+): 'all' | 'one' | undefined => {
+  if (isEverything || !entry.readings) return 'all';
+  const isRelated = within
+    ? (node: Node) => within.contains(node) || node.contains(within)
+    : (node: Node) => isOver(node, box);
+  const isMoving = () => {
+    if (within) {
+      for (const node of scrolled) if (within.contains(node)) return true;
+    } else if (isPage) {
+      return true;
+    }
+    for (const [node, until] of moving) {
+      if (until > now && isRelated(node)) return true;
+    }
+    return false;
+  };
+  const isTouched = () => {
+    if (touched.size > touchedLimit) return true;
+    for (const node of touched) if (isRelated(node)) return true;
+    return false;
+  };
+  if (isMoving()) return 'one';
+  return isTouched() ? 'all' : undefined;
+};
+
+/**
+ * The points read one a frame left in this frame (see `readingOf`): one,
+ * however many elements are moving, each in turn (see `sample`).
+ */
+let pointsLeft = 0;
+
+/** Who read a point this frame (see `pointsLeft`), last in line after it. */
+let turnTaken: Entry | undefined;
+
+/**
+ * An entry's luminance, if it's due (see above): none off-screen, or within
+ * an ancestor not there yet. Moving, one point a frame (each a hit test of
+ * the page, costly on a large one), the others' latest kept; then the rest,
+ * one a frame, so all are read once it's stopped.
+ */
+const readingOf = (entry: Entry, now: number) => {
   if (!entry.isVisible) return undefined;
+  const within = entry.within?.current ?? undefined;
+  if (entry.within && !within) return undefined;
+  const { element } = entry;
+  const box = element.getBoundingClientRect();
+  const due = dueOf(entry, within, box, now);
+  if (!due && entry.unread === 0) return undefined;
   // (Inert or hidden (e.g. a Navigation stack's pages as they move, or
   // under its top one): not sampled, its tone kept. What's behind it is
   // passed by too (ignoring the pointer, as a moving page does; hidden),
   // so it can't be read right; and it's not taking part, for now.)
-  const { element } = entry;
   if (
     element.closest('[inert]') ||
     !element.checkVisibility({ visibilityProperty: true })
   ) {
     return undefined;
   }
-  const within = entry.within?.current ?? undefined;
-  if (entry.within && !within) return undefined;
-  if (within ? !isDue(within, now) : !isPageDue) return undefined;
-  return luminanceBehind(element, within);
+  if (due === 'all' || !entry.readings) {
+    entry.readings = Array.from({ length: pointCount }, (_, index) =>
+      luminanceAtPoint(element, within, box, index),
+    );
+    entry.unread = 0;
+  } else {
+    if (due === 'one') entry.unread = pointCount;
+    // (Another's turn this frame: its points left for the next.)
+    if (pointsLeft === 0) {
+      isReading = true;
+      return undefined;
+    }
+    pointsLeft -= 1;
+    turnTaken = entry;
+    entry.readings[entry.cursor] = luminanceAtPoint(
+      element,
+      within,
+      box,
+      entry.cursor,
+    );
+    entry.cursor = (entry.cursor + 1) % pointCount;
+    entry.unread -= 1;
+    if (entry.unread > 0) isReading = true;
+  }
+  return averageOf(entry.readings);
 };
 
 /** Each entry's tone sampled (reads), then those changed told (writes). */
 const sample = () => {
   frame = 0;
   const now = performance.now();
-  const isPageDue = isEverything || isPage || now < movingUntil;
+  isReading = false;
+  pointsLeft = 1;
+  turnTaken = undefined;
   const readings: [Entry, number][] = [];
   for (const entry of entries.values()) {
-    const luminance = readingOf(entry, now, isPageDue);
+    const luminance = readingOf(entry, now);
     if (luminance !== undefined) readings.push([entry, luminance]);
+  }
+  // (Its turn taken: the others' first next frame. Set by `readingOf`.)
+  const taken = turnTaken as Entry | undefined;
+  if (taken) {
+    entries.delete(taken.element);
+    entries.set(taken.element, taken);
   }
   isEverything = false;
   isPage = false;
@@ -368,7 +504,8 @@ const sample = () => {
   }
   // (While something transitions or animates (e.g. a card's background
   // as it's switched on): every frame, its colors read as they go.)
-  if (now < movingUntil) request();
+  // (Points still to be read: next frame.)
+  if (now < movingUntil || isReading) request();
   // (Held ones looked at again once their dwell's over.)
   if (wait !== Infinity) {
     clearTimeout(timer);
@@ -404,9 +541,34 @@ let resizeObserver: ResizeObserver | undefined;
 let intersectionObserver: IntersectionObserver | undefined;
 let pageObserver: MutationObserver | undefined;
 
+/**
+ * Whether something moving is a sampled element's concern: in what it's
+ * within (or around it), or over it, or in it or around it (e.g. a sheet
+ * with its toolbar), as it starts.
+ */
+const concernsAny = (node: Node) => {
+  for (const { element, within } of entries.values()) {
+    const ancestor = within?.current;
+    if (ancestor) {
+      if (ancestor.contains(node) || node.contains(ancestor)) return true;
+      continue;
+    }
+    const isNear = element.contains(node) || node.contains(element);
+    if (isNear || isOver(node, element.getBoundingClientRect())) return true;
+  }
+  return false;
+};
+
+/**
+ * Something started moving (see `movingStarts`): sampled every frame for a
+ * while (see `movingFor`), if it's any element's concern (see
+ * `concernsAny`); else nothing (e.g. a live value's arrow turning far
+ * below: no frames). Its end samples what's over it all the same.
+ */
 const onMoving = ({ target }: Event) => {
+  if (!(target instanceof Node) || !concernsAny(target)) return;
   movingUntil = performance.now() + movingFor;
-  if (target instanceof Node) moving.set(target, movingUntil);
+  moving.set(target, movingUntil);
   request();
 };
 
@@ -510,21 +672,25 @@ const register = (
 ) => {
   if (entries.size === 0) listen();
   const entry: Entry = {
+    cursor: 0,
     dwell,
     element,
     isVisible: true,
     last: undefined,
     onChange,
     pending: undefined,
+    readings: undefined,
+    unread: 0,
     within,
   };
   entries.set(element, entry);
   resizeObserver?.observe(element);
   intersectionObserver?.observe(element);
-  const luminance =
+  entry.readings =
     within && !within.current
       ? undefined
-      : luminanceBehind(element, within?.current ?? undefined);
+      : readingsBehind(element, within?.current ?? undefined);
+  const luminance = entry.readings && averageOf(entry.readings);
   if (luminance !== undefined) {
     entry.last = nextTone(luminance, undefined);
     onChange(entry.last);
@@ -555,7 +721,6 @@ export const useBackdropTone = (
   { dwell = 0, enabled = true, within }: BackdropToneOptions = {},
 ): BackdropTone | undefined => {
   const [tone, setTone] = useState<BackdropTone | undefined>(undefined);
-
   useLayoutEffect(() => {
     const { current: element } = ref;
     if (!enabled || !element) return undefined;

@@ -26,6 +26,10 @@ export type { SymbolIcon, SymbolProps } from './props.js';
 // In a line of text, its ink's center on the text's: half the cap height up
 // from the baseline (`baselineShift`, see style.css).
 //
+// Its box the glyph's, or a square (`box`), the same for every icon (e.g. a
+// card's symbols lining up, whatever their shapes): the glyph centered in
+// it, at its own size (a larger one past its edges, not scaled down).
+//
 // SF Symbols' paths are SF Pro glyphs at 20pt (e.g. `circle` is 19.92 wide,
 // the glyph's ink box 0.996em): other icons give their own units.
 const defaultUnitsPerEm = 20;
@@ -84,6 +88,7 @@ export const Symbol = forwardRef<HTMLSpanElement, SymbolProps>(
   (
     {
       baselineShift = 'optical',
+      box = 'glyph',
       children,
       className,
       emphasizedIcon,
@@ -96,6 +101,7 @@ export const Symbol = forwardRef<HTMLSpanElement, SymbolProps>(
     <span
       ref={ref}
       data-baseline-shift={baselineShift}
+      data-box={box}
       data-symbol={icon.sourceName}
       style={withStyle(
         { '--uikit-symbol-height': `${String(sizeOf(icon).height)}em` },

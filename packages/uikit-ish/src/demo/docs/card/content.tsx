@@ -79,6 +79,7 @@ export const lockCard = ({
   >
     <Card.Symbol {...parts['Card.Symbol']}>
       <Symbol
+        box="square"
         emphasizedIcon={sfLockFill}
         icon={sfLockOpen}
         {...parts.Symbol}
@@ -119,6 +120,7 @@ export const lightsCard = ({
     >
       <Card.Symbol {...parts['Card.Symbol']}>
         <Symbol
+          box="square"
           emphasizedIcon={sfLightbulbFill}
           icon={sfLightbulb}
           {...parts.Symbol}
@@ -162,6 +164,7 @@ export const cameraCard = ({
     <FlipParts />
     <Card.Symbol {...parts['Card.Symbol']}>
       <Symbol
+        box="square"
         icon={sfPhoto}
         {...parts.Symbol}
       />
@@ -198,6 +201,7 @@ export const lampCard = ({
   >
     <Card.Symbol {...parts['Card.Symbol']}>
       <Symbol
+        box="square"
         emphasizedIcon={sfLightbulbFill}
         icon={sfLightbulb}
         {...parts.Symbol}
@@ -239,6 +243,7 @@ export const temperatureCard = ({ parts = {} }: Parts): ReactNode => (
     />
     <Card.Symbol {...parts['Card.Symbol']}>
       <Symbol
+        box="square"
         icon={sfThermometerMedium}
         {...parts.Symbol}
       />
@@ -257,6 +262,7 @@ export const humidityCard = ({ parts = {} }: Parts): ReactNode => (
   <Card.Root {...parts['Card.Root']}>
     <Card.Symbol {...parts['Card.Symbol']}>
       <Symbol
+        box="square"
         icon={sfHumidityFill}
         {...parts.Symbol}
       />
@@ -309,6 +315,7 @@ export const heatingCard = ({
       <FlipParts />
       <Card.Symbol {...parts['Card.Symbol']}>
         <Symbol
+          box="square"
           icon={sfThermometerMedium}
           {...parts.Symbol}
         />

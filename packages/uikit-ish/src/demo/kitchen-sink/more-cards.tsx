@@ -148,6 +148,7 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
         tint={tint}
       >
         <Symbol
+          box="square"
           emphasizedIcon={sfLightbulbLedFill}
           icon={sfLightbulbLed}
         />
@@ -566,6 +567,7 @@ const ThermostatCard: FunctionComponent<{ expansion?: Expansion }> = ({
       <FlipParts />
       <Card.Symbol>
         <Symbol
+          box="square"
           emphasizedIcon={emphasizedIcon}
           icon={icon}
         />
@@ -685,7 +687,10 @@ const WeatherCard: FunctionComponent<{ expansion?: Expansion }> = ({
     <TonedCard>
       <FlipParts />
       <Card.Symbol>
-        <Symbol icon={sfCloudSunFill} />
+        <Symbol
+          box="square"
+          icon={sfCloudSunFill}
+        />
       </Card.Symbol>
       {isLarge ? <HourStrip hours={forecast} /> : null}
       {/* (Large, its value large: the sky in its title.) */}
@@ -740,7 +745,10 @@ const EnergyCard: FunctionComponent<{ expansion?: Expansion }> = ({
     <TonedCard>
       <FlipParts />
       <Card.Symbol>
-        <Symbol icon={sfBoltFill} />
+        <Symbol
+          box="square"
+          icon={sfBoltFill}
+        />
       </Card.Symbol>
       {isLarge ? (
         <BarChart

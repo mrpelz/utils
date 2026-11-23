@@ -120,7 +120,10 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
       {/* (Its parts moved from where they were as it expands, with GSAP.) */}
       <FlipParts />
       <Card.Symbol>
-        <Symbol icon={sfThermometerMedium} />
+        <Symbol
+          box="square"
+          icon={sfThermometerMedium}
+        />
       </Card.Symbol>
       {isExpanded ? (
         <ControlCards.SliderFill
@@ -326,7 +329,10 @@ const CameraCard: FunctionComponent = () => {
       {/* (Its parts moved from where they were as it opens, with GSAP.) */}
       <FlipParts />
       <Card.Symbol>
-        <Symbol icon={sfPhoto} />
+        <Symbol
+          box="square"
+          icon={sfPhoto}
+        />
       </Card.Symbol>
       <Card.Title>Front Door Camera</Card.Title>
       <Card.Value>{isOpen ? 'Live, recording' : 'Live'}</Card.Value>
