@@ -136,6 +136,16 @@
     container: uikit-card / size;
   }
 
+  /* (Off screen, what's in it skipped: not styled, laid out, painted or
+     hit-tested, so a page of many cards scrolls smoothly; its glass and
+     shadow its card's, drawn all the same (clipped by its own rounded box,
+     nothing of it past its card's edge). Its size its card's either way.
+     Not while editing: tiles moved and resized across the grid, each
+     drawn as it goes.) */
+  .uikit-card-root:not([data-editing]) > .uikit-card-frame {
+    content-visibility: auto;
+  }
+
   /* (Its tile getting to a new box (see Grid's reshape.ts): its frame at
      the size it's getting to (its parts laid out there at once), from its
      glass's top leading corner; what's beyond its glass clipped.) */

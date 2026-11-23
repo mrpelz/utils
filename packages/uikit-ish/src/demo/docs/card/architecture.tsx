@@ -161,6 +161,14 @@ export const CardArchitecture: FunctionComponent = () => (
         <a href="#laid-out-by-its-size">Laid out by its size</a>).
       </li>
       <li>
+        The frame also lets the browser skip what’s in a card while it’s off
+        screen (<code>content-visibility: auto</code>). Its content isn’t
+        styled, laid out, painted or hit-tested then, so a page of many cards
+        scrolls smoothly. The root’s glass and shadow are drawn as usual. In
+        edit mode nothing is skipped, because tiles move and resize across the
+        grid.
+      </li>
+      <li>
         The root also provides two contexts, without elements. One is a color
         scheme for everything in the card. The other is the layer its parts draw
         copies into over a slider’s fill (see{' '}
