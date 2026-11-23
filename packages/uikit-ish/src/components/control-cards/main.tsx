@@ -1618,10 +1618,19 @@ const SegmentedChoice = ({
       placeThumb(thumb, root.querySelector('[data-checked]'));
     };
     place();
-    const frame = requestAnimationFrame(() => {
+    let frame = requestAnimationFrame(() => {
       root.dataset.placed = '';
     });
-    const observer = new ResizeObserver(place);
+    // (Its box changing (e.g. its card resized, opened): there at once, as
+    // its options are; moved only as another's chosen.)
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      delete root.dataset.placed;
+      place();
+      frame = requestAnimationFrame(() => {
+        root.dataset.placed = '';
+      });
+    });
     observer.observe(root);
     // (Its options changing (added, removed, laid out anew): placed again.)
     const mutations = new MutationObserver(place);

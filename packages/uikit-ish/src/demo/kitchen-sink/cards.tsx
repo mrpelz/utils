@@ -729,6 +729,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           optionContent="label"
         >
+          <FlipParts />
           {segmentsOf(heatPumpModes)}
         </Toned.Segmented>
       ),
@@ -744,6 +745,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           name="Office Heat Pump"
           offValue="off"
         >
+          <FlipParts />
           {segmentsOf(heatPumpModes)}
         </Toned.Segmented>
       ),
@@ -760,6 +762,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           tint={cardTints.air}
         >
+          <FlipParts />
           {segmentsOf([
             { icon: sfPower, label: 'Off', value: 'off' },
             { icon: sfFanFill, label: 'Auto', value: 'auto' },
@@ -781,6 +784,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           tint="oklch(64% 0.21 25)"
         >
+          <FlipParts />
           {segmentsOf([
             { icon: sfLockOpen, label: 'Off', value: 'off' },
             { icon: sfHouseFill, label: 'Home', value: 'home' },
@@ -801,6 +805,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           opening={{ closeLabel: 'Close', label: 'Guest Room Heat modes' }}
         >
+          <FlipParts />
           {segmentsOf(heatPumpModes)}
         </Toned.Segmented>
       ),

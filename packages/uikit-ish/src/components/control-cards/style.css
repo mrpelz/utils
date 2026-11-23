@@ -216,6 +216,12 @@
     -webkit-user-select: none;
     user-select: none;
 
+    /* (None shown (1x1): there all the same, unseen, its options telling
+       the card theirs, see main.tsx.) */
+    &[hidden] {
+      display: none;
+    }
+
     &[data-layout='tall'] {
       margin-top: 10px;
     }

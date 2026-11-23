@@ -605,6 +605,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           optionContent="icon"
         >
+          <FlipParts />
           {segmentsOf(heatPumpModes)}
         </Toned.Segmented>
       ),
@@ -621,6 +622,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           optionContent="label"
         >
+          <FlipParts />
           {segmentsOf(heatPumpModes)}
         </Toned.Segmented>
       ),
@@ -638,6 +640,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
 
           tint={cardTints.air}
         >
+          <FlipParts />
           {segmentsOf(fanSpeeds)}
         </Toned.Segmented>
       ),
@@ -654,6 +657,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           // (Cooling not available (e.g. in winter): disabled.)
         >
+          <FlipParts />
           {segmentsOf(
             heatPumpModes.map((mode) =>
               mode.value === 'cool' ? { ...mode, disabled: true } : mode,
@@ -675,6 +679,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
 
           tint={cardTints.air}
         >
+          <FlipParts />
           {segmentsOf(fanSpeeds)}
         </Toned.Segmented>
       ),
@@ -690,6 +695,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           name="Workshop Heat Pump"
           offValue="off"
         >
+          <FlipParts />
           {segmentsOf(heatPumpTargets)}
         </Toned.Segmented>
       ),
@@ -706,6 +712,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           offValue="off"
           // (The chime unavailable (e.g. muted at night): disabled.)
         >
+          <FlipParts />
           {segmentsOf(
             speakerSources.map((source) =>
               source.value === 'chime' ? { ...source, disabled: true } : source,
@@ -727,6 +734,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
 
           tint={cardTints.air}
         >
+          <FlipParts />
           {segmentsOf(fanSpeeds)}
         </Toned.Segmented>
       ),
@@ -745,6 +753,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
 
           orientation="vertical"
         >
+          <FlipParts />
           {segmentsOf(heatingPrograms)}
         </Toned.Segmented>
       ),
@@ -763,6 +772,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
 
           orientation="vertical"
         >
+          <FlipParts />
           {segmentsOf(scenes)}
         </Toned.Segmented>
       ),
@@ -782,6 +792,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
 
           orientation="vertical"
         >
+          <FlipParts />
           {segmentsOf(scenes)}
         </Toned.Segmented>
       ),
@@ -801,6 +812,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
 
           orientation="vertical"
         >
+          <FlipParts />
           {segmentsOf(entryScenes)}
         </Toned.Segmented>
       ),
