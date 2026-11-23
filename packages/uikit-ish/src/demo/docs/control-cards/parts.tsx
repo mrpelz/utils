@@ -11,6 +11,7 @@ import {
   type ControlCardOpenButtonsProps,
   type ControlCardProgressProps,
   ControlCards,
+  type ControlCardSegmentedItemProps,
   type ControlCardSegmentedProps,
   type ControlCardSliderFillProps,
   type ControlCardSliderProps,
@@ -38,6 +39,8 @@ import {
   sfDoorGarageOpen,
   sfLightStrip2,
   sfLightStrip2Fill,
+  sfPower,
+  sfSnowflake,
   sfSpeakerFill,
   sfThermometerMedium,
   sfWindowShadeClosed,
@@ -51,6 +54,7 @@ import {
   controlCardsListRows,
   controlCardsOpenButtonsRows,
   controlCardsProgressRows,
+  controlCardsSegmentedItemRows,
   controlCardsSegmentedRows,
   controlCardsSliderFillRows,
   controlCardsSliderRows,
@@ -77,9 +81,11 @@ import {
   getPropOptionsSwitch,
   propOptionsOpenButtons,
   propOptionsProgress,
+  propOptionsSegmentedItem,
   propOptionsState,
   propOptionsTrend,
   propOptionsValue,
+  type SegmentedOptionData,
 } from './props.js';
 
 /** The parts a card of the views' own renders (see the views below). */
@@ -394,29 +400,112 @@ const ListPart: FunctionComponent = () => (
           name: 'List',
           openSize: '4x3',
           size: expansion?.expanded ? expansion.expandedSize : '2x2',
-          sizes: ['2x2', '2x3', '3x3'],
+          sizes: cardSizes.summaryDisplay,
         },
       ];
     }}
   />
 );
 
+/** The segmented card's view: its items, as it composes them. */
+const segmentedOthers = {
+  'ControlCards.SegmentedItem': [
+    'children',
+    'icon',
+    'subtitle',
+    'tint',
+    'value',
+  ],
+} as const;
+
 const SegmentedPart: FunctionComponent = () => (
   <PartView
     id="control-cards-parts-segmented"
     options={getPropOptionsSegmented}
+    others={segmentedOthers}
     part="ControlCards.Segmented"
-    tilesOf={(props) => [
-      {
-        card: (
-          <ControlCards.Segmented {...(props as ControlCardSegmentedProps)} />
-        ),
-        name: 'Segmented',
-        openSize: '2x1',
-        size: '2x1',
-        sizes: ['1x1', '2x1', '1x2', '2x2'],
-      },
-    ]}
+    tilesOf={(props, partProps) => {
+      // (Its items composed from the data its control chose.)
+      const { children: data, ...card } = props as Omit<
+        ControlCardSegmentedProps,
+        'children'
+      > & { children: readonly SegmentedOptionData[] };
+      return [
+        {
+          card: (
+            <ControlCards.Segmented {...card}>
+              {data.map(({ label, value, ...option }) => (
+                <ControlCards.SegmentedItem
+                  key={value}
+                  {...partProps['ControlCards.SegmentedItem']}
+                  value={value}
+                  {...option}
+                >
+                  {label}
+                </ControlCards.SegmentedItem>
+              ))}
+            </ControlCards.Segmented>
+          ),
+          name: 'Segmented',
+          openSize: '2x1',
+          size: '2x1',
+          sizes: cardSizes.choiceControl,
+        },
+      ];
+    }}
+  />
+);
+
+/** The segmented item's view: its card, the card's other items. */
+const segmentedItemOthers = {
+  'ControlCards.Segmented': ['defaultValue', 'icon', 'name', 'offValue'],
+  'ControlCards.SegmentedItem (others)': ['children', 'icon', 'tint', 'value'],
+} as const;
+
+const SegmentedItemPart: FunctionComponent = () => (
+  <PartView
+    id="control-cards-parts-segmented-item"
+    options={propOptionsSegmentedItem}
+    others={segmentedItemOthers}
+    part="ControlCards.SegmentedItem"
+    tilesOf={(props, partProps) => {
+      const others = partProps['ControlCards.SegmentedItem (others)'];
+      return [
+        {
+          card: (
+            <ControlCards.Segmented
+              {...partProps['ControlCards.Segmented']}
+              defaultValue="heat"
+              icon={sfPower}
+              name="Heat Pump"
+              offValue="off"
+            >
+              <ControlCards.SegmentedItem
+                {...others}
+                icon={sfPower}
+                value="off"
+              >
+                Off
+              </ControlCards.SegmentedItem>
+              <ControlCards.SegmentedItem
+                {...(props as ControlCardSegmentedItemProps)}
+              />
+              <ControlCards.SegmentedItem
+                {...others}
+                icon={sfSnowflake}
+                tint={cardTints.shade}
+                value="cool"
+              >
+                Cool
+              </ControlCards.SegmentedItem>
+            </ControlCards.Segmented>
+          ),
+          name: 'Segmented',
+          size: '2x2',
+          sizes: cardSizes.choiceControl,
+        },
+      ];
+    }}
   />
 );
 
@@ -655,6 +744,11 @@ export const ControlCardsParts: FunctionComponent = () => (
           <li>
             <PartLink part="ControlCards.Segmented" /> (its own corner buttons,
             through its opening prop)
+            <ul>
+              <li>
+                <PartLink part="ControlCards.SegmentedItem" /> (one per option)
+              </li>
+            </ul>
           </li>
           <li>
             <PartLink part="ControlCards.List" /> (its own corner buttons,
@@ -808,9 +902,20 @@ export const ControlCardsParts: FunctionComponent = () => (
       part="ControlCards.Segmented"
       rows={controlCardsSegmentedRows}
       bullets={[
-        'A device of a few modes, for example a heat pump’s Off, Heat, Cool and Auto: its options as segments in a well at its bottom, the chosen one raised. Built on Base UI’s RadioGroup, so the arrow keys move between them.',
-        'Its tile’s size sets its layout. Across a row, its symbol and title sit on the top line and the segments show their labels. Taller, its title and value sit as on any card, and each segment shows its symbol over its label. One wide and taller, the options stack. At 1x1 it only shows the chosen option and opens above the page to choose.',
+        'A device of a few modes, for example a heat pump’s Off, Heat, Cool and Auto: its options as segments in a well at its bottom, the chosen one raised. Built on Base UI’s RadioGroup, so the arrow keys move between them. A drag along them chooses each option as it reaches it; a touch across them scrolls the page instead.',
+        'Whether segments show symbols, labels or both is the app’s choice (optionContent), not its size’s; so is whether they sit side by side or stack (orientation), for example stacked in a wide tile for long labels.',
+        'Its tile’s size sets its layout. Across a row, its symbol and title sit on the top line, a segment’s symbol beside its label. Taller, its title and value sit as on any card, a segment’s symbol over its label. One wide and taller, the options stack, each with its symbol over its label, as in a taller tile. At 1x1 it only shows the chosen option and opens above the page to choose.',
+        'Options can have a subtitle under their label, in the card’s value color, where there’s room: in tiles taller than a row, and in stacked options only once each option is tall enough for it.',
         'It’s lit while the chosen option isn’t its off option, and its symbol and tint are the chosen option’s.',
+      ]}
+    />
+    <Section
+      Demo={SegmentedItemPart}
+      part="ControlCards.SegmentedItem"
+      rows={controlCardsSegmentedItemRows}
+      bullets={[
+        'An option of a segmented card, composed in it as Segmented’s items are: its value, its words as its children, and what the card takes from it while it’s chosen (its symbol, its tint, its words as the card’s value).',
+        'It tells its card these through context, so it can sit anywhere inside the card. At 1x1, where no options show, it stays mounted, unseen.',
       ]}
     />
     <Section
@@ -900,6 +1005,7 @@ export const controlCardsPartsDemos = [
   LightPart,
   ListPart,
   SegmentedPart,
+  SegmentedItemPart,
   ChannelsPart,
   TrendPart,
   ExpandButtonPart,

@@ -1,3 +1,4 @@
+import type { Radio as BaseRadio } from '@base-ui/react/radio';
 import type { ReactNode } from 'react';
 
 import type { CardRootProps } from '../card/main.js';
@@ -287,22 +288,48 @@ export type ControlCardLightProps = ControlCardProps &
     value?: readonly number[];
   };
 
-/** A segmented card's option (see `ControlCardSegmentedProps`). */
-export type ControlCardSegmentedOption = {
+/** A segmented card's option (`ControlCards.SegmentedItem`). */
+export type ControlCardSegmentedItemProps = Omit<
+  BaseRadio.Root.Props,
+  'children' | 'ref' | 'value'
+> & {
   /**
-   * Its symbol: in its segment (in a tile taller than a row, or upright),
-   * and the card's while it's chosen (else the card's `icon`).
+   * Its words: its segment's (its name with its symbol only, see
+   * `optionContent`), and the card's value while it's chosen.
+   */
+  children: ReactNode;
+  /**
+   * Whether it can't be chosen now (as Segmented's items): dimmed, not
+   * pressed, dragged past, skipped by keys (see Base UI's Radio).
+   */
+  disabled?: boolean;
+  /**
+   * Its symbol: in its segment, and the card's while it's chosen (else
+   * the card's `icon`).
    */
   icon?: SymbolIcon;
-  /** Its words: its segment's, and the card's value while it's chosen. */
-  label: string;
+  /**
+   * More words, under its words (in the card's value's color), where
+   * there's room for them: in a tile taller than a row (not across one,
+   * not with its symbol only, see `optionContent`); stacked, once its
+   * segment's tall enough.
+   */
+  subtitle?: ReactNode;
   /** The card's symbol's tint while it's chosen (else the card's `tint`). */
   tint?: string;
   /** What it stands for (unique in its card). */
   value: string;
 };
 
-export type ControlCardSegmentedProps = ControlCardProps & {
+export type ControlCardSegmentedProps = Omit<ControlCardProps, 'children'> & {
+  /**
+   * Its options (`ControlCards.SegmentedItem`s), in order: segments in a
+   * well at its bottom, side by side (across a row, a symbol beside its
+   * words; taller, over them), or stacked (beside them; one wide, over
+   * them), the chosen one's raised; dragged between (each chosen as it's
+   * reached).
+   */
+  children: ReactNode;
   /** The option chosen at first (uncontrolled). @default its first's */
   defaultValue?: string;
   /**
@@ -320,11 +347,19 @@ export type ControlCardSegmentedProps = ControlCardProps & {
    */
   opening?: ControlCardOpenButtonsProps;
   /**
-   * Its options, in order: segments in a well at its bottom, side by side
-   * (across a row, their words; taller, their symbols over them too), or
-   * stacked (upright), the chosen one's raised.
+   * What its options' segments show: their symbols and words (`both`; an
+   * option without a symbol, its words), their symbols only (`icon`, its
+   * words its name, unseen), or their words only (`label`).
+   * @default 'both'
    */
-  options: readonly ControlCardSegmentedOption[];
+  optionContent?: 'both' | 'icon' | 'label';
+  /**
+   * Its options side by side (`horizontal`) or stacked (`vertical`), in a
+   * tile taller than a row; in one row, side by side only (vertical: none,
+   * as 1x1, see `opening`). None: by its size (one wide and taller,
+   * stacked; else side by side).
+   */
+  orientation?: 'horizontal' | 'vertical';
   /** Its symbol's tint (an option's own instead, while it's chosen). */
   tint?: string;
   /** The option chosen (controlled). */
@@ -336,6 +371,11 @@ export type ControlCardRow = {
   icon?: SymbolIcon;
   /** Its label, also its key: unique in its card. */
   label: string;
+  /**
+   * Pressed (anywhere on it), e.g. going to a page of its own: a chevron
+   * after its value (List's `DrillIn`), its label a button.
+   */
+  onPress?: () => void;
   value: ReactNode;
 };
 

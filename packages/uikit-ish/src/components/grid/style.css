@@ -1257,15 +1257,37 @@
   }
 
   /* (Its corner buttons, open or closing: one going at the start of its
-     move, by its color, as hidden ones fade (see above); the other coming
-     at its end.) */
+     move, by its color, as hidden ones fade (see above); one shown (e.g.
+     its x) coming once at its end (an animation: shown, only then); its
+     color otherwise changing at once, as its text's (e.g. lit).) */
   .uikit-grid-item-body[data-grid-open] .uikit-grid-corner-button {
-    transition-delay: 200ms;
-    transition-duration: 120ms;
+    transition-duration: 0s;
 
     &[data-grid-hidden] {
-      transition-delay: 0s;
       transition-duration: 80ms;
     }
+  }
+
+  .uikit-grid-item-body[data-grid-open='open']
+    .uikit-grid-corner-button:not([data-grid-hidden]) {
+    animation: 120ms 200ms backwards uikit-grid-corner-appear;
+
+    > .uikit-grid-corner-icon {
+      animation: 120ms 200ms backwards uikit-grid-corner-icon-appear;
+    }
+  }
+}
+
+/* A corner button shown (see above): from transparent, its color and its
+   icon's backing (colors only, no opacity: in a scroller, iOS). */
+@keyframes uikit-grid-corner-appear {
+  from {
+    color: transparent;
+  }
+}
+
+@keyframes uikit-grid-corner-icon-appear {
+  from {
+    stroke: transparent;
   }
 }

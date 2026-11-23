@@ -141,7 +141,7 @@ export const lightsCard = ({
 /**
  * A camera: opened above the page (its item's `open`, its `openSize`) by
  * its corner button or a press anywhere on it; open, it shows more, its x
- * (top leading) closing it (as a press beside it, or Escape).
+ * (top trailing) closing it (as a press beside it, or Escape).
  */
 export const cameraCard = ({
   isOpen,

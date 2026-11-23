@@ -204,7 +204,7 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
 };
 
 /** A light's channels: their names and tints (see `ChannelLightCard`). */
-const rgb = [
+export const rgb = [
   { label: 'R', name: 'Red', tint: '#ff3b30' },
   { label: 'G', name: 'Green', tint: '#34c759' },
   { label: 'B', name: 'Blue', tint: '#0a84ff' },
@@ -217,7 +217,7 @@ const warm = { label: 'WW', name: 'Warm white', tint: '#ffd9a0' } as const;
  * A light of several channels (three, four, five): a light card; opened
  * above the page (`opens`) or expanded for its bars.
  */
-const ChannelLightCard: FunctionComponent<{
+export const ChannelLightCard: FunctionComponent<{
   channels: readonly ControlCardChannel[];
   /** Its symbol's icon while on (e.g. filled). */
   emphasizedIcon: SymbolIcon;
@@ -926,7 +926,7 @@ export const moreTiles: readonly Tile[] = [
   },
   {
     card: RoomCard,
-    kind: 'numericalDisplay',
+    kind: 'summaryDisplay',
     name: 'Living Room',
     openSize: '4x3',
     size: '2x2',

@@ -267,6 +267,31 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
         and there’s no lens.
       </li>
       <li>
+        Dragging between options is its own, as Segmented’s is but without the
+        lens: the thumb is what moves. A press waits until it moves 4px (a touch
+        8px) and then looks at the direction. Along the options it’s a drag, and
+        each option is chosen as the finger reaches it, the thumb going there. A
+        touch across them is a scroll: it’s let go, as on the slider cards. Once
+        dragging, a non-passive touchmove listener keeps the browser from
+        panning as the finger strays across (React’s are passive). Upright cards
+        don’t let the page scroll from them, as vertical sliders don’t; they’re
+        slim, so there’s room beside them to scroll.
+      </li>
+      <li>
+        What each segment shows is the app’s choice (<code>optionContent</code>
+        ): symbol and label, symbol only (the label becomes its name), or label
+        only. The layout only arranges them, beside each other across a row and
+        stacked when taller.
+      </li>
+      <li>
+        Its options are composed as Segmented’s items are: each a{' '}
+        <PartLink part="ControlCards.SegmentedItem" /> in the card. Each item
+        tells the card its symbol, words and tint through context, in a layout
+        effect, so the card can show the chosen one’s as its own symbol and
+        value. At 1x1, where no options show, the items stay mounted in a hidden
+        group, so the card still knows them.
+      </li>
+      <li>
         A thumb sits under the chosen option. A layout effect measures that
         option’s box and moves the thumb there, again whenever the group
         resizes. It only transitions once it has been placed, so it doesn’t
@@ -274,8 +299,10 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
       </li>
       <li>
         The layout comes from its grid item’s size (its open size while it’s
-        open above the page): a row, taller, upright, or 1x1 without options.
-        Outside a grid, it’s a row.
+        open above the page) and its orientation, if the app gives one: a row,
+        taller, stacked, or 1x1 without options. Stacked needs at least two
+        rows, so a vertical card one row tall shows only its chosen option.
+        Outside a grid, it’s a row, or stacked when vertical.
       </li>
       <li>
         The card is active while the chosen option isn’t its off option, so Card

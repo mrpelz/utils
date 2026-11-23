@@ -128,13 +128,29 @@ export const useCardOrientation = (): CardOrientation => {
  * The sizes the library's kinds of cards support, for their items'
  * `supportedSizes`: a binary display or control (a state, a switch), a
  * numerical display (a value) or control (a slider: never square, so it
- * has a direction).
+ * has a direction), a choice of a few (segments: across a row, taller,
+ * upright, or 1x1 opening to choose), a summary (rows: never 1x1).
  */
 export const cardSizes: CardSizes = {
   binaryControl: ['1x1', '2x1'],
   binaryDisplay: ['1x1', '2x1'],
-  numericalControl: ['2x1', '3x1', '1x2', '1x3'],
+  choiceControl: [
+    '1x1',
+    '2x1',
+    '3x1',
+    '4x1',
+    '1x2',
+    '2x2',
+    '3x2',
+    '4x2',
+    '1x3',
+    '2x3',
+    '1x4',
+    '2x4',
+  ],
+  numericalControl: ['2x1', '3x1', '4x1', '1x2', '1x3'],
   numericalDisplay: ['1x1', '2x1', '2x2'],
+  summaryDisplay: ['2x1', '2x2', '3x2', '4x1', '4x2', '3x3', '4x3', '4x4'],
 };
 
 /** Its corner buttons' animations' id (see `useCornersFollowing`). */

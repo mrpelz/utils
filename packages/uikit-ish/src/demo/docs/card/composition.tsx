@@ -1168,11 +1168,10 @@ export const CardComposition: FunctionComponent = () => (
           component="list"
           part="forwardClick"
         />
-        . Open, an x (<code>close</code>) in the top leading corner closes it,
-        where the grid’s remove buttons are, and the card takes no press of its
-        own. Each button is shown only in its state (<code>visible</code>),
-        fading as the card grows and shrinks, and the card’s symbol moves beside
-        its title, clear of the x.
+        . Open, an x (<code>close</code>) in the top trailing corner closes it,
+        clear of the card’s symbol, and the card takes no press of its own. Each
+        button is shown only in its state (<code>visible</code>), fading as the
+        card grows and shrinks.
       </li>
       <li>
         The grid lifts the card itself, so what’s in it keeps its state. A faint
@@ -1345,11 +1344,10 @@ export const CardComposition: FunctionComponent = () => (
           component="control-cards"
           part="ControlCards.OpenButtons"
         />{' '}
-        put the x that closes it in the top leading corner and the button that
+        put the x that closes it in the top trailing corner and the button that
         opens it in the bottom trailing one, each <code>visible</code> in its
-        own state: one fades out at the start of the move and the other fades in
-        at its end. While the x is there, the symbol moves beside the title,
-        clear of it (see{' '}
+        own state: one fades out at the start of the move and the x fades in
+        once, after it’s open. A switch there moves in, clear of it (see{' '}
         <a href="#opening-above-the-page">Opening above the page</a>).
       </li>
       <li>

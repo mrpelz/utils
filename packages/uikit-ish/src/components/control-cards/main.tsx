@@ -6,14 +6,17 @@ import './style.css';
 import { Radio as BaseRadio } from '@base-ui/react/radio';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import {
+  createContext,
   type CSSProperties,
   forwardRef,
   type MouseEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
   type TouchEvent as ReactTouchEvent,
+  useCallback,
   useContext,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -32,13 +35,13 @@ import {
 } from '../glass/main.js';
 import { measureOf } from '../grid/handle.js';
 import { iconOf, polyline } from '../grid/icons.js';
-import { gridIcons, useGridItem } from '../grid/main.js';
+import { gridIcons, startWithFrame, useGridItem } from '../grid/main.js';
 import { forwardClick, List } from '../list/main.js';
 import { Progress } from '../progress/main.js';
 import { useSettings } from '../settings/main.js';
 import { Slider } from '../slider/main.js';
 import { Symbol, type SymbolIcon } from '../symbol/main.js';
-import { cn } from '../utils/main.js';
+import { cn, reducedMotionOf } from '../utils/main.js';
 import type {
   ControlCardButtonProps,
   ControlCardChannel,
@@ -49,7 +52,7 @@ import type {
   ControlCardListProps,
   ControlCardOpenButtonsProps,
   ControlCardProgressProps,
-  ControlCardSegmentedOption,
+  ControlCardSegmentedItemProps,
   ControlCardSegmentedProps,
   ControlCardSliderFillProps,
   ControlCardSliderProps,
@@ -72,7 +75,7 @@ export type {
   ControlCardProgressProps,
   ControlCardProps,
   ControlCardRow,
-  ControlCardSegmentedOption,
+  ControlCardSegmentedItemProps,
   ControlCardSegmentedProps,
   ControlCardSliderFillProps,
   ControlCardSliderProps,
@@ -1023,26 +1026,81 @@ const ExpandButton = ({
  * Card sets it, opened above the page too): by its height, at least one;
  * as the card's size changes too.
  */
+const rowsIn = (list: HTMLElement) => {
+  const row =
+    Number.parseFloat(
+      getComputedStyle(list).getPropertyValue('--uikit-list-row-min-height'),
+    ) || 30;
+  return Math.max(1, Math.floor(list.clientHeight / row));
+};
+
 const useRowsThatFit = () => {
   const [list, setList] = useState<HTMLElement | null>(null);
   const [count, setCount] = useState(1);
   useLayoutEffect(() => {
     if (!list) return undefined;
-    const update = () => {
-      const row =
-        Number.parseFloat(
-          getComputedStyle(list).getPropertyValue(
-            '--uikit-list-row-min-height',
-          ),
-        ) || 30;
-      setCount(Math.max(1, Math.floor(list.clientHeight / row)));
-    };
-    update();
-    const observer = new ResizeObserver(update);
+    const observer = new ResizeObserver(() => setCount(rowsIn(list)));
     observer.observe(list);
     return () => observer.disconnect();
   }, [list]);
-  return [setList, count] as const;
+  // (Also after each render, before it's painted: its tile resized in it
+  // (e.g. collapsed), its rows counted at once, not a frame late (a frame
+  // of the rows of the size it had, its last row a new one after).)
+  useLayoutEffect(() => {
+    if (!list) return;
+    const read = () => setCount(rowsIn(list));
+    read();
+  });
+  return [setList, count, list] as const;
+};
+
+/** Grid's reflow (its tiles reshaping): its duration and easing. */
+const reflowDuration = 300;
+const reflowEasing = 'cubic-bezier(0.32, 0.72, 0, 1)';
+
+/** Its last row's height's animation (see `useLastRowHeight`). */
+const lastRowId = 'uikit-control-cards-last-row';
+
+/**
+ * Its list's last row's height changing with how many rows there are (one
+ * only: taller, see Card), as its tile reshapes (Grid's reflow: its
+ * duration and easing): from the height it had, animated, started with
+ * the frames (see Grid's `startWithFrame`: a long task laying the page out
+ * anew, e.g. its tile expanding, not past it already, as a transition
+ * would be).
+ */
+const useLastRowHeight = (list: HTMLElement | null, count: number): void => {
+  const last = useRef<{ count: number; height: string } | undefined>(undefined);
+  useLayoutEffect(() => {
+    const row = list?.querySelector<HTMLElement>(
+      ':scope .uikit-list-item:last-child .uikit-list-row',
+    );
+    if (!row) {
+      last.current = undefined;
+      return;
+    }
+    for (const animation of row.getAnimations()) {
+      if (animation.id === lastRowId) animation.cancel();
+    }
+    const height = getComputedStyle(row).minHeight;
+    const before = last.current;
+    last.current = { count, height };
+    if (
+      !before ||
+      before.count === count ||
+      before.height === height ||
+      reducedMotionOf(row).matches
+    ) {
+      return;
+    }
+    startWithFrame(
+      row.animate([{ minHeight: before.height }, { minHeight: height }], {
+        duration: reflowDuration,
+        easing: reflowEasing,
+        id: lastRowId,
+      }),
+    );
+  }, [count, list]);
 };
 
 /** What its list's last row does, if anything (see `ListCard`). */
@@ -1166,7 +1224,7 @@ const ListCard = forwardRef<HTMLDivElement, ControlCardListProps>(
     },
     ref,
   ) => {
-    const [list, fit] = useRowsThatFit();
+    const [list, fit, listElement] = useRowsThatFit();
     const item = useGridItem();
     const isOpen = item?.open === true;
     const action = useListAction({
@@ -1176,6 +1234,7 @@ const ListCard = forwardRef<HTMLDivElement, ControlCardListProps>(
     });
     // (Its last row the action's, if any: one row less.)
     const shown = action ? rows.slice(0, fit - 1) : rows.slice(0, fit);
+    useLastRowHeight(listElement, shown.length + (action ? 1 : 0));
     return (
       <Card.Root
         ref={ref}
@@ -1200,15 +1259,32 @@ const ListCard = forwardRef<HTMLDivElement, ControlCardListProps>(
                       </List.Leading>
                     ) : null}
                     <List.Content>
-                      <List.Title>{row.label}</List.Title>
+                      {/* (Pressed, going on (e.g. to its page): its label
+                          a button, its row its hit area, see List.) */}
+                      <List.Title
+                        render={
+                          row.onPress ? (
+                            <button
+                              type="button"
+                              onClick={row.onPress}
+                            />
+                          ) : undefined
+                        }
+                      >
+                        {row.label}
+                      </List.Title>
                     </List.Content>
                     <List.Trailing>
                       <List.Detail>{row.value}</List.Detail>
+                      {row.onPress ? <List.DrillIn /> : null}
                     </List.Trailing>
                   </List.Item>
                 ))}
                 {action ? (
+                  // (Keyed: the same row however many come before it, its
+                  // height animated, see `useLastRowHeight`.)
                   <ActionRow
+                    key="action"
                     action={action}
                     hasIcons={rows.some((row) => row.icon !== undefined)}
                     label={
@@ -1283,7 +1359,7 @@ const OpenButtons = ({
       />
       <Card.CornerButton
         aria-label={closeLabel}
-        corner="top-leading"
+        corner="top-trailing"
         icon={gridIcons.close}
         visible={isOpen}
         onClick={() => item?.setOpen(false)}
@@ -1296,70 +1372,250 @@ const OpenButtons = ({
 type SegmentedLayout = 'compact' | 'row' | 'tall' | 'upright';
 
 /**
- * Its layout by its size (open above the page, that one; outside a grid,
- * a row): one wide and one tall, its options' words across its bottom
- * (`row`); wider and taller, their symbols over them (`tall`); one wide
- * and taller, stacked (`upright`); 1x1, none (`compact`).
+ * Its layout by its size (open above the page, that one) and its
+ * orientation (the app's; none, by its size): taller than a row, its
+ * options stacked (`upright`: vertical, or one wide) or side by side, a
+ * symbol over its words (`tall`: horizontal, or wider); one row, side by
+ * side across it (`row`: wider, not vertical); else none (`compact`: 1x1,
+ * or vertical in one row, no room to stack them). Outside a grid, a row,
+ * or stacked (vertical).
  */
-const useSegmentedLayout = (): SegmentedLayout => {
+const layoutOf = (
+  orientation: ControlCardSegmentedProps['orientation'],
+  isWide: boolean,
+  isTall: boolean,
+): SegmentedLayout => {
+  if (isTall) {
+    if (orientation === undefined) return isWide ? 'tall' : 'upright';
+    return orientation === 'vertical' ? 'upright' : 'tall';
+  }
+  return isWide && orientation !== 'vertical' ? 'row' : 'compact';
+};
+
+/** Its layout (see `layoutOf`), and whether it's one wide (narrow). */
+const useSegmentedLayout = (
+  orientation: ControlCardSegmentedProps['orientation'],
+): readonly [SegmentedLayout, boolean] => {
   const item = useGridItem();
-  if (!item) return 'row';
+  if (!item) return [orientation === 'vertical' ? 'upright' : 'row', false];
   const [columns = '1', rows = '1'] = (
     item.open ? item.openSize : item.size
   ).split('x');
   const isWide = columns === '*' || Number(columns) >= 2;
-  if (Number(rows) >= 2) return isWide ? 'tall' : 'upright';
-  return isWide ? 'row' : 'compact';
+  return [layoutOf(orientation, isWide, Number(rows) >= 2), !isWide];
+};
+
+/** A segmented card's thumb, placed on an option's box (see below). */
+const placeThumb = (thumb: HTMLElement, on: HTMLElement | null) => {
+  thumb.hidden = !on;
+  if (!on) return;
+  thumb.style.setProperty(
+    '--uikit-control-cards-thumb-x',
+    `${String(on.offsetLeft)}px`,
+  );
+  thumb.style.setProperty(
+    '--uikit-control-cards-thumb-y',
+    `${String(on.offsetTop)}px`,
+  );
+  thumb.style.setProperty(
+    '--uikit-control-cards-thumb-width',
+    `${String(on.offsetWidth)}px`,
+  );
+  thumb.style.setProperty(
+    '--uikit-control-cards-thumb-height',
+    `${String(on.offsetHeight)}px`,
+  );
+};
+
+/** The option nearest a point, along the options (see `dragProps`). */
+const nearestOption = (
+  root: HTMLElement,
+  isUpright: boolean,
+  { clientX, clientY }: { clientX: number; clientY: number },
+) => {
+  let nearest: HTMLElement | undefined;
+  let distance = Infinity;
+  for (const option of root.querySelectorAll<HTMLElement>('[role="radio"]')) {
+    if (Object.hasOwn(option.dataset, 'disabled')) continue;
+    const box = option.getBoundingClientRect();
+    const away = isUpright
+      ? Math.abs(box.top + box.height / 2 - clientY)
+      : Math.abs(box.left + box.width / 2 - clientX);
+    if (!(away < distance)) {
+      continue;
+    }
+
+    distance = away;
+    nearest = option;
+  }
+  return nearest;
 };
 
 /**
- * Its options' segments (a radio group, Base UI's): in a well, the chosen
- * one's raised (a thumb, moved to it as it's chosen, by its box: its
- * corners the well's less its padding, a pill while short).
+ * Dragging between a segmented card's options (as Segmented's, no lens:
+ * its thumb what moves): held back until it moves (`pressSlop`; a touch,
+ * `touchSlop`), then along the options (a mouse, any way), the nearest one
+ * chosen as it's reached (its thumb going there); a touch across them, or
+ * the browser panning first (it's cancelled), a scroll, let go (as a
+ * slider card's, see `pressProps`). Dragging, the page doesn't pan (see
+ * `SegmentedChoice`). Released before, a press: the option's own (its
+ * click).
+ */
+const dragProps = (
+  isUpright: boolean,
+  onChoose: (value: string) => void,
+): { onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void } => ({
+  onPointerDown: (event) => {
+    if (event.button !== 0) return;
+    const root = event.currentTarget;
+    const { clientX, clientY, pointerId, pointerType } = event;
+    const isMouse = pointerType === 'mouse';
+    const slop = isMouse ? pressSlop : touchSlop;
+    let isDragging = false;
+    let under: HTMLElement | undefined;
+    const listening = new AbortController();
+    const options = { capture: true, signal: listening.signal };
+    const end = () => {
+      listening.abort();
+      delete root.dataset.dragging;
+    };
+    addEventListener(
+      'pointermove',
+      (move) => {
+        if (move.pointerId !== pointerId) return;
+        if (!isDragging) {
+          const across = Math.abs(move.clientX - clientX);
+          const upright = Math.abs(move.clientY - clientY);
+          if (Math.hypot(across, upright) < slop) return;
+          const along = isUpright ? upright : across;
+          const crossing = isUpright ? across : upright;
+          // (A touch across them: a scroll, let go.)
+          if (!isMouse && crossing > along) {
+            end();
+            return;
+          }
+          isDragging = true;
+          root.dataset.dragging = '';
+        }
+        // (Its nearest option chosen as it's reached.)
+        const next = nearestOption(root, isUpright, move);
+        if (!next || next === under) return;
+        under = next;
+        const { value } = next.dataset;
+        if (value !== undefined && !Object.hasOwn(next.dataset, 'checked')) {
+          onChoose(value);
+        }
+      },
+      options,
+    );
+    addEventListener(
+      'pointerup',
+      (up) => {
+        if (up.pointerId !== pointerId) return;
+        end();
+        if (!isDragging) return;
+        // (Its click next, if any: not an option's (dragged, not pressed);
+        // none before another press or key, nothing.)
+        const clicking = new AbortController();
+        const once = { capture: true, signal: clicking.signal };
+        addEventListener(
+          'click',
+          (clicked) => {
+            clicking.abort();
+            clicked.preventDefault();
+            clicked.stopPropagation();
+          },
+          once,
+        );
+        for (const type of ['pointerdown', 'keydown']) {
+          addEventListener(type, () => clicking.abort(), once);
+        }
+      },
+      options,
+    );
+    addEventListener(
+      'pointercancel',
+      (cancel) => {
+        if (cancel.pointerId === pointerId) end();
+      },
+      options,
+    );
+  },
+});
+
+/** A segmented card's option, as it tells its card (see `SegmentedItem`). */
+type SegmentedOptionInfo = {
+  icon: SymbolIcon | undefined;
+  label: ReactNode;
+  tint: string | undefined;
+};
+
+/** What a segmented card's options read from it (see `SegmentedItem`). */
+type SegmentedContextValue = {
+  content: 'both' | 'icon' | 'label';
+  layout: SegmentedLayout;
+  /** Tells it an option (its symbol, words, tint), until it's gone. */
+  register: (value: string, info: SegmentedOptionInfo) => () => void;
+};
+
+const SegmentedContext = createContext<SegmentedContextValue | undefined>(
+  undefined,
+);
+
+/**
+ * Its options, as they've told it (in the order they did: theirs), see
+ * `SegmentedItem`.
+ */
+const useSegmentedOptions = () => {
+  const [options, setOptions] = useState<
+    ReadonlyMap<string, SegmentedOptionInfo>
+  >(() => new Map());
+  const register = useCallback((value: string, info: SegmentedOptionInfo) => {
+    setOptions((current) => new Map(current).set(value, info));
+    return () =>
+      setOptions((current) => {
+        const next = new Map(current);
+        next.delete(value);
+        return next;
+      });
+  }, []);
+  return [options, register] as const;
+};
+
+/**
+ * Its options' segments (a radio group, Base UI's; its options its
+ * children, see `SegmentedItem`): in a well, the chosen one's raised (a
+ * thumb, moved to it as it's chosen, by its box: its corners the well's
+ * less its padding, a pill while short); dragged between (see
+ * `dragProps`). None shown (1x1): there all the same, unseen, its options
+ * telling the card theirs.
  */
 const SegmentedChoice = ({
+  children,
+  isNarrow,
   layout,
   name,
   onValueChange,
-  options,
   value,
 }: {
-  layout: Exclude<SegmentedLayout, 'compact'>;
+  children: ReactNode;
+  /** One wide (stacked: each its symbol over its words, see Card). */
+  isNarrow: boolean;
+  layout: SegmentedLayout;
   name: string;
   onValueChange: (value: string) => void;
-  options: readonly ControlCardSegmentedOption[];
   value: string;
 }): ReactNode => {
   const group = useRef<HTMLDivElement>(null);
+  const isShown = layout !== 'compact';
   // (Its thumb on the chosen segment, as it's chosen and as its box
   // changes; moved (transitioned) once it's been placed.)
   useLayoutEffect(() => {
     const root = group.current;
     const thumb = root?.querySelector<HTMLElement>('[data-part="thumb"]');
-    if (!root || !thumb) return undefined;
+    if (!root || !thumb || !isShown) return undefined;
     const place = () => {
-      const chosen = root.querySelector<HTMLElement>('[data-checked]');
-      if (!chosen) {
-        thumb.hidden = true;
-        return;
-      }
-      thumb.hidden = false;
-      thumb.style.setProperty(
-        '--uikit-control-cards-thumb-x',
-        `${String(chosen.offsetLeft)}px`,
-      );
-      thumb.style.setProperty(
-        '--uikit-control-cards-thumb-y',
-        `${String(chosen.offsetTop)}px`,
-      );
-      thumb.style.setProperty(
-        '--uikit-control-cards-thumb-width',
-        `${String(chosen.offsetWidth)}px`,
-      );
-      thumb.style.setProperty(
-        '--uikit-control-cards-thumb-height',
-        `${String(chosen.offsetHeight)}px`,
-      );
+      placeThumb(thumb, root.querySelector('[data-checked]'));
     };
     place();
     const frame = requestAnimationFrame(() => {
@@ -1367,11 +1623,29 @@ const SegmentedChoice = ({
     });
     const observer = new ResizeObserver(place);
     observer.observe(root);
+    // (Its options changing (added, removed, laid out anew): placed again.)
+    const mutations = new MutationObserver(place);
+    mutations.observe(root, { childList: true });
     return () => {
       cancelAnimationFrame(frame);
       observer.disconnect();
+      mutations.disconnect();
     };
-  }, [layout, options, value]);
+  }, [isShown, layout, value]);
+  // (Dragged (see `dragProps`): its touch's moves not the page's, its pan
+  // not starting as the finger strays across its options; not passive, as
+  // React's listeners are.)
+  useLayoutEffect(() => {
+    const root = group.current;
+    if (!root) return undefined;
+    const hold = (move: TouchEvent) => {
+      if (Object.hasOwn(root.dataset, 'dragging') && move.cancelable) {
+        move.preventDefault();
+      }
+    };
+    root.addEventListener('touchmove', hold, { passive: false });
+    return () => root.removeEventListener('touchmove', hold);
+  }, []);
   return (
     <BaseRadioGroup
       ref={group}
@@ -1379,45 +1653,84 @@ const SegmentedChoice = ({
       className="uikit-control-cards-segmented-choice"
       data-control-cards-part="segmented-choice"
       data-layout={layout}
+      data-narrow={isNarrow ? '' : undefined}
+      hidden={!isShown}
       value={value}
       onValueChange={(next) => onValueChange(next as string)}
+      {...dragProps(layout === 'upright', onValueChange)}
     >
       <span
         aria-hidden="true"
         className="uikit-control-cards-segmented-thumb"
         data-part="thumb"
       />
-      {options.map((option) => (
-        <BaseRadio.Root
-          key={option.value}
-          className="uikit-control-cards-segmented-item"
-          value={option.value}
-        >
-          {layout !== 'row' && option.icon ? (
-            <Symbol icon={option.icon} />
-          ) : null}
-          <span className="uikit-control-cards-segmented-label">
-            {option.label}
-          </span>
-        </BaseRadio.Root>
-      ))}
+      {children}
     </BaseRadioGroup>
   );
 };
 
 /**
+ * A segmented card's option (a radio, Base UI's): its symbol and its words
+ * (`children`), or either (its card's `optionContent`; its symbol only, its
+ * words unseen, its name), a subtitle under them where there's room;
+ * telling its card its symbol, words and tint (its value and symbol while
+ * it's chosen).
+ */
+const SegmentedItem = forwardRef<HTMLElement, ControlCardSegmentedItemProps>(
+  ({ children, className, icon, subtitle, tint, value, ...props }, ref) => {
+    const context = useContext(SegmentedContext);
+    const register = context?.register;
+    useLayoutEffect(
+      () => register?.(value, { icon, label: children, tint }),
+      [children, icon, register, tint, value],
+    );
+    const content = context?.content ?? 'both';
+    const hasIcon = icon !== undefined && content !== 'label';
+    const isIconOnly = hasIcon && content === 'icon';
+    return (
+      <BaseRadio.Root
+        ref={ref}
+        {...props}
+        className={cn('uikit-control-cards-segmented-item', className)}
+        data-control-cards-part="segmented-item"
+        data-value={value}
+        value={value}
+      >
+        {hasIcon ? <Symbol icon={icon} /> : null}
+        {/* (Its words, and more under them where there's room: taller
+            than a row; its symbol only, unseen, its name.) */}
+        <span
+          className="uikit-control-cards-segmented-text"
+          data-unseen={isIconOnly ? '' : undefined}
+        >
+          <span className="uikit-control-cards-segmented-label">
+            {children}
+          </span>
+          {context?.layout !== 'row' && subtitle !== undefined ? (
+            <span className="uikit-control-cards-segmented-subtitle">
+              {subtitle}
+            </span>
+          ) : null}
+        </span>
+      </BaseRadio.Root>
+    );
+  },
+);
+
+/**
  * A device of a few modes (e.g. a heat pump's Off, Heat, Cool, Auto): its
- * options as segments in a well at its bottom (see `SegmentedChoice`), laid
- * out by its size (see `useSegmentedLayout`); 1x1, its chosen option's
- * words only, opening above the page to choose (`opening`). Lit while its
- * chosen option isn't its `offValue`; its symbol the chosen option's.
+ * options (its children, `SegmentedItem`s) as segments in a well at its
+ * bottom (see `SegmentedChoice`), laid out by its size and orientation
+ * (see `useSegmentedLayout`); 1x1, its chosen option's words only, opening
+ * above the page to choose (`opening`). Lit while its chosen option isn't
+ * its `offValue`; its symbol and tint the chosen option's.
  */
 const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
   (
     {
       children,
       className,
-      defaultValue,
+      defaultValue = '',
       emphasizedIcon,
       icon,
       name,
@@ -1425,21 +1738,26 @@ const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
       onClick,
       onValueChange,
       opening,
-      options,
+      optionContent = 'both',
+      orientation,
       tint,
       value,
       ...props
     },
     ref,
   ) => {
-    const [current, setCurrent] = useControlled(
-      value,
-      defaultValue ?? options[0]?.value ?? '',
-    );
-    const layout = useSegmentedLayout();
+    const [options, register] = useSegmentedOptions();
+    // (None chosen at first: its first option.)
+    const [chosenValue, setCurrent] = useControlled(value, defaultValue);
+    const current = chosenValue || (options.keys().next().value ?? '');
+    const [layout, isNarrow] = useSegmentedLayout(orientation);
     const item = useGridItem();
-    const chosen = options.find((option) => option.value === current);
+    const chosen = options.get(current);
     const isCompact = layout === 'compact';
+    const context = useMemo(
+      () => ({ content: optionContent, layout, register }),
+      [layout, optionContent, register],
+    );
     return (
       <Card.Root
         ref={ref}
@@ -1462,18 +1780,20 @@ const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
         </Card.Symbol>
         <Card.Title>{name}</Card.Title>
         {layout === 'row' ? null : <Card.Value>{chosen?.label}</Card.Value>}
-        {isCompact ? null : (
+        <SegmentedContext.Provider value={context}>
           <SegmentedChoice
+            isNarrow={isNarrow}
             layout={layout}
             name={name}
-            options={options}
             value={current}
             onValueChange={(next) => {
               setCurrent(next);
               onValueChange?.(next);
             }}
-          />
-        )}
+          >
+            {children}
+          </SegmentedChoice>
+        </SegmentedContext.Provider>
         {/* (Its corner buttons, as a list card's: one opening it, 1x1;
             open, an x in its top trailing corner, clear of its symbol.) */}
         {opening ? (
@@ -1493,7 +1813,6 @@ const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
             />
           </>
         ) : null}
-        {children}
       </Card.Root>
     );
   },
@@ -1510,6 +1829,7 @@ export const ControlCards = {
   Light,
   List: ListCard,
   Segmented: SegmentedCard,
+  SegmentedItem,
   Channels,
   Trend,
   ExpandButton,

@@ -95,7 +95,12 @@ export type CardOrientation = 'horizontal' | 'vertical';
 /** The sizes each kind of card supports (see `cardSizes`). */
 export type CardSizes = Readonly<
   Record<
-    'binaryControl' | 'binaryDisplay' | 'numericalControl' | 'numericalDisplay',
+    | 'binaryControl'
+    | 'binaryDisplay'
+    | 'choiceControl'
+    | 'numericalControl'
+    | 'numericalDisplay'
+    | 'summaryDisplay',
     readonly GridSize[]
   >
 >;

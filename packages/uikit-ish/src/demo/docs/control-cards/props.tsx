@@ -3,9 +3,9 @@
 import type {
   ControlCardChannel,
   ControlCardRow,
-  ControlCardSegmentedOption,
   ControlCardStates,
   ControlCardValueTextDetails,
+  SymbolIcon,
 } from '../../../components/index.js';
 import { cardTints } from '../../tooling/card-kit.js';
 import { AddLog } from '../../tooling/frame/log.js';
@@ -291,12 +291,12 @@ const expansionOf = (addLog: AddLog, expanded: boolean) =>
     {
       collapsedSize: '2x2' as const,
       expanded,
-      expandedSize: '2x3' as const,
+      expandedSize: '3x3' as const,
       label: 'Living Room details',
       onExpandedChange: (next: boolean) =>
         addLog(`expansion.onExpandedChange: ${String(next)}`),
     },
-    `{ collapsedSize: "2x2", expanded: ${String(expanded)}, expandedSize: "2x3", … }`,
+    `{ collapsedSize: "2x2", expanded: ${String(expanded)}, expandedSize: "3x3", … }`,
   );
 
 export const getPropOptionsList = (addLog: AddLog) => ({
@@ -309,6 +309,14 @@ export const getPropOptionsList = (addLog: AddLog) => ({
   rows: [
     new MappedProp(roomRows, '[a room’s, with symbols]'),
     new MappedProp(detailRows, '[a device’s details]'),
+    new MappedProp(
+      roomRows.map((row, index) =>
+        index < 2
+          ? { ...row, onPress: () => addLog(`${row.label}: pressed`) }
+          : row,
+      ),
+      '[a room’s, two going on (onPress)]',
+    ),
     new MappedProp([], '[none]'),
   ] as const,
   status: [undefined, 'Online'] as const,
@@ -335,13 +343,46 @@ export const getPropOptionsList = (addLog: AddLog) => ({
   ...rootOptions,
 });
 
-const heatPumpOptions: readonly ControlCardSegmentedOption[] = [
+/** A segmented card's option, as the demos keep it (see `itemsOf`). */
+export type SegmentedOptionData = {
+  disabled?: boolean;
+  icon?: SymbolIcon;
+  label: string;
+  subtitle?: string;
+  tint?: string;
+  value: string;
+};
+
+export const heatPumpOptions: readonly SegmentedOptionData[] = [
   { icon: sfPower, label: 'Off', value: 'off' },
   { icon: sfFlameFill, label: 'Heat', tint: cardTints.heat, value: 'heat' },
   { icon: sfSnowflake, label: 'Cool', tint: cardTints.shade, value: 'cool' },
   { icon: sfThermometerMedium, label: 'Auto', value: 'auto' },
 ];
-const alarmOptions: readonly ControlCardSegmentedOption[] = [
+const heatPumpTargetOptions: readonly SegmentedOptionData[] = [
+  { icon: sfPower, label: 'Off', value: 'off' },
+  {
+    icon: sfFlameFill,
+    label: 'Heat',
+    subtitle: 'to 21 °C',
+    tint: cardTints.heat,
+    value: 'heat',
+  },
+  {
+    icon: sfSnowflake,
+    label: 'Cool',
+    subtitle: 'to 24 °C',
+    tint: cardTints.shade,
+    value: 'cool',
+  },
+  {
+    icon: sfThermometerMedium,
+    label: 'Auto',
+    subtitle: '21 to 24 °C',
+    value: 'auto',
+  },
+];
+const alarmOptions: readonly SegmentedOptionData[] = [
   { icon: sfLockOpen, label: 'Off', value: 'off' },
   { icon: sfHouseFill, label: 'Home', value: 'home' },
   { icon: sfAirplane, label: 'Away', value: 'away' },
@@ -354,12 +395,25 @@ export const getPropOptionsSegmented = (addLog: AddLog) => ({
     new MappedProp(sfLockOpen, '[lock.open]'),
   ] as const,
   emphasizedIcon: [undefined] as const,
-  options: [
+  // (Its items' data: the part's view composes them, see parts.tsx.)
+  children: [
     new MappedProp(heatPumpOptions, '[Off, Heat, Cool, Auto]'),
     new MappedProp(alarmOptions, '[Off, Home, Away]'),
+    new MappedProp(
+      heatPumpTargetOptions,
+      '[Off, Heat, Cool, Auto] with subtitles',
+    ),
+    new MappedProp(
+      heatPumpOptions.map((option) =>
+        option.value === 'cool' ? { ...option, disabled: true } : option,
+      ),
+      '[Off, Heat, Cool (disabled), Auto]',
+    ),
   ] as const,
   defaultValue: ['heat', 'off', 'home'] as const,
   offValue: ['off', undefined] as const,
+  optionContent: [undefined, 'icon', 'label'] as const,
+  orientation: [undefined, 'vertical', 'horizontal'] as const,
   onValueChange: [logged(addLog, 'value'), undefined] as const,
   tint: [undefined, cardTints.heat] as const,
   opening: [
@@ -371,6 +425,16 @@ export const getPropOptionsSegmented = (addLog: AddLog) => ({
   ] as const,
   ...rootOptions,
 });
+
+export const propOptionsSegmentedItem = {
+  children: ['Heat', 'Heating'] as const,
+  value: ['heat'] as const,
+  icon: [new MappedProp(sfFlameFill, '[flame.fill]'), undefined] as const,
+  subtitle: [undefined, 'to 21 °C'] as const,
+  tint: [new MappedProp(cardTints.heat, 'cardTints.heat'), undefined] as const,
+  disabled: [undefined, true] as const,
+  className: commonPropOptions.className,
+};
 
 export const getPropOptionsChannels = (addLog: AddLog) => ({
   channels: channelsOptions,

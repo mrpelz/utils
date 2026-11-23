@@ -329,9 +329,9 @@ export const controlCardsLightRows: readonly PropRow[] = [
 export const controlCardsListRows: readonly PropRow[] = [
   [
     'rows',
-    'readonly { icon?: SymbolIcon; label: string; value: ReactNode }[]',
+    'readonly { icon?: SymbolIcon; label: string; onPress?: () => void; value: ReactNode }[]',
     undefined,
-    'Its rows, as many as fit whole, in order. When some are left out, the last one counts them instead. Each label is also its key. With none, there’s no list.',
+    'Its rows, as many as fit whole, in order. When some are left out, the last one counts them instead. Each label is also its key. A row with onPress is pressed anywhere on it, for example to go to a page of its own, and shows a chevron after its value. With none, there’s no list.',
   ],
   [
     'status',
@@ -383,10 +383,28 @@ export const controlCardsListRows: readonly PropRow[] = [
 
 export const controlCardsSegmentedRows: readonly PropRow[] = [
   [
-    'options',
-    'readonly { icon?: SymbolIcon; label: string; tint?: string; value: string }[]',
+    'children',
+    'ReactNode',
     undefined,
-    'Its options, in order, as segments in a well at its bottom. Across a row, a segment shows its label; in a taller tile, its symbol over it; upright, they stack, the symbol beside the label. The chosen option’s label is the card’s value, and its symbol and tint are the card’s symbol’s.',
+    <>
+      Its options, each a <PartLink part="ControlCards.SegmentedItem" />, in
+      order, as segments in a well at its bottom, dragged between or pressed.
+      Across a row and in a taller tile they sit side by side; upright, they
+      stack. The chosen option’s words are the card’s value, and its symbol and
+      tint are the card’s symbol’s.
+    </>,
+  ],
+  [
+    'optionContent',
+    '"both" | "icon" | "label"',
+    code('"both"'),
+    'What each segment shows: its symbol and label (an option without a symbol shows its label), its symbol only (the label becomes its accessible name), or its label only. Across a row the symbol sits beside the label, in a taller tile above it.',
+  ],
+  [
+    'orientation',
+    '"horizontal" | "vertical"',
+    undefined,
+    'Its options side by side or stacked, in a tile at least two rows tall. In a one-row tile they’re side by side; vertical then shows only the chosen option, as at 1x1. Without it, the tile’s size decides: one wide and taller, stacked; otherwise side by side.',
   ],
   ['value', 'string', undefined, 'The chosen option (controlled).'],
   [
@@ -399,7 +417,7 @@ export const controlCardsSegmentedRows: readonly PropRow[] = [
     'onValueChange',
     '(value: string) => void',
     undefined,
-    'As an option is chosen, by a press or the arrow keys.',
+    'As an option is chosen, by a press, a drag or the arrow keys.',
   ],
   [
     'offValue',
@@ -429,6 +447,42 @@ export const controlCardsSegmentedRows: readonly PropRow[] = [
     </>,
   ],
   ...cardRows,
+];
+
+export const controlCardsSegmentedItemRows: readonly PropRow[] = [
+  ['value', 'string', undefined, 'What it stands for, unique in its card.'],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words: its segment’s, and the card’s value while it’s chosen. With symbols only (the card’s optionContent), they’re its name, unseen.',
+  ],
+  [
+    'icon',
+    'SymbolIcon',
+    undefined,
+    'Its symbol, in its segment and as the card’s while it’s chosen (else the card’s icon).',
+  ],
+  [
+    'subtitle',
+    'ReactNode',
+    undefined,
+    'More words under its words, in the card’s value color, where there’s room: in a tile taller than a row, not with symbols only, and when stacked only once it’s tall enough.',
+  ],
+  [
+    'tint',
+    'string',
+    undefined,
+    'The card’s symbol’s tint while it’s chosen (else the card’s tint).',
+  ],
+  [
+    'disabled',
+    'boolean',
+    code('false'),
+    'Whether it can’t be chosen now: dimmed, not pressed, dragged past and skipped by the arrow keys, as in Segmented.',
+  ],
+  ['className', 'string', undefined, 'Its class, beside its own.'],
+  ['ref', 'Ref<HTMLElement>', undefined, 'Its element.'],
 ];
 
 export const controlCardsChannelsRows: readonly PropRow[] = [

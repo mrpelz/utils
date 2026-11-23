@@ -235,7 +235,7 @@ const OpenButtons: FunctionComponent<{ label: string }> = ({ label }) => {
       />
       <Grid.CornerButton
         aria-label="Close"
-        corner="top-leading"
+        corner="top-trailing"
         icon={gridIcons.close}
         visible={isOpen}
         onClick={() => item?.setOpen(false)}

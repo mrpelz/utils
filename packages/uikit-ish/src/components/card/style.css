@@ -666,6 +666,16 @@
   .uikit-card-layout > .uikit-list-root {
     --color-ui-label: var(--uikit-glass-content);
     --color-ui-secondary-label: var(--uikit-glass-content-secondary);
+
+    /* (A row's chevron (it's pressed, e.g. going to its page), faint; a row
+       pressed, no tint (what it does shows at once: a page, the card
+       expanding or opening), see below.) */
+    --color-ui-tertiary-label: color-mix(
+      in srgb,
+      var(--uikit-glass-content) 30%,
+      transparent
+    );
+    --uikit-list-pressed-background: transparent;
     --font-ui-body-size: var(--font-ui-subheadline-size);
     --font-ui-body-line-height: var(--font-ui-subheadline-line-height);
     --font-ui-body-tracking: var(--font-ui-subheadline-tracking);
@@ -718,6 +728,18 @@
     );
   }
 
+  /* (A row pressed (its title a button, see List): its separator, and the
+     next row's, kept, as its background is (see above); the first row's
+     still none, as ever.) */
+  .uikit-card-layout
+    > .uikit-list-root
+    .uikit-list-item:has(> * > * > * > button[data-list-part='title']:enabled:active) {
+    &:not(:first-child),
+    & + .uikit-list-item {
+      --uikit-list-separator-opacity: 1;
+    }
+  }
+
   /* (Its groups set into its glass, see its wells above.) */
   .uikit-card-layout > .uikit-list-root .uikit-list-group {
     box-shadow: var(--uikit-card-well-shadow);
@@ -752,7 +774,7 @@
     outline-offset: 2px;
   }
 
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-trailing']) > .uikit-switch-root {
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden])) > .uikit-switch-root {
     margin-inline-end: var(--uikit-card-corner-room, 18px);
   }
 

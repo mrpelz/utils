@@ -1287,7 +1287,7 @@ const CameraCard = ({ name }) => {
       />
       <Grid.CornerButton
         aria-label="Close"
-        corner="top-leading"
+        corner="top-trailing"
         icon={gridIcons.close}
         visible={item.open}
         onClick={() => item.setOpen(false)}
@@ -1336,7 +1336,7 @@ const OpenButtons: FunctionComponent<{
       <Grid.CornerButton
         {...cornerProps}
         aria-label="Close"
-        corner="top-leading"
+        corner="top-trailing"
         icon={gridIcons.close}
         visible={isOpen}
         onClick={() => item?.setOpen(false)}
@@ -1709,7 +1709,7 @@ export const GridComposition: FunctionComponent = () => (
         <PartLink part="useGridItem" />
         ’s <code>open</code> and <code>setOpen</code>: <code>gridIcons</code>’s{' '}
         <code>open</code> while it’s closed, its x (<code>close</code>) in the
-        top leading corner while it’s open. Each is hidden while the other
+        top trailing corner while it’s open. Each is hidden while the other
         shows.
       </li>
       <li>

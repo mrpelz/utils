@@ -238,8 +238,22 @@ export const cardSizesRows: readonly PropRow[] = [
   [
     'numericalControl',
     'GridSize[]',
-    code('["2x1", "3x1", "1x2", "1x3"]'),
+    code('["2x1", "3x1", "4x1", "1x2", "1x3"]'),
     'A slider. Never square, so it always has a direction.',
+  ],
+  [
+    'choiceControl',
+    'GridSize[]',
+    code(
+      '["1x1", "2x1", "3x1", "4x1", "1x2", "2x2", "3x2", "4x2", "1x3", "2x3", "1x4", "2x4"]',
+    ),
+    'A choice of a few, for example a heat pump’s modes: side by side across a row or taller, stacked when upright (or when the app says so), opening to choose at 1x1.',
+  ],
+  [
+    'summaryDisplay',
+    'GridSize[]',
+    code('["2x1", "2x2", "3x2", "4x1", "4x2", "3x3", "4x3", "4x4"]'),
+    'A summary in rows, for example a room’s. Never 1x1: it shows at least one row.',
   ],
 ];
 

@@ -58,12 +58,14 @@ import {
 } from './cards-shared.js';
 import { SectionHeader } from './grid-shared.js';
 import { moreTiles } from './more-cards.js';
+import { segmentsOf } from './segments.js';
 import {
   AdaptiveBarTitle,
   BackButton,
   type SinkPages,
   usePush,
 } from './shared.js';
+import { variantRooms } from './variant-cards.js';
 
 // Cards: a home's devices as cards in a grid on a picture, every kind in
 // each of its sizes: binary displays (a door, a lock), binary controls
@@ -212,6 +214,64 @@ const LightsCard: FunctionComponent = () => {
     </Toned.State>
   );
 };
+
+/**
+ * The home's summary (a list card): some rows going to a page of their own
+ * (a chevron after their value: Lights, Doors), others not (Devices).
+ */
+const HomeCard: FunctionComponent = () => {
+  const push = usePush();
+  const onCount = Object.values(useLights()).filter(Boolean).length;
+  return (
+    <Toned.List
+      icon={sfHouseFill}
+      name="Home"
+      rows={[
+        {
+          icon: sfLightbulbFill,
+          label: 'Lights',
+          onPress: () => push('card/lights'),
+          value: onCount > 0 ? `${String(onCount)} on` : 'Off',
+        },
+        {
+          icon: sfLockFill,
+          label: 'Doors',
+          onPress: () => push('card/doors'),
+          value: '1 unlocked',
+        },
+        {
+          icon: sfAntennaRadiowavesLeftAndRight,
+          label: 'Devices',
+          value: '12 online',
+        },
+      ]}
+    />
+  );
+};
+
+/** The doors' page: each door, locked or not (see `HomeCard`). */
+const DoorsPage: FunctionComponent = () => (
+  <List.Root>
+    <List.Section>
+      <List.Group>
+        {[
+          ['Front Door', 'Locked'],
+          ['Back Door', 'Unlocked'],
+          ['Garage', 'Locked'],
+        ].map(([name, state]) => (
+          <List.Item key={name}>
+            <List.Content>
+              <List.Title>{name}</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <List.Detail>{state}</List.Detail>
+            </List.Trailing>
+          </List.Item>
+        ))}
+      </List.Group>
+    </List.Section>
+  </List.Root>
+);
 
 /** The lights' page: a switch per light, a press on its row as on it. */
 const LightsPage: FunctionComponent = () => {
@@ -388,9 +448,6 @@ const heatPumpModes = [
   { icon: sfSnowflake, label: 'Cool', tint: cardTints.shade, value: 'cool' },
   { icon: sfThermometerMedium, label: 'Auto', value: 'auto' },
 ] as const;
-
-/** A segmented card's sizes (see the Modes room): each of its layouts. */
-const segmentedSizes = ['1x1', '2x1', '1x2', '2x2'] as const;
 
 const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
   'Living Room': [
@@ -614,15 +671,22 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
   // expanded at first).)
   Summaries: [
     {
+      // (Rows going to pages of their own: a chevron after their values.)
+      card: HomeCard,
+      kind: 'summaryDisplay',
+      name: 'Home',
+      size: '2x2',
+    },
+    {
       card: () => <SummaryCard name="Kitchen" />,
-      kind: 'numericalDisplay',
+      kind: 'summaryDisplay',
       name: 'Kitchen',
       openSize: '4x3',
       size: '2x2',
     },
     {
       card: () => <SummaryCard name="Bedroom" />,
-      kind: 'numericalDisplay',
+      kind: 'summaryDisplay',
       name: 'Bedroom',
       openSize: '4x3',
       size: '2x1',
@@ -635,7 +699,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
         />
       ),
       expandedSize: '2x2',
-      kind: 'numericalDisplay',
+      kind: 'summaryDisplay',
       name: 'Garage Sensor',
       size: '2x1',
     },
@@ -647,12 +711,13 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
         />
       ),
       expandedSize: '2x2',
-      kind: 'numericalDisplay',
+      kind: 'summaryDisplay',
       name: 'Attic Sensor',
       size: '2x1',
     },
   ],
-  // (A device of a few modes in each of its layouts: across a row, taller,
+  // (A device of a few modes in each of its layouts: across a row (its
+  // words only, two wide; its symbols beside them, three wide), taller,
   // upright, and 1x1, opening above the page to choose.)
   Modes: [
     {
@@ -662,13 +727,14 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           icon={sfPower}
           name="Heat Pump"
           offValue="off"
-          options={heatPumpModes}
-        />
+          optionContent="label"
+        >
+          {segmentsOf(heatPumpModes)}
+        </Toned.Segmented>
       ),
-      kind: 'numericalDisplay',
+      kind: 'choiceControl',
       name: 'Heat Pump',
       size: '2x1',
-      sizes: segmentedSizes,
     },
     {
       card: () => (
@@ -677,13 +743,13 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           icon={sfPower}
           name="Office Heat Pump"
           offValue="off"
-          options={heatPumpModes}
-        />
+        >
+          {segmentsOf(heatPumpModes)}
+        </Toned.Segmented>
       ),
-      kind: 'numericalDisplay',
+      kind: 'choiceControl',
       name: 'Office Heat Pump',
-      size: '2x1',
-      sizes: segmentedSizes,
+      size: '3x1',
     },
     {
       card: () => (
@@ -693,18 +759,18 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           name="Air Purifier"
           offValue="off"
           tint={cardTints.air}
-          options={[
+        >
+          {segmentsOf([
             { icon: sfPower, label: 'Off', value: 'off' },
             { icon: sfFanFill, label: 'Auto', value: 'auto' },
             { icon: sfTortoiseFill, label: 'Slow', value: 'slow' },
             { icon: sfHareFill, label: 'Turbo', value: 'turbo' },
-          ]}
-        />
+          ])}
+        </Toned.Segmented>
       ),
-      kind: 'numericalDisplay',
+      kind: 'choiceControl',
       name: 'Air Purifier',
       size: '2x2',
-      sizes: segmentedSizes,
     },
     {
       card: () => (
@@ -714,17 +780,17 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           name="Alarm"
           offValue="off"
           tint="oklch(64% 0.21 25)"
-          options={[
+        >
+          {segmentsOf([
             { icon: sfLockOpen, label: 'Off', value: 'off' },
             { icon: sfHouseFill, label: 'Home', value: 'home' },
             { icon: sfAirplane, label: 'Away', value: 'away' },
-          ]}
-        />
+          ])}
+        </Toned.Segmented>
       ),
-      kind: 'numericalDisplay',
+      kind: 'choiceControl',
       name: 'Alarm',
       size: '1x2',
-      sizes: segmentedSizes,
     },
     {
       card: () => (
@@ -734,16 +800,17 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           name="Guest Room Heat"
           offValue="off"
           opening={{ closeLabel: 'Close', label: 'Guest Room Heat modes' }}
-          options={heatPumpModes}
-        />
+        >
+          {segmentsOf(heatPumpModes)}
+        </Toned.Segmented>
       ),
-      kind: 'numericalDisplay',
+      kind: 'choiceControl',
       name: 'Guest Room Heat',
-      openSize: '2x1',
+      openSize: '3x2',
       size: '1x1',
-      sizes: segmentedSizes,
     },
   ],
+  ...variantRooms,
   Security: [
     {
       card: () => (
@@ -883,9 +950,12 @@ const CardsApp: FunctionComponent = () => {
           <CardToneContext.Provider
             value={tone === 'scheme' ? undefined : (tone as GlassContextValue)}
           >
+            {/* (Four rows at most: the long cards, e.g. a segmented card's
+                many options stacked.) */}
             <Grid.Root
               className="kitchen-sink-grid"
               editing={editing}
+              maxTileRows={4}
               reorderHandle={handle}
             >
               {Object.entries(rooms).map(([room, tiles]) => (
@@ -983,4 +1053,5 @@ const CardsApp: FunctionComponent = () => {
 export const cardsPages: SinkPages = {
   card: { Content: CardsApp, isBare: true, title: 'Cards' },
   'card/lights': { Content: LightsPage, title: 'Lights' },
+  'card/doors': { Content: DoorsPage, title: 'Doors' },
 };

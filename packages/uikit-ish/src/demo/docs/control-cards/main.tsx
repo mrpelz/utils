@@ -311,7 +311,7 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
     name: 'Living Room',
     openSize: '4x3',
     size: '2x2',
-    sizes: cardSizes.numericalDisplay,
+    sizes: cardSizes.summaryDisplay,
   },
   {
     card: (
@@ -321,27 +321,42 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         icon={sfPower}
         name="Heat Pump"
         offValue="off"
-        options={[
-          { icon: sfPower, label: 'Off', value: 'off' },
-          {
-            icon: sfFlameFill,
-            label: 'Heat',
-            tint: cardTints.heat,
-            value: 'heat',
-          },
-          {
-            icon: sfSnowflake,
-            label: 'Cool',
-            tint: cardTints.shade,
-            value: 'cool',
-          },
-          { icon: sfThermometerMedium, label: 'Auto', value: 'auto' },
-        ]}
-      />
+      >
+        <ControlCards.SegmentedItem
+          {...partProps['ControlCards.SegmentedItem']}
+          icon={sfPower}
+          value="off"
+        >
+          Off
+        </ControlCards.SegmentedItem>
+        <ControlCards.SegmentedItem
+          {...partProps['ControlCards.SegmentedItem']}
+          icon={sfFlameFill}
+          tint={cardTints.heat}
+          value="heat"
+        >
+          Heat
+        </ControlCards.SegmentedItem>
+        <ControlCards.SegmentedItem
+          {...partProps['ControlCards.SegmentedItem']}
+          icon={sfSnowflake}
+          tint={cardTints.shade}
+          value="cool"
+        >
+          Cool
+        </ControlCards.SegmentedItem>
+        <ControlCards.SegmentedItem
+          {...partProps['ControlCards.SegmentedItem']}
+          icon={sfThermometerMedium}
+          value="auto"
+        >
+          Auto
+        </ControlCards.SegmentedItem>
+      </ControlCards.Segmented>
     ),
     name: 'Heat Pump',
     size: '2x1',
-    sizes: ['1x1', '2x1', '1x2', '2x2'],
+    sizes: cardSizes.choiceControl,
   },
 ];
 
@@ -358,12 +373,13 @@ export const everyCardParts = {
   ],
   'ControlCards.List': ['icon', 'name', 'opening', 'rows'],
   'ControlCards.Segmented': [
+    'children',
     'defaultValue',
     'icon',
     'name',
     'offValue',
-    'options',
   ],
+  'ControlCards.SegmentedItem': ['children', 'icon', 'tint', 'value'],
   'ControlCards.Progress': [
     'active',
     'emphasizedIcon',
