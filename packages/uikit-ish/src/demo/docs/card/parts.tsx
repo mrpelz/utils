@@ -380,11 +380,14 @@ export const CardParts: FunctionComponent = () => (
           component="list"
           part="List.Root"
         />{' '}
-        (inset grouped, its default style) shows rows in it, between its top and
-        its title: its group on the card’s glass as on an island’s, rounded
-        within the card’s corners, each row on one line, in the card’s colors.
-        It doesn’t scroll: what doesn’t fit is cut off, so show as many rows as
-        fit (see{' '}
+        (inset grouped, its default style) shows rows in it. Its group sits in a
+        well at the card’s bottom, 6px from its edges, its corners following the
+        card’s. The card’s title and value sit beside its symbol at the top, the
+        value small. Each row stays on one line, in the card’s text size and
+        colors, its symbol under the card’s and its title where the card’s
+        starts. Open above the page, the rows take the list’s own size. It
+        doesn’t scroll: what doesn’t fit is cut off, so show as many rows as fit
+        (see{' '}
         <a href={publicUrl('card/composition#rows-in-a-card')}>
           Rows in a card
         </a>

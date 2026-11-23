@@ -126,6 +126,7 @@ export const Toned = {
   Light: toned(ControlCards.Light),
   List: toned(ControlCards.List),
   Progress: toned(ControlCards.Progress),
+  Segmented: toned(ControlCards.Segmented),
   Slider: toned(ControlCards.Slider),
   State: toned(ControlCards.State),
   Switch: toned(ControlCards.Switch),

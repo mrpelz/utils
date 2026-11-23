@@ -3,6 +3,7 @@
 import type {
   ControlCardChannel,
   ControlCardRow,
+  ControlCardSegmentedOption,
   ControlCardStates,
   ControlCardValueTextDetails,
 } from '../../../components/index.js';
@@ -14,6 +15,7 @@ import {
   MappedProp,
 } from '../../tooling/frame/prop-control.js';
 import {
+  sfAirplane,
   sfAntennaRadiowavesLeftAndRight,
   sfBell,
   sfBellFill,
@@ -23,6 +25,7 @@ import {
   sfEnvelopeFill,
   sfFan,
   sfFanFill,
+  sfFlameFill,
   sfHouseFill,
   sfHumidityFill,
   sfLightbulb,
@@ -32,6 +35,7 @@ import {
   sfLockFill,
   sfLockOpen,
   sfPower,
+  sfSnowflake,
   sfThermometerMedium,
   sfWasher,
   sfWasherFill,
@@ -281,7 +285,21 @@ const detailRows: readonly ControlCardRow[] = [
   { label: 'Signal', value: '−62 dBm' },
 ];
 
-export const propOptionsList = {
+/** A list card's ways to show more (see `getPropOptionsList`). */
+const expansionOf = (addLog: AddLog, expanded: boolean) =>
+  new MappedProp(
+    {
+      collapsedSize: '2x2' as const,
+      expanded,
+      expandedSize: '2x3' as const,
+      label: 'Living Room details',
+      onExpandedChange: (next: boolean) =>
+        addLog(`expansion.onExpandedChange: ${String(next)}`),
+    },
+    `{ collapsedSize: "2x2", expanded: ${String(expanded)}, expandedSize: "2x3", … }`,
+  );
+
+export const getPropOptionsList = (addLog: AddLog) => ({
   name: ['Living Room', 'Hallway Sensor'] as const,
   icon: [
     new MappedProp(sfHouseFill, '[house.fill]'),
@@ -294,8 +312,65 @@ export const propOptionsList = {
     new MappedProp([], '[none]'),
   ] as const,
   status: [undefined, 'Online'] as const,
+  opening: [
+    new MappedProp(
+      { closeLabel: 'Close', label: 'Living Room details' },
+      '{ closeLabel: "Close", label: "Living Room details" }',
+    ),
+    undefined,
+  ] as const,
+  expansion: [
+    undefined,
+    expansionOf(addLog, false),
+    expansionOf(addLog, true),
+  ] as const,
+  getMoreLabel: [
+    undefined,
+    new MappedProp(
+      (count: number) => `+${String(count)}`,
+      '(count) => "+" + String(count)',
+    ),
+  ] as const,
+  lessLabel: [undefined, 'Fewer'] as const,
   ...rootOptions,
-};
+});
+
+const heatPumpOptions: readonly ControlCardSegmentedOption[] = [
+  { icon: sfPower, label: 'Off', value: 'off' },
+  { icon: sfFlameFill, label: 'Heat', tint: cardTints.heat, value: 'heat' },
+  { icon: sfSnowflake, label: 'Cool', tint: cardTints.shade, value: 'cool' },
+  { icon: sfThermometerMedium, label: 'Auto', value: 'auto' },
+];
+const alarmOptions: readonly ControlCardSegmentedOption[] = [
+  { icon: sfLockOpen, label: 'Off', value: 'off' },
+  { icon: sfHouseFill, label: 'Home', value: 'home' },
+  { icon: sfAirplane, label: 'Away', value: 'away' },
+];
+
+export const getPropOptionsSegmented = (addLog: AddLog) => ({
+  name: ['Heat Pump', 'Alarm'] as const,
+  icon: [
+    new MappedProp(sfPower, '[power]'),
+    new MappedProp(sfLockOpen, '[lock.open]'),
+  ] as const,
+  emphasizedIcon: [undefined] as const,
+  options: [
+    new MappedProp(heatPumpOptions, '[Off, Heat, Cool, Auto]'),
+    new MappedProp(alarmOptions, '[Off, Home, Away]'),
+  ] as const,
+  defaultValue: ['heat', 'off', 'home'] as const,
+  offValue: ['off', undefined] as const,
+  onValueChange: [logged(addLog, 'value'), undefined] as const,
+  tint: [undefined, cardTints.heat] as const,
+  opening: [
+    new MappedProp(
+      { closeLabel: 'Close', label: 'Heat Pump modes' },
+      '{ closeLabel: "Close", label: "Heat Pump modes" }',
+    ),
+    undefined,
+  ] as const,
+  ...rootOptions,
+});
 
 export const getPropOptionsChannels = (addLog: AddLog) => ({
   channels: channelsOptions,

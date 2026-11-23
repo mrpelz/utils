@@ -412,6 +412,7 @@ export const roomCard = ({
   <ControlCards.List
     icon={sfHouseFill}
     name="Living Room"
+    opening={{ closeLabel: 'Close', label: 'Living Room details' }}
     rows={[
       {
         icon: sfLightbulbFill,
@@ -436,11 +437,6 @@ export const roomCard = ({
     {/* (Its parts moved from where they were as it opens, with GSAP: the
         demos' helper, see Building for changing sizes.) */}
     <FlipParts />
-    <ControlCards.OpenButtons
-      closeLabel="Close"
-      label="Living Room details"
-      {...parts['ControlCards.OpenButtons']}
-    />
   </ControlCards.List>
 );
 
@@ -607,8 +603,7 @@ const kindParts: Readonly<
   },
   lock: { 'Card.Root': ['active'], ...symbolParts, ...textParts },
   room: {
-    'ControlCards.List': ['icon', 'name', 'rows'],
-    ...openParts,
+    'ControlCards.List': ['icon', 'name', 'opening', 'rows'],
   },
   temperature: {
     'Card.CornerButton': ['aria-label', 'icon', 'onClick'],

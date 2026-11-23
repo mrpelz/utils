@@ -113,6 +113,220 @@
     }
   }
 
+  /* A list card's last row (`ControlCards.List`): its label quiet (the
+     glass's secondary color), the corner symbol at its end in its text's
+     color, as a value would be. */
+  .uikit-control-cards-list [data-control-cards-part='list-action'] {
+    [data-list-part='title'] {
+      color: var(--uikit-glass-content-secondary);
+    }
+
+    [data-list-part='detail'] {
+      display: flex;
+      color: var(--uikit-glass-content);
+    }
+  }
+
+  /* (A list card's corner button over its last row (see main.tsx): its hit
+     area only, nothing drawn.) */
+  .uikit-control-cards-hit-area.uikit-card-corner-button {
+    opacity: 0;
+  }
+
+  /* A segmented card (`ControlCards.Segmented`), by its layout (see
+     main.tsx): a row, its symbol and title on its top line, its options
+     across its bottom; taller, its title and value as any card's, its
+     options under them; upright, stacked in all the room below; 1x1, as
+     any card. Its value small, whatever its size (its options are what's
+     large). */
+  .uikit-control-cards-segmented {
+    /* (Its symbol the chosen option's: in a slot of its own height, the
+       same whichever it is (icons' heights differ), nothing below it
+       moving as another's chosen.) */
+    .uikit-card-symbol {
+      height: 24px;
+    }
+
+    .uikit-card-value {
+      color: var(--uikit-glass-content-secondary);
+      font-size: var(--font-ui-subheadline-size);
+      font-variation-settings: normal;
+      font-weight: normal;
+      line-height: var(--font-ui-subheadline-line-height);
+    }
+
+    &[data-layout='row'] > .uikit-card-frame > .uikit-card-layout {
+      align-items: center;
+      grid-template:
+        'symbol title' auto
+        '. .' 1fr
+        'choice choice' auto / auto 1fr;
+    }
+
+    /* (Across a row, an x in its top trailing corner (open above the
+       page): its title clear of it.) */
+    &[data-layout='row']
+      > .uikit-card-frame
+      > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden]))
+      > .uikit-card-title {
+      padding-inline-end: var(--uikit-card-header-room, 28px);
+    }
+
+    &[data-layout='tall'] > .uikit-card-frame > .uikit-card-layout {
+      grid-template:
+        'symbol control' auto
+        '. .' 1fr
+        'title title' auto
+        'value value' auto
+        'choice choice' auto / 1fr auto;
+    }
+
+    &[data-layout='upright'] > .uikit-card-frame > .uikit-card-layout {
+      grid-template:
+        'symbol control' auto
+        'title title' auto
+        'value value' auto
+        'choice choice' 1fr / 1fr auto;
+    }
+  }
+
+  /* Its options (a radio group): in a well at its bottom, 6px from its
+     edges (its padding, 12px 14px, given back less that), its corners
+     concentric with the card's; side by side in equal columns, or stacked
+     in equal rows (upright). */
+  .uikit-control-cards-segmented-choice {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 3px;
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 6px);
+    margin: 0 -8px -6px;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    grid-area: choice;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+
+    &[data-layout='tall'] {
+      margin-top: 10px;
+    }
+
+    &[data-layout='upright'] {
+      align-self: stretch;
+      margin-top: 8px;
+      grid-auto-flow: row;
+      grid-auto-rows: minmax(0, 1fr);
+    }
+  }
+
+  /* The chosen option's raised thumb: under it, at its box (see main.tsx),
+     its corners the well's less its padding (a pill while it's short);
+     white on light glass, a light tint on dark. Moving to another as it's
+     chosen, once placed. */
+  .uikit-control-cards-segmented-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--uikit-control-cards-thumb-width, 0);
+    height: var(--uikit-control-cards-thumb-height, 0);
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 9px);
+    background-color: light-dark(#fff, rgb(255 255 255 / 22%));
+    box-shadow:
+      0 1px 3px rgb(0 0 0 / 18%),
+      0 0 0 0.5px rgb(0 0 0 / 6%);
+    pointer-events: none;
+    translate: var(--uikit-control-cards-thumb-x, 0)
+      var(--uikit-control-cards-thumb-y, 0);
+
+    [data-placed] > & {
+      transition-duration: 250ms;
+      transition-property: translate, width, height;
+      transition-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+
+      @media (prefers-reduced-motion: reduce) {
+        transition-duration: 0s;
+      }
+    }
+  }
+
+  /* An option: its words (across a row), its symbol over them (taller), or
+     beside them, at the card's padding (upright: the well's 6px, its 3px
+     and its own 5px); over the thumb. Chosen, emphasized. */
+  .uikit-control-cards-segmented-item {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
+
+    position: relative;
+    display: flex;
+    min-width: 0;
+    height: 30px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 9px);
+    color: var(--uikit-glass-content);
+    font-size: 13px;
+    font-variation-settings: 'wght' 510;
+    font-weight: round(down, 510, 100);
+    gap: 4px;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+
+    /* (On a layer of its own throughout, as Segmented's items are: the
+       thumb sliding under it, WebKit (iOS) would otherwise move it to one
+       for the move, snapped to whole pixels, and back after, its symbol
+       jumping by a fraction of a pixel each time.) */
+    transform: translate3d(0, 0, 0);
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+    }
+
+    &[data-checked] {
+      font-variation-settings: 'wght' 590;
+      font-weight: round(down, 590, 100);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-ui-primary);
+      outline-offset: -2px;
+    }
+
+    [data-layout='tall'] > & {
+      height: 46px;
+      flex-direction: column;
+      font-size: 11px;
+      gap: 2px;
+
+      > .uikit-symbol {
+        font-size: 18px;
+      }
+    }
+
+    [data-layout='upright'] > & {
+      height: auto;
+      justify-content: flex-start;
+      padding: 0 5px;
+      font-size: var(--font-ui-subheadline-size);
+      gap: 10px;
+
+      > .uikit-symbol {
+        width: var(--uikit-card-symbol-width, 28px);
+        justify-content: center;
+        font-size: 17px;
+      }
+    }
+  }
+
+  .uikit-control-cards-segmented-label {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   /* A value's trend (`ControlCards.Value`'s `trend`): an arrow after it,
      turned by its angle (a transform, not a layer change: it may turn in a
      scroller). */

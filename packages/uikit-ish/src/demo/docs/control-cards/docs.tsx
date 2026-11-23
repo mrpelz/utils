@@ -214,7 +214,7 @@ export const controlCardsSliderFillRows: readonly PropRow[] = [
     'onPress',
     '() => void',
     undefined,
-    'Given, a click on it (released before it moves) calls this instead of setting a value, for example to toggle its card’s switch; a drag sets its value. Without it, a press sets its value.',
+    'Given, a click on it (released before it moves) calls this instead of setting a value, for example to toggle its card’s switch; a drag sets its value. Without it, a tap sets its value where it lands. Either way, a touch moving across the card scrolls the page instead.',
   ],
   [
     'getValueText',
@@ -331,9 +331,103 @@ export const controlCardsListRows: readonly PropRow[] = [
     'rows',
     'readonly { icon?: SymbolIcon; label: string; value: ReactNode }[]',
     undefined,
-    'Its rows, as many as fit whole, in order. Each label is also its key. With none, there’s no list.',
+    'Its rows, as many as fit whole, in order. When some are left out, the last one counts them instead. Each label is also its key. With none, there’s no list.',
   ],
-  ['status', 'ReactNode', undefined, 'Its value’s words, under its title.'],
+  [
+    'status',
+    'ReactNode',
+    undefined,
+    'Its value’s words, small under its title.',
+  ],
+  [
+    'opening',
+    '{ closeLabel: string; label: string }',
+    undefined,
+    <>
+      Opens it above the page through its{' '}
+      <PartLink
+        component="grid"
+        part="Grid.Item"
+      />
+      , taking what <PartLink part="ControlCards.OpenButtons" /> takes. While
+      rows are left out, its last row opens it. With no list, a corner button
+      does. Open, an × in its top trailing corner closes it.
+    </>,
+  ],
+  [
+    'expansion',
+    '{ collapsedSize: GridSize; expanded: boolean; expandedSize: GridSize; label: string; onExpandedChange: (expanded: boolean) => void }',
+    undefined,
+    <>
+      Expands it in place, taking what{' '}
+      <PartLink part="ControlCards.ExpandButton" /> takes. While rows are left
+      out, its last row expands it; expanded, its last row makes it small again.
+      With no list, a corner button does. It comes before opening.
+    </>,
+  ],
+  [
+    'getMoreLabel',
+    '(count: number) => string',
+    // eslint-disable-next-line no-template-curly-in-string -- the default's code, shown
+    code('`${count} more`'),
+    'The last row’s words while rows are left out, given how many.',
+  ],
+  [
+    'lessLabel',
+    'string',
+    code('"Less"'),
+    'The last row’s words while it’s expanded.',
+  ],
+  ...cardRows,
+];
+
+export const controlCardsSegmentedRows: readonly PropRow[] = [
+  [
+    'options',
+    'readonly { icon?: SymbolIcon; label: string; tint?: string; value: string }[]',
+    undefined,
+    'Its options, in order, as segments in a well at its bottom. Across a row, a segment shows its label; in a taller tile, its symbol over it; upright, they stack, the symbol beside the label. The chosen option’s label is the card’s value, and its symbol and tint are the card’s symbol’s.',
+  ],
+  ['value', 'string', undefined, 'The chosen option (controlled).'],
+  [
+    'defaultValue',
+    'string',
+    'its first option’s',
+    'The option chosen at first (uncontrolled).',
+  ],
+  [
+    'onValueChange',
+    '(value: string) => void',
+    undefined,
+    'As an option is chosen, by a press or the arrow keys.',
+  ],
+  [
+    'offValue',
+    'string',
+    undefined,
+    'The option that means off. While it’s chosen, the card is dark glass; any other, it’s lit. Without it, the card follows its glass and is never lit.',
+  ],
+  [
+    'tint',
+    'string',
+    undefined,
+    'Its symbol’s tint, unless the chosen option has its own.',
+  ],
+  [
+    'opening',
+    '{ closeLabel: string; label: string }',
+    undefined,
+    <>
+      For a 1x1 tile, too small for its options: a corner button (or a press on
+      the card) opens it above the page through its{' '}
+      <PartLink
+        component="grid"
+        part="Grid.Item"
+      />
+      , where it shows them. Open, an × in its top trailing corner closes it. It
+      takes what <PartLink part="ControlCards.OpenButtons" /> takes.
+    </>,
+  ],
   ...cardRows,
 ];
 

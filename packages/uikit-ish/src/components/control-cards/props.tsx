@@ -287,6 +287,50 @@ export type ControlCardLightProps = ControlCardProps &
     value?: readonly number[];
   };
 
+/** A segmented card's option (see `ControlCardSegmentedProps`). */
+export type ControlCardSegmentedOption = {
+  /**
+   * Its symbol: in its segment (in a tile taller than a row, or upright),
+   * and the card's while it's chosen (else the card's `icon`).
+   */
+  icon?: SymbolIcon;
+  /** Its words: its segment's, and the card's value while it's chosen. */
+  label: string;
+  /** The card's symbol's tint while it's chosen (else the card's `tint`). */
+  tint?: string;
+  /** What it stands for (unique in its card). */
+  value: string;
+};
+
+export type ControlCardSegmentedProps = ControlCardProps & {
+  /** The option chosen at first (uncontrolled). @default its first's */
+  defaultValue?: string;
+  /**
+   * The option that's off: chosen, the card isn't lit (its dark glass);
+   * any other, it is. None: as its glass is (never lit).
+   */
+  offValue?: string;
+  /** Chosen, as it's pressed (or by keys, see Base UI's RadioGroup). */
+  onValueChange?: (value: string) => void;
+  /**
+   * Opening it above the page (its grid item's `open`; as `OpenButtons`,
+   * its props), a tile too small for its options (1x1): its corner
+   * button, or a press on it, opening it; open, an x in its top trailing
+   * corner (clear of its symbol) closing it.
+   */
+  opening?: ControlCardOpenButtonsProps;
+  /**
+   * Its options, in order: segments in a well at its bottom, side by side
+   * (across a row, their words; taller, their symbols over them too), or
+   * stacked (upright), the chosen one's raised.
+   */
+  options: readonly ControlCardSegmentedOption[];
+  /** Its symbol's tint (an option's own instead, while it's chosen). */
+  tint?: string;
+  /** The option chosen (controlled). */
+  value?: string;
+};
+
 /** A list card's row: its symbol (optional), its label, its value. */
 export type ControlCardRow = {
   icon?: SymbolIcon;
@@ -296,7 +340,34 @@ export type ControlCardRow = {
 };
 
 export type ControlCardListProps = ControlCardProps & {
-  /** Its rows: as many as fit whole shown, in order. */
+  /**
+   * Expanding it in place (as `ExpandButton`, its props): from its list's
+   * last row while rows are left out (“3 more”, see `getMoreLabel`),
+   * expanded, making it small again from there (“Less”, see `lessLabel`);
+   * no list shown, by `ExpandButton` in its corner. Before `opening`.
+   */
+  expansion?: ControlCardExpandButtonProps;
+  /**
+   * Its list's last row while rows are left out (their count given).
+   * @default `${count} more`
+   */
+  getMoreLabel?: (count: number) => string;
+  /**
+   * Its list's last row while it's expanded (see `expansion`).
+   * @default 'Less'
+   */
+  lessLabel?: string;
+  /**
+   * Opening it above the page (its grid item's `open`, see `Grid.Item`;
+   * as `OpenButtons`, its props): from its list's last row while rows are
+   * left out (“3 more”), no list shown, by a corner button; open, closed by
+   * an x in its top trailing corner (clear of its symbol).
+   */
+  opening?: ControlCardOpenButtonsProps;
+  /**
+   * Its rows: as many as fit whole shown, in order; the last one, while
+   * some are left out, counting them (see `getMoreLabel`).
+   */
   rows: readonly ControlCardRow[];
   /** Its value's words, under its title (none: none). */
   status?: ReactNode;

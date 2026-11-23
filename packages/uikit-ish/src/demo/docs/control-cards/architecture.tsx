@@ -27,18 +27,22 @@ const switchCode = `// ControlCards.Switch, in short: a Card.Root and its parts,
 </Card.Root>`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
-const pressCode = `// pressProps, in short: a press on a slider with a click of its own is
-// held back, so the slider doesn't set its value as it's pressed.
+const pressCode = `// pressProps, in short: every press on a slider card is held back, so
+// the slider doesn't set its value as it's pressed, nor follow a scroll.
 onPointerDownCapture: (event) => {
   event.stopPropagation();                   // the slider not told yet
   on('pointermove', (move) => {
-    if (distance(move, event) < 4) return;   // the grid's slop
+    if (distance(move, event) < slop) return; // 4px, a touch's 8px
+    stopListening();
+    if (isTouch && movesAcross(move, event)) return; // a scroll: let go
     target.dispatchEvent(new PointerEvent('pointerdown', event)); // a drag
   });
   on('pointerup', () => {
+    if (!onClick) return target.dispatchEvent(event); // a tap sets the value
     onClick();                               // a click: the value kept
     swallowNextClickElsewhere();             // a tap moved to the switch
   });
+  on('pointercancel', stopListening);        // the browser scrolls
 }`;
 
 const sections: readonly Section[] = [
@@ -46,6 +50,7 @@ const sections: readonly Section[] = [
   ['the-slider-cards', 'The slider cards'],
   ['a-light-s-channels', 'A light’s channels'],
   ['values-and-lists', 'Values and lists'],
+  ['a-choice-of-modes', 'A choice of modes'],
   ['corner-buttons', 'Corner buttons'],
   ['what-flows-in-and-out', 'What flows in and out'],
 ];
@@ -162,6 +167,20 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
         4px, it’s dispatched again at the place where it started.
       </li>
       <li>
+        A touch waits for 8px, then looks at its direction. Along the fill, it’s
+        a drag. Across it, it’s a scroll: the page scrolls and the value stays.
+        Base UI’s slider follows a finger even while the page scrolls, so it
+        never sees these touches.
+      </li>
+      <li>
+        Without a click of its own, a press released before it moves is handed
+        to the slider then, so a tap still sets the value where it lands.
+      </li>
+      <li>
+        A vertical fill can’t tell a scroll from a drag, so the page doesn’t
+        scroll from it, just like with any other vertical slider.
+      </li>
+      <li>
         On iOS, the browser can move a tap’s click to the switch nearby. That
         click is swallowed, so the switch doesn’t toggle twice.
       </li>
@@ -217,8 +236,50 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
       <li>
         <PartLink part="ControlCards.List" /> holds a glass{' '}
         <a href={publicUrl('list')}>List</a> of rows. A resize observer counts
-        how many 36px rows fit whole in its room, at least one, and only those
-        render. So the card’s size decides how many rows you see.
+        how many rows fit whole in its room, at least one, and only those
+        render. A row is as tall as Card makes it: 30px in a tile, 44px open
+        above the page. So the card’s size decides how many rows you see.
+      </li>
+      <li>
+        When rows are left out, the last row counts them instead, and it’s a
+        button that expands the card (where that would change its size) or opens
+        it above the page. Expanded, it makes the card small again. Its corner
+        symbol is the one the corner button would show. With no rows, the card
+        falls back to those corner buttons. With rows, a corner button that
+        draws nothing sits over the last row and does the same, for a large
+        touch target; it’s hidden from assistive technology and the keyboard,
+        which use the row.
+      </li>
+    </ul>
+
+    <Heading
+      id="a-choice-of-modes"
+      level={2}
+    >
+      A choice of modes
+    </Heading>
+    <ul>
+      <li>
+        <PartLink part="ControlCards.Segmented" /> isn’t built on{' '}
+        <a href={publicUrl('segmented')}>Segmented</a>, which only lays its
+        items out side by side. It’s Base UI’s RadioGroup, its options as radios
+        in a well, so it can stack them too. The arrow keys move between them,
+        and there’s no lens.
+      </li>
+      <li>
+        A thumb sits under the chosen option. A layout effect measures that
+        option’s box and moves the thumb there, again whenever the group
+        resizes. It only transitions once it has been placed, so it doesn’t
+        slide in when the card mounts.
+      </li>
+      <li>
+        The layout comes from its grid item’s size (its open size while it’s
+        open above the page): a row, taller, upright, or 1x1 without options.
+        Outside a grid, it’s a row.
+      </li>
+      <li>
+        The card is active while the chosen option isn’t its off option, so Card
+        lights it. Its symbol and tint follow the chosen option.
       </li>
     </ul>
 

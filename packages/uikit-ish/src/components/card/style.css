@@ -277,6 +277,23 @@
     }
   }
 
+  /* (With a list in it (see below): its symbol's slot as wide as its rows'
+     symbols', its value small, whatever its size.) */
+  .uikit-card-layout:has(> .uikit-list-root) {
+    > .uikit-card-symbol {
+      min-width: var(--uikit-card-symbol-width, 28px);
+      justify-content: center;
+    }
+
+    > .uikit-card-value {
+      color: var(--uikit-glass-content-secondary);
+      font-size: var(--font-ui-subheadline-size);
+      font-variation-settings: normal;
+      font-weight: normal;
+      line-height: var(--font-ui-subheadline-line-height);
+    }
+  }
+
   /* A slider in it (see main.tsx): its control the whole card, the fill
      its background (from its leading edge, or from its bottom upright), no
      knob; its ticks lines across it; its label and value laid out as its
@@ -636,31 +653,69 @@
   }
 
   /* A list in it (List's inset grouped style, its default; as on an
-     island's glass, its groups on the glass's fill, see Glass): across it,
-     between its top row (a symbol, a switch) and its title, its groups
-     rounded within the card's corners (its radius less its padding), its
-     rows compact, in its glass's content colors; filling its row, whatever
-     the card aligns (e.g. to its end, with a corner button top leading).
-     Not a scroller: a card
-     shows a summary, what doesn't fit is clipped (more shows as it expands
-     or opens). */
+     island's glass, its groups on the glass's fill, see Glass): a well at
+     its bottom, 6px from its edges (its padding's 12px 14px given back,
+     less that), its corners concentric with the card's (its radius less
+     6px); its rows' content where the card's is (8px in from the well's
+     edge, at its padding), their symbols centered under the card's (their
+     slot as wide as it is, see below), their titles where its title is;
+     compact (in its title's size), in its glass's content colors. Its
+     group at its bottom, what's left of its room above it. Not a
+     scroller: a card shows a summary, what doesn't fit is left out (more
+     shows as it expands or opens, see ControlCards' List). */
   .uikit-card-layout > .uikit-list-root {
     --color-ui-label: var(--uikit-glass-content);
     --color-ui-secondary-label: var(--uikit-glass-content-secondary);
+    --font-ui-body-size: var(--font-ui-subheadline-size);
+    --font-ui-body-line-height: var(--font-ui-subheadline-line-height);
+    --font-ui-body-tracking: var(--font-ui-subheadline-tracking);
     --uikit-list-inset: 0px;
-    --uikit-list-radius: calc(var(--uikit-grid-item-radius, 24px) - 12px);
+    --uikit-list-radius: calc(var(--uikit-grid-item-radius, 24px) - 6px);
     --uikit-list-section-spacing: 0px;
-    --uikit-list-row-min-height: 36px;
+    --uikit-list-row-min-height: 30px;
     --uikit-list-row-padding-block: 0px;
+    --uikit-list-row-padding-start: 8px;
     --uikit-list-group-background: var(--uikit-card-well);
 
+    display: flex;
     overflow: clip;
     min-width: 0;
     min-height: 0;
-    align-self: stretch;
-    grid-column: 1 / -1;
-    grid-row: 2;
-    margin-block: 14px 4px;
+    flex-direction: column;
+    justify-content: flex-end;
+    margin: 10px -8px -6px;
+
+    /* (Their content, and separators, ending 8px before the well's edge,
+       as they start.) */
+    .uikit-list-row {
+      padding-inline-end: 8px;
+
+      &::before {
+        inset-inline-end: 8px;
+      }
+    }
+  }
+
+  /* (Open above the page (see Grid): its rows the List's own size; closing,
+     its tile's again from the start, as its frame is (laid out at the size
+     it's getting to, see above).) */
+  [data-grid-open='open'] .uikit-card-layout > .uikit-list-root {
+    --font-ui-body-size: inherit;
+    --font-ui-body-line-height: inherit;
+    --font-ui-body-tracking: inherit;
+    --uikit-list-row-min-height: 44px;
+  }
+
+  /* (One row only: as tall as the well's corners need (twice its radius,
+     the card's less 6px: a pill), its curves following the card's, 6px in
+     as any; its content where it is. Its row only: how many rows fit is
+     still counted by the root's row height, see ControlCards' List.) */
+  .uikit-card-layout
+    > .uikit-list-root:has(.uikit-list-group > .uikit-list-item:only-child)
+    .uikit-list-row {
+    --uikit-list-min-height: calc(
+      2 * (var(--uikit-grid-item-radius, 24px) - 6px)
+    );
   }
 
   /* (Its groups set into its glass, see its wells above.) */
@@ -668,11 +723,15 @@
     box-shadow: var(--uikit-card-well-shadow);
   }
 
-  /* (Its rows' symbols in its text's color, as its own symbol is.) */
+  /* (Its rows' symbols in its text's color, as its own symbol is; their
+     slot as wide as it is, 10px before their titles, as its title is after
+     it.) */
   .uikit-card-layout
     > .uikit-list-root
     [data-list-part='image'][data-variant='symbol'] {
+    width: var(--uikit-card-symbol-width, 28px);
     color: inherit;
+    margin-inline-end: 10px;
   }
 
   /* (Its rows one line each: their titles and details cut short.) */
@@ -705,13 +764,12 @@
     padding-inline-end: var(--uikit-card-corner-room, 18px);
   }
 
-  /* With a list in it (see above): its symbol and title at its top, on a
-     line, centered (its value, if any, under the title; a switch beside),
-     the list in all the room
-     below, a little apart from them; whatever corner button it shows,
-     well clear of it: one top leading (an x), its symbol and title in from
-     it (`--uikit-card-header-room`); one at the bottom, the list ending
-     above it. */
+  /* With a list in it (see above): its symbol at its top, its title beside
+     it, centered on it, its value (small, whatever its size) under the
+     title (a switch at the end); the list in all the room below. An x in
+     its top trailing corner (open above the page, see ControlCards' List):
+     its title and value clear of it (`--uikit-card-header-room`); one top
+     leading, its symbol and title in from it. */
   .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root) {
     align-items: center;
     grid-template:
@@ -729,8 +787,8 @@
     margin-inline-start: var(--uikit-card-header-room, 28px);
   }
 
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner^='bottom']:not([data-grid-hidden])) > .uikit-list-root {
-    margin-block-end: calc(var(--uikit-card-corner-room, 18px) + 4px);
+  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden])) > :is(.uikit-card-title, .uikit-card-value) {
+    padding-inline-end: var(--uikit-card-header-room, 28px);
   }
 
   /* (Its parts over a slider's fill, drawn again in it (see

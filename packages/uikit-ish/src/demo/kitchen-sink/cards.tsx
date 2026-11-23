@@ -24,17 +24,26 @@ import { cardTints } from '../tooling/card-kit.js';
 import { FlipParts } from '../tooling/flip.js';
 import { gridSigns as gridSignsOf } from '../tooling/grid-signs.js';
 import {
+  sfAirplane,
+  sfAntennaRadiowavesLeftAndRight,
   sfDoorLeftHandClosed,
   sfDoorLeftHandOpen,
   sfFan,
   sfFanFill,
+  sfFlameFill,
+  sfHareFill,
+  sfHomepodFill,
+  sfHouseFill,
   sfHumidityFill,
   sfLightbulb,
   sfLightbulbFill,
   sfLockFill,
   sfLockOpen,
   sfPhoto,
+  sfPower,
+  sfSnowflake,
   sfThermometerMedium,
+  sfTortoiseFill,
   sfWindowShadeClosed,
 } from '../tooling/icons.js';
 import {
@@ -306,6 +315,83 @@ const EmptyOpeningCard: FunctionComponent<{ name: string }> = ({ name }) => (
   </TonedCard>
 );
 
+/** A room's summary's rows (see the Summaries room): more than fit. */
+const roomRows = [
+  { icon: sfLightbulbFill, label: 'Lights', value: '2 on' },
+  { icon: sfThermometerMedium, label: 'Temperature', value: '21.5 °C' },
+  { icon: sfHumidityFill, label: 'Humidity', value: '46 %' },
+  { icon: sfWindowShadeClosed, label: 'Blinds', value: '50 %' },
+  { icon: sfHomepodFill, label: 'Speaker', value: 'Paused' },
+  { icon: sfDoorLeftHandClosed, label: 'Balcony Door', value: 'Closed' },
+  {
+    icon: sfAntennaRadiowavesLeftAndRight,
+    label: 'Devices',
+    value: '12 online',
+  },
+] as const;
+
+/** A device's details' rows (see the Summaries room): no symbols. */
+const deviceRows = [
+  { label: 'Last heard', value: '2 min. ago' },
+  { label: 'Connection', value: 'Zigbee' },
+  { label: 'Battery', value: '80 %' },
+  { label: 'Signal', value: '−62 dBm' },
+  { label: 'Firmware', value: '1.4.2' },
+] as const;
+
+/**
+ * A device's status (a list card), expanding in place from its last row
+ * (see the Summaries room).
+ */
+const SensorCard: FunctionComponent<{
+  expansion?: Expansion;
+  name: string;
+}> = ({ expansion, name }) => (
+  <Toned.List
+    icon={sfAntennaRadiowavesLeftAndRight}
+    name={name}
+    rows={deviceRows}
+    status="Online"
+    expansion={
+      expansion
+        ? {
+            collapsedSize: expansion.collapsedSize,
+            expanded: expansion.isExpanded,
+            expandedSize: expansion.expandedSize,
+            label: `${name} details`,
+            onExpandedChange: expansion.onToggle,
+          }
+        : undefined
+    }
+  />
+);
+
+/**
+ * A room's summary (a list card), opening above the page from its last
+ * row (see the Summaries room).
+ */
+const SummaryCard: FunctionComponent<{ name: string }> = ({ name }) => (
+  <Toned.List
+    icon={sfHouseFill}
+    name={name}
+    opening={{ closeLabel: 'Close', label: `${name} details` }}
+    rows={roomRows}
+  >
+    <FlipParts />
+  </Toned.List>
+);
+
+/** A heat pump's modes (see the Modes room): off, or heating, cooling. */
+const heatPumpModes = [
+  { icon: sfPower, label: 'Off', value: 'off' },
+  { icon: sfFlameFill, label: 'Heat', tint: cardTints.heat, value: 'heat' },
+  { icon: sfSnowflake, label: 'Cool', tint: cardTints.shade, value: 'cool' },
+  { icon: sfThermometerMedium, label: 'Auto', value: 'auto' },
+] as const;
+
+/** A segmented card's sizes (see the Modes room): each of its layouts. */
+const segmentedSizes = ['1x1', '2x1', '1x2', '2x2'] as const;
+
 const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
   'Living Room': [
     {
@@ -523,6 +609,141 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     },
   ],
   'More Kinds': moreTiles,
+  // (Rows, as the mock-ups show them: a room's, opening from its last row
+  // (2x2, 2x1); a device's details, expanding from it and back (one
+  // expanded at first).)
+  Summaries: [
+    {
+      card: () => <SummaryCard name="Kitchen" />,
+      kind: 'numericalDisplay',
+      name: 'Kitchen',
+      openSize: '4x3',
+      size: '2x2',
+    },
+    {
+      card: () => <SummaryCard name="Bedroom" />,
+      kind: 'numericalDisplay',
+      name: 'Bedroom',
+      openSize: '4x3',
+      size: '2x1',
+    },
+    {
+      card: ({ expansion }) => (
+        <SensorCard
+          expansion={expansion}
+          name="Garage Sensor"
+        />
+      ),
+      expandedSize: '2x2',
+      kind: 'numericalDisplay',
+      name: 'Garage Sensor',
+      size: '2x1',
+    },
+    {
+      card: ({ expansion }) => (
+        <SensorCard
+          expansion={expansion}
+          name="Attic Sensor"
+        />
+      ),
+      expandedSize: '2x2',
+      kind: 'numericalDisplay',
+      name: 'Attic Sensor',
+      size: '2x1',
+    },
+  ],
+  // (A device of a few modes in each of its layouts: across a row, taller,
+  // upright, and 1x1, opening above the page to choose.)
+  Modes: [
+    {
+      card: () => (
+        <Toned.Segmented
+          defaultValue="heat"
+          icon={sfPower}
+          name="Heat Pump"
+          offValue="off"
+          options={heatPumpModes}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Heat Pump',
+      size: '2x1',
+      sizes: segmentedSizes,
+    },
+    {
+      card: () => (
+        <Toned.Segmented
+          defaultValue="off"
+          icon={sfPower}
+          name="Office Heat Pump"
+          offValue="off"
+          options={heatPumpModes}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Office Heat Pump',
+      size: '2x1',
+      sizes: segmentedSizes,
+    },
+    {
+      card: () => (
+        <Toned.Segmented
+          defaultValue="slow"
+          icon={sfPower}
+          name="Air Purifier"
+          offValue="off"
+          tint={cardTints.air}
+          options={[
+            { icon: sfPower, label: 'Off', value: 'off' },
+            { icon: sfFanFill, label: 'Auto', value: 'auto' },
+            { icon: sfTortoiseFill, label: 'Slow', value: 'slow' },
+            { icon: sfHareFill, label: 'Turbo', value: 'turbo' },
+          ]}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Air Purifier',
+      size: '2x2',
+      sizes: segmentedSizes,
+    },
+    {
+      card: () => (
+        <Toned.Segmented
+          defaultValue="away"
+          icon={sfLockOpen}
+          name="Alarm"
+          offValue="off"
+          tint="oklch(64% 0.21 25)"
+          options={[
+            { icon: sfLockOpen, label: 'Off', value: 'off' },
+            { icon: sfHouseFill, label: 'Home', value: 'home' },
+            { icon: sfAirplane, label: 'Away', value: 'away' },
+          ]}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Alarm',
+      size: '1x2',
+      sizes: segmentedSizes,
+    },
+    {
+      card: () => (
+        <Toned.Segmented
+          defaultValue="off"
+          icon={sfPower}
+          name="Guest Room Heat"
+          offValue="off"
+          opening={{ closeLabel: 'Close', label: 'Guest Room Heat modes' }}
+          options={heatPumpModes}
+        />
+      ),
+      kind: 'numericalDisplay',
+      name: 'Guest Room Heat',
+      openSize: '2x1',
+      size: '1x1',
+      sizes: segmentedSizes,
+    },
+  ],
   Security: [
     {
       card: () => (
@@ -574,7 +795,10 @@ const CardsApp: FunctionComponent = () => {
   const [tone, setTone] = useState<string>('scheme');
   const [rooms, setRooms] = useState(roomsInitial);
   // (Which are expanded: the app's state, not stored; none while editing.)
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
+  // (One expanded at first, as the mock-ups show it: Attic Sensor's.)
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
+    () => new Set(['Attic Sensor']),
+  );
   const toggle = (name: string) =>
     setExpanded((current) => {
       const next = new Set(current);

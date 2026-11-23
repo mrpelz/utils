@@ -41,8 +41,8 @@ export const cardRootRows: readonly PropRow[] = [
         component="list"
         part="List.Root"
       />{' '}
-      (inset grouped, its default style), its group between the card’s top and
-      its title.
+      (inset grouped, its default style), its group in a well at the card’s
+      bottom, under its symbol and title.
     </>,
   ],
   glassSurfaceRow('the card'),

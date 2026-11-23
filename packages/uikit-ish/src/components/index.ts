@@ -343,6 +343,8 @@ export {
   type ControlCardProps,
   type ControlCardRow,
   ControlCards,
+  type ControlCardSegmentedOption,
+  type ControlCardSegmentedProps,
   type ControlCardSliderFillProps,
   type ControlCardSliderProps,
   type ControlCardStateProps,

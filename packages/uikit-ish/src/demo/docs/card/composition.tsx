@@ -444,7 +444,8 @@ const [isExpanded, setIsExpanded] = useState(false);
 </Grid.Item>`;
 
 const rowsCode = `// A room's summary in rows (ControlCards' List): as many as fit whole,
-// four on its tile, all of them open above the page.
+// the last counting those left out and opening it above the page, where
+// all of them show (an x in its top trailing corner closes it).
 <Grid.Item
   openLabel="Living Room"
   openSize="4x4"
@@ -461,9 +462,8 @@ const rowsCode = `// A room's summary in rows (ControlCards' List): as many as f
       { icon: sfThermometerMedium, label: 'Heating to', value: '22 °C' },
       { icon: sfHumidityFill, label: 'Humidity', value: '46%' },
     ]}
-  >
-    <ControlCards.OpenButtons closeLabel="Close" label="Living Room details" />
-  </ControlCards.List>
+    opening={{ closeLabel: 'Close', label: 'Living Room details' }}
+  />
 </Grid.Item>`;
 
 const aloneCode = `// No grid: as large as its box, never in edit mode, its parts laid out
@@ -1221,22 +1221,25 @@ export const CardComposition: FunctionComponent = () => (
           component="list"
           part="List.Root"
         />{' '}
-        between the card’s symbol and its title, its group on the card’s glass
-        as on an island’s. The rows follow the floor lamp’s switch beside it.
+        in a well at the card’s bottom, under its symbol and title. The rows
+        follow the floor lamp’s switch beside it.
       </li>
       <li>
         The list doesn’t scroll in a card, and each row stays on one line. The
-        card shows as many rows as fit whole: four on its tile, all five when
-        it’s open above the page.
+        card shows as many rows as fit whole. When some are left out, its last
+        row counts them, for example “2 more”.
       </li>
       <li>
-        It opens with{' '}
+        That row opens it above the page, where all of them show, as the
+        camera’s card opens with its corner button (see{' '}
+        <a href="#opening-above-the-page">Opening above the page</a>). Its
+        opening prop takes what{' '}
         <PartLink
           component="control-cards"
           part="ControlCards.OpenButtons"
-        />
-        , as the camera’s card does (see{' '}
-        <a href="#opening-above-the-page">Opening above the page</a>).
+        />{' '}
+        takes. Open, an × in its top trailing corner closes it, clear of its
+        symbol.
       </li>
       <li>
         <strong>Library:</strong> the list card, its rows fitted to its size,

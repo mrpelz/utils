@@ -25,6 +25,7 @@ import {
   sfBellFill,
   sfFan,
   sfFanFill,
+  sfFlameFill,
   sfHouseFill,
   sfHumidityFill,
   sfLightbulb,
@@ -33,6 +34,8 @@ import {
   sfLightStrip2Fill,
   sfLockFill,
   sfLockOpen,
+  sfPower,
+  sfSnowflake,
   sfThermometerMedium,
   sfWasher,
   sfWasherFill,
@@ -296,24 +299,49 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         {...partProps['ControlCards.List']}
         icon={sfHouseFill}
         name="Living Room"
+        opening={{ closeLabel: 'Close', label: 'Living Room details' }}
         rows={[
           { icon: sfLightbulbFill, label: 'Lights', value: '2 on' },
           { icon: sfThermometerMedium, label: 'Temperature', value: '21.5 °C' },
           { icon: sfHumidityFill, label: 'Humidity', value: '46 %' },
           { icon: sfWindowShadeClosed, label: 'Blinds', value: '50 %' },
         ]}
-      >
-        <ControlCards.OpenButtons
-          {...partProps['ControlCards.OpenButtons']}
-          closeLabel="Close"
-          label="Living Room details"
-        />
-      </ControlCards.List>
+      />
     ),
     name: 'Living Room',
     openSize: '4x3',
     size: '2x2',
     sizes: cardSizes.numericalDisplay,
+  },
+  {
+    card: (
+      <ControlCards.Segmented
+        {...partProps['ControlCards.Segmented']}
+        defaultValue="heat"
+        icon={sfPower}
+        name="Heat Pump"
+        offValue="off"
+        options={[
+          { icon: sfPower, label: 'Off', value: 'off' },
+          {
+            icon: sfFlameFill,
+            label: 'Heat',
+            tint: cardTints.heat,
+            value: 'heat',
+          },
+          {
+            icon: sfSnowflake,
+            label: 'Cool',
+            tint: cardTints.shade,
+            value: 'cool',
+          },
+          { icon: sfThermometerMedium, label: 'Auto', value: 'auto' },
+        ]}
+      />
+    ),
+    name: 'Heat Pump',
+    size: '2x1',
+    sizes: ['1x1', '2x1', '1x2', '2x2'],
   },
 ];
 
@@ -328,8 +356,14 @@ export const everyCardParts = {
     'icon',
     'name',
   ],
-  'ControlCards.List': ['children', 'icon', 'name', 'rows'],
-  'ControlCards.OpenButtons': ['closeLabel', 'label'],
+  'ControlCards.List': ['icon', 'name', 'opening', 'rows'],
+  'ControlCards.Segmented': [
+    'defaultValue',
+    'icon',
+    'name',
+    'offValue',
+    'options',
+  ],
   'ControlCards.Progress': [
     'active',
     'emphasizedIcon',

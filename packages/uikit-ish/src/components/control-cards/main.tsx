@@ -3,6 +3,8 @@ import '../list/style.css';
 import '../progress/style.css';
 import './style.css';
 
+import { Radio as BaseRadio } from '@base-ui/react/radio';
+import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import {
   type CSSProperties,
   forwardRef,
@@ -47,6 +49,8 @@ import type {
   ControlCardListProps,
   ControlCardOpenButtonsProps,
   ControlCardProgressProps,
+  ControlCardSegmentedOption,
+  ControlCardSegmentedProps,
   ControlCardSliderFillProps,
   ControlCardSliderProps,
   ControlCardStateProps,
@@ -68,6 +72,8 @@ export type {
   ControlCardProgressProps,
   ControlCardProps,
   ControlCardRow,
+  ControlCardSegmentedOption,
+  ControlCardSegmentedProps,
   ControlCardSliderFillProps,
   ControlCardSliderProps,
   ControlCardStateProps,
@@ -294,8 +300,11 @@ const Value = forwardRef<HTMLDivElement, ControlCardValueProps>(
 );
 
 // How far a press moves before it's a drag (px; the grid's resize
-// handle's, see Grid's edit.ts).
+// handle's, see Grid's edit.ts); a touch's (or a pen's), before it's told
+// a drag (along the slider) from a scroll (across it), as a browser tells
+// a pan.
 const pressSlop = 4;
+const touchSlop = 8;
 
 // (A press handed on to the slider (see `pressProps`): let through; one
 // held back, not yet a drag or a click: its touch held back too.)
@@ -303,102 +312,116 @@ let isHandingOn = false;
 let isHolding = false;
 
 /**
- * A slider's press (its `Slider.Root`'s props): a drag goes to the slider,
- * from where it was pressed; a click (released before it moves
- * `pressSlop`) is `onClick`'s, the slider never told (its value kept).
- * Its click, if the browser moves it to a control near it (e.g. the
- * card's switch, a tap's target adjusted, as WebKit's on iOS), not that
- * control's too (toggled back): swallowed. (Not the click deciding: on
- * iOS, none may come to it.)
- * Held back at first (the slider would set its value as it's pressed),
- * then handed on (the press again, where it started) once it's a drag.
- * None: the slider's own.
+ * A slider's press (its `Slider.Root`'s props), held back at first (the
+ * slider would set its value as it's pressed, and, a touch, follow it
+ * even as the page scrolls, see Base UI's SliderControl):
+ * - Moved (`pressSlop`; a touch, `touchSlop`) along it (a mouse, any
+ *   way): a drag, handed on to the slider (the press again, where it
+ *   started).
+ * - A touch moved across it, or the browser panning (it's cancelled): a
+ *   scroll, the page's, the slider never told.
+ * - Released before: `onClick`'s, the slider never told (its value
+ *   kept); its click, if the browser moves it to a control near it (e.g.
+ *   the card's switch, a tap's target adjusted, as WebKit's on iOS), not
+ *   that control's too (toggled back): swallowed (not the click deciding:
+ *   on iOS, none may come to it). No `onClick`: handed on to the slider as
+ *   it's released (its value set where it was pressed).
  */
 const pressProps = (
   onClick: (() => void) | undefined,
+  orientation: CardOrientation,
 ): {
-  onPointerDownCapture?: (event: ReactPointerEvent<HTMLElement>) => void;
-  onTouchStartCapture?: (event: ReactTouchEvent<HTMLElement>) => void;
-} => {
-  if (onClick === undefined) return {};
-  const click = onClick;
-  return {
-    onPointerDownCapture: (event) => {
-      if (isHandingOn || event.button !== 0) return;
-      event.stopPropagation();
-      // (The DOM's event: React's wraps it, Preact's is it.)
-      const pressed =
-        (event as { nativeEvent?: PointerEvent }).nativeEvent ??
-        (event as unknown as PointerEvent);
-      const { clientX, clientY, pointerId, target } = pressed;
-      const root = event.currentTarget;
-      const listening = new AbortController();
-      const options = { capture: true, signal: listening.signal };
-      isHolding = true;
-      listening.signal.addEventListener('abort', () => {
-        isHolding = false;
-      });
-      addEventListener(
-        'pointermove',
-        (move) => {
-          if (move.pointerId !== pointerId) return;
-          const moved = Math.hypot(
-            move.clientX - clientX,
-            move.clientY - clientY,
-          );
-          if (moved < pressSlop) return;
-          listening.abort();
-          // (A drag: the press handed on, as it was.)
-          isHandingOn = true;
-          try {
-            target?.dispatchEvent(new PointerEvent('pointerdown', pressed));
-          } finally {
-            isHandingOn = false;
-          }
-        },
-        options,
-      );
-      addEventListener(
-        'pointerup',
-        (up) => {
-          if (up.pointerId !== pointerId) return;
-          listening.abort();
-          click();
-          // (Its click next, if any, elsewhere: swallowed; none before
-          // another press or key, nothing.)
-          const clicking = new AbortController();
-          const once = { capture: true, signal: clicking.signal };
-          addEventListener(
-            'click',
-            (clicked) => {
-              clicking.abort();
-              if (root.contains(clicked.target as Node | null)) return;
-              clicked.preventDefault();
-              clicked.stopPropagation();
-            },
-            once,
-          );
-          for (const type of ['pointerdown', 'keydown']) {
-            addEventListener(type, () => clicking.abort(), once);
-          }
-        },
-        options,
-      );
-      addEventListener(
-        'pointercancel',
-        (cancel) => {
-          if (cancel.pointerId === pointerId) listening.abort();
-        },
-        options,
-      );
-    },
-    // (The slider takes a touch's start too, unless its pointer's started
-    // it (see Base UI's SliderControl): held back with it.)
-    onTouchStartCapture: (event) => {
-      if (isHolding) event.stopPropagation();
-    },
-  };
-};
+  onPointerDownCapture: (event: ReactPointerEvent<HTMLElement>) => void;
+  onTouchStartCapture: (event: ReactTouchEvent<HTMLElement>) => void;
+} => ({
+  onPointerDownCapture: (event) => {
+    if (isHandingOn || event.button !== 0) return;
+    event.stopPropagation();
+    // (The DOM's event: React's wraps it, Preact's is it.)
+    const pressed =
+      (event as { nativeEvent?: PointerEvent }).nativeEvent ??
+      (event as unknown as PointerEvent);
+    const { clientX, clientY, pointerId, pointerType, target } = pressed;
+    const isMouse = pointerType === 'mouse';
+    const slop = isMouse ? pressSlop : touchSlop;
+    const root = event.currentTarget;
+    const handOn = () => {
+      isHandingOn = true;
+      try {
+        target?.dispatchEvent(new PointerEvent('pointerdown', pressed));
+      } finally {
+        isHandingOn = false;
+      }
+    };
+    const listening = new AbortController();
+    const options = { capture: true, signal: listening.signal };
+    isHolding = true;
+    listening.signal.addEventListener('abort', () => {
+      isHolding = false;
+    });
+    addEventListener(
+      'pointermove',
+      (move) => {
+        if (move.pointerId !== pointerId) return;
+        const across = Math.abs(move.clientX - clientX);
+        const upright = Math.abs(move.clientY - clientY);
+        if (Math.hypot(across, upright) < slop) return;
+        listening.abort();
+        // (A touch across it: a scroll, let go.)
+        const along = orientation === 'vertical' ? upright : across;
+        const crossing = orientation === 'vertical' ? across : upright;
+        if (!isMouse && crossing > along) return;
+        handOn();
+      },
+      options,
+    );
+    addEventListener(
+      'pointerup',
+      (up) => {
+        if (up.pointerId !== pointerId) return;
+        listening.abort();
+        // (No click of its own: the slider's, its value set there; this
+        // release ending it, as it goes on.)
+        if (onClick === undefined) {
+          handOn();
+          return;
+        }
+        onClick();
+        // (Its click next, if any, elsewhere: swallowed; none before
+        // another press or key, nothing.)
+        const clicking = new AbortController();
+        const once = { capture: true, signal: clicking.signal };
+        addEventListener(
+          'click',
+          (clicked) => {
+            clicking.abort();
+            if (root.contains(clicked.target as Node | null)) return;
+            clicked.preventDefault();
+            clicked.stopPropagation();
+          },
+          once,
+        );
+        for (const type of ['pointerdown', 'keydown']) {
+          addEventListener(type, () => clicking.abort(), once);
+        }
+      },
+      options,
+    );
+    addEventListener(
+      'pointercancel',
+      (cancel) => {
+        if (cancel.pointerId === pointerId) listening.abort();
+      },
+      options,
+    );
+  },
+  // (The slider takes a touch's start too, unless its pointer's started
+  // it (see Base UI's SliderControl), following it past a pan: held back
+  // with it.)
+  onTouchStartCapture: (event) => {
+    if (isHolding) event.stopPropagation();
+  },
+});
 
 /**
  * Its fill's tone (opaque: its color's), as its tint or the color scheme
@@ -568,7 +591,7 @@ const SliderFill = forwardRef<HTMLDivElement, ControlCardSliderFillProps>(
           setCurrent(next as number);
           onValueChange?.(next as number);
         }}
-        {...pressProps(onPress)}
+        {...pressProps(onPress, orientation)}
       >
         <Slider.Control>
           <Slider.Track>
@@ -960,81 +983,6 @@ const Light = forwardRef<HTMLDivElement, ControlCardLightProps>(
   },
 );
 
-/** A list card's row's height (px; a row in a card, see Card). */
-const rowHeight = 36;
-
-/**
- * How many rows of its list fit in it whole (its box filling its room in
- * the card, see Card): by its height, at least one; as the card's size
- * changes too.
- */
-const useRowsThatFit = () => {
-  const [list, setList] = useState<HTMLElement | null>(null);
-  const [count, setCount] = useState(1);
-  useLayoutEffect(() => {
-    if (!list) return undefined;
-    const update = () =>
-      setCount(Math.max(1, Math.floor(list.clientHeight / rowHeight)));
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [list]);
-  return [setList, count] as const;
-};
-
-/**
- * A summary in rows (e.g. a room's, a device's details): its symbol and
- * title at its top, a glass list of rows under them (as many as fit
- * whole); its value's words, if given. No rows, no list.
- */
-const ListCard = forwardRef<HTMLDivElement, ControlCardListProps>(
-  (
-    { children, className, emphasizedIcon, icon, name, rows, status, ...props },
-    ref,
-  ) => {
-    const [list, fit] = useRowsThatFit();
-    return (
-      <Card.Root
-        ref={ref}
-        {...props}
-        className={cn('uikit-control-cards-list', className)}
-        data-control-cards-part="list"
-      >
-        <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
-        {rows.length === 0 ? null : (
-          <List.Root ref={list}>
-            <List.Section>
-              <List.Group>
-                {rows.slice(0, fit).map((row) => (
-                  <List.Item key={row.label}>
-                    {row.icon ? (
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={row.icon} />
-                        </List.Image>
-                      </List.Leading>
-                    ) : null}
-                    <List.Content>
-                      <List.Title>{row.label}</List.Title>
-                    </List.Content>
-                    <List.Trailing>
-                      <List.Detail>{row.value}</List.Detail>
-                    </List.Trailing>
-                  </List.Item>
-                ))}
-              </List.Group>
-            </List.Section>
-          </List.Root>
-        )}
-        <Card.Title>{name}</Card.Title>
-        {status === undefined ? null : <Card.Value>{status}</Card.Value>}
-        {children}
-      </Card.Root>
-    );
-  },
-);
-
 /**
  * A corner button expanding its card in place and making it small again
  * (bottom trailing; its grid item's size is the app's, see Grid).
@@ -1070,6 +1018,251 @@ const ExpandButton = ({
 };
 
 /**
+ * How many rows of its list fit in it whole (its box filling its room in
+ * the card, see Card; a row's height its `--uikit-list-row-min-height`, as
+ * Card sets it, opened above the page too): by its height, at least one;
+ * as the card's size changes too.
+ */
+const useRowsThatFit = () => {
+  const [list, setList] = useState<HTMLElement | null>(null);
+  const [count, setCount] = useState(1);
+  useLayoutEffect(() => {
+    if (!list) return undefined;
+    const update = () => {
+      const row =
+        Number.parseFloat(
+          getComputedStyle(list).getPropertyValue(
+            '--uikit-list-row-min-height',
+          ),
+        ) || 30;
+      setCount(Math.max(1, Math.floor(list.clientHeight / row)));
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [list]);
+  return [setList, count] as const;
+};
+
+/** What its list's last row does, if anything (see `ListCard`). */
+type ListAction =
+  | { kind: 'expand' | 'less'; onPress: () => void }
+  | { kind: 'more'; onPress?: () => void }
+  | { kind: 'open'; onPress: () => void };
+
+const actionIcons = {
+  expand: gridIcons.expand,
+  less: gridIcons.collapse,
+  more: undefined,
+  open: gridIcons.open,
+} as const;
+
+/**
+ * What a list card's last row does (see `ListCard`): open above the page,
+ * none; expanded, making it small again; rows left out, expanding it (only
+ * where that'd change its size, as `ExpandButton`), else opening it, else
+ * only counting them; none.
+ */
+const useListAction = ({
+  expansion,
+  isLeftOut,
+  opening,
+}: {
+  expansion: ControlCardExpandButtonProps | undefined;
+  isLeftOut: boolean;
+  opening: ControlCardOpenButtonsProps | undefined;
+}): ListAction | undefined => {
+  const item = useGridItem();
+  if (item?.open === true) return undefined;
+  const canExpand =
+    expansion !== undefined &&
+    (item?.sizeOf(expansion.collapsedSize).size ?? expansion.collapsedSize) !==
+      (item?.sizeOf(expansion.expandedSize).size ?? expansion.expandedSize);
+  if (canExpand && expansion.expanded) {
+    return { kind: 'less', onPress: () => expansion.onExpandedChange(false) };
+  }
+  if (!isLeftOut) return undefined;
+  if (canExpand) {
+    return { kind: 'expand', onPress: () => expansion.onExpandedChange(true) };
+  }
+  return opening
+    ? { kind: 'open', onPress: () => item?.setOpen(true) }
+    : { kind: 'more' };
+};
+
+/**
+ * A list card's last row (see `ListCard`): its label where its rows' are
+ * (after their symbols' room, if they have them), pressed doing its
+ * action; the corner symbol for it where a value is.
+ */
+const ActionRow = ({
+  action,
+  hasIcons,
+  label,
+}: {
+  action: ListAction;
+  hasIcons: boolean;
+  label: string;
+}): ReactNode => {
+  const icon = actionIcons[action.kind];
+  const isExpanding = action.kind === 'expand' || action.kind === 'less';
+  return (
+    <List.Item data-control-cards-part="list-action">
+      {hasIcons ? (
+        <List.Leading>
+          <List.Image variant="symbol" />
+        </List.Leading>
+      ) : null}
+      <List.Content>
+        <List.Title
+          render={
+            action.onPress ? (
+              <button
+                aria-expanded={isExpanding ? action.kind === 'less' : undefined}
+                type="button"
+                onClick={action.onPress}
+              />
+            ) : undefined
+          }
+        >
+          {label}
+        </List.Title>
+      </List.Content>
+      {icon ? (
+        <List.Trailing>
+          <List.Detail>
+            <Symbol icon={icon} />
+          </List.Detail>
+        </List.Trailing>
+      ) : null}
+    </List.Item>
+  );
+};
+
+/**
+ * A summary in rows (e.g. a room's, a device's details): its symbol, its
+ * title and status beside it at its top, a glass list of rows (as many as
+ * fit whole) in a well at its bottom. Rows left out, its last row counts
+ * them, expanding or opening it (`expansion`, `opening`); expanded, it
+ * makes it small again. No rows, no list (its corner buttons instead);
+ * open above the page, an x in its top trailing corner closes it.
+ */
+const ListCard = forwardRef<HTMLDivElement, ControlCardListProps>(
+  (
+    {
+      children,
+      className,
+      emphasizedIcon,
+      expansion,
+      getMoreLabel = (count) => `${String(count)} more`,
+      icon,
+      lessLabel = 'Less',
+      name,
+      opening,
+      rows,
+      status,
+      ...props
+    },
+    ref,
+  ) => {
+    const [list, fit] = useRowsThatFit();
+    const item = useGridItem();
+    const isOpen = item?.open === true;
+    const action = useListAction({
+      expansion,
+      isLeftOut: rows.length > fit,
+      opening,
+    });
+    // (Its last row the action's, if any: one row less.)
+    const shown = action ? rows.slice(0, fit - 1) : rows.slice(0, fit);
+    return (
+      <Card.Root
+        ref={ref}
+        {...props}
+        className={cn('uikit-control-cards-list', className)}
+        data-control-cards-part="list"
+      >
+        <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
+        <Card.Title>{name}</Card.Title>
+        {status === undefined ? null : <Card.Value>{status}</Card.Value>}
+        {rows.length === 0 ? null : (
+          <List.Root ref={list}>
+            <List.Section>
+              <List.Group>
+                {shown.map((row) => (
+                  <List.Item key={row.label}>
+                    {row.icon ? (
+                      <List.Leading>
+                        <List.Image variant="symbol">
+                          <Symbol icon={row.icon} />
+                        </List.Image>
+                      </List.Leading>
+                    ) : null}
+                    <List.Content>
+                      <List.Title>{row.label}</List.Title>
+                    </List.Content>
+                    <List.Trailing>
+                      <List.Detail>{row.value}</List.Detail>
+                    </List.Trailing>
+                  </List.Item>
+                ))}
+                {action ? (
+                  <ActionRow
+                    action={action}
+                    hasIcons={rows.some((row) => row.icon !== undefined)}
+                    label={
+                      action.kind === 'less'
+                        ? lessLabel
+                        : getMoreLabel(rows.length - shown.length)
+                    }
+                  />
+                ) : null}
+              </List.Group>
+            </List.Section>
+          </List.Root>
+        )}
+        {/* (Its last row's action, also a corner button over it, not
+            drawn (its row draws its symbol there): a corner button's large
+            hit area; for pointers only, the row's button for keys and
+            assistive technology.) */}
+        {rows.length > 0 && action?.onPress ? (
+          <Card.CornerButton
+            aria-hidden
+            className="uikit-control-cards-hit-area"
+            icon={actionIcons[action.kind] ?? gridIcons.open}
+            tabIndex={-1}
+            onClick={action.onPress}
+          />
+        ) : null}
+        {/* (No list: its corner buttons, as the other cards'.) */}
+        {rows.length === 0 && expansion ? (
+          <ExpandButton {...expansion} />
+        ) : null}
+        {rows.length === 0 && opening && !expansion ? (
+          <Card.CornerButton
+            aria-label={opening.label}
+            icon={gridIcons.open}
+            visible={!isOpen}
+            onClick={() => item?.setOpen(true)}
+          />
+        ) : null}
+        {opening ? (
+          <Card.CornerButton
+            aria-label={opening.closeLabel}
+            corner="top-trailing"
+            icon={gridIcons.close}
+            visible={isOpen}
+            onClick={() => item?.setOpen(false)}
+          />
+        ) : null}
+        {children}
+      </Card.Root>
+    );
+  },
+);
+
+/**
  * Corner buttons opening its card above the page (its grid item's `open`,
  * see `Grid.Item`), bottom trailing, and closing it (top leading), each
  * shown as it applies.
@@ -1099,6 +1292,213 @@ const OpenButtons = ({
   );
 };
 
+/** A segmented card's layout, by its tile's size (see `SegmentedCard`). */
+type SegmentedLayout = 'compact' | 'row' | 'tall' | 'upright';
+
+/**
+ * Its layout by its size (open above the page, that one; outside a grid,
+ * a row): one wide and one tall, its options' words across its bottom
+ * (`row`); wider and taller, their symbols over them (`tall`); one wide
+ * and taller, stacked (`upright`); 1x1, none (`compact`).
+ */
+const useSegmentedLayout = (): SegmentedLayout => {
+  const item = useGridItem();
+  if (!item) return 'row';
+  const [columns = '1', rows = '1'] = (
+    item.open ? item.openSize : item.size
+  ).split('x');
+  const isWide = columns === '*' || Number(columns) >= 2;
+  if (Number(rows) >= 2) return isWide ? 'tall' : 'upright';
+  return isWide ? 'row' : 'compact';
+};
+
+/**
+ * Its options' segments (a radio group, Base UI's): in a well, the chosen
+ * one's raised (a thumb, moved to it as it's chosen, by its box: its
+ * corners the well's less its padding, a pill while short).
+ */
+const SegmentedChoice = ({
+  layout,
+  name,
+  onValueChange,
+  options,
+  value,
+}: {
+  layout: Exclude<SegmentedLayout, 'compact'>;
+  name: string;
+  onValueChange: (value: string) => void;
+  options: readonly ControlCardSegmentedOption[];
+  value: string;
+}): ReactNode => {
+  const group = useRef<HTMLDivElement>(null);
+  // (Its thumb on the chosen segment, as it's chosen and as its box
+  // changes; moved (transitioned) once it's been placed.)
+  useLayoutEffect(() => {
+    const root = group.current;
+    const thumb = root?.querySelector<HTMLElement>('[data-part="thumb"]');
+    if (!root || !thumb) return undefined;
+    const place = () => {
+      const chosen = root.querySelector<HTMLElement>('[data-checked]');
+      if (!chosen) {
+        thumb.hidden = true;
+        return;
+      }
+      thumb.hidden = false;
+      thumb.style.setProperty(
+        '--uikit-control-cards-thumb-x',
+        `${String(chosen.offsetLeft)}px`,
+      );
+      thumb.style.setProperty(
+        '--uikit-control-cards-thumb-y',
+        `${String(chosen.offsetTop)}px`,
+      );
+      thumb.style.setProperty(
+        '--uikit-control-cards-thumb-width',
+        `${String(chosen.offsetWidth)}px`,
+      );
+      thumb.style.setProperty(
+        '--uikit-control-cards-thumb-height',
+        `${String(chosen.offsetHeight)}px`,
+      );
+    };
+    place();
+    const frame = requestAnimationFrame(() => {
+      root.dataset.placed = '';
+    });
+    const observer = new ResizeObserver(place);
+    observer.observe(root);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [layout, options, value]);
+  return (
+    <BaseRadioGroup
+      ref={group}
+      aria-label={name}
+      className="uikit-control-cards-segmented-choice"
+      data-control-cards-part="segmented-choice"
+      data-layout={layout}
+      value={value}
+      onValueChange={(next) => onValueChange(next as string)}
+    >
+      <span
+        aria-hidden="true"
+        className="uikit-control-cards-segmented-thumb"
+        data-part="thumb"
+      />
+      {options.map((option) => (
+        <BaseRadio.Root
+          key={option.value}
+          className="uikit-control-cards-segmented-item"
+          value={option.value}
+        >
+          {layout !== 'row' && option.icon ? (
+            <Symbol icon={option.icon} />
+          ) : null}
+          <span className="uikit-control-cards-segmented-label">
+            {option.label}
+          </span>
+        </BaseRadio.Root>
+      ))}
+    </BaseRadioGroup>
+  );
+};
+
+/**
+ * A device of a few modes (e.g. a heat pump's Off, Heat, Cool, Auto): its
+ * options as segments in a well at its bottom (see `SegmentedChoice`), laid
+ * out by its size (see `useSegmentedLayout`); 1x1, its chosen option's
+ * words only, opening above the page to choose (`opening`). Lit while its
+ * chosen option isn't its `offValue`; its symbol the chosen option's.
+ */
+const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
+  (
+    {
+      children,
+      className,
+      defaultValue,
+      emphasizedIcon,
+      icon,
+      name,
+      offValue,
+      onClick,
+      onValueChange,
+      opening,
+      options,
+      tint,
+      value,
+      ...props
+    },
+    ref,
+  ) => {
+    const [current, setCurrent] = useControlled(
+      value,
+      defaultValue ?? options[0]?.value ?? '',
+    );
+    const layout = useSegmentedLayout();
+    const item = useGridItem();
+    const chosen = options.find((option) => option.value === current);
+    const isCompact = layout === 'compact';
+    return (
+      <Card.Root
+        ref={ref}
+        active={offValue === undefined ? undefined : current !== offValue}
+        {...props}
+        className={cn('uikit-control-cards-segmented', className)}
+        data-control-cards-part="segmented"
+        data-layout={layout}
+        onClick={
+          onClick ??
+          (isCompact && opening ? () => item?.setOpen(true) : undefined)
+        }
+      >
+        <Card.Symbol tint={chosen?.tint ?? tint}>
+          {chosen?.icon ? (
+            <Symbol icon={chosen.icon} />
+          ) : (
+            symbolOf({ emphasizedIcon, icon })
+          )}
+        </Card.Symbol>
+        <Card.Title>{name}</Card.Title>
+        {layout === 'row' ? null : <Card.Value>{chosen?.label}</Card.Value>}
+        {isCompact ? null : (
+          <SegmentedChoice
+            layout={layout}
+            name={name}
+            options={options}
+            value={current}
+            onValueChange={(next) => {
+              setCurrent(next);
+              onValueChange?.(next);
+            }}
+          />
+        )}
+        {/* (Its corner buttons, as a list card's: one opening it, 1x1;
+            open, an x in its top trailing corner, clear of its symbol.) */}
+        {opening ? (
+          <>
+            <Card.CornerButton
+              aria-label={opening.label}
+              icon={gridIcons.open}
+              visible={isCompact && item?.open !== true}
+              onClick={() => item?.setOpen(true)}
+            />
+            <Card.CornerButton
+              aria-label={opening.closeLabel}
+              corner="top-trailing"
+              icon={gridIcons.close}
+              visible={item?.open === true}
+              onClick={() => item?.setOpen(false)}
+            />
+          </>
+        ) : null}
+        {children}
+      </Card.Root>
+    );
+  },
+);
+
 export const ControlCards = {
   State,
   Switch: SwitchCard,
@@ -1109,6 +1509,7 @@ export const ControlCards = {
   Progress: ProgressCard,
   Light,
   List: ListCard,
+  Segmented: SegmentedCard,
   Channels,
   Trend,
   ExpandButton,

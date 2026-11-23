@@ -11,6 +11,7 @@ import {
   type ControlCardOpenButtonsProps,
   type ControlCardProgressProps,
   ControlCards,
+  type ControlCardSegmentedProps,
   type ControlCardSliderFillProps,
   type ControlCardSliderProps,
   type ControlCardStateProps,
@@ -50,6 +51,7 @@ import {
   controlCardsListRows,
   controlCardsOpenButtonsRows,
   controlCardsProgressRows,
+  controlCardsSegmentedRows,
   controlCardsSliderFillRows,
   controlCardsSliderRows,
   controlCardsStateRows,
@@ -68,10 +70,11 @@ import {
   getPropOptionsChannels,
   getPropOptionsExpandButton,
   getPropOptionsLight,
+  getPropOptionsList,
+  getPropOptionsSegmented,
   getPropOptionsSlider,
   getPropOptionsSliderFill,
   getPropOptionsSwitch,
-  propOptionsList,
   propOptionsOpenButtons,
   propOptionsProgress,
   propOptionsState,
@@ -379,14 +382,39 @@ const LightPart: FunctionComponent = () => (
 const ListPart: FunctionComponent = () => (
   <PartView
     id="control-cards-parts-list"
-    options={propOptionsList}
+    options={getPropOptionsList}
     part="ControlCards.List"
+    tilesOf={(props) => {
+      // (Its size by its expansion's `expanded`: the app's, here the
+      // controls'; opened above the page, larger.)
+      const { expansion } = props as ControlCardListProps;
+      return [
+        {
+          card: <ControlCards.List {...(props as ControlCardListProps)} />,
+          name: 'List',
+          openSize: '4x3',
+          size: expansion?.expanded ? expansion.expandedSize : '2x2',
+          sizes: ['2x2', '2x3', '3x3'],
+        },
+      ];
+    }}
+  />
+);
+
+const SegmentedPart: FunctionComponent = () => (
+  <PartView
+    id="control-cards-parts-segmented"
+    options={getPropOptionsSegmented}
+    part="ControlCards.Segmented"
     tilesOf={(props) => [
       {
-        card: <ControlCards.List {...(props as ControlCardListProps)} />,
-        name: 'List',
-        size: '2x2',
-        sizes: ['2x2', '2x3', '3x3'],
+        card: (
+          <ControlCards.Segmented {...(props as ControlCardSegmentedProps)} />
+        ),
+        name: 'Segmented',
+        openSize: '2x1',
+        size: '2x1',
+        sizes: ['1x1', '2x1', '1x2', '2x2'],
       },
     ]}
   />
@@ -616,14 +644,21 @@ export const ControlCardsParts: FunctionComponent = () => (
             <PartLink part="ControlCards.Slider" />,{' '}
             <PartLink part="ControlCards.Button" />,{' '}
             <PartLink part="ControlCards.Progress" />,{' '}
-            <PartLink part="ControlCards.Light" /> or{' '}
-            <PartLink part="ControlCards.List" />
+            <PartLink part="ControlCards.Light" />
             <ul>
               <li>
                 <PartLink part="ControlCards.ExpandButton" /> or{' '}
                 <PartLink part="ControlCards.OpenButtons" /> (optional)
               </li>
             </ul>
+          </li>
+          <li>
+            <PartLink part="ControlCards.Segmented" /> (its own corner buttons,
+            through its opening prop)
+          </li>
+          <li>
+            <PartLink part="ControlCards.List" /> (its own corner buttons,
+            through its opening and expansion props)
           </li>
           <li>
             <span>or your own</span>{' '}
@@ -764,7 +799,18 @@ export const ControlCardsParts: FunctionComponent = () => (
       part="ControlCards.List"
       rows={controlCardsListRows}
       bullets={[
-        'A summary in rows, for example a room’s or a device’s details: as many rows as fit whole, so open above the page, it shows more.',
+        'A summary in rows, for example a room’s or a device’s details, in a well at the card’s bottom: as many rows as fit whole. Their symbols sit under the card’s symbol, their labels where its title starts.',
+        'When rows are left out, the last row counts them and expands the card or opens it above the page, showing the corner symbol for that. Expanded, the last row makes it small again. An invisible corner button over that row does the same, so a touch near the corner has a large target. Open, an × in its top trailing corner closes it, clear of its symbol.',
+      ]}
+    />
+    <Section
+      Demo={SegmentedPart}
+      part="ControlCards.Segmented"
+      rows={controlCardsSegmentedRows}
+      bullets={[
+        'A device of a few modes, for example a heat pump’s Off, Heat, Cool and Auto: its options as segments in a well at its bottom, the chosen one raised. Built on Base UI’s RadioGroup, so the arrow keys move between them.',
+        'Its tile’s size sets its layout. Across a row, its symbol and title sit on the top line and the segments show their labels. Taller, its title and value sit as on any card, and each segment shows its symbol over its label. One wide and taller, the options stack. At 1x1 it only shows the chosen option and opens above the page to choose.',
+        'It’s lit while the chosen option isn’t its off option, and its symbol and tint are the chosen option’s.',
       ]}
     />
     <Section
@@ -853,6 +899,7 @@ export const controlCardsPartsDemos = [
   ProgressPart,
   LightPart,
   ListPart,
+  SegmentedPart,
   ChannelsPart,
   TrendPart,
   ExpandButtonPart,

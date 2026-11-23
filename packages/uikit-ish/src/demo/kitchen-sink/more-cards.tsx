@@ -282,6 +282,17 @@ const DeviceCard: FunctionComponent<{ expansion?: Expansion }> = ({
       icon={sfAntennaRadiowavesLeftAndRight}
       name={name}
       status={isExpanded ? 'Online' : `Online · ${agoOf(heard, now)}`}
+      expansion={
+        expansion
+          ? {
+              collapsedSize: expansion.collapsedSize,
+              expanded: expansion.isExpanded,
+              expandedSize: expansion.expandedSize,
+              label: `${name} details`,
+              onExpandedChange: expansion.onToggle,
+            }
+          : undefined
+      }
       rows={
         isExpanded
           ? [
@@ -295,12 +306,6 @@ const DeviceCard: FunctionComponent<{ expansion?: Expansion }> = ({
       }
     >
       <FlipParts />
-      {expansion ? (
-        <ExpandButton
-          expansion={expansion}
-          name={name}
-        />
-      ) : null}
     </Toned.List>
   );
 };
@@ -404,6 +409,7 @@ const RoomCard: FunctionComponent = () => {
     <Toned.List
       icon={sfHouseFill}
       name={name}
+      opening={{ closeLabel: 'Close', label: `${name} details` }}
       rows={[
         {
           icon: sfLightbulbFill,
@@ -437,7 +443,6 @@ const RoomCard: FunctionComponent = () => {
       ]}
     >
       <FlipParts />
-      <OpenButtons name={name} />
     </Toned.List>
   );
 };
