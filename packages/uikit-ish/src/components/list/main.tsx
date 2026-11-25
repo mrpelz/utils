@@ -3076,10 +3076,38 @@ const IndexItem = forwardRef<HTMLElement, ListIndexItemProps>(
 );
 
 /**
+ * What takes its own presses in a row or a card (see `forwardClick`): a
+ * control (a button, a link, a field, a radio, a slider…), or what's
+ * marked so (`data-card-own-press`, e.g. a card's channels, its choice).
+ */
+const ownPressSelector = [
+  'a[href]',
+  'button',
+  'input',
+  'label',
+  'select',
+  'textarea',
+  '[contenteditable=""]',
+  '[contenteditable="true"]',
+  '[role=button]',
+  '[role=checkbox]',
+  '[role=link]',
+  '[role=menuitem]',
+  '[role=option]',
+  '[role=radio]',
+  '[role=slider]',
+  '[role=switch]',
+  '[role=tab]',
+  '[data-card-own-press]',
+].join(', ');
+
+/**
  * A row's click handler passing the click on to the control in it
  * (`selector`, e.g. `[role=switch]`), as native rows do, unless it was the
- * control's own: `<List.Item onClick={forwardClick('[role=switch]')}>`. As
- * the click it is: a pointer's (`detail` > 0) or a keyboard's (a control's
+ * control's own, or another one's in it (a button, a radio, a slider…, or
+ * what's marked `data-card-own-press`: e.g. a card's channels, its
+ * choice): `<List.Item onClick={forwardClick('[role=switch]')}>`. As the
+ * click it is: a pointer's (`detail` > 0) or a keyboard's (a control's
  * `click()` would be a keyboard's, so menus would open with their first
  * item highlighted).
  */
@@ -3091,6 +3119,10 @@ export const forwardClick =
     if (!control || (target instanceof Node && control.contains(target))) {
       return;
     }
+    // (Another control's press, in it: that one's own.)
+    const own =
+      target instanceof Element ? target.closest(ownPressSelector) : null;
+    if (own && own !== currentTarget && currentTarget.contains(own)) return;
     control.dispatchEvent(new globalThis.MouseEvent('click', event));
   };
 

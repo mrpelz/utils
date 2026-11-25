@@ -918,8 +918,8 @@ export const SliderParts: FunctionComponent = () => (
         For a slider filling a card, with its label and value drawn again inside
         the fill, see{' '}
         <PartLink
-          component="control-cards"
-          part="ControlCards.SliderFill"
+          component="card"
+          part="Card.Slider"
         />
         .
       </li>
@@ -1044,8 +1044,8 @@ export const SliderParts: FunctionComponent = () => (
       <li>
         In a slider filling a card (
         <PartLink
-          component="control-cards"
-          part="ControlCards.SliderFill"
+          component="card"
+          part="Card.Slider"
         />
         ), they’re lines across the card.
       </li>

@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo } from 'react';
+import { Fragment, FunctionComponent, useMemo } from 'react';
 
 import { cardSizes } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -15,6 +15,7 @@ import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
+import { cardBlockDemos, CardBlockSections } from './blocks.js';
 import { type CardTile, cardTiles, partsOfTiles } from './content.js';
 import {
   cardCornerButtonRows,
@@ -39,7 +40,7 @@ import {
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in a code sample, not interpolations */
 const useCardOrientationCode = `import { Card, useCardOrientation } from '@mrpelz/uikit-ish';
 
-// ControlCards' SliderFill (and so the slider cards) reads it itself: its
+// Card.Slider (and so the slider cards) reads it itself: its
 // slider across a wide tile, upright in a tall one. For content of your
 // own, read it in the component rendering the card (inside its Grid.Item):
 // a battery's level, a bar along its tile.
@@ -78,7 +79,7 @@ const PartView: FunctionComponent<{
   const [log, addLog] = useLog();
   const stage = useCardsStage(addLog);
   const [external] = useProvidedState(id);
-  const [control, props, state] = usePropControl(
+  const [control, props, state, elementKey] = usePropControl(
     useMemo(
       () => (typeof options === 'function' ? options(addLog) : options),
       [addLog, options],
@@ -90,15 +91,19 @@ const PartView: FunctionComponent<{
       title: part,
     },
   );
-  const [partControls, partProps, partState] = usePartControls(
+  const [partControls, partProps, partState, partsKey] = usePartControls(
     useMemo(() => {
       const { [part]: featured = [], ...others } = cardParts;
+      // (On some cards only: its other instances' group, if the others
+      // render it at all.)
+      const elsewhere =
+        on &&
+        partsOfTiles(cardTiles.filter(({ name }) => !on.includes(name)))[part];
       return partPropMaps(
         {
           ...stageParts,
           ...others,
-          // (On some cards only: its other instances' group.)
-          ...(on && { [`${part} (others)`]: featured }),
+          ...(elsewhere && { [`${part} (others)`]: featured }),
         },
         addLog,
       );
@@ -108,6 +113,16 @@ const PartView: FunctionComponent<{
 
   const [presentationControl, presentation, presentationState] =
     usePresentation(id);
+  // (Only those set: the cards spread a part's props after their own, so
+  // an unset one (`undefined`) mustn't override theirs, e.g. a switch's
+  // `checked`, as the other parts' groups don't.)
+  const setProps = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(props).filter(([, value]) => value !== undefined),
+      ),
+    [props],
+  );
 
   return (
     <Component
@@ -119,13 +134,17 @@ const PartView: FunctionComponent<{
       state={[state, partState, presentationState]}
       title={part}
     >
-      {cardsStage(stage, partProps, (name) => ({
-        ...partProps,
-        [part]:
-          on === undefined || on.includes(name)
-            ? props
-            : (partProps[`${part} (others)`] ?? {}),
-      }))}
+      {/* (Mounted anew as a control changes: a default is read as it
+          mounts.) */}
+      <Fragment key={`${elementKey}-${partsKey}`}>
+        {cardsStage(stage, partProps, (name) => ({
+          ...partProps,
+          [part]:
+            on === undefined || on.includes(name)
+              ? setProps
+              : (partProps[`${part} (others)`] ?? {}),
+        }))}
+      </Fragment>
     </Component>
   );
 };
@@ -214,7 +233,7 @@ const OrientationPart: FunctionComponent = () => {
   const id = 'card-parts-use-card-orientation';
   const [log, addLog] = useLog();
   const stage = useCardsStage(addLog, orientationTiles);
-  const [partControls, partProps, partState] = usePartControls(
+  const [partControls, partProps, partState, partsKey] = usePartControls(
     useMemo(
       () =>
         partPropMaps(
@@ -239,7 +258,7 @@ const OrientationPart: FunctionComponent = () => {
       state={[partState, presentationState]}
       title="useCardOrientation"
     >
-      {cardsStage(stage, partProps)}
+      <Fragment key={partsKey}>{cardsStage(stage, partProps)}</Fragment>
     </Component>
   );
 };
@@ -249,7 +268,15 @@ export const CardParts: FunctionComponent = () => (
   <>
     <ul className="demo-lead">
       <li>Root: the glass surface, in a grid’s tile or on its own.</li>
-      <li>Symbol, Title, Value: what it shows.</li>
+      <li>Symbol, Title, Subtitle, Value, Trend: what it shows.</li>
+      <li>
+        Slider, Progress, StageList, Channels, Segmented, Rows: what fills its
+        bottom, each composed of its own parts.
+      </li>
+      <li>
+        CornerButton, ExpandButton, OpenButton, CloseButton: what’s more to it,
+        by its tile’s state.
+      </li>
       <li>
         Switch: its switch, in the card’s tint. Or a{' '}
         <PartLink
@@ -269,7 +296,7 @@ export const CardParts: FunctionComponent = () => (
           (optional: its tile, with its <code>supportedSizes</code> from
         </span>{' '}
         <PartLink part="cardSizes" />
-        <span>)</span>
+        <span>; its expandedSize and openSize for the corner buttons)</span>
         <ul>
           <li>
             <PartLink part="Card.Root" />
@@ -281,21 +308,91 @@ export const CardParts: FunctionComponent = () => (
                 <PartLink part="Card.Title" />
               </li>
               <li>
-                <PartLink part="Card.Value" /> (optional)
+                <PartLink part="Card.Subtitle" /> (optional)
               </li>
               <li>
-                <PartLink part="Card.CornerButton" /> (optional, several)
+                <PartLink part="Card.Value" /> (optional)
+                <ul>
+                  <li>
+                    <PartLink part="Card.Trend" /> (optional)
+                  </li>
+                </ul>
               </li>
               <li>
                 <PartLink part="Card.Switch" /> (optional)
               </li>
               <li>
-                <PartLink
-                  component="slider"
-                  part="Slider.Root"
-                />{' '}
-                (optional; the slider’s orientation from{' '}
-                <PartLink part="useCardOrientation" />)
+                one of:
+                <ul>
+                  <li>
+                    <PartLink part="Card.Slider" />, or a plain{' '}
+                    <PartLink
+                      component="slider"
+                      part="Slider.Root"
+                    />{' '}
+                    (its orientation from <PartLink part="useCardOrientation" />
+                    )
+                  </li>
+                  <li>
+                    <PartLink part="Card.Progress" />
+                    <ul>
+                      <li>
+                        <PartLink part="Card.ProgressValue" /> (optional)
+                      </li>
+                      <li>
+                        <PartLink part="Card.ProgressBar" />
+                        <ul>
+                          <li>
+                            <PartLink part="Card.ProgressLabel" />,{' '}
+                            <PartLink part="Card.ProgressDetail" /> (optional)
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <PartLink part="Card.StageList" />
+                    <ul>
+                      <li>
+                        <PartLink part="Card.Stage" /> (several)
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <PartLink part="Card.Channels" />
+                    <ul>
+                      <li>
+                        <PartLink part="Card.Channel" /> (several)
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <PartLink part="Card.Segmented" />
+                    <ul>
+                      <li>
+                        <PartLink part="Card.SegmentedItem" /> (several)
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <PartLink part="Card.Rows" />, or a plain{' '}
+                    <PartLink
+                      component="list"
+                      part="List.Root"
+                    />
+                    <ul>
+                      <li>
+                        <PartLink part="Card.Row" /> (several)
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <PartLink part="Card.CornerButton" />,{' '}
+                <PartLink part="Card.ExpandButton" />,{' '}
+                <PartLink part="Card.OpenButton" />,{' '}
+                <PartLink part="Card.CloseButton" /> (optional, several)
               </li>
             </ul>
           </li>
@@ -350,8 +447,8 @@ export const CardParts: FunctionComponent = () => (
       <li>
         A slider filling it with{' '}
         <PartLink
-          component="control-cards"
-          part="ControlCards.SliderFill"
+          component="card"
+          part="Card.Slider"
         />{' '}
         has an opaque fill, and everything over it is drawn twice: on the card,
         and inside the fill in the text color for the fill’s tone. The card’s{' '}
@@ -617,6 +714,8 @@ export const CardParts: FunctionComponent = () => (
     <h3>Props</h3>
     <PropsTable rows={cardCornerButtonRows} />
 
+    <CardBlockSections />
+
     <Heading
       id="cardsizes"
       level={2}
@@ -644,8 +743,8 @@ export const CardParts: FunctionComponent = () => (
       </li>
       <li>
         <PartLink
-          component="control-cards"
-          part="ControlCards.SliderFill"
+          component="card"
+          part="Card.Slider"
         />{' '}
         reads it itself, so a slider card turns as it’s resized from wide to
         tall, as these two do in edit mode.
@@ -675,5 +774,6 @@ export const cardPartsDemos = [
   TitlePart,
   ValuePart,
   CornerButtonPart,
+  ...cardBlockDemos,
   OrientationPart,
 ];

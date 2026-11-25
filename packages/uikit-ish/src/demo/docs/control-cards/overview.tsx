@@ -7,21 +7,16 @@ import { usePartControls } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
 import { publicUrl } from '../../tooling/public-url.js';
+import { stageParts, tileStage, useStageOpen } from '../card/stage.js';
 import { partPropMaps } from '../part-options.js';
-import {
-  controlCardsStage,
-  everyCardOf,
-  everyCardParts,
-  stageParts,
-  useStageOpen,
-} from './main.js';
+import { everyCardOf, everyCardParts } from './main.js';
 
 /** One of each card, in a grid on a phone. */
 const LiveView: FunctionComponent = () => {
   const id = 'control-cards-overview';
   const [log, addLog] = useLog();
   const open = useStageOpen();
-  const [partControls, partProps, partState] = usePartControls(
+  const [partControls, partProps, partState, partsKey] = usePartControls(
     useMemo(
       () => partPropMaps({ ...stageParts, ...everyCardParts }, addLog),
       [addLog],
@@ -41,7 +36,7 @@ const LiveView: FunctionComponent = () => {
       state={[partState, presentationState]}
       title="ControlCards"
     >
-      {controlCardsStage(everyCardOf(partProps), partProps, open)}
+      {tileStage(everyCardOf(partProps), partProps, open, partsKey)}
     </Component>
   );
 };
@@ -70,8 +65,9 @@ export const ControlCardsOverview: FunctionComponent = () => (
         ).
       </li>
       <li>
-        The parts they’re built of are there for cards of your own: a slider
-        filling a card, a light’s channels, a trend arrow, and corner buttons
+        They’re composed of Card’s parts, and the composed ones (a progress,
+        stages, a light, rows, a choice) take those parts as their children: a
+        slider filling a card, a light’s channels, a trend arrow, corner buttons
         that expand a card or open it above the page.
       </li>
     </ul>
@@ -94,8 +90,12 @@ export const ControlCardsOverview: FunctionComponent = () => (
           component="card"
           part="Card.Root"
         />{' '}
-        and its parts, and take the pieces you need from here, for example{' '}
-        <PartLink part="ControlCards.SliderFill" />.
+        and its parts, for example a{' '}
+        <PartLink
+          component="card"
+          part="Card.Slider"
+        />
+        .
       </li>
       <li>
         A slider card reads with any tint: what’s over its fill is drawn again

@@ -1000,9 +1000,11 @@ export const GlossaryPage: FunctionComponent = () => (
         ).
       </Term>
       <Term term="Expanding">
-        A tile made larger in place by the app, usually from a corner button:
-        the app changes its size and keeps which tiles are expanded. The tile
-        moves and resizes to its new box, the tiles after it reflow, and in an{' '}
+        A tile made larger in place, usually from a corner button: shown at its
+        item’s <code>expandedSize</code> while it’s <code>expanded</code> (the
+        app’s state, or the item’s own), its own size staying as it is, and made
+        small again as <See term="Edit mode" /> starts. The tile moves and
+        resizes to its new box, the tiles after it reflow, and in an{' '}
         <See term="Area" /> it grows within its room. What’s in it is laid out
         at the new size from the start; moving it from where it was is the app’s
         (
@@ -1013,8 +1015,8 @@ export const GlossaryPage: FunctionComponent = () => (
         ). A button for it hides while expanding would change nothing, for
         example when the grid has too few columns for the larger size (
         <PartLink
-          component="control-cards"
-          part="ControlCards.ExpandButton"
+          component="card"
+          part="Card.ExpandButton"
         />
         ).
       </Term>
@@ -1050,9 +1052,9 @@ export const GlossaryPage: FunctionComponent = () => (
       <Term term="Ready-made card">
         A card set up for one kind of device, from{' '}
         <Docs to="control-cards">ControlCards</Docs>: a switch, a state, a
-        value, a slider, a button, a progress, a light, rows. Each is a{' '}
-        <Docs to="card">Card</Docs> with its parts; the pieces they’re built of
-        are there for cards of your own.
+        value, a slider, a button, a progress, stages, a light, rows, a choice.
+        Each is a <Docs to="card">Card</Docs> composed of its parts, which are
+        there for cards of your own.
       </Term>
       <Term term="Momentary card">
         A <Docs to="card">Card</Docs> for something that happens rather than

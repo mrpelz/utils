@@ -1,15 +1,8 @@
 import '../card/style.css';
 
-import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
+import { FunctionComponent, useMemo } from 'react';
 
-import {
-  cardSizes,
-  ControlCards,
-  Grid,
-  type GridSize,
-  Page,
-  Viewport,
-} from '../../../components/index.js';
+import { Card, cardSizes, ControlCards } from '../../../components/index.js';
 import { cardTints } from '../../tooling/card-kit.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -19,7 +12,6 @@ import {
   usePartControls,
 } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
-import { gridSigns } from '../../tooling/grid-signs.js';
 import {
   sfBell,
   sfBellFill,
@@ -41,99 +33,13 @@ import {
   sfWasherFill,
   sfWindowShadeClosed,
 } from '../../tooling/icons.js';
+import {
+  stageParts,
+  type StageTile,
+  tileStage,
+  useStageOpen,
+} from '../card/stage.js';
 import { partPropMaps } from '../part-options.js';
-
-/** A tile on the stage (see `controlCardsStage`): its card and sizes. */
-export type StageTile = {
-  card: ReactNode;
-  name: string;
-  /** Its size opened above the page (none: it doesn't open). */
-  openSize?: GridSize;
-  size: GridSize;
-  sizes: readonly GridSize[];
-};
-
-/** Which tile is open above the page (the app's state; see the stage). */
-export const useStageOpen = (): readonly [
-  string | undefined,
-  (name: string, open: boolean) => void,
-] => {
-  const [opened, setOpened] = useState<string | undefined>(undefined);
-  return [opened, (name, open) => setOpened(open ? name : undefined)] as const;
-};
-
-/**
- * A phone's page of control cards on a picture, in a grid: each tile its
- * card, its size, its supported sizes, opening above the page where it has
- * a size for that. Its parts' props from `partProps`. A function returning
- * its JSX, called in the demo (not a component): the demo's code shows the
- * parts as written.
- */
-export const controlCardsStage = (
-  tiles: readonly StageTile[],
-  partProps: PartProps,
-  [opened, setOpen]: ReturnType<typeof useStageOpen>,
-): ReactNode => (
-  <>
-    <Viewport.Background>
-      <div
-        aria-hidden="true"
-        className="demo-picture"
-      />
-    </Viewport.Background>
-    <Viewport.Content {...partProps['Viewport.Content']}>
-      <Page.Root
-        {...partProps['Page.Root']}
-        className={['card-demo-page', partProps['Page.Root']?.className]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        <Viewport.Padding edge="block-start" />
-        <div className="card-demo-content">
-          <Grid.Root
-            {...partProps['Grid.Root']}
-            style={gridSigns(partProps['Grid.Root']?.style)}
-          >
-            {tiles.map(({ card, name, openSize, size, sizes }) => (
-              <Grid.Item
-                key={name}
-                {...partProps['Grid.Item']}
-                dropName={name}
-                size={size}
-                supportedSizes={sizes}
-                {...(openSize && {
-                  open: opened === name,
-                  openLabel: name,
-                  openSize,
-                })}
-                onOpenChange={(open) => setOpen(name, open)}
-              >
-                {card}
-              </Grid.Item>
-            ))}
-          </Grid.Root>
-        </div>
-        <Viewport.Padding edge="block-end" />
-      </Page.Root>
-    </Viewport.Content>
-  </>
-);
-
-/** The parts the stage shows (see `controlCardsStage`), the props it sets. */
-export const stageParts = {
-  'Grid.Item': [
-    'dropName',
-    'onOpenChange',
-    'open',
-    'openLabel',
-    'openSize',
-    'size',
-    'supportedSizes',
-  ],
-  'Grid.Root': [],
-  'Page.Root': [],
-  'Viewport.Content': [],
-} as const;
 
 const percent = { maximumFractionDigits: 0, style: 'percent' } as const;
 
@@ -149,7 +55,7 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         defaultChecked
         emphasizedIcon={sfLightbulbFill}
         icon={sfLightbulb}
-        name="Floor Lamp"
+        label="Floor Lamp"
       />
     ),
     name: 'Floor Lamp',
@@ -162,7 +68,7 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         {...partProps['ControlCards.Switch']}
         emphasizedIcon={sfFanFill}
         icon={sfFan}
-        name="Ceiling Fan"
+        label="Ceiling Fan"
       />
     ),
     name: 'Ceiling Fan',
@@ -179,9 +85,9 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         emphasizedIcon={sfLightbulbFill}
         format={percent}
         icon={sfLightbulb}
+        label="Dimmer"
         max={1}
         min={0}
-        name="Dimmer"
         tint={cardTints.light}
       />
     ),
@@ -196,9 +102,9 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         defaultValue={0.5}
         format={percent}
         icon={sfWindowShadeClosed}
+        label="Blinds"
         max={1}
         min={0}
-        name="Blinds"
         step={0.25}
         tint={cardTints.shade}
       />
@@ -214,7 +120,7 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         active
         emphasizedIcon={sfLockFill}
         icon={sfLockOpen}
-        name="Front Door"
+        label="Front Door"
         states={['Locked', 'Unlocked']}
       />
     ),
@@ -228,7 +134,7 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         {...partProps['ControlCards.Value']}
         format={percent}
         icon={sfHumidityFill}
-        name="Humidity"
+        label="Humidity"
         trend={-20}
         value={0.46}
       />
@@ -241,34 +147,38 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
     card: (
       <ControlCards.Light
         {...partProps['ControlCards.Light']}
+        defaultChecked
         emphasizedIcon={sfLightStrip2Fill}
         icon={sfLightStrip2}
-        name="Light Strip"
+        label="Light Strip"
       >
-        <ControlCards.Channels {...partProps['ControlCards.Channels']}>
-          <ControlCards.Channel
-            {...partProps['ControlCards.Channel']}
-            defaultValue={1}
-            name="Red"
+        <Card.Channels {...partProps['Card.Channels']}>
+          <Card.Channel
+            {...partProps['Card.Channel']}
+            defaultValue={100}
+            label="Red"
             tint="#ff3b30"
           />
-          <ControlCards.Channel
-            {...partProps['ControlCards.Channel']}
-            defaultValue={0.6}
-            name="Green"
+          <Card.Channel
+            {...partProps['Card.Channel']}
+            defaultValue={60}
+            label="Green"
             tint="#34c759"
           />
-          <ControlCards.Channel
-            {...partProps['ControlCards.Channel']}
-            defaultValue={0.2}
-            name="Blue"
+          <Card.Channel
+            {...partProps['Card.Channel']}
+            defaultValue={20}
+            label="Blue"
             tint="#0a84ff"
           />
-        </ControlCards.Channels>
-        <ControlCards.OpenButtons
-          {...partProps['ControlCards.OpenButtons']}
-          closeLabel="Close"
-          label="Light Strip details"
+        </Card.Channels>
+        <Card.OpenButton
+          {...partProps['Card.OpenButton']}
+          aria-label="Light Strip details"
+        />
+        <Card.CloseButton
+          {...partProps['Card.CloseButton']}
+          aria-label="Close"
         />
       </ControlCards.Light>
     ),
@@ -283,7 +193,7 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         {...partProps['ControlCards.Button']}
         emphasizedIcon={sfBellFill}
         icon={sfBell}
-        name="Doorbell"
+        label="Doorbell"
         status="Quiet"
       />
     ),
@@ -298,21 +208,21 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         active
         emphasizedIcon={sfWasherFill}
         icon={sfWasher}
-        name="Washer"
-        value={53}
+        label="Washer"
       >
-        <ControlCards.ProgressBar {...partProps['ControlCards.ProgressBar']}>
-          <ControlCards.ProgressLabel
-            {...partProps['ControlCards.ProgressLabel']}
-          >
-            Rinsing
-          </ControlCards.ProgressLabel>
-          <ControlCards.ProgressDetail
-            {...partProps['ControlCards.ProgressDetail']}
-          >
-            42 min left
-          </ControlCards.ProgressDetail>
-        </ControlCards.ProgressBar>
+        <Card.Progress
+          {...partProps['Card.Progress']}
+          value={53}
+        >
+          <Card.ProgressBar {...partProps['Card.ProgressBar']}>
+            <Card.ProgressLabel {...partProps['Card.ProgressLabel']}>
+              Rinsing
+            </Card.ProgressLabel>
+            <Card.ProgressDetail {...partProps['Card.ProgressDetail']}>
+              42 min left
+            </Card.ProgressDetail>
+          </Card.ProgressBar>
+        </Card.Progress>
       </ControlCards.Progress>
     ),
     name: 'Washer',
@@ -324,15 +234,43 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
       <ControlCards.List
         {...partProps['ControlCards.List']}
         icon={sfHouseFill}
-        name="Living Room"
-        opening={{ closeLabel: 'Close', label: 'Living Room details' }}
-        rows={[
-          { icon: sfLightbulbFill, label: 'Lights', value: '2 on' },
-          { icon: sfThermometerMedium, label: 'Temperature', value: '21.5 °C' },
-          { icon: sfHumidityFill, label: 'Humidity', value: '46 %' },
-          { icon: sfWindowShadeClosed, label: 'Blinds', value: '50 %' },
-        ]}
-      />
+        label="Living Room"
+      >
+        <Card.Rows {...partProps['Card.Rows']}>
+          <Card.Row
+            {...partProps['Card.Row']}
+            icon={sfLightbulbFill}
+            value="2 on"
+          >
+            Lights
+          </Card.Row>
+          <Card.Row
+            {...partProps['Card.Row']}
+            icon={sfThermometerMedium}
+            value="21.5 °C"
+          >
+            Temperature
+          </Card.Row>
+          <Card.Row
+            {...partProps['Card.Row']}
+            icon={sfHumidityFill}
+            value="46 %"
+          >
+            Humidity
+          </Card.Row>
+          <Card.Row
+            {...partProps['Card.Row']}
+            icon={sfWindowShadeClosed}
+            value="50 %"
+          >
+            Blinds
+          </Card.Row>
+        </Card.Rows>
+        <Card.CloseButton
+          {...partProps['Card.CloseButton']}
+          aria-label="Close"
+        />
+      </ControlCards.List>
     ),
     name: 'Living Room',
     openSize: '4x3',
@@ -343,41 +281,45 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
     card: (
       <ControlCards.Segmented
         {...partProps['ControlCards.Segmented']}
-        defaultValue="heat"
         icon={sfPower}
-        name="Heat Pump"
+        label="Heat Pump"
         offValue="off"
       >
-        <ControlCards.SegmentedItem
-          {...partProps['ControlCards.SegmentedItem']}
-          icon={sfPower}
-          value="off"
+        <Card.Segmented
+          {...partProps['Card.Segmented']}
+          defaultValue="heat"
         >
-          Off
-        </ControlCards.SegmentedItem>
-        <ControlCards.SegmentedItem
-          {...partProps['ControlCards.SegmentedItem']}
-          icon={sfFlameFill}
-          tint={cardTints.heat}
-          value="heat"
-        >
-          Heat
-        </ControlCards.SegmentedItem>
-        <ControlCards.SegmentedItem
-          {...partProps['ControlCards.SegmentedItem']}
-          icon={sfSnowflake}
-          tint={cardTints.shade}
-          value="cool"
-        >
-          Cool
-        </ControlCards.SegmentedItem>
-        <ControlCards.SegmentedItem
-          {...partProps['ControlCards.SegmentedItem']}
-          icon={sfThermometerMedium}
-          value="auto"
-        >
-          Auto
-        </ControlCards.SegmentedItem>
+          <Card.SegmentedItem
+            {...partProps['Card.SegmentedItem']}
+            icon={sfPower}
+            value="off"
+          >
+            Off
+          </Card.SegmentedItem>
+          <Card.SegmentedItem
+            {...partProps['Card.SegmentedItem']}
+            icon={sfFlameFill}
+            tint={cardTints.heat}
+            value="heat"
+          >
+            Heat
+          </Card.SegmentedItem>
+          <Card.SegmentedItem
+            {...partProps['Card.SegmentedItem']}
+            icon={sfSnowflake}
+            tint={cardTints.shade}
+            value="cool"
+          >
+            Cool
+          </Card.SegmentedItem>
+          <Card.SegmentedItem
+            {...partProps['Card.SegmentedItem']}
+            icon={sfThermometerMedium}
+            value="auto"
+          >
+            Auto
+          </Card.SegmentedItem>
+        </Card.Segmented>
       </ControlCards.Segmented>
     ),
     name: 'Heat Pump',
@@ -388,30 +330,35 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
 
 /** The parts `everyCardOf` renders, and the props it sets on them. */
 export const everyCardParts = {
-  'ControlCards.Button': ['emphasizedIcon', 'icon', 'name', 'status'],
-  'ControlCards.Channel': ['defaultValue', 'name', 'tint'],
-  'ControlCards.Channels': ['children'],
-  'ControlCards.Light': ['children', 'emphasizedIcon', 'icon', 'name'],
-  'ControlCards.List': ['icon', 'name', 'opening', 'rows'],
-  'ControlCards.Segmented': [
+  'Card.Channel': ['defaultValue', 'label', 'tint'],
+  'Card.Channels': ['children'],
+  'Card.CloseButton': ['aria-label'],
+  'Card.OpenButton': ['aria-label'],
+  'Card.Progress': ['children', 'value'],
+  'Card.ProgressBar': ['children'],
+  'Card.ProgressDetail': ['children'],
+  'Card.ProgressLabel': ['children'],
+  'Card.Row': ['children', 'icon', 'value'],
+  'Card.Rows': ['children'],
+  'Card.Segmented': ['children', 'defaultValue'],
+  'Card.SegmentedItem': ['children', 'icon', 'tint', 'value'],
+  'ControlCards.Button': ['emphasizedIcon', 'icon', 'label', 'status'],
+  'ControlCards.Light': [
     'children',
-    'defaultValue',
+    'defaultChecked',
+    'emphasizedIcon',
     'icon',
-    'name',
-    'offValue',
+    'label',
   ],
-  'ControlCards.SegmentedItem': ['children', 'icon', 'tint', 'value'],
+  'ControlCards.List': ['children', 'icon', 'label'],
   'ControlCards.Progress': [
     'active',
     'children',
     'emphasizedIcon',
     'icon',
-    'name',
-    'value',
+    'label',
   ],
-  'ControlCards.ProgressBar': ['children'],
-  'ControlCards.ProgressDetail': ['children'],
-  'ControlCards.ProgressLabel': ['children'],
+  'ControlCards.Segmented': ['children', 'icon', 'label', 'offValue'],
   'ControlCards.Slider': [
     'brightness',
     'defaultChecked',
@@ -419,15 +366,15 @@ export const everyCardParts = {
     'emphasizedIcon',
     'format',
     'icon',
+    'label',
     'max',
     'min',
-    'name',
     'step',
     'tint',
   ],
-  'ControlCards.State': ['active', 'emphasizedIcon', 'icon', 'name', 'states'],
-  'ControlCards.Switch': ['defaultChecked', 'emphasizedIcon', 'icon', 'name'],
-  'ControlCards.Value': ['format', 'icon', 'name', 'trend', 'value'],
+  'ControlCards.State': ['active', 'emphasizedIcon', 'icon', 'label', 'states'],
+  'ControlCards.Switch': ['defaultChecked', 'emphasizedIcon', 'icon', 'label'],
+  'ControlCards.Value': ['format', 'icon', 'label', 'trend', 'value'],
 } as const;
 
 /** A phone: one of each control card, in a grid. */
@@ -435,7 +382,7 @@ export const ControlCardsDemo: FunctionComponent = () => {
   const id = 'control-cards';
   const [log, addLog] = useLog();
   const open = useStageOpen();
-  const [partControls, partProps, partState] = usePartControls(
+  const [partControls, partProps, partState, partsKey] = usePartControls(
     useMemo(
       () => partPropMaps({ ...stageParts, ...everyCardParts }, addLog),
       [addLog],
@@ -454,7 +401,7 @@ export const ControlCardsDemo: FunctionComponent = () => {
       state={[partState, presentationState]}
       title="ControlCards"
     >
-      {controlCardsStage(everyCardOf(partProps), partProps, open)}
+      {tileStage(everyCardOf(partProps), partProps, open, partsKey)}
     </Component>
   );
 };

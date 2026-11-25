@@ -426,12 +426,12 @@ export const GridOverview: FunctionComponent = () => (
         spacers and breaks appear and disappear.
       </li>
       <li>
-        A tile can expand, the app changing its size, or open above the page (an
-        item’s <code>open</code>), usually from a{' '}
-        <PartLink part="Grid.CornerButton" /> in it. Either way it moves and
-        resizes to its new box, what’s in it laid out at the new size from the
-        start; <PartLink part="useGridItemLayout" /> tells what’s in it, to move
-        its own parts along (see{' '}
+        A tile can expand in place (an item’s <code>expanded</code>, to its{' '}
+        <code>expandedSize</code>) or open above the page (its <code>open</code>
+        ), usually from a <PartLink part="Grid.CornerButton" /> in it. Either
+        way it moves and resizes to its new box, what’s in it laid out at the
+        new size from the start; <PartLink part="useGridItemLayout" /> tells
+        what’s in it, to move its own parts along (see{' '}
         <a href={publicUrl('grid/composition#expanding-in-place')}>
           Expanding in place
         </a>{' '}

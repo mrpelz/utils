@@ -1036,7 +1036,8 @@ export const forwardClickRows: readonly PropRow[] = [
     <>
       The row’s <code>onClick</code>. It clicks the control as the kind of click
       it is (a pointer’s or a keyboard’s), unless the click was the control’s
-      own.
+      own or another control’s in the row (or marked{' '}
+      <code>data-card-own-press</code>).
     </>,
   ],
 ];

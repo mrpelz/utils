@@ -1766,6 +1766,18 @@ export const GridParts: FunctionComponent = () => (
         Starting edit mode closes it too.
       </li>
       <li>
+        Expanded (<code>expanded</code>, or <PartLink part="useGridItem" />
+        ’s <code>setExpanded</code>), it’s shown at its{' '}
+        <code>expandedSize</code> in place, the grid reflowing around it, while
+        its own size stays as it is. Starting edit mode makes it small again. A
+        card’s{' '}
+        <PartLink
+          component="card"
+          part="Card.ExpandButton"
+        />{' '}
+        does it from its corner.
+      </li>
+      <li>
         Renders a <code>div</code>.
       </li>
     </ul>

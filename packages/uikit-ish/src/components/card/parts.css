@@ -1,0 +1,783 @@
+/* Card's building blocks (see the parts: subtitle, trend, progress,
+   stages, channels, a choice, rows), after its own look (style.css). */
+
+/* (A channel's fill's ends (see below): its part of the fill beyond its
+   share, 18px (half its thumb) between them, none at its least, 36px at
+   its greatest; registered to slide there, not inherited.) */
+@property --uikit-card-channel-ends {
+  inherits: false;
+  initial-value: 18px;
+  syntax: '<length>';
+}
+
+@layer uikit-ish {
+  /* A fill's tint probe (see the parts): unseen, its color the fill's. */
+  .uikit-card-tint-probe {
+    color: var(--uikit-slider-tint);
+  }
+
+  /* A card's subtitle (`Card.Subtitle`): a row of its own under its
+     title (its look below). */
+  .uikit-card-layout:where(:has(> .uikit-card-subtitle)) {
+    grid-template:
+      'symbol control' auto
+      '. .' 1fr
+      'title title' auto
+      'subtitle subtitle' auto
+      'value value' auto / 1fr auto;
+  }
+
+  /* A card's channels (`Card.Channels`): at its bottom, 6px in from
+     its edges (as a list card's well), stacked, whatever its width. */
+  .uikit-card-channels {
+    display: grid;
+    min-width: 0;
+    margin: 10px -8px -6px;
+    gap: 6px;
+    grid-column: 1 / -1;
+    grid-row: -1;
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
+  /* A channel (`Card.Channel`): a pill-shaped well, its thumb round
+     (a white ring), inside it at either end, filled with the light it gives
+     (see the parts). An amount's fill in its tint up to its thumb's center,
+     all the way at its ends (sliding there: its ends' part, below); a
+     scale's colors along it. Its labels placed by main.tsx (sliding, once
+     placed), each in its color scheme (on its fill, or a scale's color). */
+  .uikit-card-channel {
+    min-width: 0;
+
+    /* (Dragged, its words not selected, nor a touch's menu called.) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .uikit-card-channel-well {
+    position: relative;
+    overflow: clip;
+    height: 36px;
+    border-radius: 18px;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    font-size: var(--font-ui-footnote-size, 13px);
+    font-variation-settings: 'wght' 590;
+    font-weight: 600;
+
+    .uikit-card-channel[data-scale] > & {
+      background-image: linear-gradient(
+        to right in srgb-linear,
+        var(--uikit-card-channel-scale)
+      );
+    }
+
+    .uikit-card-channel[data-scale]:dir(rtl) > & {
+      background-image: linear-gradient(
+        to left in srgb-linear,
+        var(--uikit-card-channel-scale)
+      );
+    }
+  }
+
+  .uikit-card-channel-fill {
+    position: absolute;
+    width: calc(
+      var(--uikit-card-channel-ends) +
+        (100% - 36px) * var(--uikit-card-channel-share)
+    );
+    background-color: var(
+      --uikit-card-channel-tint,
+      var(--color-ui-primary)
+    );
+    inset-block: 0;
+    inset-inline-start: 0;
+    pointer-events: none;
+    transition: --uikit-card-channel-ends 200ms ease-out;
+
+    &[data-edge='min'] {
+      --uikit-card-channel-ends: 0px;
+    }
+
+    &[data-edge='max'] {
+      --uikit-card-channel-ends: 36px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: 0s;
+    }
+  }
+
+  .uikit-card-channel-label,
+  .uikit-card-channel-value {
+    position: absolute;
+    color: var(--uikit-glass-content);
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    line-height: 36px;
+    pointer-events: none;
+    white-space: nowrap;
+
+    .uikit-card-channel-well[data-placed] > & {
+      transition:
+        translate 260ms cubic-bezier(0.3, 0.7, 0.2, 1),
+        color 160ms;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .uikit-card-channel-well[data-placed] > & {
+        transition: none;
+      }
+    }
+  }
+
+  .uikit-card-channel-value {
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: normal;
+    font-weight: 500;
+  }
+
+  /* (Its control 4px in from its well's edges: its thumb so far in at
+     either end, see the parts.) */
+  .uikit-card-channel-control {
+    position: absolute;
+    inset: 4px;
+    touch-action: pan-y;
+  }
+
+  .uikit-card-channel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .uikit-card-channel-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--uikit-card-channel-light);
+    box-shadow:
+      0 0 0 3px #fff,
+      0 1px 4px 3px rgb(0 0 0 / 18%);
+
+    /* (Focused by keys: its ring in the focus color, not an outline around
+       it: clipped by its well at its ends.) */
+    &:has(:focus-visible) {
+      box-shadow:
+        0 0 0 3px var(--color-ui-primary),
+        0 1px 4px 3px rgb(0 0 0 / 18%);
+    }
+  }
+
+  /* (A corner button in its bottom trailing corner (e.g. collapsing it):
+     its channels' last well ends before its target (44px from the card's
+     edges, the well 6px in), the rest of the stack as wide as ever; a bar
+     or stages end above it, beside it in a tile a row tall.) */
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button[data-grid-corner='bottom-trailing']:not([data-grid-hidden]), > .uikit-card-edit-layer > .uikit-card-corner-button[data-grid-corner='bottom-trailing']:not([data-grid-hidden])) > .uikit-card-frame > .uikit-card-layout {
+    > .uikit-card-channels > :last-child {
+      margin-inline-end: 38px;
+    }
+
+    > :is(.uikit-card-progress-bar, .uikit-card-stage-list) {
+      margin-block-end: 10px;
+    }
+
+    /* (In a tile a row tall, no room above it: a bar or stages end before
+       its target instead, as the last channel does.) */
+    @container uikit-card (height < 180px) {
+      > :is(.uikit-card-progress-bar, .uikit-card-stage-list) {
+        margin-block-end: -6px;
+        margin-inline-end: 38px;
+      }
+    }
+  }
+
+  /* (A light card's value small beside its channels, whatever its size:
+     no room for a large one.) */
+  .uikit-card-layout:where(:has(> .uikit-card-channels:not([hidden])))
+    > .uikit-card-value {
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-subheadline-size);
+    font-variation-settings: normal;
+    font-weight: normal;
+    line-height: var(--font-ui-subheadline-line-height);
+  }
+
+  /* A list card's last row (`Card.Rows`): its label quiet (the
+     glass's secondary color), the corner symbol at its end in its text's
+     color, as a value would be. */
+  .uikit-card-rows [data-card-part='rows-action'] {
+    [data-list-part='title'] {
+      color: var(--uikit-glass-content-secondary);
+    }
+
+    [data-list-part='detail'] {
+      display: flex;
+      color: var(--uikit-glass-content);
+    }
+  }
+
+  /* (A list card's corner button over its last row (see the parts): its hit
+     area only, nothing drawn.) */
+  .uikit-card-rows-hit-area.uikit-card-corner-button {
+    opacity: 0;
+  }
+
+  /* A card with a choice (`Card.Segmented`), by its layout (see
+     segmented.tsx): a row, its symbol and title on its top line, its
+     options across its bottom; taller, its title and value as any card's,
+     its options under them; upright, stacked in all the room below; 1x1,
+     as any card. Its value small, whatever its size (its options are
+     what's large). */
+  .uikit-card-layout:where(:has(> .uikit-card-segmented)) {
+    /* (Its symbol (a ready-made card's: the chosen option's) in a slot of
+       its own height, the same whichever it is (icons' heights differ),
+       nothing below it moving as another's chosen.) */
+    > .uikit-card-symbol {
+      height: 24px;
+    }
+
+    > .uikit-card-value {
+      color: var(--uikit-glass-content-secondary);
+      font-size: var(--font-ui-subheadline-size);
+      font-variation-settings: normal;
+      font-weight: normal;
+      line-height: var(--font-ui-subheadline-line-height);
+    }
+  }
+
+  .uikit-card-layout:has(> .uikit-card-segmented[data-layout='row']) {
+    align-items: center;
+    grid-template:
+      'symbol title' auto
+      '. .' 1fr
+      'choice choice' auto / auto 1fr;
+
+    /* (An x in its top trailing corner (open above the page): its title
+       clear of it.) */
+    &:has(> .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden]))
+      > .uikit-card-title {
+      padding-inline-end: var(--uikit-card-header-room, 28px);
+    }
+  }
+
+  .uikit-card-layout:has(> .uikit-card-segmented[data-layout='tall']) {
+    grid-template:
+      'symbol control' auto
+      '. .' 1fr
+      'title title' auto
+      'value value' auto
+      'choice choice' auto / 1fr auto;
+  }
+
+  .uikit-card-layout:has(> .uikit-card-segmented[data-layout='upright']) {
+    grid-template:
+      'symbol control' auto
+      'title title' auto
+      'value value' auto
+      'choice choice' 1fr / 1fr auto;
+  }
+
+  /* Its options (a radio group): in a well at its bottom, 6px from its
+     edges (its padding, 12px 14px, given back less that), its corners
+     concentric with the card's; side by side in equal columns, or stacked
+     in equal rows (upright). */
+  .uikit-card-segmented {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    padding: 3px;
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 6px);
+    margin: 0 -8px -6px;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    grid-area: choice;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+
+    /* (Dragged along its options (see the parts): the page scrolling across
+       them only (upright, none from it: a slim card, room around it to
+       scroll); nothing selected as it's dragged.) */
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+
+    /* (None shown (1x1): there all the same, unseen, its options telling
+       the card theirs, see the parts.) */
+    &[hidden] {
+      display: none;
+    }
+
+    &[data-layout='tall'] {
+      margin-top: 10px;
+    }
+
+    &[data-layout='upright'] {
+      align-self: stretch;
+      margin-top: 8px;
+      grid-auto-flow: row;
+      grid-auto-rows: minmax(0, 1fr);
+      touch-action: pan-x;
+    }
+  }
+
+  /* The chosen option's raised thumb: under it, at its box (see the parts),
+     its corners the well's less its padding (a pill while it's short);
+     white on light glass, a light tint on dark. Moving to another as it's
+     chosen, once placed. */
+  .uikit-card-segmented-thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--uikit-card-segmented-thumb-width, 0);
+    height: var(--uikit-card-segmented-thumb-height, 0);
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 9px);
+    background-color: light-dark(#fff, rgb(255 255 255 / 22%));
+    box-shadow:
+      0 1px 3px rgb(0 0 0 / 18%),
+      0 0 0 0.5px rgb(0 0 0 / 6%);
+    pointer-events: none;
+    translate: var(--uikit-card-segmented-thumb-x, 0)
+      var(--uikit-card-segmented-thumb-y, 0);
+
+    [data-placed] > & {
+      transition-duration: 250ms;
+      transition-property: translate, width, height;
+      transition-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+
+      @media (prefers-reduced-motion: reduce) {
+        transition-duration: 0s;
+      }
+    }
+  }
+
+  /* An option: its words (across a row), its symbol over them (taller), or
+     beside them, at the card's padding (upright: the well's 6px, its 3px
+     and its own 5px); over the thumb. Chosen, emphasized. */
+  .uikit-card-segmented-item {
+    --uikit-utils-cursor: attr(cursor type(<custom-ident>), pointer);
+
+    position: relative;
+    display: flex;
+    min-width: 0;
+    height: 30px;
+    box-sizing: border-box;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 9px);
+    color: var(--uikit-glass-content);
+    font-size: 13px;
+    font-variation-settings: 'wght' 510;
+    font-weight: round(down, 510, 100);
+    gap: 4px;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+
+    /* (On a layer of its own throughout, as Segmented's items are: the
+       thumb sliding under it, WebKit (iOS) would otherwise move it to one
+       for the move, snapped to whole pixels, and back after, its symbol
+       jumping by a fraction of a pixel each time.) */
+    transform: translate3d(0, 0, 0);
+
+    @media (hover: hover) {
+      cursor: var(--uikit-utils-cursor);
+    }
+
+    &[data-checked] {
+      font-variation-settings: 'wght' 590;
+      font-weight: round(down, 590, 100);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-ui-primary);
+      outline-offset: -2px;
+    }
+
+    /* (Disabled: dimmed, as Segmented's; no presses (dragged past, see
+       main.tsx).) */
+    &[data-disabled] {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    /* (Across a row: its symbol beside its words, a little larger. In a
+       slot of its own height, its icon centered in it: icons' heights
+       differ, its words in the same place in each, whichever.) */
+    > .uikit-symbol {
+      height: 1.3em;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    /* (Taller: its symbol over its words, at its top, the symbols of all
+       of them in a line, with a subtitle or not.) */
+    [data-layout='tall'] > & {
+      height: auto;
+      min-height: 46px;
+      flex-direction: column;
+      justify-content: flex-start;
+      font-size: 11px;
+      gap: 2px;
+      padding-block: 6px 4px;
+
+      /* (No symbol: no symbols to line up, its words centered.) */
+      &:not(:has(> .uikit-symbol)) {
+        justify-content: center;
+      }
+
+      > .uikit-symbol {
+        font-size: 18px;
+      }
+    }
+
+    /* (Stacked: each a box its subtitle shows in only if it's tall
+       enough, see the subtitle.) */
+    [data-layout='upright'] > & {
+      height: auto;
+      justify-content: flex-start;
+      padding: 0 5px;
+      container: uikit-segment / size;
+      font-size: var(--font-ui-subheadline-size);
+      gap: 10px;
+
+      /* (Its symbol only (see `optionContent`): centered, as across.) */
+      &:not(:has(> .uikit-card-segmented-text)) {
+        justify-content: center;
+      }
+
+      > .uikit-symbol {
+        width: var(--uikit-card-symbol-width, 28px);
+        justify-content: center;
+        font-size: 17px;
+      }
+    }
+
+    /* (Stacked, one wide: its symbol over its words, centered, as taller
+       across, see above.) */
+    [data-layout='upright'][data-narrow] > & {
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 4px;
+      font-size: 11px;
+      gap: 2px;
+
+      > .uikit-symbol {
+        width: auto;
+        font-size: 17px;
+      }
+    }
+  }
+
+  /* An option's words: its label, a subtitle under it (in the card's
+     value's color, as small as a stacked option's label allows; across,
+     centered, as its label). */
+  .uikit-card-segmented-text {
+    display: grid;
+    min-width: 0;
+    max-width: 100%;
+    justify-items: start;
+
+    :is([data-layout='tall'], [data-layout='upright'][data-narrow]) & {
+      justify-items: center;
+    }
+  }
+
+  .uikit-card-segmented-label,
+  .uikit-card-segmented-subtitle {
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .uikit-card-segmented-subtitle {
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-footnote-size);
+    font-variation-settings: normal;
+    font-weight: normal;
+    line-height: var(--font-ui-footnote-line-height);
+
+    :is([data-layout='tall'], [data-layout='upright'][data-narrow]) & {
+      font-size: 10px;
+      line-height: 12px;
+    }
+  }
+
+  /* (Stacked, a subtitle only where its option is tall enough: beside its
+     symbol, its label's line and its own; one wide, under its symbol (its
+     slot's height) too, and a little room around them.) */
+  @container uikit-segment (height < 38px) {
+    .uikit-card-segmented-subtitle {
+      display: none;
+    }
+  }
+
+  @container uikit-segment (height < 58px) {
+    [data-narrow] .uikit-card-segmented-subtitle {
+      display: none;
+    }
+  }
+
+  /* A value's trend (`Card.Trend`): an arrow after it,
+     turned by its angle (a transform, not a layer change: it may turn in a
+     scroller). */
+  .uikit-card-trend {
+    display: inline-block;
+    font-size: 0.8em;
+    line-height: 0;
+    margin-inline-start: 0.25em;
+    rotate: calc(-1deg * var(--uikit-card-trend, 0));
+    transition: rotate 600ms;
+    vertical-align: middle;
+
+    /* (Mirrored, pointing back: turned the other way to rise.) */
+    &:dir(rtl) {
+      rotate: calc(1deg * var(--uikit-card-trend, 0));
+      scale: -1 1;
+    }
+  }
+
+  /* A progress card's bar (`Card.ProgressBar`): a pill at its
+     bottom (a well, as a list card's: 6px in from its edges, its corners
+     concentric with its own), 36px, filling from its start in its tint;
+     what's on it at its padding, in its text's colors, and again on the
+     fill (a copy, as wide as the pill, clipped to the fill) in the fill's
+     color scheme (see the parts). By its clip, not its layout: nothing laid
+     out anew as it changes. */
+  .uikit-card-progress-bar {
+    position: relative;
+    overflow: clip;
+    height: 36px;
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 6px);
+    margin: 10px -8px -6px;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    font-size: var(--font-ui-subheadline-size);
+    font-variant-numeric: tabular-nums;
+    grid-column: 1 / -1;
+    grid-row: -1;
+  }
+
+  .uikit-card-progress-content {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 8px;
+  }
+
+  .uikit-card-progress-label {
+    overflow: hidden;
+    min-width: 0;
+    color: var(--uikit-glass-content);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .uikit-card-progress-detail {
+    flex: none;
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-footnote-size, 13px);
+    margin-inline-start: auto;
+    white-space: nowrap;
+  }
+
+  /* (Base UI's progress bar: over the pill, its fill in it.) */
+  .uikit-card-progress-meter {
+    position: absolute;
+    inset: 0;
+  }
+
+  .uikit-card-progress-fill {
+    position: absolute;
+    background-color: var(
+      --uikit-card-progress-tint,
+      var(--color-ui-primary)
+    );
+    clip-path: inset(
+      0 calc(100% - var(--uikit-card-progress, 0%)) 0 0
+    );
+    inset: 0;
+    transition: clip-path 300ms;
+
+    &:dir(rtl) {
+      clip-path: inset(
+        0 0 0 calc(100% - var(--uikit-card-progress, 0%))
+      );
+    }
+
+    > .uikit-card-tint-probe {
+      color: var(--uikit-card-progress-tint, var(--color-ui-primary));
+    }
+
+    /* (Its detail quieter as its label is drawn on it (see
+       `textSchemeOn`), not in the glass's secondary color: a gray,
+       meant for the glass, not for a colored fill.) */
+    .uikit-card-progress-detail {
+      color: color-mix(in srgb, var(--uikit-glass-content) 75%, transparent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: 0s;
+    }
+  }
+
+  /* A card's subtitle (`Card.Subtitle`): small, in its secondary
+     text color, in its row (see the top). */
+  .uikit-card-subtitle {
+    overflow: hidden;
+    min-width: 0;
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-subheadline-size);
+    grid-area: subtitle;
+    line-height: var(--font-ui-subheadline-line-height);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* (In a tile a row tall, beside a bar, stages or channels: no room under
+     its title for a subtitle or a progress's value.) */
+  @container uikit-card (height < 180px) {
+    .uikit-card-layout:has(
+        > .uikit-card-progress-bar,
+        > .uikit-card-stage-list,
+        > .uikit-card-channels:not([hidden])
+      )
+      > :is(.uikit-card-subtitle, .uikit-card-progress-value) {
+      display: none;
+    }
+
+    /* (Its bar closer under its title: the room a row-tall tile has for
+       its symbol, its title's line and the bar, none of them cut.) */
+    .uikit-card-layout > .uikit-card-progress-bar {
+      margin-top: 6px;
+    }
+  }
+
+  /* A stages card's list (`Card.StageList`): its stages along a
+     line at its bottom, each a dot (18px) and its words under it, the line
+     between their dots (clear of them, and of the current one's ring).
+     Compact: a one-row tile's room under its title (into its padding, as
+     a progress bar). Done (before the current one): its dot a pale tint, a
+     check in the tint; current: its dot the tint, a ring around it, its
+     words emphasized; to come: its dot the well's, its words quiet. The
+     line in the tint as far as the current one. */
+  .uikit-card-stage-list {
+    display: grid;
+    padding: 0;
+    margin: 4px 0 -6px;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    grid-column: 1 / -1;
+    grid-row: -1;
+    list-style: none;
+  }
+
+  .uikit-card-stage {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-caption2-size, 11px);
+    gap: 2px;
+    justify-items: center;
+    line-height: 13px;
+
+    /* (The line from the one before, between their dots' edges, clear of
+       them: a pale dot doesn't show it through.) */
+    &:not(:first-child)::before {
+      position: absolute;
+      top: 8px;
+      width: calc(100% - 30px);
+      height: 2px;
+      border-radius: 1px;
+      background-color: var(--uikit-card-well);
+      content: '';
+      inset-inline-end: calc(50% + 15px);
+    }
+  }
+
+  /* (Its check centered on it, its box larger than it: a flex box
+     centers an item overflowing it on both sides.) */
+  .uikit-card-stage-dot {
+    position: relative;
+    display: flex;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    font-size: 13px;
+  }
+
+  /* (Its check: only once done, see below.) */
+  .uikit-card-stage-check {
+    visibility: hidden;
+
+    .uikit-card-stage:has(~ [data-current]) & {
+      visibility: visible;
+    }
+  }
+
+  .uikit-card-stage-label {
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* (Done: those before the current one.) */
+  .uikit-card-stage:has(~ [data-current]) {
+    &::before {
+      background-color: var(
+        --uikit-card-stages-tint,
+        var(--color-ui-primary)
+      );
+    }
+
+    > .uikit-card-stage-dot {
+      background-color: color-mix(
+        in srgb,
+        var(--uikit-card-stages-tint, var(--color-ui-primary)) 25%,
+        transparent
+      );
+      box-shadow: none;
+      color: var(--uikit-card-stages-tint, var(--color-ui-primary));
+    }
+  }
+
+  .uikit-card-stage[data-current] {
+    color: var(--uikit-glass-content);
+    font-weight: 600;
+
+    &::before {
+      background-color: var(
+        --uikit-card-stages-tint,
+        var(--color-ui-primary)
+      );
+    }
+
+    > .uikit-card-stage-dot {
+      background-color: var(
+        --uikit-card-stages-tint,
+        var(--color-ui-primary)
+      );
+      box-shadow: 0 0 0 3px
+        color-mix(
+          in srgb,
+          var(--uikit-card-stages-tint, var(--color-ui-primary)) 30%,
+          transparent
+        );
+    }
+  }
+}

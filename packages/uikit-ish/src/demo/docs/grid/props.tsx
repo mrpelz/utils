@@ -160,6 +160,17 @@ export const getPropOptionsItem =
     ] as const,
     openSize: [undefined, '2x2', '3x2'] as const,
     openLabel: [name, undefined] as const,
+    expandedSize: [undefined, '2x2', '4x2'] as const,
+    expanded: [undefined, true, false] as const,
+    defaultExpanded: [undefined, true] as const,
+    onExpandedChange: [
+      new MappedProp(
+        (expanded: boolean, { reason }: { reason: string }) =>
+          addLog(`${name}: ${expanded ? 'expand' : 'collapse'} (${reason})`),
+        '[log]',
+      ),
+      undefined,
+    ] as const,
   });
 
 export const getPropOptionsSpacer =

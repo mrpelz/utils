@@ -193,27 +193,38 @@ const every: readonly GridSize[] = [
 ];
 
 /** The page: a bar with Back and Edit, and the sections below it. */
+/** A size's units (columns times rows). */
+const unitsOf = (size: GridSize) =>
+  size
+    .split('x')
+    .map(Number)
+    .reduce((product, each) => product * each, 1);
+
 /**
- * A tile expanding by its corner button (the app's state: its size, see
- * `ChangingTiles`), hidden while editing (the grid's own controls take
- * the corners then).
+ * A tile's corner button expanding it in place and making it small again:
+ * its item's expansion (`expanded`, `expandedSize`). Its icon by which way
+ * it goes; hidden while editing, and where expanding changes nothing (both
+ * sizes the same as its item would be them now, e.g. too few columns), as
+ * a card's `Card.ExpandButton`.
  */
-const ExpandButton: FunctionComponent<{
-  isExpanded: boolean;
-  /** Whether it's smaller expanded (its icon the other way around). */
-  isShrinking?: boolean;
-  label: string;
-  onToggle: () => void;
-}> = ({ isExpanded, isShrinking = false, label, onToggle }) => {
+const ExpandButton: FunctionComponent<{ label: string }> = ({ label }) => {
   const item = useGridItem();
+  const isExpanded = item?.expanded === true;
+  const small = item?.sizeOf(item.requested).size;
+  const large = item?.expandedSize
+    ? item.sizeOf(item.expandedSize).size
+    : undefined;
+  const [from, to] = isExpanded ? [large, small] : [small, large];
+  const isGrowing =
+    from !== undefined && to !== undefined && unitsOf(to) > unitsOf(from);
   return (
     <Grid.CornerButton
       mirrored
       aria-expanded={isExpanded}
       aria-label={label}
-      icon={isExpanded === isShrinking ? gridIcons.expand : gridIcons.collapse}
-      visible={item?.editing !== true}
-      onClick={onToggle}
+      icon={isGrowing ? gridIcons.expand : gridIcons.collapse}
+      visible={item?.editing !== true && large !== undefined && small !== large}
+      onClick={() => item?.setExpanded(!isExpanded)}
     />
   );
 };
@@ -250,12 +261,15 @@ type Expanding = {
   area?: readonly [size: GridSize, placement: GridPlacement];
   expanded: GridSize;
   size: GridSize;
+  /** Its sizes, if not just its size and its size expanded. */
+  supported?: readonly GridSize[];
 };
 
 const expandingTiles: readonly Expanding[] = [
   { expanded: '2x2', size: '1x1' },
   { expanded: '2x1', size: '1x1' },
-  { expanded: '4x2', size: '2x1' },
+  // (3x2 too: 4x2 on a phone's three columns, its expanded size there.)
+  { expanded: '4x2', size: '2x1', supported: ['2x1', '3x2', '4x2'] },
   { expanded: '2x3', size: '1x2' },
   { expanded: '1x1', size: '3x2' },
 ];
@@ -278,13 +292,6 @@ const openingTiles: readonly { open: GridSize; size: GridSize }[] = [
   { open: '4x2', size: '*x1' },
 ];
 
-/** A size's units (columns times rows). */
-const unitsOf = (size: GridSize) =>
-  size
-    .split('x')
-    .map(Number)
-    .reduce((product, each) => product * each, 1);
-
 /** A tile's name by its sizes (unique on the page: its buttons' names too). */
 const nameOf = (
   verb: string,
@@ -300,16 +307,8 @@ const nameOf = (
  * moving), and opening above the page from and to different sizes.
  */
 const ChangingTiles: FunctionComponent = () => {
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
-  const toggle = (name: string) =>
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
   const expandingTile = (
-    { area, expanded: larger, size }: Expanding,
+    { area, expanded: larger, size, supported }: Expanding,
     place: number,
   ) => {
     const isShrinking = unitsOf(larger) < unitsOf(size);
@@ -319,23 +318,19 @@ const ChangingTiles: FunctionComponent = () => {
       larger,
       area,
     );
-    const isExpanded = expanded.has(name);
     return (
       <Grid.Item
         key={name}
-        size={isExpanded ? larger : size}
-        supportedSizes={[size, larger]}
+        // (Expanded: its own state, small again as editing starts.)
+        expandedSize={larger}
+        size={size}
+        supportedSizes={supported ?? [size, larger]}
       >
         <Tile
           label={name}
           place={place}
         />
-        <ExpandButton
-          isExpanded={isExpanded}
-          isShrinking={isShrinking}
-          label={name}
-          onToggle={() => toggle(name)}
-        />
+        <ExpandButton label={name} />
         {area ? (
           <Grid.Area
             defaultPlacement={area[1]}

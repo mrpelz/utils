@@ -36,19 +36,6 @@ import {
 type Parts = { parts?: PartProps };
 
 /**
- * A card's expansion, as the app keeps it (see `useCardsStage`): whether
- * it's expanded, and asking for the other.
- */
-export type Expansion = {
-  /** Its size, not expanded (its stored size). */
-  collapsedSize: GridSize;
-  /** Its size, expanded. */
-  expandedSize: GridSize;
-  isExpanded: boolean;
-  onToggle: () => void;
-};
-
-/**
  * Whether a card shows its large layout: its tile at least 2x2, however it
  * got there (expanded, or resized in edit mode).
  */
@@ -174,11 +161,14 @@ export const cameraCard = ({
       {isOpen ? 'Live, recording since 8:12' : 'Live'}
     </Card.Value>
     {/* (Opening it, closed; its x, open, where the others' are: each
-        fading as it grows and shrinks, see ControlCards' `OpenButtons`.) */}
-    <ControlCards.OpenButtons
-      closeLabel="Close"
-      label="Front Door Camera"
-      {...parts['ControlCards.OpenButtons']}
+        fading as it grows and shrinks, by its item's open.) */}
+    <Card.OpenButton
+      aria-label="Front Door Camera"
+      {...parts['Card.OpenButton']}
+    />
+    <Card.CloseButton
+      aria-label="Close"
+      {...parts['Card.CloseButton']}
     />
   </Card.Root>
 );
@@ -278,19 +268,20 @@ export const humidityCard = ({ parts = {} }: Parts): ReactNode => (
 
 /**
  * Heating: small, the room's temperature; expanded (the app's size for
- * it, see `useCardsStage`), a slider filling it (ControlCards'
- * `SliderFill`) setting what it heats to. Its corner button expands it (as
+ * it, see `useCardsStage`), a slider filling it (a
+ * `Card.Slider`) setting what it heats to. Its corner button expands it (as
  * a press anywhere on it does) and makes it small again (only it: the
  * slider takes the rest).
  */
 export const heatingCard = ({
-  expansion,
+  canExpand = false,
   onTargetChange,
   parts = {},
   size,
   target,
 }: Parts & {
-  expansion?: Expansion;
+  /** Whether its tile expands (its item's expanded size). */
+  canExpand?: boolean;
   onTargetChange: (target: number) => void;
   /** Its tile's size: large (expanded, or resized so), its slider. */
   size?: GridSize;
@@ -302,7 +293,7 @@ export const heatingCard = ({
       // (Small, a press anywhere on it as on its button; expanded, its
       // slider's, the button alone expanding it no more.)
       onClick={
-        expansion && !isExpanded
+        canExpand && !isExpanded
           ? forwardClick(
               '[data-card-part=corner-button]:not([data-grid-hidden])',
             )
@@ -321,16 +312,16 @@ export const heatingCard = ({
         />
       </Card.Symbol>
       {isExpanded ? (
-        <ControlCards.SliderFill
+        <Card.Slider
           format={celsius}
+          label="Heat to"
           max={26}
           min={16}
-          name="Heat to"
           step={0.5}
           tint={cardTints.heat}
           value={target}
           onValueChange={onTargetChange}
-          {...parts['ControlCards.SliderFill']}
+          {...parts['Card.Slider']}
         />
       ) : (
         <>
@@ -342,18 +333,12 @@ export const heatingCard = ({
           />
         </>
       )}
-      {/* (Hidden while expanding changes nothing, e.g. too few columns:
-          see ControlCards' `ExpandButton`.) */}
-      {expansion ? (
-        <ControlCards.ExpandButton
-          collapsedSize={expansion.collapsedSize}
-          expanded={expansion.isExpanded}
-          expandedSize={expansion.expandedSize}
-          label="Heating details"
-          onExpandedChange={expansion.onToggle}
-          {...parts['ControlCards.ExpandButton']}
-        />
-      ) : null}
+      {/* (By its item's expansion; hidden while expanding changes
+          nothing, e.g. too few columns.) */}
+      <Card.ExpandButton
+        aria-label="Heating details"
+        {...parts['Card.ExpandButton']}
+      />
     </Card.Root>
   );
 };
@@ -390,9 +375,9 @@ export const dimmerCard = ({
     emphasizedIcon={emphasizedIcon}
     format={{ maximumFractionDigits: 0, style: 'percent' }}
     icon={icon}
+    label={name}
     max={1}
     min={0}
-    name={name}
     step={step}
     tint={tint}
     value={value}
@@ -418,29 +403,50 @@ export const roomCard = ({
 }: Parts & { states: CardStates }): ReactNode => (
   <ControlCards.List
     icon={sfHouseFill}
-    name="Living Room"
-    opening={{ closeLabel: 'Close', label: 'Living Room details' }}
-    rows={[
-      {
-        icon: sfLightbulbFill,
-        label: 'Floor Lamp',
-        value: states.lamp ? 'On' : 'Off',
-      },
-      { icon: sfLightbulbFill, label: 'Dimmer', value: percent(states.dimmer) },
-      {
-        icon: sfWindowShadeClosed,
-        label: 'Blinds',
-        value: percent(states.blinds),
-      },
-      {
-        icon: sfThermometerMedium,
-        label: 'Heating to',
-        value: `${String(states.heating)} °C`,
-      },
-      { icon: sfHumidityFill, label: 'Humidity', value: percent(0.46) },
-    ]}
+    label="Living Room"
     {...parts['ControlCards.List']}
   >
+    <Card.Rows {...parts['Card.Rows']}>
+      <Card.Row
+        icon={sfLightbulbFill}
+        value={states.lamp ? 'On' : 'Off'}
+        {...parts['Card.Row']}
+      >
+        Floor Lamp
+      </Card.Row>
+      <Card.Row
+        icon={sfLightbulbFill}
+        value={percent(states.dimmer)}
+        {...parts['Card.Row']}
+      >
+        Dimmer
+      </Card.Row>
+      <Card.Row
+        icon={sfWindowShadeClosed}
+        value={percent(states.blinds)}
+        {...parts['Card.Row']}
+      >
+        Blinds
+      </Card.Row>
+      <Card.Row
+        icon={sfThermometerMedium}
+        value={`${String(states.heating)} °C`}
+        {...parts['Card.Row']}
+      >
+        Heating to
+      </Card.Row>
+      <Card.Row
+        icon={sfHumidityFill}
+        value={percent(0.46)}
+        {...parts['Card.Row']}
+      >
+        Humidity
+      </Card.Row>
+    </Card.Rows>
+    <Card.CloseButton
+      aria-label="Close"
+      {...parts['Card.CloseButton']}
+    />
     {/* (Its parts moved from where they were as it opens, with GSAP: the
         demos' helper, see Building for changing sizes.) */}
     <FlipParts />
@@ -467,7 +473,8 @@ export const cardStatesInitial: CardStates = {
 
 /** What a tile's card is shown with (see `cardOf`). */
 export type CardContext = Required<Parts> & {
-  expansion: Expansion | undefined;
+  /** Whether its tile expands (its item's expanded size). */
+  canExpand: boolean;
   isOpen: boolean;
   /** Sets a card's state (logged). */
   set: <K extends keyof CardStates>(key: K, value: CardStates[K]) => void;
@@ -509,9 +516,9 @@ const cards: Readonly<Record<CardKind, (context: CardContext) => ReactNode>> = {
       parts,
       value: states.dimmer,
     }),
-  heating: ({ expansion, parts, set, size, states }) =>
+  heating: ({ canExpand, parts, set, size, states }) =>
     heatingCard({
-      expansion,
+      canExpand,
       onTargetChange: (target) => set('heating', target),
       parts,
       size,
@@ -543,26 +550,22 @@ const textParts = {
   'Card.Value': ['children', 'format', 'value'],
 } as const;
 const expandParts = {
-  'ControlCards.ExpandButton': [
-    'collapsedSize',
-    'expanded',
-    'expandedSize',
-    'label',
-    'onExpandedChange',
-  ],
+  'Card.ExpandButton': ['aria-label'],
 } as const;
 const openParts = {
-  'ControlCards.OpenButtons': ['closeLabel', 'label'],
+  'Card.CloseButton': ['aria-label'],
+  'Card.OpenButton': ['aria-label'],
 } as const;
 const sliderCardParts = {
   'ControlCards.Slider': [
     'brightness',
+    'defaultValue',
     'emphasizedIcon',
     'format',
     'icon',
+    'label',
     'max',
     'min',
-    'name',
     'step',
     'tint',
     'value',
@@ -589,11 +592,11 @@ const kindParts: Readonly<
     'Card.Root': ['onClick'],
     ...symbolParts,
     ...textParts,
-    'ControlCards.SliderFill': [
+    'Card.Slider': [
       'format',
+      'label',
       'max',
       'min',
-      'name',
       'step',
       'tint',
       'value',
@@ -606,11 +609,19 @@ const kindParts: Readonly<
     'Card.Root': ['active', 'onClick'],
     ...symbolParts,
     ...textParts,
-    'Card.Switch': ['aria-label', 'checked', 'onCheckedChange'],
+    'Card.Switch': [
+      'aria-label',
+      'checked',
+      'defaultChecked',
+      'onCheckedChange',
+    ],
   },
   lock: { 'Card.Root': ['active'], ...symbolParts, ...textParts },
   room: {
-    'ControlCards.List': ['icon', 'name', 'opening', 'rows'],
+    'Card.CloseButton': ['aria-label'],
+    'Card.Row': ['children', 'icon', 'value'],
+    'Card.Rows': ['children'],
+    'ControlCards.List': ['children', 'icon', 'label'],
   },
   temperature: {
     'Card.CornerButton': ['aria-label', 'icon', 'onClick'],
@@ -643,7 +654,7 @@ export const partsOfTiles = (
 export type CardTile = {
   /** Room around its tile (a `Grid.Area`), its tile centered in it. */
   area?: GridSize;
-  /** Its size expanded (see `Expansion`), if it expands. */
+  /** Its size expanded (its item's `expandedSize`), if it expands. */
   expandedSize?: GridSize;
   kind: CardKind;
   name: string;

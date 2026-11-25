@@ -67,6 +67,7 @@ import type {
   GridBreakRows,
   GridCornerButtonProps,
   GridDropGroupProps,
+  GridExpandedChangeReason,
   GridHeaderProps,
   GridItemProps,
   GridItemState,
@@ -105,6 +106,8 @@ export type {
   GridBreakProps,
   GridBreakRows,
   GridDropGroupProps,
+  GridExpandedChangeDetails,
+  GridExpandedChangeReason,
   GridHeaderProps,
   GridItemLayoutChange,
   GridItemLayoutHandlers,
@@ -807,12 +810,15 @@ const fitOf = (
 const useCell = ({
   area: spec,
   defaultSize = '1x1',
+  expandedSize,
   onSizeChange,
   size: controlledSize,
   supportedSizes,
 }: {
   area?: AreaSpec;
   defaultSize?: GridSize;
+  /** Its size shown while it's expanded (see `Item`); none, its own. */
+  expandedSize?: GridSize;
   onSizeChange?: (size: GridSize, details: GridSizeChangeDetails) => void;
   size?: GridSize;
   supportedSizes?: readonly GridSize[];
@@ -820,6 +826,8 @@ const useCell = ({
   const { columns, editing, maxTileRows, minColumns } = useContext(GridContext);
   const [ownSize, setOwnSize] = useState(defaultSize);
   const requested = controlledSize ?? ownSize;
+  // (Expanded: shown at that size, its own kept, see `Item`.)
+  const shown = expandedSize ?? requested;
   // (Its area's, from its `Grid.Area`; none: none, its tile centered.)
   const {
     movable,
@@ -882,7 +890,7 @@ const useCell = ({
     size,
     sizeColumns,
     sizeRows,
-  } = fitOf(requested, requestedArea, fitting);
+  } = fitOf(shown, requestedArea, fitting);
   const sizeOf = useCallback(
     (next: GridSize): GridSizeFit => {
       const fit = fitOf(next, requestedArea, fitting);
@@ -892,10 +900,10 @@ const useCell = ({
   );
   const areaSizeOf = useCallback(
     (next: GridSize): GridSizeFit => {
-      const fit = fitOf(requested, next, fitting);
+      const fit = fitOf(shown, next, fitting);
       return { isFitted: fit.isAreaFitted, size: fit.layout };
     },
-    [fitting, requested],
+    [fitting, shown],
   );
   const [x, y] = placementOffset(
     placement,
@@ -925,7 +933,11 @@ const useCell = ({
   const state = useMemo(
     (): CellState => ({
       area: layout,
+      canOpen: false,
       editing,
+      // (Not expanded: an item's own, see `Item`.)
+      expanded: false,
+      expandedSize: undefined,
       hasArea,
       isFitted,
       isFreeArea,
@@ -939,6 +951,7 @@ const useCell = ({
       requested,
       requestPlacement,
       requestSize,
+      setExpanded: noOpen,
       setOpen: noOpen,
       size,
       sizeOf,
@@ -1589,6 +1602,53 @@ const usePlacing = (
 };
 
 /**
+ * An item's expansion (see `GridItemProps.expanded`): controlled or its
+ * own; never while editing, which makes it small again (its own state too,
+ * as it renders; told, as any other change); without an expanded size,
+ * never.
+ */
+const useExpansion = ({
+  controlled,
+  defaultExpanded,
+  editing,
+  expandedSize,
+  onExpandedChange,
+}: {
+  controlled: boolean | undefined;
+  defaultExpanded: boolean;
+  editing: boolean;
+  expandedSize: GridSize | undefined;
+  onExpandedChange: GridItemProps['onExpandedChange'];
+}) => {
+  const [own, setOwn] = useState(defaultExpanded);
+  const [wasEditing, setWasEditing] = useState(editing);
+  if (wasEditing !== editing) {
+    setWasEditing(editing);
+    if (editing) setOwn(false);
+  }
+  const isExpanded =
+    (controlled ?? own) && !editing && expandedSize !== undefined;
+  const latest = useRef(onExpandedChange);
+  const wasExpanded = useRef(isExpanded);
+  useLayoutEffect(() => {
+    latest.current = onExpandedChange;
+    // (Made small again by editing: told, as any other way.)
+    if (wasExpanded.current && !isExpanded && editing) {
+      onExpandedChange?.(false, { reason: 'edit' });
+    }
+    wasExpanded.current = isExpanded;
+  });
+  const changeExpanded = useCallback(
+    (next: boolean, reason: GridExpandedChangeReason) => {
+      setOwn(next);
+      latest.current?.(next, { reason });
+    },
+    [],
+  );
+  return { changeExpanded, isExpanded };
+};
+
+/**
  * An item: a cell spanning its area (its effective size without one, see
  * the top), its tile (its body) in it, what's in it filling that (e.g. a
  * `Card`, a `ResizeHandle`), its sizes read with `useGridItem`; room
@@ -1599,14 +1659,18 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     {
       children,
       className,
+      defaultExpanded = false,
       defaultOpen = false,
       defaultSize,
       dropName,
+      expanded: controlledExpanded,
+      expandedSize,
+      onExpandedChange,
       onOpenChange,
       onSizeChange,
       open: controlledOpen,
       openLabel,
-      openSize = '4x3',
+      openSize: openSizeGiven,
       reorderHandle,
       size: controlledSize,
       style,
@@ -1618,6 +1682,16 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     const ref = useForwardedRef(forwardedRef);
     const entry = useCellEntry(ref, reorderHandle, dropName);
     const { host, setSlot, spec } = useAreaHost();
+    const { editing } = useContext(GridContext);
+    // (Expanded in place: shown at its expanded size, its own kept; never
+    // while editing, which makes it small again, see `useExpansion`.)
+    const { changeExpanded, isExpanded } = useExpansion({
+      controlled: controlledExpanded,
+      defaultExpanded,
+      editing,
+      expandedSize,
+      onExpandedChange,
+    });
     const {
       areaState,
       bodyStyle,
@@ -1628,11 +1702,13 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     } = useCell({
       area: spec,
       defaultSize,
+      expandedSize: isExpanded ? expandedSize : undefined,
       onSizeChange,
       size: controlledSize,
       supportedSizes,
     });
 
+    const openSize = openSizeGiven ?? '4x3';
     const body = useRef<HTMLDivElement>(null);
     // (Open above the page (see overlay.tsx): never while editing, which
     // closes it.)
@@ -1684,11 +1760,24 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     const state = useMemo(
       (): CellState => ({
         ...cellState,
+        canOpen: openSizeGiven !== undefined,
+        expanded: isExpanded,
+        expandedSize,
         open: isOpen,
         openSize,
+        setExpanded: (next: boolean) => changeExpanded(next, 'none'),
         setOpen: (next: boolean) => changeOpen(next, 'none'),
       }),
-      [cellState, changeOpen, isOpen, openSize],
+      [
+        cellState,
+        changeExpanded,
+        changeOpen,
+        expandedSize,
+        isExpanded,
+        isOpen,
+        openSize,
+        openSizeGiven,
+      ],
     );
     // (Filling its area: nowhere to go in it; held, its area moves (the
     // item, its cell), its crosshairs the area's, see the CSS.)
@@ -2974,7 +3063,10 @@ const Break = forwardRef<HTMLDivElement, GridBreakProps>(
       // (Its rows as a size; no area of its own.)
       return {
         area: size,
+        canOpen: false,
         editing,
+        expanded: false,
+        expandedSize: undefined,
         hasArea: false,
         isFitted: false,
         // (Any of its rows: free.)
@@ -2988,6 +3080,7 @@ const Break = forwardRef<HTMLDivElement, GridBreakProps>(
         requested: size,
         requestPlacement: noPlacement,
         requestSize,
+        setExpanded: noOpen,
         setOpen: noOpen,
         size,
         // (Its rows, as asked: a unit wide, never fitted.)

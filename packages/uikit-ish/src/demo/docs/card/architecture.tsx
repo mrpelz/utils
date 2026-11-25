@@ -10,7 +10,7 @@ import {
 import { publicUrl } from '../../tooling/public-url.js';
 
 // `/card/architecture`: how Card is built inside, and what flows into it
-// from Grid, Glass, Switch and ControlCards.
+// from Grid, Glass, Switch and Slider.
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 const treeCode = `<div class="uikit-card-root uikit-glass-medium uikit-glass-panel"
@@ -39,7 +39,7 @@ const scheme = isEditing
     ? toned                                 // not switchable: by its glass
     : state ? 'light' : 'dark';             // lit, or dark glass`;
 
-const blendCode = `// ControlCards.SliderFill, in short: it registers a layer inside its
+const blendCode = `// Card.Slider, in short: it registers a layer inside its
 // fill; the card's parts draw a copy of themselves into it.
 const setLayer = useContext(CardBlendScope)?.setLayer;
 
@@ -73,6 +73,24 @@ useGridItemLayout({
 });`;
 /* eslint-enable unicorn/no-incorrect-template-string-interpolation */
 
+const pressCode = `// pressProps, in short: every press on what a card drags is held back, so
+// the slider doesn't set its value as it's pressed, nor follow a scroll.
+onPointerDownCapture: (event) => {
+  event.stopPropagation();                   // the slider not told yet
+  on('pointermove', (move) => {
+    if (distance(move, event) < slop) return; // 4px, a touch's 8px
+    stopListening();
+    if (isTouch && movesAcross(move, event)) return; // a scroll: let go
+    target.dispatchEvent(new PointerEvent('pointerdown', event)); // a drag
+  });
+  on('pointerup', () => {
+    if (!onClick) return target.dispatchEvent(event); // a tap sets the value
+    onClick();                               // a click: the value kept
+    swallowNextClickElsewhere();             // a tap moved to the switch
+  });
+  on('pointercancel', stopListening);        // the browser scrolls
+}`;
+
 const sections: readonly Section[] = [
   ['the-element-tree', 'The element tree'],
   ['the-roots-state', 'The root’s state'],
@@ -80,6 +98,12 @@ const sections: readonly Section[] = [
   ['the-parts', 'The parts'],
   ['moving-with-its-tile', 'Moving with its tile'],
   ['drawing-over-a-fill', 'Drawing over a fill'],
+  ['presses-on-what-it-drags', 'Presses on what it drags'],
+  ['progress-and-stages', 'Progress and stages'],
+  ['channels', 'Channels'],
+  ['a-choice-of-a-few', 'A choice of a few'],
+  ['rows', 'Rows'],
+  ['corner-buttons-by-its-tile', 'Corner buttons by its tile'],
   ['what-flows-in-and-out', 'What flows in and out'],
 ];
 
@@ -302,12 +326,26 @@ export const CardArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="Card.Title" /> and <PartLink part="Card.Value" /> are
-        spans with a part attribute.
+        <PartLink part="Card.Title" />, <PartLink part="Card.Subtitle" /> and{' '}
+        <PartLink part="Card.Value" /> are spans with a part attribute, each
+        replaceable through <code>render</code>.
+      </li>
+      <li>
+        The title tells the card its id in a layout effect (its own, or a
+        generated one). The parts that are named by it, a progress bar, stages
+        and a choice, read it from the card’s context, so they need no name of
+        their own.
       </li>
       <li>
         The value formats a number with <code>Intl.NumberFormat</code>, using
         your options. It uses the document’s language, unless you give a locale.
+        Its children follow the number, for example a{' '}
+        <PartLink part="Card.Trend" />; without a number, they’re shown instead.
+      </li>
+      <li>
+        <PartLink part="Card.Trend" /> is an arrow turned by its angle with a
+        transition. For assistive technology, it’s named rising, falling or
+        steady.
       </li>
       <li>
         <PartLink part="Card.Symbol" /> is a span that its{' '}
@@ -388,8 +426,8 @@ export const CardArchitecture: FunctionComponent = () => (
       <li>
         A slider can fill the card (
         <PartLink
-          component="control-cards"
-          part="ControlCards.SliderFill"
+          component="card"
+          part="Card.Slider"
         />
         ). Its fill is opaque, and it moves across whatever is over it.
       </li>
@@ -421,10 +459,207 @@ export const CardArchitecture: FunctionComponent = () => (
       </li>
       <li>
         A slider in the card has no other link to it. Slider itself knows
-        nothing about cards. The fill and the layer belong to ControlCards.
+        nothing about cards. The fill and the layer belong to Card.Slider.
       </li>
     </ul>
     <CodeView code={blendCode} />
+
+    <Heading
+      id="presses-on-what-it-drags"
+      level={2}
+    >
+      Presses on what it drags
+    </Heading>
+    <ul>
+      <li>
+        <PartLink part="Card.Slider" />, <PartLink part="Card.Channel" /> and{' '}
+        <PartLink part="Card.Segmented" /> are dragged. Until a press turns out
+        to be a drag or a click, the slider isn’t told about it, so it doesn’t
+        jump to where you pressed. Once the press moves 4px, it’s dispatched
+        again at the place where it started.
+      </li>
+      <li>
+        A touch waits for 8px, then looks at its direction. Along the control,
+        it’s a drag. Across it, it’s a scroll: the page scrolls and the value
+        stays. Base UI’s slider follows a finger even while the page scrolls, so
+        it never sees these touches.
+      </li>
+      <li>
+        Without a click of its own (the slider’s <code>onPress</code>), a press
+        released before it moves is handed to the slider then, so a tap still
+        sets the value where it lands. With one, the value is kept, and if the
+        browser moves the tap’s click to a switch nearby (as on iOS), that click
+        is swallowed, so the switch doesn’t toggle twice.
+      </li>
+      <li>
+        Once dragged, a non-passive touchmove listener keeps the page from
+        panning (React’s are passive). An upright slider can’t tell a scroll
+        from a drag, so the page doesn’t scroll from it, as with any vertical
+        slider.
+      </li>
+      <li>
+        Channels and a choice are marked <code>data-card-own-press</code>: the
+        card shows no press tint for them, and{' '}
+        <PartLink
+          component="list"
+          part="forwardClick"
+        />{' '}
+        doesn’t pass their presses on to the card’s switch.
+      </li>
+    </ul>
+    <CodeView code={pressCode} />
+
+    <Heading
+      id="progress-and-stages"
+      level={2}
+    >
+      Progress and stages
+    </Heading>
+    <ul>
+      <li>
+        <PartLink part="Card.Progress" /> renders no element: it holds its
+        value, range and format in a context, as Base UI’s Progress.Root does,
+        so its value (<PartLink part="Card.ProgressValue" />) and its bar can
+        sit in different places of the card’s layout.
+      </li>
+      <li>
+        <PartLink part="Card.ProgressBar" /> is a pill at the card’s bottom
+        holding Base UI’s progress bar, so it’s announced as one. Its{' '}
+        <PartLink part="Card.ProgressLabel" /> and{' '}
+        <PartLink part="Card.ProgressDetail" /> are drawn twice, and the copy on
+        the fill is clipped to it, so they read on both parts without laying
+        anything out anew. On the fill they take dark or light text, whichever
+        has more perceived contrast with the tint (APCA, not WCAG’s ratio, which
+        picks dark text on mid blues), read once and again when the tint or the
+        color scheme changes.
+      </li>
+      <li>
+        <PartLink part="Card.StageList" /> is an ordered list. Each{' '}
+        <PartLink part="Card.Stage" /> compares its value with the list’s; done,
+        current and to come follow from the stylesheet (those before the current
+        one).
+      </li>
+      <li>
+        A <PartLink part="Card.Subtitle" /> and a progress value each have a row
+        of their own under the title. A tile a row tall has no room for them
+        beside a bar, stages or channels, so they don’t show there.
+      </li>
+    </ul>
+
+    <Heading
+      id="channels"
+      level={2}
+    >
+      Channels
+    </Heading>
+    <ul>
+      <li>
+        Each <PartLink part="Card.Channel" /> is Base UI’s slider, controlled or
+        uncontrolled on its own. It tells its <PartLink part="Card.Channels" />,
+        through context, the light it gives: an amount, its tint by its share; a
+        scale, its color at its value.
+      </li>
+      <li>
+        The channels add their amounts up in linear light, as light does, then
+        tint them by any scale, and report the result at full strength with its
+        brightness (its strongest amount’s share) through{' '}
+        <code>onLightChange</code>.
+      </li>
+      <li>
+        A channel’s thumb is placed by Base UI, kept inside its well at both
+        ends. Its fill and its labels are its own: the labels are placed after
+        each change, and each takes dark or light text by what’s under its
+        center, by the same contrast as a progress bar’s. The colors behind that
+        are read once, and again when they or the color scheme change; moving
+        the thumb only compares numbers.
+      </li>
+    </ul>
+
+    <Heading
+      id="a-choice-of-a-few"
+      level={2}
+    >
+      A choice of a few
+    </Heading>
+    <ul>
+      <li>
+        <PartLink part="Card.Segmented" /> isn’t built on{' '}
+        <a href={publicUrl('segmented')}>Segmented</a>, which only lays its
+        items out side by side. It’s Base UI’s RadioGroup, its options as radios
+        in a well, so it can stack them too. The arrow keys move between them,
+        and there’s no lens: dragging moves its thumb, choosing each option as
+        the finger reaches it.
+      </li>
+      <li>
+        Each <PartLink part="Card.SegmentedItem" /> tells its choice its symbol,
+        words and tint, in a layout effect. At 1x1, where no options show, the
+        items stay mounted in a hidden group, so a ready-made card still knows
+        them.
+      </li>
+      <li>
+        A thumb sits under the chosen option. A layout effect measures that
+        option’s box and moves the thumb there, again whenever the group
+        resizes. It only transitions once it has been placed, so it doesn’t
+        slide in when the card mounts.
+      </li>
+      <li>
+        Its layout comes from its grid item’s size (its open size while it’s
+        open above the page) and its orientation, if the app gives one: a row,
+        taller, stacked, or 1x1 without options. The card’s layout follows it
+        through the stylesheet (<code>:has()</code>), so it works in any card.
+      </li>
+    </ul>
+
+    <Heading
+      id="rows"
+      level={2}
+    >
+      Rows
+    </Heading>
+    <ul>
+      <li>
+        <PartLink part="Card.Rows" /> is a glass{' '}
+        <a href={publicUrl('list')}>List</a> of its <PartLink part="Card.Row" />
+        s. A resize observer counts how many rows fit whole in its room, at
+        least one, and only those render. A row is as tall as Card makes it:
+        30px in a tile, 44px open above the page.
+      </li>
+      <li>
+        When rows are left out, the last row counts them instead, and it’s a
+        button that expands the tile (its item’s expanded size, where that would
+        change its size) or opens it above the page (an item with an open size).
+        Expanded, it makes the tile small again. A corner button that draws
+        nothing sits over the last row and does the same, for a large touch
+        target; it’s hidden from assistive technology and the keyboard, which
+        use the row.
+      </li>
+    </ul>
+
+    <Heading
+      id="corner-buttons-by-its-tile"
+      level={2}
+    >
+      Corner buttons by its tile
+    </Heading>
+    <ul>
+      <li>
+        <PartLink part="Card.ExpandButton" />,{' '}
+        <PartLink part="Card.OpenButton" /> and{' '}
+        <PartLink part="Card.CloseButton" /> are corner buttons acting on their
+        grid item, through{' '}
+        <PartLink
+          component="grid"
+          part="useGridItem"
+        />
+        : its expansion (<code>setExpanded</code>) and its <code>open</code> (
+        <code>setOpen</code>). They hold no state of their own.
+      </li>
+      <li>
+        The expand button resolves both sizes the way the item would resolve
+        them now (<code>sizeOf</code>). If both come out the same, for example
+        with too few columns, it’s hidden. Its icon shows which way it goes.
+      </li>
+    </ul>
 
     <Heading
       id="what-flows-in-and-out"
@@ -467,10 +702,20 @@ export const CardArchitecture: FunctionComponent = () => (
         they sit, as direct children of its layout.
       </li>
       <li>
-        <strong>Out to ControlCards:</strong> <code>CardBlendScope</code> for
-        the slider fill’s copies, <PartLink part="useCardOrientation" /> for its
-        direction, and <PartLink part="cardSizes" /> for the items of the
-        ready-made cards.
+        <strong>From Base UI directly:</strong> its slider (
+        <PartLink part="Card.Channel" />
+        ), its progress bar (<PartLink part="Card.ProgressBar" />) and its radio
+        group (<PartLink part="Card.Segmented" />
+        ). From the color picker, its CSS color parser.
+      </li>
+      <li>
+        <strong>Out to ControlCards:</strong> its parts; the contexts a
+        ready-made card hears its channels and its choice through, and tells its
+        open button whether to show (see{' '}
+        <a href={publicUrl('control-cards/architecture')}>
+          ControlCards’ architecture
+        </a>
+        ); <PartLink part="cardSizes" /> for the items of the ready-made cards.
       </li>
       <li>
         <strong>Out to the app:</strong> <code>actionsRef</code>’s{' '}

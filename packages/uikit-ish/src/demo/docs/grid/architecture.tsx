@@ -744,8 +744,13 @@ export const GridMotionArchitecture: FunctionComponent = () => (
       </li>
       <li>
         <PartLink
-          component="control-cards"
-          part="ControlCards.OpenButtons"
+          component="card"
+          part="Card.OpenButton"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="card"
+          part="Card.CloseButton"
         />{' '}
         open and close it from its corners.
       </li>

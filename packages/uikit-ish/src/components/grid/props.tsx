@@ -220,6 +220,16 @@ export type GridOpenChangeReason =
 /** What an item's open change was (see `GridItemProps.onOpenChange`). */
 export type GridOpenChangeDetails = { reason: GridOpenChangeReason };
 
+/**
+ * Why an item's expansion changed (see `GridItemProps.expanded`): its grid
+ * starting edit mode (made small again), or the app (`setExpanded`, e.g. a
+ * card's `Card.ExpandButton`).
+ */
+export type GridExpandedChangeReason = 'edit' | 'none';
+
+/** What an item's expansion change was (see `onExpandedChange`). */
+export type GridExpandedChangeDetails = { reason: GridExpandedChangeReason };
+
 export type GridItemProps = ComponentProps<'div'> &
   GridDraggableProps & {
     /**
@@ -228,10 +238,36 @@ export type GridItemProps = ComponentProps<'div'> &
      * for room around its tile, its own controls in it.
      */
     children?: ReactNode;
+    /**
+     * Whether it's expanded initially (uncontrolled, see `expanded`).
+     * @default false
+     */
+    defaultExpanded?: boolean;
     /** Whether it's open initially (uncontrolled, see `open`). @default false */
     defaultOpen?: boolean;
     /** Its initial size (uncontrolled). @default '1x1' */
     defaultSize?: GridSize;
+    /**
+     * Whether it's expanded in place (controlled): shown at its
+     * `expandedSize` instead of its size, which stays as it is (stored);
+     * the grid reflowing around it. Made small again as its grid starts
+     * edit mode (sizes are chosen there). Without an `expandedSize`, never.
+     */
+    expanded?: boolean;
+    /**
+     * Its size expanded (see `expanded`): snapped and fitted as its size is
+     * (smaller than its size too: expanding then makes it smaller).
+     */
+    expandedSize?: GridSize;
+    /**
+     * Called as it's expanded or made small again (see `expanded`): by the
+     * app (e.g. its card's `Card.ExpandButton`, through `useGridItem`'s
+     * `setExpanded`), or made small again by edit mode starting.
+     */
+    onExpandedChange?: (
+      expanded: boolean,
+      details: GridExpandedChangeDetails,
+    ) => void;
     /**
      * Called as it's opened or closed (see `open`): by the app (e.g. its
      * card's corner button, through `useGridItem`'s `setOpen`), or closed
@@ -457,8 +493,17 @@ export type GridSizeFit = {
 
 /** An item's sizes and state (see `useGridItem`). */
 export type GridItemState = {
+  /**
+   * Whether it opens above the page: its `openSize` given (see
+   * `GridItemProps.open`).
+   */
+  canOpen: boolean;
   /** Whether its grid is editing. */
   editing: boolean;
+  /** Whether it's expanded in place (see `GridItemProps.expanded`). */
+  expanded: boolean;
+  /** Its size expanded (its `expandedSize`), if it has one. */
+  expandedSize: GridSize | undefined;
   /**
    * Whether it's narrower than snapped, to fit the columns or its area (its
    * area's own fit: `GridAreaState.isFitted`).
@@ -476,13 +521,19 @@ export type GridItemState = {
    * takes in (none by default).
    */
   requestSize: (size: GridSize, details?: GridSizeChangeDetails) => void;
-  /** Its size as the user chose it. */
+  /** Its size as the user chose it (expanded or not: its stored size). */
   requested: GridSize;
+  /**
+   * Expands it or makes it small again (its `onExpandedChange`, reason
+   * none).
+   */
+  setExpanded: (expanded: boolean) => void;
   /** Opens or closes it above the page (its `onOpenChange`, reason none). */
   setOpen: (open: boolean) => void;
   /**
-   * Its effective size: requested, snapped to supported, then the widest
-   * supported that fits if that's too wide (or than its area).
+   * Its effective size: requested (expanded, its `expandedSize`), snapped
+   * to supported, then the widest supported that fits if that's too wide
+   * (or than its area).
    */
   size: GridSize;
   /**

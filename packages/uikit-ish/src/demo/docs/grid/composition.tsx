@@ -1117,38 +1117,77 @@ const Room: FunctionComponent = () => {
 const expandingCode = `// The app's card (here just the device's name).
 const DeviceCard = ({ name }) => <div className="device-card">{name}</div>;
 
-// Which tiles are expanded: the app's state.
-const [expanded, setExpanded] = useState([]);
-const toggle = (name) =>
-  setExpanded((current) =>
-    current.includes(name)
-      ? current.filter((each) => each !== name)
-      : [...current, name],
+// Its corner button: its item's expansion (useGridItem); hidden where
+// expanding changes nothing (both sizes the same at these columns).
+const ExpandButton = ({ label }) => {
+  const item = useGridItem();
+  const small = item.sizeOf(item.requested).size;
+  const large = item.sizeOf(item.expandedSize).size;
+  return (
+    <Grid.CornerButton
+      mirrored
+      aria-expanded={item.expanded}
+      aria-label={label}
+      icon={item.expanded ? gridIcons.collapse : gridIcons.expand}
+      visible={small !== large}
+      onClick={() => item.setExpanded(!item.expanded)}
+    />
   );
+};
+
+// Which tiles are expanded: the app's state (or each item's own, without
+// expanded and onExpandedChange); edit mode makes them small again.
+const [expanded, setExpanded] = useState([]);
 
 <Grid.Root>
-  {tiles.map(({ area, expandedSize, name, size }) => {
-    const isExpanded = expanded.includes(name);
-    return (
-      <Grid.Item
-        key={name}
-        size={isExpanded ? expandedSize : size}
-        supportedSizes={[size, expandedSize]}
-      >
-        <DeviceCard name={name} />
-        <Grid.CornerButton
-          mirrored
-          aria-expanded={isExpanded}
-          aria-label={\`\${name} details\`}
-          icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
-          onClick={() => toggle(name)}
-        />
-        {/* Room around it: it grows in there, nothing else moving. */}
-        {area ? <Grid.Area size={area} /> : null}
-      </Grid.Item>
-    );
-  })}
+  {tiles.map(({ area, expandedSize, name, size }) => (
+    <Grid.Item
+      key={name}
+      expanded={expanded.includes(name)}
+      expandedSize={expandedSize}
+      size={size}
+      supportedSizes={[size, expandedSize]}
+      onExpandedChange={(next) =>
+        setExpanded((current) =>
+          next ? [...current, name] : current.filter((each) => each !== name),
+        )
+      }
+    >
+      <DeviceCard name={name} />
+      <ExpandButton label={\`\${name} details\`} />
+      {/* Room around it: it grows in there, nothing else moving. */}
+      {area ? <Grid.Area size={area} /> : null}
+    </Grid.Item>
+  ))}
 </Grid.Root>`;
+
+/**
+ * A tile's corner button expanding it and making it small again (see
+ * `Expanding`): its item's expansion; hidden where expanding changes
+ * nothing.
+ */
+const ExpandButton: FunctionComponent<{
+  cornerProps?: Record<string, unknown>;
+  label: string;
+}> = ({ cornerProps, label }) => {
+  const item = useGridItem();
+  const small = item?.sizeOf(item.requested).size;
+  const large = item?.expandedSize
+    ? item.sizeOf(item.expandedSize).size
+    : undefined;
+  const isExpanded = item?.expanded === true;
+  return (
+    <Grid.CornerButton
+      {...cornerProps}
+      mirrored
+      aria-expanded={isExpanded}
+      aria-label={label}
+      icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
+      visible={large !== undefined && small !== large}
+      onClick={() => item?.setExpanded(!isExpanded)}
+    />
+  );
+};
 
 /** The tiles that expand (see `Expanding`): their sizes, an area. */
 const expandingTiles: readonly {
@@ -1156,11 +1195,19 @@ const expandingTiles: readonly {
   expandedSize: GridSize;
   name: string;
   size: GridSize;
+  /** Its sizes, if not just its size and its size expanded. */
+  supported?: readonly GridSize[];
 }[] = [
   { expandedSize: '2x2', name: 'Heating', size: '1x1' },
   { expandedSize: '2x1', name: 'Lamp', size: '1x1' },
   { area: '3x2', expandedSize: '2x2', name: 'Clock', size: '1x1' },
-  { expandedSize: '4x2', name: 'Speaker', size: '2x1' },
+  // (3x2 too: on a phone's three columns, its expanded size there.)
+  {
+    expandedSize: '4x2',
+    name: 'Speaker',
+    size: '2x1',
+    supported: ['2x1', '3x2', '4x2'],
+  },
 ];
 
 /**
@@ -1171,12 +1218,12 @@ const Expanding: FunctionComponent = () => {
   const id = 'grid-composition-expanding';
   const [log, addLog] = useLog();
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
-  const toggle = (name: string) =>
+  const change = (name: string, isExpanded: boolean, reason: string) =>
     setExpanded((current) => {
       const next = new Set(current);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      addLog(`${name} ${next.has(name) ? 'expanded' : 'small again'}`);
+      if (isExpanded) next.add(name);
+      else next.delete(name);
+      addLog(`${name} ${isExpanded ? 'expanded' : 'small again'} (${reason})`);
       return next;
     });
 
@@ -1192,8 +1239,15 @@ const Expanding: FunctionComponent = () => {
               'icon',
               'mirrored',
               'onClick',
+              'visible',
             ],
-            'Grid.Item': ['size', 'supportedSizes'],
+            'Grid.Item': [
+              'expanded',
+              'expandedSize',
+              'onExpandedChange',
+              'size',
+              'supportedSizes',
+            ],
             'Grid.Root': [],
             'Page.Root': [],
             'Viewport.Content': [],
@@ -1232,33 +1286,36 @@ const Expanding: FunctionComponent = () => {
               {...partProps['Grid.Root']}
               style={gridSigns(partProps['Grid.Root']?.style)}
             >
-              {expandingTiles.map(({ area, expandedSize, name, size }) => {
-                const isExpanded = expanded.has(name);
-                return (
-                  <Grid.Item
-                    key={name}
-                    {...partProps['Grid.Item']}
-                    size={isExpanded ? expandedSize : size}
-                    supportedSizes={[size, expandedSize]}
-                  >
-                    <div className="grid-demo-tile">{name}</div>
-                    <Grid.CornerButton
-                      {...partProps['Grid.CornerButton']}
-                      mirrored
-                      aria-expanded={isExpanded}
-                      aria-label={`${name} details`}
-                      icon={isExpanded ? gridIcons.collapse : gridIcons.expand}
-                      onClick={() => toggle(name)}
-                    />
-                    {area ? (
-                      <Grid.Area
-                        {...partProps['Grid.Area']}
-                        size={area}
+              {expandingTiles.map(
+                ({ area, expandedSize, name, size, supported }) => {
+                  const isExpanded = expanded.has(name);
+                  return (
+                    <Grid.Item
+                      key={name}
+                      {...partProps['Grid.Item']}
+                      expanded={isExpanded}
+                      expandedSize={expandedSize}
+                      size={size}
+                      supportedSizes={supported ?? [size, expandedSize]}
+                      onExpandedChange={(next, { reason }) =>
+                        change(name, next, reason)
+                      }
+                    >
+                      <div className="grid-demo-tile">{name}</div>
+                      <ExpandButton
+                        cornerProps={partProps['Grid.CornerButton']}
+                        label={`${name} details`}
                       />
-                    ) : null}
-                  </Grid.Item>
-                );
-              })}
+                      {area ? (
+                        <Grid.Area
+                          {...partProps['Grid.Area']}
+                          size={area}
+                        />
+                      ) : null}
+                    </Grid.Item>
+                  );
+                },
+              )}
             </Grid.Root>
           </div>
           <Viewport.Padding
@@ -1656,18 +1713,27 @@ export const GridComposition: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        Expanding a tile is the app changing its size. A{' '}
-        <PartLink part="Grid.CornerButton" /> asks for the other size, and the
-        app keeps which tiles are expanded in its own state, apart from the
-        sizes the user chose. Here that state isn’t stored, so tiles are small
-        again after a reload.
+        An item expands in place to its <code>expandedSize</code>: controlled (
+        <code>expanded</code>, kept by the app) or its own, its size, the one
+        the user chose, staying as it is. A{' '}
+        <PartLink part="Grid.CornerButton" /> asks for the other state through{' '}
+        <PartLink part="useGridItem" />
+        ’s <code>setExpanded</code>. Edit mode makes it small again. Here the
+        state isn’t stored, so tiles are small again after a reload.
       </li>
       <li>
         The button’s icon comes from the same state:{' '}
         <PartLink part="gridIcons" />
         ’s <code>expand</code> while it’s small, <code>collapse</code> while
         it’s expanded. It’s <code>mirrored</code>, since the triangle points to
-        a corner, and says its state with <code>aria-expanded</code>.
+        a corner, and says its state with <code>aria-expanded</code>. It hides
+        where expanding changes nothing: both sizes the same at the columns
+        there are (<code>sizeOf</code>). A card’s{' '}
+        <PartLink
+          component="card"
+          part="Card.ExpandButton"
+        />{' '}
+        is this button ready-made.
       </li>
       <li>
         The tile moves and resizes to its new box, and the tiles after it
@@ -1681,11 +1747,12 @@ export const GridComposition: FunctionComponent = () => (
         ), so it grows from the middle of its area and nothing around it moves.
       </li>
       <li>
-        <strong>Library:</strong> the tile getting to its new box, the reflow,
-        the corner button and its icons.
+        <strong>Library:</strong> the item’s expansion, the tile getting to its
+        new box, the reflow, the corner button and its icons.
       </li>
       <li>
-        <strong>Demo:</strong> which tiles are expanded and their sizes.
+        <strong>Demo:</strong> which tiles are expanded (logged with why) and
+        their sizes.
       </li>
     </ul>
     <CodeView code={expandingCode} />

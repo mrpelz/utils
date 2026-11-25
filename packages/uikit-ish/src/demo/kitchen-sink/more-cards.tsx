@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   type CardActions,
-  ControlCards,
   forwardClick,
   Progress,
   Segmented,
@@ -60,8 +59,8 @@ import {
   sfWindowShadeClosed,
 } from '../tooling/icons.js';
 import {
-  type Expansion,
   lightsStore,
+  rowsOf,
   type Tile,
   Toned,
   TonedCard,
@@ -87,29 +86,20 @@ const percent = (value: number) =>
     style: 'percent',
   }).format(value);
 
-/** Its corner button expanding it and making it small again. */
-const ExpandButton: FunctionComponent<{
-  expansion: Expansion;
-  name: string;
-}> = ({
-  expansion: { collapsedSize, expandedSize, isExpanded, onToggle },
-  name,
-}) => (
-  <ControlCards.ExpandButton
-    collapsedSize={collapsedSize}
-    expanded={isExpanded}
-    expandedSize={expandedSize}
-    label={`${name} details`}
-    onExpandedChange={onToggle}
-  />
+/**
+ * Its corner button expanding it and making it small again (its grid
+ * item's `expandedSize`, if any).
+ */
+const ExpandButton: FunctionComponent<{ name: string }> = ({ name }) => (
+  <Card.ExpandButton aria-label={`${name} details`} />
 );
 
 /** Its corner buttons opening it above the page and closing it. */
 const OpenButtons: FunctionComponent<{ name: string }> = ({ name }) => (
-  <ControlCards.OpenButtons
-    closeLabel="Close"
-    label={`${name} details`}
-  />
+  <>
+    <Card.OpenButton aria-label={`${name} details`} />
+    <Card.CloseButton aria-label="Close" />
+  </>
 );
 
 /** A color temperature's range (kelvin). */
@@ -132,9 +122,7 @@ const kelvinScale = Array.from({ length: 6 }, (_, index) =>
  * (the app's to decide; here, a light's that dims out): dimmed to nothing,
  * off; brightened from it, on; switched on at nothing, at full.
  */
-const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
-  expansion,
-}) => {
+const TunableLightCard: FunctionComponent = () => {
   const [brightness, setBrightness] = useState(0.7);
   const [kelvin, setKelvin] = useState(3100);
   const [isOn, setIsOn] = useState(true);
@@ -153,17 +141,7 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
     <TonedCard
       active={isExpanded ? undefined : false}
       onClick={
-        isExpanded
-          ? (event) => {
-              if (
-                event.target instanceof Element &&
-                event.target.closest('.uikit-control-cards-channels')
-              ) {
-                return;
-              }
-              forwardClick('[role=switch]:not([disabled])')(event);
-            }
-          : undefined
+        isExpanded ? forwardClick('[role=switch]:not([disabled])') : undefined
       }
     >
       <FlipParts />
@@ -179,9 +157,10 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
       </Card.Symbol>
       {isExpanded ? (
         <>
-          <ControlCards.Channels>
-            <ControlCards.Channel
-              name="Brightness"
+          <Card.Channels>
+            <Card.Channel
+              label="Brightness"
+              max={1}
               tint={tint}
               value={brightness}
               onValueChange={(next) => {
@@ -190,37 +169,43 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
               }}
             />
             {/* (A scale, not an amount: the app's colors, warm to cool.) */}
-            <ControlCards.Channel
+            <Card.Channel
               colors={kelvinScale}
-              getValueText={(_, value) => `${String(value)} K`}
+              getAriaValueText={(_, value) => `${String(value)} K`}
+              label="Temperature"
               max={coolest}
               min={warmest}
-              name="Temperature"
               step={100}
               value={kelvin}
               onValueChange={setKelvin}
-            />
-          </ControlCards.Channels>
+            >
+              {(_, value) => `${String(value)} K`}
+            </Card.Channel>
+          </Card.Channels>
           <Card.Title>{name}</Card.Title>
           <Card.Value>{percent(brightness)}</Card.Value>
         </>
       ) : (
-        <ControlCards.SliderFill
+        <Card.Slider
           format={{ maximumFractionDigits: 0, style: 'percent' }}
           // (Its state with its value, as a slider card's: the app's, here
           // as ControlCards.Slider's default.)
-          getValueText={(formatted) => `${isOn ? 'On' : 'Off'} · ${formatted}`}
+          label={name}
           max={1}
           min={0}
-          name={name}
           tint={tint}
           value={brightness}
+          getAriaValueText={(formatted) =>
+            `${isOn ? 'On' : 'Off'} · ${formatted}`
+          }
           onPress={() => switchTo(!isOn)}
           onValueChange={(next) => {
             setBrightness(next);
             setIsOn(next > 0);
           }}
-        />
+        >
+          {(formatted) => `${isOn ? 'On' : 'Off'} · ${formatted}`}
+        </Card.Slider>
       )}
       <Card.Switch
         aria-label={name}
@@ -228,12 +213,7 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
         tint={tint}
         onCheckedChange={switchTo}
       />
-      {expansion ? (
-        <ExpandButton
-          expansion={expansion}
-          name={name}
-        />
-      ) : null}
+      <ExpandButton name={name} />
     </TonedCard>
   );
 };
@@ -265,35 +245,30 @@ export const ChannelLightCard: FunctionComponent<{
   channels: readonly LightChannel[];
   /** Its symbol's icon while on (e.g. filled). */
   emphasizedIcon: SymbolIcon;
-  expansion?: Expansion;
   icon: SymbolIcon;
   initial: readonly number[];
   name: string;
   /** Opened above the page for its channels (else expanded). */
   opens?: boolean;
-}> = ({ channels, expansion, initial, name, opens = false, ...props }) => (
+}> = ({ channels, initial, name, opens = false, ...props }) => (
   <Toned.Light
-    name={name}
+    defaultChecked
+    label={name}
     {...props}
   >
     <FlipParts />
-    <ControlCards.Channels>
+    <Card.Channels>
       {channels.map(({ name: channel, tint }, index) => (
-        <ControlCards.Channel
+        <Card.Channel
           key={channel}
-          defaultValue={initial[index] ?? 1}
-          name={channel}
+          defaultValue={(initial[index] ?? 1) * 100}
+          label={channel}
           tint={tint}
         />
       ))}
-    </ControlCards.Channels>
+    </Card.Channels>
     {opens ? <OpenButtons name={name} /> : null}
-    {!opens && expansion ? (
-      <ExpandButton
-        expansion={expansion}
-        name={name}
-      />
-    ) : null}
+    {opens ? null : <ExpandButton name={name} />}
   </Toned.Light>
 );
 
@@ -323,9 +298,7 @@ const useNow = (every: number) => {
  * A device's status (a list card): its connection's symbol, online and
  * when it was last heard from; expanded, the details in rows.
  */
-const DeviceCard: FunctionComponent<{ expansion?: Expansion }> = ({
-  expansion,
-}) => {
+const DeviceCard: FunctionComponent = () => {
   const now = useNow(30_000);
   const [heard] = useState(() => Date.now() - 2 * 60_000);
   const isExpanded = useIsLarge();
@@ -333,20 +306,11 @@ const DeviceCard: FunctionComponent<{ expansion?: Expansion }> = ({
   return (
     <Toned.List
       icon={sfAntennaRadiowavesLeftAndRight}
-      name={name}
+      label={name}
       status={isExpanded ? 'Online' : `Online · ${agoOf(heard, now)}`}
-      expansion={
-        expansion
-          ? {
-              collapsedSize: expansion.collapsedSize,
-              expanded: expansion.isExpanded,
-              expandedSize: expansion.expandedSize,
-              label: `${name} details`,
-              onExpandedChange: expansion.onToggle,
-            }
-          : undefined
-      }
-      rows={
+    >
+      <FlipParts />
+      {rowsOf(
         isExpanded
           ? [
               { label: 'Last heard', value: agoOf(heard, now) },
@@ -355,10 +319,9 @@ const DeviceCard: FunctionComponent<{ expansion?: Expansion }> = ({
               { label: 'Signal', value: '−62 dBm' },
               { label: 'Firmware', value: '1.4.2' },
             ]
-          : []
-      }
-    >
-      <FlipParts />
+          : [],
+      )}
+      {isExpanded ? null : <ExpandButton name={name} />}
     </Toned.List>
   );
 };
@@ -395,7 +358,7 @@ const TrendCard: FunctionComponent<{
     <Toned.Value
       format={format}
       icon={icon}
-      name={name}
+      label={name}
       trend={angle}
       value={value}
     />
@@ -422,13 +385,13 @@ const DoorbellCard: FunctionComponent = () => {
       actionsRef={actions}
       emphasizedIcon={sfBellFill}
       icon={sfBell}
-      name="Doorbell"
+      label="Doorbell"
       status={
         rang === undefined
           ? 'Quiet'
           : `Rang ${new Intl.DateTimeFormat(undefined, { timeStyle: 'short' }).format(rang)}`
       }
-      onPress={() => setRang(Date.now())}
+      onClick={() => setRang(Date.now())}
     />
   );
 };
@@ -440,9 +403,9 @@ const AllOffCard: FunctionComponent = () => {
   return (
     <Toned.Button
       icon={sfPower}
-      name="All Lights Off"
+      label="All Lights Off"
       status={onCount > 0 ? `${String(onCount)} on` : 'All off'}
-      onPress={() => {
+      onClick={() => {
         for (const name of Object.keys(lights)) lightsStore.set(name, false);
       }}
     />
@@ -461,9 +424,10 @@ const RoomCard: FunctionComponent = () => {
   return (
     <Toned.List
       icon={sfHouseFill}
-      name={name}
-      opening={{ closeLabel: 'Close', label: `${name} details` }}
-      rows={[
+      label={name}
+    >
+      <FlipParts />
+      {rowsOf([
         {
           icon: sfLightbulbFill,
           label: 'Lights',
@@ -480,7 +444,7 @@ const RoomCard: FunctionComponent = () => {
                 style: 'unit',
                 unit: 'celsius',
               }).format(temperature)}
-              <ControlCards.Trend angle={angle} />
+              <Card.Trend angle={angle} />
             </>
           ),
         },
@@ -493,9 +457,8 @@ const RoomCard: FunctionComponent = () => {
           label: 'Devices',
           value: '12 online',
         },
-      ]}
-    >
-      <FlipParts />
+      ])}
+      <Card.CloseButton aria-label="Close" />
     </Toned.List>
   );
 };
@@ -606,9 +569,7 @@ const modeTints: Readonly<Record<Mode, string>> = {
  * large (expanded, or resized so), a segmented control for its mode and a
  * stepper for its target.
  */
-const ThermostatCard: FunctionComponent<{ expansion?: Expansion }> = ({
-  expansion,
-}) => {
+const ThermostatCard: FunctionComponent = () => {
   const [mode, setMode] = useState<Mode>('heat');
   const [target, setTarget] = useState(21.5);
   const isLarge = useIsLarge();
@@ -670,12 +631,7 @@ const ThermostatCard: FunctionComponent<{ expansion?: Expansion }> = ({
           {label} · {target.toFixed(1)} °C
         </Card.Value>
       )}
-      {expansion ? (
-        <ExpandButton
-          expansion={expansion}
-          name={name}
-        />
-      ) : null}
+      <ExpandButton name={name} />
     </TonedCard>
   );
 };
@@ -705,19 +661,20 @@ const GarageCard: FunctionComponent = () => {
       active={position > 0}
       emphasizedIcon={sfDoorGarageOpen}
       icon={sfDoorGarageClosed}
-      name="Garage Door"
+      label="Garage Door"
       tint="var(--color-ui-system-orange)"
-      value={direction === 0 ? undefined : position * 100}
       onClick={() => setDirection(position > 0 ? -1 : 1)}
     >
-      {/* (Moving, its bar; at rest, its state as its subtitle.) */}
-      {direction === 0 ? (
-        <ControlCards.Subtitle>{state}</ControlCards.Subtitle>
-      ) : (
-        <ControlCards.ProgressBar>
-          <ControlCards.ProgressLabel>{state}</ControlCards.ProgressLabel>
-        </ControlCards.ProgressBar>
-      )}
+      <Card.Progress value={direction === 0 ? null : position * 100}>
+        {/* (Moving, its bar; at rest, its state as its subtitle.) */}
+        {direction === 0 ? (
+          <Card.Subtitle>{state}</Card.Subtitle>
+        ) : (
+          <Card.ProgressBar>
+            <Card.ProgressLabel>{state}</Card.ProgressLabel>
+          </Card.ProgressBar>
+        )}
+      </Card.Progress>
     </Toned.Progress>
   );
 };
@@ -738,9 +695,7 @@ const forecast: readonly (readonly [string, SymbolIcon, string])[] = [
  * The weather: small, now; large (expanded, or opened above the page), the
  * next hours in rows, as many as fit.
  */
-const WeatherCard: FunctionComponent<{ expansion?: Expansion }> = ({
-  expansion,
-}) => {
+const WeatherCard: FunctionComponent = () => {
   const isLarge = useIsLarge();
   const name = 'Weather';
   return (
@@ -756,12 +711,7 @@ const WeatherCard: FunctionComponent<{ expansion?: Expansion }> = ({
       {/* (Large, its value large: the sky in its title.) */}
       <Card.Title>{isLarge ? `${name} · Partly cloudy` : name}</Card.Title>
       <Card.Value>{isLarge ? '12°' : '12° · Partly cloudy'}</Card.Value>
-      {expansion ? (
-        <ExpandButton
-          expansion={expansion}
-          name={name}
-        />
-      ) : null}
+      <ExpandButton name={name} />
     </TonedCard>
   );
 };
@@ -781,9 +731,7 @@ const today: readonly number[] = Array.from({ length: 24 }, (_, index) =>
  * The power the home draws now, and its course over the last minutes (a
  * sparkline, larger on a larger tile), changing by itself.
  */
-const EnergyCard: FunctionComponent<{ expansion?: Expansion }> = ({
-  expansion,
-}) => {
+const EnergyCard: FunctionComponent = () => {
   const [values, setValues] = useState<readonly number[]>(() =>
     Array.from({ length: 24 }, (_, index) => 1.1 + Math.sin(index / 3) * 0.3),
   );
@@ -825,12 +773,7 @@ const EnergyCard: FunctionComponent<{ expansion?: Expansion }> = ({
       )}
       <Card.Title>{name}</Card.Title>
       <Card.Value>{now.toFixed(1)} kW</Card.Value>
-      {expansion ? (
-        <ExpandButton
-          expansion={expansion}
-          name={name}
-        />
-      ) : null}
+      <ExpandButton name={name} />
     </TonedCard>
   );
 };
@@ -862,17 +805,16 @@ const WasherCard: FunctionComponent = () => {
       active
       emphasizedIcon={sfWasherFill}
       icon={sfWasher}
-      name="Washer"
-      value={done * 100}
+      label="Washer"
     >
-      <ControlCards.Subtitle>Cotton, 40°</ControlCards.Subtitle>
-      <ControlCards.ProgressValue />
-      <ControlCards.ProgressBar>
-        <ControlCards.ProgressLabel>{phaseOf(done)}</ControlCards.ProgressLabel>
-        <ControlCards.ProgressDetail>
-          {left} min left
-        </ControlCards.ProgressDetail>
-      </ControlCards.ProgressBar>
+      <Card.Progress value={done * 100}>
+        <Card.Subtitle>Cotton, 40°</Card.Subtitle>
+        <Card.ProgressValue />
+        <Card.ProgressBar>
+          <Card.ProgressLabel>{phaseOf(done)}</Card.ProgressLabel>
+          <Card.ProgressDetail>{left} min left</Card.ProgressDetail>
+        </Card.ProgressBar>
+      </Card.Progress>
     </Toned.Progress>
   );
 };
@@ -919,21 +861,20 @@ const ProgramStagesCard: FunctionComponent<{
       active={current !== 'done'}
       emphasizedIcon={sfWasherFill}
       icon={sfWasher}
-      name={name}
+      label={name}
       tint="var(--color-ui-system-teal)"
-      value={current}
     >
-      <ControlCards.Subtitle>{subtitle}</ControlCards.Subtitle>
-      <ControlCards.StageList>
+      <Card.Subtitle>{subtitle}</Card.Subtitle>
+      <Card.StageList value={current}>
         {stages.map(([value, label]) => (
-          <ControlCards.Stage
+          <Card.Stage
             key={value}
             value={value}
           >
             {label}
-          </ControlCards.Stage>
+          </Card.Stage>
         ))}
-      </ControlCards.StageList>
+      </Card.StageList>
     </Toned.Stages>
   );
 };
@@ -965,9 +906,9 @@ const MailboxCard: FunctionComponent = () => {
       badge={letters > 0 ? letters : undefined}
       emphasizedIcon={sfEnvelopeFill}
       icon={sfEnvelope}
-      name="Mailbox"
+      label="Mailbox"
       status={letters > 0 ? `${String(letters)} letters` : 'Empty'}
-      onPress={() => setLetters(0)}
+      onClick={() => setLetters(0)}
     />
   );
 };
@@ -983,11 +924,10 @@ export const moreTiles: readonly Tile[] = [
     sizes: ['2x1', '2x2'],
   },
   {
-    card: ({ expansion }) => (
+    card: () => (
       <ChannelLightCard
         channels={rgb}
         emphasizedIcon={sfLightStrip2Fill}
-        expansion={expansion}
         icon={sfLightStrip2}
         initial={[0.9, 0.3, 0.6]}
         name="Light Strip"
@@ -1002,11 +942,10 @@ export const moreTiles: readonly Tile[] = [
   {
     // (An app's dark channel colors: their names and values light on their
     // fills, dark on their wells.)
-    card: ({ expansion }) => (
+    card: () => (
       <ChannelLightCard
         channels={deepChannels}
         emphasizedIcon={sfLightStrip2Fill}
-        expansion={expansion}
         icon={sfLightStrip2}
         initial={[0.04, 0.6, 0.85]}
         name="Aquarium Light"
@@ -1037,11 +976,10 @@ export const moreTiles: readonly Tile[] = [
   {
     // (Its five channels stacked: three rows' height, expanded.)
     area: '4x3',
-    card: ({ expansion }) => (
+    card: () => (
       <ChannelLightCard
         channels={[...rgb, cool, warm]}
         emphasizedIcon={sfLampFloorFill}
-        expansion={expansion}
         icon={sfLampFloor}
         initial={[0.6, 0.2, 0.1, 0.3, 0.8]}
         name="Floor Lamp"

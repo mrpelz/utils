@@ -36,26 +36,27 @@ import { propOptionsRoot } from './props.js';
 /**
  * A phone's page of cards (see `cardsStage`): its tiles (one of each kind
  * by default; each its kind's sizes, its own size stored), edit mode, the
- * expanded ones (the app's state, not stored; none while editing), the
- * opened one, the cards' own state. The demo's, as an app keeps it.
+ * expanded ones (the app's state, not stored; its items make them small
+ * again as editing starts), the opened one, the cards' own state. The
+ * demo's, as an app keeps it.
  */
 export type CardsStageState = {
   editing: boolean;
   expanded: ReadonlySet<string>;
   handle: GridReorderHandle;
   opened: string | undefined;
-  /** A tile resized in edit mode (made small again). */
+  /** A tile resized in edit mode. */
   resize: (name: string, size: GridSize) => void;
   /** Sets a card's state (see `CardContext`). */
   set: CardContext['set'];
+  /** Expands a tile, or makes it small again (its item's change). */
+  setExpanded: (name: string, expanded: boolean, reason?: string) => void;
   /** Opens a tile above the page, or closes it. */
   setOpen: (name: string, open: boolean, reason?: string) => void;
   states: CardStates;
   tiles: readonly CardTile[];
-  /** Edit and Done (edited as stored: expanded ones small again). */
+  /** Edit and Done. */
   toggleEditing: () => void;
-  /** A tile expanded, or made small again. */
-  toggleExpanded: (name: string) => void;
 };
 
 export const useCardsStage = (
@@ -92,6 +93,17 @@ export const useCardsStage = (
       addLog(`${key}: ${String(value)}`);
       setStates((current) => ({ ...current, [key]: value }));
     },
+    setExpanded: (name: string, isExpanded: boolean, reason?: string) => {
+      addLog(
+        `${name}: ${isExpanded ? 'expand' : 'collapse'}${reason ? ` (${reason})` : ''}`,
+      );
+      setExpanded((current) => {
+        const next = new Set(current);
+        if (isExpanded) next.add(name);
+        else next.delete(name);
+        return next;
+      });
+    },
     setOpen: (name: string, open: boolean, reason?: string) => {
       addLog(
         `${name}: ${open ? 'open' : 'close'}${reason ? ` (${reason})` : ''}`,
@@ -100,11 +112,6 @@ export const useCardsStage = (
     },
     resize: (name: string, size: GridSize) => {
       addLog(`${name} size: ${size}`);
-      setExpanded((current) => {
-        const next = new Set(current);
-        next.delete(name);
-        return next;
-      });
       setTiles((current) =>
         current.map((tile) => (tile.name === name ? { ...tile, size } : tile)),
       );
@@ -113,16 +120,7 @@ export const useCardsStage = (
     tiles,
     toggleEditing: () => {
       addLog(editing ? 'done' : 'edit');
-      if (!editing) setExpanded(new Set());
       setEditing(!editing);
-    },
-    toggleExpanded: (name: string) => {
-      const isExpanded = !expanded.has(name);
-      addLog(`${name}: ${isExpanded ? 'expand' : 'collapse'}`);
-      const next = new Set(expanded);
-      if (isExpanded) next.add(name);
-      else next.delete(name);
-      setExpanded(next);
     },
   };
 };
@@ -175,11 +173,10 @@ export const cardsStage = (
           >
             {stage.tiles.map(
               ({ area, expandedSize, kind, name, openSize, size, sizes }) => {
+                // (Expanding: the app's state, its item's expanded size;
+                // its card's button shown only where that changes its
+                // size, at these columns too, see `Card.ExpandButton`.)
                 const isExpanded = stage.expanded.has(name);
-                // (Expanding, its button shown only where that changes its
-                // size, at these columns too: see ControlCards'
-                // `ExpandButton`.)
-                const canExpand = expandedSize !== undefined;
                 const shown = isExpanded && expandedSize ? expandedSize : size;
                 const isOpen = stage.opened === name;
                 return (
@@ -194,23 +191,21 @@ export const cardsStage = (
                       openLabel: name,
                       openSize,
                     })}
+                    expanded={expandedSize ? isExpanded : undefined}
+                    expandedSize={expandedSize}
                     reorderHandle={stage.handle}
-                    size={shown}
+                    size={size}
                     supportedSizes={sizes}
                     onSizeChange={(next) => stage.resize(name, next)}
+                    onExpandedChange={(next, { reason }) =>
+                      stage.setExpanded(name, next, reason)
+                    }
                     onOpenChange={(open, { reason }) =>
                       stage.setOpen(name, open, reason)
                     }
                   >
                     {cardOf(kind, {
-                      expansion: canExpand
-                        ? {
-                            collapsedSize: size,
-                            expandedSize,
-                            isExpanded,
-                            onToggle: () => stage.toggleExpanded(name),
-                          }
-                        : undefined,
+                      canExpand: expandedSize !== undefined,
                       isOpen,
                       parts: partsOf(name),
                       set: stage.set,
@@ -249,6 +244,9 @@ export const stageParts = {
     'defaultOpen',
     'defaultSize',
     'dropName',
+    'expanded',
+    'expandedSize',
+    'onExpandedChange',
     'onOpenChange',
     'onSizeChange',
     'open',

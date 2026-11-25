@@ -49,8 +49,8 @@ import {
 } from '../tooling/icons.js';
 import {
   CardToneContext,
-  type Expansion,
   lightsStore,
+  rowsOf,
   settingsStore,
   type Tile,
   Toned,
@@ -98,22 +98,21 @@ const percent: Intl.NumberFormatOptions = {
 
 /**
  * Heating: small, the room's temperature; expanded, a slider filling it
- * (ControlCards' `SliderFill`) setting what it heats to. Its corner button
+ * (a `Card.Slider`) setting what it heats to. Its corner button
  * expands it and makes it small again.
  */
-const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
-  expansion,
-}) => {
+const HeatingCard: FunctionComponent = () => {
   const [target, setTarget] = useState(22);
   // (Large (expanded, or resized so): its slider.)
   const isExpanded = useIsLarge();
+  const canExpand = useGridItem()?.expandedSize !== undefined;
   return (
     <TonedCard
       // (Small, a press anywhere on it as on its button (shown: expanding
       // changing it); expanded, its slider's, the button alone expanding
       // it no more.)
       onClick={
-        expansion && !isExpanded
+        canExpand && !isExpanded
           ? forwardClick(
               '[data-card-part=corner-button]:not([data-grid-hidden])',
             )
@@ -129,11 +128,11 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
         />
       </Card.Symbol>
       {isExpanded ? (
-        <ControlCards.SliderFill
+        <Card.Slider
           format={celsius}
+          label="Heat to"
           max={26}
           min={16}
-          name="Heat to"
           step={0.5}
           tint={cardTints.heat}
           value={target}
@@ -148,15 +147,7 @@ const HeatingCard: FunctionComponent<{ expansion?: Expansion }> = ({
           />
         </>
       )}
-      {expansion ? (
-        <ControlCards.ExpandButton
-          collapsedSize={expansion.collapsedSize}
-          expanded={expansion.isExpanded}
-          expandedSize={expansion.expandedSize}
-          label="Heating details"
-          onExpandedChange={expansion.onToggle}
-        />
-      ) : null}
+      <Card.ExpandButton aria-label="Heating details" />
     </TonedCard>
   );
 };
@@ -176,9 +167,9 @@ const DimmerCard: FunctionComponent = () => {
       emphasizedIcon={sfLightbulbFill}
       format={percent}
       icon={sfLightbulb}
+      label="Dimmer"
       max={1}
       min={0}
-      name="Dimmer"
       tint={cardTints.light}
       value={value}
       onValueChange={setValue}
@@ -208,7 +199,7 @@ const LightsCard: FunctionComponent = () => {
       active={onCount > 0}
       emphasizedIcon={sfLightbulbFill}
       icon={sfLightbulb}
-      name="Lights"
+      label="Lights"
       states={[`${String(onCount)} On`, 'Off']}
       onClick={forwardClick('[data-card-part=corner-button]')}
     >
@@ -231,8 +222,9 @@ const HomeCard: FunctionComponent = () => {
   return (
     <Toned.List
       icon={sfHouseFill}
-      name="Home"
-      rows={[
+      label="Home"
+    >
+      {rowsOf([
         {
           icon: sfLightbulbFill,
           label: 'Lights',
@@ -250,8 +242,8 @@ const HomeCard: FunctionComponent = () => {
           label: 'Devices',
           value: '12 online',
         },
-      ]}
-    />
+      ])}
+    </Toned.List>
   );
 };
 
@@ -400,10 +392,10 @@ const CameraCard: FunctionComponent = () => {
       <Card.Value>{isOpen ? 'Live, recording' : 'Live'}</Card.Value>
       {/* (Opening it, closed; its x, open, where the others' are: each
           fading as it grows and shrinks.) */}
-      <ControlCards.OpenButtons
-        closeLabel="Close"
-        label="Front Door Camera"
-      />
+      <>
+        <Card.OpenButton aria-label="Front Door Camera" />
+        <Card.CloseButton aria-label="Close" />
+      </>
     </TonedCard>
   );
 };
@@ -413,20 +405,9 @@ const CameraCard: FunctionComponent = () => {
  * making it small again), nothing in it moving but that, with its corner:
  * the tile's own motion.
  */
-const EmptyExpandingCard: FunctionComponent<{
-  expansion?: Expansion;
-  name: string;
-}> = ({ expansion, name }) => (
+const EmptyExpandingCard: FunctionComponent<{ name: string }> = ({ name }) => (
   <TonedCard>
-    {expansion ? (
-      <ControlCards.ExpandButton
-        collapsedSize={expansion.collapsedSize}
-        expanded={expansion.isExpanded}
-        expandedSize={expansion.expandedSize}
-        label={name}
-        onExpandedChange={expansion.onToggle}
-      />
-    ) : null}
+    <Card.ExpandButton aria-label={name} />
   </TonedCard>
 );
 
@@ -436,10 +417,10 @@ const EmptyExpandingCard: FunctionComponent<{
  */
 const EmptyOpeningCard: FunctionComponent<{ name: string }> = ({ name }) => (
   <TonedCard>
-    <ControlCards.OpenButtons
-      closeLabel="Close"
-      label={name}
-    />
+    <>
+      <Card.OpenButton aria-label={name} />
+      <Card.CloseButton aria-label="Close" />
+    </>
   </TonedCard>
 );
 
@@ -471,27 +452,14 @@ const deviceRows = [
  * A device's status (a list card), expanding in place from its last row
  * (see the Summaries room).
  */
-const SensorCard: FunctionComponent<{
-  expansion?: Expansion;
-  name: string;
-}> = ({ expansion, name }) => (
+const SensorCard: FunctionComponent<{ name: string }> = ({ name }) => (
   <Toned.List
     icon={sfAntennaRadiowavesLeftAndRight}
-    name={name}
-    rows={deviceRows}
+    label={name}
     status="Online"
-    expansion={
-      expansion
-        ? {
-            collapsedSize: expansion.collapsedSize,
-            expanded: expansion.isExpanded,
-            expandedSize: expansion.expandedSize,
-            label: `${name} details`,
-            onExpandedChange: expansion.onToggle,
-          }
-        : undefined
-    }
-  />
+  >
+    {rowsOf(deviceRows)}
+  </Toned.List>
 );
 
 /**
@@ -501,11 +469,11 @@ const SensorCard: FunctionComponent<{
 const SummaryCard: FunctionComponent<{ name: string }> = ({ name }) => (
   <Toned.List
     icon={sfHouseFill}
-    name={name}
-    opening={{ closeLabel: 'Close', label: `${name} details` }}
-    rows={roomRows}
+    label={name}
   >
     <FlipParts />
+    {rowsOf(roomRows)}
+    <Card.CloseButton aria-label="Close" />
   </Toned.List>
 );
 
@@ -525,7 +493,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           defaultChecked
           emphasizedIcon={sfLightbulbFill}
           icon={sfLightbulb}
-          name="Floor Lamp"
+          label="Floor Lamp"
           tint={cardTints.light}
         >
           {/* (Its settings, editing or not: its color as the card's, lit
@@ -545,7 +513,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Switch
           emphasizedIcon={sfFanFill}
           icon={sfFan}
-          name="Ceiling Fan"
+          label="Ceiling Fan"
           tint={cardTints.air}
         />
       ),
@@ -565,9 +533,9 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           defaultValue={0.5}
           format={percent}
           icon={sfWindowShadeClosed}
+          label="Blinds"
           max={1}
           min={0}
-          name="Blinds"
           step={0.25}
           tint={cardTints.shade}
         />
@@ -586,9 +554,9 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           emphasizedIcon={sfFanFill}
           format={percent}
           icon={sfFan}
+          label="Fan Speed"
           max={1}
           min={0}
-          name="Fan Speed"
           step={0.25}
           tint={cardTints.air}
         />
@@ -603,7 +571,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       card: () => (
         <Toned.Value
           icon={sfThermometerMedium}
-          name="Living Room Temperature"
+          label="Living Room Temperature"
           value={21.5}
           format={{
             maximumFractionDigits: 1,
@@ -628,7 +596,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Value
           format={percent}
           icon={sfHumidityFill}
-          name="Humidity"
+          label="Humidity"
           value={0.46}
         >
           {/* (Its settings, editing or not.) */}
@@ -647,9 +615,9 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Slider
           defaultValue={21}
           icon={sfThermometerMedium}
+          label="Thermostat"
           max={25}
           min={15}
-          name="Thermostat"
           step={0.5}
           tint={cardTints.heat}
           format={{
@@ -667,7 +635,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       card: () => (
         <Toned.Value
           icon={sfFanFill}
-          name="Wind"
+          label="Wind"
           value={12.5}
           format={{
             maximumFractionDigits: 1,
@@ -683,12 +651,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
   ],
   Empty: [
     {
-      card: ({ expansion }) => (
-        <EmptyExpandingCard
-          expansion={expansion}
-          name="Expand in place"
-        />
-      ),
+      card: () => <EmptyExpandingCard name="Expand in place" />,
       expandedSize: '2x2',
       kind: 'numericalDisplay',
       name: 'Empty, expanding',
@@ -696,12 +659,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     },
     {
       area: '3x2',
-      card: ({ expansion }) => (
-        <EmptyExpandingCard
-          expansion={expansion}
-          name="Expand in its area"
-        />
-      ),
+      card: () => <EmptyExpandingCard name="Expand in its area" />,
       expandedSize: '2x2',
       kind: 'numericalDisplay',
       name: 'Empty, expanding in its area',
@@ -779,24 +737,14 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       size: '2x1',
     },
     {
-      card: ({ expansion }) => (
-        <SensorCard
-          expansion={expansion}
-          name="Garage Sensor"
-        />
-      ),
+      card: () => <SensorCard name="Garage Sensor" />,
       expandedSize: '2x2',
       kind: 'summaryDisplay',
       name: 'Garage Sensor',
       size: '2x1',
     },
     {
-      card: ({ expansion }) => (
-        <SensorCard
-          expansion={expansion}
-          name="Attic Sensor"
-        />
-      ),
+      card: () => <SensorCard name="Attic Sensor" />,
       expandedSize: '2x2',
       kind: 'summaryDisplay',
       name: 'Attic Sensor',
@@ -810,14 +758,18 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="heat"
           icon={sfPower}
-          name="Heat Pump"
+          label="Heat Pump"
           offValue="off"
-          optionContent="label"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(heatPumpModes)}
+          <Card.Segmented
+            defaultValue="heat"
+            optionContent="label"
+          >
+            {segmentsOf(heatPumpModes)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -827,13 +779,15 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="off"
           icon={sfPower}
-          name="Office Heat Pump"
+          label="Office Heat Pump"
           offValue="off"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(heatPumpModes)}
+          <Card.Segmented defaultValue="off">
+            {segmentsOf(heatPumpModes)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -843,19 +797,21 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="slow"
           icon={sfPower}
-          name="Air Purifier"
+          label="Air Purifier"
           offValue="off"
           tint={cardTints.air}
         >
+          {' '}
           <FlipParts />
-          {segmentsOf([
-            { icon: sfPower, label: 'Off', value: 'off' },
-            { icon: sfFanFill, label: 'Auto', value: 'auto' },
-            { icon: sfTortoiseFill, label: 'Slow', value: 'slow' },
-            { icon: sfHareFill, label: 'Turbo', value: 'turbo' },
-          ])}
+          <Card.Segmented defaultValue="slow">
+            {segmentsOf([
+              { icon: sfPower, label: 'Off', value: 'off' },
+              { icon: sfFanFill, label: 'Auto', value: 'auto' },
+              { icon: sfTortoiseFill, label: 'Slow', value: 'slow' },
+              { icon: sfHareFill, label: 'Turbo', value: 'turbo' },
+            ])}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -865,18 +821,20 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="away"
           icon={sfLockOpen}
-          name="Alarm"
+          label="Alarm"
           offValue="off"
           tint="oklch(64% 0.21 25)"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf([
-            { icon: sfLockOpen, label: 'Off', value: 'off' },
-            { icon: sfHouseFill, label: 'Home', value: 'home' },
-            { icon: sfAirplane, label: 'Away', value: 'away' },
-          ])}
+          <Card.Segmented defaultValue="away">
+            {segmentsOf([
+              { icon: sfLockOpen, label: 'Off', value: 'off' },
+              { icon: sfHouseFill, label: 'Home', value: 'home' },
+              { icon: sfAirplane, label: 'Away', value: 'away' },
+            ])}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -886,14 +844,17 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="off"
           icon={sfPower}
-          name="Guest Room Heat"
+          label="Guest Room Heat"
           offValue="off"
-          opening={{ closeLabel: 'Close', label: 'Guest Room Heat modes' }}
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(heatPumpModes)}
+          <Card.Segmented defaultValue="off">
+            {segmentsOf(heatPumpModes)}
+          </Card.Segmented>
+          <Card.OpenButton aria-label="Guest Room Heat modes" />
+          <Card.CloseButton aria-label="Close" />
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -910,7 +871,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           active
           emphasizedIcon={sfLockFill}
           icon={sfLockOpen}
-          name="Front Door"
+          label="Front Door"
           states={['Locked', 'Unlocked']}
         />
       ),
@@ -924,7 +885,7 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           active={false}
           emphasizedIcon={sfDoorLeftHandOpen}
           icon={sfDoorLeftHandClosed}
-          name="Back Door"
+          label="Back Door"
           states={['Open', 'Closed']}
         />
       ),
@@ -953,30 +914,12 @@ const CardsApp: FunctionComponent = () => {
   // (The cards' glass context, to compare: the scheme's, forced, adaptive.)
   const [tone, setTone] = useState<string>('scheme');
   const [rooms, setRooms] = useState(roomsInitial);
-  // (Which are expanded: the app's state, not stored; none while editing.)
-  // (One expanded at first, as the mock-ups show it: Attic Sensor's.)
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
-    () => new Set(['Attic Sensor']),
-  );
-  const toggle = (name: string) =>
-    setExpanded((current) => {
-      const next = new Set(current);
-      if (next.has(name)) next.delete(name);
-      else next.add(name);
-      return next;
-    });
   const [gridSigns] = useState(gridSignsOf);
   const handle = Grid.useCreateReorderHandle({
     onReorder: (change) =>
       setRooms((current) => Grid.reorder(current, change, ({ name }) => name)),
   });
   const resize = (name: string, size: GridSize) => {
-    // (Resized: as stored, small.)
-    setExpanded((current) => {
-      const next = new Set(current);
-      next.delete(name);
-      return next;
-    });
     setRooms((current) =>
       Object.fromEntries(
         Object.entries(current).map(([room, tiles]) => [
@@ -1007,11 +950,7 @@ const CardsApp: FunctionComponent = () => {
             <Toolbar.Trailing>
               <Toolbar.Button
                 prominent={editing}
-                onClick={() => {
-                  // (Edited as stored: expanded ones small again.)
-                  if (!editing) setExpanded(new Set());
-                  setEditing(!editing);
-                }}
+                onClick={() => setEditing(!editing)}
               >
                 <Button.Label>{editing ? 'Done' : 'Edit'}</Button.Label>
               </Toolbar.Button>
@@ -1067,47 +1006,36 @@ const CardsApp: FunctionComponent = () => {
                       openSize,
                       size,
                       sizes,
-                    }) => {
-                      const isExpanded = expanded.has(name);
-                      // (Expanding, its button shown only where that
-                      // changes its size, at these columns too.)
-                      const canExpand = expandedSize !== undefined;
-                      return (
-                        <Grid.Item
-                          key={name}
-                          dropName={name}
-                          openLabel={openSize ? name : undefined}
-                          openSize={openSize}
-                          reorderHandle={handle}
-                          supportedSizes={sizes ?? cardSizes[kind]}
-                          size={
-                            isExpanded && expandedSize ? expandedSize : size
-                          }
-                          onSizeChange={(next) => resize(name, next)}
-                        >
-                          <CardOf
-                            expansion={
-                              canExpand
-                                ? {
-                                    collapsedSize: size,
-                                    expandedSize,
-                                    isExpanded,
-                                    onToggle: () => toggle(name),
-                                  }
-                                : undefined
-                            }
-                          />
-                          <Grid.ResizeHandle />
-                          {/* (Room around it: expanded, it grows in there,
+                    }) => (
+                      // (Expanding (its expanded size, if any): its
+                      // card's button only where that changes its size, at
+                      // these columns too.)
+                      <Grid.Item
+                        key={name}
+                        // (Expanded: its own state, not stored; small
+                        // again as editing starts. One at first, as the
+                        // mock-ups show it: Attic Sensor's.)
+                        defaultExpanded={name === 'Attic Sensor'}
+                        dropName={name}
+                        expandedSize={expandedSize}
+                        openLabel={openSize ? name : undefined}
+                        openSize={openSize}
+                        reorderHandle={handle}
+                        size={size}
+                        supportedSizes={sizes ?? cardSizes[kind]}
+                        onSizeChange={(next) => resize(name, next)}
+                      >
+                        <CardOf />
+                        <Grid.ResizeHandle />
+                        {/* (Room around it: expanded, it grows in there,
                             nothing around it moving.) */}
-                          {area ? (
-                            <Grid.Area defaultSize={area}>
-                              <Grid.ResizeHandle />
-                            </Grid.Area>
-                          ) : null}
-                        </Grid.Item>
-                      );
-                    },
+                        {area ? (
+                          <Grid.Area defaultSize={area}>
+                            <Grid.ResizeHandle />
+                          </Grid.Area>
+                        ) : null}
+                      </Grid.Item>
+                    ),
                   )}
                 </Grid.Section>
               ))}
@@ -1121,7 +1049,7 @@ const CardsApp: FunctionComponent = () => {
                 <ControlCards.Switch
                   emphasizedIcon={sfLightbulbFill}
                   icon={sfLightbulb}
-                  name="Desk Lamp"
+                  label="Desk Lamp"
                   tint={cardTints.light}
                 />
               </div>
@@ -1129,7 +1057,7 @@ const CardsApp: FunctionComponent = () => {
                 <ControlCards.Value
                   format={percent}
                   icon={sfHumidityFill}
-                  name="Humidity"
+                  label="Humidity"
                   value={0.52}
                 />
               </div>

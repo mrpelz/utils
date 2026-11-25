@@ -3,6 +3,7 @@ import {
   createContext,
   createElement,
   FunctionComponent,
+  type ReactNode,
   useContext,
   useSyncExternalStore,
 } from 'react';
@@ -10,37 +11,51 @@ import {
 import {
   Card,
   type CardRootProps,
+  type CardRowProps,
   cardSizes,
   ControlCards,
   type GlassContextValue,
   type GridSize,
+  type SymbolIcon,
   useGridItem,
 } from '../../components/index.js';
 
 // What the Cards pages share (see cards.tsx, more-cards.tsx): a tile's
-// shape, a card's expansion, the lights' store.
+// shape, a card's rows, the lights' store.
 
-/**
- * A card's expansion (see `CardsApp`): whether it's expanded (the app's
- * state, not stored), and asking for the other.
- */
-export type Expansion = {
-  /** Its size, not expanded (its stored size). */
-  collapsedSize: GridSize;
-  /** Its size, expanded. */
-  expandedSize: GridSize;
-  isExpanded: boolean;
-  onToggle: () => void;
+/** A card's row's data (see `rowsOf`). */
+export type RowData = {
+  readonly icon?: SymbolIcon;
+  readonly label: string;
+  readonly onPress?: () => void;
+  readonly value: ReactNode;
 };
+
+/** A card's rows (a `Card.Rows` of `Card.Row`s), from their data. */
+export const rowsOf = (rows: readonly RowData[]): ReactNode =>
+  createElement(
+    Card.Rows,
+    null,
+    rows.map(({ icon, label, onPress, value }) =>
+      createElement(
+        // (Its own props, keyed: its label its children.)
+        Card.Row as ComponentType<
+          Pick<CardRowProps, 'icon' | 'onClick' | 'value'> & { key: string }
+        >,
+        { icon, key: label, onClick: onPress, value },
+        label,
+      ),
+    ),
+  );
 
 /**
  * A tile: a card's kind (its sizes), its size, the card in it; its size
- * expanded, if it expands (see `Expansion`).
+ * expanded, if it expands (its grid item's `expandedSize`).
  */
 export type Tile = {
   /** Room around its tile (a `Grid.Area`), its tile centered in it. */
   area?: GridSize;
-  card: FunctionComponent<{ expansion?: Expansion }>;
+  card: FunctionComponent;
   expandedSize?: GridSize;
   kind: keyof typeof cardSizes;
   name: string;

@@ -1,4 +1,5 @@
 import {
+  baseUiRows,
   code,
   elementRows,
   glassSurfaceRow,
@@ -151,7 +152,7 @@ export const cardSymbolRows: readonly PropRow[] = [
     </>,
     'Its color while it’s on: active, or its card lit.',
   ],
-  ...elementRows('span', 'HTMLSpanElement'),
+  ...renderRows('span', 'HTMLSpanElement'),
 ];
 
 export const cardSwitchRows: readonly PropRow[] = [
@@ -187,7 +188,13 @@ export const cardTitleRows: readonly PropRow[] = [
     undefined,
     'What the card is about, for example a device’s name. Two lines at most.',
   ],
-  ...elementRows('span', 'HTMLSpanElement'),
+  [
+    'id',
+    'string',
+    'a generated one',
+    'Its id. The parts named by the card’s title (a progress bar, stages, a choice) are labelled by it.',
+  ],
+  ...renderRows('span', 'HTMLSpanElement'),
 ];
 
 export const cardValueRows: readonly PropRow[] = [
@@ -222,9 +229,9 @@ export const cardValueRows: readonly PropRow[] = [
     'children',
     'ReactNode',
     undefined,
-    'What it shows when there’s no number, for example a state: “Locked”.',
+    'What it shows when there’s no number, for example a state: “Locked”. With a number, what’s shown after it, for example a Card.Trend.',
   ],
-  ...elementRows('span', 'HTMLSpanElement'),
+  ...renderRows('span', 'HTMLSpanElement'),
 ];
 
 export const cardSizesRows: readonly PropRow[] = [
@@ -283,11 +290,482 @@ export const cardUseCardOrientationRows: readonly PropRow[] = [
     <>
       Its tile’s shape: wider than tall (or square) is horizontal. Outside a
       grid, horizontal. Lay out content of your own by it;{' '}
-      <PartLink
-        component="control-cards"
-        part="ControlCards.SliderFill"
-      />{' '}
-      reads it itself.
+      <PartLink part="Card.Slider" /> reads it itself.
     </>,
   ],
+];
+
+/** A number's format and locale. */
+const formatRows = (byDefault?: string): readonly PropRow[] => [
+  [
+    'format',
+    'Intl.NumberFormatOptions',
+    byDefault === undefined ? undefined : code(byDefault),
+    'How its value is shown, for example { style: "percent" }.',
+  ],
+  ['locale', 'Intl.LocalesArgument', 'the document’s language', 'Its locale.'],
+];
+
+/** A percentage's format, as a share of its range. */
+const percentDefault = '{ maximumFractionDigits: 0, style: "percent" }';
+
+/** A Base UI slider's value and range (a slider's, a channel's). */
+const sliderValueRows: readonly PropRow[] = [
+  ['value', 'number', undefined, 'Its value (controlled).'],
+  ['defaultValue', 'number', 'its min', 'Its value at first (uncontrolled).'],
+  [
+    'onValueChange',
+    '(value: number) => void',
+    undefined,
+    'As its value changes, dragged or by keyboard.',
+  ],
+  ['min', 'number', code('0'), 'Its least value.'],
+  ['max', 'number', code('100'), 'Its greatest value.'],
+  [
+    'getAriaValueText',
+    '(formattedValue: string, value: number) => string',
+    'its formatted value',
+    'What assistive technology reads as its value, as Base UI’s.',
+  ],
+  ['disabled', 'boolean', code('false'), 'Whether it takes no input.'],
+  ['name', 'string', undefined, 'Its input’s name, for a form, as Base UI’s.'],
+];
+
+export const cardSubtitleRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words, for example a program’s name or when it ends.',
+  ],
+  ...renderRows('span', 'HTMLSpanElement'),
+];
+
+export const cardTrendRows: readonly PropRow[] = [
+  [
+    'angle',
+    'number',
+    undefined,
+    'How steeply its value changes: -90 (falling) to 90 (rising) degrees, 0 steady. Assistive technology reads rising, falling or steady.',
+  ],
+  ...renderRows('span', 'HTMLSpanElement'),
+];
+
+export const cardSliderRows: readonly PropRow[] = [
+  [
+    'label',
+    'string',
+    undefined,
+    'Its label at the card’s bottom, and its accessible name, for example the card’s name.',
+  ],
+  ...sliderValueRows,
+  [
+    'step',
+    'number',
+    'continuous (a hundredth of its range)',
+    'Its values’ step. Given, it snaps, and a tick marks each step across the card.',
+  ],
+  ...formatRows(),
+  [
+    'tint',
+    'string (a CSS color)',
+    'the app’s tint',
+    'Its fill’s color, opaque. Any color reads: what’s over the fill is drawn again inside it, dark on a bright fill, light on a dim one.',
+  ],
+  [
+    'children',
+    '(formattedValue: string, value: number) => ReactNode',
+    'its formatted value',
+    'Its value’s words at the card’s bottom, for example its card’s state with it (“On · 60%”).',
+  ],
+  [
+    'onPress',
+    '() => void',
+    undefined,
+    'Given, a press on it (released before it moves) calls this instead of setting a value, for example to toggle its card’s switch; a drag sets its value. Without it, a tap sets its value where it lands. Either way, a touch moving across the card scrolls the page instead.',
+  ],
+  [
+    '…',
+    'Slider.Root’s props',
+    undefined,
+    <>
+      Its other props are its{' '}
+      <PartLink
+        component="slider"
+        part="Slider.Root"
+      />
+      ’s, except its orientation (by its tile, see{' '}
+      <PartLink part="useCardOrientation" />
+      ).
+    </>,
+  ],
+];
+
+export const cardProgressRows: readonly PropRow[] = [
+  [
+    'value',
+    'number | null',
+    undefined,
+    'Its value, min to max. null: nothing under way (its bar empty, no value shown).',
+  ],
+  ['min', 'number', code('0'), 'Its least value.'],
+  ['max', 'number', code('100'), 'Its greatest value.'],
+  ...formatRows(percentDefault),
+  [
+    'getAriaValueText',
+    '(formattedValue: string, value: number | null) => string',
+    'its formatted value',
+    'What assistive technology reads as its value, as Base UI’s.',
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its parts: a <PartLink part="Card.ProgressValue" />, a{' '}
+      <PartLink part="Card.ProgressBar" />, and anything else of the card’s. It
+      renders no element of its own.
+    </>,
+  ],
+];
+
+export const cardProgressValueRows: readonly PropRow[] = [
+  [
+    'children',
+    '(formattedValue: string, value: number) => ReactNode',
+    'its formatted value',
+    'Its words, from its progress’s value formatted and the value itself, as Base UI’s Progress.Value.',
+  ],
+  ...renderRows('span', 'HTMLSpanElement'),
+];
+
+export const cardProgressBarRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      What’s on it: a <PartLink part="Card.ProgressLabel" /> and a{' '}
+      <PartLink part="Card.ProgressDetail" />, drawn on the well and again on
+      the fill.
+    </>,
+  ],
+  [
+    'tint',
+    'string (a CSS color)',
+    'the app’s tint',
+    'Its fill’s color. What’s drawn on the fill is dark or light, whichever reads better on it.',
+  ],
+  [
+    'aria-label',
+    'string',
+    'its card’s title',
+    'Its accessible name. Without it, it’s named by its card’s Card.Title.',
+  ],
+  ...renderRows('div', 'HTMLDivElement'),
+];
+
+export const cardProgressLabelRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words at the bar’s start, for example its phase.',
+  ],
+  ...renderRows('span', 'HTMLSpanElement'),
+];
+
+export const cardProgressDetailRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words at the bar’s end, quieter, for example how long it has left.',
+  ],
+  ...renderRows('span', 'HTMLSpanElement'),
+];
+
+export const cardStageListRows: readonly PropRow[] = [
+  [
+    'value',
+    'string',
+    undefined,
+    'Its current stage’s value. Those before it are done, those after it to come. Without it, all are to come.',
+  ],
+  [
+    'tint',
+    'string (a CSS color)',
+    'the app’s tint',
+    'The color of its current stage and of those done.',
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its stages, each a <PartLink part="Card.Stage" />, in order.
+    </>,
+  ],
+  [
+    'aria-label',
+    'string',
+    'its card’s title',
+    'Its accessible name. Without it, it’s named by its card’s Card.Title.',
+  ],
+  ...elementRows('ol', 'HTMLOListElement'),
+];
+
+export const cardStageRows: readonly PropRow[] = [
+  [
+    'value',
+    'string',
+    undefined,
+    'What it is. Its list’s value names the current stage.',
+  ],
+  ['children', 'ReactNode', undefined, 'Its words, under its dot.'],
+  ...elementRows('li', 'HTMLLIElement'),
+];
+
+export const cardChannelsRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its channels, each a <PartLink part="Card.Channel" />, in order.
+    </>,
+  ],
+  [
+    'onLightChange',
+    '(light: { brightness: number; color: string | undefined }) => void',
+    undefined,
+    'As the light its channels make together changes: its color at full strength (the amounts added up, tinted by the scales) and its brightness (its strongest amount’s share).',
+  ],
+  ...elementRows('div', 'HTMLDivElement'),
+];
+
+export const cardChannelRows: readonly PropRow[] = [
+  [
+    'label',
+    'string',
+    undefined,
+    'Its name: on its well, and its slider’s accessible name.',
+  ],
+  [
+    'tint',
+    'string (a CSS color)',
+    'the app’s tint',
+    'An amount’s color at its greatest value. Its fill is this color, its thumb this color mixed on black by its share.',
+  ],
+  [
+    'colors',
+    'readonly string[]',
+    undefined,
+    'A scale instead of an amount: its colors from its least value to its greatest, evenly spread, two or more. Its well shows them, its thumb the color at its value. For example a color temperature, warm to cool.',
+  ],
+  ...sliderValueRows,
+  ['step', 'number', 'a hundredth of its range', 'How far a step goes.'],
+  ...formatRows(percentDefault),
+  [
+    'children',
+    '(formattedValue: string, value: number) => ReactNode',
+    'its formatted value',
+    'Its value’s words on its well, for example “3800 K”.',
+  ],
+  ...baseUiRows('div', 'HTMLDivElement').filter(([name]) => name !== 'render'),
+];
+
+export const cardSegmentedRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its options, each a <PartLink part="Card.SegmentedItem" />, in order, as
+      segments in a well at its card’s bottom, dragged between or pressed.
+      Across a row and in a taller tile they sit side by side; upright, they
+      stack; at 1x1 they’re hidden.
+    </>,
+  ],
+  ['value', 'string', undefined, 'The chosen option (controlled).'],
+  [
+    'defaultValue',
+    'string',
+    'its first option’s',
+    'The option chosen at first (uncontrolled).',
+  ],
+  [
+    'onValueChange',
+    '(value: string) => void',
+    undefined,
+    'As an option is chosen, by a press, a drag or the arrow keys.',
+  ],
+  [
+    'optionContent',
+    union('both', 'icon', 'label'),
+    code(union('both')),
+    'What each segment shows: its symbol and label (an option without a symbol shows its label), its symbol only (the label becomes its accessible name), or its label only.',
+  ],
+  [
+    'orientation',
+    union('horizontal', 'vertical'),
+    undefined,
+    'Its options side by side or stacked, in a tile at least two rows tall. In a one-row tile they’re side by side; vertical then hides them, as at 1x1. Without it, the tile’s size decides: one wide and taller, stacked; otherwise side by side.',
+  ],
+  ['disabled', 'boolean', code('false'), 'Whether none can be chosen.'],
+  [
+    'aria-label',
+    'string',
+    'its card’s title',
+    'Its accessible name. Without it, it’s named by its card’s Card.Title.',
+  ],
+  ...baseUiRows('div', 'HTMLDivElement'),
+];
+
+export const cardSegmentedItemRows: readonly PropRow[] = [
+  ['value', 'string', undefined, 'What it stands for, unique in its choice.'],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words: its segment’s (with symbols only, its unseen name), and a ready-made card’s value while it’s chosen.',
+  ],
+  [
+    'icon',
+    'SymbolIcon',
+    undefined,
+    'Its symbol, in its segment (and a ready-made card’s while it’s chosen).',
+  ],
+  [
+    'subtitle',
+    'ReactNode',
+    undefined,
+    'More words under its words, in the card’s value color, where there’s room: in a tile taller than a row, not with symbols only, and when stacked only once it’s tall enough.',
+  ],
+  [
+    'tint',
+    'string',
+    undefined,
+    'A ready-made card’s symbol’s tint while it’s chosen.',
+  ],
+  [
+    'disabled',
+    'boolean',
+    code('false'),
+    'Whether it can’t be chosen now: dimmed, not pressed, dragged past and skipped by the arrow keys, as in Segmented.',
+  ],
+  ...baseUiRows('span', 'HTMLElement'),
+];
+
+export const cardRowsRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its rows, each a <PartLink part="Card.Row" />, in order: as many as fit
+      whole. When some are left out, the last one counts them instead, expanding
+      its tile (its{' '}
+      <PartLink
+        component="grid"
+        part="Grid.Item"
+      />
+      ’s expandedSize) or opening it (an item with an openSize); expanded, it
+      makes it small again.
+    </>,
+  ],
+  [
+    'getMoreLabel',
+    '(count: number) => string',
+    // eslint-disable-next-line no-template-curly-in-string -- the default's code, shown
+    code('`${count} more`'),
+    'The last row’s words while rows are left out, given how many.',
+  ],
+  [
+    'lessLabel',
+    'string',
+    code('"Less"'),
+    'The last row’s words while its tile is expanded.',
+  ],
+  [
+    '…',
+    'List.Root’s props',
+    undefined,
+    <>
+      Its other props are its{' '}
+      <PartLink
+        component="list"
+        part="List.Root"
+      />
+      ’s (its class, its style, render…).
+    </>,
+  ],
+];
+
+export const cardRowRows: readonly PropRow[] = [
+  ['children', 'ReactNode', undefined, 'Its label.'],
+  ['icon', 'SymbolIcon', undefined, 'Its symbol, before its label.'],
+  ['value', 'ReactNode', undefined, 'Its value, at its end.'],
+  [
+    'onClick',
+    '() => void',
+    undefined,
+    'Given, it’s pressed anywhere on it, for example to go to a page of its own, and shows a chevron after its value.',
+  ],
+  [
+    '…',
+    'List.Item’s props',
+    undefined,
+    <>
+      Its other props are its{' '}
+      <PartLink
+        component="list"
+        part="List.Item"
+      />
+      ’s (its class, its style, render…), but its onClick and value (its own,
+      above).
+    </>,
+  ],
+];
+
+/** A corner button's props (theirs, but its icon, corner, visibility). */
+const cornerButtonRestRow: PropRow = [
+  '…',
+  'Card.CornerButton’s props',
+  undefined,
+  <>
+    Its other props are a <PartLink part="Card.CornerButton" />
+    ’s, except its icon, its corner and its visibility (its own). Its onClick
+    runs after its own action.
+  </>,
+];
+
+export const cardExpandButtonRows: readonly PropRow[] = [
+  [
+    'aria-label',
+    'string',
+    undefined,
+    'Its accessible name, for example “Heating details”.',
+  ],
+  cornerButtonRestRow,
+];
+
+export const cardOpenButtonRows: readonly PropRow[] = [
+  [
+    'aria-label',
+    'string',
+    undefined,
+    'Its accessible name, for example “Speaker details”.',
+  ],
+  cornerButtonRestRow,
+];
+
+export const cardCloseButtonRows: readonly PropRow[] = [
+  [
+    'aria-label',
+    'string',
+    undefined,
+    'Its accessible name, for example “Close”.',
+  ],
+  cornerButtonRestRow,
 ];

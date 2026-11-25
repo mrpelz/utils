@@ -571,8 +571,10 @@ const partsKey = '$parts';
 /**
  * A demo's other parts' prop controls (see `partPropMaps`): a section per
  * part (titled by its name, closed), their state one object for the URL
- * (by part, as each `usePropControl`'s), and each part's props, to spread
- * on all its elements in the demo (before their own props, which win).
+ * (by part, as each `usePropControl`'s), each part's props, to spread on
+ * all its elements in the demo (before their own props, which win), and a
+ * key for what they're spread on, new as they change (so it mounts anew:
+ * e.g. for a `defaultValue`, only read as it mounts).
  * Its state marked (`$parts`), found among the demo's provided states
  * (`provided`) wherever it is: not by its index, the URL's states may be
  * fewer (e.g. a link setting the first only), or their number vary.
@@ -580,7 +582,7 @@ const partsKey = '$parts';
 export const usePartControls = (
   propMaps: PartPropMaps,
   { provided = [] }: { provided?: readonly unknown[] } = {},
-): [ReactNode, PartProps, object] => {
+): [ReactNode, PartProps, object, string] => {
   const externalState = useMemo(() => {
     const entry = provided.find(
       (state) => isObject(state) && partsKey in state,
@@ -721,7 +723,10 @@ export const usePartControls = (
     ),
   );
 
-  return [controls, props, toExternalState];
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- new with the props
+  const elementKey = useMemo(() => nextId(), [props]);
+
+  return [controls, props, toExternalState, elementKey];
 };
 
 /** A glass surface's `context` (see Glass): forced, adaptive. */

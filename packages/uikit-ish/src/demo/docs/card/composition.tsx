@@ -43,6 +43,7 @@ import {
   temperatureCard,
 } from './content.js';
 import { cardsStage, stageParts, useCardsStage } from './main.js';
+import { MixedSection, MixedView } from './mixed.js';
 
 /* eslint-disable unicorn/no-incorrect-template-string-interpolation -- JSX braces in code samples, not interpolations */
 
@@ -55,8 +56,10 @@ const celsius = {
   unit: 'celsius',
 };
 
-const HeatingCard = ({ isExpanded, onToggle, size }) => {
+const HeatingCard = () => {
   const [target, setTarget] = useState(22);
+  // (Its item's expansion, see Grid.Item's expanded.)
+  const isExpanded = useGridItem()?.expanded === true;
   return (
     // Small, a press anywhere on it as on its button (while it's shown);
     // expanded, the slider takes it.
@@ -74,12 +77,12 @@ const HeatingCard = ({ isExpanded, onToggle, size }) => {
         <Symbol box="square" icon={sfThermometerMedium} />
       </Card.Symbol>
       {isExpanded ? (
-        // A slider filling the card (ControlCards' SliderFill).
-        <ControlCards.SliderFill
+        // A slider filling the card (Card.Slider).
+        <Card.Slider
           format={celsius}
           max={26}
           min={16}
-          name="Heat to"
+          label="Heat to"
           step={0.5}
           tint="oklch(72% 0.17 50)"
           value={target}
@@ -91,48 +94,32 @@ const HeatingCard = ({ isExpanded, onToggle, size }) => {
           <Card.Value format={celsius} value={21.5} />
         </>
       )}
-      {/* Hidden while expanding changes nothing (e.g. too few columns);
-          its icon by which way it goes. */}
-      <ControlCards.ExpandButton
-        collapsedSize={size}
-        expanded={isExpanded}
-        expandedSize="2x2"
-        label="Heating details"
-        onExpandedChange={onToggle}
-      />
+      {/* Its item's expansion; hidden while expanding changes nothing
+          (e.g. too few columns), its icon by which way it goes. */}
+      <Card.ExpandButton aria-label="Heating details" />
     </Card.Root>
   );
 };
 
 // The app's state: the size the user chose (stored), whether it's
-// expanded (here, not stored), edit mode.
+// expanded (here, not stored; edit mode makes it small again), edit mode.
 const [size, setSize] = useState('1x1');
 const [isExpanded, setIsExpanded] = useState(false);
 const [editing, setEditing] = useState(false);
 
-<Button.Root
-  onClick={() => {
-    // (Edited at its own size: small again.)
-    setIsExpanded(false);
-    setEditing(!editing);
-  }}
->
+<Button.Root onClick={() => setEditing(!editing)}>
   <Button.Label>{editing ? 'Done' : 'Edit'}</Button.Label>
 </Button.Root>
 <Grid.Root editing={editing}>
   <Grid.Item
-    size={isExpanded ? '2x2' : size}
+    expanded={isExpanded}
+    expandedSize="2x2"
+    size={size}
     supportedSizes={cardSizes.numericalDisplay}
-    onSizeChange={(next) => {
-      setSize(next);
-      setIsExpanded(false);
-    }}
+    onExpandedChange={setIsExpanded}
+    onSizeChange={setSize}
   >
-    <HeatingCard
-      isExpanded={isExpanded}
-      size={size}
-      onToggle={() => setIsExpanded(!isExpanded)}
-    />
+    <HeatingCard />
     <Grid.ResizeHandle />
   </Grid.Item>
 </Grid.Root>`;
@@ -219,8 +206,8 @@ const LightsCard = ({ onDrillIn }) => (
 </Navigation.Root>`;
 
 const overlayCode = `// A camera: open above the page, it shows more; its corner button opens
-// it (and a press anywhere on it), an x closes it (ControlCards'
-// OpenButtons: its item's open and setOpen).
+// it (and a press anywhere on it), an x closes it (Card's
+// OpenButton and CloseButton: its item's open and setOpen).
 const CameraCard = () => {
   const item = useGridItem();
   const isOpen = item?.open === true;
@@ -241,7 +228,7 @@ const CameraCard = () => {
       <Card.Title>Front Door Camera</Card.Title>
       <Card.Value>{isOpen ? 'Live, recording since 8:12' : 'Live'}</Card.Value>
       {/* Opening it while it's closed; its x while it's open. */}
-      <ControlCards.OpenButtons closeLabel="Close" label="Front Door Camera" />
+      <><Card.OpenButton aria-label="Front Door Camera" /><Card.CloseButton aria-label="Close" /></>
     </Card.Root>
   );
 };
@@ -385,8 +372,9 @@ const celsius = {
   unit: 'celsius',
 };
 
-const HeatingCard = ({ isExpanded, onToggle }) => {
+const HeatingCard = () => {
   const [target, setTarget] = useState(22);
+  const isExpanded = useGridItem()?.expanded === true;
   return (
     <Card.Root
       onClick={
@@ -402,11 +390,11 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
       </Card.Symbol>
       {isExpanded ? (
         // Only in the larger form: shown as the card's edge passes it.
-        <ControlCards.SliderFill
+        <Card.Slider
           format={celsius}
           max={26}
           min={16}
-          name="Heat to"
+          label="Heat to"
           step={0.5}
           tint="oklch(72% 0.17 50)"
           value={target}
@@ -418,52 +406,44 @@ const HeatingCard = ({ isExpanded, onToggle }) => {
           <Card.Value format={celsius} value={21.5} />
         </>
       )}
-      <ControlCards.ExpandButton
-        collapsedSize="1x1"
-        expanded={isExpanded}
-        expandedSize="2x2"
-        label="Heating details"
-        onExpandedChange={onToggle}
-      />
+      <Card.ExpandButton aria-label="Heating details" />
     </Card.Root>
   );
 };
 
-const [isExpanded, setIsExpanded] = useState(false);
-
-// In room of its own: expanded, it grows there, nothing around it moving.
+// In room of its own: expanded (its own state here), it grows there,
+// nothing around it moving.
 <Grid.Item
-  size={isExpanded ? '2x2' : '1x1'}
+  defaultSize="1x1"
+  expandedSize="2x2"
   supportedSizes={cardSizes.numericalDisplay}
 >
-  <HeatingCard
-    isExpanded={isExpanded}
-    onToggle={() => setIsExpanded(!isExpanded)}
-  />
+  <HeatingCard />
   <Grid.Area defaultSize="3x2" />
 </Grid.Item>`;
 
-const rowsCode = `// A room's summary in rows (ControlCards' List): as many as fit whole,
-// the last counting those left out and opening it above the page, where
-// all of them show (an x in its top trailing corner closes it).
+const rowsCode = `// A room's summary in rows (ControlCards' List, its Card.Rows): as many
+// as fit whole, the last counting those left out and opening it above the
+// page (its item's openSize), where all of them show (a Card.CloseButton
+// in its top trailing corner closes it).
 <Grid.Item
   openLabel="Living Room"
   openSize="4x4"
   size="2x2"
   supportedSizes={['2x2']}
 >
-  <ControlCards.List
-    icon={sfHouseFill}
-    name="Living Room"
-    rows={[
-      { icon: sfLightbulbFill, label: 'Floor Lamp', value: isLampOn ? 'On' : 'Off' },
-      { icon: sfLightbulbFill, label: 'Dimmer', value: '60%' },
-      { icon: sfWindowShadeClosed, label: 'Blinds', value: '50%' },
-      { icon: sfThermometerMedium, label: 'Heating to', value: '22 °C' },
-      { icon: sfHumidityFill, label: 'Humidity', value: '46%' },
-    ]}
-    opening={{ closeLabel: 'Close', label: 'Living Room details' }}
-  />
+  <ControlCards.List icon={sfHouseFill} label="Living Room">
+    <Card.Rows>
+      <Card.Row icon={sfLightbulbFill} value={isLampOn ? 'On' : 'Off'}>
+        Floor Lamp
+      </Card.Row>
+      <Card.Row icon={sfLightbulbFill} value="60%">Dimmer</Card.Row>
+      <Card.Row icon={sfWindowShadeClosed} value="50%">Blinds</Card.Row>
+      <Card.Row icon={sfThermometerMedium} value="22 °C">Heating to</Card.Row>
+      <Card.Row icon={sfHumidityFill} value="46%">Humidity</Card.Row>
+    </Card.Rows>
+    <Card.CloseButton aria-label="Close" />
+  </ControlCards.List>
 </Grid.Item>`;
 
 const aloneCode = `// No grid: as large as its box, never in edit mode, its parts laid out
@@ -953,6 +933,7 @@ const sections: readonly Section[] = [
   ['opening-above-the-page', 'Opening above the page'],
   ['rows-in-a-card', 'Rows in a card'],
   ['building-for-changing-sizes', 'Building for changing sizes'],
+  ['building-blocks-together', 'Building blocks together'],
   ['on-its-own', 'On its own'],
 ];
 
@@ -976,8 +957,9 @@ export const CardComposition: FunctionComponent = () => (
       </li>
       <li>
         This page is about what cards do in a grid: expanding, drilling in,
-        opening above the page, changing size. The ready-made cards (a switch, a
-        state, a value, a slider, a button, a light, rows) are on{' '}
+        opening above the page, changing size, and its building blocks together.
+        The ready-made cards (a switch, a state, a value, a slider, a button, a
+        progress, stages, a light, rows, a choice) are on{' '}
         <a href={publicUrl('control-cards')}>ControlCards</a>’ pages.
       </li>
     </ul>
@@ -995,23 +977,25 @@ export const CardComposition: FunctionComponent = () => (
         and moves the tiles after it.
       </li>
       <li>
-        Expanding is the app’s: it keeps whether the card is expanded and gives
-        its{' '}
+        Expanding is its{' '}
         <PartLink
           component="grid"
           part="Grid.Item"
-        />{' '}
-        the expanded size, here 2x2, which must be in its{' '}
-        <code>supportedSizes</code>. Whether that’s stored is the app’s choice
-        too. Here it isn’t, so the card is small again after a reload.
+        />
+        ’s: its <code>expandedSize</code>, here 2x2, which must be in its{' '}
+        <code>supportedSizes</code>, and whether it’s expanded (
+        <code>expanded</code>, kept by the app, or its own). Its own size stays
+        as it is. Whether the expansion is stored is the app’s choice. Here it
+        isn’t, so the card is small again after a reload; edit mode makes it
+        small again too.
       </li>
       <li>
         <PartLink
-          component="control-cards"
-          part="ControlCards.ExpandButton"
+          component="card"
+          part="Card.ExpandButton"
         />
         , a <PartLink part="Card.CornerButton" />, asks for the other state. It
-        gets both sizes and compares them as its item would be them now (
+        compares both sizes as its item would be them now (
         <PartLink
           component="grid"
           part="useGridItem"
@@ -1145,8 +1129,13 @@ export const CardComposition: FunctionComponent = () => (
         says how large (<code>openSize</code>, here 4x3, fitted to the screen)
         and what it’s called as a dialog (<code>openLabel</code>).{' '}
         <PartLink
-          component="control-cards"
-          part="ControlCards.OpenButtons"
+          component="card"
+          part="Card.OpenButton"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="card"
+          part="Card.CloseButton"
         />{' '}
         open and close it with{' '}
         <PartLink
@@ -1231,14 +1220,13 @@ export const CardComposition: FunctionComponent = () => (
       <li>
         That row opens it above the page, where all of them show, as the
         camera’s card opens with its corner button (see{' '}
-        <a href="#opening-above-the-page">Opening above the page</a>). Its
-        opening prop takes what{' '}
+        <a href="#opening-above-the-page">Opening above the page</a>): its item
+        has an openSize. Open, a{' '}
         <PartLink
-          component="control-cards"
-          part="ControlCards.OpenButtons"
+          component="card"
+          part="Card.CloseButton"
         />{' '}
-        takes. Open, an × in its top trailing corner closes it, clear of its
-        symbol.
+        in its top trailing corner closes it, clear of its symbol.
       </li>
       <li>
         <strong>Library:</strong> the list card, its rows fitted to its size,
@@ -1341,8 +1329,13 @@ export const CardComposition: FunctionComponent = () => (
         <strong>Opening above the page:</strong> give the item an{' '}
         <code>openSize</code> and an <code>openLabel</code>.{' '}
         <PartLink
-          component="control-cards"
-          part="ControlCards.OpenButtons"
+          component="card"
+          part="Card.OpenButton"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="card"
+          part="Card.CloseButton"
         />{' '}
         put the x that closes it in the top trailing corner and the button that
         opens it in the bottom trailing one, each <code>visible</code> in its
@@ -1379,6 +1372,8 @@ export const CardComposition: FunctionComponent = () => (
     <CodeView code={sizeCode} />
     <SizeView />
 
+    <MixedSection />
+
     <Heading
       id="on-its-own"
       level={2}
@@ -1409,5 +1404,6 @@ export const cardCompositionDemos = [
   OverlayView,
   RowsView,
   SizeView,
+  MixedView,
   AloneView,
 ];

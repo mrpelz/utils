@@ -205,8 +205,8 @@ export const SliderArchitecture: FunctionComponent = () => (
         />{' '}
         styles a slider placed directly in it.{' '}
         <PartLink
-          component="control-cards"
-          part="ControlCards.SliderFill"
+          component="card"
+          part="Card.Slider"
         />{' '}
         builds a slider that fills a card from these parts. Neither changes the
         slider’s code.

@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 
-import { ControlCards } from '../../components/index.js';
+import { Card } from '../../components/index.js';
 import { cardTints } from '../tooling/card-kit.js';
 import { FlipParts } from '../tooling/flip.js';
 import {
@@ -44,7 +44,7 @@ import {
   sfWasherFill,
   sfWindowShadeClosed,
 } from '../tooling/icons.js';
-import { type Expansion, type Tile, Toned } from './cards-shared.js';
+import { rowsOf, type Tile, Toned } from './cards-shared.js';
 import { ChannelLightCard, rgb } from './more-cards.js';
 import { segmentsOf } from './segments.js';
 
@@ -87,41 +87,28 @@ const roomRows = [
 const RoomSummary: FunctionComponent<{ name: string }> = ({ name }) => (
   <Toned.List
     icon={sfHouseFill}
-    name={name}
-    opening={{ closeLabel: 'Close', label: `${name} details` }}
-    rows={roomRows}
+    label={name}
   >
     <FlipParts />
+    {rowsOf(roomRows)}
+    <Card.CloseButton aria-label="Close" />
   </Toned.List>
 );
 
 /** A device's details, expanding in place (no symbols in its rows). */
-const DeviceSummary: FunctionComponent<{
-  expansion?: Expansion;
-  name: string;
-}> = ({ expansion, name }) => (
+const DeviceSummary: FunctionComponent<{ name: string }> = ({ name }) => (
   <Toned.List
     icon={sfAntennaRadiowavesLeftAndRight}
-    name={name}
+    label={name}
     status="Online · 1 min. ago"
-    expansion={
-      expansion
-        ? {
-            collapsedSize: expansion.collapsedSize,
-            expanded: expansion.isExpanded,
-            expandedSize: expansion.expandedSize,
-            label: `${name} details`,
-            onExpandedChange: expansion.onToggle,
-          }
-        : undefined
-    }
-    rows={[
+  >
+    {rowsOf([
       { label: 'Connection', value: 'Thread' },
       { label: 'Battery', value: '64 %' },
       { label: 'Signal', value: '−58 dBm' },
       { label: 'Firmware', value: '2.0.1' },
-    ]}
-  />
+    ])}
+  </Toned.List>
 );
 
 /** A heat pump's modes, with symbols (tinted while chosen). */
@@ -277,7 +264,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           defaultChecked
           emphasizedIcon={sfLightbulbFill}
           icon={sfLightbulb}
-          name="Hall Light"
+          label="Hall Light"
           tint={cardTints.light}
         />
       ),
@@ -290,7 +277,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Switch
           emphasizedIcon={sfLightbulbFill}
           icon={sfLightbulb}
-          name="Porch Light"
+          label="Porch Light"
           tint={cardTints.light}
         />
       ),
@@ -304,7 +291,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           active
           emphasizedIcon={sfDoorGarageOpen}
           icon={sfDoorGarageClosed}
-          name="Carport Gate"
+          label="Carport Gate"
           states={['Open', 'Closed']}
         />
       ),
@@ -318,7 +305,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           active={false}
           emphasizedIcon={sfLockFill}
           icon={sfLockOpen}
-          name="Shed"
+          label="Shed"
           states={['Locked', 'Unlocked']}
         />
       ),
@@ -334,7 +321,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Value
           format={celsius}
           icon={sfThermometerMedium}
-          name="Bedroom"
+          label="Bedroom"
           trend={40}
           value={19.5}
         />
@@ -348,7 +335,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Value
           format={percent}
           icon={sfHumidityFill}
-          name="Cellar Humidity"
+          label="Cellar Humidity"
           trend={-30}
           value={0.68}
         />
@@ -361,7 +348,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
       card: () => (
         <Toned.Value
           icon={sfDropFill}
-          name="Rain Today"
+          label="Rain Today"
           trend={0}
           value={4.2}
           format={{
@@ -388,9 +375,9 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           emphasizedIcon={sfSunMaxFill}
           format={percent}
           icon={sfSunMax}
+          label="Kitchen Lights"
           max={1}
           min={0}
-          name="Kitchen Lights"
           tint={cardTints.light}
         />
       ),
@@ -404,9 +391,9 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           defaultValue={0.3}
           format={percent}
           icon={sfSpeakerWave3Fill}
+          label="Volume"
           max={1}
           min={0}
-          name="Volume"
           step={0.1}
         />
       ),
@@ -422,9 +409,9 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           emphasizedIcon={sfFanFill}
           format={percent}
           icon={sfFan}
+          label="Attic Fan"
           max={1}
           min={0}
-          name="Attic Fan"
           step={0.25}
           tint={cardTints.air}
         />
@@ -442,9 +429,9 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           emphasizedIcon={sfLightbulbFill}
           format={percent}
           icon={sfLightbulb}
+          label="Garden Lights"
           max={1}
           min={0}
-          name="Garden Lights"
           tint={cardTints.light}
         />
       ),
@@ -458,9 +445,9 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           defaultValue={0.5}
           format={percent}
           icon={sfWindowShadeClosed}
+          label="Skylight"
           max={1}
           min={0}
-          name="Skylight"
           tint={cardTints.shade}
         />
       ),
@@ -476,7 +463,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Button
           emphasizedIcon={sfBellFill}
           icon={sfBell}
-          name="Chime"
+          label="Chime"
           status="Ready"
         />
       ),
@@ -490,14 +477,15 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           active
           emphasizedIcon={sfWasherFill}
           icon={sfWasher}
-          name="Dryer"
+          label="Dryer"
           // (A light tint: dark text on its fill, see ControlCards.)
           tint="var(--color-ui-system-yellow)"
-          value={80}
         >
-          <ControlCards.ProgressBar>
-            <ControlCards.ProgressLabel>12 min</ControlCards.ProgressLabel>
-          </ControlCards.ProgressBar>
+          <Card.Progress value={80}>
+            <Card.ProgressBar>
+              <Card.ProgressLabel>12 min</Card.ProgressLabel>
+            </Card.ProgressBar>
+          </Card.Progress>
         </Toned.Progress>
       ),
       kind: 'progressDisplay',
@@ -511,18 +499,17 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
         <Toned.Progress
           emphasizedIcon={sfWasherFill}
           icon={sfWasher}
-          name="Dishwasher"
+          label="Dishwasher"
           tint="var(--color-ui-system-purple)"
-          value={35}
         >
-          <ControlCards.Subtitle>Eco, ends at 15:10</ControlCards.Subtitle>
-          <ControlCards.ProgressValue />
-          <ControlCards.ProgressBar>
-            <ControlCards.ProgressLabel>Drying</ControlCards.ProgressLabel>
-            <ControlCards.ProgressDetail>
-              40 min left
-            </ControlCards.ProgressDetail>
-          </ControlCards.ProgressBar>
+          <Card.Progress value={35}>
+            <Card.Subtitle>Eco, ends at 15:10</Card.Subtitle>
+            <Card.ProgressValue />
+            <Card.ProgressBar>
+              <Card.ProgressLabel>Drying</Card.ProgressLabel>
+              <Card.ProgressDetail>40 min left</Card.ProgressDetail>
+            </Card.ProgressBar>
+          </Card.Progress>
         </Toned.Progress>
       ),
       kind: 'progressDisplay',
@@ -538,16 +525,15 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           active={false}
           emphasizedIcon={sfCarFill}
           icon={sfCar}
-          name="Car"
+          label="Car"
           tint="var(--color-ui-system-green)"
-          value={64}
         >
-          <ControlCards.ProgressBar>
-            <ControlCards.ProgressLabel>Charging</ControlCards.ProgressLabel>
-            <ControlCards.ProgressDetail>
-              1 h 20 min
-            </ControlCards.ProgressDetail>
-          </ControlCards.ProgressBar>
+          <Card.Progress value={64}>
+            <Card.ProgressBar>
+              <Card.ProgressLabel>Charging</Card.ProgressLabel>
+              <Card.ProgressDetail>1 h 20 min</Card.ProgressDetail>
+            </Card.ProgressBar>
+          </Card.Progress>
         </Toned.Progress>
       ),
       kind: 'progressDisplay',
@@ -617,12 +603,7 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
       size: '3x3',
     },
     {
-      card: ({ expansion }) => (
-        <DeviceSummary
-          expansion={expansion}
-          name="Cellar Sensor"
-        />
-      ),
+      card: () => <DeviceSummary name="Cellar Sensor" />,
       expandedSize: '4x2',
       kind: 'summaryDisplay',
       name: 'Cellar Sensor',
@@ -642,14 +623,18 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="cool"
           icon={sfPower}
-          name="Lounge Heat Pump"
+          label="Lounge Heat Pump"
           offValue="off"
-          optionContent="icon"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(heatPumpModes)}
+          <Card.Segmented
+            defaultValue="cool"
+            optionContent="icon"
+          >
+            {segmentsOf(heatPumpModes)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -659,14 +644,18 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="heat"
           icon={sfPower}
-          name="Studio Heat Pump"
+          label="Studio Heat Pump"
           offValue="off"
-          optionContent="label"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(heatPumpModes)}
+          <Card.Segmented
+            defaultValue="heat"
+            optionContent="label"
+          >
+            {segmentsOf(heatPumpModes)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -676,15 +665,17 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="mid"
           icon={sfFan}
-          name="Ceiling Fan Speed"
+          label="Ceiling Fan Speed"
           offValue="off"
 
           tint={cardTints.air}
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(fanSpeeds)}
+          <Card.Segmented defaultValue="mid">
+            {segmentsOf(fanSpeeds)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -694,18 +685,20 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="auto"
           icon={sfPower}
-          name="Basement Heat Pump"
+          label="Basement Heat Pump"
           offValue="off"
           // (Cooling not available (e.g. in winter): disabled.)
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(
-            heatPumpModes.map((mode) =>
-              mode.value === 'cool' ? { ...mode, disabled: true } : mode,
-            ),
-          )}
+          <Card.Segmented defaultValue="auto">
+            {segmentsOf(
+              heatPumpModes.map((mode) =>
+                mode.value === 'cool' ? { ...mode, disabled: true } : mode,
+              ),
+            )}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -715,15 +708,17 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="low"
           icon={sfFan}
-          name="Bathroom Fan"
+          label="Bathroom Fan"
           offValue="off"
 
           tint={cardTints.air}
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(fanSpeeds)}
+          <Card.Segmented defaultValue="low">
+            {segmentsOf(fanSpeeds)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -733,13 +728,15 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="heat"
           icon={sfPower}
-          name="Workshop Heat Pump"
+          label="Workshop Heat Pump"
           offValue="off"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(heatPumpTargets)}
+          <Card.Segmented defaultValue="heat">
+            {segmentsOf(heatPumpTargets)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -749,18 +746,22 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="stream"
           icon={sfSpeakerFill}
-          name="Speaker Source"
+          label="Speaker Source"
           offValue="off"
           // (The chime unavailable (e.g. muted at night): disabled.)
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(
-            speakerSources.map((source) =>
-              source.value === 'chime' ? { ...source, disabled: true } : source,
-            ),
-          )}
+          <Card.Segmented defaultValue="stream">
+            {segmentsOf(
+              speakerSources.map((source) =>
+                source.value === 'chime'
+                  ? { ...source, disabled: true }
+                  : source,
+              ),
+            )}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -770,15 +771,17 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
     {
       card: () => (
         <Toned.Segmented
-          defaultValue="off"
           icon={sfFan}
-          name="Porch Fan"
+          label="Porch Fan"
           offValue="off"
 
           tint={cardTints.air}
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(fanSpeeds)}
+          <Card.Segmented defaultValue="off">
+            {segmentsOf(fanSpeeds)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -789,15 +792,18 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
       // (Stacked as the app says, though two wide: long words.)
       card: () => (
         <Toned.Segmented
-          defaultValue="night"
           icon={sfFlameFill}
-          name="Heating Program"
+          label="Heating Program"
           offValue="off"
-
-          orientation="vertical"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(heatingPrograms)}
+          <Card.Segmented
+            defaultValue="night"
+            orientation="vertical"
+          >
+            {segmentsOf(heatingPrograms)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -808,15 +814,18 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
       // (Long, many options stacked.)
       card: () => (
         <Toned.Segmented
-          defaultValue="relax"
           icon={sfLightbulbFill}
-          name="Scenes"
+          label="Scenes"
           offValue="off"
-
-          orientation="vertical"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(scenes)}
+          <Card.Segmented
+            defaultValue="relax"
+            orientation="vertical"
+          >
+            {segmentsOf(scenes)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -828,15 +837,18 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
       // words (their subtitles where they're tall enough: here, none).)
       card: () => (
         <Toned.Segmented
-          defaultValue="movie"
           icon={sfLightbulbFill}
-          name="Den Scenes"
+          label="Den Scenes"
           offValue="off"
-
-          orientation="vertical"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(scenes)}
+          <Card.Segmented
+            defaultValue="movie"
+            orientation="vertical"
+          >
+            {segmentsOf(scenes)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',
@@ -848,15 +860,18 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
       // subtitles, under their words.)
       card: () => (
         <Toned.Segmented
-          defaultValue="arrive"
           icon={sfHouseFill}
-          name="Entry"
+          label="Entry"
           offValue="off"
-
-          orientation="vertical"
         >
+          {' '}
           <FlipParts />
-          {segmentsOf(entryScenes)}
+          <Card.Segmented
+            defaultValue="arrive"
+            orientation="vertical"
+          >
+            {segmentsOf(entryScenes)}
+          </Card.Segmented>
         </Toned.Segmented>
       ),
       kind: 'choiceControl',

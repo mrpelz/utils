@@ -1,152 +1,78 @@
 import '../card/style.css';
-import '../list/style.css';
+import '../card/parts.css';
 import './style.css';
 
-import { Progress as BaseProgress } from '@base-ui/react/progress';
-import { Radio as BaseRadio } from '@base-ui/react/radio';
-import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
-import { Slider as BaseSlider } from '@base-ui/react/slider';
 import {
-  createContext,
-  type CSSProperties,
   forwardRef,
-  type MouseEvent,
-  type PointerEvent as ReactPointerEvent,
   type ReactNode,
-  type TouchEvent as ReactTouchEvent,
   useCallback,
-  useContext,
-  useId,
-  useLayoutEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react';
 
 import { Badge } from '../badge/main.js';
+import { OpenButtonHintContext } from '../card/buttons.js';
+import { ChannelsHostContext } from '../card/channels.js';
+import { Card, type CardLight } from '../card/main.js';
 import {
-  Card,
-  CardBlendScope,
-  type CardOrientation,
-  useCardOrientation,
-} from '../card/main.js';
-import { parseCssColor } from '../color-picker/color.js';
-import { colorSchemeStyle } from '../glass/main.js';
-import { measureOf } from '../grid/handle.js';
-import { iconOf, polyline } from '../grid/icons.js';
-import { gridIcons, startWithFrame, useGridItem } from '../grid/main.js';
-import { forwardClick, List } from '../list/main.js';
-import { useSettings } from '../settings/main.js';
-import { Slider } from '../slider/main.js';
+  SegmentedHostContext,
+  type SegmentedLayout,
+  type SegmentedOptionInfo,
+  useSegmentedOptions,
+} from '../card/segmented.js';
+import {
+  formatted,
+  percentFormat,
+  useControlled,
+  useIsLarge,
+} from '../card/shared.js';
+import { useGridItem } from '../grid/main.js';
+import { forwardClick } from '../list/main.js';
 import { Symbol, type SymbolIcon } from '../symbol/main.js';
-import { cn, reducedMotionOf, withStyle } from '../utils/main.js';
+import { cn, withStyle } from '../utils/main.js';
 import type {
   ControlCardButtonProps,
-  ControlCardChannelProps,
-  ControlCardChannelsProps,
-  ControlCardExpandButtonProps,
-  ControlCardFormat,
   ControlCardLightProps,
   ControlCardListProps,
-  ControlCardOpenButtonsProps,
-  ControlCardProgressBarProps,
-  ControlCardProgressDetailProps,
-  ControlCardProgressLabelProps,
   ControlCardProgressProps,
-  ControlCardProgressValueProps,
-  ControlCardSegmentedItemProps,
   ControlCardSegmentedProps,
-  ControlCardSliderFillProps,
   ControlCardSliderProps,
-  ControlCardStageListProps,
-  ControlCardStageProps,
   ControlCardStagesProps,
   ControlCardStateProps,
-  ControlCardSubtitleProps,
+  ControlCardStates,
   ControlCardSwitchProps,
-  ControlCardTextStates,
-  ControlCardTrendProps,
   ControlCardValueProps,
   ControlCardValueTextDetails,
 } from './props.js';
 
 export type {
   ControlCardButtonProps,
-  ControlCardChannelProps,
-  ControlCardChannelsProps,
-  ControlCardExpandButtonProps,
-  ControlCardFormat,
+  ControlCardGetValueText,
   ControlCardLightProps,
   ControlCardListProps,
-  ControlCardOpenButtonsProps,
-  ControlCardProgressBarProps,
-  ControlCardProgressDetailProps,
-  ControlCardProgressLabelProps,
   ControlCardProgressProps,
-  ControlCardProgressValueProps,
   ControlCardProps,
-  ControlCardRow,
-  ControlCardSegmentedItemProps,
   ControlCardSegmentedProps,
-  ControlCardStageListProps,
-  ControlCardStageProps,
-  ControlCardStagesProps,
-  ControlCardSliderFillProps,
   ControlCardSliderProps,
+  ControlCardStagesProps,
   ControlCardStateProps,
-  ControlCardSubtitleProps,
   ControlCardStates,
   ControlCardSwitchProps,
-  ControlCardTextStates,
-  ControlCardTrendProps,
   ControlCardValueProps,
   ControlCardValueTextDetails,
 } from './props.js';
 
-// Control cards: ready-made cards (each a `Card.Root` and its parts) for
-// what a home's devices show and control: a state, a switch, a value, a
-// slider, a momentary button, a progress, a run of stages, a light of
-// several channels, a list, a few modes; and what they're made of besides
-// (a subtitle, a progress's bar, a light's channels, corner buttons
-// expanding a card and opening it above the page). A namespace, not one
-// component's parts: each card stands on its own, its other props its
-// `Card.Root`'s. Its `children` added after its parts (e.g. a corner
-// button); a composed card's (a progress, stages, a light) its parts too,
-// as the app shows them.
+// Control cards: ready-made cards for what a home's devices show and
+// control (a state, a switch, a value, a slider, a momentary button, a
+// progress, a run of stages, a light of several channels, a summary in
+// rows, a few modes), each a `Card.Root` and Card's parts, composed. A
+// namespace, not one component's parts: each card stands on its own, its
+// other props its `Card.Root`'s. Its `children` added after its parts
+// (e.g. a corner button); a composed card's (a progress, stages, a light,
+// rows, a choice) its own parts too, Card's, as the app shows them.
 
-/** Controlled or uncontrolled state (as Base UI's components). */
-const useControlled = <T,>(
-  value: T | undefined,
-  defaultValue: T,
-): [T, (next: T) => void] => {
-  const [state, setState] = useState(defaultValue);
-  return [value === undefined ? state : value, setState];
-};
-
-/** The document's language, if it says (none: the runtime's default). */
-const documentLocale = () =>
-  typeof document === 'undefined'
-    ? undefined
-    : document.documentElement.lang || undefined;
-
-/** A number, formatted (see `ControlCardFormat`). */
-const formatted = (value: number, { format, locale }: ControlCardFormat) =>
-  new Intl.NumberFormat(locale ?? documentLocale(), format).format(value);
-
-/**
- * Whether its card shows its large layout: its tile at least 2x2 (a full
- * width's: wide), however it got there (expanded, resized), or open above
- * the page.
- */
-const useIsLarge = () => {
-  const item = useGridItem();
-  if (!item) return false;
-  const [columns = '1', rows = '1'] = item.size.split('x');
-  return (
-    item.open ||
-    ((columns === '*' || Number(columns) >= 2) && Number(rows) >= 2)
-  );
-};
+/** The words for on and off, unless given. */
+const onOff: ControlCardStates = ['On', 'Off'];
 
 /** Its symbol: its icon, or its emphasized one while on. */
 const symbolOf = (
@@ -162,6 +88,20 @@ const symbolOf = (
   </Symbol>
 );
 
+/** Its switching: on or off, controlled or its own, told as it changes. */
+const useSwitching = (
+  checked: boolean | undefined,
+  defaultChecked: boolean,
+  onCheckedChange: ((checked: boolean) => void) | undefined,
+) => {
+  const [isOn, setIsOn] = useControlled(checked, defaultChecked);
+  const switchTo = (next: boolean) => {
+    setIsOn(next);
+    onCheckedChange?.(next);
+  };
+  return [isOn, switchTo] as const;
+};
+
 /**
  * A binary display: its state lit (`active`), its symbol emphasized, its
  * value its state's words (e.g. a door open or closed).
@@ -174,8 +114,8 @@ const State = forwardRef<HTMLDivElement, ControlCardStateProps>(
       className,
       emphasizedIcon,
       icon,
-      name,
-      states = ['On', 'Off'],
+      label,
+      states = onOff,
       ...props
     },
     ref,
@@ -188,7 +128,7 @@ const State = forwardRef<HTMLDivElement, ControlCardStateProps>(
       data-control-cards-part="state"
     >
       <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
-      <Card.Title>{name}</Card.Title>
+      <Card.Title>{label}</Card.Title>
       <Card.Value>{active ? states[0] : states[1]}</Card.Value>
       {children}
     </Card.Root>
@@ -206,22 +146,23 @@ const SwitchCard = forwardRef<HTMLDivElement, ControlCardSwitchProps>(
       children,
       className,
       defaultChecked = false,
+      disabled,
       emphasizedIcon,
       icon,
-      name,
+      label,
       onCheckedChange,
       onClick,
-      states = ['On', 'Off'],
+      states = onOff,
       tint,
       ...props
     },
     ref,
   ) => {
-    const [isOn, setIsOn] = useControlled(checked, defaultChecked);
-    const switchTo = (next: boolean) => {
-      setIsOn(next);
-      onCheckedChange?.(next);
-    };
+    const [isOn, switchTo] = useSwitching(
+      checked,
+      defaultChecked,
+      onCheckedChange,
+    );
     return (
       <Card.Root
         ref={ref}
@@ -229,16 +170,20 @@ const SwitchCard = forwardRef<HTMLDivElement, ControlCardSwitchProps>(
         {...props}
         className={cn('uikit-control-cards-switch', className)}
         data-control-cards-part="switch"
-        onClick={onClick ?? forwardClick('[role=switch]')}
+        onClick={
+          onClick ??
+          (disabled ? undefined : forwardClick('[role=switch]:not([disabled])'))
+        }
       >
         <Card.Symbol tint={tint}>
           {symbolOf({ emphasizedIcon, icon })}
         </Card.Symbol>
-        <Card.Title>{name}</Card.Title>
+        <Card.Title>{label}</Card.Title>
         <Card.Value>{isOn ? states[0] : states[1]}</Card.Value>
         <Card.Switch
-          aria-label={name}
+          aria-label={label}
           checked={isOn}
+          disabled={disabled}
           tint={tint}
           onCheckedChange={switchTo}
         />
@@ -248,42 +193,9 @@ const SwitchCard = forwardRef<HTMLDivElement, ControlCardSwitchProps>(
   },
 );
 
-/** A trend's arrow (see `Trend`): pointing ahead, turned by its angle. */
-const trendIcon = iconOf(
-  'control-cards.trend',
-  polyline([-4.5, 0], [4.5, 0]) + polyline([0.5, -4], [4.5, 0], [0.5, 4]),
-);
-
-/** A trend's words, by its angle (see `Trend`). */
-const trendOf = (angle: number) => {
-  if (angle > 10) return 'rising';
-  return angle < -10 ? 'falling' : 'steady';
-};
-
-/**
- * A value's trend: an arrow pointing up as steeply as it rises (`angle`,
- * -90 to 90 degrees: 0 steady), named for assistive technology. It turns
- * to a new angle by its own transform.
- */
-const Trend = ({ angle }: ControlCardTrendProps): ReactNode => {
-  const clamped = Math.max(-90, Math.min(90, angle));
-  return (
-    <span
-      aria-label={trendOf(clamped)}
-      className="uikit-control-cards-trend"
-      role="img"
-      style={
-        { '--uikit-control-cards-trend': String(clamped) } as CSSProperties
-      }
-    >
-      <Symbol icon={trendIcon} />
-    </span>
-  );
-};
-
 /**
  * A numerical display: its value, formatted as the app says, and its
- * trend (an arrow after it), if given.
+ * trend (a `Card.Trend` after it), if given.
  */
 const Value = forwardRef<HTMLDivElement, ControlCardValueProps>(
   (
@@ -293,8 +205,8 @@ const Value = forwardRef<HTMLDivElement, ControlCardValueProps>(
       emphasizedIcon,
       format,
       icon,
+      label,
       locale,
-      name,
       trend,
       value,
       ...props
@@ -308,388 +220,16 @@ const Value = forwardRef<HTMLDivElement, ControlCardValueProps>(
       data-control-cards-part="value"
     >
       <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
-      <Card.Title>{name}</Card.Title>
+      <Card.Title>{label}</Card.Title>
       <Card.Value>
         {typeof value === 'number'
           ? formatted(value, { format, locale })
           : value}
-        {trend === undefined ? null : <Trend angle={trend} />}
+        {trend === undefined ? null : <Card.Trend angle={trend} />}
       </Card.Value>
       {children}
     </Card.Root>
   ),
-);
-
-// How far a press moves before it's a drag (px; the grid's resize
-// handle's, see Grid's edit.ts); a touch's (or a pen's), before it's told
-// a drag (along the slider) from a scroll (across it), as a browser tells
-// a pan.
-const pressSlop = 4;
-const touchSlop = 8;
-
-// (A press handed on to the slider (see `pressProps`): let through; one
-// held back, not yet a drag or a click: its touch held back too.)
-let isHandingOn = false;
-let isHolding = false;
-
-/**
- * A slider's press (its `Slider.Root`'s props), held back at first (the
- * slider would set its value as it's pressed, and, a touch, follow it
- * even as the page scrolls, see Base UI's SliderControl):
- * - Moved (`pressSlop`; a touch, `touchSlop`) along it (a mouse, any
- *   way): a drag, handed on to the slider (the press again, where it
- *   started).
- * - A touch moved across it, or the browser panning (it's cancelled): a
- *   scroll, the page's, the slider never told.
- * - Released before: `onClick`'s, the slider never told (its value
- *   kept); its click, if the browser moves it to a control near it (e.g.
- *   the card's switch, a tap's target adjusted, as WebKit's on iOS), not
- *   that control's too (toggled back): swallowed (not the click deciding:
- *   on iOS, none may come to it). No `onClick`: handed on to the slider as
- *   it's released (its value set where it was pressed).
- */
-const pressProps = (
-  onClick: (() => void) | undefined,
-  orientation: CardOrientation,
-): {
-  onPointerDownCapture: (event: ReactPointerEvent<HTMLElement>) => void;
-  onTouchStartCapture: (event: ReactTouchEvent<HTMLElement>) => void;
-} => ({
-  onPointerDownCapture: (event) => {
-    if (isHandingOn || event.button !== 0) return;
-    event.stopPropagation();
-    // (The DOM's event: React's wraps it, Preact's is it.)
-    const pressed =
-      (event as { nativeEvent?: PointerEvent }).nativeEvent ??
-      (event as unknown as PointerEvent);
-    const { clientX, clientY, pointerId, pointerType, target } = pressed;
-    const isMouse = pointerType === 'mouse';
-    const slop = isMouse ? pressSlop : touchSlop;
-    const root = event.currentTarget;
-    const handOn = () => {
-      isHandingOn = true;
-      try {
-        target?.dispatchEvent(new PointerEvent('pointerdown', pressed));
-      } finally {
-        isHandingOn = false;
-      }
-    };
-    const listening = new AbortController();
-    const options = { capture: true, signal: listening.signal };
-    isHolding = true;
-    listening.signal.addEventListener('abort', () => {
-      isHolding = false;
-    });
-    addEventListener(
-      'pointermove',
-      (move) => {
-        if (move.pointerId !== pointerId) return;
-        const across = Math.abs(move.clientX - clientX);
-        const upright = Math.abs(move.clientY - clientY);
-        if (Math.hypot(across, upright) < slop) return;
-        listening.abort();
-        // (A touch across it: a scroll, let go.)
-        const along = orientation === 'vertical' ? upright : across;
-        const crossing = orientation === 'vertical' ? across : upright;
-        if (!isMouse && crossing > along) return;
-        handOn();
-      },
-      options,
-    );
-    addEventListener(
-      'pointerup',
-      (up) => {
-        if (up.pointerId !== pointerId) return;
-        listening.abort();
-        // (No click of its own: the slider's, its value set there; this
-        // release ending it, as it goes on.)
-        if (onClick === undefined) {
-          handOn();
-          return;
-        }
-        onClick();
-        // (Its click next, if any, elsewhere: swallowed; none before
-        // another press or key, nothing.)
-        const clicking = new AbortController();
-        const once = { capture: true, signal: clicking.signal };
-        addEventListener(
-          'click',
-          (clicked) => {
-            clicking.abort();
-            if (root.contains(clicked.target as Node | null)) return;
-            clicked.preventDefault();
-            clicked.stopPropagation();
-          },
-          once,
-        );
-        for (const type of ['pointerdown', 'keydown']) {
-          addEventListener(type, () => clicking.abort(), once);
-        }
-      },
-      options,
-    );
-    addEventListener(
-      'pointercancel',
-      (cancel) => {
-        if (cancel.pointerId === pointerId) listening.abort();
-      },
-      options,
-    );
-  },
-  // (The slider takes a touch's start too, unless its pointer's started
-  // it (see Base UI's SliderControl), following it past a pan: held back
-  // with it.)
-  onTouchStartCapture: (event) => {
-    if (isHolding) event.stopPropagation();
-  },
-});
-
-/** APCA's luminance of an sRGB color (0 to 255 each), soft-clamped at black. */
-const apcaLuminanceOf = (red: number, green: number, blue: number) => {
-  const luminance =
-    0.212_672_9 * (red / 255) ** 2.4 +
-    0.715_152_2 * (green / 255) ** 2.4 +
-    0.072_175 * (blue / 255) ** 2.4;
-  return luminance < 0.022
-    ? luminance + (0.022 - luminance) ** 1.414
-    : luminance;
-};
-
-/**
- * APCA's contrast of text on a background (Lc's magnitude, 0 to about 108),
- * by their luminances (see `apcaLuminanceOf`): dark text on light, or light
- * text on dark, each by its own curve.
- */
-const apcaContrastOf = (text: number, background: number) => {
-  if (background > text) {
-    const contrast = (background ** 0.56 - text ** 0.57) * 1.14;
-    return contrast < 0.1 ? 0 : (contrast - 0.027) * 100;
-  }
-  const contrast = (background ** 0.65 - text ** 0.62) * 1.14;
-  return contrast > -0.1 ? 0 : -(contrast + 0.027) * 100;
-};
-
-const darkText = apcaLuminanceOf(0, 0, 0);
-const lightText = apcaLuminanceOf(255, 255, 255);
-
-/**
- * The color scheme of what's drawn on a color (e.g. a fill): dark text (a
- * light scheme) or light text (a dark one), whichever contrasts more with
- * it, by APCA (perceived contrast: e.g. a mid blue, light text, where
- * WCAG's ratio picks dark); unreadable or nearly clear, none.
- */
-const textSchemeOn = (color: string): 'dark' | 'light' | undefined => {
-  const parsed = parseCssColor(color);
-  if (!parsed || parsed.a < 0.3) return undefined;
-  const background = apcaLuminanceOf(parsed.r, parsed.g, parsed.b);
-  return apcaContrastOf(darkText, background) >=
-    apcaContrastOf(lightText, background)
-    ? 'light'
-    : 'dark';
-};
-
-/**
- * The color scheme of what's drawn over its fill (see `textSchemeOn`), as
- * its tint or the color scheme changes (not as it moves). Its tint's, read
- * where it's drawn (its `light-dark()` resolved there), not what's painted:
- * off, with a switch, the fill isn't drawn (see Card), and its scheme is
- * still wanted as it's switched on.
- */
-const useFillScheme = (
-  probe: { current: HTMLElement | null },
-  tint: string | undefined,
-) => {
-  const { colorScheme } = useSettings();
-  const [scheme, setScheme] = useState<'dark' | 'light' | undefined>();
-  useLayoutEffect(() => {
-    const { current: element } = probe;
-    if (!element) return;
-    // (Its color computed, the var resolved, by a probe kept in its fill
-    // (see `TintProbe`): only read, nothing changed on the page, so many
-    // cards mounting at once (e.g. a page pushed) don't each restyle it.)
-    const read = () => {
-      setScheme(textSchemeOn(getComputedStyle(element).color));
-    };
-    read();
-  }, [colorScheme, probe, tint]);
-  return scheme;
-};
-
-/** A fill's tint, resolved where it's drawn (see `useFillScheme`). */
-const TintProbe = forwardRef<HTMLSpanElement>((_, ref) => (
-  <span
-    ref={ref}
-    hidden
-    aria-hidden="true"
-    className="uikit-control-cards-tint-probe"
-  />
-));
-
-/**
- * A slider card's switch (see `ControlCardSliderProps.checked`): whether
- * it has one, whether it's on (with none: on), switching it.
- */
-const useSliderSwitch = (
-  checked: boolean | undefined,
-  defaultChecked: boolean | undefined,
-  onCheckedChange: ((checked: boolean) => void) | undefined,
-) => {
-  const hasSwitch = checked !== undefined || defaultChecked !== undefined;
-  const [isOn, setIsOn] = useControlled(checked, defaultChecked ?? true);
-  const switchTo = (next: boolean) => {
-    setIsOn(next);
-    onCheckedChange?.(next);
-  };
-  return { hasSwitch, isOn, switchTo };
-};
-
-/**
- * What's over a slider's fill, drawn again in it (see `SliderFill`): a
- * layer at the card's size, in the fill's color scheme, its label, its
- * value and its ticks in it; the card's own parts portaled in (see Card's
- * `CardBlendScope`). Hidden from assistive technology, inert.
- */
-/** A slider's value text, as `Slider.Value`'s children (its first value). */
-type ValueText = (
-  formattedValues: readonly string[],
-  values: readonly number[],
-) => string;
-
-/** A value text (see `getValueText`) as `Slider.Value`'s children. */
-const valueTextOf = (
-  getValueText: ((formattedValue: string, value: number) => string) | undefined,
-): ValueText | undefined =>
-  getValueText
-    ? (formattedValues, values) =>
-        getValueText(formattedValues[0] ?? '', values[0] ?? 0)
-    : undefined;
-
-const FillCopies = ({
-  layerRef,
-  name,
-  orientation,
-  scheme,
-  ticks,
-  valueText,
-}: {
-  layerRef: ((layer: HTMLElement | null) => void) | undefined;
-  name: string;
-  orientation: CardOrientation;
-  scheme: 'dark' | 'light';
-  ticks: number | undefined;
-  valueText: ValueText | undefined;
-}) => (
-  <span
-    ref={layerRef}
-    aria-hidden
-    inert
-    className="uikit-card-blend"
-    data-color-scheme={scheme}
-    data-orientation={orientation}
-    style={colorSchemeStyle(scheme)}
-  >
-    <span
-      className="uikit-slider-label"
-      data-card-copy=""
-    >
-      {name}
-    </span>
-    <Slider.Value data-card-copy="">{valueText}</Slider.Value>
-    {ticks === undefined ? null : (
-      <Slider.Ticks
-        count={ticks}
-        data-card-copy=""
-      />
-    )}
-  </span>
-);
-
-/**
- * A slider filling its card (a `Card.Root`'s, among its parts): its fill
- * the card's background (from its leading edge, or from its bottom upright,
- * by its tile's shape), ticks at its steps (`step`), its label and value at
- * the card's bottom. What's over the fill (its label, value and ticks, the
- * card's symbol and corner buttons) drawn twice: on the card, and again
- * inside the fill in the fill's color scheme (dark on a bright fill, light
- * on a dim one), clipped by its edge, so it reads whatever its tint. With
- * an `onPress`, a click on it is that (e.g. a switch toggled), a drag sets
- * its value.
- */
-const SliderFill = forwardRef<HTMLDivElement, ControlCardSliderFillProps>(
-  (
-    {
-      className,
-      defaultValue,
-      format,
-      getValueText,
-      locale,
-      max = 100,
-      min = 0,
-      name,
-      onPress,
-      onValueChange,
-      step,
-      tint,
-      value,
-    },
-    ref,
-  ) => {
-    const orientation: CardOrientation = useCardOrientation();
-    const [current, setCurrent] = useControlled(value, defaultValue ?? min);
-    // (Its fill's color scheme; the layer in it registered with its card,
-    // see `CardBlendScope`.)
-    const probe = useRef<HTMLSpanElement>(null);
-    const scheme = useFillScheme(probe, tint);
-    const setLayer = useContext(CardBlendScope)?.setLayer;
-    const ticks =
-      step === undefined ? undefined : Math.round((max - min) / step) + 1;
-    const valueText = valueTextOf(getValueText);
-    return (
-      <Slider.Root
-        ref={ref}
-        className={cn('uikit-control-cards-slider-fill', className)}
-        data-control-cards-part="slider-fill"
-        format={format}
-        locale={locale}
-        max={max}
-        min={min}
-        orientation={orientation}
-        step={step ?? (max - min) / 100}
-        tint={tint}
-        value={current}
-        onValueChange={(next) => {
-          setCurrent(next as number);
-          onValueChange?.(next as number);
-        }}
-        {...pressProps(onPress, orientation)}
-      >
-        <Slider.Control>
-          <Slider.Track>
-            <Slider.Indicator>
-              <TintProbe ref={probe} />
-              {scheme ? (
-                <FillCopies
-                  layerRef={setLayer}
-                  name={name}
-                  orientation={orientation}
-                  scheme={scheme}
-                  ticks={ticks}
-                  valueText={valueText}
-                />
-              ) : null}
-            </Slider.Indicator>
-            {ticks === undefined ? null : <Slider.Ticks count={ticks} />}
-            <Slider.Thumb
-              aria-label={name}
-              getAriaValueText={getValueText}
-            />
-          </Slider.Track>
-        </Slider.Control>
-        <Slider.Label>{name}</Slider.Label>
-        <Slider.Value>{valueText}</Slider.Value>
-      </Slider.Root>
-    );
-  },
 );
 
 /**
@@ -699,6 +239,7 @@ const SliderFill = forwardRef<HTMLDivElement, ControlCardSliderFillProps>(
  */
 const defaultValueText = (
   formattedValue: string,
+  _value: number,
   { checked, states: [on, off] }: ControlCardValueTextDetails,
 ) =>
   checked === undefined
@@ -706,7 +247,7 @@ const defaultValueText = (
     : `${checked ? on : off} · ${formattedValue}`;
 
 /**
- * A numerical control: a `SliderFill` in a card, its symbol at its top.
+ * A numerical control: a `Card.Slider` in a card, its symbol at its top.
  * Optionally a switch (`checked`): on and off, its value kept; a click on
  * the card toggles it, a drag sets its value.
  */
@@ -719,17 +260,18 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
       className,
       defaultChecked,
       defaultValue,
+      disabled,
       emphasizedIcon,
       format,
-      getValueText,
+      getValueText = defaultValueText,
       icon,
+      label,
       locale,
       max = 100,
       min = 0,
-      name,
       onCheckedChange,
       onValueChange,
-      states = ['On', 'Off'],
+      states = onOff,
       step,
       tint,
       value,
@@ -738,9 +280,10 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
     ref,
   ) => {
     const [current, setCurrent] = useControlled(value, defaultValue ?? min);
-    const { hasSwitch, isOn, switchTo } = useSliderSwitch(
+    const hasSwitch = checked !== undefined || defaultChecked !== undefined;
+    const [isOn, switchTo] = useSwitching(
       checked,
-      defaultChecked,
+      defaultChecked ?? true,
       onCheckedChange,
     );
     // (Its symbol on: a brightness's above its minimum, while on; else, as
@@ -749,6 +292,9 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
     const isSymbolOn = brightness
       ? isOnAtAll && current > min
       : hasSwitch && isOn;
+    const details = { checked: hasSwitch ? isOn : undefined, states };
+    const text = (formattedValue: string, number: number) =>
+      getValueText(formattedValue, number, details);
     return (
       <Card.Root
         ref={ref}
@@ -762,38 +308,30 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
         <Card.Symbol active={isSymbolOn}>
           {symbolOf({ emphasizedIcon, icon })}
         </Card.Symbol>
-        <SliderFill
+        <Card.Slider
+          disabled={disabled}
           format={format}
+          getAriaValueText={text}
+          label={label}
           locale={locale}
           max={max}
           min={min}
-          name={name}
           step={step}
           tint={tint}
           value={current}
-          getValueText={(formattedValue, number) => {
-            const isChecked = hasSwitch ? isOn : undefined;
-            if (getValueText) {
-              return getValueText(formattedValue, number, {
-                checked: isChecked,
-                states,
-              });
-            }
-            return defaultValueText(formattedValue, {
-              checked: isChecked,
-              states,
-            });
-          }}
-          onPress={hasSwitch ? () => switchTo(!isOn) : undefined}
+          onPress={hasSwitch && !disabled ? () => switchTo(!isOn) : undefined}
           onValueChange={(next) => {
             setCurrent(next);
             onValueChange?.(next);
           }}
-        />
+        >
+          {text}
+        </Card.Slider>
         {hasSwitch ? (
           <Card.Switch
-            aria-label={name}
+            aria-label={label}
             checked={isOn}
+            disabled={disabled}
             tint={tint}
             onCheckedChange={switchTo}
           />
@@ -805,9 +343,10 @@ const SliderCard = forwardRef<HTMLDivElement, ControlCardSliderProps>(
 );
 
 /**
- * A momentary button: a press does something once (e.g. a doorbell rung,
- * all lights off); it lights up for a moment and fades back, also as the
- * app flashes it (`actionsRef`). A badge on its symbol, if given.
+ * A momentary button: a press (its `onClick`) does something once (e.g. a
+ * doorbell rung, all lights off); it lights up for a moment and fades
+ * back, also as the app flashes it (`actionsRef`). A badge on its symbol,
+ * if given.
  */
 const Button = forwardRef<HTMLDivElement, ControlCardButtonProps>(
   (
@@ -817,9 +356,7 @@ const Button = forwardRef<HTMLDivElement, ControlCardButtonProps>(
       className,
       emphasizedIcon,
       icon,
-      name,
-      onClick,
-      onPress,
+      label,
       status,
       ...props
     },
@@ -831,10 +368,6 @@ const Button = forwardRef<HTMLDivElement, ControlCardButtonProps>(
       {...props}
       className={cn('uikit-control-cards-button', className)}
       data-control-cards-part="button"
-      onClick={(event: MouseEvent<HTMLDivElement>) => {
-        onPress?.();
-        onClick?.(event);
-      }}
     >
       <Card.Symbol>
         {symbolOf(
@@ -844,7 +377,7 @@ const Button = forwardRef<HTMLDivElement, ControlCardButtonProps>(
           ),
         )}
       </Card.Symbol>
-      <Card.Title>{name}</Card.Title>
+      <Card.Title>{label}</Card.Title>
       {status === undefined ? null : <Card.Value>{status}</Card.Value>}
       {children}
     </Card.Root>
@@ -852,76 +385,10 @@ const Button = forwardRef<HTMLDivElement, ControlCardButtonProps>(
 );
 
 /**
- * A card's subtitle: more words under its title (e.g. a program's), small,
- * in its secondary text color; where there's room for them (in a tile
- * taller than a row, beside a bar, stages or channels; see the CSS).
- */
-const Subtitle = forwardRef<HTMLSpanElement, ControlCardSubtitleProps>(
-  ({ children, className }, ref) => (
-    <span
-      ref={ref}
-      className={cn('uikit-control-cards-subtitle', className)}
-      data-control-cards-part="subtitle"
-    >
-      {children}
-    </span>
-  ),
-);
-
-/** A share's default format: a whole percentage. */
-const percentFormat: Intl.NumberFormatOptions = {
-  maximumFractionDigits: 0,
-  style: 'percent',
-};
-
-/** Its share of its range (0 to 1); none, none. */
-const shareOf = (value: number | undefined, min: number, max: number) =>
-  value === undefined || max <= min
-    ? 0
-    : Math.min(Math.max((value - min) / (max - min), 0), 1);
-
-/**
- * A value's words by a format (see `ControlCardFormat`): a percentage of
- * its share (`style: 'percent'`), else the value itself.
- */
-const formattedShare = (
-  value: number,
-  share: number,
-  { format, locale }: ControlCardFormat,
-) => formatted(format?.style === 'percent' ? share : value, { format, locale });
-
-/** A progress card's progress, for its parts (see `ProgressCard`). */
-type ProgressContextValue = ControlCardFormat & {
-  max: number;
-  name: string;
-  tint: string | undefined;
-  value: number | undefined;
-};
-
-const ProgressContext = createContext<ProgressContextValue | undefined>(
-  undefined,
-);
-
-/**
- * Whether a progress bar's words are its fill's copy (see `ProgressBar`):
- * theirs, not the app's, to hold no ref of the app's (its words' own, on
- * the well, do).
- */
-const ProgressCopyContext = createContext(false);
-
-const useProgressContext = (part: string) => {
-  const context = useContext(ProgressContext);
-  if (!context) {
-    throw new Error(`ControlCards.${part} goes in a ControlCards.Progress.`);
-  }
-  return context;
-};
-
-/**
- * A device's progress (e.g. a washer's run): its symbol and its title, its
- * parts composed in it (its children): a subtitle (`Subtitle`), its value
- * (`ProgressValue`), its bar (`ProgressBar`), as the app shows them; its
- * progress (`value`, `max`, `format`) theirs to show.
+ * A device's progress (e.g. a washer's run): its symbol (in its tint) and
+ * its title; its parts composed in it (its children: a `Card.Progress`
+ * holding a `Card.Subtitle`, a `Card.ProgressValue`, a `Card.ProgressBar`),
+ * as the app shows them; its bar's fill in its tint (unless the bar's own).
  */
 const ProgressCard = forwardRef<HTMLDivElement, ControlCardProgressProps>(
   (
@@ -930,704 +397,89 @@ const ProgressCard = forwardRef<HTMLDivElement, ControlCardProgressProps>(
       children,
       className,
       emphasizedIcon,
-      format = percentFormat,
       icon,
-      locale,
-      max = 100,
-      name,
+      label,
       style,
       tint,
-      value,
       ...props
     },
     ref,
-  ) => {
-    const context = useMemo(
-      () => ({ format, locale, max, name, tint, value }),
-      [format, locale, max, name, tint, value],
-    );
-    return (
-      <Card.Root
-        ref={ref}
-        active={active}
-        {...props}
-        className={cn('uikit-control-cards-progress', className)}
-        data-control-cards-part="progress"
-        style={withStyle(
-          { '--uikit-control-cards-progress-tint': tint },
-          style,
-        )}
-      >
-        {/* (In its tint, as its fill: the app's, by default.) */}
-        <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
-          {symbolOf({ emphasizedIcon, icon })}
-        </Card.Symbol>
-        <Card.Title>{name}</Card.Title>
-        <ProgressContext.Provider value={context}>
-          {children}
-        </ProgressContext.Provider>
-      </Card.Root>
-    );
-  },
-);
-
-/**
- * A progress card's value: its progress in words (by its `format`: e.g.
- * `72%`), as a card's value (large in a large tile); in a tile a row tall,
- * none beside its bar (no room for it, see the CSS). None under way, none.
- */
-const ProgressValue = forwardRef<
-  HTMLSpanElement,
-  ControlCardProgressValueProps
->(({ children, className }, ref) => {
-  const { format, locale, max, value } = useProgressContext('ProgressValue');
-  if (value === undefined) return null;
-  const text = formattedShare(value, shareOf(value, 0, max), {
-    format,
-    locale,
-  });
-  return (
-    <Card.Value
+  ) => (
+    <Card.Root
       ref={ref}
-      className={cn('uikit-control-cards-progress-value', className)}
-      data-control-cards-part="progress-value"
+      active={active}
+      {...props}
+      className={cn('uikit-control-cards-progress', className)}
+      data-control-cards-part="progress"
+      style={withStyle({ '--uikit-card-progress-tint': tint }, style)}
     >
-      {children ? children(text, value) : text}
-    </Card.Value>
-  );
-});
-
-/**
- * A progress card's bar: a pill at its bottom (a well, as a list card's),
- * filling from its start in its tint; what's on it (its children: a
- * `ProgressLabel`, a `ProgressDetail`) drawn on the well, and again on the
- * fill (a copy, as wide as the pill, clipped to it) in the fill's color
- * scheme (by its tint, see `textSchemeOn`: read as its tint or the color
- * scheme changes). Base UI's progress bar (named as its card), the words
- * beside it, read as they are.
- */
-const ProgressBar = forwardRef<HTMLDivElement, ControlCardProgressBarProps>(
-  ({ children, className }, ref) => {
-    const { max, name, tint, value } = useProgressContext('ProgressBar');
-    const probe = useRef<HTMLSpanElement>(null);
-    const scheme = useFillScheme(probe, tint);
-    return (
-      <div
-        ref={ref}
-        className={cn('uikit-control-cards-progress-bar', className)}
-        data-control-cards-part="progress-bar"
-        style={
-          {
-            '--uikit-control-cards-progress': `${String(shareOf(value, 0, max) * 100)}%`,
-          } as CSSProperties
-        }
-      >
-        <span className="uikit-control-cards-progress-content">{children}</span>
-        <BaseProgress.Root
-          aria-label={name}
-          className="uikit-control-cards-progress-meter"
-          max={max}
-          value={value ?? null}
-        >
-          <span
-            aria-hidden="true"
-            className="uikit-control-cards-progress-fill"
-            data-color-scheme={scheme}
-            style={colorSchemeStyle(scheme)}
-          >
-            <TintProbe ref={probe} />
-            <ProgressCopyContext.Provider value>
-              <span className="uikit-control-cards-progress-content">
-                {children}
-              </span>
-            </ProgressCopyContext.Provider>
-          </span>
-        </BaseProgress.Root>
-      </div>
-    );
-  },
-);
-
-/** A progress bar's words at its start (e.g. `Rinsing`). */
-const ProgressLabel = forwardRef<
-  HTMLSpanElement,
-  ControlCardProgressLabelProps
->(({ children, className }, ref) => (
-  <span
-    ref={useContext(ProgressCopyContext) ? undefined : ref}
-    className={cn('uikit-control-cards-progress-label', className)}
-    data-control-cards-part="progress-label"
-  >
-    {children}
-  </span>
-));
-
-/**
- * A progress bar's words at its end (e.g. `40 min left`), quieter: on the
- * well in its secondary text color, on the fill in the fill's text color,
- * less strong (see the CSS).
- */
-const ProgressDetail = forwardRef<
-  HTMLSpanElement,
-  ControlCardProgressDetailProps
->(({ children, className }, ref) => (
-  <span
-    ref={useContext(ProgressCopyContext) ? undefined : ref}
-    className={cn('uikit-control-cards-progress-detail', className)}
-    data-control-cards-part="progress-detail"
-  >
-    {children}
-  </span>
-));
-
-/** A color's channels, linear light (0 to 1 each). */
-type LinearRgb = readonly [red: number, green: number, blue: number];
-
-/** An sRGB channel (0 to 255), linear (0 to 1). */
-const linearChannel = (channel: number) => {
-  const value = channel / 255;
-  return value <= 0.040_45 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-};
-
-/** A linear channel (0 to 1), sRGB (0 to 255). */
-const encodedChannel = (channel: number) => {
-  const value = Math.min(Math.max(channel, 0), 1);
-  return Math.round(
-    (value <= 0.003_130_8
-      ? value * 12.92
-      : 1.055 * value ** (1 / 2.4) - 0.055) * 255,
-  );
-};
-
-/** A computed color in linear light; unreadable, none. */
-const linearOf = (color: string): LinearRgb | undefined => {
-  const parsed = parseCssColor(color);
-  if (!parsed) return undefined;
-  return [
-    linearChannel(parsed.r),
-    linearChannel(parsed.g),
-    linearChannel(parsed.b),
-  ];
-};
-
-/** Linear light as a CSS color (sRGB). */
-const cssOf = ([red, green, blue]: LinearRgb) =>
-  `rgb(${String(encodedChannel(red))} ${String(encodedChannel(green))} ${String(encodedChannel(blue))})`;
-
-/**
- * Where a share (0 to 1) falls among a scale's colors (evenly spread): the
- * color before it, and how far it is toward the next (0 to 1).
- */
-const scaleSegment = (count: number, share: number) => {
-  const at = share * (count - 1);
-  const index = Math.min(Math.floor(at), count - 2);
-  return { index, part: at - index };
-};
-
-/**
- * A scale's color at a share (see `scaleSegment`): the two around it mixed
- * in linear light, as CSS (its thumb's).
- */
-const colorAt = (colors: readonly string[], share: number) => {
-  const { index, part } = scaleSegment(colors.length, share);
-  return `color-mix(in srgb-linear, ${colors[index + 1] ?? ''} ${String(part * 100)}%, ${colors[index] ?? ''})`;
-};
-
-/** A scale's light at a share (see `colorAt`), from its colors' light. */
-const colorAtLinear = (
-  colors: readonly LinearRgb[],
-  share: number,
-): LinearRgb | undefined => {
-  const { index, part } = scaleSegment(colors.length, share);
-  const from = colors[index];
-  const to = colors[index + 1];
-  if (!from || !to) return undefined;
-  return [
-    from[0] + (to[0] - from[0]) * part,
-    from[1] + (to[1] - from[1]) * part,
-    from[2] + (to[2] - from[2]) * part,
-  ];
-};
-
-/**
- * The light a channel gives (see `Light`): an amount's (its tint, by its
- * share), or a scale's (its color at its value).
- */
-type ChannelLight = {
-  kind: 'amount' | 'scale';
-  rgb: LinearRgb;
-  share: number;
-};
-
-/** A light's channels reporting the light they give (see `Light`). */
-type LightContextValue = {
-  isLarge: boolean;
-  report: (id: string, light: ChannelLight | undefined) => void;
-};
-
-const LightContext = createContext<LightContextValue | undefined>(undefined);
-
-/**
- * What a light's channels make together: the amounts added up, tinted by
- * the scales (multiplied: e.g. a brightness, by a color temperature), at
- * full strength (its strongest channel full: its color, not how bright,
- * see its value); none giving any, none.
- */
-const lightColorOf = (lights: readonly ChannelLight[]) => {
-  const amounts = lights.filter(({ kind }) => kind === 'amount');
-  let rgb: [number, number, number] =
-    amounts.length === 0 ? [1, 1, 1] : [0, 0, 0];
-  for (const {
-    rgb: [red, green, blue],
-  } of amounts) {
-    rgb = [rgb[0] + red, rgb[1] + green, rgb[2] + blue];
-  }
-  for (const {
-    kind,
-    rgb: [red, green, blue],
-  } of lights) {
-    if (kind === 'scale') rgb = [rgb[0] * red, rgb[1] * green, rgb[2] * blue];
-  }
-  const strongest = Math.max(...rgb);
-  return strongest <= 0
-    ? undefined
-    : cssOf([rgb[0] / strongest, rgb[1] / strongest, rgb[2] / strongest]);
-};
-
-/** Its well's measures (px): its thumb's inset, its size; its labels'. */
-const channelInset = 4;
-const channelThumb = 28;
-const channelPadding = 12;
-const channelGap = 6;
-/** How far its thumb clears a label moved away before it moves back. */
-const channelSlack = 8;
-
-/**
- * A channel's colors as computed (vars, `light-dark()` resolved where it's
- * drawn: its probes', see `Channel`), read as they or the color scheme
- * change; and in linear light.
- */
-const useResolvedColors = (
-  probes: { current: HTMLElement | null },
-  colors: readonly string[],
-) => {
-  const { colorScheme } = useSettings();
-  const colorKey = colors.join('|');
-  const [resolved, setResolved] = useState<readonly string[]>([]);
-  useLayoutEffect(() => {
-    const { current: element } = probes;
-    if (!element) return;
-    const read = () => {
-      const next = [...element.children].map(
-        (probe) => getComputedStyle(probe).color,
-      );
-      setResolved((last) => (last.join('|') === next.join('|') ? last : next));
-    };
-    read();
-  }, [colorKey, colorScheme, probes]);
-  const linear = useMemo(
-    () =>
-      resolved
-        .map((color) => linearOf(color))
-        .filter((rgb): rgb is LinearRgb => rgb !== undefined),
-    [resolved],
-  );
-  return { linear, resolved };
-};
-
-/**
- * The light a channel gives, told its light card (see `Light`): an
- * amount's tint by its share, a scale's color at it; gone, none.
- */
-const useChannelReport = (
-  linear: readonly LinearRgb[],
-  isScale: boolean,
-  share: number,
-) => {
-  const report = useContext(LightContext)?.report;
-  const id = useId();
-  useLayoutEffect(() => {
-    if (!report) return;
-    const [own] = linear;
-    const rgb = isScale
-      ? colorAtLinear(linear, share)
-      : own && ([own[0] * share, own[1] * share, own[2] * share] as const);
-    report(id, rgb && { kind: isScale ? 'scale' : 'amount', rgb, share });
-  }, [id, isScale, linear, report, share]);
-  useLayoutEffect(() => () => report?.(id, undefined), [id, report]);
-};
-
-/**
- * A channel's own properties (see the CSS): the light at its thumb, a
- * scale's colors along its well (their stops from its thumb's center at
- * one end to it at the other), its share, its tint.
- */
-const channelStyleOf = (
-  scale: readonly string[] | undefined,
-  share: number,
-  tint: string | undefined,
-) => {
-  const middle = channelInset + channelThumb / 2;
-  return {
-    '--uikit-control-cards-channel-light': scale
-      ? colorAt(scale, share)
-      : `color-mix(in srgb-linear, var(--uikit-control-cards-channel-tint) ${String(share * 100)}%, black)`,
-    '--uikit-control-cards-channel-scale': scale
-      ?.map(
-        (color, index) =>
-          `${color} calc(${String(middle)}px + (100% - ${String(2 * middle)}px) * ${String(index / (scale.length - 1))})`,
-      )
-      .join(', '),
-    '--uikit-control-cards-channel-share': String(share),
-    '--uikit-control-cards-channel-tint': tint,
-  } as CSSProperties;
-};
-
-/** An amount's fill's edge (px, from its start; see `placeChannelLabels`). */
-const fillEdgeOf = (width: number, share: number) => {
-  if (share <= 0) return 0;
-  if (share >= 1) return width;
-  const middle = channelInset + channelThumb / 2;
-  return middle + (width - 2 * middle) * share;
-};
-
-/**
- * A channel's labels placed (see `Channel`): its name at its start, its
- * value at its end, the one its thumb would cover beside the other (back
- * once the thumb's clear of it by `channelSlack`), each in the color scheme
- * of what's under its center (an amount's fill, by its tint, see
- * `textSchemeOn`; or its well; a scale's color there). Which were moved,
- * for the next time.
- */
-const placeChannelLabels = ({
-  element,
-  linear,
-  moved,
-  named,
-  scale,
-  share,
-  tint,
-  valued,
-}: {
-  element: HTMLElement;
-  linear: readonly LinearRgb[];
-  moved: { name: boolean; value: boolean };
-  named: HTMLElement;
-  scale: boolean;
-  share: number;
-  tint: string | undefined;
-  valued: HTMLElement;
-}) => {
-  const width = element.clientWidth;
-  const nameWidth = named.offsetWidth;
-  const valueWidth = valued.offsetWidth;
-  // (Its thumb, from its start: as Base UI insets it, see `Channel`.)
-  const thumbStart =
-    channelInset + (width - 2 * channelInset - channelThumb) * share;
-  const thumbEnd = thumbStart + channelThumb;
-  const nameAt = [channelPadding, channelPadding + nameWidth] as const;
-  const valueAt = [
-    width - channelPadding - valueWidth,
-    width - channelPadding,
-  ] as const;
-  const isOver = ([from, to]: readonly [number, number], wasMoved: boolean) => {
-    const slack = wasMoved ? channelSlack : 0;
-    return thumbEnd > from - slack && thumbStart < to + slack;
-  };
-  const nameMoved = isOver(nameAt, moved.name);
-  const valueMoved = !nameMoved && isOver(valueAt, moved.value);
-  const nameX = nameMoved ? valueAt[0] - channelGap - nameWidth : nameAt[0];
-  const valueX = valueMoved ? nameAt[1] + channelGap : valueAt[0];
-  const sign = getComputedStyle(element).direction === 'rtl' ? -1 : 1;
-  // (An amount's fill's edge, from its start: its thumb's center, its ends
-  // all the way, see the CSS.)
-  const edge = fillEdgeOf(width, share);
-  const schemeAt = (center: number) => {
-    if (scale) {
-      const rgb = colorAtLinear(linear, center / width);
-      return rgb && textSchemeOn(cssOf(rgb));
-    }
-    return center < edge && tint ? textSchemeOn(tint) : undefined;
-  };
-  for (const [label, x, labelWidth] of [
-    [named, nameX, nameWidth],
-    [valued, valueX, valueWidth],
-  ] as const) {
-    label.style.translate = `${String(sign * x)}px 0`;
-    const scheme = schemeAt(x + labelWidth / 2);
-    label.style.colorScheme = scheme ?? '';
-    if (scheme) label.dataset.colorScheme = scheme;
-    else delete label.dataset.colorScheme;
-  }
-  // (Placed where it starts without sliding there; from then on, sliding,
-  // see the CSS.)
-  if (element.dataset.placed === undefined) {
-    requestAnimationFrame(() => {
-      element.dataset.placed = '';
-    });
-  }
-  return { name: nameMoved, value: valueMoved };
-};
-
-/**
- * A card's channels (e.g. a light's red, green and blue): its sliders
- * (`Channel`s, its children), each in a well of its own, stacked at its
- * bottom, whatever its width. In a light card, only while it's large (its
- * channels mounted while it's small all the same, unseen, as they tell it
- * the light they give).
- */
-const Channels = forwardRef<HTMLDivElement, ControlCardChannelsProps>(
-  ({ children, className }, ref) => {
-    const light = useContext(LightContext);
-    return (
-      <div
-        ref={ref}
-        className={cn('uikit-control-cards-channels', className)}
-        // (Its presses its channels', not its card's: no press tint on the
-        // card, see Card.)
-        data-card-own-press=""
-        data-control-cards-part="channels"
-        hidden={light ? !light.isLarge : undefined}
-      >
-        {children}
-      </div>
-    );
-  },
+      {/* (In its tint, as its fill: the app's, by default.) */}
+      <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
+        {symbolOf({ emphasizedIcon, icon })}
+      </Card.Symbol>
+      <Card.Title>{label}</Card.Title>
+      {children}
+    </Card.Root>
+  ),
 );
 
 /**
- * A channel: Base UI's slider in a well of its own, its thumb round, kept
- * inside it (`thumbAlignment: 'edge'`), filled with the light it gives. An
- * amount (`tint`): filled from its start in its tint as far as its thumb's
- * center (all the way at its ends, sliding there), its thumb its tint mixed
- * on black by its share (in linear light, as light adds up: none, black).
- * A scale (`colors`): its colors along its well, its thumb the color at its
- * value. Its name at its start, its value at its end; the one its thumb
- * would cover sliding to the other end, beside the other, and back once
- * the thumb's clear of it again. Each label's color scheme by one sample
- * under its center (the fill's, by its tint, see `textSchemeOn`; the
- * well's; a scale's color there), its colors read as they or the color
- * scheme change. A press held back until it's a drag along it (a touch
- * across it the page's scroll); then its touch held from the page.
+ * A run of stages in order (e.g. a washer's: Wash, Rinse, Spin, Done),
+ * shown, not chosen: its symbol (in its tint) and its title, its parts
+ * composed in it (its children: a `Card.Subtitle`, a `Card.StageList` of
+ * `Card.Stage`s, its current one its `value`), its stages in its tint
+ * (unless the list's own). Never 1x1 (see `cardSizes.stagesDisplay`).
  */
-const Channel = forwardRef<HTMLDivElement, ControlCardChannelProps>(
+const StagesCard = forwardRef<HTMLDivElement, ControlCardStagesProps>(
   (
     {
+      active,
+      children,
       className,
-      colors,
-      defaultValue,
-      disabled,
-      format = percentFormat,
-      getValueText,
-      locale,
-      max = 1,
-      min = 0,
-      name,
-      onValueChange,
-      step,
+      emphasizedIcon,
+      icon,
+      label,
+      style,
       tint,
-      value,
+      ...props
     },
     ref,
-  ) => {
-    const [current, setCurrent] = useControlled(value, defaultValue ?? min);
-    const share = shareOf(current, min, max);
-    const scale = colors && colors.length >= 2 ? colors : undefined;
-    const formattedValue = formattedShare(current, share, { format, locale });
-    const text = getValueText
-      ? getValueText(formattedValue, current)
-      : formattedValue;
-
-    // (Its colors resolved, see `useResolvedColors`; the light it gives
-    // told its light card, see `useChannelReport`.)
-    const probes = useRef<HTMLSpanElement>(null);
-    const probed = scale ?? [tint ?? 'var(--color-ui-primary)'];
-    const { linear, resolved } = useResolvedColors(probes, probed);
-    useChannelReport(linear, scale !== undefined, share);
-
-    // (Its labels placed (see above), each in its color scheme: written as
-    // its value or its labels' sizes change, not rendered.)
-    const well = useRef<HTMLDivElement>(null);
-    const nameLabel = useRef<HTMLSpanElement>(null);
-    const valueLabel = useRef<HTMLSpanElement>(null);
-    const moved = useRef({ name: false, value: false });
-    const place = useRef<() => void>(() => undefined);
-    useLayoutEffect(() => {
-      place.current = () => {
-        const { current: element } = well;
-        const { current: named } = nameLabel;
-        const { current: valued } = valueLabel;
-        if (!element || !named || !valued) return;
-        moved.current = placeChannelLabels({
-          element,
-          linear,
-          moved: moved.current,
-          named,
-          scale: scale !== undefined,
-          share,
-          tint: resolved[0],
-          valued,
-        });
-      };
-      place.current();
-    });
-    useLayoutEffect(() => {
-      const observer = new ResizeObserver(() => place.current());
-      for (const element of [
-        well.current,
-        nameLabel.current,
-        valueLabel.current,
-      ]) {
-        if (element) observer.observe(element);
-      }
-      return () => observer.disconnect();
-    }, []);
-
-    // (Dragged (handed on to it, see `pressProps`): its touch's moves not
-    // the page's; not passive, as React's listeners are.)
-    useLayoutEffect(() => {
-      const { current: element } = well;
-      if (!element) return undefined;
-      const hold = (move: TouchEvent) => {
-        if (element.closest('[data-dragging]') && move.cancelable) {
-          move.preventDefault();
-        }
-      };
-      element.addEventListener('touchmove', hold, { passive: false });
-      return () => element.removeEventListener('touchmove', hold);
-    }, []);
-
-    // (At an end, its fill all the way, see the CSS.)
-    let edge: 'max' | 'min' | undefined;
-    if (share <= 0) edge = 'min';
-    if (share >= 1) edge = 'max';
-    return (
-      <BaseSlider.Root
-        ref={ref}
-        className={cn('uikit-control-cards-channel', className)}
-        data-control-cards-part="channel"
-        data-scale={scale ? '' : undefined}
-        disabled={disabled}
-        format={format}
-        locale={locale}
-        max={max}
-        min={min}
-        step={step ?? (max - min) / 100}
-        style={channelStyleOf(scale, share, tint)}
-        thumbAlignment="edge"
-        value={current}
-        onValueChange={(next) => {
-          setCurrent(next as number);
-          onValueChange?.(next as number);
-        }}
-        // (A press held back until it's a drag along it; a touch across it
-        // the page's scroll, see `pressProps`.)
-        {...pressProps(undefined, 'horizontal')}
-      >
-        <div
-          ref={well}
-          className="uikit-control-cards-channel-well"
-        >
-          {scale ? null : (
-            <span
-              aria-hidden="true"
-              className="uikit-control-cards-channel-fill"
-              data-edge={edge}
-            />
-          )}
-          <span
-            ref={probes}
-            hidden
-            aria-hidden="true"
-          >
-            {probed.map((color, index) => (
-              <span
-                key={index}
-                style={{ color }}
-              />
-            ))}
-          </span>
-          <span
-            ref={nameLabel}
-            aria-hidden="true"
-            className="uikit-control-cards-channel-name"
-          >
-            {name}
-          </span>
-          <span
-            ref={valueLabel}
-            aria-hidden="true"
-            className="uikit-control-cards-channel-value"
-          >
-            {text}
-          </span>
-          <BaseSlider.Control className="uikit-control-cards-channel-control">
-            <BaseSlider.Track className="uikit-control-cards-channel-track">
-              <BaseSlider.Thumb
-                aria-label={name}
-                className="uikit-control-cards-channel-thumb"
-                getAriaValueText={
-                  getValueText
-                    ? (formattedThumb, thumbValue) =>
-                        getValueText(formattedThumb, thumbValue)
-                    : undefined
-                }
-              />
-            </BaseSlider.Track>
-          </BaseSlider.Control>
-        </div>
-      </BaseSlider.Root>
-    );
-  },
+  ) => (
+    <Card.Root
+      ref={ref}
+      active={active}
+      {...props}
+      className={cn('uikit-control-cards-stages', className)}
+      data-control-cards-part="stages"
+      style={withStyle({ '--uikit-card-stages-tint': tint }, style)}
+    >
+      {/* (In its tint, as its stages: the app's, by default.) */}
+      <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
+        {symbolOf({ emphasizedIcon, icon })}
+      </Card.Symbol>
+      <Card.Title>{label}</Card.Title>
+      {children}
+    </Card.Root>
+  ),
 );
 
 /**
- * A light's value text (see `getValueText`): the app's; by default, on, its
- * brightness, off, its off word.
+ * A light's value text by default (see `getValueText`): on, its
+ * brightness; off, its off word.
  */
 const lightValueText = (
-  brightness: number,
-  {
-    checked,
-    format,
-    getValueText,
-    locale,
-    states,
-  }: ControlCardFormat & {
-    checked: boolean;
-    getValueText: ControlCardLightProps['getValueText'];
-    states: ControlCardTextStates;
-  },
-) => {
-  const formattedValue = formatted(brightness, { format, locale });
-  if (getValueText) {
-    return getValueText(formattedValue, brightness, { checked, states });
-  }
-  return checked ? formattedValue : states[1];
-};
-
-/**
- * A press on a card's body passed on to its switch (e.g. a light's): not
- * one on its channels (their sliders' own), nor on its switch itself.
- */
-const forwardBodyClick = (event: MouseEvent<HTMLElement>) => {
-  const { target } = event;
-  if (
-    target instanceof Element &&
-    target.closest('.uikit-control-cards-channels')
-  ) {
-    return;
-  }
-  forwardClick('[role=switch]:not([disabled])')(event);
-};
+  formattedValue: string,
+  _value: number,
+  { checked, states: [, off] }: ControlCardValueTextDetails,
+) => (checked ? formattedValue : off);
 
 /**
  * A light of several channels (e.g. red, green, blue): a switch, lit while
- * on, its symbol in the color its channels make (see `lightColorOf`), its
- * value its brightness (its strongest amount channel's share). Its channels
- * composed in it (a `Channels`, its children), shown while it's large
- * (expanded, resized, opened). A press on its body (not on its channels)
- * toggles it.
+ * on, its symbol in the color its channels make (see `Card.Channels`'
+ * light), its value its brightness (its strongest amount channel's share).
+ * Its channels composed in it (a `Card.Channels`, its children), shown
+ * while it's large (expanded, resized, opened). A press on its body (not on
+ * its channels: theirs, see `forwardClick`) toggles it.
  */
 const Light = forwardRef<HTMLDivElement, ControlCardLightProps>(
   (
@@ -1635,926 +487,163 @@ const Light = forwardRef<HTMLDivElement, ControlCardLightProps>(
       checked,
       children,
       className,
-      defaultChecked = true,
+      defaultChecked = false,
+      disabled,
       emphasizedIcon,
       format = percentFormat,
-      getValueText,
+      getValueText = lightValueText,
       icon,
+      label,
       locale,
-      name,
       onCheckedChange,
       onClick,
-      states = ['On', 'Off'],
+      states = onOff,
       ...props
     },
     ref,
   ) => {
-    const [isOn, setIsOn] = useControlled(checked, defaultChecked);
-    const isLarge = useIsLarge();
-    const [lights, setLights] = useState<
-      Readonly<Record<string, ChannelLight>>
-    >({});
-    const report = useCallback(
-      (id: string, light: ChannelLight | undefined) =>
-        setLights((last) => {
-          const before = last[id];
-          if (
-            before?.kind === light?.kind &&
-            before?.share === light?.share &&
-            before?.rgb.join(',') === light?.rgb.join(',')
-          ) {
-            return last;
-          }
-          const next = { ...last };
-          if (light) next[id] = light;
-          else delete next[id];
-          return next;
-        }),
-      [],
+    const [isOn, switchTo] = useSwitching(
+      checked,
+      defaultChecked,
+      onCheckedChange,
     );
-    const context = useMemo(() => ({ isLarge, report }), [isLarge, report]);
-    const all = Object.values(lights);
-    const color = isOn ? lightColorOf(all) : undefined;
-    const amounts = all.filter(({ kind }) => kind === 'amount');
-    const brightness =
-      amounts.length === 0 ? 1 : Math.max(...amounts.map(({ share }) => share));
-    const switchTo = (next: boolean) => {
-      setIsOn(next);
-      onCheckedChange?.(next);
-    };
+    const isLarge = useIsLarge();
+    const [light, setLight] = useState<CardLight>({
+      brightness: 1,
+      color: undefined,
+    });
+    const onLightChange = useCallback((next: CardLight) => {
+      setLight((last) =>
+        last.brightness === next.brightness && last.color === next.color
+          ? last
+          : next,
+      );
+    }, []);
+    const host = useMemo(
+      () => ({ isShown: isLarge, onLightChange }),
+      [isLarge, onLightChange],
+    );
+    const color = isOn ? light.color : undefined;
+    const formattedValue = formatted(light.brightness, { format, locale });
     return (
       <Card.Root
         ref={ref}
         {...props}
         className={cn('uikit-control-cards-light', className)}
         data-control-cards-part="light"
-        onClick={onClick ?? forwardBodyClick}
+        onClick={
+          onClick ??
+          (disabled ? undefined : forwardClick('[role=switch]:not([disabled])'))
+        }
       >
         <Card.Symbol style={color ? { color } : undefined}>
           {symbolOf({ emphasizedIcon, icon })}
         </Card.Symbol>
         <Card.Switch
-          aria-label={name}
+          aria-label={label}
           checked={isOn}
+          disabled={disabled}
           tint={color}
           onCheckedChange={switchTo}
         />
-        <Card.Title>{name}</Card.Title>
+        <Card.Title>{label}</Card.Title>
         <Card.Value>
-          {lightValueText(brightness, {
+          {getValueText(formattedValue, light.brightness, {
             checked: isOn,
-            format,
-            getValueText,
-            locale,
             states,
           })}
         </Card.Value>
-        <LightContext.Provider value={context}>
+        <ChannelsHostContext.Provider value={host}>
           {children}
-        </LightContext.Provider>
+        </ChannelsHostContext.Provider>
       </Card.Root>
     );
   },
 );
-
-/**
- * A corner button expanding its card in place and making it small again
- * (bottom trailing; its grid item's size is the app's, see Grid).
- */
-const ExpandButton = ({
-  collapsedSize,
-  expanded,
-  expandedSize,
-  label,
-  onExpandedChange,
-}: ControlCardExpandButtonProps): ReactNode => {
-  // (Each size as its item would be it now (see `useGridItem`'s
-  // `sizeOf`): the same, expanding changes nothing, hidden; outside a
-  // grid, as given.)
-  const item = useGridItem();
-  const small = item?.sizeOf(collapsedSize).size ?? collapsedSize;
-  const large = item?.sizeOf(expandedSize).size ?? expandedSize;
-  // (Its icon by where it goes: larger, expanding; smaller, collapsing
-  // (e.g. expanded smaller than it's stored).)
-  const [from, to] = expanded ? [large, small] : [small, large];
-  return (
-    <Card.CornerButton
-      mirrored
-      aria-expanded={expanded}
-      aria-label={label}
-      visible={small !== large}
-      icon={
-        measureOf(to) > measureOf(from) ? gridIcons.expand : gridIcons.collapse
-      }
-      onClick={() => onExpandedChange(!expanded)}
-    />
-  );
-};
-
-/**
- * How many rows of its list fit in it whole (its box filling its room in
- * the card, see Card; a row's height its `--uikit-list-row-min-height`, as
- * Card sets it, opened above the page too): by its height, at least one;
- * as the card's size changes too.
- */
-const rowsIn = (list: HTMLElement) => {
-  const row =
-    Number.parseFloat(
-      getComputedStyle(list).getPropertyValue('--uikit-list-row-min-height'),
-    ) || 30;
-  return Math.max(1, Math.floor(list.clientHeight / row));
-};
-
-/**
- * Reads to do once a commit's layout effects have all run (a microtask,
- * still before it's painted): together, so the page is styled and laid out
- * for them once, not once per card between other effects' changes (e.g.
- * a page of many list cards pushed).
- */
-const pendingReads = new Set<() => void>();
-const readTogether = (read: () => void) => {
-  if (pendingReads.size === 0) {
-    queueMicrotask(() => {
-      const reads = [...pendingReads];
-      pendingReads.clear();
-      for (const each of reads) each();
-    });
-  }
-  pendingReads.add(read);
-};
-
-const useRowsThatFit = () => {
-  const [list, setList] = useState<HTMLElement | null>(null);
-  const [count, setCount] = useState(1);
-  useLayoutEffect(() => {
-    if (!list) return undefined;
-    const observer = new ResizeObserver(() => setCount(rowsIn(list)));
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [list]);
-  // (Also after each render, before it's painted: its tile resized in it
-  // (e.g. collapsed), its rows counted at once, not a frame late (a frame
-  // of the rows of the size it had, its last row a new one after).)
-  // (Read with the others' (see `readTogether`): still before it's
-  // painted.)
-  useLayoutEffect(() => {
-    if (!list) return undefined;
-    const read = () => {
-      if (list.isConnected) setCount(rowsIn(list));
-    };
-    readTogether(read);
-    return () => {
-      pendingReads.delete(read);
-    };
-  });
-  return [setList, count, list] as const;
-};
-
-/** Grid's reflow (its tiles reshaping): its duration and easing. */
-const reflowDuration = 300;
-const reflowEasing = 'cubic-bezier(0.32, 0.72, 0, 1)';
-
-/** Its last row's height's animation (see `useLastRowHeight`). */
-const lastRowId = 'uikit-control-cards-last-row';
-
-/**
- * Its list's last row's height changing with how many rows there are (one
- * only: taller, see Card), as its tile reshapes (Grid's reflow: its
- * duration and easing): from the height it had, animated, started with
- * the frames (see Grid's `startWithFrame`: a long task laying the page out
- * anew, e.g. its tile expanding, not past it already, as a transition
- * would be).
- */
-const useLastRowHeight = (list: HTMLElement | null, count: number): void => {
-  const last = useRef<{ count: number; height: string } | undefined>(undefined);
-  // (Read with the others' (see `readTogether`): still before it's
-  // painted, its animation starting with its frame.)
-  useLayoutEffect(() => {
-    const measure = () => {
-      const row = list?.isConnected
-        ? list.querySelector<HTMLElement>(
-            ':scope .uikit-list-item:last-child .uikit-list-row',
-          )
-        : null;
-      if (!row) {
-        last.current = undefined;
-        return;
-      }
-      for (const animation of row.getAnimations()) {
-        if (animation.id === lastRowId) animation.cancel();
-      }
-      const height = getComputedStyle(row).minHeight;
-      const before = last.current;
-      last.current = { count, height };
-      if (
-        !before ||
-        before.count === count ||
-        before.height === height ||
-        reducedMotionOf(row).matches
-      ) {
-        return;
-      }
-      startWithFrame(
-        row.animate([{ minHeight: before.height }, { minHeight: height }], {
-          duration: reflowDuration,
-          easing: reflowEasing,
-          id: lastRowId,
-        }),
-      );
-    };
-    readTogether(measure);
-    return () => {
-      pendingReads.delete(measure);
-    };
-  }, [count, list]);
-};
-
-/** What its list's last row does, if anything (see `ListCard`). */
-type ListAction =
-  | { kind: 'expand' | 'less'; onPress: () => void }
-  | { kind: 'more'; onPress?: () => void }
-  | { kind: 'open'; onPress: () => void };
-
-const actionIcons = {
-  expand: gridIcons.expand,
-  less: gridIcons.collapse,
-  more: undefined,
-  open: gridIcons.open,
-} as const;
-
-/**
- * What a list card's last row does (see `ListCard`): open above the page,
- * none; expanded, making it small again; rows left out, expanding it (only
- * where that'd change its size, as `ExpandButton`), else opening it, else
- * only counting them; none.
- */
-const useListAction = ({
-  expansion,
-  isLeftOut,
-  opening,
-}: {
-  expansion: ControlCardExpandButtonProps | undefined;
-  isLeftOut: boolean;
-  opening: ControlCardOpenButtonsProps | undefined;
-}): ListAction | undefined => {
-  const item = useGridItem();
-  if (item?.open === true) return undefined;
-  const canExpand =
-    expansion !== undefined &&
-    (item?.sizeOf(expansion.collapsedSize).size ?? expansion.collapsedSize) !==
-      (item?.sizeOf(expansion.expandedSize).size ?? expansion.expandedSize);
-  if (canExpand && expansion.expanded) {
-    return { kind: 'less', onPress: () => expansion.onExpandedChange(false) };
-  }
-  if (!isLeftOut) return undefined;
-  if (canExpand) {
-    return { kind: 'expand', onPress: () => expansion.onExpandedChange(true) };
-  }
-  return opening
-    ? { kind: 'open', onPress: () => item?.setOpen(true) }
-    : { kind: 'more' };
-};
-
-/**
- * A list card's last row (see `ListCard`): its label where its rows' are
- * (after their symbols' room, if they have them), pressed doing its
- * action; the corner symbol for it where a value is.
- */
-const ActionRow = ({
-  action,
-  hasIcons,
-  label,
-}: {
-  action: ListAction;
-  hasIcons: boolean;
-  label: string;
-}): ReactNode => {
-  const icon = actionIcons[action.kind];
-  const isExpanding = action.kind === 'expand' || action.kind === 'less';
-  return (
-    <List.Item data-control-cards-part="list-action">
-      {hasIcons ? (
-        <List.Leading>
-          <List.Image variant="symbol" />
-        </List.Leading>
-      ) : null}
-      <List.Content>
-        <List.Title
-          render={
-            action.onPress ? (
-              <button
-                aria-expanded={isExpanding ? action.kind === 'less' : undefined}
-                type="button"
-                onClick={action.onPress}
-              />
-            ) : undefined
-          }
-        >
-          {label}
-        </List.Title>
-      </List.Content>
-      {icon ? (
-        <List.Trailing>
-          <List.Detail>
-            <Symbol icon={icon} />
-          </List.Detail>
-        </List.Trailing>
-      ) : null}
-    </List.Item>
-  );
-};
 
 /**
  * A summary in rows (e.g. a room's, a device's details): its symbol, its
- * title and status beside it at its top, a glass list of rows (as many as
- * fit whole) in a well at its bottom. Rows left out, its last row counts
- * them, expanding or opening it (`expansion`, `opening`); expanded, it
- * makes it small again. No rows, no list (its corner buttons instead);
- * open above the page, an x in its top trailing corner closes it.
+ * title and status beside it at its top, its rows (a `Card.Rows`, its
+ * children) in a well at its bottom, as many as fit whole; rows left out,
+ * its last row counts them, expanding or opening its tile (see
+ * `Card.Rows`).
  */
 const ListCard = forwardRef<HTMLDivElement, ControlCardListProps>(
   (
-    {
-      children,
-      className,
-      emphasizedIcon,
-      expansion,
-      getMoreLabel = (count) => `${String(count)} more`,
-      icon,
-      lessLabel = 'Less',
-      name,
-      opening,
-      rows,
-      status,
-      ...props
-    },
+    { children, className, emphasizedIcon, icon, label, status, ...props },
     ref,
-  ) => {
-    const [list, fit, listElement] = useRowsThatFit();
-    const item = useGridItem();
-    const isOpen = item?.open === true;
-    const action = useListAction({
-      expansion,
-      isLeftOut: rows.length > fit,
-      opening,
-    });
-    // (Its last row the action's, if any: one row less.)
-    const shown = action ? rows.slice(0, fit - 1) : rows.slice(0, fit);
-    useLastRowHeight(listElement, shown.length + (action ? 1 : 0));
-    return (
-      <Card.Root
-        ref={ref}
-        {...props}
-        className={cn('uikit-control-cards-list', className)}
-        data-control-cards-part="list"
-      >
-        <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
-        <Card.Title>{name}</Card.Title>
-        {status === undefined ? null : <Card.Value>{status}</Card.Value>}
-        {rows.length === 0 ? null : (
-          <List.Root ref={list}>
-            <List.Section>
-              <List.Group>
-                {shown.map((row) => (
-                  <List.Item key={row.label}>
-                    {row.icon ? (
-                      <List.Leading>
-                        <List.Image variant="symbol">
-                          <Symbol icon={row.icon} />
-                        </List.Image>
-                      </List.Leading>
-                    ) : null}
-                    <List.Content>
-                      {/* (Pressed, going on (e.g. to its page): its label
-                          a button, its row its hit area, see List.) */}
-                      <List.Title
-                        render={
-                          row.onPress ? (
-                            <button
-                              type="button"
-                              onClick={row.onPress}
-                            />
-                          ) : undefined
-                        }
-                      >
-                        {row.label}
-                      </List.Title>
-                    </List.Content>
-                    <List.Trailing>
-                      <List.Detail>{row.value}</List.Detail>
-                      {row.onPress ? <List.DrillIn /> : null}
-                    </List.Trailing>
-                  </List.Item>
-                ))}
-                {action ? (
-                  // (Keyed: the same row however many come before it, its
-                  // height animated, see `useLastRowHeight`.)
-                  <ActionRow
-                    key="action"
-                    action={action}
-                    hasIcons={rows.some((row) => row.icon !== undefined)}
-                    label={
-                      action.kind === 'less'
-                        ? lessLabel
-                        : getMoreLabel(rows.length - shown.length)
-                    }
-                  />
-                ) : null}
-              </List.Group>
-            </List.Section>
-          </List.Root>
-        )}
-        {/* (Its last row's action, also a corner button over it, not
-            drawn (its row draws its symbol there): a corner button's large
-            hit area; for pointers only, the row's button for keys and
-            assistive technology.) */}
-        {rows.length > 0 && action?.onPress ? (
-          <Card.CornerButton
-            aria-hidden
-            className="uikit-control-cards-hit-area"
-            icon={actionIcons[action.kind] ?? gridIcons.open}
-            tabIndex={-1}
-            onClick={action.onPress}
-          />
-        ) : null}
-        {/* (No list: its corner buttons, as the other cards'.) */}
-        {rows.length === 0 && expansion ? (
-          <ExpandButton {...expansion} />
-        ) : null}
-        {rows.length === 0 && opening && !expansion ? (
-          <Card.CornerButton
-            aria-label={opening.label}
-            icon={gridIcons.open}
-            visible={!isOpen}
-            onClick={() => item?.setOpen(true)}
-          />
-        ) : null}
-        {opening ? (
-          <Card.CornerButton
-            aria-label={opening.closeLabel}
-            corner="top-trailing"
-            icon={gridIcons.close}
-            visible={isOpen}
-            onClick={() => item?.setOpen(false)}
-          />
-        ) : null}
-        {children}
-      </Card.Root>
-    );
-  },
-);
-
-/**
- * Corner buttons opening its card above the page (its grid item's `open`,
- * see `Grid.Item`), bottom trailing, and closing it (top leading), each
- * shown as it applies.
- */
-const OpenButtons = ({
-  closeLabel,
-  label,
-}: ControlCardOpenButtonsProps): ReactNode => {
-  const item = useGridItem();
-  const isOpen = item?.open === true;
-  return (
-    <>
-      <Card.CornerButton
-        aria-label={label}
-        icon={gridIcons.open}
-        visible={!isOpen}
-        onClick={() => item?.setOpen(true)}
-      />
-      <Card.CornerButton
-        aria-label={closeLabel}
-        corner="top-trailing"
-        icon={gridIcons.close}
-        visible={isOpen}
-        onClick={() => item?.setOpen(false)}
-      />
-    </>
-  );
-};
-
-/** A segmented card's layout, by its tile's size (see `SegmentedCard`). */
-type SegmentedLayout = 'compact' | 'row' | 'tall' | 'upright';
-
-/**
- * Its layout by its size (open above the page, that one) and its
- * orientation (the app's; none, by its size): taller than a row, its
- * options stacked (`upright`: vertical, or one wide) or side by side, a
- * symbol over its words (`tall`: horizontal, or wider); one row, side by
- * side across it (`row`: wider, not vertical); else none (`compact`: 1x1,
- * or vertical in one row, no room to stack them). Outside a grid, a row,
- * or stacked (vertical).
- */
-const layoutOf = (
-  orientation: ControlCardSegmentedProps['orientation'],
-  isWide: boolean,
-  isTall: boolean,
-): SegmentedLayout => {
-  if (isTall) {
-    if (orientation === undefined) return isWide ? 'tall' : 'upright';
-    return orientation === 'vertical' ? 'upright' : 'tall';
-  }
-  return isWide && orientation !== 'vertical' ? 'row' : 'compact';
-};
-
-/** Its layout (see `layoutOf`), and whether it's one wide (narrow). */
-const useSegmentedLayout = (
-  orientation: ControlCardSegmentedProps['orientation'],
-): readonly [SegmentedLayout, boolean] => {
-  const item = useGridItem();
-  if (!item) return [orientation === 'vertical' ? 'upright' : 'row', false];
-  const [columns = '1', rows = '1'] = (
-    item.open ? item.openSize : item.size
-  ).split('x');
-  const isWide = columns === '*' || Number(columns) >= 2;
-  return [layoutOf(orientation, isWide, Number(rows) >= 2), !isWide];
-};
-
-/** A segmented card's thumb, placed on an option's box (see below). */
-const placeThumb = (thumb: HTMLElement, on: HTMLElement | null) => {
-  thumb.hidden = !on;
-  if (!on) return;
-  thumb.style.setProperty(
-    '--uikit-control-cards-thumb-x',
-    `${String(on.offsetLeft)}px`,
-  );
-  thumb.style.setProperty(
-    '--uikit-control-cards-thumb-y',
-    `${String(on.offsetTop)}px`,
-  );
-  thumb.style.setProperty(
-    '--uikit-control-cards-thumb-width',
-    `${String(on.offsetWidth)}px`,
-  );
-  thumb.style.setProperty(
-    '--uikit-control-cards-thumb-height',
-    `${String(on.offsetHeight)}px`,
-  );
-};
-
-/** The option nearest a point, along the options (see `dragProps`). */
-const nearestOption = (
-  root: HTMLElement,
-  isUpright: boolean,
-  { clientX, clientY }: { clientX: number; clientY: number },
-) => {
-  let nearest: HTMLElement | undefined;
-  let distance = Infinity;
-  for (const option of root.querySelectorAll<HTMLElement>('[role="radio"]')) {
-    if (Object.hasOwn(option.dataset, 'disabled')) continue;
-    const box = option.getBoundingClientRect();
-    const away = isUpright
-      ? Math.abs(box.top + box.height / 2 - clientY)
-      : Math.abs(box.left + box.width / 2 - clientX);
-    if (!(away < distance)) {
-      continue;
-    }
-
-    distance = away;
-    nearest = option;
-  }
-  return nearest;
-};
-
-/**
- * Dragging between a segmented card's options (as Segmented's, no lens:
- * its thumb what moves): held back until it moves (`pressSlop`; a touch,
- * `touchSlop`), then along the options (a mouse, any way), the nearest one
- * chosen as it's reached (its thumb going there); a touch across them, or
- * the browser panning first (it's cancelled), a scroll, let go (as a
- * slider card's, see `pressProps`). Dragging, the page doesn't pan (see
- * `SegmentedChoice`). Released before, a press: the option's own (its
- * click).
- */
-const dragProps = (
-  isUpright: boolean,
-  onChoose: (value: string) => void,
-): { onPointerDown: (event: ReactPointerEvent<HTMLElement>) => void } => ({
-  onPointerDown: (event) => {
-    if (event.button !== 0) return;
-    const root = event.currentTarget;
-    const { clientX, clientY, pointerId, pointerType } = event;
-    const isMouse = pointerType === 'mouse';
-    const slop = isMouse ? pressSlop : touchSlop;
-    let isDragging = false;
-    let under: HTMLElement | undefined;
-    const listening = new AbortController();
-    const options = { capture: true, signal: listening.signal };
-    const end = () => {
-      listening.abort();
-      delete root.dataset.dragging;
-    };
-    addEventListener(
-      'pointermove',
-      (move) => {
-        if (move.pointerId !== pointerId) return;
-        if (!isDragging) {
-          const across = Math.abs(move.clientX - clientX);
-          const upright = Math.abs(move.clientY - clientY);
-          if (Math.hypot(across, upright) < slop) return;
-          const along = isUpright ? upright : across;
-          const crossing = isUpright ? across : upright;
-          // (A touch across them: a scroll, let go.)
-          if (!isMouse && crossing > along) {
-            end();
-            return;
-          }
-          isDragging = true;
-          root.dataset.dragging = '';
-        }
-        // (Its nearest option chosen as it's reached.)
-        const next = nearestOption(root, isUpright, move);
-        if (!next || next === under) return;
-        under = next;
-        const { value } = next.dataset;
-        if (value !== undefined && !Object.hasOwn(next.dataset, 'checked')) {
-          onChoose(value);
-        }
-      },
-      options,
-    );
-    addEventListener(
-      'pointerup',
-      (up) => {
-        if (up.pointerId !== pointerId) return;
-        end();
-        if (!isDragging) return;
-        // (Its click next, if any: not an option's (dragged, not pressed);
-        // none before another press or key, nothing.)
-        const clicking = new AbortController();
-        const once = { capture: true, signal: clicking.signal };
-        addEventListener(
-          'click',
-          (clicked) => {
-            clicking.abort();
-            clicked.preventDefault();
-            clicked.stopPropagation();
-          },
-          once,
-        );
-        for (const type of ['pointerdown', 'keydown']) {
-          addEventListener(type, () => clicking.abort(), once);
-        }
-      },
-      options,
-    );
-    addEventListener(
-      'pointercancel',
-      (cancel) => {
-        if (cancel.pointerId === pointerId) end();
-      },
-      options,
-    );
-  },
-});
-
-/** A segmented card's option, as it tells its card (see `SegmentedItem`). */
-type SegmentedOptionInfo = {
-  icon: SymbolIcon | undefined;
-  label: ReactNode;
-  tint: string | undefined;
-};
-
-/** What a segmented card's options read from it (see `SegmentedItem`). */
-type SegmentedContextValue = {
-  content: 'both' | 'icon' | 'label';
-  layout: SegmentedLayout;
-  /** Tells it an option (its symbol, words, tint), until it's gone. */
-  register: (value: string, info: SegmentedOptionInfo) => () => void;
-};
-
-const SegmentedContext = createContext<SegmentedContextValue | undefined>(
-  undefined,
-);
-
-/**
- * Its options, as they've told it (in the order they did: theirs), see
- * `SegmentedItem`.
- */
-const useSegmentedOptions = () => {
-  const [options, setOptions] = useState<
-    ReadonlyMap<string, SegmentedOptionInfo>
-  >(() => new Map());
-  const register = useCallback((value: string, info: SegmentedOptionInfo) => {
-    setOptions((current) => new Map(current).set(value, info));
-    return () =>
-      setOptions((current) => {
-        const next = new Map(current);
-        next.delete(value);
-        return next;
-      });
-  }, []);
-  return [options, register] as const;
-};
-
-/**
- * Its options' segments (a radio group, Base UI's; its options its
- * children, see `SegmentedItem`): in a well, the chosen one's raised (a
- * thumb, moved to it as it's chosen, by its box: its corners the well's
- * less its padding, a pill while short); dragged between (see
- * `dragProps`). None shown (1x1): there all the same, unseen, its options
- * telling the card theirs.
- */
-const SegmentedChoice = ({
-  children,
-  isNarrow,
-  layout,
-  name,
-  onValueChange,
-  value,
-}: {
-  children: ReactNode;
-  /** One wide (stacked: each its symbol over its words, see Card). */
-  isNarrow: boolean;
-  layout: SegmentedLayout;
-  name: string;
-  onValueChange: (value: string) => void;
-  value: string;
-}): ReactNode => {
-  const group = useRef<HTMLDivElement>(null);
-  const isShown = layout !== 'compact';
-  // (Its thumb on the chosen segment, as it's chosen and as its box
-  // changes; moved (transitioned) once it's been placed.)
-  useLayoutEffect(() => {
-    const root = group.current;
-    const thumb = root?.querySelector<HTMLElement>('[data-part="thumb"]');
-    if (!root || !thumb || !isShown) return undefined;
-    const place = () => {
-      placeThumb(thumb, root.querySelector('[data-checked]'));
-    };
-    place();
-    let frame = requestAnimationFrame(() => {
-      root.dataset.placed = '';
-    });
-    // (Its box changing (e.g. its card resized, opened): there at once, as
-    // its options are; moved only as another's chosen. Its first report
-    // (as it's observed, each choice: this effect's again) no change.)
-    let size = `${String(root.offsetWidth)}x${String(root.offsetHeight)}`;
-    const observer = new ResizeObserver(() => {
-      const next = `${String(root.offsetWidth)}x${String(root.offsetHeight)}`;
-      if (next === size) return;
-      size = next;
-      cancelAnimationFrame(frame);
-      delete root.dataset.placed;
-      place();
-      frame = requestAnimationFrame(() => {
-        root.dataset.placed = '';
-      });
-    });
-    observer.observe(root);
-    // (Its options changing (added, removed, laid out anew), or another
-    // marked chosen (Base UI's radios a render after its value): placed
-    // again.)
-    const mutations = new MutationObserver(place);
-    mutations.observe(root, {
-      attributeFilter: ['data-checked'],
-      childList: true,
-      subtree: true,
-    });
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      mutations.disconnect();
-    };
-  }, [isShown, layout, value]);
-  // (Dragged (see `dragProps`): its touch's moves not the page's, its pan
-  // not starting as the finger strays across its options; not passive, as
-  // React's listeners are.)
-  useLayoutEffect(() => {
-    const root = group.current;
-    if (!root) return undefined;
-    const hold = (move: TouchEvent) => {
-      if (Object.hasOwn(root.dataset, 'dragging') && move.cancelable) {
-        move.preventDefault();
-      }
-    };
-    root.addEventListener('touchmove', hold, { passive: false });
-    return () => root.removeEventListener('touchmove', hold);
-  }, []);
-  return (
-    <BaseRadioGroup
-      ref={group}
-      aria-label={name}
-      className="uikit-control-cards-segmented-choice"
-      data-control-cards-part="segmented-choice"
-      data-layout={layout}
-      data-narrow={isNarrow ? '' : undefined}
-      hidden={!isShown}
-      value={value}
-      onValueChange={(next) => onValueChange(next as string)}
-      {...dragProps(layout === 'upright', onValueChange)}
+  ) => (
+    <Card.Root
+      ref={ref}
+      {...props}
+      className={cn('uikit-control-cards-list', className)}
+      data-control-cards-part="list"
     >
-      <span
-        aria-hidden="true"
-        className="uikit-control-cards-segmented-thumb"
-        data-part="thumb"
-      />
+      <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
+      <Card.Title>{label}</Card.Title>
+      {status === undefined ? null : <Card.Value>{status}</Card.Value>}
       {children}
-    </BaseRadioGroup>
-  );
-};
-
-/**
- * A segmented card's option (a radio, Base UI's): its symbol and its words
- * (`children`), or either (its card's `optionContent`; its symbol only, its
- * words unseen, its name), a subtitle under them where there's room;
- * telling its card its symbol, words and tint (its value and symbol while
- * it's chosen).
- */
-const SegmentedItem = forwardRef<HTMLElement, ControlCardSegmentedItemProps>(
-  ({ children, className, icon, subtitle, tint, value, ...props }, ref) => {
-    const context = useContext(SegmentedContext);
-    const register = context?.register;
-    useLayoutEffect(
-      () => register?.(value, { icon, label: children, tint }),
-      [children, icon, register, tint, value],
-    );
-    const content = context?.content ?? 'both';
-    const hasIcon = icon !== undefined && content !== 'label';
-    const isIconOnly = hasIcon && content === 'icon';
-    return (
-      <BaseRadio.Root
-        ref={ref}
-        {...props}
-        className={cn('uikit-control-cards-segmented-item', className)}
-        data-control-cards-part="segmented-item"
-        data-value={value}
-        value={value}
-      >
-        {hasIcon ? <Symbol icon={icon} /> : null}
-        {/* (Its words, and more under them where there's room: taller
-            than a row; its symbol only, unseen, its name.) */}
-        <span
-          className="uikit-control-cards-segmented-text"
-          data-unseen={isIconOnly ? '' : undefined}
-        >
-          <span className="uikit-control-cards-segmented-label">
-            {children}
-          </span>
-          {context?.layout !== 'row' && subtitle !== undefined ? (
-            <span className="uikit-control-cards-segmented-subtitle">
-              {subtitle}
-            </span>
-          ) : null}
-        </span>
-      </BaseRadio.Root>
-    );
-  },
+    </Card.Root>
+  ),
 );
 
 /**
  * A device of a few modes (e.g. a heat pump's Off, Heat, Cool, Auto): its
- * options (its children, `SegmentedItem`s) as segments in a well at its
- * bottom (see `SegmentedChoice`), laid out by its size and orientation
- * (see `useSegmentedLayout`); 1x1, its chosen option's words only, opening
- * above the page to choose (`opening`). Lit while its chosen option isn't
- * its `offValue`; its symbol and tint the chosen option's.
+ * choice composed in it (a `Card.Segmented` of `Card.SegmentedItem`s, its
+ * children), laid out by its size; 1x1, its chosen option's words only, a
+ * press on it opening it above the page (its grid item's `openSize` given;
+ * a `Card.OpenButton` and a `Card.CloseButton` among its children). Lit
+ * while its chosen option isn't its `offValue`; its symbol and tint the
+ * chosen option's.
  */
 const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
   (
     {
       children,
       className,
-      defaultValue = '',
       emphasizedIcon,
       icon,
-      name,
+      label,
       offValue,
       onClick,
-      onValueChange,
-      opening,
-      optionContent = 'both',
-      orientation,
       tint,
-      value,
       ...props
     },
     ref,
   ) => {
     const [options, register] = useSegmentedOptions();
-    // (None chosen at first: its first option.)
-    const [chosenValue, setCurrent] = useControlled(value, defaultValue);
-    const current = chosenValue || (options.keys().next().value ?? '');
-    const [layout, isNarrow] = useSegmentedLayout(orientation);
-    const item = useGridItem();
-    const chosen = options.get(current);
-    const isCompact = layout === 'compact';
-    const context = useMemo(
-      () => ({ content: optionContent, layout, register }),
-      [layout, optionContent, register],
+    const [{ layout, value }, setReported] = useState<{
+      layout: SegmentedLayout | undefined;
+      value: string | undefined;
+    }>({ layout: undefined, value: undefined });
+    const report = useCallback(
+      (next: string, nextLayout: SegmentedLayout) =>
+        setReported((last) =>
+          last.value === next && last.layout === nextLayout
+            ? last
+            : { layout: nextLayout, value: next },
+        ),
+      [],
     );
+    const host = useMemo(() => ({ register, report }), [register, report]);
+    const item = useGridItem();
+    const chosen: SegmentedOptionInfo | undefined =
+      value === undefined ? undefined : options.get(value);
+    const isCompact = layout === 'compact';
     return (
       <Card.Root
         ref={ref}
-        active={offValue === undefined ? undefined : current !== offValue}
+        active={
+          offValue === undefined || value === undefined
+            ? undefined
+            : value !== offValue
+        }
         {...props}
         className={cn('uikit-control-cards-segmented', className)}
         data-control-cards-part="segmented"
-        data-layout={layout}
         onClick={
           onClick ??
-          (isCompact && opening ? () => item?.setOpen(true) : undefined)
+          (isCompact && item?.canOpen ? () => item.setOpen(true) : undefined)
         }
       >
         <Card.Symbol tint={chosen?.tint ?? tint}>
@@ -2567,161 +656,15 @@ const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
             symbolOf({ emphasizedIcon, icon })
           )}
         </Card.Symbol>
-        <Card.Title>{name}</Card.Title>
+        <Card.Title>{label}</Card.Title>
         {layout === 'row' ? null : <Card.Value>{chosen?.label}</Card.Value>}
-        <SegmentedContext.Provider value={context}>
-          <SegmentedChoice
-            isNarrow={isNarrow}
-            layout={layout}
-            name={name}
-            value={current}
-            onValueChange={(next) => {
-              setCurrent(next);
-              onValueChange?.(next);
-            }}
-          >
+        <SegmentedHostContext.Provider value={host}>
+          {/* (Its open button shown only while its options aren't.) */}
+          <OpenButtonHintContext.Provider value={isCompact}>
             {children}
-          </SegmentedChoice>
-        </SegmentedContext.Provider>
-        {/* (Its corner buttons, as a list card's: one opening it, 1x1;
-            open, an x in its top trailing corner, clear of its symbol.) */}
-        {opening ? (
-          <>
-            <Card.CornerButton
-              aria-label={opening.label}
-              icon={gridIcons.open}
-              visible={isCompact && item?.open !== true}
-              onClick={() => item?.setOpen(true)}
-            />
-            <Card.CornerButton
-              aria-label={opening.closeLabel}
-              corner="top-trailing"
-              icon={gridIcons.close}
-              visible={item?.open === true}
-              onClick={() => item?.setOpen(false)}
-            />
-          </>
-        ) : null}
+          </OpenButtonHintContext.Provider>
+        </SegmentedHostContext.Provider>
       </Card.Root>
-    );
-  },
-);
-
-/** A done stage's check (see `Stage`), drawn as the corner symbols are. */
-const stageDoneIcon = iconOf(
-  'control-cards.stage-done',
-  // (Centered: its stroke's box about the origin.)
-  polyline([-3.75, 0.25], [-1.25, 2.75], [3.75, -2.75]),
-);
-
-/** A stages card's name and current stage, for its parts. */
-const StagesContext = createContext<
-  { name: string; value: string | undefined } | undefined
->(undefined);
-
-/**
- * A run of stages in order (e.g. a washer's: Wash, Rinse, Spin, Done),
- * shown, not chosen: its symbol and its title, its parts composed in it
- * (its children): a subtitle (`Subtitle`), its stages (a `StageList` of
- * `Stage`s) as dots along a line at its bottom, those done checked, its
- * current one (`value`) in its tint, those to come empty; their words
- * under them. Never 1x1 (see `cardSizes.stagesDisplay`).
- */
-const StagesCard = forwardRef<HTMLDivElement, ControlCardStagesProps>(
-  (
-    {
-      active,
-      children,
-      className,
-      emphasizedIcon,
-      icon,
-      name,
-      style,
-      tint,
-      value,
-      ...props
-    },
-    ref,
-  ) => {
-    const context = useMemo(() => ({ name, value }), [name, value]);
-    return (
-      <Card.Root
-        ref={ref}
-        active={active}
-        {...props}
-        className={cn('uikit-control-cards-stages', className)}
-        data-control-cards-part="stages"
-        style={withStyle({ '--uikit-control-cards-stages-tint': tint }, style)}
-      >
-        {/* (In its tint, as its fill: the app's, by default.) */}
-        <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
-          {symbolOf({ emphasizedIcon, icon })}
-        </Card.Symbol>
-        <Card.Title>{name}</Card.Title>
-        <StagesContext.Provider value={context}>
-          {children}
-        </StagesContext.Provider>
-      </Card.Root>
-    );
-  },
-);
-
-/**
- * A stages card's stages: an ordered list (named as its card), its
- * `Stage`s along a line at the card's bottom.
- */
-const StageList = forwardRef<HTMLOListElement, ControlCardStageListProps>(
-  ({ children, className, ...props }, ref) => {
-    const context = useContext(StagesContext);
-    if (!context) {
-      throw new Error('ControlCards.StageList goes in a ControlCards.Stages.');
-    }
-    return (
-      <ol
-        ref={ref}
-        aria-label={context.name}
-        {...props}
-        className={cn('uikit-control-cards-stage-list', className)}
-        data-control-cards-part="stage-list"
-        data-current={context.value === undefined ? undefined : ''}
-      >
-        {children}
-      </ol>
-    );
-  },
-);
-
-/**
- * A stage of a stages card (in its `StageList`): its dot and its words;
- * done (before the current one), current, or to come, by its place (see
- * the CSS).
- */
-const Stage = forwardRef<HTMLLIElement, ControlCardStageProps>(
-  ({ children, className, value, ...props }, ref) => {
-    const isCurrent = useContext(StagesContext)?.value === value;
-    return (
-      <li
-        ref={ref}
-        aria-current={isCurrent ? 'step' : undefined}
-        {...props}
-        className={cn('uikit-control-cards-stage', className)}
-        data-control-cards-part="stage"
-        data-current={isCurrent ? '' : undefined}
-        data-value={value}
-      >
-        <span
-          aria-hidden="true"
-          className="uikit-control-cards-stage-dot"
-        >
-          <Symbol
-            baselineShift="none"
-            box="square"
-            className="uikit-control-cards-stage-check"
-            icon={stageDoneIcon}
-          />
-        </span>
-        <span className="uikit-control-cards-stage-label">{children}</span>
-      </li>
     );
   },
 );
@@ -2731,24 +674,10 @@ export const ControlCards = {
   Switch: SwitchCard,
   Value,
   Slider: SliderCard,
-  SliderFill,
   Button,
   Progress: ProgressCard,
-  ProgressBar,
-  ProgressLabel,
-  ProgressDetail,
-  ProgressValue,
-  Subtitle,
+  Stages: StagesCard,
   Light,
   List: ListCard,
   Segmented: SegmentedCard,
-  SegmentedItem,
-  Stages: StagesCard,
-  StageList,
-  Stage,
-  Channels,
-  Channel,
-  Trend,
-  ExpandButton,
-  OpenButtons,
 };

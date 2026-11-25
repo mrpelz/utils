@@ -5586,6 +5586,27 @@ export const ListParts: FunctionComponent = () => (
         would open with their first item highlighted.) The control’s own clicks
         aren’t passed on again.
       </li>
+      <li>
+        A press on another control in the row stays that control’s: a button, a
+        link, a field, a radio, a slider, or anything marked{' '}
+        <code>data-card-own-press</code> (a card’s{' '}
+        <PartLink
+          component="card"
+          part="Card.Channels"
+        />{' '}
+        or{' '}
+        <PartLink
+          component="card"
+          part="Card.Segmented"
+        />
+        ). The same handler on a{' '}
+        <PartLink
+          component="card"
+          part="Card.Root"
+        />{' '}
+        passes presses on its body to its switch, never those on its other
+        controls.
+      </li>
     </ul>
     <CodeView code={forwardClickCode} />
     <h3>Arguments and Return</h3>

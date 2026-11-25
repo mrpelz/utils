@@ -199,6 +199,41 @@ export const gridItemRows: readonly PropRow[] = [
   ],
   onSizeChangeRow('by its resize handle'),
   [
+    'expanded',
+    'boolean',
+    undefined,
+    'Whether it’s expanded in place (controlled): shown at its expandedSize instead of its size, which stays as it is (stored), the grid reflowing around it. Edit mode makes it small again, as sizes are chosen there. Without an expandedSize, it never is.',
+  ],
+  [
+    'defaultExpanded',
+    'boolean',
+    code('false'),
+    'Whether it’s expanded initially (uncontrolled).',
+  ],
+  [
+    'onExpandedChange',
+    '(expanded: boolean, details: GridExpandedChangeDetails) => void',
+    undefined,
+    <>
+      Called as it’s expanded or made small again. The reason (
+      <code>details.reason</code>) is <code>edit</code> when edit mode starts,
+      or <code>none</code> when the app asked, through{' '}
+      <PartLink part="useGridItem" />
+      ’s <code>setExpanded</code> (for example a card’s{' '}
+      <PartLink
+        component="card"
+        part="Card.ExpandButton"
+      />
+      ).
+    </>,
+  ],
+  [
+    'expandedSize',
+    'GridSize',
+    undefined,
+    'Its size expanded, snapped and fitted as its size is. It can be smaller than its size; expanding then makes it smaller.',
+  ],
+  [
     'open',
     'boolean',
     undefined,
@@ -227,7 +262,7 @@ export const gridItemRows: readonly PropRow[] = [
     'openSize',
     'GridSize',
     code(union('4x3')),
-    'Its size while it’s open, in the grid’s units, fitted to the screen with a margin.',
+    'Its size while it’s open, in the grid’s units, fitted to the screen with a margin. Given, it opens (see useGridItem’s canOpen), for example from a card’s last row of rows.',
   ],
   [
     'openLabel',
@@ -698,6 +733,30 @@ export const gridUseGridItemRows: readonly PropRow[] = [
     'The sizes it can be, smallest area first.',
   ],
   ['editing', 'boolean', undefined, 'Whether its grid is in edit mode.'],
+  [
+    'expanded',
+    'boolean',
+    undefined,
+    'Whether it’s expanded in place (its item’s expanded).',
+  ],
+  [
+    'expandedSize',
+    'GridSize | undefined',
+    undefined,
+    'Its size expanded (its item’s expandedSize), if it has one.',
+  ],
+  [
+    'setExpanded',
+    '(expanded: boolean) => void',
+    undefined,
+    'Expands it or makes it small again, for example from its card’s corner button.',
+  ],
+  [
+    'canOpen',
+    'boolean',
+    undefined,
+    'Whether it opens above the page: its item’s openSize is given.',
+  ],
   [
     'open',
     'boolean',
