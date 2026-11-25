@@ -31,6 +31,7 @@ import {
   sfFan,
   sfFanFill,
   sfFlameFill,
+  sfGearshape,
   sfHareFill,
   sfHomepodFill,
   sfHouseFill,
@@ -50,11 +51,13 @@ import {
   CardToneContext,
   type Expansion,
   lightsStore,
+  settingsStore,
   type Tile,
   Toned,
   TonedCard,
   useIsLarge,
   useLights,
+  useSettingsTarget,
 } from './cards-shared.js';
 import { SectionHeader } from './grid-shared.js';
 import { moreTiles } from './more-cards.js';
@@ -277,6 +280,65 @@ const DoorsPage: FunctionComponent = () => (
 );
 
 /** The lights' page: a switch per light, a press on its row as on it. */
+/**
+ * A card's settings button (a gear, in its top trailing corner, free of
+ * the grid's edit buttons): to its settings page (`card/settings`); shown
+ * only while editing (`show`, e.g. a card's settings), or either way
+ * (`stay`, in the grid's controls' color while editing).
+ */
+const SettingsButton: FunctionComponent<{
+  name: string;
+  whileEditing: 'show' | 'stay';
+}> = ({ name, whileEditing }) => {
+  const push = usePush();
+  return (
+    <Card.CornerButton
+      aria-label={`${name} Settings`}
+      corner="top-trailing"
+      icon={sfGearshape}
+      whileEditing={whileEditing}
+      onClick={() => {
+        settingsStore.set(name);
+        push('card/settings');
+      }}
+    />
+  );
+};
+
+/** A card's settings (see `SettingsButton`): the app's, made up. */
+const SettingsPage: FunctionComponent = () => {
+  const name = useSettingsTarget();
+  return (
+    <List.Root>
+      <List.Section>
+        <List.Group>
+          <List.Item>
+            <List.Content>
+              <List.Title>Name</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <List.Detail>{name}</List.Detail>
+            </List.Trailing>
+          </List.Item>
+          <List.Item onClick={forwardClick('[role=switch]')}>
+            <List.Content>
+              <List.Title>Show in Home</List.Title>
+            </List.Content>
+            <List.Trailing>
+              <Switch.Root
+                defaultChecked
+                aria-label="Show in Home"
+              >
+                <Switch.Thumb />
+              </Switch.Root>
+            </List.Trailing>
+          </List.Item>
+        </List.Group>
+      </List.Section>
+    </List.Root>
+  );
+};
+
 const LightsPage: FunctionComponent = () => {
   const lights = useLights();
   return (
@@ -465,7 +527,14 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           icon={sfLightbulb}
           name="Floor Lamp"
           tint={cardTints.light}
-        />
+        >
+          {/* (Its settings, editing or not: its color as the card's, lit
+              or off, and the grid's controls' while editing.) */}
+          <SettingsButton
+            name="Floor Lamp"
+            whileEditing="stay"
+          />
+        </Toned.Switch>
       ),
       kind: 'binaryControl',
       name: 'Floor Lamp',
@@ -542,7 +611,13 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
             style: 'unit',
             unit: 'celsius',
           }}
-        />
+        >
+          {/* (Its settings, while editing only.) */}
+          <SettingsButton
+            name="Living Room Temperature"
+            whileEditing="show"
+          />
+        </Toned.Value>
       ),
       kind: 'numericalDisplay',
       name: 'Temperature',
@@ -555,7 +630,13 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           icon={sfHumidityFill}
           name="Humidity"
           value={0.46}
-        />
+        >
+          {/* (Its settings, editing or not.) */}
+          <SettingsButton
+            name="Humidity"
+            whileEditing="stay"
+          />
+        </Toned.Value>
       ),
       kind: 'numericalDisplay',
       name: 'Humidity',
@@ -1065,4 +1146,5 @@ export const cardsPages: SinkPages = {
   card: { Content: CardsApp, isBare: true, title: 'Cards' },
   'card/lights': { Content: LightsPage, title: 'Lights' },
   'card/doors': { Content: DoorsPage, title: 'Doors' },
+  'card/settings': { Content: SettingsPage, title: 'Settings' },
 };

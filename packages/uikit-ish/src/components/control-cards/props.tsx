@@ -1,5 +1,5 @@
 import type { Radio as BaseRadio } from '@base-ui/react/radio';
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 
 import type { CardRootProps } from '../card/main.js';
 import type { GridSize } from '../grid/main.js';
@@ -214,23 +214,76 @@ export type ControlCardButtonProps = ControlCardProps & {
   status?: ReactNode;
 };
 
-export type ControlCardProgressProps = ControlCardProps & {
-  /** Whether it's on (lit, its emphasized icon). */
-  active?: boolean;
+export type ControlCardProgressProps = ControlCardProps &
+  ControlCardFormat & {
+    /** Whether it's on (lit, its emphasized icon). */
+    active?: boolean;
+    /**
+     * Its parts (see `ControlCards.Progress`): e.g. a `ControlCards.Subtitle`,
+     * a `ControlCards.ProgressValue`, a `ControlCards.ProgressBar`; and what's
+     * added (e.g. a corner button).
+     */
+    children?: ReactNode;
+    /**
+     * Its progress's greatest value.
+     * @default 100
+     */
+    max?: number;
+    /**
+     * Its bar's fill's color, and its symbol's while it's on (as a stages
+     * card's).
+     * @default the app's tint
+     */
+    tint?: string;
+    /** Its progress (0 to `max`); none, none under way (its bar empty). */
+    value?: number;
+  };
+
+/**
+ * A progress card's bar (`ControlCards.ProgressBar`): a pill at the card's
+ * bottom, Base UI's progress bar.
+ */
+export type ControlCardProgressBarProps = {
   /**
-   * Its progress's greatest value.
-   * @default 100
+   * What's on it (a `ControlCards.ProgressLabel`, a
+   * `ControlCards.ProgressDetail`), drawn on the well and again on the fill.
    */
-  max?: number;
-  /** Its value's words (e.g. how long it has left). */
-  status?: ReactNode;
+  children?: ReactNode;
+  className?: string;
+};
+
+/** A progress bar's words at its start (`ControlCards.ProgressLabel`). */
+export type ControlCardProgressLabelProps = {
+  /** Its words (e.g. `Rinsing`). */
+  children: ReactNode;
+  className?: string;
+};
+
+/** A progress bar's words at its end (`ControlCards.ProgressDetail`). */
+export type ControlCardProgressDetailProps = {
+  /** Its words (e.g. `40 min left`). */
+  children: ReactNode;
+  className?: string;
+};
+
+/** A progress card's value (`ControlCards.ProgressValue`). */
+export type ControlCardProgressValueProps = {
   /**
-   * Its progress bar's color.
-   * @default the app's tint
+   * Its words, from its formatted value and its value (see the card's
+   * `format`); none, its formatted value.
    */
-  tint?: string;
-  /** Its progress (0 to `max`); none (`undefined`), no bar. */
-  value?: number;
+  children?: (formattedValue: string, value: number) => ReactNode;
+  className?: string;
+};
+
+/**
+ * A card's subtitle (`ControlCards.Subtitle`): more words under its title,
+ * where there's room for them.
+ */
+export type ControlCardSubtitleProps = {
+  /** Its words (e.g. `Cotton, 40°`). */
+  children: ReactNode;
+  className?: string;
 };
 
 export type ControlCardTrendProps = {
@@ -241,52 +294,138 @@ export type ControlCardTrendProps = {
   angle: number;
 };
 
-/** A channel of a light, or a bar (see `ControlCards.Channels`). */
-export type ControlCardChannel = {
-  /** Its name, short (e.g. `R`), shown on its bar. */
-  label: string;
-  /** Its accessible name (e.g. `Red`). */
-  name: string;
-  /** Its bar's color. */
-  tint: string;
+/** A card's channels (`ControlCards.Channels`): its sliders, stacked. */
+export type ControlCardChannelsProps = {
+  /** Its channels (`ControlCards.Channel`s), in order. */
+  children: ReactNode;
+  className?: string;
 };
 
-export type ControlCardChannelsProps = {
-  /** Its bars, in order. */
-  channels: readonly ControlCardChannel[];
+/**
+ * A channel (`ControlCards.Channel`): a slider in a well of its own. An
+ * amount (`tint`: e.g. a light's red, black to red), or a scale (`colors`:
+ * e.g. a color temperature, warm to cold).
+ */
+export type ControlCardChannelProps = ControlCardFormat & {
   className?: string;
-  /** As a bar's value changes: its index, its value (0 to 1). */
-  onValueChange?: (index: number, value: number) => void;
-  /** Each bar's value (0 to 1), by index. */
-  value: readonly number[];
+  /**
+   * Its colors from its least value to its greatest (evenly spread; two or
+   * more): a scale, shown whole on its well, its thumb the color at its
+   * value (e.g. a color temperature's, warm to cold). Instead of `tint`.
+   */
+  colors?: readonly string[];
+  /** Its value at first (uncontrolled). */
+  defaultValue?: number;
+  /** Whether it takes no input. */
+  disabled?: boolean;
+  /**
+   * Its value's words, from its formatted value and its value (e.g.
+   * `3800 K`); none, its formatted value.
+   */
+  getValueText?: (formattedValue: string, value: number) => string;
+  /**
+   * Its greatest value.
+   * @default 1
+   */
+  max?: number;
+  /**
+   * Its least value.
+   * @default 0
+   */
+  min?: number;
+  /** Its name (e.g. `Red`): on its well, and its slider's name. */
+  name: string;
+  /** As its value changes. */
+  onValueChange?: (value: number) => void;
+  /**
+   * How far a step goes.
+   * @default 1/100 of its range
+   */
+  step?: number;
+  /**
+   * An amount's color at its greatest value (e.g. a light's red): its fill,
+   * its thumb that color mixed on black by its share (as light adds up).
+   * @default the app's tint
+   */
+  tint?: string;
+  /** Its value (controlled). */
+  value?: number;
 };
 
 export type ControlCardLightProps = ControlCardProps &
   ControlCardFormat & {
-    /** Its channels (e.g. red, green, blue): bars, shown large. */
-    channels: readonly ControlCardChannel[];
     /** Whether it's on (controlled). */
     checked?: boolean;
+    /**
+     * Its parts (see `ControlCards.Light`): its `ControlCards.Channels`,
+     * shown large; and what's added (e.g. a corner button).
+     */
+    children?: ReactNode;
     /**
      * Whether it's on at first (uncontrolled).
      * @default true
      */
     defaultChecked?: boolean;
-    /** Its channels' values at first (uncontrolled; 0 to 1 each). */
-    defaultValue?: readonly number[];
     /**
-     * Its value's words while it's off (on: its brightness, its strongest
-     * channel's).
-     * @default 'Off'
+     * Its value's text (its value line), the app's: from its brightness
+     * formatted (see `format`; its strongest amount channel's share), its
+     * brightness, and whether it's on (see `states`).
+     * @default on, its brightness (“60%”); off, its off word (“Off”)
      */
-    offLabel?: ReactNode;
+    getValueText?: (
+      formattedValue: string,
+      value: number,
+      details: ControlCardValueTextDetails,
+    ) => string;
     /** As it's switched. */
     onCheckedChange?: (checked: boolean) => void;
-    /** As a channel's value changes: all of them (0 to 1 each). */
-    onValueChange?: (value: readonly number[]) => void;
-    /** Its channels' values (controlled; 0 to 1 each). */
-    value?: readonly number[];
+    /**
+     * Its value's words, on and off (see `getValueText`).
+     * @default ['On', 'Off']
+     */
+    states?: ControlCardTextStates;
   };
+
+/** A stages card's stage (`ControlCards.Stage`). */
+export type ControlCardStageProps = Omit<ComponentProps<'li'>, 'children'> & {
+  /** Its words, under its dot. */
+  children: ReactNode;
+  /** What it is (its card's `value` names the current one). */
+  value: string;
+};
+
+/**
+ * A stages card (`ControlCards.Stages`): a run of stages in order (e.g. a
+ * washer's), shown, not chosen.
+ */
+export type ControlCardStagesProps = ControlCardProps & {
+  /** Whether it's on (lit, its emphasized icon), e.g. while it runs. */
+  active?: boolean;
+  /**
+   * Its parts (see `ControlCards.Stages`): e.g. a `ControlCards.Subtitle`, a
+   * `ControlCards.StageList`; and what's added (e.g. a corner button).
+   */
+  children: ReactNode;
+  /**
+   * The color of its current stage, and of those done.
+   * @default the app's tint
+   */
+  tint?: string;
+  /**
+   * Its current stage's value: those before it done, those after to come;
+   * none, all to come.
+   */
+  value?: string;
+};
+
+/** A stages card's stages (`ControlCards.StageList`), an ordered list. */
+export type ControlCardStageListProps = Omit<
+  ComponentProps<'ol'>,
+  'children'
+> & {
+  /** Its stages (`ControlCards.Stage`s), in order. */
+  children: ReactNode;
+};
 
 /** A segmented card's option (`ControlCards.SegmentedItem`). */
 export type ControlCardSegmentedItemProps = Omit<

@@ -64,7 +64,8 @@ export type {
 //
 // Also:
 // - In edit mode (its item's grid's), its content is inert (presses go to
-//   the grid: held, it's dragged) and veiled, so the grid's corner symbols
+//   the grid: held, it's dragged; but its corner buttons shown then, over
+//   it, see `CornerButton`) and veiled, so the grid's corner symbols
 //   read on it. The veil lifts (and those symbols fade with it) while a
 //   tile's dragged or resized, on every card of the grid, so they show
 //   their content as the grid changes; a resized tile's outline shows as
@@ -114,6 +115,12 @@ type CardBlend = {
  */
 export const CardBlendScope = createContext<CardBlend | undefined>(undefined);
 
+/**
+ * Its layer over its veil while editing (see `Root`): where its corner
+ * buttons shown then are (see `CornerButton`), outside its inert frame.
+ */
+const CardEditLayer = createContext<HTMLElement | null>(null);
+
 /** The tile's shape (its item's effective size): wide, horizontal. */
 export const useCardOrientation = (): CardOrientation => {
   const item = useGridItem();
@@ -129,7 +136,9 @@ export const useCardOrientation = (): CardOrientation => {
  * `supportedSizes`: a binary display or control (a state, a switch), a
  * numerical display (a value) or control (a slider: never square, so it
  * has a direction), a choice of a few (segments: across a row, taller,
- * upright, or 1x1 opening to choose), a summary (rows: never 1x1).
+ * upright, or 1x1 opening to choose), a summary (rows: never 1x1), a
+ * progress (a pill), a run of stages (along a line: never 1x1, too narrow
+ * for them).
  */
 export const cardSizes: CardSizes = {
   binaryControl: ['1x1', '2x1'],
@@ -150,6 +159,8 @@ export const cardSizes: CardSizes = {
   ],
   numericalControl: ['2x1', '3x1', '4x1', '1x2', '1x3'],
   numericalDisplay: ['1x1', '2x1', '2x2'],
+  progressDisplay: ['1x1', '2x1', '3x1', '4x1', '2x2'],
+  stagesDisplay: ['2x1', '3x1', '4x1', '2x2', '4x2'],
   summaryDisplay: ['2x1', '2x2', '3x2', '4x1', '4x2', '3x3', '4x3', '4x4'],
 };
 
@@ -315,10 +326,22 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
     // (A layer its parts draw their copies in, registered by what fills
     // it, see `CardBlendScope`.)
     const [blendLayer, setBlendLayer] = useState<HTMLElement | null>(null);
+    // (Editing: a layer over its veil, for its corner buttons shown then;
+    // see `CornerButton`.)
+    const [editLayer, setEditLayer] = useState<HTMLElement | null>(null);
     const blend = useMemo(
       () => ({ layer: blendLayer, setLayer: setBlendLayer }),
       [blendLayer],
     );
+    // (Editing: not pressed, its presses the grid's.)
+    const flashed =
+      momentary && onClick
+        ? (event: MouseEvent<HTMLDivElement>) => {
+            flash();
+            onClick(event);
+          }
+        : onClick;
+    const pressed = isEditing ? undefined : flashed;
     return useRender({
       defaultTagName: 'div',
       props: {
@@ -330,9 +353,22 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
             {/* (Its colors known (its glass, lit or not): its parts not
                 sampled.) */}
             <CardBlendScope.Provider value={blend}>
-              <div className="uikit-card-frame">
-                <div className="uikit-card-layout">{children}</div>
-              </div>
+              <CardEditLayer.Provider value={isEditing ? editLayer : null}>
+                {/* (Editing: what's in it inert, see the top; its corner
+                    buttons shown then over it, in its edit layer.) */}
+                <div
+                  className="uikit-card-frame"
+                  inert={isEditing || undefined}
+                >
+                  <div className="uikit-card-layout">{children}</div>
+                </div>
+                {isEditing ? (
+                  <div
+                    ref={setEditLayer}
+                    className="uikit-card-edit-layer"
+                  />
+                ) : null}
+              </CardEditLayer.Provider>
             </CardBlendScope.Provider>
           </ColorSchemeScope>
         ),
@@ -351,14 +387,7 @@ const Root = forwardRef<HTMLDivElement, CardRootProps>(
         // (Pressed as a whole: its feedback, see style.css.)
         'data-pressable': onClick ? '' : undefined,
         'data-editing': isEditing ? '' : undefined,
-        inert: isEditing || undefined,
-        onClick:
-          momentary && onClick
-            ? (event: MouseEvent<HTMLDivElement>) => {
-                flash();
-                onClick(event);
-              }
-            : onClick,
+        onClick: pressed,
         style: withStyle(colorSchemeStyle(scheme), style),
       },
       ref,
@@ -468,20 +497,33 @@ const Value = forwardRef<HTMLSpanElement, CardValueProps>(
 
 /**
  * A button in its corner (see `Grid.CornerButton`): shown while its grid
- * isn't editing (faded out, inert, while it is; and as `visible` says). A
+ * isn't editing (faded out, inert, while it is), or while it is too, or
+ * then only (`whileEditing`: over its veil then); and as `visible` says. A
  * press on it is its own, not the card's (e.g. not toggling a switch in
  * it, see `forwardClick`).
  */
 const CornerButton = forwardRef<HTMLButtonElement, CardCornerButtonProps>(
   (
-    { className, corner, icon, mirrored, onClick, visible = true, ...props },
+    {
+      className,
+      corner,
+      icon,
+      mirrored,
+      onClick,
+      visible = true,
+      whileEditing = 'hide',
+      ...props
+    },
     ref,
   ) => {
-    const isEditing = useGridItem()?.editing === true;
-    const isShown = visible && !isEditing;
     // (Over a slider's fill (see `CardBlendScope`): pressed, but
     // drawn by its copies, one on its glass, under the fill, one in it.)
     const blendLayer = useContext(CardBlendScope)?.layer ?? null;
+    // (Shown while editing (see `whileEditing`): over its card's veil, in
+    // its edit layer, outside its inert frame.)
+    const editLayer = useContext(CardEditLayer);
+    const isOnEditLayer =
+      editLayer !== null && visible && whileEditing !== 'hide';
     const copy = (
       <Grid.CornerButton
         aria-hidden
@@ -492,25 +534,30 @@ const CornerButton = forwardRef<HTMLButtonElement, CardCornerButtonProps>(
         icon={icon}
         mirrored={mirrored}
         render={<span />}
-        visible={isShown}
+        visible={visible}
+        whileEditing={whileEditing}
+      />
+    );
+    const button = (
+      <Grid.CornerButton
+        ref={ref}
+        className={cn('uikit-card-corner-button', className)}
+        corner={corner}
+        data-card-part="corner-button"
+        icon={icon}
+        mirrored={mirrored}
+        visible={visible}
+        whileEditing={whileEditing}
+        {...props}
+        onClick={(event: MouseEvent<HTMLButtonElement>) => {
+          event.stopPropagation();
+          onClick?.(event);
+        }}
       />
     );
     return (
       <>
-        <Grid.CornerButton
-          ref={ref}
-          className={cn('uikit-card-corner-button', className)}
-          corner={corner}
-          data-card-part="corner-button"
-          icon={icon}
-          mirrored={mirrored}
-          visible={isShown}
-          {...props}
-          onClick={(event: MouseEvent<HTMLButtonElement>) => {
-            event.stopPropagation();
-            onClick?.(event);
-          }}
-        />
+        {isOnEditLayer ? createPortal(button, editLayer) : button}
         {blendLayer ? copy : null}
         {blendLayer ? createPortal(copy, blendLayer) : null}
       </>

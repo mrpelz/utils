@@ -30,6 +30,7 @@ export const getPropOptionsCornerButton = (addLog: AddLog) => ({
   ...gridCornerButton(addLog),
   'aria-label': ['Living Room details', undefined] as const,
   visible: [undefined, false] as const,
+  whileEditing: [undefined, 'show', 'stay'] as const,
 });
 
 export const propOptionsSymbol = {

@@ -112,12 +112,25 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
         on its symbol.
       </li>
       <li>
-        <PartLink part="ControlCards.Progress" /> shows a{' '}
-        <PartLink
-          component="progress"
-          part="Progress.Root"
-        />{' '}
-        bar between its top row and its title, while there’s a value.
+        <PartLink part="ControlCards.Progress" /> is composed: its symbol and
+        title are its own, and the app puts in what it shows. A{' '}
+        <PartLink part="ControlCards.ProgressBar" /> is a pill at its bottom: a
+        well like a list card’s, filling in its tint. It’s Base UI’s progress
+        bar, so it’s announced as one. Its{' '}
+        <PartLink part="ControlCards.ProgressLabel" /> and{' '}
+        <PartLink part="ControlCards.ProgressDetail" /> are drawn twice, and the
+        copy on the fill is clipped to it, so they read on both parts without
+        laying anything out anew. On the fill they take dark or light text,
+        whichever has more perceived contrast with the tint (APCA, not WCAG’s
+        ratio, which picks dark text on mid blues), read once and again when the
+        tint or the color scheme changes. The detail there is that text color,
+        less strong, not the glass’s secondary gray.
+      </li>
+      <li>
+        A <PartLink part="ControlCards.Subtitle" /> and a{' '}
+        <PartLink part="ControlCards.ProgressValue" /> each have a row of their
+        own under the title, so a large tile can show both. A tile a row tall
+        has no room for them beside the bar, so they don’t show there.
       </li>
     </ul>
     <CodeView code={switchCode} />
@@ -200,19 +213,36 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
     </Heading>
     <ul>
       <li>
-        <PartLink part="ControlCards.Light" /> has a switch and a value for each
-        channel. Its symbol is colored by the channels, mixed by their shares (
-        <code>color-mix</code> in OKLab, two at a time). Its value is the
-        strongest channel’s.
+        <PartLink part="ControlCards.Light" /> has a switch and a value, and its
+        channels are composed in it: a <PartLink part="ControlCards.Channels" />{' '}
+        of <PartLink part="ControlCards.Channel" />
+        s, each controlled or uncontrolled on its own, as Base UI’s sliders are.
+        Each channel tells the light, through context, the light it gives.
       </li>
       <li>
-        In a large tile, at least two by two or open above the page, it shows{' '}
-        <PartLink part="ControlCards.Channels" />, with a slider for each
-        channel. In a small tile, a press on the card toggles its switch.
+        Its symbol’s color adds up its amount channels in linear light, as light
+        does, then tints them by any scale channel, and shows the result at full
+        strength. Its value is its strongest amount channel’s share.
       </li>
       <li>
-        In a tile taller than one row, the channels stand upright side by side.
-        Otherwise they’re stacked across, with each short name beside its bar.
+        In a large tile, at least two by two or open above the page, its
+        channels show. In a small tile they stay mounted but hidden. A press on
+        the card’s body toggles its switch, at any size, but not one on its
+        channels. Its channels’ presses are their own: the card shows no press
+        tint for them (<code>data-card-own-press</code>, see Card).
+      </li>
+      <li>
+        A channel’s thumb is placed by Base UI, kept inside its well at both
+        ends. Its fill and its labels are its own: the labels are placed after
+        each change, and each takes dark or light text by what’s under its
+        center, by the same contrast as a progress bar’s. The colors behind that
+        are read once, and again when they or the color scheme change; moving
+        the thumb only compares numbers.
+      </li>
+      <li>
+        A press on a channel is held back as a slider card’s is, until it’s a
+        drag along the well; a touch across it scrolls the page, the value
+        untouched. Once it’s dragged, its touch doesn’t scroll the page.
       </li>
     </ul>
 
@@ -347,12 +377,14 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
         <code>useGridItem</code>), and its icons.
       </li>
       <li>
-        <strong>From the controls:</strong> Switch, Slider, Progress, List,
-        Badge and Symbol.
+        <strong>From the controls:</strong> Switch, Slider, List, Badge and
+        Symbol. From Base UI directly: its progress bar (a progress card’s bar),
+        its slider (a channel) and its radio group (a segmented card).
       </li>
       <li>
-        <strong>From Glass and Settings:</strong> a fill’s tone, and the color
-        scheme it’s read again for.
+        <strong>From Glass and Settings:</strong> the color scheme of what’s
+        drawn on a fill, and the color scheme its color is read again for. From
+        the color picker, its CSS color parser.
       </li>
     </ul>
   </>

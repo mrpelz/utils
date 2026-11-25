@@ -417,6 +417,12 @@ export const gridCornerButtonRows: readonly PropRow[] = [
     'Whether it’s shown. Hidden, it fades out and can’t be pressed or focused.',
   ],
   [
+    'whileEditing',
+    union('hide', 'show', 'stay'),
+    code(union('stay')),
+    'In edit mode: hidden then (hide), shown only then (show, for example a card’s settings), or shown either way (stay). Shown in edit mode, it’s in the color of the grid’s own buttons. A tap on it is its own, and a drag from it moves its cell, as from the remove button.',
+  ],
+  [
     'mirrored',
     'boolean',
     code('false'),
@@ -683,7 +689,7 @@ export const gridUseGridItemRows: readonly PropRow[] = [
     'isFitted',
     'boolean',
     undefined,
-    'Whether it’s shown smaller than requested, to fit the columns.',
+    'Whether it’s shown smaller than requested, to fit the columns or its area. Whether the area itself was narrowed is useGridArea’s isFitted.',
   ],
   [
     'supportedSizes',
@@ -732,6 +738,12 @@ export const gridUseGridAreaRows: readonly PropRow[] = [
     'Its size as laid out: the room its item takes, snapped, fitted to the columns, at least its tile’s.',
   ],
   ['requested', 'GridSize', undefined, 'Its size as the user chose it.'],
+  [
+    'isFitted',
+    'boolean',
+    undefined,
+    'Whether it’s narrower than requested, to fit the columns. Whether its tile was narrowed within it is the item’s isFitted.',
+  ],
   [
     'supportedSizes',
     'GridSize[]',

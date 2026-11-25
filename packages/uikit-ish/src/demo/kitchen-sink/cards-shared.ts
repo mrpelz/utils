@@ -77,6 +77,30 @@ export const lightsStore = (() => {
 export const useLights = (): Lights =>
   useSyncExternalStore(lightsStore.subscribe, lightsStore.get);
 
+/**
+ * The card whose settings are shown (see `SettingsButton`): its name, in a
+ * store of the page's, as its settings page is another page.
+ */
+export const settingsStore = (() => {
+  let name = '';
+  const listeners = new Set<() => void>();
+  return {
+    get: () => name,
+    set: (next: string) => {
+      name = next;
+      for (const listener of listeners) listener();
+    },
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+  };
+})();
+export const useSettingsTarget = (): string =>
+  useSyncExternalStore(settingsStore.subscribe, settingsStore.get);
+
 /** A size's columns and rows (a full width's columns: as many as fit, 4). */
 export const spanOf = (size: GridSize): readonly [number, number] => {
   const [columns = '1', rows = '1'] = size.split('x');
@@ -128,6 +152,7 @@ export const Toned = {
   Progress: toned(ControlCards.Progress),
   Segmented: toned(ControlCards.Segmented),
   Slider: toned(ControlCards.Slider),
+  Stages: toned(ControlCards.Stages),
   State: toned(ControlCards.State),
   Switch: toned(ControlCards.Switch),
   Value: toned(ControlCards.Value),

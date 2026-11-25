@@ -55,6 +55,18 @@ const cardRows: readonly PropRow[] = [
   ],
 ];
 
+/** A composed card's rows: its parts as its children, then its root's. */
+const composedCardRows = (parts: PropRow[3]): readonly PropRow[] => [
+  ...cardRows.filter(([name]) => name !== 'children'),
+  ['children', 'ReactNode', undefined, parts],
+];
+
+/** A plain part's class and element. */
+const plainRows = (element: string): readonly PropRow[] => [
+  ['className', 'string', undefined, 'Its class, beside its own.'],
+  ['ref', `Ref<${element}>`, undefined, 'Its element.'],
+];
+
 /** A number's format and locale. */
 const formatRows = (what: string): readonly PropRow[] => [
   [
@@ -268,7 +280,7 @@ export const controlCardsProgressRows: readonly PropRow[] = [
     'value',
     'number',
     undefined,
-    'Its progress, 0 to max. Without it, there’s no bar: for example a garage door at rest.',
+    'Its progress, 0 to max. Without it, nothing is under way: its bar is empty, and it has no value.',
   ],
   ['max', 'number', code('100'), 'Its progress’s greatest value.'],
   [
@@ -278,52 +290,160 @@ export const controlCardsProgressRows: readonly PropRow[] = [
     'Whether it’s on: lit, its symbol emphasized.',
   ],
   [
-    'status',
-    'ReactNode',
-    undefined,
-    'Its value’s words, for example how long it has left.',
+    'tint',
+    'string (a CSS color)',
+    'the app’s tint',
+    'The color its bar fills in, and its symbol’s while it’s on, as a stages card’s.',
   ],
-  ['tint', 'string (a CSS color)', 'the app’s tint', 'Its bar’s color.'],
-  ...cardRows,
+  [
+    'format',
+    'Intl.NumberFormatOptions',
+    code('{ maximumFractionDigits: 0, style: "percent" }'),
+    'How its value is shown: as a percentage, its share of max.',
+  ],
+  ['locale', 'Intl.LocalesArgument', 'the document’s language', 'Its locale.'],
+  ...composedCardRows(
+    <>
+      Its parts, as the app shows them: a{' '}
+      <PartLink part="ControlCards.Subtitle" />, a{' '}
+      <PartLink part="ControlCards.ProgressValue" />, a{' '}
+      <PartLink part="ControlCards.ProgressBar" />; and what’s added, for
+      example a corner button.
+    </>,
+  ),
 ];
 
-/** A channel's shape (see `ControlCards.Channels`). */
-const channelsRow: PropRow = [
-  'channels',
-  'readonly { label: string; name: string; tint: string }[]',
-  undefined,
-  'Its channels: each a short label shown on its bar, an accessible name and its bar’s color.',
+export const controlCardsProgressBarRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      What’s on it: a <PartLink part="ControlCards.ProgressLabel" /> and a{' '}
+      <PartLink part="ControlCards.ProgressDetail" />.
+    </>,
+  ],
+  ...plainRows('HTMLDivElement'),
+];
+
+export const controlCardsProgressLabelRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words at the bar’s start, for example its phase.',
+  ],
+  ...plainRows('HTMLSpanElement'),
+];
+
+export const controlCardsProgressDetailRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words at the bar’s end, quieter, for example how long it has left.',
+  ],
+  ...plainRows('HTMLSpanElement'),
+];
+
+export const controlCardsProgressValueRows: readonly PropRow[] = [
+  [
+    'children',
+    '(formattedValue: string, value: number) => ReactNode',
+    'its formatted value',
+    'Its words, from its card’s value formatted and the value itself.',
+  ],
+  ...plainRows('HTMLSpanElement'),
+];
+
+export const controlCardsSubtitleRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    'Its words, for example a program’s name or when it ends.',
+  ],
+  ...plainRows('HTMLSpanElement'),
+];
+
+export const controlCardsStagesRows: readonly PropRow[] = [
+  [
+    'value',
+    'string',
+    undefined,
+    'Its current stage’s value. Those before it are done, those after it to come. Without it, all are to come.',
+  ],
+  [
+    'active',
+    'boolean',
+    undefined,
+    'Whether it’s on: lit, its symbol emphasized. For example while a program runs.',
+  ],
+  [
+    'tint',
+    'string (a CSS color)',
+    'the app’s tint',
+    'The color of its current stage, of those done and of its symbol.',
+  ],
+  ...composedCardRows(
+    <>
+      Its parts: a <PartLink part="ControlCards.Subtitle" /> and a{' '}
+      <PartLink part="ControlCards.StageList" />; and what’s added, for example
+      a corner button.
+    </>,
+  ),
+];
+
+export const controlCardsStageListRows: readonly PropRow[] = [
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its stages, each a <PartLink part="ControlCards.Stage" />, in order.
+    </>,
+  ],
+  [
+    '…',
+    'ComponentProps<"ol">',
+    undefined,
+    'Its other props are its list element’s.',
+  ],
+  ...plainRows('HTMLOListElement'),
+];
+
+export const controlCardsStageRows: readonly PropRow[] = [
+  [
+    'value',
+    'string',
+    undefined,
+    'What it is. Its card’s value names the current stage.',
+  ],
+  ['children', 'ReactNode', undefined, 'Its words, under its dot.'],
+  ['className', 'string', undefined, 'Classes added to its element.'],
 ];
 
 export const controlCardsLightRows: readonly PropRow[] = [
-  channelsRow,
-  [
-    'value',
-    'readonly number[]',
-    undefined,
-    'Its channels’ values, 0 to 1 each (controlled).',
-  ],
-  [
-    'defaultValue',
-    'readonly number[]',
-    'all at 1',
-    'Its channels’ values at first (uncontrolled).',
-  ],
-  [
-    'onValueChange',
-    '(value: readonly number[]) => void',
-    undefined,
-    'As a channel changes: all of them.',
-  ],
   ...checkedRows('true'),
   [
-    'offLabel',
-    'ReactNode',
-    'Off',
-    'Its value’s words while it’s off. On, its value is its brightness: its strongest channel, formatted.',
+    'getValueText',
+    '(formattedValue: string, value: number, details: { checked, states }) => string',
+    'on, its brightness; off, its off word',
+    'Its value’s text: the app’s wording, from its brightness formatted (its strongest amount channel’s share), the brightness itself, and whether it’s on. For example “On · 60%” and “Off · 60%”, as a slider card says by default.',
+  ],
+  [
+    'states',
+    'readonly [on: string, off: string]',
+    'On and Off',
+    'Its value’s words, on and off, for getValueText; by default, its off word shows while it’s off.',
   ],
   ...formatRows('its brightness'),
-  ...cardRows,
+  ...composedCardRows(
+    <>
+      Its parts: its <PartLink part="ControlCards.Channels" />, shown while it’s
+      large; and what’s added, for example a corner button.
+    </>,
+  ),
 ];
 
 export const controlCardsListRows: readonly PropRow[] = [
@@ -486,21 +606,62 @@ export const controlCardsSegmentedItemRows: readonly PropRow[] = [
 ];
 
 export const controlCardsChannelsRows: readonly PropRow[] = [
-  channelsRow,
   [
-    'value',
-    'readonly number[]',
+    'children',
+    'ReactNode',
     undefined,
-    'Each bar’s value, 0 to 1, by index.',
+    <>
+      Its channels, each a <PartLink part="ControlCards.Channel" />, in order.
+    </>,
   ],
+  ...plainRows('HTMLDivElement'),
+];
+
+export const controlCardsChannelRows: readonly PropRow[] = [
+  [
+    'name',
+    'string',
+    undefined,
+    'Its name: on its well, and its slider’s accessible name.',
+  ],
+  [
+    'tint',
+    'string (a CSS color)',
+    'the app’s tint',
+    'An amount’s color at its greatest value. Its fill is this color, its thumb this color mixed on black by its share.',
+  ],
+  [
+    'colors',
+    'readonly string[]',
+    undefined,
+    'A scale instead of an amount: its colors from its least value to its greatest, evenly spread, two or more. Its well shows them, its thumb the color at its value. For example a color temperature, warm to cool.',
+  ],
+  ['value', 'number', undefined, 'Its value (controlled).'],
+  ['defaultValue', 'number', 'its min', 'Its value at first (uncontrolled).'],
   [
     'onValueChange',
-    '(index: number, value: number) => void',
+    '(value: number) => void',
     undefined,
-    'As a bar’s value changes: its index and its value.',
+    'As its value changes.',
   ],
-  ['className', 'string', undefined, 'Its class, beside its own.'],
-  ['ref', 'Ref<HTMLDivElement>', undefined, 'Its element.'],
+  ['min', 'number', code('0'), 'Its least value.'],
+  ['max', 'number', code('1'), 'Its greatest value.'],
+  ['step', 'number', 'a hundredth of its range', 'How far a step goes.'],
+  [
+    'getValueText',
+    '(formattedValue: string, value: number) => string',
+    undefined,
+    'Its value’s words, on its well and for assistive technology, for example “3800 K”.',
+  ],
+  [
+    'format',
+    'Intl.NumberFormatOptions',
+    code('{ maximumFractionDigits: 0, style: "percent" }'),
+    'How its value is shown: as a percentage, its share of its range.',
+  ],
+  ['locale', 'Intl.LocalesArgument', 'the document’s language', 'Its locale.'],
+  ['disabled', 'boolean', undefined, 'Whether it takes no input.'],
+  ...plainRows('HTMLDivElement'),
 ];
 
 export const controlCardsTrendRows: readonly PropRow[] = [

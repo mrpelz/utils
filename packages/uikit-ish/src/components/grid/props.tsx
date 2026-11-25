@@ -358,6 +358,13 @@ export type GridSpawnProps = useRender.ComponentProps<'button'> &
 export type GridCorner =
   'bottom-leading' | 'bottom-trailing' | 'top-leading' | 'top-trailing';
 
+/**
+ * A corner button in edit mode (see `GridCornerButtonProps.whileEditing`,
+ * as List's rows' `whileEditing`): `hide` (only while not editing), `show`
+ * (only while editing, e.g. a card's settings), or `stay` (both).
+ */
+export type GridWhileEditing = 'hide' | 'show' | 'stay';
+
 export type GridCornerButtonProps = useRender.ComponentProps<'button'> & {
   /**
    * The corner it's in: a 44px target there, its icon 16.5px in from both
@@ -380,10 +387,18 @@ export type GridCornerButtonProps = useRender.ComponentProps<'button'> & {
   /**
    * Whether it's shown: hidden, it fades out (by its color) and can't be
    * pressed or focused. The grid's own show while it's editing; a card's
-   * while it isn't (see `Card.CornerButton`).
+   * while it isn't, by default (see `whileEditing`, `Card.CornerButton`).
    * @default true
    */
   visible?: boolean;
+  /**
+   * In edit mode: shown only then (`show`, e.g. a card's settings), hidden
+   * then (`hide`), or either way (`stay`). Shown while editing, it's in the
+   * grid's controls' color, over a card's veil, and a press on it is its
+   * own (a drag from it moves its cell, as from the remove button).
+   * @default 'stay'
+   */
+  whileEditing?: GridWhileEditing;
 };
 
 export type GridResizeHandleProps = useRender.ComponentProps<'button'>;
@@ -444,7 +459,10 @@ export type GridSizeFit = {
 export type GridItemState = {
   /** Whether its grid is editing. */
   editing: boolean;
-  /** Whether it's narrower than snapped, to fit the columns. */
+  /**
+   * Whether it's narrower than snapped, to fit the columns or its area (its
+   * area's own fit: `GridAreaState.isFitted`).
+   */
   isFitted: boolean;
   /** Whether it's open above the page (see `GridItemProps.open`). */
   open: boolean;
@@ -480,6 +498,11 @@ export type GridItemState = {
 
 /** An item's area and its state (see `useGridArea`). */
 export type GridAreaState = {
+  /**
+   * Whether it's narrower than chosen (`requested`), to fit the columns
+   * (its tile's own fit: `GridItemState.isFitted`).
+   */
+  isFitted: boolean;
   /** Whether its tile can be moved within it. */
   movable: boolean;
   /** Where its tile sits in it. */

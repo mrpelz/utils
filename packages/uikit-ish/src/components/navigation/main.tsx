@@ -703,9 +703,15 @@ const Stack = forwardRef<HTMLDivElement, NavigationStackProps>(
       );
       setLastShown(shown);
       setLingering([...kept, ...dropped]);
-      if (returning.length > 0) {
+      // (Anew only if pushed again (in the stack's keys): not one back only
+      // to leave (popped: gone for a render before its transition starts,
+      // see `changeKeys`), which is the page it was, kept.)
+      const pushedAgain = returning.filter((page) =>
+        keys.includes(String(page.key)),
+      );
+      if (pushedAgain.length > 0) {
         const next = new Map(generations);
-        for (const page of returning) {
+        for (const page of pushedAgain) {
           const key = String(page.key);
           next.set(key, (next.get(key) ?? 0) + 1);
         }

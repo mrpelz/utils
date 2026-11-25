@@ -1,116 +1,199 @@
 /* ControlCards (see main.tsx): what its cards add to Card's parts. */
+
+/* (A channel's fill's ends (see below): its part of the fill beyond its
+   share, 18px (half its thumb) between them, none at its least, 36px at
+   its greatest; registered to slide there, not inherited.) */
+@property --uikit-control-cards-channel-ends {
+  inherits: false;
+  initial-value: 18px;
+  syntax: '<length>';
+}
+
 @layer uikit-ish {
-  /* A card's bars (`ControlCards.Channels`): between its top row and its
-     title, side by side upright or stacked across, each rounded, its fill
-     its tint, its name on it upright, beside it across (no knob: the bar
-     is the control). */
+  /* A fill's tint probe (see main.tsx): unseen, its color the fill's. */
+  .uikit-control-cards-tint-probe {
+    color: var(--uikit-slider-tint);
+  }
+
+  /* A card's subtitle (`ControlCards.Subtitle`): a row of its own under its
+     title (its look below). */
+  .uikit-card-layout:where(:has(> .uikit-control-cards-subtitle)) {
+    grid-template:
+      'symbol control' auto
+      '. .' 1fr
+      'title title' auto
+      'subtitle subtitle' auto
+      'value value' auto / 1fr auto;
+  }
+
+  /* A card's channels (`ControlCards.Channels`): at its bottom, 6px in from
+     its edges (as a list card's well), stacked, whatever its width. */
   .uikit-control-cards-channels {
     display: grid;
     min-width: 0;
-    min-height: 0;
-    align-self: stretch;
+    margin: 10px -8px -6px;
     gap: 6px;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
     grid-column: 1 / -1;
-    grid-row: 2;
-    margin-block: 8px;
+    grid-row: -1;
 
-    /* (Stacked across, one row's room: too thin for a name on each, so
-       each name beside its bar, at its leading end, centered on it; the
-       names one column, the bars starting together, see below.) */
-    &[data-orientation='horizontal'] {
-      column-gap: 8px;
-      grid-auto-flow: row;
-      grid-auto-rows: minmax(0, 1fr);
-      grid-template-columns: auto minmax(0, 1fr);
+    &[hidden] {
+      display: none;
     }
+  }
 
-    .uikit-slider-root {
-      position: relative;
-      display: grid;
-      width: auto;
-      min-width: 0;
-      height: auto;
-      min-height: 0;
-      place-self: stretch stretch;
-    }
+  /* A channel (`ControlCards.Channel`): a pill-shaped well, its thumb round
+     (a white ring), inside it at either end, filled with the light it gives
+     (see main.tsx). An amount's fill in its tint up to its thumb's center,
+     all the way at its ends (sliding there: its ends' part, below); a
+     scale's colors along it. Its labels placed by main.tsx (sliding, once
+     placed), each in its color scheme (on its fill, or a scale's color). */
+  .uikit-control-cards-channel {
+    min-width: 0;
 
-    .uikit-slider-control {
-      position: absolute;
-      min-width: 0;
-      min-height: 0;
-      inset: 0;
-    }
+    /* (Dragged, its words not selected, nor a touch's menu called.) */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 
-    /* (Each a well set into the card's glass (see Card), its fill
-       translucent, lit along its top.) */
-    .uikit-slider-track {
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
-      border-radius: 12px;
-      background-color: var(--uikit-card-well);
-      box-shadow: var(--uikit-card-well-shadow);
-    }
+  .uikit-control-cards-channel-well {
+    position: relative;
+    overflow: clip;
+    height: 36px;
+    border-radius: 18px;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    font-size: var(--font-ui-footnote-size, 13px);
+    font-variation-settings: 'wght' 590;
+    font-weight: 600;
 
-    .uikit-slider-indicator {
-      border-radius: 0;
-      background-color: color-mix(
-        in srgb,
-        var(--uikit-slider-tint) 70%,
-        transparent
-      );
+    .uikit-control-cards-channel[data-scale] > & {
       background-image: linear-gradient(
-        to bottom,
-        rgb(255 255 255 / 22%),
-        transparent 45%
+        to right in srgb-linear,
+        var(--uikit-control-cards-channel-scale)
       );
-      box-shadow: inset 0 0.5px 0 rgb(255 255 255 / 45%);
     }
 
-    .uikit-slider-thumb {
-      &::before,
-      &::after {
-        display: none;
+    .uikit-control-cards-channel[data-scale]:dir(rtl) > & {
+      background-image: linear-gradient(
+        to left in srgb-linear,
+        var(--uikit-control-cards-channel-scale)
+      );
+    }
+  }
+
+  .uikit-control-cards-channel-fill {
+    position: absolute;
+    width: calc(
+      var(--uikit-control-cards-channel-ends) +
+        (100% - 36px) * var(--uikit-control-cards-channel-share)
+    );
+    background-color: var(
+      --uikit-control-cards-channel-tint,
+      var(--color-ui-primary)
+    );
+    inset-block: 0;
+    inset-inline-start: 0;
+    pointer-events: none;
+    transition: --uikit-control-cards-channel-ends 200ms ease-out;
+
+    &[data-edge='min'] {
+      --uikit-control-cards-channel-ends: 0px;
+    }
+
+    &[data-edge='max'] {
+      --uikit-control-cards-channel-ends: 36px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: 0s;
+    }
+  }
+
+  .uikit-control-cards-channel-name,
+  .uikit-control-cards-channel-value {
+    position: absolute;
+    color: var(--uikit-glass-content);
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    line-height: 36px;
+    pointer-events: none;
+    white-space: nowrap;
+
+    .uikit-control-cards-channel-well[data-placed] > & {
+      transition:
+        translate 260ms cubic-bezier(0.3, 0.7, 0.2, 1),
+        color 160ms;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .uikit-control-cards-channel-well[data-placed] > & {
+        transition: none;
       }
     }
+  }
 
-    .uikit-slider-label {
-      position: absolute;
-      z-index: 1;
-      color: inherit;
-      font-size: 11px;
-      font-variation-settings: 'wght' 590;
-      font-weight: 600;
-      inset-block-end: 4px;
-      inset-inline: 0;
-      pointer-events: none;
-      text-align: center;
+  .uikit-control-cards-channel-value {
+    font-variant-numeric: tabular-nums;
+    font-variation-settings: normal;
+    font-weight: 500;
+  }
+
+  /* (Its control 4px in from its well's edges: its thumb so far in at
+     either end, see main.tsx.) */
+  .uikit-control-cards-channel-control {
+    position: absolute;
+    inset: 4px;
+    touch-action: pan-y;
+  }
+
+  .uikit-control-cards-channel-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .uikit-control-cards-channel-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: var(--uikit-control-cards-channel-light);
+    box-shadow:
+      0 0 0 3px #fff,
+      0 1px 4px 3px rgb(0 0 0 / 18%);
+
+    /* (Focused by keys: its ring in the focus color, not an outline around
+       it: clipped by its well at its ends.) */
+    &:has(:focus-visible) {
+      box-shadow:
+        0 0 0 3px var(--color-ui-primary),
+        0 1px 4px 3px rgb(0 0 0 / 18%);
+    }
+  }
+
+  /* (A corner button in its bottom trailing corner (e.g. collapsing it):
+     its channels' last well ends before its target (44px from the card's
+     edges, the well 6px in), the rest of the stack as wide as ever; a bar
+     or stages end above it.) */
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button[data-grid-corner='bottom-trailing']:not([data-grid-hidden]), > .uikit-card-edit-layer > .uikit-card-corner-button[data-grid-corner='bottom-trailing']:not([data-grid-hidden])) > .uikit-card-frame > .uikit-card-layout {
+    > .uikit-control-cards-channels > :last-child {
+      margin-inline-end: 38px;
     }
 
-    &[data-orientation='horizontal'] .uikit-slider-root {
-      align-items: center;
-      grid-column: 1 / -1;
-      grid-template-columns: subgrid;
-      grid-template-rows: minmax(0, 1fr);
+    > :is(.uikit-control-cards-progress-bar, .uikit-control-cards-stage-list) {
+      margin-block-end: 10px;
     }
+  }
 
-    &[data-orientation='horizontal'] .uikit-slider-control {
-      position: relative;
-      height: 100%;
-      grid-column: 2;
-      grid-row: 1;
-      inset: auto;
-    }
-
-    &[data-orientation='horizontal'] .uikit-slider-label {
-      position: static;
-      grid-column: 1;
-      grid-row: 1;
-      line-height: 1;
-      text-align: start;
-    }
+  /* (A light card's value small beside its channels, whatever its size:
+     no room for a large one.) */
+  .uikit-card-layout:where(:has(> .uikit-control-cards-channels:not([hidden])))
+    > .uikit-card-value {
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-subheadline-size);
+    font-variation-settings: normal;
+    font-weight: normal;
+    line-height: var(--font-ui-subheadline-line-height);
   }
 
   /* A list card's last row (`ControlCards.List`): its label quiet (the
@@ -453,40 +536,234 @@
     }
   }
 
-  /* A card's own controls (a progress bar, see `ControlCards.Progress`):
-     between its top row and its title, centered in their room. */
-  .uikit-control-cards-controls {
-    /* (A progress bar as long as its room, however short: not its least
-       length, see Progress.) */
-    --uikit-progress-min-length: 0px;
-
-    display: grid;
-    min-width: 0;
-    min-height: 0;
-    align-content: center;
-    align-self: stretch;
-    gap: 10px;
+  /* A progress card's bar (`ControlCards.ProgressBar`): a pill at its
+     bottom (a well, as a list card's: 6px in from its edges, its corners
+     concentric with its own), 36px, filling from its start in its tint;
+     what's on it at its padding, in its text's colors, and again on the
+     fill (a copy, as wide as the pill, clipped to the fill) in the fill's
+     color scheme (see main.tsx). By its clip, not its layout: nothing laid
+     out anew as it changes. */
+  .uikit-control-cards-progress-bar {
+    position: relative;
+    overflow: clip;
+    height: 36px;
+    border-radius: calc(var(--uikit-grid-item-radius, 24px) - 6px);
+    margin: 10px -8px -6px;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    font-size: var(--font-ui-subheadline-size);
+    font-variant-numeric: tabular-nums;
     grid-column: 1 / -1;
-    grid-row: 2;
-    margin-block: 8px 14px;
+    grid-row: -1;
   }
 
-  /* (In a wide card one row tall, no room between its top row and its
-     title: beside its title and value instead, at its trailing end, as
-     wide as fits; they keep to their column.) */
-  @container uikit-card (aspect-ratio > 1.5) and (height < 160px) {
-    .uikit-control-cards-controls {
-      width: clamp(48px, 28cqi, 120px);
-      align-self: center;
-      margin: 0;
-      grid-column: 2;
-      grid-row: 3 / span 2;
-      margin-inline-start: 8px;
+  .uikit-control-cards-progress-content {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 8px;
+    padding-inline: 8px;
+  }
+
+  .uikit-control-cards-progress-label {
+    overflow: hidden;
+    min-width: 0;
+    color: var(--uikit-glass-content);
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .uikit-control-cards-progress-detail {
+    flex: none;
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-footnote-size, 13px);
+    margin-inline-start: auto;
+    white-space: nowrap;
+  }
+
+  /* (Base UI's progress bar: over the pill, its fill in it.) */
+  .uikit-control-cards-progress-meter {
+    position: absolute;
+    inset: 0;
+  }
+
+  .uikit-control-cards-progress-fill {
+    position: absolute;
+    background-color: var(
+      --uikit-control-cards-progress-tint,
+      var(--color-ui-primary)
+    );
+    clip-path: inset(
+      0 calc(100% - var(--uikit-control-cards-progress, 0%)) 0 0
+    );
+    inset: 0;
+    transition: clip-path 300ms;
+
+    &:dir(rtl) {
+      clip-path: inset(
+        0 0 0 calc(100% - var(--uikit-control-cards-progress, 0%))
+      );
     }
 
-    .uikit-card-layout:has(> .uikit-control-cards-controls)
-      > :is(.uikit-card-title, .uikit-card-value) {
-      grid-column: 1;
+    > .uikit-control-cards-tint-probe {
+      color: var(--uikit-control-cards-progress-tint, var(--color-ui-primary));
+    }
+
+    /* (Its detail quieter as its label is drawn on it (see
+       `textSchemeOn`), not in the glass's secondary color: a gray,
+       meant for the glass, not for a colored fill.) */
+    .uikit-control-cards-progress-detail {
+      color: color-mix(in srgb, var(--uikit-glass-content) 75%, transparent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: 0s;
+    }
+  }
+
+  /* A card's subtitle (`ControlCards.Subtitle`): small, in its secondary
+     text color, in its row (see the top). */
+  .uikit-control-cards-subtitle {
+    overflow: hidden;
+    min-width: 0;
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-subheadline-size);
+    grid-area: subtitle;
+    line-height: var(--font-ui-subheadline-line-height);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* (In a tile a row tall, beside a bar, stages or channels: no room under
+     its title for a subtitle or a progress's value.) */
+  @container uikit-card (height < 180px) {
+    .uikit-card-layout:has(
+        > .uikit-control-cards-progress-bar,
+        > .uikit-control-cards-stage-list,
+        > .uikit-control-cards-channels:not([hidden])
+      )
+      > :is(.uikit-control-cards-subtitle, .uikit-control-cards-progress-value) {
+      display: none;
+    }
+  }
+
+  /* A stages card's list (`ControlCards.StageList`): its stages along a
+     line at its bottom, each a dot (18px) and its words under it, the line
+     between their dots (clear of them, and of the current one's ring).
+     Compact: a one-row tile's room under its title (into its padding, as
+     a progress bar). Done (before the current one): its dot a pale tint, a
+     check in the tint; current: its dot the tint, a ring around it, its
+     words emphasized; to come: its dot the well's, its words quiet. The
+     line in the tint as far as the current one. */
+  .uikit-control-cards-stage-list {
+    display: grid;
+    padding: 0;
+    margin: 4px 0 -6px;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    grid-column: 1 / -1;
+    grid-row: -1;
+    list-style: none;
+  }
+
+  .uikit-control-cards-stage {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    color: var(--uikit-glass-content-secondary);
+    font-size: var(--font-ui-caption2-size, 11px);
+    gap: 2px;
+    justify-items: center;
+    line-height: 13px;
+
+    /* (The line from the one before, between their dots' edges, clear of
+       them: a pale dot doesn't show it through.) */
+    &:not(:first-child)::before {
+      position: absolute;
+      top: 8px;
+      width: calc(100% - 30px);
+      height: 2px;
+      border-radius: 1px;
+      background-color: var(--uikit-card-well);
+      content: '';
+      inset-inline-end: calc(50% + 15px);
+    }
+  }
+
+  /* (Its check centered on it, its box larger than it: a flex box
+     centers an item overflowing it on both sides.) */
+  .uikit-control-cards-stage-dot {
+    position: relative;
+    display: flex;
+    width: 18px;
+    height: 18px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: var(--uikit-card-well);
+    box-shadow: var(--uikit-card-well-shadow);
+    font-size: 13px;
+  }
+
+  /* (Its check: only once done, see below.) */
+  .uikit-control-cards-stage-check {
+    visibility: hidden;
+
+    .uikit-control-cards-stage:has(~ [data-current]) & {
+      visibility: visible;
+    }
+  }
+
+  .uikit-control-cards-stage-label {
+    overflow: hidden;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* (Done: those before the current one.) */
+  .uikit-control-cards-stage:has(~ [data-current]) {
+    &::before {
+      background-color: var(
+        --uikit-control-cards-stages-tint,
+        var(--color-ui-primary)
+      );
+    }
+
+    > .uikit-control-cards-stage-dot {
+      background-color: color-mix(
+        in srgb,
+        var(--uikit-control-cards-stages-tint, var(--color-ui-primary)) 25%,
+        transparent
+      );
+      box-shadow: none;
+      color: var(--uikit-control-cards-stages-tint, var(--color-ui-primary));
+    }
+  }
+
+  .uikit-control-cards-stage[data-current] {
+    color: var(--uikit-glass-content);
+    font-weight: 600;
+
+    &::before {
+      background-color: var(
+        --uikit-control-cards-stages-tint,
+        var(--color-ui-primary)
+      );
+    }
+
+    > .uikit-control-cards-stage-dot {
+      background-color: var(
+        --uikit-control-cards-stages-tint,
+        var(--color-ui-primary)
+      );
+      box-shadow: 0 0 0 3px
+        color-mix(
+          in srgb,
+          var(--uikit-control-cards-stages-tint, var(--color-ui-primary)) 30%,
+          transparent
+        );
     }
   }
 }

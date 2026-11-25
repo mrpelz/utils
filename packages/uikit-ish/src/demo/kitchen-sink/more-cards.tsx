@@ -4,8 +4,8 @@ import {
   Button,
   Card,
   type CardActions,
-  type ControlCardChannel,
   ControlCards,
+  forwardClick,
   Progress,
   Segmented,
   Stepper,
@@ -112,9 +112,17 @@ const OpenButtons: FunctionComponent<{ name: string }> = ({ name }) => (
   />
 );
 
-/** A color temperature's range (kelvin), as a slider's 0 to 1. */
+/** A color temperature's range (kelvin). */
 const warmest = 2200;
 const coolest = 6500;
+
+/**
+ * A color temperature's colors along its range, warm to cool (the app's:
+ * its light's, see `kelvinColor`), for its channel's scale.
+ */
+const kelvinScale = Array.from({ length: 6 }, (_, index) =>
+  kelvinColor(warmest + ((coolest - warmest) * index) / 5),
+);
 
 /**
  * A tunable white light: small, a slider filling it (its brightness, in
@@ -128,20 +136,36 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
   expansion,
 }) => {
   const [brightness, setBrightness] = useState(0.7);
-  const [warmth, setWarmth] = useState(0.2);
+  const [kelvin, setKelvin] = useState(3100);
   const [isOn, setIsOn] = useState(true);
   const switchTo = (next: boolean) => {
     setIsOn(next);
     if (next && brightness <= 0) setBrightness(1);
   };
-  const kelvin = Math.round(warmest + warmth * (coolest - warmest));
   const tint = kelvinColor(kelvin);
   const isExpanded = useIsLarge();
   const name = 'Desk Light';
   return (
-    // (Never lit, as a dimmer: its dark glass and its fill telling how
-    // much; its symbol on while it's on at all.)
-    <TonedCard active={false}>
+    // (Small, a slider card: never lit, as a dimmer, its dark glass and its
+    // fill telling how much; its symbol on while it's on at all. Large, its
+    // channels: lit by its switch, a press on its body (not on its
+    // channels) toggling it, as a light card's.)
+    <TonedCard
+      active={isExpanded ? undefined : false}
+      onClick={
+        isExpanded
+          ? (event) => {
+              if (
+                event.target instanceof Element &&
+                event.target.closest('.uikit-control-cards-channels')
+              ) {
+                return;
+              }
+              forwardClick('[role=switch]:not([disabled])')(event);
+            }
+          : undefined
+      }
+    >
       <FlipParts />
       <Card.Symbol
         active={isOn && brightness > 0}
@@ -155,19 +179,29 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
       </Card.Symbol>
       {isExpanded ? (
         <>
-          <ControlCards.Channels
-            value={[brightness, warmth]}
-            channels={[
-              { label: 'Light', name: 'Brightness', tint },
-              { label: 'Color', name: 'Color temperature', tint },
-            ]}
-            onValueChange={(index, value) =>
-              index === 0 ? setBrightness(value) : setWarmth(value)
-            }
-          />
-          <Card.Title>
-            {name} · {kelvin} K
-          </Card.Title>
+          <ControlCards.Channels>
+            <ControlCards.Channel
+              name="Brightness"
+              tint={tint}
+              value={brightness}
+              onValueChange={(next) => {
+                setBrightness(next);
+                setIsOn(next > 0);
+              }}
+            />
+            {/* (A scale, not an amount: the app's colors, warm to cool.) */}
+            <ControlCards.Channel
+              colors={kelvinScale}
+              getValueText={(_, value) => `${String(value)} K`}
+              max={coolest}
+              min={warmest}
+              name="Temperature"
+              step={100}
+              value={kelvin}
+              onValueChange={setKelvin}
+            />
+          </ControlCards.Channels>
+          <Card.Title>{name}</Card.Title>
           <Card.Value>{percent(brightness)}</Card.Value>
         </>
       ) : (
@@ -204,37 +238,55 @@ const TunableLightCard: FunctionComponent<{ expansion?: Expansion }> = ({
   );
 };
 
-/** A light's channels: their names and tints (see `ChannelLightCard`). */
-export const rgb = [
-  { label: 'R', name: 'Red', tint: '#ff3b30' },
-  { label: 'G', name: 'Green', tint: '#34c759' },
-  { label: 'B', name: 'Blue', tint: '#0a84ff' },
-] as const;
-const white = { label: 'W', name: 'White', tint: '#fff4e0' } as const;
-const cool = { label: 'CW', name: 'Cool white', tint: '#cfdcff' } as const;
-const warm = { label: 'WW', name: 'Warm white', tint: '#ffd9a0' } as const;
+/** A light's channel: its name and its tint (see `ChannelLightCard`). */
+type LightChannel = { readonly name: string; readonly tint: string };
+
+/** A light's channels (see `ChannelLightCard`). */
+export const rgb: readonly LightChannel[] = [
+  { name: 'Red', tint: '#ff3b30' },
+  { name: 'Green', tint: '#34c759' },
+  { name: 'Blue', tint: '#0a84ff' },
+];
+const white: LightChannel = { name: 'White', tint: '#fff4e0' };
+const cool: LightChannel = { name: 'Cool white', tint: '#cfdcff' };
+const warm: LightChannel = { name: 'Warm white', tint: '#ffd9a0' };
+const deepChannels: readonly LightChannel[] = [
+  { name: 'Royal Blue', tint: '#1a2a8c' },
+  { name: 'Violet', tint: '#5b1f9e' },
+  { name: 'Deep Red', tint: '#7a0d12' },
+];
 
 /**
- * A light of several channels (three, four, five): a light card; opened
- * above the page (`opens`) or expanded for its bars.
+ * A light of several channels (three, four, five): a light card, its
+ * channels composed in it; opened above the page (`opens`) or expanded for
+ * them.
  */
 export const ChannelLightCard: FunctionComponent<{
-  channels: readonly ControlCardChannel[];
+  channels: readonly LightChannel[];
   /** Its symbol's icon while on (e.g. filled). */
   emphasizedIcon: SymbolIcon;
   expansion?: Expansion;
   icon: SymbolIcon;
   initial: readonly number[];
   name: string;
-  /** Opened above the page for its bars (else expanded). */
+  /** Opened above the page for its channels (else expanded). */
   opens?: boolean;
-}> = ({ expansion, initial, name, opens = false, ...props }) => (
+}> = ({ channels, expansion, initial, name, opens = false, ...props }) => (
   <Toned.Light
-    defaultValue={initial}
     name={name}
     {...props}
   >
     <FlipParts />
+    <ControlCards.Channels>
+      {channels.map(({ name: channel, tint }, index) => (
+        <ControlCards.Channel
+          key={channel}
+          defaultValue={initial[index] ?? 1}
+          name={channel}
+          tint={tint}
+        />
+      ))}
+    </ControlCards.Channels>
     {opens ? <OpenButtons name={name} /> : null}
     {!opens && expansion ? (
       <ExpandButton
@@ -654,11 +706,19 @@ const GarageCard: FunctionComponent = () => {
       emphasizedIcon={sfDoorGarageOpen}
       icon={sfDoorGarageClosed}
       name="Garage Door"
-      status={state}
       tint="var(--color-ui-system-orange)"
       value={direction === 0 ? undefined : position * 100}
       onClick={() => setDirection(position > 0 ? -1 : 1)}
-    />
+    >
+      {/* (Moving, its bar; at rest, its state as its subtitle.) */}
+      {direction === 0 ? (
+        <ControlCards.Subtitle>{state}</ControlCards.Subtitle>
+      ) : (
+        <ControlCards.ProgressBar>
+          <ControlCards.ProgressLabel>{state}</ControlCards.ProgressLabel>
+        </ControlCards.ProgressBar>
+      )}
+    </Toned.Progress>
   );
 };
 
@@ -775,7 +835,17 @@ const EnergyCard: FunctionComponent<{ expansion?: Expansion }> = ({
   );
 };
 
-/** A washing machine (a progress card): how long it has left. */
+/** A washer's phase by how far it's got (0 to 1). */
+const phaseOf = (done: number) => {
+  if (done < 0.5) return 'Washing';
+  return done < 0.8 ? 'Rinsing' : 'Spinning';
+};
+
+/**
+ * A washing machine (a progress card): its program as its subtitle, how
+ * far it's got as its value (large, where there's room), its bar saying
+ * its phase and how long it has left.
+ */
 const WasherCard: FunctionComponent = () => {
   const total = 90;
   const [left, setLeft] = useState(42);
@@ -786,17 +856,103 @@ const WasherCard: FunctionComponent = () => {
     );
     return () => clearInterval(timer);
   }, []);
+  const done = (total - left) / total;
   return (
     <Toned.Progress
       active
       emphasizedIcon={sfWasherFill}
       icon={sfWasher}
       name="Washer"
-      status={`${String(left)} min left`}
-      value={((total - left) / total) * 100}
-    />
+      value={done * 100}
+    >
+      <ControlCards.Subtitle>Cotton, 40°</ControlCards.Subtitle>
+      <ControlCards.ProgressValue />
+      <ControlCards.ProgressBar>
+        <ControlCards.ProgressLabel>{phaseOf(done)}</ControlCards.ProgressLabel>
+        <ControlCards.ProgressDetail>
+          {left} min left
+        </ControlCards.ProgressDetail>
+      </ControlCards.ProgressBar>
+    </Toned.Progress>
   );
 };
+
+/** A washer's program's stages (see `ProgramStagesCard`). */
+const washerStages = [
+  ['wash', 'Wash'],
+  ['rinse', 'Rinse'],
+  ['spin', 'Spin'],
+  ['done', 'Done'],
+] as const;
+
+/** A dishwasher's program's stages, more of them (see `ProgramStagesCard`). */
+const dishwasherStages = [
+  ['soak', 'Soak'],
+  ['prewash', 'Prewash'],
+  ['wash', 'Wash'],
+  ['rinse', 'Rinse'],
+  ['dry', 'Dry'],
+  ['done', 'Done'],
+] as const;
+
+/**
+ * A program (a stages card): its stages, the current one moving on every
+ * few seconds (the app's, here a timer), round again after Done; its
+ * subtitle where there's room for it.
+ */
+const ProgramStagesCard: FunctionComponent<{
+  name: string;
+  stages: readonly (readonly [value: string, label: string])[];
+  subtitle: string;
+}> = ({ name, stages, subtitle }) => {
+  const [index, setIndex] = useState(1);
+  useEffect(() => {
+    const timer = setInterval(
+      () => setIndex((current) => (current + 1) % stages.length),
+      4000,
+    );
+    return () => clearInterval(timer);
+  }, [stages]);
+  const [current] = stages[index] ?? stages[0] ?? [''];
+  return (
+    <Toned.Stages
+      active={current !== 'done'}
+      emphasizedIcon={sfWasherFill}
+      icon={sfWasher}
+      name={name}
+      tint="var(--color-ui-system-teal)"
+      value={current}
+    >
+      <ControlCards.Subtitle>{subtitle}</ControlCards.Subtitle>
+      <ControlCards.StageList>
+        {stages.map(([value, label]) => (
+          <ControlCards.Stage
+            key={value}
+            value={value}
+          >
+            {label}
+          </ControlCards.Stage>
+        ))}
+      </ControlCards.StageList>
+    </Toned.Stages>
+  );
+};
+
+const WasherStagesCard: FunctionComponent = () => (
+  <ProgramStagesCard
+    name="Washer Program"
+    stages={washerStages}
+    subtitle="Cotton, ends at 14:30"
+  />
+);
+
+const DishwasherStagesCard: FunctionComponent = () => (
+  <ProgramStagesCard
+    name="Dishwasher Program"
+    stages={dishwasherStages}
+    subtitle="Intensive, ends at 16:05"
+  />
+);
 
 /**
  * The mailbox (a button card): how many letters are in it, a badge on its
@@ -844,6 +1000,25 @@ export const moreTiles: readonly Tile[] = [
     sizes: ['1x1', '2x1', '2x2'],
   },
   {
+    // (An app's dark channel colors: their names and values light on their
+    // fills, dark on their wells.)
+    card: ({ expansion }) => (
+      <ChannelLightCard
+        channels={deepChannels}
+        emphasizedIcon={sfLightStrip2Fill}
+        expansion={expansion}
+        icon={sfLightStrip2}
+        initial={[0.04, 0.6, 0.85]}
+        name="Aquarium Light"
+      />
+    ),
+    expandedSize: '2x2',
+    kind: 'binaryControl',
+    name: 'Aquarium Light',
+    size: '2x2',
+    sizes: ['1x1', '2x1', '2x2'],
+  },
+  {
     card: () => (
       <ChannelLightCard
         opens
@@ -860,7 +1035,8 @@ export const moreTiles: readonly Tile[] = [
     size: '2x1',
   },
   {
-    area: '4x2',
+    // (Its five channels stacked: three rows' height, expanded.)
+    area: '4x3',
     card: ({ expansion }) => (
       <ChannelLightCard
         channels={[...rgb, cool, warm]}
@@ -871,13 +1047,13 @@ export const moreTiles: readonly Tile[] = [
         name="Floor Lamp"
       />
     ),
-    expandedSize: '4x2',
+    expandedSize: '4x3',
     kind: 'binaryControl',
     name: 'Floor Lamp (five channels)',
     size: '2x1',
-    // (3x2 too: on a grid of three columns, its area and expanded size
+    // (3x3 too: on a grid of three columns, its area and expanded size
     // fitted to them, it expands as wide as it can.)
-    sizes: ['2x1', '3x2', '4x2'],
+    sizes: ['2x1', '3x3', '4x3'],
   },
   {
     card: DeviceCard,
@@ -979,10 +1155,21 @@ export const moreTiles: readonly Tile[] = [
   },
   {
     card: WasherCard,
-    kind: 'numericalDisplay',
+    kind: 'progressDisplay',
     name: 'Washer',
-    size: '2x1',
-    sizes: ['2x1', '2x2'],
+    size: '2x2',
+  },
+  {
+    card: WasherStagesCard,
+    kind: 'stagesDisplay',
+    name: 'Washer Program',
+    size: '2x2',
+  },
+  {
+    card: DishwasherStagesCard,
+    kind: 'stagesDisplay',
+    name: 'Dishwasher Program',
+    size: '4x1',
   },
   {
     card: MailboxCard,

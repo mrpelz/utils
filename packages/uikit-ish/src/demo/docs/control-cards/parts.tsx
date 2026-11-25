@@ -4,6 +4,7 @@ import {
   Card,
   cardSizes,
   type ControlCardButtonProps,
+  type ControlCardChannelProps,
   type ControlCardChannelsProps,
   type ControlCardExpandButtonProps,
   type ControlCardLightProps,
@@ -15,6 +16,9 @@ import {
   type ControlCardSegmentedProps,
   type ControlCardSliderFillProps,
   type ControlCardSliderProps,
+  type ControlCardStageListProps,
+  type ControlCardStageProps,
+  type ControlCardStagesProps,
   type ControlCardStateProps,
   type ControlCardSwitchProps,
   type ControlCardTrendProps,
@@ -37,28 +41,41 @@ import { Heading, PartLink, sectionId } from '../../tooling/guide/sections.js';
 import {
   sfDoorGarageClosed,
   sfDoorGarageOpen,
+  sfLampFloorFill,
+  sfLightbulbFill,
   sfLightStrip2,
   sfLightStrip2Fill,
   sfPower,
   sfSnowflake,
   sfSpeakerFill,
   sfThermometerMedium,
+  sfWasher,
+  sfWasherFill,
   sfWindowShadeClosed,
 } from '../../tooling/icons.js';
 import { partPropMaps } from '../part-options.js';
 import {
   controlCardsButtonRows,
+  controlCardsChannelRows,
   controlCardsChannelsRows,
   controlCardsExpandButtonRows,
   controlCardsLightRows,
   controlCardsListRows,
   controlCardsOpenButtonsRows,
+  controlCardsProgressBarRows,
+  controlCardsProgressDetailRows,
+  controlCardsProgressLabelRows,
   controlCardsProgressRows,
+  controlCardsProgressValueRows,
   controlCardsSegmentedItemRows,
   controlCardsSegmentedRows,
   controlCardsSliderFillRows,
   controlCardsSliderRows,
+  controlCardsStageListRows,
+  controlCardsStageRows,
+  controlCardsStagesRows,
   controlCardsStateRows,
+  controlCardsSubtitleRows,
   controlCardsSwitchRows,
   controlCardsTrendRows,
   controlCardsValueRows,
@@ -70,8 +87,10 @@ import {
   useStageOpen,
 } from './main.js';
 import {
+  type ChannelData,
+  fiveChannels,
   getPropOptionsButton,
-  getPropOptionsChannels,
+  getPropOptionsChannel,
   getPropOptionsExpandButton,
   getPropOptionsLight,
   getPropOptionsList,
@@ -79,13 +98,28 @@ import {
   getPropOptionsSlider,
   getPropOptionsSliderFill,
   getPropOptionsSwitch,
+  kelvinColors,
+  longStages,
+  type ProgressPartData,
+  propOptionsChannels,
   propOptionsOpenButtons,
   propOptionsProgress,
+  propOptionsProgressBar,
+  propOptionsProgressDetail,
+  propOptionsProgressLabel,
+  propOptionsProgressValue,
   propOptionsSegmentedItem,
+  propOptionsStage,
+  propOptionsStageList,
+  propOptionsStages,
   propOptionsState,
+  propOptionsSubtitle,
   propOptionsTrend,
   propOptionsValue,
   type SegmentedOptionData,
+  type StageData,
+  type StagesPartData,
+  washerStages,
 } from './props.js';
 
 /** The parts a card of the views' own renders (see the views below). */
@@ -292,14 +326,82 @@ const ButtonPart: FunctionComponent = () => (
   />
 );
 
-/** The progress view's second card (large): what it sets. */
+/**
+ * A part's children: its control's (a featured part's), else the view's
+ * own words.
+ */
+const childrenOr = (
+  props: PartProps[string] | undefined,
+  words: ReactNode,
+): ReactNode => (props?.children as ReactNode | undefined) ?? words;
+
+/**
+ * A progress card's parts as its view composes them (see
+ * `propOptionsProgress`'s children): each with its group's props.
+ */
+const progressPartsOf = (
+  parts: readonly ProgressPartData[],
+  partProps: PartProps,
+  words: { detail?: string; label: string; subtitle: string },
+): ReactNode =>
+  parts.map((part) => {
+    if (part === 'subtitle') {
+      return (
+        <ControlCards.Subtitle
+          key={part}
+          {...partProps['ControlCards.Subtitle']}
+        >
+          {childrenOr(partProps['ControlCards.Subtitle'], words.subtitle)}
+        </ControlCards.Subtitle>
+      );
+    }
+    if (part === 'value') {
+      return (
+        <ControlCards.ProgressValue
+          key={part}
+          {...partProps['ControlCards.ProgressValue']}
+        />
+      );
+    }
+    return (
+      <ControlCards.ProgressBar
+        key={part}
+        {...partProps['ControlCards.ProgressBar']}
+      >
+        <ControlCards.ProgressLabel
+          {...partProps['ControlCards.ProgressLabel']}
+        >
+          {childrenOr(partProps['ControlCards.ProgressLabel'], words.label)}
+        </ControlCards.ProgressLabel>
+        {words.detail === undefined ? null : (
+          <ControlCards.ProgressDetail
+            {...partProps['ControlCards.ProgressDetail']}
+          >
+            {childrenOr(partProps['ControlCards.ProgressDetail'], words.detail)}
+          </ControlCards.ProgressDetail>
+        )}
+      </ControlCards.ProgressBar>
+    );
+  });
+
+/** A progress card's parts the views set (their words). */
+const progressPartsOthers = {
+  'ControlCards.ProgressBar': [],
+  'ControlCards.ProgressDetail': ['children'],
+  'ControlCards.ProgressLabel': ['children'],
+  'ControlCards.ProgressValue': [],
+  'ControlCards.Subtitle': ['children'],
+} as const;
+
+/** The progress view's other cards (small, large): what they set. */
 const progressOthers = {
+  ...progressPartsOthers,
   'ControlCards.Progress (others)': [
     'active',
+    'children',
     'emphasizedIcon',
     'icon',
     'name',
-    'status',
     'value',
   ],
 } as const;
@@ -310,44 +412,452 @@ const ProgressPart: FunctionComponent = () => (
     options={propOptionsProgress}
     others={progressOthers}
     part="ControlCards.Progress"
+    tilesOf={(props, partProps) => {
+      const { children: parts, ...card } = props as Omit<
+        ControlCardProgressProps,
+        'children'
+      > & { children: readonly ProgressPartData[] };
+      const others = partProps['ControlCards.Progress (others)'];
+      return [
+        {
+          card: (
+            <ControlCards.Progress {...card}>
+              {progressPartsOf(parts, partProps, {
+                detail: '40 min left',
+                label: 'Rinsing',
+                subtitle: 'Cotton, 40°',
+              })}
+            </ControlCards.Progress>
+          ),
+          name: 'Wide',
+          size: '2x1',
+          sizes: cardSizes.progressDisplay,
+        },
+        {
+          card: (
+            <ControlCards.Progress
+              {...others}
+              active
+              emphasizedIcon={sfWasherFill}
+              icon={sfWasher}
+              name="Dryer"
+              value={20}
+            >
+              {progressPartsOf(['bar'], partProps, {
+                label: '48 min',
+                subtitle: 'Cotton',
+              })}
+            </ControlCards.Progress>
+          ),
+          name: 'Small',
+          size: '1x1',
+          sizes: cardSizes.progressDisplay,
+        },
+        {
+          card: (
+            <ControlCards.Progress
+              {...others}
+              active
+              emphasizedIcon={sfDoorGarageOpen}
+              icon={sfDoorGarageClosed}
+              name="Garage Door"
+              value={35}
+            >
+              {progressPartsOf(['subtitle', 'value', 'bar'], partProps, {
+                detail: '6 s left',
+                label: 'Opening…',
+                subtitle: 'Opened by Alex',
+              })}
+            </ControlCards.Progress>
+          ),
+          name: 'Large',
+          size: '2x2',
+          sizes: cardSizes.progressDisplay,
+        },
+      ];
+    }}
+  />
+);
+
+/**
+ * A progress part's view's other parts (see `ProgressComposedPart`): the
+ * card's, the other parts' (not the featured one: its control's). Each
+ * kept as it is (a view's memo's input).
+ */
+const progressComposedOthers = Object.fromEntries(
+  (
+    [
+      'ControlCards.ProgressBar',
+      'ControlCards.ProgressDetail',
+      'ControlCards.ProgressLabel',
+      'ControlCards.ProgressValue',
+      'ControlCards.Subtitle',
+    ] as const
+  ).map((featured) => [
+    featured,
+    {
+      ...Object.fromEntries(
+        Object.entries(progressPartsOthers).filter(
+          ([part]) => part !== featured,
+        ),
+      ),
+      'ControlCards.Progress': [
+        'active',
+        'children',
+        'emphasizedIcon',
+        'icon',
+        'name',
+        'value',
+      ],
+    },
+  ]),
+) as Record<string, Record<string, readonly string[]>>;
+
+/**
+ * A progress part's view (see below): a washer's card, its parts
+ * composed, the featured one's props its control's (outlined).
+ */
+const ProgressComposedPart: FunctionComponent<{
+  id: string;
+  options: PropMap;
+  part:
+    | 'ControlCards.ProgressBar'
+    | 'ControlCards.ProgressDetail'
+    | 'ControlCards.ProgressLabel'
+    | 'ControlCards.ProgressValue'
+    | 'ControlCards.Subtitle';
+}> = ({ id, options, part }) => (
+  <PartView
+    id={id}
+    options={options}
+    others={progressComposedOthers[part]}
+    part={part}
+    tilesOf={(props, partProps) => {
+      // (The featured part's props its own control's, the others' their
+      // groups'.)
+      const composed = { ...partProps, [part]: props };
+      return [
+        {
+          card: (
+            <ControlCards.Progress
+              {...partProps['ControlCards.Progress']}
+              active
+              emphasizedIcon={sfWasherFill}
+              icon={sfWasher}
+              name="Washer"
+              value={53}
+            >
+              {progressPartsOf(['subtitle', 'value', 'bar'], composed, {
+                detail: '40 min left',
+                label: 'Rinsing',
+                subtitle: 'Cotton, 40°',
+              })}
+            </ControlCards.Progress>
+          ),
+          name: 'Large',
+          size: '2x2',
+          sizes: cardSizes.progressDisplay,
+        },
+      ];
+    }}
+  />
+);
+
+const ProgressBarPart: FunctionComponent = () => (
+  <ProgressComposedPart
+    id="control-cards-parts-progress-bar"
+    options={propOptionsProgressBar}
+    part="ControlCards.ProgressBar"
+  />
+);
+
+const ProgressLabelPart: FunctionComponent = () => (
+  <ProgressComposedPart
+    id="control-cards-parts-progress-label"
+    options={propOptionsProgressLabel}
+    part="ControlCards.ProgressLabel"
+  />
+);
+
+const ProgressDetailPart: FunctionComponent = () => (
+  <ProgressComposedPart
+    id="control-cards-parts-progress-detail"
+    options={propOptionsProgressDetail}
+    part="ControlCards.ProgressDetail"
+  />
+);
+
+const ProgressValuePart: FunctionComponent = () => (
+  <ProgressComposedPart
+    id="control-cards-parts-progress-value"
+    options={propOptionsProgressValue}
+    part="ControlCards.ProgressValue"
+  />
+);
+
+const SubtitlePart: FunctionComponent = () => (
+  <ProgressComposedPart
+    id="control-cards-parts-subtitle"
+    options={propOptionsSubtitle}
+    part="ControlCards.Subtitle"
+  />
+);
+
+/** A stage list's stages, each with its group's props (see below). */
+const stagesOf = (data: readonly StageData[], partProps: PartProps) =>
+  data.map(({ label, value }) => (
+    <ControlCards.Stage
+      key={value}
+      {...partProps['ControlCards.Stage']}
+      value={value}
+    >
+      {label}
+    </ControlCards.Stage>
+  ));
+
+/**
+ * A stages card's parts as its views compose them (see
+ * `propOptionsStages`'s children): its subtitle, its list of stages.
+ */
+const stagesPartsOf = (
+  parts: readonly StagesPartData[],
+  partProps: PartProps,
+  stages: ReactNode,
+  subtitle: string,
+): ReactNode =>
+  parts.map((part) =>
+    part === 'subtitle' ? (
+      <ControlCards.Subtitle
+        key={part}
+        {...partProps['ControlCards.Subtitle']}
+      >
+        {childrenOr(partProps['ControlCards.Subtitle'], subtitle)}
+      </ControlCards.Subtitle>
+    ) : (
+      <ControlCards.StageList
+        key={part}
+        {...partProps['ControlCards.StageList']}
+      >
+        {stages}
+      </ControlCards.StageList>
+    ),
+  );
+
+/** The stages card's view: its parts, as it composes them. */
+const stagesOthers = {
+  'ControlCards.Stage': ['children', 'value'],
+  'ControlCards.StageList': ['children'],
+  'ControlCards.Stages (others)': [
+    'active',
+    'children',
+    'emphasizedIcon',
+    'icon',
+    'name',
+    'tint',
+    'value',
+  ],
+  'ControlCards.Subtitle': ['children'],
+} as const;
+
+const StagesPart: FunctionComponent = () => (
+  <PartView
+    id="control-cards-parts-stages"
+    options={propOptionsStages}
+    others={stagesOthers}
+    part="ControlCards.Stages"
+    tilesOf={(props, partProps) => {
+      const { children: parts, ...card } = props as Omit<
+        ControlCardStagesProps,
+        'children'
+      > & { children: readonly StagesPartData[] };
+      const others = partProps['ControlCards.Stages (others)'];
+      return [
+        {
+          card: (
+            <ControlCards.Stages {...card}>
+              {stagesPartsOf(
+                parts,
+                partProps,
+                stagesOf(washerStages, partProps),
+                'Cotton, 40°',
+              )}
+            </ControlCards.Stages>
+          ),
+          name: 'Stages',
+          size: '2x1',
+          sizes: cardSizes.stagesDisplay,
+        },
+        {
+          card: (
+            <ControlCards.Stages
+              {...others}
+              active
+              emphasizedIcon={sfWasherFill}
+              icon={sfWasher}
+              name="Washer Program"
+              tint="var(--color-ui-system-teal)"
+              value="rinse"
+            >
+              {stagesPartsOf(
+                ['subtitle', 'list'],
+                partProps,
+                stagesOf(longStages, partProps),
+                'Intensive, ends at 16:05',
+              )}
+            </ControlCards.Stages>
+          ),
+          name: 'More stages',
+          size: '4x1',
+          sizes: cardSizes.stagesDisplay,
+        },
+        {
+          card: (
+            <ControlCards.Stages
+              {...others}
+              active
+              emphasizedIcon={sfWasherFill}
+              icon={sfWasher}
+              name="Washer Program"
+              tint="var(--color-ui-system-teal)"
+              value="spin"
+            >
+              {stagesPartsOf(
+                ['subtitle', 'list'],
+                partProps,
+                stagesOf(washerStages, partProps),
+                'Cotton, ends at 14:30',
+              )}
+            </ControlCards.Stages>
+          ),
+          name: 'Large',
+          size: '2x2',
+          sizes: cardSizes.stagesDisplay,
+        },
+      ];
+    }}
+  />
+);
+
+/** The stage list's view: its card, its stages. */
+const stageListOthers = {
+  'ControlCards.Stage': ['children', 'value'],
+  'ControlCards.Stages': [
+    'active',
+    'children',
+    'emphasizedIcon',
+    'icon',
+    'name',
+    'tint',
+    'value',
+  ],
+} as const;
+
+const StageListPart: FunctionComponent = () => (
+  <PartView
+    id="control-cards-parts-stage-list"
+    options={propOptionsStageList}
+    others={stageListOthers}
+    part="ControlCards.StageList"
+    tilesOf={(props, partProps) => {
+      const { children: data, ...list } = props as Omit<
+        ControlCardStageListProps,
+        'children'
+      > & { children: readonly StageData[] };
+      return [
+        {
+          card: (
+            <ControlCards.Stages
+              {...partProps['ControlCards.Stages']}
+              active
+              emphasizedIcon={sfWasherFill}
+              icon={sfWasher}
+              name="Washer Program"
+              tint="var(--color-ui-system-teal)"
+              value="rinse"
+            >
+              <ControlCards.StageList {...list}>
+                {stagesOf(data, partProps)}
+              </ControlCards.StageList>
+            </ControlCards.Stages>
+          ),
+          name: 'Stage list',
+          size: '4x1',
+          sizes: cardSizes.stagesDisplay,
+        },
+      ];
+    }}
+  />
+);
+
+/** The stage's view: its card, its list, the list's other stages. */
+const stageOthers = {
+  'ControlCards.StageList': ['children'],
+  'ControlCards.Stages': [
+    'active',
+    'children',
+    'emphasizedIcon',
+    'icon',
+    'name',
+    'tint',
+    'value',
+  ],
+} as const;
+
+const StagePart: FunctionComponent = () => (
+  <PartView
+    id="control-cards-parts-stage"
+    options={propOptionsStage}
+    others={stageOthers}
+    part="ControlCards.Stage"
     tilesOf={(props, partProps) => [
       {
         card: (
-          <ControlCards.Progress {...(props as ControlCardProgressProps)} />
-        ),
-        name: 'Wide',
-        size: '2x1',
-        sizes: cardSizes.numericalDisplay,
-      },
-      {
-        card: (
-          <ControlCards.Progress
-            {...partProps['ControlCards.Progress (others)']}
+          <ControlCards.Stages
+            {...partProps['ControlCards.Stages']}
             active
-            emphasizedIcon={sfDoorGarageOpen}
-            icon={sfDoorGarageClosed}
-            name="Garage Door"
-            status="Opening…"
-            value={35}
-          />
+            emphasizedIcon={sfWasherFill}
+            icon={sfWasher}
+            name="Washer Program"
+            tint="var(--color-ui-system-teal)"
+            value="rinse"
+          >
+            <ControlCards.StageList {...partProps['ControlCards.StageList']}>
+              <ControlCards.Stage value="wash">Wash</ControlCards.Stage>
+              <ControlCards.Stage {...(props as ControlCardStageProps)} />
+              <ControlCards.Stage value="spin">Spin</ControlCards.Stage>
+            </ControlCards.StageList>
+          </ControlCards.Stages>
         ),
-        name: 'Large',
-        size: '2x2',
-        sizes: cardSizes.numericalDisplay,
+        name: 'Stage',
+        size: '2x1',
+        sizes: cardSizes.stagesDisplay,
       },
     ]}
   />
 );
 
-/** The light view's second card (large): what it sets. */
+/**
+ * A light's or a card's channels as the views compose them (see
+ * `channelsOptions`): each with its group's props.
+ */
+const channelsOf = (data: readonly ChannelData[], partProps: PartProps) =>
+  data.map(({ name, ...channel }) => (
+    <ControlCards.Channel
+      key={name}
+      {...partProps['ControlCards.Channel']}
+      name={name}
+      {...channel}
+    />
+  ));
+
+/** What the views set on a channel (its data's). */
+const channelFixed = ['colors', 'defaultValue', 'name', 'tint'] as const;
+
+/** The light view's parts, and its second card (large): what it sets. */
 const lightOthers = {
-  'ControlCards.Light (others)': [
-    'channels',
-    'defaultValue',
-    'emphasizedIcon',
-    'icon',
-    'name',
-  ],
+  'ControlCards.Channel': channelFixed,
+  'ControlCards.Channels': ['children'],
+  'ControlCards.Light (others)': ['children', 'emphasizedIcon', 'icon', 'name'],
 } as const;
 
 const LightPart: FunctionComponent = () => (
@@ -356,29 +866,149 @@ const LightPart: FunctionComponent = () => (
     options={getPropOptionsLight}
     others={lightOthers}
     part="ControlCards.Light"
+    tilesOf={(props, partProps) => {
+      const { children: data, ...card } = props as Omit<
+        ControlCardLightProps,
+        'children'
+      > & { children: readonly ChannelData[] };
+      const channels = (
+        <ControlCards.Channels {...partProps['ControlCards.Channels']}>
+          {channelsOf(data, partProps)}
+        </ControlCards.Channels>
+      );
+      return [
+        {
+          card: <ControlCards.Light {...card}>{channels}</ControlCards.Light>,
+          name: 'Small',
+          size: '2x1',
+          sizes: cardSizes.binaryControl,
+        },
+        {
+          card: (
+            <ControlCards.Light
+              {...partProps['ControlCards.Light (others)']}
+              emphasizedIcon={sfLightStrip2Fill}
+              icon={sfLightStrip2}
+              name="Light Strip"
+            >
+              {channels}
+            </ControlCards.Light>
+          ),
+          name: 'Large',
+          size: '2x2',
+          sizes: ['2x2'],
+        },
+      ];
+    }}
+  />
+);
+
+/** A card of the views' own without a value (see `ownCardParts`). */
+const { 'Card.Value': _value, ...ownCardPartsNoValue } = ownCardParts;
+
+/** The channels' view: its cards' parts, the wide card's channels too. */
+const channelsOthers = {
+  ...ownCardPartsNoValue,
+  'ControlCards.Channel': channelFixed,
+  'ControlCards.Channels (others)': ['children'],
+} as const;
+
+const ChannelsPart: FunctionComponent = () => (
+  <PartView
+    id="control-cards-parts-channels"
+    options={propOptionsChannels}
+    others={channelsOthers}
+    part="ControlCards.Channels"
+    tilesOf={(props, partProps) => {
+      const { children: data, ...channels } = props as Omit<
+        ControlCardChannelsProps,
+        'children'
+      > & { children: readonly ChannelData[] };
+      return [
+        {
+          card: (
+            <Card.Root {...partProps['Card.Root']}>
+              <Card.Symbol {...partProps['Card.Symbol']}>
+                <Symbol
+                  box="square"
+                  {...partProps.Symbol}
+                  icon={sfLightStrip2Fill}
+                />
+              </Card.Symbol>
+              <Card.Title {...partProps['Card.Title']}>Light Strip</Card.Title>
+              <ControlCards.Channels {...channels}>
+                {channelsOf(data, partProps)}
+              </ControlCards.Channels>
+            </Card.Root>
+          ),
+          name: 'Light Strip',
+          size: '2x2',
+          sizes: ['2x2'],
+        },
+        {
+          card: (
+            <Card.Root {...partProps['Card.Root']}>
+              <Card.Symbol {...partProps['Card.Symbol']}>
+                <Symbol
+                  box="square"
+                  {...partProps.Symbol}
+                  icon={sfLampFloorFill}
+                />
+              </Card.Symbol>
+              <Card.Title {...partProps['Card.Title']}>Floor Lamp</Card.Title>
+              <ControlCards.Channels
+                {...partProps['ControlCards.Channels (others)']}
+              >
+                {channelsOf(fiveChannels, partProps)}
+              </ControlCards.Channels>
+            </Card.Root>
+          ),
+          name: 'Wide, five channels',
+          size: '4x3',
+          sizes: ['4x3'],
+        },
+      ];
+    }}
+  />
+);
+
+/** The channel's view: its card's parts, its channels, the other one. */
+const channelOthers = {
+  ...ownCardPartsNoValue,
+  'ControlCards.Channel (others)': channelFixed,
+  'ControlCards.Channels': ['children'],
+} as const;
+
+const ChannelPart: FunctionComponent = () => (
+  <PartView
+    id="control-cards-parts-channel"
+    options={getPropOptionsChannel}
+    others={channelOthers}
+    part="ControlCards.Channel"
     tilesOf={(props, partProps) => [
       {
-        card: <ControlCards.Light {...(props as ControlCardLightProps)} />,
-        name: 'Small',
-        size: '2x1',
-        sizes: cardSizes.binaryControl,
-      },
-      {
         card: (
-          <ControlCards.Light
-            {...partProps['ControlCards.Light (others)']}
-            defaultValue={[1, 0.6, 0.2]}
-            emphasizedIcon={sfLightStrip2Fill}
-            icon={sfLightStrip2}
-            name="Light Strip"
-            channels={[
-              { label: 'R', name: 'Red', tint: '#ff3b30' },
-              { label: 'G', name: 'Green', tint: '#34c759' },
-              { label: 'B', name: 'Blue', tint: '#0a84ff' },
-            ]}
-          />
+          <Card.Root {...partProps['Card.Root']}>
+            <Card.Symbol {...partProps['Card.Symbol']}>
+              <Symbol
+                box="square"
+                {...partProps.Symbol}
+                icon={sfLightbulbFill}
+              />
+            </Card.Symbol>
+            <Card.Title {...partProps['Card.Title']}>Desk Light</Card.Title>
+            <ControlCards.Channels {...partProps['ControlCards.Channels']}>
+              <ControlCards.Channel {...(props as ControlCardChannelProps)} />
+              <ControlCards.Channel
+                {...partProps['ControlCards.Channel (others)']}
+                colors={kelvinColors}
+                defaultValue={0.3}
+                name="Temperature"
+              />
+            </ControlCards.Channels>
+          </Card.Root>
         ),
-        name: 'Large',
+        name: 'Channel',
         size: '2x2',
         sizes: ['2x2'],
       },
@@ -507,60 +1137,6 @@ const SegmentedItemPart: FunctionComponent = () => (
         },
       ];
     }}
-  />
-);
-
-/** The bars' view: its cards' parts, the second bars' (across) too. */
-const channelsOthers = {
-  ...ownCardParts,
-  'ControlCards.Channels (others)': ['channels', 'value'],
-} as const;
-
-const ChannelsPart: FunctionComponent = () => (
-  <PartView
-    id="control-cards-parts-channels"
-    options={getPropOptionsChannels}
-    others={channelsOthers}
-    part="ControlCards.Channels"
-    tilesOf={(props, partProps) => [
-      {
-        card: (
-          <Card.Root {...partProps['Card.Root']}>
-            <Card.Symbol {...partProps['Card.Symbol']}>
-              <Symbol
-                box="square"
-                {...partProps.Symbol}
-                icon={sfLightStrip2Fill}
-              />
-            </Card.Symbol>
-            <ControlCards.Channels {...(props as ControlCardChannelsProps)} />
-            <Card.Title {...partProps['Card.Title']}>Light Strip</Card.Title>
-          </Card.Root>
-        ),
-        name: 'Upright',
-        size: '2x2',
-        sizes: ['2x2'],
-      },
-      {
-        card: (
-          <Card.Root {...partProps['Card.Root']}>
-            <ControlCards.Channels
-              {...partProps['ControlCards.Channels (others)']}
-              value={[0.2, 0.8, 0.5]}
-              channels={[
-                { label: 'R', name: 'Red', tint: '#ff3b30' },
-                { label: 'G', name: 'Green', tint: '#34c759' },
-                { label: 'B', name: 'Blue', tint: '#0a84ff' },
-              ]}
-            />
-            <Card.Title {...partProps['Card.Title']}>Light Strip</Card.Title>
-          </Card.Root>
-        ),
-        name: 'Across',
-        size: '3x1',
-        sizes: ['3x1'],
-      },
-    ]}
   />
 );
 
@@ -876,7 +1452,83 @@ export const ControlCardsParts: FunctionComponent = () => (
       part="ControlCards.Progress"
       rows={controlCardsProgressRows}
       bullets={[
-        'Something under way, for example a washer’s program: a progress bar between its top and its title while there’s a value, beside its title in a wide card one row tall.',
+        <>
+          Something under way, for example a washer’s program. Its symbol and
+          title are its own; the rest is composed in it, as the app shows it: a{' '}
+          <PartLink part="ControlCards.Subtitle" />, its value (
+          <PartLink part="ControlCards.ProgressValue" />
+          ), its bar (<PartLink part="ControlCards.ProgressBar" />
+          ).
+        </>,
+        'In tiles a row tall there’s no room for a subtitle or a value beside the bar, so only the bar shows; taller tiles show all three, the value large. It fits every size from 1x1 up.',
+        'Without a value, nothing is under way. The app can leave out the bar then and show the state as a subtitle, for example a garage door at rest.',
+      ]}
+    />
+    <Section
+      Demo={ProgressBarPart}
+      part="ControlCards.ProgressBar"
+      rows={controlCardsProgressBarRows}
+      bullets={[
+        <>
+          A pill at the card’s bottom that fills in its tint as far as the
+          progress has got. On it, a{' '}
+          <PartLink part="ControlCards.ProgressLabel" /> at its start and a{' '}
+          <PartLink part="ControlCards.ProgressDetail" /> at its end.
+        </>,
+        'What’s on it is drawn twice: on the well in the card’s text colors, and on the fill, clipped by it. On the fill it takes dark or light text, whichever has more contrast with the tint, read once and again when the tint or the color scheme changes; its detail is that color, less strong.',
+        'It’s Base UI’s progress bar, named as its card, so assistive technology reads it as one. Its words sit beside it and are read as they are.',
+      ]}
+    />
+    <Section
+      Demo={ProgressLabelPart}
+      part="ControlCards.ProgressLabel"
+      rows={controlCardsProgressLabelRows}
+      bullets={[
+        <>
+          Words at the start of a <PartLink part="ControlCards.ProgressBar" />,
+          for example its phase. Long words end in an ellipsis before they reach
+          its detail.
+        </>,
+      ]}
+    />
+    <Section
+      Demo={ProgressDetailPart}
+      part="ControlCards.ProgressDetail"
+      rows={controlCardsProgressDetailRows}
+      bullets={[
+        <>
+          Quieter words at the end of a{' '}
+          <PartLink part="ControlCards.ProgressBar" />, for example how long it
+          has left.
+        </>,
+      ]}
+    />
+    <Section
+      Demo={ProgressValuePart}
+      part="ControlCards.ProgressValue"
+      rows={controlCardsProgressValueRows}
+      bullets={[
+        <>
+          A <PartLink part="ControlCards.Progress" />
+          ’s value in words, by its format: a percentage by default. It’s the
+          card’s value, so it’s large in a large tile. In tiles a row tall it
+          doesn’t show beside the bar.
+        </>,
+      ]}
+    />
+    <Section
+      Demo={SubtitlePart}
+      part="ControlCards.Subtitle"
+      rows={controlCardsSubtitleRows}
+      bullets={[
+        <>
+          More words under a card’s title, small and grey, for example a
+          program’s name or when it ends. It has a row of its own, so a card can
+          show it and a large value together. It goes in a{' '}
+          <PartLink part="ControlCards.Progress" /> or a{' '}
+          <PartLink part="ControlCards.Stages" />.
+        </>,
+        'Beside a bar or stages, it shows only in tiles taller than a row, where there’s room for it.',
       ]}
     />
     <Section
@@ -885,12 +1537,17 @@ export const ControlCardsParts: FunctionComponent = () => (
       rows={controlCardsLightRows}
       bullets={[
         <>
-          A light of several channels. Small, a switch, its symbol in the color
-          they make, its brightness; a press on it toggles it. Large (expanded,
-          resized or open above the page), a bar per channel (
-          <PartLink part="ControlCards.Channels" />
-          ).
+          A light of several channels, composed in it as a{' '}
+          <PartLink part="ControlCards.Channels" /> of{' '}
+          <PartLink part="ControlCards.Channel" />
+          s. It shows a switch, its symbol in the color its channels make, and
+          its brightness. Large (expanded, resized or open above the page), its
+          channels show too. A press on its body toggles it, at any size, but
+          not a press on its channels.
         </>,
+        'Its symbol’s color adds up its amount channels as light does, tinted by any scale channel (for example a brightness by a color temperature), shown at full strength. Its brightness is its strongest amount channel’s share.',
+        'Its value’s words are the app’s (getValueText, states). By default it shows its brightness while on and its off word while off.',
+        'While it’s small its channels stay mounted, unseen, so it still knows the light they give.',
       ]}
     />
     <Section
@@ -924,12 +1581,77 @@ export const ControlCardsParts: FunctionComponent = () => (
       ]}
     />
     <Section
+      Demo={StagesPart}
+      part="ControlCards.Stages"
+      rows={controlCardsStagesRows}
+      bullets={[
+        <>
+          A run of stages in order, for example a washer’s program: shown, not
+          chosen. Its symbol and title are its own; composed in it are a{' '}
+          <PartLink part="ControlCards.Subtitle" /> and a{' '}
+          <PartLink part="ControlCards.StageList" /> of its stages.
+        </>,
+        'Wider tiles give more stages room, and in tiles taller than a row its subtitle shows under its name. Never 1x1: too narrow for them.',
+      ]}
+    />
+    <Section
+      Demo={StageListPart}
+      part="ControlCards.StageList"
+      rows={controlCardsStageListRows}
+      bullets={[
+        <>
+          The stages of a <PartLink part="ControlCards.Stages" />, as dots along
+          a line at its bottom, their words under them. Those done are checked,
+          the current one is in its tint with a ring, those to come are empty.
+        </>,
+        'It’s an ordered list named as its card, its current stage marked as the current step, so assistive technology reads where it is. It takes no presses of its own.',
+      ]}
+    />
+    <Section
+      Demo={StagePart}
+      part="ControlCards.Stage"
+      rows={controlCardsStageRows}
+      bullets={[
+        <>
+          A stage in a <PartLink part="ControlCards.StageList" />: its value and
+          its words. Whether it’s done, current or to come follows from its
+          place before or after the card’s current one.
+        </>,
+      ]}
+    />
+    <Section
       Demo={ChannelsPart}
       part="ControlCards.Channels"
       rows={controlCardsChannelsRows}
       bullets={[
-        'Bars between a card’s top and its title, one slider each, 0 to 1: side by side in a tile taller than a row, stacked across in a row.',
-        'Upright, each bar’s short name sits on it. Stacked across, the bars are too thin for that, so the names sit beside them at their leading end, in one column, and the bars start together.',
+        <>
+          A card’s channels, each a <PartLink part="ControlCards.Channel" /> in
+          a well of its own, stacked at its bottom, 6px in from its edges,
+          whatever the card’s width. Each takes 42px of height, so a card with
+          many channels needs a taller tile: five fit in three rows.
+        </>,
+        <>
+          In a <PartLink part="ControlCards.Light" />, they show only while it’s
+          large. Elsewhere, for example in a{' '}
+          <PartLink
+            component="card"
+            part="Card.Root"
+          />{' '}
+          of the app’s own, they always show.
+        </>,
+      ]}
+    />
+    <Section
+      Demo={ChannelPart}
+      part="ControlCards.Channel"
+      rows={controlCardsChannelRows}
+      bullets={[
+        'Base UI’s slider in a pill-shaped well, its thumb round and kept inside the well at both ends. A drag anywhere on the well sets it, and the arrow keys step it.',
+        'A touch is held back until it moves: along the well it’s a drag, across it a scroll of the page, the value untouched. While it’s dragged, the page doesn’t scroll, and its words can’t be selected. A tap sets the value where it lands.',
+        'An amount (tint) fills from its start in its tint as far as the thumb’s center. At its least and greatest values the fill slides the rest of the way, to nothing or the whole well. Its thumb shows the light it gives: its tint mixed on black by its share, as light adds up, so 0% is black.',
+        'A scale (colors) shows its colors along the well instead of a fill, its thumb the color at its value: for example a color temperature, warm to cool. The colors are the app’s.',
+        'Its name sits at its start and its value at its end. When the thumb would cover one of them, that one slides to the other end beside the other, and back once the thumb is clear again.',
+        'Each label takes dark or light text by what’s under its center: on the fill, whichever has more contrast with its tint; on the well, the card’s text color; on a scale, by its color there. The colors are read once, and again when they or the color scheme change.',
       ]}
     />
     <Section
@@ -1007,11 +1729,20 @@ export const controlCardsPartsDemos = [
   SliderFillPart,
   ButtonPart,
   ProgressPart,
+  ProgressBarPart,
+  ProgressLabelPart,
+  ProgressDetailPart,
+  ProgressValuePart,
+  SubtitlePart,
   LightPart,
   ListPart,
   SegmentedPart,
   SegmentedItemPart,
+  StagesPart,
+  StageListPart,
+  StagePart,
   ChannelsPart,
+  ChannelPart,
   TrendPart,
   ExpandButtonPart,
   OpenButtonsPart,

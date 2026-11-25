@@ -6,7 +6,19 @@ import type { GridCornerButtonProps, GridSize } from '../grid/main.js';
 import type { SwitchRootProps } from '../switch/props.js';
 
 /** A card's corner button: a `Grid.CornerButton` (see `Card.CornerButton`). */
-export type CardCornerButtonProps = GridCornerButtonProps;
+export type CardCornerButtonProps = Omit<
+  GridCornerButtonProps,
+  'whileEditing'
+> & {
+  /**
+   * In edit mode: hidden then (`hide`), shown only then (`show`, e.g. a
+   * button opening the card's settings), or either way (`stay`). Shown
+   * while editing, it's over the card's veil, in the grid's controls'
+   * color (see `Grid.CornerButton`).
+   * @default 'hide'
+   */
+  whileEditing?: GridCornerButtonProps['whileEditing'];
+};
 
 /** A card's actions (see `CardRootProps.actionsRef`). */
 export type CardActions = {
@@ -100,6 +112,8 @@ export type CardSizes = Readonly<
     | 'choiceControl'
     | 'numericalControl'
     | 'numericalDisplay'
+    | 'progressDisplay'
+    | 'stagesDisplay'
     | 'summaryDisplay',
     readonly GridSize[]
   >

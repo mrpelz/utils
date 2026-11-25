@@ -52,53 +52,11 @@
     text-align: start;
     transition: background-color 200ms;
 
-    /* Its veil (editing, see main.tsx): over all of it, under the grid's
-       corner symbols (beside it, in its tile); lifted while the grid's
-       tiles are dragged or resized, as they fade (see below). */
-    &::after {
-      position: absolute;
-      z-index: 2;
-      border-radius: inherit;
-      background-color: transparent;
-      content: '';
-      inset: 0;
-      pointer-events: none;
-      transition: background-color 200ms;
-    }
-
-    /* (Pressable (an `onClick`, see main.tsx): hovered, a tint of its
-       text's color; pressed, more; by its color, no layer changing.) */
+    /* (Pressable (an `onClick`, see main.tsx): its press tint, see its
+       frame below.) */
     &[data-pressable] {
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
-    }
-
-    @media (hover: hover) {
-      &[data-pressable]:hover::after {
-        background-color: color-mix(in srgb, currentcolor 6%, transparent);
-      }
-    }
-
-    &[data-pressable]:active::after {
-      background-color: color-mix(in srgb, currentcolor 12%, transparent);
-      transition-duration: 0s;
-    }
-
-    &[data-editing]::after {
-      /* (Over everything in it, its switch and corner buttons too (their
-         own, above a slider's fill: see below); not as its press tint.) */
-      z-index: 4;
-      background-color: var(
-        --uikit-card-veil,
-        light-dark(
-          color-mix(in srgb, var(--color-ui-system-background) 45%, transparent),
-          color-mix(in srgb, var(--color-ui-system-background) 58%, transparent)
-        )
-      );
-    }
-
-    .uikit-grid-root[data-grid-drag] &[data-editing]::after {
-      background-color: transparent;
     }
   }
 
@@ -124,6 +82,20 @@
     }
   }
 
+  /* (Its edit layer (editing, see main.tsx): over its frame and its veil,
+     its corner buttons shown then on it, pressable; nothing else.) */
+  .uikit-card-edit-layer {
+    position: absolute;
+    z-index: 5;
+    border-radius: inherit;
+    inset: 0;
+    pointer-events: none;
+
+    > * {
+      pointer-events: auto;
+    }
+  }
+
   /* Its frame: what its size queries ask (see below), filling it. */
   .uikit-card-frame {
     position: relative;
@@ -139,11 +111,70 @@
   /* (Off screen, what's in it skipped: not styled, laid out, painted or
      hit-tested, so a page of many cards scrolls smoothly; its glass and
      shadow its card's, drawn all the same (clipped by its own rounded box,
-     nothing of it past its card's edge). Its size its card's either way.
-     Not while editing: tiles moved and resized across the grid, each
-     drawn as it goes.) */
-  .uikit-card-root:not([data-editing]) > .uikit-card-frame {
+     nothing of it past its card's edge). Its size its card's either way,
+     editing too.) */
+  .uikit-card-root > .uikit-card-frame {
     content-visibility: auto;
+
+    /* Its veil (editing, see main.tsx), and its press tint: on its frame,
+       in the frame's stacking (its own, skipped as it is: see above), so
+       what's in it can be over it (e.g. a corner button shown while
+       editing); under the grid's corner symbols beside it, in its tile;
+       lifted while the grid's tiles are dragged or resized, as they fade
+       (see below). */
+    &::after {
+      position: absolute;
+      z-index: 2;
+      border-radius: inherit;
+      background-color: transparent;
+      content: '';
+      inset: 0;
+      pointer-events: none;
+      transition: background-color 200ms;
+    }
+
+    /* (Pressable: hovered, a tint of its text's color; pressed, more; by
+       its color, no layer changing. Not while what's hovered or pressed
+       takes its presses itself (`data-card-own-press`, e.g. a light's
+       channels): its own, not the card's.) */
+    @media (hover: hover) {
+      :where(
+          .uikit-card-root[data-pressable]:hover:not(
+              :has([data-card-own-press]:hover)
+            )
+        )
+        > &::after {
+        background-color: color-mix(in srgb, currentcolor 6%, transparent);
+      }
+    }
+
+    :where(
+        .uikit-card-root[data-pressable]:active:not(
+            :has([data-card-own-press]:active)
+          )
+      )
+      > &::after {
+      background-color: color-mix(in srgb, currentcolor 12%, transparent);
+      transition-duration: 0s;
+    }
+
+    :where(.uikit-card-root[data-editing]) > &::after {
+      /* (Over everything in it, its switch and corner buttons too (their
+         own, above a slider's fill: see below), but those shown while
+         editing; not as its press tint.) */
+      z-index: 4;
+      background-color: var(
+        --uikit-card-veil,
+        light-dark(
+          color-mix(in srgb, var(--color-ui-system-background) 45%, transparent),
+          color-mix(in srgb, var(--color-ui-system-background) 58%, transparent)
+        )
+      );
+    }
+
+    :where(.uikit-grid-root[data-grid-drag] .uikit-card-root[data-editing]) > &::after {
+      background-color: transparent;
+    }
   }
 
   /* (Its tile getting to a new box (see Grid's reshape.ts): its frame at
@@ -192,16 +223,13 @@
     );
   }
 
-  /* (Its tile's corner symbols fading as its veil lifts, see above: in
-     their color (as they fade, see Grid), no layer changing.) */
+  /* (Its tile's corner symbols fading as its veil lifts, see above: by
+     their share shown (as they fade, see Grid), no layer changing.) */
   .uikit-grid-root[data-grid-drag]
     .uikit-grid-item:has(> .uikit-grid-item-body > .uikit-card-root)
-    :is(.uikit-grid-corner-button, .uikit-grid-move-sign) {
-    color: transparent;
-
+    :is(.uikit-grid-corner-button, .uikit-grid-move-sign)
     > .uikit-grid-corner-icon {
-      stroke: transparent;
-    }
+    --uikit-grid-corner-shown: 0;
   }
 
   /* A corner button (see main.tsx, Grid's): in its text's color, above
@@ -211,6 +239,15 @@
   .uikit-card-corner-button {
     z-index: 3;
     color: inherit;
+
+    /* (Shown while editing (its `whileEditing`, in its edit layer, see
+       below): in the grid's controls' color on the veil, see above.) */
+    &[data-grid-editing]:not([data-grid-hidden]) {
+      color: light-dark(
+        var(--glass-ui-medium-light-content),
+        var(--glass-ui-medium-dark-content)
+      );
+    }
   }
 
   /* Its symbol: at its top leading corner, a little larger than its text.
@@ -784,15 +821,15 @@
     outline-offset: 2px;
   }
 
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden])) > .uikit-switch-root {
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden]), > .uikit-card-edit-layer > .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden])) > .uikit-card-frame > .uikit-card-layout > .uikit-switch-root {
     margin-inline-end: var(--uikit-card-corner-room, 18px);
   }
 
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='bottom-leading']) > .uikit-card-value {
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button[data-grid-corner='bottom-leading'], > .uikit-card-edit-layer > .uikit-card-corner-button[data-grid-corner='bottom-leading']) > .uikit-card-frame > .uikit-card-layout > .uikit-card-value {
     padding-inline-start: var(--uikit-card-corner-room, 18px);
   }
 
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-card-corner-button[data-grid-corner='bottom-trailing']) > .uikit-card-value {
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button[data-grid-corner='bottom-trailing'], > .uikit-card-edit-layer > .uikit-card-corner-button[data-grid-corner='bottom-trailing']) > .uikit-card-frame > .uikit-card-layout > .uikit-card-value {
     padding-inline-end: var(--uikit-card-corner-room, 18px);
   }
 
@@ -815,11 +852,11 @@
     }
   }
 
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > :is(.uikit-card-symbol, .uikit-card-title:first-child) {
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden]), > .uikit-card-edit-layer > .uikit-card-corner-button[data-grid-corner='top-leading']:not([data-grid-hidden])) > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root) > :is(.uikit-card-symbol, .uikit-card-title:first-child) {
     margin-inline-start: var(--uikit-card-header-room, 28px);
   }
 
-  .uikit-card-root > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root):has(> .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden])) > :is(.uikit-card-title, .uikit-card-value) {
+  .uikit-card-root:has(> .uikit-card-frame > .uikit-card-layout > .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden]), > .uikit-card-edit-layer > .uikit-card-corner-button[data-grid-corner='top-trailing']:not([data-grid-hidden])) > .uikit-card-frame > .uikit-card-layout:has(> .uikit-list-root) > :is(.uikit-card-title, .uikit-card-value) {
     padding-inline-end: var(--uikit-card-header-room, 28px);
   }
 

@@ -101,6 +101,7 @@ export type {
   GridAreaState,
   GridCorner,
   GridCornerButtonProps,
+  GridWhileEditing,
   GridBreakProps,
   GridBreakRows,
   GridDropGroupProps,
@@ -872,6 +873,7 @@ const useCell = ({
     [columns, isFreeArea, isFreeSize, maxTileRows, sorted, sortedAreas],
   );
   const {
+    isAreaFitted,
     isFitted,
     isFullWidth,
     layout,
@@ -966,6 +968,7 @@ const useCell = ({
   const areaState = useMemo(
     (): GridAreaState | undefined =>
       spec && {
+        isFitted: isAreaFitted,
         movable,
         placement,
         requested: requestedArea ?? size,
@@ -977,6 +980,7 @@ const useCell = ({
       },
     [
       areaSizeOf,
+      isAreaFitted,
       layout,
       movable,
       placement,
@@ -1080,25 +1084,40 @@ const CornerButton = forwardRef<HTMLButtonElement, GridCornerButtonProps>(
       mirrored = false,
       render,
       visible = true,
+      whileEditing = 'stay',
       ...props
     },
     ref,
-  ) =>
-    useRender({
+  ) => {
+    const editing = useGridItem()?.editing === true;
+    const isShown =
+      visible &&
+      (whileEditing === 'stay' || (whileEditing === 'show') === editing);
+    // (The app's, shown while editing: an edit control there (a press its
+    // own, a drag from it its cell's, as from the remove button), in the
+    // grid's controls' color (see the CSS). The grid's own mark
+    // themselves.)
+    const isOwn = Object.hasOwn(props, 'data-grid-edit-control');
+    const isEditControl = editing && isShown && !isOwn;
+    return useRender({
       defaultTagName: 'button',
       props: {
         className: cn('uikit-grid-corner-button', className),
         'data-grid-corner': corner,
-        'data-grid-hidden': visible ? undefined : '',
+        'data-grid-drag-through': isEditControl ? '' : undefined,
+        'data-grid-edit-control': isEditControl ? '' : undefined,
+        'data-grid-editing': editing && isShown ? '' : undefined,
+        'data-grid-hidden': isShown ? undefined : '',
         'data-grid-mirrored': mirrored ? '' : undefined,
-        inert: !visible,
+        inert: !isShown,
         type: 'button',
         ...props,
         children: <CornerIcon icon={icon} />,
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
 /** A movable tile's mark (see `moveSignOf`: its sign on it). */

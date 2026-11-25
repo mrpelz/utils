@@ -20,8 +20,9 @@ const breakable = (label: string) =>
   label.replaceAll(/\p{L}{11,}/gu, (word) => [...word].join('\u00AD'));
 
 /**
- * A tile shows its name and size (and the size asked for, if the grid gave
- * it a different one; open above the page, its open size and its own),
+ * A tile shows its name and size (and the size asked for, if the grid
+ * fitted it to its columns or area; its area's likewise; open above the
+ * page, its open size and its own),
  * and its place in its section's order (spacers and
  * breaks counted too; from 1). In edit mode its corner resizes it.
  */
@@ -37,11 +38,9 @@ export const Tile: FunctionComponent<{ label: string; place: number }> = ({
         <span>{breakable(label)}</span>
         <span className="kitchen-sink-grid-tile-size">
           {item?.open ? `open, ${item.openSize} (${item.size})` : item?.size}
-          {item && !item.open && item.size !== item.requested
-            ? ` (${item.requested})`
-            : ''}
+          {item && !item.open && item.isFitted ? ` (${item.requested})` : ''}
           {area
-            ? ` in ${area.size}${area.size === area.requested ? '' : ` (${area.requested})`}, ${area.placement}`
+            ? ` in ${area.size}${area.isFitted ? ` (${area.requested})` : ''}, ${area.placement}`
             : ''}
         </span>
         <span className="kitchen-sink-grid-tile-size">#{place + 1}</span>

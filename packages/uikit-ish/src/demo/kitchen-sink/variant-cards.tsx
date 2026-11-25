@@ -1,5 +1,6 @@
 import { FunctionComponent } from 'react';
 
+import { ControlCards } from '../../components/index.js';
 import { cardTints } from '../tooling/card-kit.js';
 import { FlipParts } from '../tooling/flip.js';
 import {
@@ -8,6 +9,8 @@ import {
   sfBell,
   sfBellFill,
   sfBook,
+  sfCar,
+  sfCarFill,
   sfDoorGarageClosed,
   sfDoorGarageOpen,
   sfDoorLeftHandClosed,
@@ -488,28 +491,68 @@ export const variantRooms: Readonly<Record<string, readonly Tile[]>> = {
           emphasizedIcon={sfWasherFill}
           icon={sfWasher}
           name="Dryer"
-          status="12 min left"
+          // (A light tint: dark text on its fill, see ControlCards.)
+          tint="var(--color-ui-system-yellow)"
           value={80}
-        />
+        >
+          <ControlCards.ProgressBar>
+            <ControlCards.ProgressLabel>12 min</ControlCards.ProgressLabel>
+          </ControlCards.ProgressBar>
+        </Toned.Progress>
       ),
-      kind: 'numericalDisplay',
+      kind: 'progressDisplay',
       name: 'Dryer',
       size: '1x1',
     },
     {
       card: () => (
+        // (Not switchable (`active` left out): its glass by the color
+        // scheme, or the page's tone.)
         <Toned.Progress
-          active
           emphasizedIcon={sfWasherFill}
           icon={sfWasher}
           name="Dishwasher"
-          status="40 min left"
+          tint="var(--color-ui-system-purple)"
           value={35}
-        />
+        >
+          <ControlCards.Subtitle>Eco, ends at 15:10</ControlCards.Subtitle>
+          <ControlCards.ProgressValue />
+          <ControlCards.ProgressBar>
+            <ControlCards.ProgressLabel>Drying</ControlCards.ProgressLabel>
+            <ControlCards.ProgressDetail>
+              40 min left
+            </ControlCards.ProgressDetail>
+          </ControlCards.ProgressBar>
+        </Toned.Progress>
       ),
-      kind: 'numericalDisplay',
+      kind: 'progressDisplay',
       name: 'Dishwasher',
       size: '2x2',
+    },
+    {
+      // (Not active: the car's off, parked, while its battery charges; dark
+      // glass, its symbol and fill not lit, its progress shown all the same.
+      // Whether a progress is "on" is the app's, see ControlCards.)
+      card: () => (
+        <Toned.Progress
+          active={false}
+          emphasizedIcon={sfCarFill}
+          icon={sfCar}
+          name="Car"
+          tint="var(--color-ui-system-green)"
+          value={64}
+        >
+          <ControlCards.ProgressBar>
+            <ControlCards.ProgressLabel>Charging</ControlCards.ProgressLabel>
+            <ControlCards.ProgressDetail>
+              1 h 20 min
+            </ControlCards.ProgressDetail>
+          </ControlCards.ProgressBar>
+        </Toned.Progress>
+      ),
+      kind: 'progressDisplay',
+      name: 'Car',
+      size: '2x1',
     },
     {
       card: () => (

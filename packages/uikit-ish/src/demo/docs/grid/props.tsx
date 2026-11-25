@@ -232,6 +232,7 @@ export const getPropOptionsCornerButton = (addLog: AddLog) => ({
   ] as const,
   mirrored: [undefined, true] as const,
   visible: [undefined, false] as const,
+  whileEditing: [undefined, 'hide', 'show'] as const,
   'aria-label': ['Details', undefined] as const,
   onClick: [
     undefined,

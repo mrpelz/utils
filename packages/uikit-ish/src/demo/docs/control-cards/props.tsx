@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types -- prop control options, typed by inference */
 
 import type {
-  ControlCardChannel,
   ControlCardRow,
   ControlCardStates,
   ControlCardValueTextDetails,
@@ -208,6 +207,9 @@ export const getPropOptionsButton = (addLog: AddLog) => ({
   ...rootOptions,
 });
 
+/** Which of a progress card's parts its view composes (see parts.tsx). */
+export type ProgressPartData = 'bar' | 'subtitle' | 'value';
+
 export const propOptionsProgress = {
   name: ['Washer', 'Garage Door'] as const,
   icon: [
@@ -222,24 +224,165 @@ export const propOptionsProgress = {
   active: [true, undefined, false] as const,
   value: [53, undefined, 0, 100] as const,
   max: [undefined, 90] as const,
-  status: ['42 min left', undefined, 'Opening…'] as const,
-  tint: [undefined, 'var(--color-ui-system-orange)'] as const,
+  tint: [undefined, 'var(--color-ui-system-orange)', '#ffd60a'] as const,
+  format: [undefined, percent] as const,
+  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
+  // (Its parts: the view composes them, see parts.tsx.)
+  children: [
+    new MappedProp<readonly ProgressPartData[]>(['bar'], '[ProgressBar]'),
+    new MappedProp<readonly ProgressPartData[]>(
+      ['subtitle', 'value', 'bar'],
+      '[Subtitle, ProgressValue, ProgressBar]',
+    ),
+    new MappedProp<readonly ProgressPartData[]>(['subtitle'], '[Subtitle]'),
+  ] as const,
   ...rootOptions,
 };
 
-const rgb: readonly ControlCardChannel[] = [
-  { label: 'R', name: 'Red', tint: '#ff3b30' },
-  { label: 'G', name: 'Green', tint: '#34c759' },
-  { label: 'B', name: 'Blue', tint: '#0a84ff' },
+export const propOptionsProgressBar = {
+  className: commonPropOptions.className,
+};
+
+export const propOptionsProgressLabel = {
+  children: ['Rinsing', 'Layer 184 of 256'] as const,
+  className: commonPropOptions.className,
+};
+
+export const propOptionsProgressDetail = {
+  children: ['40 min left', '2 h 10 min'] as const,
+  className: commonPropOptions.className,
+};
+
+export const propOptionsProgressValue = {
+  children: [
+    undefined,
+    new MappedProp(
+      (formattedValue: string) => `${formattedValue} done`,
+      '[(formattedValue) => formattedValue + " done"]',
+    ),
+  ] as const,
+  className: commonPropOptions.className,
+};
+
+export const propOptionsSubtitle = {
+  children: ['Cotton, 40°', 'Ends at 14:30'] as const,
+  className: commonPropOptions.className,
+};
+
+/** A washer's program's stages (see `ControlCards.StageList`'s view). */
+export type StageData = { label: string; value: string };
+export const washerStages: readonly StageData[] = [
+  { label: 'Wash', value: 'wash' },
+  { label: 'Rinse', value: 'rinse' },
+  { label: 'Spin', value: 'spin' },
+  { label: 'Done', value: 'done' },
 ];
-const rgbw: readonly ControlCardChannel[] = [
-  ...rgb,
-  { label: 'W', name: 'White', tint: '#fff4e0' },
+export const longStages: readonly StageData[] = [
+  { label: 'Soak', value: 'soak' },
+  { label: 'Prewash', value: 'prewash' },
+  { label: 'Wash', value: 'wash' },
+  { label: 'Rinse', value: 'rinse' },
+  { label: 'Spin', value: 'spin' },
+  { label: 'Done', value: 'done' },
+];
+const dishwasherStages: readonly StageData[] = [
+  { label: 'Prewash', value: 'prewash' },
+  { label: 'Main wash', value: 'main' },
+  { label: 'Dry', value: 'dry' },
 ];
 
+/** Which of a stages card's parts its view composes (see parts.tsx). */
+export type StagesPartData = 'list' | 'subtitle';
+
+export const propOptionsStages = {
+  name: ['Washer Program', 'Dishwasher'] as const,
+  icon: [new MappedProp(sfWasher, '[washer]')] as const,
+  emphasizedIcon: [
+    new MappedProp(sfWasherFill, '[washer.fill]'),
+    undefined,
+  ] as const,
+  // (Its parts: the view composes them, see parts.tsx.)
+  children: [
+    new MappedProp<readonly StagesPartData[]>(['list'], '[StageList]'),
+    new MappedProp<readonly StagesPartData[]>(
+      ['subtitle', 'list'],
+      '[Subtitle, StageList]',
+    ),
+  ] as const,
+  value: ['rinse', undefined, 'wash', 'done', 'main'] as const,
+  active: [true, undefined, false] as const,
+  tint: [
+    'var(--color-ui-system-teal)',
+    undefined,
+    'var(--color-ui-system-orange)',
+  ] as const,
+  ...rootOptions,
+};
+
+export const propOptionsStageList = {
+  // (Its stages' data: the part's view composes them, see parts.tsx.)
+  children: [
+    new MappedProp(washerStages, '[Wash, Rinse, Spin, Done]'),
+    new MappedProp(dishwasherStages, '[Prewash, Main wash, Dry]'),
+    new MappedProp(longStages, '[Soak, Prewash, Wash, Rinse, Spin, Done]'),
+  ] as const,
+  className: commonPropOptions.className,
+};
+
+export const propOptionsStage = {
+  children: ['Rinse', 'Rinse and hold'] as const,
+  value: ['rinse', 'hold'] as const,
+  className: commonPropOptions.className,
+};
+
+/** A channel the views compose (see `ControlCards.Channel`). */
+export type ChannelData = {
+  colors?: readonly string[];
+  defaultValue: number;
+  name: string;
+  tint?: string;
+};
+
+/** A color temperature's colors, warm to cool (an app's). */
+export const kelvinColors = [
+  '#ff8b27',
+  '#ffb46b',
+  '#ffd1a3',
+  '#ffe7d2',
+  '#fff6ef',
+  '#f1f2ff',
+] as const;
+
+const rgb: readonly ChannelData[] = [
+  { defaultValue: 1, name: 'Red', tint: '#ff3b30' },
+  { defaultValue: 0.6, name: 'Green', tint: '#34c759' },
+  { defaultValue: 0.2, name: 'Blue', tint: '#0a84ff' },
+];
+const rgbw: readonly ChannelData[] = [
+  ...rgb,
+  { defaultValue: 0.8, name: 'White', tint: '#fff4e0' },
+];
+const deep: readonly ChannelData[] = [
+  { defaultValue: 0.04, name: 'Royal Blue', tint: '#1a2a8c' },
+  { defaultValue: 0.6, name: 'Violet', tint: '#5b1f9e' },
+  { defaultValue: 0.85, name: 'Deep Red', tint: '#7a0d12' },
+];
+export const fiveChannels: readonly ChannelData[] = [
+  ...rgb,
+  { defaultValue: 0.3, name: 'Cool white', tint: '#cfdcff' },
+  { defaultValue: 0.8, name: 'Warm white', tint: '#ffd9a0' },
+];
+const tunable: readonly ChannelData[] = [
+  { defaultValue: 0.7, name: 'Brightness', tint: '#ffd1a3' },
+  { colors: kelvinColors, defaultValue: 0.3, name: 'Temperature' },
+];
+
+/** A light's or channels' channels (their view composes them). */
 const channelsOptions = [
   new MappedProp(rgb, '[red, green, blue]'),
   new MappedProp(rgbw, '[red, green, blue, white]'),
+  new MappedProp(deep, '[royal blue, violet, deep red]'),
+  new MappedProp(tunable, '[brightness, temperature (a scale)]'),
 ] as const;
 
 export const getPropOptionsLight = (addLog: AddLog) => ({
@@ -253,21 +396,27 @@ export const getPropOptionsLight = (addLog: AddLog) => ({
     undefined,
     new MappedProp(sfLightbulbFill, '[lightbulb.fill]'),
   ] as const,
-  channels: channelsOptions,
-  defaultValue: [
-    undefined,
-    new MappedProp([1, 0.6, 0.2, 0], '[1, 0.6, 0.2, 0]'),
-  ] as const,
-  value: [
-    undefined,
-    new MappedProp([0.2, 0.4, 1, 0.5], '[0.2, 0.4, 1, 0.5]'),
-  ] as const,
-  onValueChange: [logged(addLog, 'value'), undefined] as const,
+  // (Its channels' data: the view composes them in its Channels.)
+  children: channelsOptions,
   defaultChecked: [undefined, true, false] as const,
   checked: [undefined, true, false] as const,
   onCheckedChange: [logged(addLog, 'checked'), undefined] as const,
-  offLabel: [undefined, 'Aus'] as const,
-  format: [undefined, celsius] as const,
+  states: [
+    undefined,
+    new MappedProp(['An', 'Aus'] as const, '["An", "Aus"]'),
+  ] as const,
+  getValueText: [
+    undefined,
+    new MappedProp(
+      (
+        formattedValue: string,
+        _value: number,
+        { checked, states: [on, off] }: ControlCardValueTextDetails,
+      ) => `${checked ? on : off} · ${formattedValue}`,
+      '[state · value, on and off]',
+    ),
+  ] as const,
+  format: [undefined, percent] as const,
   locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
   ...rootOptions,
 });
@@ -436,13 +585,41 @@ export const propOptionsSegmentedItem = {
   className: commonPropOptions.className,
 };
 
-export const getPropOptionsChannels = (addLog: AddLog) => ({
-  channels: channelsOptions,
-  value: [
-    new MappedProp([1, 0.6, 0.2, 0.8], '[1, 0.6, 0.2, 0.8]'),
-    new MappedProp([0, 0, 0, 0], '[all 0]'),
+export const propOptionsChannels = {
+  // (Its channels' data: the view composes them.)
+  children: channelsOptions,
+  className: commonPropOptions.className,
+};
+
+export const getPropOptionsChannel = (addLog: AddLog) => ({
+  name: ['Red', 'Temperature'] as const,
+  tint: [
+    '#ff3b30',
+    undefined,
+    '#1a2a8c',
+    'var(--color-ui-system-teal)',
   ] as const,
+  colors: [
+    undefined,
+    new MappedProp(kelvinColors, '[warm to cool, six colors]'),
+    new MappedProp(['#000', '#fff'], '[black, white]'),
+  ] as const,
+  defaultValue: [0.6, undefined, 0, 1] as const,
+  value: [undefined, 0, 0.03, 0.5, 0.97, 1] as const,
   onValueChange: [logged(addLog, 'value'), undefined] as const,
+  min: [undefined, 2200] as const,
+  max: [undefined, 6500] as const,
+  step: [undefined, 0.1, 100] as const,
+  getValueText: [
+    undefined,
+    new MappedProp(
+      (_: string, value: number) => `${String(value)} K`,
+      '[(_, value) => value + " K"]',
+    ),
+  ] as const,
+  format: [undefined, percent] as const,
+  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
+  disabled: [undefined, true] as const,
   className: commonPropOptions.className,
 });
 

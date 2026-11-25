@@ -52,8 +52,8 @@ export const ControlCardsOverview: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>
         Ready-made cards for what a home’s devices show and control: a state, a
-        switch, a value, a level, a button, a progress, a light of several
-        channels, a summary in rows.
+        switch, a value, a level, a button, a progress, a run of stages, a light
+        of several channels, a summary in rows.
       </li>
       <li>
         Each is a <a href={publicUrl('card')}>Card</a> with its parts, set up
@@ -71,8 +71,8 @@ export const ControlCardsOverview: FunctionComponent = () => (
       </li>
       <li>
         The parts they’re built of are there for cards of your own: a slider
-        filling a card, a light’s bars, a trend arrow, and corner buttons that
-        expand a card or open it above the page.
+        filling a card, a light’s channels, a trend arrow, and corner buttons
+        that expand a card or open it above the page.
       </li>
     </ul>
     <LiveView />

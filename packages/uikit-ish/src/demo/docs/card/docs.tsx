@@ -94,7 +94,13 @@ export const cardCornerButtonRows: readonly PropRow[] = [
     'visible',
     'boolean',
     code('true'),
-    'Whether it’s shown, outside edit mode. In edit mode it’s always hidden: faded out, it can’t be pressed or focused.',
+    'Whether it’s shown. Hidden, it fades out and can’t be pressed or focused.',
+  ],
+  [
+    'whileEditing',
+    union('hide', 'show', 'stay'),
+    code(union('hide')),
+    'In edit mode: hidden then (hide), shown only then (show, for example a button opening the card’s settings), or shown either way (stay). Shown in edit mode, it sits over the card’s veil in the color of the grid’s own buttons. A tap on it is its own, and a drag from it moves the card.',
   ],
   [
     'mirrored',
@@ -248,6 +254,18 @@ export const cardSizesRows: readonly PropRow[] = [
       '["1x1", "2x1", "3x1", "4x1", "1x2", "2x2", "3x2", "4x2", "1x3", "2x3", "1x4", "2x4"]',
     ),
     'A choice of a few, for example a heat pump’s modes: side by side across a row or taller, stacked when upright (or when the app says so), opening to choose at 1x1.',
+  ],
+  [
+    'progressDisplay',
+    'GridSize[]',
+    code('["1x1", "2x1", "3x1", "4x1", "2x2"]'),
+    'A progress, for example a washer’s run: its bar at the bottom, a pill that fills as it goes.',
+  ],
+  [
+    'stagesDisplay',
+    'GridSize[]',
+    code('["2x1", "3x1", "4x1", "2x2", "4x2"]'),
+    'A run of stages, for example a washer’s program: dots along a line at the bottom, wider for more stages. Never 1x1: too narrow for them.',
   ],
   [
     'summaryDisplay',

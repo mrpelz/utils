@@ -241,16 +241,30 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
     card: (
       <ControlCards.Light
         {...partProps['ControlCards.Light']}
-        defaultValue={[1, 0.6, 0.2]}
         emphasizedIcon={sfLightStrip2Fill}
         icon={sfLightStrip2}
         name="Light Strip"
-        channels={[
-          { label: 'R', name: 'Red', tint: '#ff3b30' },
-          { label: 'G', name: 'Green', tint: '#34c759' },
-          { label: 'B', name: 'Blue', tint: '#0a84ff' },
-        ]}
       >
+        <ControlCards.Channels {...partProps['ControlCards.Channels']}>
+          <ControlCards.Channel
+            {...partProps['ControlCards.Channel']}
+            defaultValue={1}
+            name="Red"
+            tint="#ff3b30"
+          />
+          <ControlCards.Channel
+            {...partProps['ControlCards.Channel']}
+            defaultValue={0.6}
+            name="Green"
+            tint="#34c759"
+          />
+          <ControlCards.Channel
+            {...partProps['ControlCards.Channel']}
+            defaultValue={0.2}
+            name="Blue"
+            tint="#0a84ff"
+          />
+        </ControlCards.Channels>
         <ControlCards.OpenButtons
           {...partProps['ControlCards.OpenButtons']}
           closeLabel="Close"
@@ -285,13 +299,25 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
         emphasizedIcon={sfWasherFill}
         icon={sfWasher}
         name="Washer"
-        status="42 min left"
         value={53}
-      />
+      >
+        <ControlCards.ProgressBar {...partProps['ControlCards.ProgressBar']}>
+          <ControlCards.ProgressLabel
+            {...partProps['ControlCards.ProgressLabel']}
+          >
+            Rinsing
+          </ControlCards.ProgressLabel>
+          <ControlCards.ProgressDetail
+            {...partProps['ControlCards.ProgressDetail']}
+          >
+            42 min left
+          </ControlCards.ProgressDetail>
+        </ControlCards.ProgressBar>
+      </ControlCards.Progress>
     ),
     name: 'Washer',
     size: '2x1',
-    sizes: cardSizes.numericalDisplay,
+    sizes: cardSizes.progressDisplay,
   },
   {
     card: (
@@ -363,14 +389,9 @@ export const everyCardOf = (partProps: PartProps): readonly StageTile[] => [
 /** The parts `everyCardOf` renders, and the props it sets on them. */
 export const everyCardParts = {
   'ControlCards.Button': ['emphasizedIcon', 'icon', 'name', 'status'],
-  'ControlCards.Light': [
-    'channels',
-    'children',
-    'defaultValue',
-    'emphasizedIcon',
-    'icon',
-    'name',
-  ],
+  'ControlCards.Channel': ['defaultValue', 'name', 'tint'],
+  'ControlCards.Channels': ['children'],
+  'ControlCards.Light': ['children', 'emphasizedIcon', 'icon', 'name'],
   'ControlCards.List': ['icon', 'name', 'opening', 'rows'],
   'ControlCards.Segmented': [
     'children',
@@ -382,12 +403,15 @@ export const everyCardParts = {
   'ControlCards.SegmentedItem': ['children', 'icon', 'tint', 'value'],
   'ControlCards.Progress': [
     'active',
+    'children',
     'emphasizedIcon',
     'icon',
     'name',
-    'status',
     'value',
   ],
+  'ControlCards.ProgressBar': ['children'],
+  'ControlCards.ProgressDetail': ['children'],
+  'ControlCards.ProgressLabel': ['children'],
   'ControlCards.Slider': [
     'brightness',
     'defaultChecked',

@@ -1,4 +1,13 @@
 /* Grid (see main.tsx). */
+
+/* (A corner symbol's share shown, 0 to 1 (see below): its icon's colors at
+   that share, faded by it alone. Registered to transition, not inherited.) */
+@property --uikit-grid-corner-shown {
+  inherits: false;
+  initial-value: 1;
+  syntax: '<number>';
+}
+
 @layer uikit-ish {
   /* Square units: its columns and unit measured (see main.tsx), its rows
      as tall as a column is wide; placed by CSS grid, in order (`dense`:
@@ -863,12 +872,25 @@
   .uikit-grid-corner-icon {
     display: block;
     overflow: visible;
-    fill: currentcolor;
+    fill: color-mix(
+      in srgb,
+      currentcolor calc(var(--uikit-grid-corner-shown) * 100%),
+      transparent
+    );
     paint-order: stroke;
-    stroke: var(--uikit-grid-corner-backing, transparent);
+    stroke: color-mix(
+      in srgb,
+      var(--uikit-grid-corner-backing, transparent)
+        calc(var(--uikit-grid-corner-shown) * 100%),
+      transparent
+    );
     stroke-linejoin: round;
     stroke-width: 3px;
-    transition: stroke 200ms;
+
+    /* (Fading in and out by its share shown (see the top), nothing else:
+       its colors change at once, as its surroundings' do, e.g. its card
+       lit.) */
+    transition: --uikit-grid-corner-shown 200ms;
   }
 
   /* A corner button (see main.tsx; the grid's controls, a card's): a 44px
@@ -892,7 +914,6 @@
     font-size: var(--uikit-grid-corner-icon-size, 15px);
     line-height: 0;
     place-items: center;
-    transition: color 200ms;
 
     &[data-grid-corner^='top'] {
       inset-block-start: 0;
@@ -1161,14 +1182,13 @@
     }
   }
 
-  /* A corner button hidden (see main.tsx; inert): faded out by its color,
-     its backing with it (over whatever colored it). */
+  /* A corner button hidden (see main.tsx; inert): its icon faded out, its
+     backing with it (see the top). */
   .uikit-grid-corner-button[data-grid-corner][data-grid-hidden] {
-    color: transparent;
     pointer-events: none;
 
     > .uikit-grid-corner-icon {
-      stroke: transparent;
+      --uikit-grid-corner-shown: 0;
     }
   }
 
@@ -1260,34 +1280,47 @@
      move, by its color, as hidden ones fade (see above); one shown (e.g.
      its x) coming once at its end (an animation: shown, only then); its
      color otherwise changing at once, as its text's (e.g. lit).) */
-  .uikit-grid-item-body[data-grid-open] .uikit-grid-corner-button {
+  .uikit-grid-item-body[data-grid-open]
+    .uikit-grid-corner-button
+    > .uikit-grid-corner-icon {
     transition-duration: 0s;
+  }
 
-    &[data-grid-hidden] {
-      transition-duration: 80ms;
-    }
+  .uikit-grid-item-body[data-grid-open]
+    .uikit-grid-corner-button[data-grid-hidden]
+    > .uikit-grid-corner-icon {
+    transition-duration: 80ms;
   }
 
   .uikit-grid-item-body[data-grid-open='open']
-    .uikit-grid-corner-button:not([data-grid-hidden]) {
-    animation: 120ms 200ms backwards uikit-grid-corner-appear;
-
+    .uikit-grid-corner-button:not([data-grid-hidden])
     > .uikit-grid-corner-icon {
-      animation: 120ms 200ms backwards uikit-grid-corner-icon-appear;
-    }
+    animation: 120ms 200ms backwards uikit-grid-corner-appear;
+  }
+
+  /* (A tile's own corner button there while editing (its `whileEditing`,
+     e.g. a card's settings): its move sign stepping aside, the tile moved
+     from anywhere all the same, from that button too. An area's sign, at
+     the area's corner, stays.) */
+  .uikit-grid-item-body:has(
+      .uikit-grid-corner-button[data-grid-corner='top-trailing'][data-grid-editing]:not([data-grid-hidden], [data-card-copy])
+    )
+    > .uikit-grid-move-sign {
+    display: none;
+  }
+
+  .uikit-grid-item:not([data-grid-room]):has(
+      .uikit-grid-corner-button[data-grid-corner='top-trailing'][data-grid-editing]:not([data-grid-hidden], [data-card-copy])
+    )
+    > .uikit-grid-move-sign {
+    display: none;
   }
 }
 
-/* A corner button shown (see above): from transparent, its color and its
-   icon's backing (colors only, no opacity: in a scroller, iOS). */
+/* A corner button shown (see above): its icon from none shown, its backing
+   with it (its colors' share, no opacity: in a scroller, iOS). */
 @keyframes uikit-grid-corner-appear {
   from {
-    color: transparent;
-  }
-}
-
-@keyframes uikit-grid-corner-icon-appear {
-  from {
-    stroke: transparent;
+    --uikit-grid-corner-shown: 0;
   }
 }

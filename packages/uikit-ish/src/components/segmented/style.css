@@ -67,6 +67,12 @@
     text-transform: none;
     transform: translate3d(0, 0, 0);
     transition-duration: 100ms;
+
+    /* (Its weight as it's checked, its opacity as it's disabled: named, not
+       all of them; with `visibility` among them, its words would stay
+       shown as its page is hidden (e.g. a page pushed over it), until the
+       transition ends.) */
+    transition-property: color, font-variation-settings, font-weight, opacity;
     -webkit-user-select: none;
     user-select: none;
 
@@ -317,7 +323,10 @@
     );
     opacity: calc(1 - var(--uikit-segmented-pressed, 0));
     pointer-events: none;
-    transition: 200ms;
+    transition-duration: 200ms;
+
+    /* (Moving and fading: named, not all, see the item's.) */
+    transition-property: clip-path, inset-inline-start, opacity;
 
     &:dir(rtl) {
       clip-path: inset(
