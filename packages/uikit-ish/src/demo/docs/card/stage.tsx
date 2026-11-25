@@ -1,10 +1,4 @@
-import {
-  Fragment,
-  FunctionComponent,
-  ReactNode,
-  useMemo,
-  useState,
-} from 'react';
+import { FunctionComponent, ReactNode, useMemo, useState } from 'react';
 
 import {
   Grid,
@@ -32,6 +26,8 @@ import { partPropMaps } from '../part-options.js';
 /** A tile on the stage (see `tileStage`): its card and sizes. */
 export type StageTile = {
   card: ReactNode;
+  /** Whether it's expanded at first (its item's own state). */
+  defaultExpanded?: boolean;
   /** Its size expanded in place (its item's `expandedSize`; none: none). */
   expandedSize?: GridSize;
   name: string;
@@ -85,10 +81,20 @@ export const tileStage = (
             style={gridSigns(partProps['Grid.Root']?.style)}
           >
             {tiles.map(
-              ({ card, expandedSize, name, openSize, size, sizes }) => (
+              ({
+                card,
+                defaultExpanded,
+                expandedSize,
+                name,
+                openSize,
+                size,
+                sizes,
+              }) => (
                 <Grid.Item
-                  key={name}
+                  // (Mounted anew with its card: its own defaults read.)
+                  key={`${name}-${cardKey}`}
                   {...partProps['Grid.Item']}
+                  defaultExpanded={defaultExpanded}
                   dropName={name}
                   expandedSize={expandedSize}
                   size={size}
@@ -100,7 +106,7 @@ export const tileStage = (
                   })}
                   onOpenChange={(open) => setOpen(name, open)}
                 >
-                  <Fragment key={cardKey}>{card}</Fragment>
+                  {card}
                 </Grid.Item>
               ),
             )}
@@ -115,9 +121,12 @@ export const tileStage = (
 /** The parts the stage shows (see `tileStage`), the props it sets. */
 export const stageParts = {
   'Grid.Item': [
+    'defaultExpanded',
     'defaultSize',
     'dropName',
+    'expanded',
     'expandedSize',
+    'onExpandedChange',
     'onOpenChange',
     'open',
     'openLabel',
@@ -126,7 +135,8 @@ export const stageParts = {
     'supportedSizes',
   ],
   'Grid.Root': [],
-  'Page.Root': [],
+  // (Its background the stage's picture's, see the demo's CSS.)
+  'Page.Root': ['background'],
   'Viewport.Content': [],
 } as const;
 

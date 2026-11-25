@@ -241,6 +241,7 @@ export const stageParts = {
   'Button.Label': [],
   'Button.Root': ['onClick', 'variant'],
   'Grid.Item': [
+    'defaultExpanded',
     'defaultOpen',
     'defaultSize',
     'dropName',
@@ -258,7 +259,8 @@ export const stageParts = {
   ],
   'Grid.ResizeHandle': [],
   'Grid.Root': ['editing', 'reorderHandle'],
-  'Page.Root': [],
+  // (Its background the stage's picture's, see the demo's CSS.)
+  'Page.Root': ['background'],
   'Viewport.Content': [],
 } as const;
 

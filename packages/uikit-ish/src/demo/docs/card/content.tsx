@@ -15,6 +15,8 @@ import { cardTints } from '../../tooling/card-kit.js';
 import { FlipParts } from '../../tooling/flip.js';
 import type { PartProps } from '../../tooling/frame/prop-control.js';
 import {
+  sfDoorLeftHandClosed,
+  sfHomepodFill,
   sfHouseFill,
   sfHumidityFill,
   sfLightbulb,
@@ -442,6 +444,20 @@ export const roomCard = ({
       >
         Humidity
       </Card.Row>
+      <Card.Row
+        icon={sfHomepodFill}
+        value="Paused"
+        {...parts['Card.Row']}
+      >
+        Speaker
+      </Card.Row>
+      <Card.Row
+        icon={sfDoorLeftHandClosed}
+        value="Closed"
+        {...parts['Card.Row']}
+      >
+        Balcony Door
+      </Card.Row>
     </Card.Rows>
     <Card.CloseButton
       aria-label="Close"
@@ -543,11 +559,12 @@ export const cardOf = (kind: CardKind, context: CardContext): ReactNode =>
 /** A card's symbol, a card's text (what each kind sets on them). */
 const symbolParts = {
   'Card.Symbol': [],
-  Symbol: ['emphasizedIcon', 'icon'],
+  Symbol: ['box', 'emphasizedIcon', 'icon'],
 } as const;
 const textParts = {
   'Card.Title': [],
-  'Card.Value': ['children', 'format', 'value'],
+  // (Its value words: a number's format and locale, a number, nothing.)
+  'Card.Value': ['children', 'format', 'locale', 'value'],
 } as const;
 const expandParts = {
   'Card.ExpandButton': ['aria-label'],
@@ -560,6 +577,9 @@ const sliderCardParts = {
   'ControlCards.Slider': [
     'brightness',
     'defaultValue',
+    // (No switch: its words for on and off unused.)
+    'getValueText',
+    'states',
     'emphasizedIcon',
     'format',
     'icon',
@@ -606,7 +626,8 @@ const kindParts: Readonly<
   },
   humidity: { 'Card.Root': [], ...symbolParts, ...textParts },
   lamp: {
-    'Card.Root': ['active', 'onClick'],
+    // (Switchable: its glass by its state, not its context.)
+    'Card.Root': ['active', 'context', 'onClick'],
     ...symbolParts,
     ...textParts,
     'Card.Switch': [
@@ -616,24 +637,32 @@ const kindParts: Readonly<
       'onCheckedChange',
     ],
   },
-  lock: { 'Card.Root': ['active'], ...symbolParts, ...textParts },
+  lock: {
+    'Card.Root': ['active', 'context'],
+    ...symbolParts,
+    ...textParts,
+  },
   room: {
     'Card.CloseButton': ['aria-label'],
     'Card.Row': ['children', 'icon', 'value'],
-    'Card.Rows': ['children'],
+    // (Opening, not expanding: no last row making it small again.)
+    'Card.Rows': ['children', 'lessLabel'],
     'ControlCards.List': ['children', 'icon', 'label'],
   },
   temperature: {
     'Card.CornerButton': ['aria-label', 'icon', 'onClick'],
     'Card.Root': ['onClick'],
     ...symbolParts,
-    ...textParts,
+    // (Its value a number, its format and the number its group's to set.)
+    'Card.Title': [],
+    'Card.Value': ['children'],
   },
 };
 
 /**
- * The parts tiles' cards render (see `kindParts`), the props any of them
- * sets left to it (no control silently doing nothing).
+ * The parts tiles' cards render (see `kindParts`), the props all of them
+ * set left out: a prop one card leaves to its group, its control acts on
+ * that card; one every card sets, its control would do nothing.
  */
 export const partsOfTiles = (
   tiles: readonly Pick<CardTile, 'kind'>[],
@@ -641,8 +670,8 @@ export const partsOfTiles = (
   const parts: Record<string, Set<string>> = {};
   for (const { kind } of tiles) {
     for (const [part, fixed] of Object.entries(kindParts[kind])) {
-      parts[part] ??= new Set();
-      for (const prop of fixed) parts[part].add(prop);
+      const own = new Set<string>(fixed);
+      parts[part] = parts[part]?.intersection(own) ?? own;
     }
   }
   return Object.fromEntries(

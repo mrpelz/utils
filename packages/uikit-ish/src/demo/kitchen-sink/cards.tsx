@@ -8,6 +8,7 @@ import {
   forwardClick,
   type GlassContextValue,
   Grid,
+  type GridCorner,
   gridIcons,
   type GridSize,
   Header,
@@ -273,20 +274,22 @@ const DoorsPage: FunctionComponent = () => (
 
 /** The lights' page: a switch per light, a press on its row as on it. */
 /**
- * A card's settings button (a gear, in its top trailing corner, free of
- * the grid's edit buttons): to its settings page (`card/settings`); shown
- * only while editing (`show`, e.g. a card's settings), or either way
- * (`stay`, in the grid's controls' color while editing).
+ * A card's settings button (a gear, in its top trailing corner by default,
+ * free of the grid's edit buttons): to its settings page
+ * (`card/settings`); shown only outside edit mode (`hide`), only while
+ * editing (`show`, e.g. a card's settings), or either way (`stay`, in the
+ * grid's controls' color while editing).
  */
 const SettingsButton: FunctionComponent<{
+  corner?: GridCorner;
   name: string;
-  whileEditing: 'show' | 'stay';
-}> = ({ name, whileEditing }) => {
+  whileEditing: 'hide' | 'show' | 'stay';
+}> = ({ corner = 'top-trailing', name, whileEditing }) => {
   const push = usePush();
   return (
     <Card.CornerButton
       aria-label={`${name} Settings`}
-      corner="top-trailing"
+      corner={corner}
       icon={sfGearshape}
       whileEditing={whileEditing}
       onClick={() => {
@@ -496,11 +499,12 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
           label="Floor Lamp"
           tint={cardTints.light}
         >
-          {/* (Its settings, editing or not: its color as the card's, lit
-              or off, and the grid's controls' while editing.) */}
+          {/* (Its settings, outside edit mode only, in its bottom
+              trailing corner: its color as the card's, lit or off.) */}
           <SettingsButton
+            corner="bottom-trailing"
             name="Floor Lamp"
-            whileEditing="stay"
+            whileEditing="hide"
           />
         </Toned.Switch>
       ),

@@ -194,7 +194,8 @@ const fillEdgeOf = (width: number, share: number) => {
 /**
  * A channel's labels placed (see `Channel`): its name at its start, its
  * value at its end, the one its thumb would cover beside the other (back
- * once the thumb's clear of it by `channelSlack`), each in the color scheme
+ * once the thumb's clear of it by `channelSlack`); covered there too, in
+ * its place, each in the color scheme
  * of what's under its center (an amount's fill, by its tint, see
  * `textSchemeOn`; or its well; a scale's color there). Which were moved,
  * for the next time.
@@ -234,10 +235,21 @@ const placeChannelLabels = ({
     const slack = wasMoved ? channelSlack : 0;
     return thumbEnd > from - slack && thumbStart < to + slack;
   };
-  const nameMoved = isOver(nameAt, moved.name);
-  const valueMoved = !nameMoved && isOver(valueAt, moved.value);
-  const nameX = nameMoved ? valueAt[0] - channelGap - nameWidth : nameAt[0];
-  const valueX = valueMoved ? nameAt[1] + channelGap : valueAt[0];
+  // (Where each would go: beside the other, at the other end.)
+  const nameAside = [
+    valueAt[0] - channelGap - nameWidth,
+    valueAt[0] - channelGap,
+  ] as const;
+  const valueAside = [
+    nameAt[1] + channelGap,
+    nameAt[1] + channelGap + valueWidth,
+  ] as const;
+  // (Moved only to where the thumb isn't: covered at both ends, it stays.)
+  const nameMoved = isOver(nameAt, moved.name) && !isOver(nameAside, false);
+  const valueMoved =
+    !nameMoved && isOver(valueAt, moved.value) && !isOver(valueAside, false);
+  const nameX = nameMoved ? nameAside[0] : nameAt[0];
+  const valueX = valueMoved ? valueAside[0] : valueAt[0];
   const sign = getComputedStyle(element).direction === 'rtl' ? -1 : 1;
   // (An amount's fill's edge, from its start: its thumb's center, its ends
   // all the way, see the CSS.)
@@ -350,7 +362,8 @@ export const Channels = forwardRef<HTMLDivElement, CardChannelsProps>(
  * A scale (`colors`): its colors along its well, its thumb the color at its
  * value. Its label at its start, its value at its end; the one its thumb
  * would cover sliding to the other end, beside the other, and back once
- * the thumb's clear of it again. Each label's color scheme by one sample
+ * the thumb's clear of it again (covered there too, in its place). Each
+ * label's color scheme by one sample
  * under its center (the fill's, by its tint, see `textSchemeOn`; the
  * well's; a scale's color there), its colors read as they or the color
  * scheme change. A press held back until it's a drag along it (a touch

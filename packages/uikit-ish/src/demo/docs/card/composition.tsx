@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo, useState } from 'react';
+import { Fragment, FunctionComponent, useMemo, useState } from 'react';
 
 import {
   Button,
@@ -472,7 +472,7 @@ const StageView: FunctionComponent<{
   const stage = useCardsStage(addLog, tiles);
   // (Room around a tile: its area's controls too.)
   const hasArea = tiles.some(({ area }) => area !== undefined);
-  const [partControls, partProps, partState] = usePartControls(
+  const [partControls, partProps, partState, partsKey] = usePartControls(
     useMemo(
       () =>
         partPropMaps(
@@ -503,7 +503,9 @@ const StageView: FunctionComponent<{
       state={[partState, presentationState]}
       title="Card"
     >
-      {cardsStage(stage, partProps)}
+      {/* (Mounted anew as a control changes: a default is read as it
+          mounts.) */}
+      <Fragment key={partsKey}>{cardsStage(stage, partProps)}</Fragment>
     </Component>
   );
 };
@@ -561,11 +563,24 @@ const DrillView: FunctionComponent = () => {
           {
             'Button.Icon': [],
             'Card.CornerButton': ['aria-label', 'icon', 'onClick'],
-            'Card.Root': ['active', 'onClick'],
+            // (Switchable (its lights on or not): its glass by its state.)
+            'Card.Root': ['active', 'context', 'onClick'],
             'Card.Symbol': [],
             'Card.Title': [],
-            'Card.Value': ['children'],
-            'Grid.Item': ['size', 'supportedSizes'],
+            // (Its words: a number's format, locale and number unused.)
+            'Card.Value': ['children', 'format', 'locale', 'value'],
+            // (Its size the app's; no expansion, no default read, nothing
+            // opened above the page.)
+            'Grid.Item': [
+              'defaultExpanded',
+              'defaultOpen',
+              'defaultSize',
+              'expanded',
+              'expandedSize',
+              'openSize',
+              'size',
+              'supportedSizes',
+            ],
             'Grid.Root': [],
             'List.Content': [],
             'List.Group': [],

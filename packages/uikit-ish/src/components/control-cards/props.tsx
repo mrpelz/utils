@@ -249,10 +249,11 @@ export type ControlCardSegmentedProps = ControlCardProps & {
    */
   children: ReactNode;
   /**
-   * The option that's off: chosen, the card isn't lit (its dark glass);
-   * any other, it is. None: as its glass is (never lit).
+   * The option (or options) that's off: chosen, the card isn't lit (its
+   * dark glass); any other, it is (e.g. `['off', 'away']`). None: as its
+   * glass is (never lit).
    */
-  offValue?: string;
+  offValue?: string | readonly string[];
   /** Its symbol's tint (an option's own instead, while it's chosen). */
   tint?: string;
 };

@@ -411,9 +411,9 @@ export const controlCardsListRows: readonly PropRow[] = [
 export const controlCardsSegmentedRows: readonly PropRow[] = [
   [
     'offValue',
-    'string',
+    'string | readonly string[]',
     undefined,
-    'The option that means off. While it’s chosen, the card is dark glass; any other, it’s lit. Without it, the card follows its glass and is never lit.',
+    'The option, or options, that mean off, for example [“off”, “away”]. While one of them is chosen, the card is dark glass; any other, it’s lit. Without it, the card follows its glass and is never lit.',
   ],
   [
     'tint',

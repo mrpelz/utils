@@ -593,7 +593,7 @@ const ListCard = forwardRef<HTMLDivElement, ControlCardListProps>(
  * children), laid out by its size; 1x1, its chosen option's words only, a
  * press on it opening it above the page (its grid item's `openSize` given;
  * a `Card.OpenButton` and a `Card.CloseButton` among its children). Lit
- * while its chosen option isn't its `offValue`; its symbol and tint the
+ * while its chosen option isn't (one of) its `offValue`; its symbol and tint the
  * chosen option's.
  */
 const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
@@ -636,7 +636,9 @@ const SegmentedCard = forwardRef<HTMLDivElement, ControlCardSegmentedProps>(
         active={
           offValue === undefined || value === undefined
             ? undefined
-            : value !== offValue
+            : !(typeof offValue === 'string'
+                ? value === offValue
+                : offValue.includes(value))
         }
         {...props}
         className={cn('uikit-control-cards-segmented', className)}

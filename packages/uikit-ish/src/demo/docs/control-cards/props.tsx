@@ -39,6 +39,7 @@ import {
   channelsOptions,
   getRowsChildrenOptions,
   percent,
+  precisePercent,
   type ProgressPartData,
   segmentedChildrenOptions,
 } from '../card/props.js';
@@ -51,6 +52,12 @@ const rootOptions = {
   ...glassSurfacePropOptions,
   ...commonPropOptions,
 };
+
+/**
+ * A switchable card's `Card.Root` props: no `context` (its state decides
+ * its glass, see `Card.Root`'s `active`).
+ */
+const switchableRootOptions = commonPropOptions;
 
 /** Logs a callback's call, its arguments shown. */
 const logged = (addLog: AddLog, name: string) =>
@@ -86,7 +93,7 @@ export const propOptionsState = {
     new MappedProp(sfLightbulbFill, '[lightbulb.fill]'),
   ] as const,
   states: [states('Locked', 'Unlocked'), undefined] as const,
-  ...rootOptions,
+  ...switchableRootOptions,
 };
 
 export const getPropOptionsSwitch = (addLog: AddLog) => ({
@@ -100,13 +107,14 @@ export const getPropOptionsSwitch = (addLog: AddLog) => ({
     undefined,
     new MappedProp(sfLightbulbFill, '[lightbulb.fill]'),
   ] as const,
-  defaultChecked: [undefined, true, false] as const,
-  checked: [undefined, true, false] as const,
+  // (Off at first: only its other states do something.)
+  defaultChecked: [undefined, true] as const,
+  checked: [undefined, true] as const,
   onCheckedChange: [logged(addLog, 'checked'), undefined] as const,
   disabled: [undefined, true] as const,
   states: [undefined, states('Running', 'Stopped')] as const,
   tint: [undefined, cardTints.light, cardTints.air] as const,
-  ...rootOptions,
+  ...switchableRootOptions,
 });
 
 export const propOptionsValue = {
@@ -118,7 +126,7 @@ export const propOptionsValue = {
   emphasizedIcon: [undefined] as const,
   value: [21.5, 0.46, -3.25, 'Unknown'] as const,
   format: [celsius, undefined, percent] as const,
-  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
+  locale: [undefined, 'de-DE', 'ar-EG'] as const,
   trend: [undefined, 30, 0, -45, 90] as const,
   ...rootOptions,
 };
@@ -134,7 +142,7 @@ const sliderOptions = (addLog: AddLog) => ({
   value: [undefined, 0, 0.5, 1] as const,
   onValueChange: [logged(addLog, 'value'), undefined] as const,
   format: [percent, undefined] as const,
-  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
+  locale: [undefined, 'de-DE', 'ar-EG'] as const,
   tint: [
     cardTints.light,
     undefined,
@@ -154,9 +162,11 @@ export const getPropOptionsSlider = (addLog: AddLog) => ({
     new MappedProp(sfLightbulbFill, '[lightbulb.fill]'),
     undefined,
   ] as const,
-  brightness: [true, undefined] as const,
-  defaultChecked: [undefined, true, false] as const,
-  checked: [undefined, true, false] as const,
+  // (Not a brightness at first: its glass by its context.)
+  brightness: [undefined, true] as const,
+  // (A switch from the start, on: its states and value text shown.)
+  defaultChecked: [true, undefined, false] as const,
+  checked: [undefined, false] as const,
   onCheckedChange: [logged(addLog, 'checked'), undefined] as const,
   states: [
     undefined,
@@ -169,8 +179,11 @@ export const getPropOptionsSlider = (addLog: AddLog) => ({
         formattedValue: string,
         _value: number,
         { checked }: ControlCardValueTextDetails,
-      ) => (checked === false ? `${formattedValue} (off)` : formattedValue),
-      '[value, “(off)” after it]',
+      ) =>
+        checked === undefined
+          ? formattedValue
+          : `${formattedValue} (${checked ? 'on' : 'off'})`,
+      '[value, “(on)” or “(off)” after it]',
     ),
   ] as const,
   ...rootOptions,
@@ -207,7 +220,8 @@ export const propOptionsProgress = {
     undefined,
     new MappedProp(sfDoorGarageOpen, '[door.garage.open]'),
   ] as const,
-  active: [true, undefined, false] as const,
+  // (Not switchable at first: its glass by its context.)
+  active: [undefined, true, false] as const,
   tint: [undefined, 'var(--color-ui-system-orange)', '#ffd60a'] as const,
   // (Its parts: the view composes them, see parts.tsx.)
   children: [
@@ -239,7 +253,8 @@ export const propOptionsStages = {
       '[Subtitle, StageList]',
     ),
   ] as const,
-  active: [true, undefined, false] as const,
+  // (Not switchable at first: its glass by its context.)
+  active: [undefined, true, false] as const,
   tint: [
     'var(--color-ui-system-teal)',
     undefined,
@@ -261,8 +276,9 @@ export const getPropOptionsLight = (addLog: AddLog) => ({
   ] as const,
   // (Its channels' data: the view composes them in its Card.Channels.)
   children: channelsOptions,
-  defaultChecked: [true, undefined, false] as const,
-  checked: [undefined, true, false] as const,
+  // (Off at first; the view's second light on: both its words shown.)
+  defaultChecked: [undefined, true] as const,
+  checked: [undefined, true] as const,
   onCheckedChange: [logged(addLog, 'checked'), undefined] as const,
   disabled: [undefined, true] as const,
   states: [undefined, states('An', 'Aus')] as const,
@@ -277,9 +293,9 @@ export const getPropOptionsLight = (addLog: AddLog) => ({
       '[state · value, on and off]',
     ),
   ] as const,
-  format: [undefined, percent] as const,
-  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
-  ...rootOptions,
+  format: [undefined, precisePercent] as const,
+  locale: [undefined, 'de-DE', 'ar-EG'] as const,
+  ...switchableRootOptions,
 });
 
 export const getPropOptionsList = (addLog: AddLog) => ({
@@ -304,7 +320,11 @@ export const propOptionsSegmented = {
   emphasizedIcon: [undefined] as const,
   // (Its options' data: the view composes them in its Card.Segmented.)
   children: segmentedChildrenOptions,
-  offValue: ['off', undefined] as const,
+  offValue: [
+    'off',
+    undefined,
+    new MappedProp(['off', 'heat'] as const, '["off", "heat"]'),
+  ] as const,
   tint: [undefined, cardTints.heat] as const,
   ...rootOptions,
 };

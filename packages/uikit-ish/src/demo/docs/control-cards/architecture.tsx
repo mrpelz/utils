@@ -134,8 +134,8 @@ export const ControlCardsArchitecture: FunctionComponent = () => (
         <PartLink part="ControlCards.Segmented" /> provides its choice a host:
         its options register there too, and the choice reports its value and
         layout. So the card’s symbol, tint and value are the chosen option’s,
-        it’s lit while that isn’t its <code>offValue</code>, and at 1x1 a press
-        on it opens it above the page. It also tells a{' '}
+        it’s lit while that isn’t one of its <code>offValue</code>s, and at 1x1
+        a press on it opens it above the page. It also tells a{' '}
         <PartLink
           component="card"
           part="Card.OpenButton"

@@ -123,6 +123,9 @@ const SliderPart: FunctionComponent = () => (
       'ControlCards.Slider (others)': [
         'defaultValue',
         'format',
+        // (No switch: its words for on and off unused.)
+        'getValueText',
+        'states',
         'icon',
         'label',
         'max',
@@ -142,7 +145,7 @@ const SliderPart: FunctionComponent = () => (
         card: (
           <ControlCards.Slider
             {...partProps['ControlCards.Slider (others)']}
-            defaultValue={0.5}
+            defaultValue={0.75}
             format={{ maximumFractionDigits: 0, style: 'percent' }}
             icon={sfWindowShadeClosed}
             label="Blinds"
@@ -471,13 +474,6 @@ const LightPart: FunctionComponent = () => (
       'Card.Channel': ['colors', 'defaultValue', 'label', 'tint'],
       'Card.Channels': ['children'],
       'Card.ExpandButton': ['aria-label'],
-      'ControlCards.Light (others)': [
-        'children',
-        'defaultChecked',
-        'emphasizedIcon',
-        'icon',
-        'label',
-      ],
     }}
     tilesOf={(props, partProps) => {
       const { children: data, ...card } = props as Omit<
@@ -505,11 +501,12 @@ const LightPart: FunctionComponent = () => (
         },
         {
           card: (
+            // (The same light, on at first (unless its control says),
+            // large: its value in its format, its five channels; the
+            // first, off at first, says its off word.)
             <ControlCards.Light
-              {...partProps['ControlCards.Light (others)']}
               defaultChecked
-              emphasizedIcon={card.emphasizedIcon}
-              icon={card.icon}
+              {...card}
               label="Floor Lamp"
             >
               <Card.Channels {...partProps['Card.Channels']}>
@@ -545,7 +542,6 @@ const ListPart: FunctionComponent = () => (
     part="ControlCards.List"
     others={{
       'Card.CloseButton': ['aria-label'],
-      'Card.ExpandButton': ['aria-label'],
       'Card.Row': ['children', 'icon', 'onClick', 'value'],
       'Card.Rows': ['children'],
     }}
@@ -561,15 +557,10 @@ const ListPart: FunctionComponent = () => (
               <Card.Rows {...partProps['Card.Rows']}>
                 {rowsOf(data, partProps)}
               </Card.Rows>
-              {/* (No rows: its corner button expands it instead.) */}
-              {data.length === 0 ? (
-                <Card.ExpandButton
-                  {...partProps['Card.ExpandButton']}
-                  aria-label="Living Room details"
-                />
-              ) : null}
             </ControlCards.List>
           ),
+          // (Expanded at first: its last row making it small again.)
+          defaultExpanded: true,
           expandedSize: '3x3',
           name: 'Expanding',
           size: '2x2',
@@ -959,9 +950,10 @@ export const ControlCardsParts: FunctionComponent = () => (
             component="grid"
             part="Grid.Item"
           />
-          ’s expandedSize) or opens it above the page (an openSize). Here: the
-          first expands, the second opens; with no rows, a{' '}
-          {cardPart('Card.ExpandButton')} expands it instead.
+          ’s expandedSize) or opens it above the page (an openSize); expanded,
+          it makes it small again. Here: the first is expanded at first, the
+          second opens. Without rows, a {cardPart('Card.ExpandButton')} in its
+          corner can expand it instead.
         </>,
       ]}
     />

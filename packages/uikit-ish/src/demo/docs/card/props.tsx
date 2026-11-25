@@ -52,6 +52,12 @@ export const percent = new MappedProp<Intl.NumberFormatOptions>(
   '[percent]',
 );
 
+/** A percentage with a decimal (not a percentage default's). */
+export const precisePercent = new MappedProp<Intl.NumberFormatOptions>(
+  { maximumFractionDigits: 1, minimumFractionDigits: 1, style: 'percent' },
+  '[percent, one decimal]',
+);
+
 export const propOptionsRoot = {
   ...glassSurfacePropOptions,
   ...commonPropOptions,
@@ -73,11 +79,30 @@ export const propOptionsSymbol = {
   tint: [undefined, 'var(--color-ui-system-yellow)'] as const,
 };
 
-/** Its switch: a switch's options, its tint a card's. */
+/**
+ * Its switch: a switch's options, its tint a card's. Its state the card's
+ * (the lamp's, kept by the stage: `checked` only to turn it off), a form's
+ * value and its explicit defaults left out (they'd change nothing here).
+ */
 export const getPropOptionsSwitch = (addLog: AddLog) => {
-  const { tint: _tint, ...options } = switchRoot(addLog, () => undefined);
+  const {
+    checked: _checked,
+    defaultChecked: _defaultChecked,
+    required: _required,
+    tint: _tint,
+    uncheckedValue: _uncheckedValue,
+    value: _value,
+    ...options
+  } = switchRoot(addLog, () => undefined);
+  const set = Object.fromEntries(
+    Object.entries(options).map(([key, values]) => [
+      key,
+      (values as readonly unknown[]).filter((each) => each !== false),
+    ]),
+  ) as unknown as typeof options;
   return {
-    ...options,
+    ...set,
+    checked: [undefined, false] as const,
     tint: [
       undefined,
       'var(--color-ui-system-teal)',
@@ -93,15 +118,7 @@ export const propOptionsTitle = {
 
 /** Formats as an app might choose them (`Intl.NumberFormat`'s options). */
 const formats = [
-  new MappedProp<Intl.NumberFormatOptions>(
-    {
-      maximumFractionDigits: 1,
-      minimumFractionDigits: 1,
-      style: 'unit',
-      unit: 'celsius',
-    },
-    '[°C, one decimal]',
-  ),
+  // (None: the card's own, °C with one decimal.)
   undefined,
   new MappedProp<Intl.NumberFormatOptions>(
     { maximumFractionDigits: 0, style: 'unit', unit: 'celsius' },
@@ -121,7 +138,7 @@ export const propOptionsValue = {
   ...renderOptions,
   value: [21.5, undefined, 0, -3.25, 1234.5] as const,
   format: formats,
-  locale: [undefined, 'en-US', 'de-DE', 'fr-FR', 'ar-EG'] as const,
+  locale: [undefined, 'de-DE', 'fr-FR', 'ar-EG'] as const,
   children: [undefined, 'Locked', ' (set)'] as const,
 };
 
@@ -138,11 +155,11 @@ export const propOptionsTrend = {
 export const getPropOptionsSlider = (addLog: AddLog) => ({
   ...elementOptions,
   label: ['Heat to', 'Dimmer'] as const,
-  min: [16, undefined, 0] as const,
-  max: [26, undefined, 100] as const,
+  min: [16, undefined, 10] as const,
+  max: [26, undefined, 30] as const,
   step: [0.5, undefined, 1, 2.5] as const,
   defaultValue: [21, undefined, 16, 26] as const,
-  value: [undefined, 16, 21, 26] as const,
+  value: [undefined, 16, 26] as const,
   onValueChange: [logged(addLog, 'value'), undefined] as const,
   onPress: [undefined, logged(addLog, 'press')] as const,
   format: [
@@ -153,7 +170,7 @@ export const getPropOptionsSlider = (addLog: AddLog) => ({
     undefined,
     percent,
   ] as const,
-  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
+  locale: [undefined, 'de-DE', 'ar-EG'] as const,
   tint: [cardTints.heat, undefined, cardTints.shade, '#1c3f94'] as const,
   disabled: [undefined, true] as const,
   name: [undefined, 'target-temperature'] as const,
@@ -180,8 +197,8 @@ export const propOptionsProgress = {
   value: [53, null, 0, 100] as const,
   min: [undefined, 20] as const,
   max: [undefined, 90] as const,
-  format: [undefined, percent] as const,
-  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
+  format: [undefined, precisePercent] as const,
+  locale: [undefined, 'de-DE', 'ar-EG'] as const,
   getAriaValueText: [
     undefined,
     new MappedProp(
@@ -355,8 +372,8 @@ export const getPropOptionsChannel = (addLog: AddLog) => ({
   min: [undefined, 2200] as const,
   max: [undefined, 6500] as const,
   step: [undefined, 10, 100] as const,
-  format: [undefined, percent] as const,
-  locale: [undefined, 'en-US', 'de-DE', 'ar-EG'] as const,
+  format: [undefined, precisePercent] as const,
+  locale: [undefined, 'de-DE', 'ar-EG'] as const,
   children: [
     undefined,
     new MappedProp(
@@ -536,7 +553,11 @@ export const getPropOptionsOpenButton = (addLog: AddLog) => ({
   mirrored: [undefined, true] as const,
 });
 
-export const getPropOptionsCloseButton = (addLog: AddLog) => ({
-  ...cornerOptions(addLog, 'Close'),
-  mirrored: [undefined, true] as const,
-});
+/** A close button: no `whileEditing` (edit mode closes its tile). */
+export const getPropOptionsCloseButton = (addLog: AddLog) => {
+  const { whileEditing: _whileEditing, ...options } = cornerOptions(
+    addLog,
+    'Close',
+  );
+  return { ...options, mirrored: [undefined, true] as const };
+};

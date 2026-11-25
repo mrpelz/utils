@@ -86,7 +86,6 @@ import {
   propOptionsStageList,
   propOptionsSubtitle,
   propOptionsTrend,
-  roomRows,
   type RowData,
   type SegmentedOptionData,
   type StageData,
@@ -853,7 +852,6 @@ const RowsPart: FunctionComponent = () => (
     others={othersBut('Card.Rows', {
       'Card.CloseButton': ['aria-label'],
       'Card.Row': rowFixed,
-      'Card.Rows (others)': ['children'],
     })}
     tilesOf={(props, partProps) => {
       const { children: data, ...rows } = props as Omit<
@@ -867,7 +865,9 @@ const RowsPart: FunctionComponent = () => (
             { icon: sfHouseFill, title: 'Living Room' },
             <Card.Rows {...rows}>{rowsOf(data, partProps)}</Card.Rows>,
           ),
-          // (Rows left out: its last row expands it.)
+          // (Expanded at first: its last row makes it small again (its
+          // lessLabel); small, it expands it.)
+          defaultExpanded: true,
           expandedSize: '3x3',
           name: 'Living Room',
           size: '2x2',
@@ -878,9 +878,9 @@ const RowsPart: FunctionComponent = () => (
             partProps,
             { icon: sfHouseFill, title: 'Kitchen' },
             <>
-              <Card.Rows {...partProps['Card.Rows (others)']}>
-                {rowsOf(roomRows, partProps)}
-              </Card.Rows>
+              {/* (The same rows: rows left out, its last row counting
+                  them (its getMoreLabel), opening it above the page.) */}
+              <Card.Rows {...rows}>{rowsOf(data, partProps)}</Card.Rows>
               <Card.CloseButton
                 {...partProps['Card.CloseButton']}
                 aria-label="Close"
@@ -905,7 +905,8 @@ const RowPart: FunctionComponent = () => (
     part="Card.Row"
     others={othersBut('Card.Row', {
       'Card.Row (others)': rowFixed,
-      'Card.Rows': ['children'],
+      // (Two rows, both fitting: no last row of its own.)
+      'Card.Rows': ['children', 'getMoreLabel', 'lessLabel'],
     })}
     tilesOf={(props, partProps) => [
       {
@@ -1274,7 +1275,7 @@ export const CardBlockSections: FunctionComponent = () => (
         'A touch is held back until it moves: along the well it’s a drag, across it a scroll of the page, the value untouched. While it’s dragged, the page doesn’t scroll, and its words can’t be selected. A tap sets the value where it lands.',
         'An amount (tint) fills from its start in its tint as far as the thumb’s center. At its least and greatest values the fill slides the rest of the way, to nothing or the whole well. Its thumb shows the light it gives: its tint mixed on black by its share, as light adds up, so 0% is black.',
         'A scale (colors) shows its colors along the well instead of a fill, its thumb the color at its value: for example a color temperature, warm to cool. The colors are the app’s; give it a range too, for example min 2200 and max 6500.',
-        'Its label sits at its start and its value at its end. When the thumb would cover one of them, that one slides to the other end beside the other, and back once the thumb is clear again. Each takes dark or light text by what’s under its center.',
+        'Its label sits at its start and its value at its end. When the thumb would cover one of them, that one slides to the other end beside the other, and back once the thumb is clear again. If the thumb would cover it there too, it stays where it is. Each takes dark or light text by what’s under its center.',
       ]}
     />
     <Section

@@ -56,12 +56,12 @@ const logSize = (addLog: AddLog, name: string) =>
 
 export const propOptionsRoot = {
   ...elementOptions,
-  editing: [undefined, false, true] as const,
-  dense: [undefined, false, true] as const,
-  gap: [undefined, 8, 12, 20] as const,
+  editing: [undefined, true] as const,
+  dense: [undefined, true] as const,
+  gap: [undefined, 8, 20] as const,
   maxTileRows: [undefined, 2, 4] as const,
   minColumns: [undefined, 5, 6] as const,
-  unitSize: [undefined, 90, 180] as const,
+  unitSize: [undefined, 70, 180] as const,
   unitMin: [undefined, 80] as const,
   unitMax: [undefined, 110] as const,
 };
@@ -114,7 +114,6 @@ export const getPropOptionsArea = (name: string) => (addLog: AddLog) => ({
   defaultPlacement: [undefined, 'top-leading', 'bottom-trailing'] as const,
   placement: [
     undefined,
-    'center',
     'top-leading',
     'top-trailing',
     'bottom-leading',
@@ -234,13 +233,7 @@ export const getPropOptionsCornerButton = (addLog: AddLog) => ({
     new MappedProp(gridIcons.resizeBoth, '[gridIcons.resizeBoth]'),
     new MappedProp(sfICircle, '[info.circle (SF Symbol)]'),
   ] as const,
-  corner: [
-    undefined,
-    'bottom-leading',
-    'top-leading',
-    'top-trailing',
-    'bottom-trailing',
-  ] as const,
+  corner: [undefined, 'bottom-leading', 'top-leading', 'top-trailing'] as const,
   mirrored: [undefined, true] as const,
   visible: [undefined, false] as const,
   whileEditing: [undefined, 'hide', 'show'] as const,
