@@ -23,6 +23,13 @@
     isolation: isolate;
   }
 
+  /* Mid-transition, a drag pans nothing: its pages ignore the pointer, so
+     it would reach whatever scrolls beneath (e.g. the document's parked
+     1px, see Viewport's status-bar.ts), taken for a status bar tap. */
+  .uikit-navigation-root[data-navigation-moving] .uikit-navigation-stack {
+    touch-action: none;
+  }
+
   .uikit-navigation-frame {
     position: absolute;
     display: flex;
