@@ -348,6 +348,41 @@
 
     }
 
+    /* Its slots (above a pressable title's hit area, see below): letting
+       presses through, to the title's hit area beneath or the row (its
+       click handler's, e.g. `forwardClick`), but where their controls are
+       pressed (focusable, or a control by its element or role: as
+       `forwardClick`'s own presses, see main.tsx). */
+    & > :is([data-list-part='leading'], [data-list-part='trailing']) {
+      pointer-events: none;
+
+      & :is(
+          a[href],
+          button,
+          input,
+          label,
+          select,
+          textarea,
+          [contenteditable=''],
+          [contenteditable='true'],
+          [tabindex],
+          [role='button'],
+          [role='checkbox'],
+          [role='link'],
+          [role='menuitem'],
+          [role='option'],
+          [role='radio'],
+          [role='radiogroup'],
+          [role='slider'],
+          [role='switch'],
+          [role='tab'],
+          [data-slider-part='control'],
+          [data-card-own-press]
+        ) {
+        pointer-events: auto;
+      }
+    }
+
     /* Slots after the content: what's in them
        in a line, 16px apart (a grabber 12px), above a pressable title's hit
        area. */

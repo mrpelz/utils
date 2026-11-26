@@ -157,6 +157,22 @@ export const ListArchitecture: FunctionComponent = () => (
         title’s hit area then covers the row, beneath the trailing controls.
       </li>
       <li>
+        Only the controls in{' '}
+        <PartLink
+          component="list"
+          part="List.Leading"
+        />{' '}
+        and{' '}
+        <PartLink
+          component="list"
+          part="List.Trailing"
+        />{' '}
+        take their own presses: anything focusable, or a control by its element
+        or role. The rest of a slot (its gaps, a detail, a chevron, an image)
+        lets presses through, to the title’s hit area or to the row’s own click
+        handler (for example <code>forwardClick</code>).
+      </li>
+      <li>
         A row with its own click handler is pressable too. It’s marked as
         pressed, unless the press is on one of its own controls.
       </li>
