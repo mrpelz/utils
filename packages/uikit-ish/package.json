@@ -30,7 +30,7 @@
     "wheel-gestures": "2.3.0"
   },
   "devDependencies": {
-    "@mrpelz/boilerplate-preact": "16.5.0",
+    "@mrpelz/boilerplate-preact": "16.5.1",
     "@mrpelz/misc-utils": "*",
     "@types/node": "26.6.6",
     "@types/webpack-env": "1.18.8",
