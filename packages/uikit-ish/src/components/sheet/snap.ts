@@ -7,6 +7,8 @@ import {
   useState,
 } from 'react';
 
+import { smoothScrollOf } from '../utils/main.js';
+
 // Snapping by its snap groups' stops (see `SnapGroup`), natively: the
 // popup a scroller (`scroll-snap-type: y mandatory`), a spacer as high as
 // it, then its panel (the sheet's look: glass, or opaque), as high too, and
@@ -230,9 +232,12 @@ export const useSnap = (
           ? element.querySelector<HTMLElement>(current.content)
           : null;
       if (content && content.scrollTop > 0) {
-        content.scrollTo({ behavior: 'smooth', top: 0 });
+        content.scrollTo({ behavior: smoothScrollOf(content), top: 0 });
       }
-      element.scrollTo({ behavior: isAnother ? 'smooth' : 'instant', top });
+      element.scrollTo({
+        behavior: isAnother ? smoothScrollOf(element) : 'instant',
+        top,
+      });
     } else if (isAnother) {
       snapOn(element);
     }
@@ -282,7 +287,12 @@ export const useSnap = (
       const index = nearestStop(stops, element.scrollTop);
       if (index === -1) {
         if (current.canClose) current.onClose(event);
-        else element.scrollTo({ behavior: 'smooth', top: stops[0] ?? 0 });
+        else {
+          element.scrollTo({
+            behavior: smoothScrollOf(element),
+            top: stops[0] ?? 0,
+          });
+        }
         return;
       }
       // (At its stop still, another at the same place: kept, e.g. stops
@@ -503,7 +513,7 @@ export const useSnap = (
         settle(event);
         return;
       }
-      element.scrollTo({ behavior: 'smooth', top });
+      element.scrollTo({ behavior: smoothScrollOf(element), top });
     };
 
     // Resized, its range with it (e.g. shrunk as the keyboard shows, grown

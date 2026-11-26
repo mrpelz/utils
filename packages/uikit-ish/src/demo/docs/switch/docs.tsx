@@ -72,7 +72,9 @@ export const switchRootRows: readonly PropRow[] = [
   [
     'onOffLabels',
     'boolean',
-    code('false'),
+    <>
+      the settings’ <code>differentiateWithoutColor</code>
+    </>,
     'Shows “I” and “O” on the track, next to the knob (as an accessibility setting would).',
   ],
   [

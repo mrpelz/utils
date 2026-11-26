@@ -2,7 +2,7 @@ import './style.css';
 
 import { FunctionComponent, useMemo } from 'react';
 
-import { Button, Symbol, Tooltip } from '../../../components/index.js';
+import { Button, Stack, Symbol, Tooltip } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
@@ -81,7 +81,14 @@ const LiveView: FunctionComponent = () => {
       state={[stateContent, stateRoot, statePositioner, partState]}
       title="Tooltip"
     >
-      <div className="tooltip-demo-buttons">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        className="tooltip-demo-buttons"
+        justify="center"
+        spacing="medium"
+      >
         <Tooltip.Root
           key={keyRoot}
           {...propsRoot}
@@ -114,7 +121,7 @@ const LiveView: FunctionComponent = () => {
             </Tooltip.Positioner>
           </Tooltip.Portal>
         </Tooltip.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

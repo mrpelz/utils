@@ -7,6 +7,7 @@ import {
   Button,
   collapsedSelection,
   List,
+  Stack,
   Symbol,
   TabBar,
 } from '../../../components/index.js';
@@ -92,7 +93,11 @@ export const BadgeDemo: FunctionComponent = () => {
       state={[stateRoot, stateContent, partState]}
       title="Badge"
     >
-      <div className="badge-demo-stage">
+      <Stack
+        align="center"
+        className="badge-demo-stage"
+        spacing="xLarge"
+      >
         <Button.Root
           {...partProps['Button.Root']}
           aria-label="Notifications"
@@ -236,7 +241,7 @@ export const BadgeDemo: FunctionComponent = () => {
             </List.Group>
           </List.Section>
         </List.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

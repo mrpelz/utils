@@ -16,11 +16,13 @@ import {
   PageControl,
   Segmented,
   Sidebar,
+  Stack,
   Switch,
   Symbol,
   TabBar,
   TextField,
   Toolbar,
+  Typography,
   useViewportScroll,
   Viewport,
 } from '../../components/index.js';
@@ -301,7 +303,7 @@ const SampleTabBar: FunctionComponent<{
   const shown = tabs.slice(0, count);
 
   return (
-    <div className="kitchen-sink-stacked">
+    <Stack>
       <TabBar.Root
         value={value}
         onValueChange={(next: unknown) => {
@@ -369,7 +371,7 @@ const SampleTabBar: FunctionComponent<{
           <Button.Label>{isCollapsed ? 'Expand' : 'Collapse'}</Button.Label>
         </Button.Root>
       ) : null}
-    </div>
+    </Stack>
   );
 };
 
@@ -1065,6 +1067,118 @@ const ColumnPage: FunctionComponent<{
   </div>
 );
 
+/** A stack's example children: buttons (enabled, see shared.tsx). */
+const stackButtons = (labels: readonly string[]) =>
+  labels.map((label) => (
+    <Button.Root
+      key={label}
+      disabled={false}
+      variant="bordered"
+    >
+      <Button.Label>{label}</Button.Label>
+    </Button.Root>
+  ));
+
+const spacingSteps = [
+  ['small', 'Small (8px)'],
+  ['medium', 'Medium (12px)'],
+  ['large', 'Large (16px, the Default)'],
+  ['xLarge', 'Extra Large (32px)'],
+] as const;
+
+/**
+ * Stack: each spacing step in a column, rows (wrapping, aligned, spread),
+ * and content on the page inset as the list's groups are.
+ */
+const StackContent: FunctionComponent = () => (
+  <List.Root>
+    {spacingSteps.map(([spacing, title]) => (
+      <Showcase
+        key={spacing}
+        isStacked
+        title={title}
+      >
+        <Stack spacing={spacing}>
+          {stackButtons(['Share', 'Duplicate', 'Move'])}
+        </Stack>
+      </Showcase>
+    ))}
+    <Showcase
+      isStacked
+      footer="Side by side, wrapping onto more lines as they don’t fit."
+      title="A Row"
+    >
+      <Stack
+        wrap
+        axis="horizontal"
+        spacing="medium"
+      >
+        {stackButtons(['Share', 'Duplicate', 'Move', 'Rename', 'Archive'])}
+      </Stack>
+    </Showcase>
+    <Showcase
+      isStacked
+      title="Aligned: Start, Center, End"
+    >
+      {(
+        [
+          ['start', 'Start'],
+          ['center', 'Center'],
+          ['end', 'End'],
+        ] as const
+      ).map(([align, label]) => (
+        <Stack
+          key={align}
+          align={align}
+          spacing="small"
+        >
+          {stackButtons([label])}
+        </Stack>
+      ))}
+    </Showcase>
+    <Showcase
+      isStacked
+      title="Spread Out"
+    >
+      <Stack
+        axis="horizontal"
+        justify="spaceBetween"
+      >
+        {stackButtons(['Back', 'Next'])}
+      </Stack>
+    </Showcase>
+    <List.Section>
+      <List.Header>
+        <List.Title>On the Page, Inset</List.Title>
+      </List.Header>
+      <Stack inset>
+        <Typography color="secondary">
+          Content that isn’t a list, 16px from the sides, as the groups below
+          are.
+        </Typography>
+        <Segmented.Root
+          aria-label="Period"
+          defaultValue="w"
+        >
+          <Segmented.Item value="d">Day</Segmented.Item>
+          <Segmented.Item value="w">Week</Segmented.Item>
+          <Segmented.Item value="m">Month</Segmented.Item>
+          <Segmented.Highlight />
+        </Segmented.Root>
+      </Stack>
+    </List.Section>
+    <List.Section>
+      <List.Group>
+        <List.Item>
+          <List.Content>
+            <List.Title>A Row in a Group</List.Title>
+          </List.Content>
+        </List.Item>
+      </List.Group>
+    </List.Section>
+  </List.Root>
+);
+
 const LayoutContent: FunctionComponent = () => (
   <List.Root>
     <List.Section>
@@ -1473,6 +1587,7 @@ export const structurePages: SinkPages = {
     title: 'Header',
   },
   layout: { Content: LayoutContent, title: 'Layout' },
+  stack: { Content: StackContent, title: 'Stack' },
   navigation: { Content: NavigationContent, title: 'Navigation' },
   ...Object.fromEntries(
     [1, 2, 3, 4, 5].map((depth) => [

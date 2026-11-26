@@ -1,3 +1,4 @@
+import { datePickerLabels } from '../../../components/index.js';
 import {
   code,
   elementRows,
@@ -5,6 +6,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -57,6 +59,52 @@ const valueRows: readonly PropRow[] = [
       days it returns <code>true</code> for are disabled.
     </>,
   ],
+];
+
+/**
+ * A built-in word's row: its prop, its default (read from the library's
+ * `datePickerLabels`), what it names.
+ */
+const labelRow = (
+  name: keyof typeof datePickerLabels,
+  description: string,
+): PropRow => [
+  name,
+  'string',
+  code(datePickerLabels[name]),
+  `${description} Read by assistive technology; give your own in another language.`,
+];
+
+/** The calendar's built-in words. */
+const calendarLabelRows: readonly PropRow[] = [
+  labelRow('previousMonthLabel', 'The previous month’s button.'),
+  labelRow('nextMonthLabel', 'The next month’s button.'),
+  labelRow('monthLabel', 'The month roll’s name.'),
+  labelRow('yearLabel', 'The year roll’s name.'),
+];
+
+/** The time roll's built-in words. */
+const timeLabelRows: readonly PropRow[] = [
+  labelRow('hoursLabel', 'The hours column’s name.'),
+  labelRow('minutesLabel', 'The minutes column’s name.'),
+  labelRow('dayPeriodLabel', 'The AM/PM column’s name.'),
+];
+
+/** The picker's own built-in words. */
+const ownLabelRows: readonly PropRow[] = [
+  labelRow('dateLabel', 'The date’s button and popup.'),
+  labelRow(
+    'dateAndTimeLabel',
+    'The date’s button and popup, with a time (mode dateAndTime).',
+  ),
+  labelRow('timeLabel', 'The time’s button, popup and row.'),
+];
+
+/** `datePickerLabels`: its keys (every built-in word), their defaults. */
+export const datePickerLabelsRows: readonly PropRow[] = [
+  ...ownLabelRows,
+  ...calendarLabelRows,
+  ...timeLabelRows,
 ];
 
 const calendarRows: readonly PropRow[] = [
@@ -128,7 +176,9 @@ const calendarRows: readonly PropRow[] = [
   [
     'locale',
     'string',
-    'the user’s',
+    <>
+      from <a href={publicUrl('settings')}>Settings</a>
+    </>,
     'The locale for names, numerals, the hour cycle and the week’s first day.',
   ],
   [
@@ -281,11 +331,15 @@ export const datePickerRootRows: readonly PropRow[] = [
   ],
   ['disabled', 'boolean', code('false'), 'Disables the whole picker.'],
   ...calendarRows,
+  ...calendarLabelRows,
+  ...timeLabelRows,
+  ...ownLabelRows,
 ];
 
 export const datePickerCalendarRows: readonly PropRow[] = [
   ...valueRows,
   ...calendarRows,
+  ...calendarLabelRows,
   [
     'label',
     'string',
@@ -367,9 +421,12 @@ export const datePickerTimeRollRows: readonly PropRow[] = [
   [
     'locale',
     'string',
-    'the user’s',
+    <>
+      from <a href={publicUrl('settings')}>Settings</a>
+    </>,
     'The locale for numerals, the hour cycle and the day period.',
   ],
+  ...timeLabelRows,
 ];
 
 export const datePickerCalendarRowRows: readonly PropRow[] = [
@@ -416,7 +473,14 @@ export const datePickerCalendarTimeRowRows: readonly PropRow[] = [
       argument).
     </>,
   ],
-  ['label', 'ReactNode', code('Time'), 'The row’s title.'],
+  [
+    'label',
+    'ReactNode',
+    <>
+      its picker’s <code>timeLabel</code>
+    </>,
+    'The row’s title.',
+  ],
 ];
 
 export const datePickerCalendarMessageRows: readonly PropRow[] = [

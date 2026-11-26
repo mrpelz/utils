@@ -36,6 +36,15 @@ import { SettingsReport, SettingsTable } from './report.js';
  * the inner one's menu opening in a portal, following its settings. Their
  * settings, resolved, in its diagnostics.
  */
+const languagesCode = `// A British person living in Germany (their app's own language choice).
+<Settings.Provider languages={['en-GB', 'de']}>
+  <App />
+</Settings.Provider>;
+
+// In it:
+useLanguage(['en-US', 'en-GB', 'de']); // 'en-GB': British strings
+useSettings().locale; // 'en-DE': German dates and numbers`;
+
 const LiveView: FunctionComponent = () => {
   const id = 'settings-overview';
   const [log, addLog] = useLog();
@@ -276,6 +285,7 @@ const sections: readonly Section[] = [
   ['when-to-use-it', 'When to use it'],
   ['key-props', 'Key props'],
   ['behavior', 'Behavior'],
+  ['languages-and-formats', 'Languages and formats'],
   ['your-apps-tint', 'Your app’s tint'],
 ];
 
@@ -290,9 +300,12 @@ export const SettingsOverview: FunctionComponent = () => (
         size.
       </li>
       <li>
-        By default, each one follows the system through a media query, and
-        updates live. A provider overrides some of them for everything inside
-        it. A provider inside that one can override them again, or reset them.
+        Inside a provider, each one follows the system through a media query,
+        and updates live, so an app puts one at its root. Outside any provider,
+        the components use the defaults, except for the color scheme and the
+        locale, which the browser follows on its own. A provider also overrides
+        some settings for everything inside it, and a provider inside that one
+        can override them again, or reset them.
       </li>
     </ul>
     <LiveView />
@@ -359,7 +372,8 @@ export const SettingsOverview: FunctionComponent = () => (
     <ul>
       <li>
         A setting comes from the nearest provider that overrides it. Without
-        one, it follows the system. Without a system value, it uses its default.
+        one, it follows the system, as long as there’s a provider at all.
+        Without a system value, or outside every provider, it uses its default.
       </li>
       <li>
         A provider overrides the settings it’s given. A setting given as{' '}
@@ -367,11 +381,9 @@ export const SettingsOverview: FunctionComponent = () => (
         an outer provider set. A setting left out comes from the outer provider.
       </li>
       <li>
-        For CSS, a provider sets custom properties (
-        <code>--uikit-settings-*</code>, see{' '}
-        <a href={publicUrl('tokens')}>Design tokens</a>) on its element.
-        Elements inside inherit them from the nearest provider. The element has
-        no box of its own (<code>display: contents</code>). For logic, use{' '}
+        For CSS, a provider sets attributes on its element, and elements inside
+        follow the nearest provider’s. The element has no box of its own (
+        <code>display: contents</code>). For logic, use{' '}
         <PartLink
           component="settings"
           part="useSettings"
@@ -392,6 +404,36 @@ export const SettingsOverview: FunctionComponent = () => (
         ).
       </li>
     </ul>
+
+    <Heading
+      id="languages-and-formats"
+      level={2}
+    >
+      Languages and formats
+    </Heading>
+    <ul>
+      <li>
+        <code>languages</code> are the user’s preferred languages, ranked.
+        Choose your app’s translation from them with{' '}
+        <PartLink
+          component="settings"
+          part="useLanguage"
+        />
+        .
+      </li>
+      <li>
+        <code>locale</code> is for formatting only: the first language with the
+        region. A British person and an American person in Germany both see
+        German dates and numbers (<code>en-DE</code>), while{' '}
+        <PartLink
+          component="settings"
+          part="useLanguage"
+        />{' '}
+        still gives one of them <code>en-GB</code> and the other{' '}
+        <code>en-US</code>.
+      </li>
+    </ul>
+    <CodeView code={languagesCode} />
 
     <Heading
       id="your-apps-tint"

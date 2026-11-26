@@ -1,5 +1,6 @@
 import { RefObject, useLayoutEffect } from 'react';
 
+import { smoothScrollOf } from '../utils/main.js';
 import { isKeyboardShown, tapSlop, textField } from './input.js';
 
 // A text field typed into, scrolled into view above the keyboard: by its
@@ -129,7 +130,7 @@ const track = (owns: (field: Element) => boolean): (() => void) => {
     if (overflowY !== 'auto' && overflowY !== 'scroll') return;
     const distance = distanceTo(field, scroller);
     if (Math.abs(distance) < 1) return;
-    scroller.scrollBy({ behavior: 'smooth', top: distance });
+    scroller.scrollBy({ behavior: smoothScrollOf(scroller), top: distance });
   };
 
   // Once everything has settled (the field and its scroller unmoved for two

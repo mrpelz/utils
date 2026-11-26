@@ -6,6 +6,7 @@ import {
   CheckboxGroup,
   Radio,
   RadioGroup,
+  Stack,
   Symbol,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -169,26 +170,31 @@ const RadioRootPart: FunctionComponent = () => {
     >
       <RadioGroup
         key={elementKey}
+
         {...partProps.RadioGroup}
         aria-label="Contact by"
-        className="checkbox-demo-group"
+
         defaultValue="email"
+        render={<Stack />}
         onValueChange={(
           value: unknown,
           { reason }: BaseRadioGroup.ChangeEventDetails,
         ) => addLog(`value change: ${String(value)}/${reason}`)}
       >
         {contacts.map(([value, label], index) => (
-          <label
+          <Stack
             key={value}
-            className="checkbox-demo-option"
+            align="center"
+            axis="horizontal"
+            render={<label />}
+            spacing="medium"
           >
             <Radio.Root
               value={value}
               {...(index === 0 ? props : partProps['Radio.Root (others)'])}
             />
             {label}
-          </label>
+          </Stack>
         ))}
       </RadioGroup>
     </Component>
@@ -238,19 +244,24 @@ const RadioIndicatorPart: FunctionComponent = () => {
     >
       <RadioGroup
         key={elementKey}
+
         {...partProps.RadioGroup}
         aria-label="Contact by"
-        className="checkbox-demo-group"
+
         defaultValue="email"
+        render={<Stack />}
         onValueChange={(
           value: unknown,
           { reason }: BaseRadioGroup.ChangeEventDetails,
         ) => addLog(`value change: ${String(value)}/${reason}`)}
       >
         {contacts.map(([value, label]) => (
-          <label
+          <Stack
             key={value}
-            className="checkbox-demo-option"
+            align="center"
+            axis="horizontal"
+            render={<label />}
+            spacing="medium"
           >
             <Radio.Root
               {...partProps['Radio.Root']}
@@ -264,7 +275,7 @@ const RadioIndicatorPart: FunctionComponent = () => {
               </Radio.Indicator>
             </Radio.Root>
             {label}
-          </label>
+          </Stack>
         ))}
       </RadioGroup>
     </Component>
@@ -310,27 +321,35 @@ const CheckboxGroupPart: FunctionComponent = () => {
         aria-label="Notify by"
         {...props}
       >
-        <div className="checkbox-demo-group">
-          <label className="checkbox-demo-option">
+        <Stack>
+          <Stack
+            align="center"
+            axis="horizontal"
+            render={<label />}
+            spacing="medium"
+          >
             <Checkbox.Root
               {...partProps['Checkbox.Root']}
               parent
             />
             All
-          </label>
+          </Stack>
           {contacts.map(([value, label]) => (
-            <label
+            <Stack
               key={value}
-              className="checkbox-demo-option"
+              align="center"
+              axis="horizontal"
+              render={<label />}
+              spacing="medium"
             >
               <Checkbox.Root
                 {...partProps['Checkbox.Root']}
                 value={value}
               />
               {label}
-            </label>
+            </Stack>
           ))}
-        </div>
+        </Stack>
       </CheckboxGroup>
     </Component>
   );
@@ -375,20 +394,23 @@ const RadioGroupPart: FunctionComponent = () => {
         aria-label="Contact by"
         {...props}
       >
-        <div className="checkbox-demo-group">
+        <Stack>
           {contacts.map(([value, label]) => (
-            <label
+            <Stack
               key={value}
-              className="checkbox-demo-option"
+              align="center"
+              axis="horizontal"
+              render={<label />}
+              spacing="medium"
             >
               <Radio.Root
                 {...partProps['Radio.Root']}
                 value={value}
               />
               {label}
-            </label>
+            </Stack>
           ))}
-        </div>
+        </Stack>
       </RadioGroup>
     </Component>
   );

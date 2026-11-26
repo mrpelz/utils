@@ -38,8 +38,8 @@
       --uikit-tab-bar-collapsed-icon-size,
       var(--uikit-tab-bar-icon-size)
     );
-    font-variation-settings: 'wght' var(--uikit-tab-bar-icon-weight);
-    font-weight: round(down, var(--uikit-tab-bar-icon-weight), 100);
+    font-variation-settings: 'wght' calc(var(--uikit-tab-bar-icon-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--uikit-tab-bar-icon-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(
       --uikit-tab-bar-collapsed-icon-letter-spacing,
       var(--uikit-tab-bar-icon-letter-spacing)
@@ -72,8 +72,8 @@
       --uikit-symbol-blend: normal;
       --uikit-symbol-emphasis: 1;
 
-      font-variation-settings: 'wght' var(--uikit-tab-bar-icon-active-weight);
-      font-weight: round(down, var(--uikit-tab-bar-icon-active-weight), 100);
+      font-variation-settings: 'wght' calc(var(--uikit-tab-bar-icon-active-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--uikit-tab-bar-icon-active-weight) + var(--uikit-font-weight-boost, 0)), 100);
     }
   }
 
@@ -107,24 +107,24 @@
 
   .uikit-tab-bar-label-text {
     overflow: hidden;
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     grid-area: 1 / 1;
     text-overflow: var(--uikit-tab-bar-label-overflow, ellipsis);
     white-space: nowrap;
 
     [data-active] > * > & {
       font-size: var(--uikit-tab-bar-label-active-size);
-      font-variation-settings: 'wght' 700;
-      font-weight: round(down, 700, 100);
+      font-variation-settings: 'wght' calc(700 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(700 + var(--uikit-font-weight-boost, 0)), 100);
     }
   }
 
   .uikit-tab-bar-label-reserve {
     overflow: hidden;
     font-size: var(--uikit-tab-bar-label-active-size);
-    font-variation-settings: 'wght' 700;
-    font-weight: round(down, 700, 100);
+    font-variation-settings: 'wght' calc(700 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(700 + var(--uikit-font-weight-boost, 0)), 100);
     grid-area: 1 / 1;
     text-overflow: var(--uikit-tab-bar-label-overflow, ellipsis);
     visibility: hidden;
@@ -695,8 +695,8 @@
         > [role='tab']
         > [data-tab-bar-part='label']
         > * {
-        font-variation-settings: 'wght' 510;
-        font-weight: round(down, 510, 100);
+        font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+        font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
       }
 
       &&:where(:not([data-collapsed-content]))

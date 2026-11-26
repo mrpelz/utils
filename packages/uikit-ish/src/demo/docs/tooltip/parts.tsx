@@ -4,6 +4,7 @@ import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
+  Stack,
   Symbol,
   Tooltip,
   useCreateTooltipHandle,
@@ -431,7 +432,14 @@ const ProviderPart: FunctionComponent = () => {
       title="Tooltip.Provider"
     >
       <Tooltip.Provider {...props}>
-        <div className="tooltip-demo-buttons">
+        <Stack
+          wrap
+          align="center"
+          axis="horizontal"
+          className="tooltip-demo-buttons"
+          justify="center"
+          spacing="medium"
+        >
           <Tooltip.Root {...partProps['Tooltip.Root']}>
             <Tooltip.Trigger
               {...partProps['Tooltip.Trigger']}
@@ -516,7 +524,7 @@ const ProviderPart: FunctionComponent = () => {
               </Tooltip.Positioner>
             </Tooltip.Portal>
           </Tooltip.Root>
-        </div>
+        </Stack>
       </Tooltip.Provider>
     </Component>
   );
@@ -566,7 +574,14 @@ const CreateHandlePart: FunctionComponent = () => {
       state={[partState]}
       title="Tooltip.createHandle"
     >
-      <div className="tooltip-demo-buttons">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        className="tooltip-demo-buttons"
+        justify="center"
+        spacing="medium"
+      >
         <Tooltip.Trigger
           {...partProps['Tooltip.Trigger']}
           aria-label="Share"
@@ -597,7 +612,7 @@ const CreateHandlePart: FunctionComponent = () => {
             Open Imperatively
           </Button.Label>
         </Button.Root>
-      </div>
+      </Stack>
       <Tooltip.Root
         {...partProps['Tooltip.Root']}
         handle={shareTooltip}
@@ -653,7 +668,14 @@ const UseCreateTooltipHandlePart: FunctionComponent = () => {
       state={[partState]}
       title="useCreateTooltipHandle"
     >
-      <div className="tooltip-demo-buttons">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        className="tooltip-demo-buttons"
+        justify="center"
+        spacing="medium"
+      >
         <Tooltip.Trigger
           {...partProps['Tooltip.Trigger']}
           aria-label="Duplicate"
@@ -696,7 +718,7 @@ const UseCreateTooltipHandlePart: FunctionComponent = () => {
             />
           </Button.Icon>
         </Tooltip.Trigger>
-      </div>
+      </Stack>
       <Tooltip.Root
         {...partProps['Tooltip.Root']}
         handle={toolbarTooltip}

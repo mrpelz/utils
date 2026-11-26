@@ -4,6 +4,7 @@ import {
   Grid,
   type GridSize,
   Page,
+  Stack,
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -75,7 +76,10 @@ export const tileStage = (
           .join(' ')}
       >
         <Viewport.Padding edge="block-start" />
-        <div className="card-demo-content">
+        <Stack
+          inset
+          className="card-demo-content"
+        >
           <Grid.Root
             {...partProps['Grid.Root']}
             style={gridSigns(partProps['Grid.Root']?.style)}
@@ -111,7 +115,7 @@ export const tileStage = (
               ),
             )}
           </Grid.Root>
-        </div>
+        </Stack>
         <Viewport.Padding edge="block-end" />
       </Page.Root>
     </Viewport.Content>

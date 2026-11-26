@@ -16,8 +16,5 @@
       opacity: 0;
     }
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      transition: none;
-    }
   }
 }

@@ -8,7 +8,9 @@ import {
   type DatePickerOpen,
   type DateRange,
   List,
+  Stack,
 } from '../../../components/index.js';
+import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
@@ -28,6 +30,7 @@ import {
   datePickerCalendarTimeRowRows,
   datePickerExpandableRows,
   datePickerHandleRows,
+  datePickerLabelsRows,
   datePickerRootRows,
   datePickerTimeRollRows,
 } from './docs.js';
@@ -41,6 +44,25 @@ import {
   propOptionsCalendarTimeRow,
   propOptionsTimeRoll,
 } from './props.js';
+
+const datePickerLabelsCode = `// Every word in German (TypeScript checks that none is missing).
+const german = {
+  dateAndTimeLabel: 'Datum und Uhrzeit',
+  dateLabel: 'Datum',
+  dayPeriodLabel: 'Vormittag/Nachmittag',
+  hoursLabel: 'Stunden',
+  minutesLabel: 'Minuten',
+  monthLabel: 'Monat',
+  nextMonthLabel: 'Nächster Monat',
+  previousMonthLabel: 'Vorheriger Monat',
+  timeLabel: 'Uhrzeit',
+  yearLabel: 'Jahr',
+} satisfies Required<DatePickerLabels>;
+
+<DatePicker.Root {...german} locale="de-DE" />;
+
+// A default, read.
+datePickerLabels.nextMonthLabel; // 'Next month'`;
 
 // An example date: April 20, 2025, 10:00.
 const example = new Date(2025, 3, 20, 10, 0);
@@ -88,28 +110,29 @@ const RootPart: FunctionComponent = () => {
       state={[state, partState]}
       title="DatePicker.Root"
     >
-      <DatePicker.Root
-        key={elementKey}
-        defaultValue={example}
-        {...props}
-      />
-      <form
-        id="date-picker-parts-root-form"
-        style={{ marginBlockStart: 16 }}
-        onSubmit={(event) => {
-          event.preventDefault();
-          addLog(
-            `submitted: ${JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))}`,
-          );
-        }}
-      >
-        <Button.Root
-          {...partProps['Button.Root']}
-          type="submit"
+      <Stack align="center">
+        <DatePicker.Root
+          key={elementKey}
+          defaultValue={example}
+          {...props}
+        />
+        <form
+          id="date-picker-parts-root-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            addLog(
+              `submitted: ${JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))}`,
+            );
+          }}
         >
-          <Button.Label {...partProps['Button.Label']}>Submit</Button.Label>
-        </Button.Root>
-      </form>
+          <Button.Root
+            {...partProps['Button.Root']}
+            type="submit"
+          >
+            <Button.Label {...partProps['Button.Label']}>Submit</Button.Label>
+          </Button.Root>
+        </form>
+      </Stack>
     </Component>
   );
 };
@@ -246,28 +269,29 @@ const CalendarPart: FunctionComponent = () => {
       state={[state, partState]}
       title="DatePicker.Calendar"
     >
-      <DatePicker.Calendar
-        key={elementKey}
-        // (A date's props, or a range's: `range` picks which.)
-        {...(props as CalendarProps)}
-      />
-      <form
-        id="date-picker-parts-calendar-form"
-        style={{ marginBlockStart: 16 }}
-        onSubmit={(event) => {
-          event.preventDefault();
-          addLog(
-            `submitted: ${JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))}`,
-          );
-        }}
-      >
-        <Button.Root
-          {...partProps['Button.Root']}
-          type="submit"
+      <Stack align="center">
+        <DatePicker.Calendar
+          key={elementKey}
+          // (A date's props, or a range's: `range` picks which.)
+          {...(props as CalendarProps)}
+        />
+        <form
+          id="date-picker-parts-calendar-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            addLog(
+              `submitted: ${JSON.stringify(Object.fromEntries(new FormData(event.currentTarget)))}`,
+            );
+          }}
         >
-          <Button.Label {...partProps['Button.Label']}>Submit</Button.Label>
-        </Button.Root>
-      </form>
+          <Button.Root
+            {...partProps['Button.Root']}
+            type="submit"
+          >
+            <Button.Label {...partProps['Button.Label']}>Submit</Button.Label>
+          </Button.Root>
+        </form>
+      </Stack>
     </Component>
   );
 };
@@ -635,6 +659,14 @@ export const DatePickerParts: FunctionComponent = () => (
         />{' '}
         (in a component)
       </li>
+      <li>
+        Built-in words:{' '}
+        <PartLink
+          component="date-picker"
+          part="datePickerLabels"
+        />{' '}
+        (the English defaults of its <code>…Label</code> props)
+      </li>
     </ul>
 
     <Heading
@@ -907,6 +939,31 @@ export const DatePickerParts: FunctionComponent = () => (
     <CalendarMessagePart />
     <h3>Props</h3>
     <PropsTable rows={datePickerCalendarMessageRows} />
+
+    <Heading
+      id="datepickerlabels"
+      level={2}
+    >
+      <code>datePickerLabels</code>
+    </Heading>
+    <ul>
+      <li>
+        The picker’s built-in words, in English: the defaults of the{' '}
+        <code>…Label</code> props of <PartLink part="DatePicker.Root" /> (all of
+        them, for its parts within), <PartLink part="DatePicker.Calendar" /> and{' '}
+        <PartLink part="DatePicker.TimeRoll" /> (their own, which win over the
+        picker’s).
+      </li>
+      <li>
+        Assistive technology reads them. The library has no translations, so for
+        another language, give your own. The locale from{' '}
+        <a href={publicUrl('settings')}>Settings</a> only changes how dates and
+        times are written.
+      </li>
+    </ul>
+    <CodeView code={datePickerLabelsCode} />
+    <h3>Keys</h3>
+    <PropsTable rows={datePickerLabelsRows} />
   </>
 );
 

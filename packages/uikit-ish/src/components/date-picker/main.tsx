@@ -18,6 +18,7 @@ import {
   MouseEvent,
   PointerEvent,
   ReactNode,
+  useContext,
   useEffect,
   useId,
   useLayoutEffect,
@@ -31,7 +32,8 @@ import { Button, ButtonRootProps } from '../button/main.js';
 import { List, useCollapsible, useExpandedOpen } from '../list/main.js';
 import { Popover, type PopoverAlign } from '../popover/main.js';
 import { Roll, type RollChangeEventDetails, RollValue } from '../roll/main.js';
-import { cn } from '../utils/main.js';
+import { useLocale, useSettings } from '../settings/main.js';
+import { cn, createLabels, reducedMotionOf } from '../utils/main.js';
 import { createHandle } from './handle.js';
 import { useMonthPager } from './pager.js';
 import type {
@@ -42,6 +44,7 @@ import type {
   CalendarSwipe,
   DatePickerChangeEventDetails,
   DatePickerExpandableProps,
+  DatePickerLabels,
   DatePickerMode,
   DatePickerOpen,
   DatePickerOpenChangeEventDetails,
@@ -59,13 +62,17 @@ export type {
   CalendarMessageProps,
   CalendarProps,
   CalendarSwipe,
+  DatePickerCalendarLabels,
   DatePickerChangeEventDetails,
   DatePickerExpandableProps,
+  DatePickerLabels,
   DatePickerMode,
   DatePickerOpen,
   DatePickerOpenChangeEventDetails,
+  DatePickerOwnLabels,
   DatePickerProps,
   DatePickerStyle,
+  DatePickerTimeLabels,
   DateRange,
   DayHighlight,
   DayHighlights,
@@ -148,6 +155,27 @@ const clampDay = (date: Date, min?: Date, max?: Date) => {
   return date;
 };
 
+/**
+ * A picker's built-in words, for assistive technology (English): the
+ * defaults of every part's `…Label` props (see `DatePickerLabels`).
+ */
+export const datePickerLabels: Required<DatePickerLabels> = {
+  dateAndTimeLabel: 'Date and time',
+  dateLabel: 'Date',
+  dayPeriodLabel: 'AM/PM',
+  hoursLabel: 'Hours',
+  minutesLabel: 'Minutes',
+  monthLabel: 'Month',
+  nextMonthLabel: 'Next month',
+  previousMonthLabel: 'Previous month',
+  timeLabel: 'Time',
+  yearLabel: 'Year',
+};
+
+/** A picker's words (see `Root`), for its parts within; a part's own. */
+const { LabelsContext, useLabels } =
+  createLabels<DatePickerLabels>(datePickerLabels);
+
 const isSelectable = (date: Date, min?: Date, max?: Date) =>
   (!min || date >= startOfDay(min)) && (!max || date <= startOfDay(max));
 
@@ -186,15 +214,24 @@ const monthWeeks = (month: Date, weekStart: number) => {
 /**
  * A day's highlights (see `DayHighlights`): its dots' tints (`undefined`:
  * the date's color), and its button's attributes for a text and a circle
- * highlight (the last of each).
+ * highlight (the last of each); with `differentiateWithoutColor`, a text
+ * highlight's dot too.
  */
-const highlightsOf = (highlights: DayHighlights) => {
+const highlightsOf = (
+  highlights: DayHighlights,
+  differentiateWithoutColor: boolean,
+) => {
   if (!highlights) return { attributes: {}, dots: [] };
   const list: readonly DayHighlight[] =
     highlights === true ? [{}] : [highlights].flat();
 
+  // (State told without color alone, see Settings: a text highlight's dot
+  // too, as its tint's alone wouldn't tell.)
   const dots = list
-    .filter(({ style = 'dot' }) => style === 'dot')
+    .filter(
+      ({ style = 'dot' }) =>
+        style === 'dot' || (differentiateWithoutColor && style === 'text'),
+    )
     .map(({ tint }) => tint);
   const text = list.findLast(({ style }) => style === 'text');
   const circle = list.findLast(({ style }) => style === 'circle');
@@ -335,13 +372,18 @@ const timeFormat = (locale?: string, cycle?: HourCycle) => {
  * numbers editable (e.g. in an expandable list row, see `DatePicker.Root`).
  */
 const TimeRoll: FunctionComponent<TimeRollProps> = ({
+  dayPeriodLabel,
   hourCycle: cycle,
-  locale,
+  hoursLabel,
+  locale: ownLocale,
   max,
   min,
+  minutesLabel,
   onValueChange: onChange,
   value,
 }) => {
+  const locale = useLocale(ownLocale);
+  const labels = useLabels({ dayPeriodLabel, hoursLabel, minutesLabel });
   const date = value ?? new Date();
   // Its day at a time, and whether that's beyond the limits.
   const at = (hour: number, minute: number) => {
@@ -395,7 +437,7 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
 
   const period = (
     <Roll.Column
-      aria-label="AM/PM"
+      aria-label={labels.dayPeriodLabel}
       value={isPm ? 'pm' : 'am'}
       onValueChange={(next: RollValue, details: RollChangeEventDetails) => {
         if ((next === 'pm') === isPm) return;
@@ -423,7 +465,7 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
       <Roll.Column
         editable
         align="end"
-        aria-label="Hours"
+        aria-label={labels.hoursLabel}
         value={shownHour}
         onValueChange={(next: RollValue, details: RollChangeEventDetails) => {
           set(hourOf(Number(next)), date.getMinutes(), details);
@@ -442,7 +484,7 @@ const TimeRoll: FunctionComponent<TimeRollProps> = ({
       <Roll.Column
         editable
         align="start"
-        aria-label="Minutes"
+        aria-label={labels.minutesLabel}
         value={date.getMinutes()}
         onValueChange={(next: RollValue, details: RollChangeEventDetails) =>
           set(hours, Number(next), details)
@@ -475,8 +517,10 @@ const MonthYearRoll: FunctionComponent<{
   max?: Date;
   min?: Date;
   month: Date;
+  monthLabel: string;
   onChange: (month: Date) => void;
-}> = ({ locale, max, min, month, onChange }) => {
+  yearLabel: string;
+}> = ({ locale, max, min, month, monthLabel, onChange, yearLabel }) => {
   const names = useMemo(() => {
     const format = new Intl.DateTimeFormat(locale, { month: 'long' });
     return Array.from({ length: 12 }, (_, index) =>
@@ -502,7 +546,7 @@ const MonthYearRoll: FunctionComponent<{
     <Roll.Root>
       <Roll.Column
         align="end"
-        aria-label="Month"
+        aria-label={monthLabel}
         value={month.getMonth()}
         onValueChange={(next: RollValue) =>
           onChange(new Date(year, Number(next), 1))
@@ -521,7 +565,7 @@ const MonthYearRoll: FunctionComponent<{
       <Roll.Column
         editable
         align="start"
-        aria-label="Year"
+        aria-label={yearLabel}
         value={year}
         onValueChange={(next: RollValue) =>
           onChange(
@@ -686,12 +730,15 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     hourCycle,
     isDateDisabled,
     label,
-    locale,
+    locale: ownLocale,
     max,
     min,
     showAdjacentMonths,
     time,
   } = props;
+  const locale = useLocale(ownLocale);
+  const labels = useLabels(props);
+  const { differentiateWithoutColor } = useSettings();
   const {
     dragged,
     draggedFrom,
@@ -814,6 +861,8 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
       bodyHeight.current = next;
       if (previous === undefined || previous === next) return;
       transition.current?.cancel();
+      // (Motion reduced: at its new height at once.)
+      if (reducedMotionOf(body).matches) return;
       body.style.overflow = 'clip';
       const animation = body.animate(
         [{ height: `${String(previous)}px` }, { height: `${String(next)}px` }],
@@ -1097,6 +1146,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
     // Not the adjacent months' days (nor their weekdays, see below).
     const { attributes, dots } = highlightsOf(
       outside ? undefined : highlighted?.(day),
+      differentiateWithoutColor,
     );
 
     return (
@@ -1233,7 +1283,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
           {/* Borderless round `Button`s, 40px: their chevrons (20px, the tint)
              28px apart. */}
           <Button.Root
-            aria-label="Previous month"
+            aria-label={labels.previousMonthLabel}
             className="uikit-date-picker-arrow"
             data-date-picker-part="arrow"
             disabled={isPreviousDisabled}
@@ -1243,7 +1293,7 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
             <Chevron isNext={false} />
           </Button.Root>
           <Button.Root
-            aria-label="Next month"
+            aria-label={labels.nextMonthLabel}
             className="uikit-date-picker-arrow"
             data-date-picker-part="arrow"
             disabled={isNextDisabled}
@@ -1335,6 +1385,8 @@ const CalendarPanel: FunctionComponent<CalendarInternalProps> = (props) => {
                 max={max}
                 min={min}
                 month={month}
+                monthLabel={labels.monthLabel}
+                yearLabel={labels.yearLabel}
                 onChange={showMonth}
               />
             ) : (
@@ -1405,17 +1457,18 @@ const CalendarTimeRow: FunctionComponent<{
   calendar: CalendarFooter;
   /**
    * The row's title.
-   * @default “Time”
+   * @default its picker's `timeLabel` (see `datePickerLabels`)
    */
   label?: ReactNode;
-}> = ({ calendar, label = 'Time' }) =>
-  calendar.time ? (
+}> = ({ calendar, label }) => {
+  const { timeLabel } = useContext(LabelsContext);
+  return calendar.time ? (
     <CalendarRow>
-      <span aria-hidden="true">{label}</span>
+      <span aria-hidden="true">{label ?? timeLabel}</span>
       <CalendarButton
         aria-controls={calendar.time.controls}
         aria-expanded={calendar.time.shown}
-        aria-label="Time"
+        aria-label={timeLabel}
         disabled={calendar.disabled}
         shape={calendar.buttonShape}
         onClick={calendar.time.toggle}
@@ -1424,6 +1477,7 @@ const CalendarTimeRow: FunctionComponent<{
       </CalendarButton>
     </CalendarRow>
   ) : null;
+};
 
 /** The calendar (inline, without the time). */
 const Calendar: FunctionComponent<CalendarProps & { label?: string }> = (
@@ -1529,6 +1583,7 @@ const TimePopover: FunctionComponent<
   }
 > = ({ align, isDisabled, label, onOpenChange, isOpen, shape, ...props }) => {
   const popupRef = useRef<HTMLDivElement>(null);
+  const { timeLabel } = useContext(LabelsContext);
 
   return (
     <Popover.Root
@@ -1536,7 +1591,7 @@ const TimePopover: FunctionComponent<
       onOpenChange={onOpenChange}
     >
       <Popover.Trigger
-        aria-label="Time"
+        aria-label={timeLabel}
         disabled={isDisabled}
         render={<CollapsedButton shape={shape} />}
       >
@@ -1550,7 +1605,7 @@ const TimePopover: FunctionComponent<
              scrolled sideways as a day takes focus; and clip its glow). */}
           <Popover.Popup
             ref={popupRef}
-            aria-label="Time"
+            aria-label={timeLabel}
             className="uikit-date-picker-popup"
             data-date-picker-part="popup"
             // The popup (not the first column: focused while the popup
@@ -1596,7 +1651,7 @@ const CalendarPopover: FunctionComponent<{
     initialRoll: 'time' | undefined,
     onTimeShownChange: (isShown: boolean) => void,
   ) => ReactNode;
-  dateLabel: string;
+  dateText: string;
   isDisabled: boolean;
   onOpenChange: (
     open: DatePickerOpen | null,
@@ -1604,21 +1659,22 @@ const CalendarPopover: FunctionComponent<{
   ) => void;
   open: DatePickerOpen | null;
   shape?: DatePickerProps['buttonShape'];
-  timeLabel?: string;
+  timeText?: string;
 }> = ({
   align,
   children,
-  dateLabel,
+  dateText,
   isDisabled,
   onOpenChange,
   open,
   shape,
-  timeLabel,
+  timeText,
 }) => {
+  const labels = useContext(LabelsContext);
   const dateTriggerId = useId();
   const timeTriggerId = useId();
   const collapsedRef = useRef<HTMLDivElement>(null);
-  const hasTime = timeLabel !== undefined;
+  const hasTime = timeText !== undefined;
   // The time's button is the open one while the time's roll shows (however
   // it was opened, or shown), the date's otherwise.
   const [isTimeShown, setIsTimeShown] = useState(open === 'time');
@@ -1655,17 +1711,17 @@ const CalendarPopover: FunctionComponent<{
           id={dateTriggerId}
           render={<CollapsedButton shape={shape} />}
         >
-          {dateLabel}
+          {dateText}
         </Popover.Trigger>
         {hasTime ? (
           <Popover.Trigger
-            aria-label="Time"
+            aria-label={labels.timeLabel}
             data-date-picker-trigger="time"
             disabled={isDisabled}
             id={timeTriggerId}
             render={<CollapsedButton shape={shape} />}
           >
-            {timeLabel}
+            {timeText}
           </Popover.Trigger>
         ) : null}
         <Popover.Portal>
@@ -1674,7 +1730,7 @@ const CalendarPopover: FunctionComponent<{
             anchor={collapsedRef}
           >
             <Popover.Popup
-              aria-label={hasTime ? 'Date and time' : 'Date'}
+              aria-label={hasTime ? labels.dateAndTimeLabel : labels.dateLabel}
               className="uikit-date-picker-popup"
               data-date-picker-part="popup"
             >
@@ -1691,7 +1747,7 @@ const CalendarPopover: FunctionComponent<{
 
 /** The compact style's buttons, toggling `open` (without popovers). */
 const ToggleButtons: FunctionComponent<{
-  dateLabel?: string;
+  dateText?: string;
   isDisabled: boolean;
   onOpenChange: (
     open: DatePickerOpen | null,
@@ -1699,8 +1755,9 @@ const ToggleButtons: FunctionComponent<{
   ) => void;
   open: DatePickerOpen | null;
   shape?: DatePickerProps['buttonShape'];
-  timeLabel?: string;
-}> = ({ dateLabel, isDisabled, onOpenChange, open, shape, timeLabel }) => {
+  timeText?: string;
+}> = ({ dateText, isDisabled, onOpenChange, open, shape, timeText }) => {
+  const labels = useContext(LabelsContext);
   const toggle = (picker: DatePickerOpen, event: Event) =>
     onOpenChange(open === picker ? null : picker, {
       event,
@@ -1723,7 +1780,7 @@ const ToggleButtons: FunctionComponent<{
       className="uikit-date-picker-collapsed"
       data-date-picker-part="collapsed"
     >
-      {dateLabel === undefined ? null : (
+      {dateText === undefined ? null : (
         <CollapsedButton
           aria-expanded={open === 'date'}
           disabled={isDisabled}
@@ -1732,20 +1789,20 @@ const ToggleButtons: FunctionComponent<{
             toggle('date', event)
           }
         >
-          {dateLabel}
+          {dateText}
         </CollapsedButton>
       )}
-      {timeLabel === undefined ? null : (
+      {timeText === undefined ? null : (
         <CollapsedButton
           aria-expanded={open === 'time'}
-          aria-label="Time"
+          aria-label={labels.timeLabel}
           disabled={isDisabled}
           shape={shape}
           onClick={(event: MouseEvent<HTMLButtonElement>) =>
             toggle('time', event)
           }
         >
-          {timeLabel}
+          {timeText}
         </CollapsedButton>
       )}
     </div>
@@ -1800,16 +1857,17 @@ const useListSync = (
  * time in a popover (or toggling `open`, without `popover`), or the
  * calendar in place (`pickerStyle`).
  */
-const Root: FunctionComponent<DatePickerProps> = (props) => {
+const RootBody: FunctionComponent<DatePickerProps> = (props) => {
   const {
     buttonShape,
     disabled = false,
     hourCycle,
-    locale,
+    locale: ownLocale,
     mode = 'date',
     pickerStyle = 'compact',
     popover = true,
   } = props;
+  const locale = useLocale(ownLocale);
   const { change, range, single } = usePickerValue(props);
   const [open, changeOpen] = usePickerOpen(props);
 
@@ -1889,8 +1947,8 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
     );
   }
 
-  const dateLabel = dateLabelOf(formats.date, range, single);
-  const timeLabel = single ? formats.time.format(single) : '–';
+  const dateText = dateLabelOf(formats.date, range, single);
+  const timeText = single ? formats.time.format(single) : '–';
 
   // Without popovers: buttons toggling `open` (for the app to show them,
   // or, with a handle, its `Expandable`).
@@ -1898,11 +1956,11 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
     return (
       <>
         <ToggleButtons
-          dateLabel={hasDate ? dateLabel : undefined}
+          dateText={hasDate ? dateText : undefined}
           isDisabled={disabled}
           open={open}
           shape={buttonShape}
-          timeLabel={hasTime ? timeLabel : undefined}
+          timeText={hasTime ? timeText : undefined}
           onOpenChange={changeOpen}
         />
         {formValue}
@@ -1922,7 +1980,7 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
           hourCycle={hourCycle}
           isDisabled={disabled}
           isOpen={open === 'time'}
-          label={timeLabel}
+          label={timeText}
           locale={locale}
           max={props.max}
           min={props.min}
@@ -1941,11 +1999,11 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
     <>
       <CalendarPopover
         align={props.popoverAlign}
-        dateLabel={dateLabel}
+        dateText={dateText}
         isDisabled={disabled}
         open={open}
         shape={buttonShape}
-        timeLabel={hasTime ? timeLabel : undefined}
+        timeText={hasTime ? timeText : undefined}
         onOpenChange={changeOpen}
       >
         {(initialRoll, onTimeShownChange) =>
@@ -1956,6 +2014,16 @@ const Root: FunctionComponent<DatePickerProps> = (props) => {
     </>
   );
 };
+
+/**
+ * A date picker (see `RootBody`), its words (its `…Label` props, see
+ * `datePickerLabels`) for its parts within.
+ */
+const Root: FunctionComponent<DatePickerProps> = (props) => (
+  <LabelsContext.Provider value={useLabels(props)}>
+    <RootBody {...props} />
+  </LabelsContext.Provider>
+);
 
 /**
  * A date picker's pickers in place (see `Root` `handle`): its calendar and

@@ -9,7 +9,6 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
-import { publicUrl } from '../../tooling/public-url.js';
 import {
   settingsPortalPropsRows,
   settingsProviderRows,
@@ -17,6 +16,18 @@ import {
 } from './docs.js';
 import { given, propOptionsProviderPart } from './props.js';
 import { SettingsReport, SettingsTable } from './report.js';
+
+const useLanguageCode = `const translations = { 'en-US': enUS, 'en-GB': enGB, de } as const;
+
+const App = () => {
+  // ['en-GB', 'de'] gives 'en-GB'; ['en-US'] (Safari) gives 'en-US'.
+  const language = useLanguage(['en-US', 'en-GB', 'de']);
+  return <Strings.Provider value={translations[language ?? 'en-US']}>…</Strings.Provider>;
+};`;
+
+const matchLanguageCode = `matchLanguage(['en-US', 'en-GB', 'de'], ['en-GB', 'de']); // 'en-GB'
+matchLanguage(['en-US', 'en-GB', 'de'], ['de-AT']); // 'de'
+matchLanguage(['en-US', 'en-GB', 'de'], ['fr']); // undefined`;
 
 const useSettingsCode = `import { useSettings } from '@mrpelz/uikit-ish';
 
@@ -26,6 +37,13 @@ export const Spinner = () => {
   // Moved from script: no movement with reduced motion.
   return <div data-spinning={reducedMotion ? undefined : ''} />;
 };`;
+
+const refreshSettingsCode = `import { refreshSettings } from '@mrpelz/uikit-ish';
+
+// Back in the app after a while: maybe in another time zone.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') refreshSettings();
+});`;
 
 const useSettingsPortalPropsCode = `import { createPortal } from 'react-dom';
 import { useSettingsPortalProps } from '@mrpelz/uikit-ish';
@@ -84,8 +102,8 @@ export const SettingsParts: FunctionComponent = () => (
     <ul className="demo-lead">
       <li>Provider: settings for everything inside it.</li>
       <li>
-        Hooks: the resolved settings for your own logic, and the props a portal
-        needs to follow them.
+        Helpers: the resolved settings for your own logic, the props a portal
+        needs to follow them, and a way to read the time zone again.
       </li>
     </ul>
     <ul className="demo-tree">
@@ -116,6 +134,24 @@ export const SettingsParts: FunctionComponent = () => (
               part="useSettingsPortalProps"
             />
           </li>
+          <li>
+            <PartLink
+              component="settings"
+              part="refreshSettings"
+            />
+          </li>
+          <li>
+            <PartLink
+              component="settings"
+              part="useLanguage"
+            />{' '}
+            and{' '}
+            <PartLink
+              component="settings"
+              part="matchLanguage"
+            />{' '}
+            (your app’s translation)
+          </li>
         </ul>
       </li>
     </ul>
@@ -135,11 +171,14 @@ export const SettingsParts: FunctionComponent = () => (
         <code>[inherit]</code> leaves its setting out.
       </li>
       <li>
-        The settings are set on its element as custom properties (
-        <code>--uikit-settings-*</code>, see{' '}
-        <a href={publicUrl('tokens')}>Design tokens</a>), inherited from the
-        nearest provider. The color scheme is also set as{' '}
-        <code>color-scheme</code> and <code>data-color-scheme</code>.
+        The settings are set on its element as attributes, which the stylesheets
+        follow: <code>data-uikit-contrast</code>,{' '}
+        <code>data-uikit-reduced-motion</code>,{' '}
+        <code>data-uikit-reduced-transparency</code>,{' '}
+        <code>data-uikit-differentiate-without-color</code>,{' '}
+        <code>data-uikit-text-size</code> and <code>data-uikit-bold-text</code>.
+        The color scheme is set as <code>data-color-scheme</code>, and the first
+        of its <code>languages</code> as <code>lang</code>.
       </li>
       <li>
         A glass surface given a <code>context</code> (a{' '}
@@ -182,7 +221,9 @@ export const SettingsParts: FunctionComponent = () => (
       <li>
         Returns the settings where it’s called. Each comes from the nearest
         provider that overrides it, else from the system (updated live), else
-        from its default.
+        from its default. Outside every provider, it returns the defaults,
+        except for the color scheme, languages, locale and region, which follow
+        the system.
       </li>
       <li>
         For component logic, such as animations run from script. A component’s
@@ -223,6 +264,74 @@ export const SettingsParts: FunctionComponent = () => (
     <CodeView code={useSettingsPortalPropsCode} />
     <h3>Value</h3>
     <PropsTable rows={settingsPortalPropsRows} />
+
+    <Heading
+      id="refreshsettings"
+      level={2}
+    >
+      <code>refreshSettings</code>
+    </Heading>
+    <ul>
+      <li>
+        Reads the system settings that send no event when they change again: the
+        time zone, which the guessed <code>region</code> comes from, and the
+        text size. They’re read the first time they’re needed, and again each
+        time you call this.
+      </li>
+      <li>
+        Call it when your app knows they may have changed, for example when it
+        comes back to the foreground (a text size is usually changed while the
+        app is in the background). Everything that reads the settings updates.
+      </li>
+    </ul>
+    <CodeView code={refreshSettingsCode} />
+
+    <Heading
+      id="uselanguage"
+      level={2}
+    >
+      <code>useLanguage</code>
+    </Heading>
+    <ul>
+      <li>
+        Returns the best of your app’s translations (language tags) for the
+        preferred languages where it’s called, from the nearest provider’s{' '}
+        <code>languages</code>, else the browser’s. Without a match, it returns
+        your first one.
+      </li>
+      <li>
+        It matches by the languages, not by the formatting <code>locale</code>:
+        a British person in Germany gets <code>en-GB</code>, not a guess from{' '}
+        <code>en-DE</code>.
+      </li>
+    </ul>
+    <CodeView code={useLanguageCode} />
+
+    <Heading
+      id="matchlanguage"
+      level={2}
+    >
+      <code>matchLanguage</code>
+    </Heading>
+    <ul>
+      <li>
+        The matching behind{' '}
+        <PartLink
+          component="settings"
+          part="useLanguage"
+        />
+        , for use outside components: your app’s translations and a ranked list
+        of preferred languages in, the best translation out (or{' '}
+        <code>undefined</code>).
+      </li>
+      <li>
+        For each preferred language in order, it takes the same tag, else that
+        tag shortened (<code>en-GB</code> to <code>en</code>), else the same
+        language with another region (<code>en-GB</code> for a preferred{' '}
+        <code>en-US</code>), before moving on to the next preferred language.
+      </li>
+    </ul>
+    <CodeView code={matchLanguageCode} />
   </>
 );
 

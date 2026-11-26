@@ -1,16 +1,21 @@
 /* Checkbox (see main.tsx). */
 @layer uikit-ish {
   /* (Shared: list.) */
+
+  /* With the text size (see Settings): 22px, its glyph 14.5px, at the
+     default (as a system's selection circles, measured: with Body). */
   .uikit-checkbox-edit-circle {
+    --uikit-checkbox-circle-size: calc(var(--font-ui-body-size) * 22 / 17);
+
     display: grid;
-    width: 22px;
-    height: 22px;
+    width: var(--uikit-checkbox-circle-size);
+    height: var(--uikit-checkbox-circle-size);
     box-sizing: border-box;
     border-radius: 50%;
     color: #fff;
-    font-size: 14.5px;
-    font-variation-settings: 'wght' 590;
-    font-weight: round(down, 590, 100);
+    font-size: calc(var(--font-ui-body-size) * 14.5 / 17);
+    font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
     place-items: center;
   }
 

@@ -18,6 +18,7 @@ import {
 import {
   PortalContainerContext,
   Settings as LibrarySettings,
+  type SettingsValues,
   useFocusShiftPrevention,
   useInputZoomPrevention,
 } from '../../../components/index.js';
@@ -253,6 +254,31 @@ const Screen: FunctionComponent<{
   </div>
 );
 
+/** The library's settings a stage overrides (see `Settings`). */
+const settingKeys = [
+  'boldText',
+  'colorScheme',
+  'contrast',
+  'differentiateWithoutColor',
+  'languages',
+  'locale',
+  'reducedMotion',
+  'reducedTransparency',
+  'region',
+  'textSize',
+] as const;
+
+/**
+ * Its stage's overrides: those chosen only (a key given, even as
+ * `undefined`, would reset it to the system's, see Settings).
+ */
+const stageOverrides = (settings: Settings): Partial<SettingsValues> =>
+  Object.fromEntries(
+    settingKeys
+      .filter((key) => settings[key] !== undefined)
+      .map((key) => [key, settings[key]]),
+  );
+
 /**
  * A demo's stage, by its type and its frame's settings (its color scheme a
  * settings provider's, so also its popups', portaled out of it): a device's
@@ -266,60 +292,57 @@ const Stage: FunctionComponent<{
   screenRef: RefObject<HTMLDivElement | null>;
   settings: Settings;
   stage?: StageType;
-}> = ({
-  children,
-  hasWallpaper,
-  screen,
-  screenRef,
-  settings: {
-    colorScheme,
+}> = ({ children, hasWallpaper, screen, screenRef, settings, stage }) => {
+  const {
     hasBackdrop,
     hasSafeAreas,
     hasStageBackground,
     isCentered,
     isStretched,
-  },
-  stage,
-}) => (
-  // (The library's settings provider, its element the stage's: the color
-  // scheme for what's within it, and its popups, portaled out of it.)
-  <LibrarySettings.Provider
-    {...(colorScheme === undefined ? {} : { colorScheme })}
-    render={
-      <div
-        className="demo-stage"
-        data-safe-areas={stage && hasSafeAreas ? '' : undefined}
-      />
-    }
-  >
-    {hasStageBackground ? <div className="demo-stage-background" /> : null}
-    <span className="demo-stage-type">{stage ?? 'simple'}</span>
-    {stage ? (
-      <div
-        data-center
-        className="demo-stage-inner"
-      >
-        <Screen
-          hasWallpaper={hasWallpaper}
-          screen={screen}
-          screenRef={screenRef}
-          stage={stage}
+  } = settings;
+
+  return (
+    // (The library's settings provider, its element the stage's: the
+    // settings chosen for what's within it, and its popups, portaled out of
+    // it; the others, as around it.)
+    <LibrarySettings.Provider
+      {...stageOverrides(settings)}
+      render={
+        <div
+          className="demo-stage"
+          data-safe-areas={stage && hasSafeAreas ? '' : undefined}
+        />
+      }
+    >
+      {hasStageBackground ? <div className="demo-stage-background" /> : null}
+      <span className="demo-stage-type">{stage ?? 'simple'}</span>
+      {stage ? (
+        <div
+          data-center
+          className="demo-stage-inner"
+        >
+          <Screen
+            hasWallpaper={hasWallpaper}
+            screen={screen}
+            screenRef={screenRef}
+            stage={stage}
+          >
+            {children}
+          </Screen>
+        </div>
+      ) : (
+        <div
+          className="demo-stage-inner"
+          data-backdrop={hasBackdrop ? '' : undefined}
+          data-center={isCentered ? '' : undefined}
+          data-stretch={isStretched ? '' : undefined}
         >
           {children}
-        </Screen>
-      </div>
-    ) : (
-      <div
-        className="demo-stage-inner"
-        data-backdrop={hasBackdrop ? '' : undefined}
-        data-center={isCentered ? '' : undefined}
-        data-stretch={isStretched ? '' : undefined}
-      >
-        {children}
-      </div>
-    )}
-  </LibrarySettings.Provider>
-);
+        </div>
+      )}
+    </LibrarySettings.Provider>
+  );
+};
 
 /**
  * A demo's diagnostics (see `Component`), in its config column: read as in
@@ -413,6 +436,63 @@ const changedSettings = (defaults: Settings, settings: Settings) => {
   return Object.keys(changed).length > 0 ? changed : undefined;
 };
 
+const onOff = ['on', 'off'] as const;
+
+/**
+ * The library's settings a stage can override (see `stageOverrides`):
+ * each its key, its label, its options (besides `[auto]`: as around the
+ * stage, the system's).
+ */
+const settingChoices: readonly (readonly [
+  key: (typeof settingKeys)[number],
+  label: string,
+  options: readonly string[],
+])[] = [
+  ['colorScheme', 'Color Scheme', ['light', 'dark']],
+  ['contrast', 'Contrast', ['standard', 'more']],
+  [
+    'textSize',
+    'Text Size',
+    [
+      'xSmall',
+      'small',
+      'medium',
+      'large',
+      'xLarge',
+      'xxLarge',
+      'xxxLarge',
+      'ax1',
+      'ax2',
+      'ax3',
+      'ax4',
+      'ax5',
+    ],
+  ],
+  ['boldText', 'Bold Text', onOff],
+  ['reducedMotion', 'Reduce Motion', onOff],
+  ['reducedTransparency', 'Reduce Transparency', onOff],
+  ['differentiateWithoutColor', 'Differentiate Without Color', onOff],
+  ['languages', 'Languages', ['en-GB,de', 'en-US,de', 'de-DE,en', 'ja']],
+  ['locale', 'Locale', ['en-US', 'en-GB', 'de-DE', 'fr-FR', 'ja-JP', 'ar-EG']],
+  ['region', 'Region', ['US', 'GB', 'DE', 'FR', 'JP']],
+];
+
+/** A setting as its option (a boolean `on` or `off`; none: `[auto]`). */
+const optionOfSetting = (value: unknown) => {
+  if (value === undefined) return '';
+  // (A list, e.g. the languages: comma-separated.)
+  if (Array.isArray(value)) return value.join(',');
+  if (typeof value === 'boolean') return value ? 'on' : 'off';
+  return String(value);
+};
+
+/** An option as its setting (`[auto]`: none, `undefined`). */
+const settingOfOption = (key: string, option: string): unknown => {
+  if (option === '') return undefined;
+  if (key === 'languages') return option.split(',');
+  return option === 'on' || option === 'off' ? option === 'on' : option;
+};
+
 /**
  * A demo's stage settings, in its config column; those its stage has no
  * use for (or, expanding, can't now) disabled.
@@ -426,7 +506,7 @@ const StageSettings: FunctionComponent<{
   stage?: StageType;
 }> = ({ canExpand, defaults, isInline, setSettings, settings, stage }) => {
   const toggle = (
-    key: Exclude<keyof Settings, 'colorScheme'>,
+    key: Exclude<keyof Settings, (typeof settingKeys)[number]>,
     label: string,
     isDisabled = false,
   ) => (
@@ -450,23 +530,34 @@ const StageSettings: FunctionComponent<{
     <section className="demo-config-section">
       <details open>
         <summary className="demo-config-heading">Stage</summary>
-        <label className="demo-setting">
-          Color Scheme{' '}
-          <select
-            name="colorScheme"
-            value={settings.colorScheme ?? ''}
-            onChange={({ currentTarget }) =>
-              setSettings((settings_) => ({
-                ...settings_,
-                colorScheme: (currentTarget.value as ColorScheme) || undefined,
-              }))
-            }
+        {settingChoices.map(([key, label, options]) => (
+          <label
+            key={key}
+            className="demo-setting"
           >
-            <option value="">[auto]</option>
-            <option value="light">light</option>
-            <option value="dark">dark</option>
-          </select>
-        </label>
+            {label}{' '}
+            <select
+              name={key}
+              value={optionOfSetting(settings[key])}
+              onChange={({ currentTarget }) =>
+                setSettings((settings_) => ({
+                  ...settings_,
+                  [key]: settingOfOption(key, currentTarget.value),
+                }))
+              }
+            >
+              <option value="">[auto]</option>
+              {options.map((option) => (
+                <option
+                  key={option}
+                  value={option}
+                >
+                  {option}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
         {toggle('hasStageBackground', 'Stage Background')}
         {toggle('hasBackdrop', 'Backdrop', isFramed)}
         {toggle('isCentered', 'Center', isFramed)}

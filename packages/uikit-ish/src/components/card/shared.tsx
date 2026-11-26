@@ -46,18 +46,14 @@ export const useControlled = <T,>(
   return [isControlled ? (value as T) : state, setState];
 };
 
-/** The document's language, if it says (none: the runtime's default). */
-export const documentLocale = (): string | undefined =>
-  typeof document === 'undefined'
-    ? undefined
-    : document.documentElement.lang || undefined;
-
-/** A number, formatted (see `CardFormat`). */
+/**
+ * A number, formatted (see `CardFormat`; its locale resolved, see
+ * Settings' `useLocale`).
+ */
 export const formatted = (
   value: number,
   { format, locale }: CardFormat,
-): string =>
-  new Intl.NumberFormat(locale ?? documentLocale(), format).format(value);
+): string => new Intl.NumberFormat(locale, format).format(value);
 
 /** A share's default format: a whole percentage. */
 export const percentFormat: Intl.NumberFormatOptions = {

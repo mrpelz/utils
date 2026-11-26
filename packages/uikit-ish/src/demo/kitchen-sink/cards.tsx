@@ -15,6 +15,7 @@ import {
   List,
   Page,
   Segmented,
+  Stack,
   Switch,
   Symbol,
   Toolbar,
@@ -1048,7 +1049,12 @@ const CardsApp: FunctionComponent = () => {
           {/* (Cards on their own: no grid, sized by their boxes.) */}
           <div className="kitchen-sink-cards-alone">
             <SectionHeaderAlone />
-            <div className="kitchen-sink-cards-alone-row">
+            <Stack
+              wrap
+              axis="horizontal"
+              className="kitchen-sink-cards-alone-row"
+              spacing="medium"
+            >
               <div>
                 <ControlCards.Switch
                   emphasizedIcon={sfLightbulbFill}
@@ -1065,7 +1071,7 @@ const CardsApp: FunctionComponent = () => {
                   value={0.52}
                 />
               </div>
-            </div>
+            </Stack>
           </div>
           <Viewport.Padding edge="block-end" />
         </Page.Root>

@@ -2,7 +2,7 @@ import './style.css';
 
 import { FunctionComponent, useMemo } from 'react';
 
-import { List, Symbol, Typography } from '../../../components/index.js';
+import { List, Stack, Symbol, Typography } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import {
@@ -109,7 +109,11 @@ const AnArticle: FunctionComponent = () => {
       state={[partState]}
       title="Typography in an article"
     >
-      <article className="typography-demo-article">
+      <Stack
+        className="typography-demo-article"
+        render={<article />}
+        spacing="small"
+      >
         <Typography
           {...partProps.Typography}
           emphasized
@@ -141,7 +145,7 @@ const AnArticle: FunctionComponent = () => {
         >
           Distances are measured by the phone’s motion sensors.
         </Typography>
-      </article>
+      </Stack>
     </Component>
   );
 };
@@ -245,7 +249,10 @@ const SymbolsInText: FunctionComponent = () => {
       state={[partState]}
       title="Symbols in text"
     >
-      <div className="typography-demo-article">
+      <Stack
+        className="typography-demo-article"
+        spacing="small"
+      >
         <Typography
           {...partProps.Typography}
           emphasized
@@ -268,7 +275,7 @@ const SymbolsInText: FunctionComponent = () => {
           />{' '}
           Backed up
         </Typography>
-      </div>
+      </Stack>
     </Component>
   );
 };

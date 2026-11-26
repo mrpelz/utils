@@ -2,11 +2,6 @@
 
 /* A view's buttons, side by side (room above them for their tooltips). */
 .tooltip-demo-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
   padding-block: 48px;
 }
 

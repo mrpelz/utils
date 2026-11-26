@@ -2,11 +2,8 @@
 
 /* A bar (as wide as a phone's content) above a spinner. */
 .progress-demo-stage {
-  display: grid;
   width: 370px;
   max-width: 100%;
-  gap: 32px;
-  justify-items: center;
   padding-block: 16px;
 
   & > [data-progress-part='root'] {

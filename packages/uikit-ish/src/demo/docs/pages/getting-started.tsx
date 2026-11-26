@@ -38,7 +38,7 @@ export const Root = () => (
     {/* Once, anywhere: pressed states on iOS (and a forced color scheme, if
         you pass one). */}
     <Styles />
-    {/* Optional: your own settings over the system's (see Settings). */}
+    {/* The system's settings (and your own over them, see Settings). */}
     <Settings.Provider>
       <Viewport.Provider>
         <App />
@@ -171,8 +171,11 @@ export const GettingStartedPage: FunctionComponent = () => (
           component="settings"
           part="Settings.Provider"
         />{' '}
-        is optional: without one, everything follows the system’s settings
-        (color scheme, contrast, reduced motion and transparency).
+        applies the system’s settings to everything inside it: contrast, reduced
+        motion and transparency, and the text size. Put one at your app’s root.
+        Outside a provider, the components use the defaults. The color scheme,
+        the languages and the locale follow the system either way, because the
+        browser handles those on its own.
       </li>
       <li>
         <PartLink

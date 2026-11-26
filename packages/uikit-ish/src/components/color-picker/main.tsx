@@ -41,6 +41,8 @@ import { Segmented } from '../segmented/main.js';
 import {
   Checkmark,
   cn,
+  createLabels,
+  smoothScrollOf,
   useForwardedRef,
   useTouchHold,
   withStyle,
@@ -53,13 +55,16 @@ import type {
   ColorPickerCodeCopyProps,
   ColorPickerCodeProps,
   ColorPickerEyedropperProps,
+  ColorPickerLabels,
   ColorPickerModeProps,
   ColorPickerModesProps,
   ColorPickerNamedColorProps,
   ColorPickerNamedProps,
+  ColorPickerOpacityProps,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorPickerSavedColorsChangeEventDetails,
+  ColorPickerSlidersLabels,
   ColorPickerSlidersModel,
   ColorPickerSlidersProps,
   ColorPickerSwatchesProps,
@@ -75,19 +80,28 @@ import type {
 
 export type {
   ColorPickerChangeEventDetails,
+  ColorPickerCodeCopyLabels,
   ColorPickerCodeCopyProps,
+  ColorPickerCodeLabels,
   ColorPickerCodeProps,
   ColorPickerEyedropperProps,
+  ColorPickerLabels,
   ColorPickerModeProps,
   ColorPickerModesProps,
   ColorPickerNamedColorProps,
+  ColorPickerNamedLabels,
   ColorPickerNamedProps,
+  ColorPickerOpacityLabels,
+  ColorPickerOpacityProps,
+  ColorPickerOwnLabels,
   ColorPickerPanelProps,
   ColorPickerRootProps,
   ColorPickerSavedColorsChangeEventDetails,
+  ColorPickerSlidersLabels,
   ColorPickerSlidersModel,
   ColorPickerSlidersProps,
   ColorPickerSlidersRange,
+  ColorPickerSwatchesLabels,
   ColorPickerSwatchesProps,
   ColorPickerSystemColorsProps,
   ColorPickerViewProps,
@@ -245,6 +259,51 @@ const PanelContext = createContext<PanelState>({
 });
 
 /**
+ * A picker's built-in words (English): the defaults of every part's
+ * `…Label` props (see `ColorPickerLabels`), shown (e.g. a channel's title,
+ * the swatches' menu and action sheet) or read by assistive technology.
+ */
+export const colorPickerLabels: Required<ColorPickerLabels> = {
+  addColorLabel: 'Add color',
+  blackLabel: 'Black',
+  blueLabel: 'Blue',
+  channelValueLabel: (channel) => `${channel} value`,
+  copyColorCodeLabel: 'Copy color code',
+  cyanLabel: 'Cyan',
+  deleteColorLabel: 'Delete',
+  eyedropperLabel: 'Eyedropper',
+  flattenColorLabel: 'Flatten color',
+  flattenColorTitleLabel: 'Flatten Color?',
+  flattenOnBlackLabel: 'Flatten on Black',
+  flattenOnWhiteLabel: 'Flatten on White',
+  greenLabel: 'Green',
+  gridLabel: 'Grid',
+  hexLabel: 'Hex',
+  hexWithAlphaLabel: 'Hex with alpha',
+  hueLabel: 'Hue',
+  indexLabel: 'Index',
+  lightnessLabel: 'Lightness',
+  magentaLabel: 'Magenta',
+  modesLabel: 'Mode',
+  opacityLabel: 'Opacity',
+  opacityValueLabel: 'Opacity percentage',
+  perceptualLabel: 'Perceptual',
+  redLabel: 'Red',
+  removeTransparencyLabel: 'Remove Transparency',
+  saturationLabel: 'Saturation',
+  savedColorsLabel: 'Saved colors',
+  spectrumLabel: 'Spectrum',
+  srgbLabel: 'sRGB',
+  systemColorsLabel: 'System colors',
+  wideGamutLabel: 'Wide gamut',
+  yellowLabel: 'Yellow',
+};
+
+/** A picker's words (see `Root`), for its parts within; a part's own. */
+const { LabelsContext, omitLabels, useLabels } =
+  createLabels<ColorPickerLabels>(colorPickerLabels);
+
+/**
  * A color picker: its color and its mode, for its parts (`Modes`,
  * `Panel`, `Eyedropper`, anywhere in it), in the app's popover or sheet.
  * Its element (`render`) may be the popover's or the sheet's popup, so its
@@ -252,8 +311,9 @@ const PanelContext = createContext<PanelState>({
  * header (`Popover.Header`, `Sheet.Header`), its panel scrolling under it.
  */
 const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
-  (
-    {
+  (allProps, ref) => {
+    const labels = useLabels(allProps);
+    const {
       className,
       defaultMode,
       defaultValue = '#000000',
@@ -263,10 +323,9 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
       render,
       style,
       value,
-      ...props
-    },
-    ref,
-  ) => {
+      ...rest
+    } = allProps;
+    const props = omitLabels(rest);
     const [own, setOwn] = useState(defaultValue);
     // Its `Opacity`s rendered: without one, the color opaque (its alpha,
     // if given one, dropped).
@@ -346,9 +405,11 @@ const Root = forwardRef<HTMLDivElement, ColorPickerRootProps>(
     });
 
     return (
-      <PickerContext.Provider value={state}>
-        <PanelContext.Provider value={modes}>{element}</PanelContext.Provider>
-      </PickerContext.Provider>
+      <LabelsContext.Provider value={labels}>
+        <PickerContext.Provider value={state}>
+          <PanelContext.Provider value={modes}>{element}</PanelContext.Provider>
+        </PickerContext.Provider>
+      </LabelsContext.Provider>
     );
   },
 );
@@ -378,11 +439,12 @@ const Panel = forwardRef<HTMLDivElement, ColorPickerPanelProps>(
 const Modes = forwardRef<HTMLDivElement, ColorPickerModesProps>(
   ({ children, ...props }, ref) => {
     const { mode, setMode } = useContext(PanelContext);
+    const { modesLabel } = useContext(LabelsContext);
 
     return (
       <Segmented.Root
         ref={ref}
-        aria-label="Mode"
+        aria-label={modesLabel}
         // (Its modes, however many, scrolled when they don't fit.)
         overflow="scroll"
         {...props}
@@ -417,11 +479,12 @@ const Mode = forwardRef<HTMLElement, ColorPickerModeProps>(
 const Grid = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
     const { color, setColor } = useContext(PickerContext);
+    const { gridLabel } = useContext(LabelsContext);
 
     return (
       <div
         ref={ref}
-        aria-label="Grid"
+        aria-label={gridLabel}
         role="group"
         {...props}
         className={cn('uikit-color-picker-grid', className)}
@@ -453,6 +516,7 @@ const Grid = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
 const Spectrum = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
   ({ className, ...props }, ref) => {
     const { color, setColor } = useContext(PickerContext);
+    const { spectrumLabel } = useContext(LabelsContext);
     const { h, l } = toHsl(color);
 
     const pick = (event: PointerEvent<HTMLDivElement>) => {
@@ -499,7 +563,7 @@ const Spectrum = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
     return (
       <div
         ref={ref}
-        aria-label="Spectrum"
+        aria-label={spectrumLabel}
         aria-valuetext={formatColor({ ...color, a: 1 })}
         role="slider"
         tabIndex={0}
@@ -619,8 +683,8 @@ const useFieldSelection = (onLeave: () => void) => {
  * its range).
  */
 const ChannelRow: FunctionComponent<{
-  /** Its field's name (e.g. “Opacity percentage”; default: “Red value”). */
-  fieldLabel?: string;
+  /** Its field's name (e.g. “Red value”, “Opacity percentage”). */
+  fieldLabel: string;
   /** Its track's background under its gradient (the opacity's checkerboard). */
   isCheckered?: boolean;
   label: string;
@@ -729,7 +793,7 @@ const ChannelRow: FunctionComponent<{
           data-color-picker-part="channel-field"
         >
           <input
-            aria-label={fieldLabel ?? `${label} value`}
+            aria-label={fieldLabel}
             inputMode="numeric"
             value={draft ?? String(value)}
             // (Left, or Enter: its value again, e.g. emptied; see
@@ -747,7 +811,8 @@ const ChannelRow: FunctionComponent<{
 /** A model's channels: their values (rounded, as shown) and back. */
 type Model = {
   channels: readonly {
-    label: string;
+    /** Its name's word (see `colorPickerLabels`). */
+    labelKey: Exclude<keyof ColorPickerSlidersLabels, 'channelValueLabel'>;
     max: number;
     unit?: string;
   }[];
@@ -765,9 +830,9 @@ type Model = {
 /** Hue (0–360°), saturation and lightness (0–100%). */
 const hsl: Model = {
   channels: [
-    { label: 'Hue', max: 360, unit: '°' },
-    { label: 'Saturation', max: 100, unit: '%' },
-    { label: 'Lightness', max: 100, unit: '%' },
+    { labelKey: 'hueLabel', max: 360, unit: '°' },
+    { labelKey: 'saturationLabel', max: 100, unit: '%' },
+    { labelKey: 'lightnessLabel', max: 100, unit: '%' },
   ],
   from: (color) => {
     const { h, l, s } = toHsl(color);
@@ -782,10 +847,10 @@ const hsl: Model = {
  */
 const cmyk: Model = {
   channels: [
-    { label: 'Cyan', max: 100, unit: '%' },
-    { label: 'Magenta', max: 100, unit: '%' },
-    { label: 'Yellow', max: 100, unit: '%' },
-    { label: 'Black', max: 100, unit: '%' },
+    { labelKey: 'cyanLabel', max: 100, unit: '%' },
+    { labelKey: 'magentaLabel', max: 100, unit: '%' },
+    { labelKey: 'yellowLabel', max: 100, unit: '%' },
+    { labelKey: 'blackLabel', max: 100, unit: '%' },
   ],
   from: ({ b, g, r }) => {
     const k = 1 - Math.max(r, g, b) / 255;
@@ -802,9 +867,9 @@ const cmyk: Model = {
 /** Red, green and blue (0–255). */
 const rgb: Model = {
   channels: [
-    { label: 'Red', max: 255 },
-    { label: 'Green', max: 255 },
-    { label: 'Blue', max: 255 },
+    { labelKey: 'redLabel', max: 255 },
+    { labelKey: 'greenLabel', max: 255 },
+    { labelKey: 'blueLabel', max: 255 },
   ],
   from: ({ b, g, r }) => [r, g, b].map((channel) => Math.round(channel)),
   to: ([r = 0, g = 0, b = 0]) => ({ b, g, r }),
@@ -818,9 +883,9 @@ const rgbKeys = ['r', 'g', 'b'] as const;
  */
 const rgbPercentage: Model = {
   channels: [
-    { label: 'Red', max: 100, unit: '%' },
-    { label: 'Green', max: 100, unit: '%' },
-    { label: 'Blue', max: 100, unit: '%' },
+    { labelKey: 'redLabel', max: 100, unit: '%' },
+    { labelKey: 'greenLabel', max: 100, unit: '%' },
+    { labelKey: 'blueLabel', max: 100, unit: '%' },
   ],
   from: ({ b, g, r }) =>
     [r, g, b].map((channel) => Math.round((channel / 255) * 100)),
@@ -879,10 +944,16 @@ const trackColors = (
  * its children (e.g. the `Code`), spaced as the channels.
  */
 const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
-  (
-    { children, className, model: modelName = 'rgb', range = 'byte', ...props },
-    ref,
-  ) => {
+  (allProps, ref) => {
+    const labels = useLabels(allProps);
+    const {
+      children,
+      className,
+      model: modelName = 'rgb',
+      range = 'byte',
+      ...rest
+    } = allProps;
+    const props = omitLabels(rest);
     const { color, setColor } = useContext(PickerContext);
     const model =
       modelName === 'rgb' && range === 'percentage'
@@ -912,10 +983,11 @@ const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
         data-model={modelName}
         data-range={modelName === 'rgb' ? range : undefined}
       >
-        {model.channels.map(({ label, max, unit }, index) => (
+        {model.channels.map(({ labelKey, max, unit }, index) => (
           <ChannelRow
-            key={label}
-            label={label}
+            key={labelKey}
+            fieldLabel={labels.channelValueLabel(labels[labelKey])}
+            label={labels[labelKey]}
             max={max}
             stops={trackColors(model, color, values, index)}
             thumbColor={opaque}
@@ -947,8 +1019,11 @@ const Sliders = forwardRef<HTMLDivElement, ColorPickerSlidersProps>(
  * above what follows. Rendered, the color has it (see `Root`): without
  * it, it's opaque.
  */
-const Opacity = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
-  ({ className, ...props }, ref) => {
+const Opacity = forwardRef<HTMLDivElement, ColorPickerOpacityProps>(
+  (allProps, ref) => {
+    const { opacityLabel, opacityValueLabel } = useLabels(allProps);
+    const { className, ...rest } = allProps;
+    const props = omitLabels(rest);
     const { color, registerOpacity, setColor } = useContext(PickerContext);
     useLayoutEffect(registerOpacity, [registerOpacity]);
 
@@ -961,8 +1036,8 @@ const Opacity = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
       >
         <ChannelRow
           isCheckered
-          fieldLabel="Opacity percentage"
-          label="Opacity"
+          fieldLabel={opacityValueLabel}
+          label={opacityLabel}
           max={100}
           thumbColor={formatColor(color)}
           unit="%"
@@ -1001,6 +1076,7 @@ const SavedSwatch: FunctionComponent<{
   onDelete: (event: Event) => void;
 }> = ({ hex, onDelete }) => {
   const { color, setColor } = useContext(PickerContext);
+  const { deleteColorLabel } = useContext(LabelsContext);
   const swatch = parseColor(hex);
 
   // Its menu (a secondary click: right click, or a long press): delete it.
@@ -1027,7 +1103,7 @@ const SavedSwatch: FunctionComponent<{
               destructive
               onClick={(event: MouseEvent<HTMLElement>) => onDelete(event)}
             >
-              <Menu.Label>Delete</Menu.Label>
+              <Menu.Label>{deleteColorLabel}</Menu.Label>
             </Menu.Item>
           </Menu.Popup>
         </Menu.Positioner>
@@ -1049,6 +1125,13 @@ const flattened = (color: Rgba, on: number): Rgba => {
  */
 const FlattenCurrent: FunctionComponent = () => {
   const { color, setColor } = useContext(PickerContext);
+  const {
+    flattenColorLabel,
+    flattenColorTitleLabel,
+    flattenOnBlackLabel,
+    flattenOnWhiteLabel,
+    removeTransparencyLabel,
+  } = useContext(LabelsContext);
   // (Pressed, its button: gone once the color's opaque.)
   const triggerRef = useRef<HTMLButtonElement>(null);
   const choose =
@@ -1062,7 +1145,7 @@ const FlattenCurrent: FunctionComponent = () => {
         render={
           <button
             ref={triggerRef}
-            aria-label="Flatten color"
+            aria-label={flattenColorLabel}
             className="uikit-color-picker-current"
             data-color-picker-part="current"
             type="button"
@@ -1077,17 +1160,17 @@ const FlattenCurrent: FunctionComponent = () => {
         finalFocus={() => triggerRef.current?.isConnected === true}
       >
         <ActionSheet.Header>
-          <ActionSheet.Title>Flatten Color?</ActionSheet.Title>
+          <ActionSheet.Title>{flattenColorTitleLabel}</ActionSheet.Title>
         </ActionSheet.Header>
         <ActionSheet.Actions>
           <ActionSheet.Action onClick={choose({ ...color, a: 1 })}>
-            Remove Transparency
+            {removeTransparencyLabel}
           </ActionSheet.Action>
           <ActionSheet.Action onClick={choose(flattened(color, 255))}>
-            Flatten on White
+            {flattenOnWhiteLabel}
           </ActionSheet.Action>
           <ActionSheet.Action onClick={choose(flattened(color, 0))}>
-            Flatten on Black
+            {flattenOnBlackLabel}
           </ActionSheet.Action>
         </ActionSheet.Actions>
       </ActionSheet.Popup>
@@ -1102,17 +1185,18 @@ const FlattenCurrent: FunctionComponent = () => {
  * (`flattenOnPress`, see `FlattenCurrent`).
  */
 const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
-  (
-    {
+  (allProps, ref) => {
+    // (Its words, for its saved colors' menus and its action sheet too.)
+    const labels = useLabels(allProps);
+    const {
       className,
       defaultSavedColors: initialSaved = defaultSavedColors,
       flattenOnPress = true,
       onSavedColorsChange,
       savedColors: savedProp,
-      ...props
-    },
-    ref,
-  ) => {
+      ...rest
+    } = allProps;
+    const props = omitLabels(rest);
     const { color } = useContext(PickerContext);
     const [ownSaved, setOwnSaved] = useState(initialSaved);
     const saved = savedProp ?? ownSaved;
@@ -1151,7 +1235,7 @@ const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
       if (!element || scrollTarget === undefined) return undefined;
       const isRightToLeft = getComputedStyle(element).direction === 'rtl';
       element.scrollTo({
-        behavior: 'smooth',
+        behavior: smoothScrollOf(element),
         left: (isRightToLeft ? -1 : 1) * scrollTarget * element.clientWidth,
       });
       // (Swipes count again once it's there.)
@@ -1169,93 +1253,95 @@ const Swatches = forwardRef<HTMLDivElement, ColorPickerSwatchesProps>(
     };
 
     return (
-      <div
-        ref={ref}
-        {...props}
-        className={cn('uikit-color-picker-swatches', className)}
-        data-color-picker-part="swatches"
-      >
-        {/* The color, over black and white (translucent); then, pressed,
-           offering it opaque. */}
-        {flattenOnPress && color.a < 1 ? (
-          <FlattenCurrent />
-        ) : (
-          <div
-            aria-hidden="true"
-            className="uikit-color-picker-current"
-            data-color-picker-part="current"
-          />
-        )}
+      <LabelsContext.Provider value={labels}>
         <div
-          className="uikit-color-picker-saved-column"
-          data-color-picker-part="saved-column"
+          ref={ref}
+          {...props}
+          className={cn('uikit-color-picker-swatches', className)}
+          data-color-picker-part="swatches"
         >
-          {/* Its pages of saved colors, side by side, swiped (snapping to
+          {/* The color, over black and white (translucent); then, pressed,
+           offering it opaque. */}
+          {flattenOnPress && color.a < 1 ? (
+            <FlattenCurrent />
+          ) : (
+            <div
+              aria-hidden="true"
+              className="uikit-color-picker-current"
+              data-color-picker-part="current"
+            />
+          )}
+          <div
+            className="uikit-color-picker-saved-column"
+            data-color-picker-part="saved-column"
+          >
+            {/* Its pages of saved colors, side by side, swiped (snapping to
              each); room for their focus rings (4px) all around, the pages 8px
              apart (so a page's rings don't show beside another). */}
-          <div
-            ref={pagesRef}
-            aria-label="Saved colors"
-            className="uikit-color-picker-saved-pages"
-            data-color-picker-part="saved-pages"
-            role="group"
-            onScroll={handleScroll}
-          >
-            {Array.from({ length: pages }, (_, index) => (
-              <Saved
-                key={index}
-                // (Only the page shown can be reached.)
-                inert={index !== shownPage}
-              >
-                {items
-                  .slice(index * pageSize, (index + 1) * pageSize)
-                  .map((hex) =>
-                    hex === undefined ? (
-                      <button
-                        key="add"
-                        aria-label="Add color"
-                        data-add=""
-                        type="button"
-                        onClick={(event: MouseEvent<HTMLButtonElement>) => {
-                          const next = formatColor(color);
-                          if (saved.includes(next)) return;
-                          changeSaved([...saved, next], {
-                            event,
-                            reason: 'add',
-                          });
-                          // On the page it lands on.
-                          goTo(Math.floor(saved.length / pageSize));
-                        }}
-                      >
-                        +
-                      </button>
-                    ) : (
-                      <SavedSwatch
-                        key={hex}
-                        hex={hex}
-                        onDelete={(event: Event) =>
-                          changeSaved(
-                            saved.filter((other) => other !== hex),
-                            { event, reason: 'delete' },
-                          )
-                        }
-                      />
-                    ),
-                  )}
-              </Saved>
-            ))}
+            <div
+              ref={pagesRef}
+              aria-label={labels.savedColorsLabel}
+              className="uikit-color-picker-saved-pages"
+              data-color-picker-part="saved-pages"
+              role="group"
+              onScroll={handleScroll}
+            >
+              {Array.from({ length: pages }, (_, index) => (
+                <Saved
+                  key={index}
+                  // (Only the page shown can be reached.)
+                  inert={index !== shownPage}
+                >
+                  {items
+                    .slice(index * pageSize, (index + 1) * pageSize)
+                    .map((hex) =>
+                      hex === undefined ? (
+                        <button
+                          key="add"
+                          aria-label={labels.addColorLabel}
+                          data-add=""
+                          type="button"
+                          onClick={(event: MouseEvent<HTMLButtonElement>) => {
+                            const next = formatColor(color);
+                            if (saved.includes(next)) return;
+                            changeSaved([...saved, next], {
+                              event,
+                              reason: 'add',
+                            });
+                            // On the page it lands on.
+                            goTo(Math.floor(saved.length / pageSize));
+                          }}
+                        >
+                          +
+                        </button>
+                      ) : (
+                        <SavedSwatch
+                          key={hex}
+                          hex={hex}
+                          onDelete={(event: Event) =>
+                            changeSaved(
+                              saved.filter((other) => other !== hex),
+                              { event, reason: 'delete' },
+                            )
+                          }
+                        />
+                      ),
+                    )}
+                </Saved>
+              ))}
+            </div>
+            {/* (Only with pages: one page, no room below the colors.) */}
+            {pages > 1 ? (
+              <PageControl
+                count={pages}
+                value={shownPage}
+                variant="plain"
+                onValueChange={goTo}
+              />
+            ) : null}
           </div>
-          {/* (Only with pages: one page, no room below the colors.) */}
-          {pages > 1 ? (
-            <PageControl
-              count={pages}
-              value={shownPage}
-              variant="plain"
-              onValueChange={goTo}
-            />
-          ) : null}
         </div>
-      </div>
+      </LabelsContext.Provider>
     );
   },
 );
@@ -1274,6 +1360,7 @@ const Eyedropper: FunctionComponent<ColorPickerEyedropperProps> = ({
   ...props
 }) => {
   const { color, setColor } = useContext(PickerContext);
+  const { eyedropperLabel } = useContext(LabelsContext);
   const Picker = eyeDropper();
   if (!Picker) return null;
 
@@ -1291,13 +1378,13 @@ const Eyedropper: FunctionComponent<ColorPickerEyedropperProps> = ({
 
   return render ? (
     cloneElement(render, {
-      'aria-label': 'Eyedropper',
+      'aria-label': eyedropperLabel,
       ...props,
       onClick: pick,
     })
   ) : (
     <Button.Root
-      aria-label="Eyedropper"
+      aria-label={eyedropperLabel}
       {...props}
       onClick={pick}
     />
@@ -1350,6 +1437,7 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
   ...props
 }) => {
   const { color, hasOpacity, setColor } = useContext(PickerContext);
+  const { systemColorsLabel } = useContext(LabelsContext);
   // (Its input, as rendered: for its button's press.)
   const [input, setInput] = useState<HTMLInputElement | null>(null);
   // (With the opacity, the input's alpha too, where it has one.)
@@ -1376,13 +1464,13 @@ const SystemColors: FunctionComponent<ColorPickerSystemColorsProps> = ({
     >
       {render ? (
         cloneElement(render, {
-          'aria-label': 'System colors',
+          'aria-label': systemColorsLabel,
           ...props,
           onClick: open,
         })
       ) : (
         <Button.Root
-          aria-label="System colors"
+          aria-label={systemColorsLabel}
           {...props}
           onClick={open}
         />
@@ -1424,7 +1512,10 @@ const noSpellcheck = (input: HTMLInputElement | null) => {
  * channel's row).
  */
 const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
-  ({ children, className, ...props }, ref) => {
+  (allProps, ref) => {
+    const { hexLabel } = useLabels(allProps);
+    const { children, className, ...rest } = allProps;
+    const props = omitLabels(rest);
     const { color, setColor } = useContext(PickerContext);
     const [draft, setDraft] = useState<string | undefined>(undefined);
     const selection = useFieldSelection(() => setDraft(undefined));
@@ -1461,7 +1552,7 @@ const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
             className="uikit-color-picker-channel-title"
             data-color-picker-part="code-title"
           >
-            Hex
+            {hexLabel}
           </div>
           {children}
           {/* Its code: `#` (not typed), its digits typed, in a field as a
@@ -1475,6 +1566,9 @@ const Code = forwardRef<HTMLDivElement, ColorPickerCodeProps>(
               // (As a property: spelled differently in React's and Preact's
               // JSX.)
               ref={noSpellcheck}
+              // (Its title shown, beside it, hidden from assistive
+              // technology: its name.)
+              aria-label={hexLabel}
               value={draft ?? formatColor(color).slice(1)}
               onChange={(event) => type(event.currentTarget.value, event)}
               {...selection}
@@ -1514,12 +1608,10 @@ const copiedFor = 1500;
  * clipboard (`onCodeCopy`); for a moment, a checkmark instead of its content
  * (`data-copied`). Its place the app's (in a `Code`, or not).
  */
-const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
-  children,
-  onCodeCopy,
-  render,
-  ...props
-}) => {
+const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = (allProps) => {
+  const labels = useLabels(allProps);
+  const { children, onCodeCopy, render, ...rest } = allProps;
+  const props = omitLabels(rest);
   const { color } = useContext(PickerContext);
   const [isCopied, setIsCopied] = useState(false);
 
@@ -1570,7 +1662,7 @@ const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
     cloneElement(
       render,
       {
-        'aria-label': 'Copy color code',
+        'aria-label': labels.copyColorCodeLabel,
         ...props,
         'data-copied': isCopied ? '' : undefined,
       },
@@ -1578,7 +1670,7 @@ const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
     )
   ) : (
     <Button.Root
-      aria-label="Copy color code"
+      aria-label={labels.copyColorCodeLabel}
       {...props}
       data-copied={isCopied ? '' : undefined}
     >
@@ -1592,7 +1684,7 @@ const CodeCopy: FunctionComponent<ColorPickerCodeCopyProps> = ({
       <Menu.Portal>
         <Menu.Positioner>
           <Menu.Popup>
-            {codeGroups(color, formatColor({ ...color, a: 1 })).map(
+            {codeGroups(color, formatColor({ ...color, a: 1 }), labels).map(
               ([title, codes], index) =>
                 index === 0 ? (
                   <Fragment key={title}>
@@ -1674,7 +1766,10 @@ const revealCentered = (element: HTMLElement) => {
  * Shown, the color's row in view at once (see `revealCentered`).
  */
 const Named = forwardRef<HTMLDivElement, ColorPickerNamedProps>(
-  ({ children, className, ...props }, forwardedRef) => {
+  (allProps, forwardedRef) => {
+    const { indexLabel } = useLabels(allProps);
+    const { children, className, ...rest } = allProps;
+    const props = omitLabels(rest);
     const ref = useForwardedRef(forwardedRef);
     // Shown (e.g. its mode chosen): the color's row in view, at once.
     useLayoutEffect(() => {
@@ -1721,7 +1816,7 @@ const Named = forwardRef<HTMLDivElement, ColorPickerNamedProps>(
                 each letter jumping to its first row, see NamedColor.) */}
             {letters.length > 0 ? (
               <List.Index
-                aria-label="Index"
+                aria-label={indexLabel}
                 data-color-picker-part="named-index"
               >
                 {letters.map((letter) => (

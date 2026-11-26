@@ -10,6 +10,7 @@ import {
   List,
   Page,
   Progress,
+  Stack,
   Toolbar,
   Viewport,
 } from '../../../components/index.js';
@@ -110,7 +111,11 @@ const CountingItems: FunctionComponent = () => {
       state={[partState]}
       title="Progress counting items"
     >
-      <div className="progress-demo-stage">
+      <Stack
+        align="center"
+        className="progress-demo-stage"
+        spacing="xLarge"
+      >
         <Progress.Root
           {...partProps['Progress.Root']}
           max={12}
@@ -138,7 +143,7 @@ const CountingItems: FunctionComponent = () => {
         >
           <Button.Label {...partProps['Button.Label']}>Restart</Button.Label>
         </Button.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

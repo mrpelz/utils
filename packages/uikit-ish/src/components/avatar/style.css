@@ -26,8 +26,8 @@
     background: linear-gradient(#a5abb8, #858994);
     color: #fff;
     font-size: calc(var(--uikit-avatar-size, 70px) * 0.4);
-    font-variation-settings: 'wght' 590;
-    font-weight: round(down, 590, 100);
+    font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: 0;
     line-height: 1;
     place-items: center;

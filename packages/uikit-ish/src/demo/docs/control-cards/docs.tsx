@@ -1,5 +1,6 @@
 import { code, PropRow } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -73,7 +74,14 @@ const formatRows = (what: string): readonly PropRow[] => [
     undefined,
     `How ${what} is shown, for example { style: 'percent' }.`,
   ],
-  ['locale', 'Intl.LocalesArgument', 'the document’s language', 'Its locale.'],
+  [
+    'locale',
+    'Intl.LocalesArgument',
+    <>
+      from <a href={publicUrl('settings')}>Settings</a>
+    </>,
+    'Its locale.',
+  ],
 ];
 
 /** Words for on and off. */

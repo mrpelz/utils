@@ -190,8 +190,18 @@ export const GlossaryPage: FunctionComponent = () => (
         the component:
         <ul>
           <li>
-            <em>Color Scheme</em> forces light or dark on the stage, and on the
-            popups the demo opens. <em>[auto]</em> follows your system.
+            <em>Color Scheme</em>, <em>Contrast</em>, <em>Text Size</em>,{' '}
+            <em>Bold Text</em>, <em>Reduce Motion</em>,{' '}
+            <em>Reduce Transparency</em>, <em>Differentiate Without Color</em>,{' '}
+            <em>Locale</em> and <em>Region</em> set the library’s settings for
+            the stage and the popups the demo opens, through a{' '}
+            <PartLink
+              component="settings"
+              part="Settings.Provider"
+            />{' '}
+            around the stage. <em>[auto]</em> leaves a setting to your system.
+            They’re a quick way to see how a component follows a setting without
+            changing your system’s.
           </li>
           <li>
             <em>Stage Background</em> shows a dotted background behind the demo.

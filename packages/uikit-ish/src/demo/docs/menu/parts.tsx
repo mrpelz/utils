@@ -6,6 +6,7 @@ import { FunctionComponent, useMemo } from 'react';
 import {
   Button,
   Menu,
+  Stack,
   Symbol,
   useCreateMenuHandle,
   useTextActionsPrevention,
@@ -5801,7 +5802,13 @@ const CreateHandlePart: FunctionComponent = () => {
       title="Menu.createHandle"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
-        <div className="menu-demo-triggers">
+        <Stack
+          wrap
+          align="center"
+          axis="horizontal"
+          justify="center"
+          spacing="medium"
+        >
           <Menu.Trigger
             {...partProps['Menu.Trigger']}
             handle={optionsMenu}
@@ -5825,7 +5832,7 @@ const CreateHandlePart: FunctionComponent = () => {
               Open Imperatively
             </Button.Label>
           </Button.Root>
-        </div>
+        </Stack>
         <Menu.Root
           {...partProps['Menu.Root']}
           handle={optionsMenu}
@@ -5922,7 +5929,13 @@ const UseCreateMenuHandlePart: FunctionComponent = () => {
       title="useCreateMenuHandle"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
-        <div className="menu-demo-triggers">
+        <Stack
+          wrap
+          align="center"
+          axis="horizontal"
+          justify="center"
+          spacing="medium"
+        >
           <Menu.Trigger
             {...partProps['Menu.Trigger']}
             handle={fileMenu}
@@ -5955,7 +5968,7 @@ const UseCreateMenuHandlePart: FunctionComponent = () => {
               Photo.jpg
             </Button.Label>
           </Menu.Trigger>
-        </div>
+        </Stack>
         <Menu.Root
           {...partProps['Menu.Root']}
           handle={fileMenu}

@@ -15,26 +15,10 @@
   font-size: 12px;
 }
 
-/* Guide demos (see composition.tsx). */
-.button-demo-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.button-demo-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
 /* A phone's width: stacked, then side by side. */
 .button-demo-panel {
-  display: flex;
   width: 370px;
   max-width: 100%;
-  flex-direction: column;
-  gap: 32px;
 }
 
 /* A picture, its controls over it. */
@@ -61,7 +45,3 @@
   inset-inline-start: 16px;
 }
 
-.button-demo-controls {
-  display: flex;
-  gap: 12px;
-}

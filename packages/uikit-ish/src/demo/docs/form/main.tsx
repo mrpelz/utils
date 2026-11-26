@@ -502,7 +502,7 @@ export const FormDemo: FunctionComponent = () => {
             {/* As wide as the rows (the groups' edges, not their text). */}
             <List.Block
               {...partProps['List.Block']}
-              style={{ paddingInline: 0 }}
+              flush
             >
               <Button.Root
                 {...partProps['Button.Root']}

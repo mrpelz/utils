@@ -2,7 +2,11 @@ import './style.css';
 
 import { FunctionComponent, useMemo } from 'react';
 
-import { CalendarFooter, DatePicker } from '../../../components/index.js';
+import {
+  CalendarFooter,
+  DatePicker,
+  Stack,
+} from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
@@ -271,7 +275,13 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                         {...partProps['DatePicker.CalendarRow']}
                       >
                         <span aria-hidden="true">Jump to</span>
-                        <span className="date-picker-demo-jumps">
+                        <Stack
+                          wrap
+                          axis="horizontal"
+                          justify="end"
+                          render={<span />}
+                          spacing="small"
+                        >
                           <DatePicker.CalendarButton
                             {...partProps['DatePicker.CalendarButton']}
                             disabled={calendar.disabled}
@@ -322,7 +332,7 @@ export const DatePickerFooterDemo: FunctionComponent = () => {
                           >
                             Now
                           </DatePicker.CalendarButton>
-                        </span>
+                        </Stack>
                       </DatePicker.CalendarRow>
                     ) : null}
                   </>

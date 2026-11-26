@@ -12,6 +12,7 @@ import {
   Sheet,
   type SheetRegular,
   type SheetSwipeDirection,
+  Stack,
   Symbol,
   TextField,
   Toolbar,
@@ -323,7 +324,11 @@ const PlaceSheet: FunctionComponent<{
   hasSearch?: boolean;
 }> = ({ hasHeaderStop = true, hasSearch = false }) => (
   <Sheet.Root defaultSnapPoint="peek">
-    <div className="kitchen-sink-showcase">
+    <Stack
+      wrap
+      align="center"
+      axis="horizontal"
+    >
       <Sheet.Trigger render={<Button.Root variant="bordered-prominent" />}>
         <Button.Label>Show Place</Button.Label>
       </Sheet.Trigger>
@@ -341,7 +346,7 @@ const PlaceSheet: FunctionComponent<{
           <Button.Label>{label}</Button.Label>
         </Sheet.Trigger>
       ))}
-    </div>
+    </Stack>
     <Sheet.Popup
       detent="medium"
       regular="card"

@@ -37,6 +37,13 @@
     background-color: var(--color-ui-system-grouped-background);
   }
 
+  /* With more contrast (its provider's, resolved, see main.tsx: the root's
+     tokens stay the defaults, outside every provider), as the content's
+     (see styles.css). */
+  :root[data-uikit-viewport-window][data-uikit-root-contrast='more'] {
+    background-color: light-dark(rgb(235 235 240), rgb(0 0 0));
+  }
+
   /* A provider's screen (not the window, see main.tsx): the same, beneath
      its layers (e.g. a page of its own in a navigation stack, not the page
      below showing through as it slides in). Unspecific: a screen's own
@@ -371,12 +378,6 @@
       }
     }
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      &::before,
-      &::after {
-        transition: none;
-      }
-    }
   }
 
   /* The bars' inner side (see EdgeEffects: what's stuck to them, measured
@@ -573,13 +574,6 @@
     }
   }
 
-  @container style(--uikit-settings-reduced-motion: 1) {
-    .uikit-viewport-anchor,
-    .uikit-viewport-content,
-    .uikit-viewport-keyboard-accessory {
-      --uikit-viewport-keyboard-transition: 0s;
-    }
-  }
 }
 
 /* A scroller's edges' progress (see edge-effect.tsx): its own styles' only

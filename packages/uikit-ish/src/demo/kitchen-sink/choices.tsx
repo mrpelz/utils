@@ -6,6 +6,7 @@ import {
   Checkbox,
   CheckboxGroup,
   ColorPicker,
+  type ColorPickerLabels,
   DatePicker,
   type DatePickerOpen,
   type DatePickerProps,
@@ -22,6 +23,7 @@ import {
   Segmented,
   Sheet,
   Slider,
+  Stack,
   Stepper,
   Switch,
   Symbol,
@@ -229,8 +231,15 @@ const CheckboxContent: FunctionComponent = () => (
     <Showcase title="Radio">
       <RadioGroup
         aria-label="Size"
-        className="kitchen-sink-showcase"
+
         defaultValue="m"
+        render={
+          <Stack
+            wrap
+            align="center"
+            axis="horizontal"
+          />
+        }
       >
         <Radio.Root
           aria-label="Small"
@@ -1236,6 +1245,27 @@ const pickerPages = [
     ),
   ],
   [
+    'date-picker/german',
+    'In German',
+    calendarPage(
+      <DatePicker.Root
+        dayPeriodLabel="Vormittag/Nachmittag"
+        defaultValue={example}
+        hoursLabel="Stunden"
+        locale="de-DE"
+        minutesLabel="Minuten"
+        mode="dateAndTime"
+        monthLabel="Monat"
+        nextMonthLabel="Nächster Monat"
+        pickerStyle="inline"
+        previousMonthLabel="Vorheriger Monat"
+        timeLabel="Uhrzeit"
+        yearLabel="Jahr"
+      />,
+      'Its locale German, and its labels for assistive technology given in German too (its own props: the library has no translations of its own).',
+    ),
+  ],
+  [
     'date-picker/inline-time',
     'Inline Date and Time',
     calendarPage(
@@ -1457,7 +1487,12 @@ const markPages = [
               <DatePicker.CalendarTimeRow calendar={calendar} />
               <DatePicker.CalendarRow>
                 <span aria-hidden="true">Jump to</span>
-                <span className="kitchen-sink-showcase">
+                <Stack
+                  wrap
+                  align="center"
+                  axis="horizontal"
+                  render={<span />}
+                >
                   <DatePicker.CalendarButton
                     disabled={calendar.disabled}
                     shape={calendar.buttonShape}
@@ -1479,7 +1514,7 @@ const markPages = [
                   >
                     Now
                   </DatePicker.CalendarButton>
-                </span>
+                </Stack>
               </DatePicker.CalendarRow>
             </>
           )}
@@ -1572,18 +1607,77 @@ const brandMode: ModeEntry = [
 ];
 
 /**
+ * A picker's words in German (its own props: the library has no
+ * translations of its own); its modes' labels the app's (see
+ * `germanModes`).
+ */
+const germanLabels: ColorPickerLabels = {
+  addColorLabel: 'Farbe hinzufügen',
+  blackLabel: 'Schwarz',
+  blueLabel: 'Blau',
+  channelValueLabel: (channel) => `Wert für ${channel}`,
+  copyColorCodeLabel: 'Farbcode kopieren',
+  cyanLabel: 'Cyan',
+  deleteColorLabel: 'Löschen',
+  eyedropperLabel: 'Pipette',
+  flattenColorLabel: 'Farbe deckend machen',
+  flattenColorTitleLabel: 'Farbe deckend machen?',
+  flattenOnBlackLabel: 'Mit Schwarz mischen',
+  flattenOnWhiteLabel: 'Mit Weiß mischen',
+  greenLabel: 'Grün',
+  gridLabel: 'Raster',
+  hexLabel: 'Hex',
+  hexWithAlphaLabel: 'Hex mit Alpha',
+  hueLabel: 'Farbton',
+  indexLabel: 'Index',
+  lightnessLabel: 'Helligkeit',
+  magentaLabel: 'Magenta',
+  modesLabel: 'Modus',
+  opacityLabel: 'Deckkraft',
+  opacityValueLabel: 'Deckkraft in Prozent',
+  perceptualLabel: 'Wahrnehmungsbasiert',
+  redLabel: 'Rot',
+  removeTransparencyLabel: 'Transparenz entfernen',
+  saturationLabel: 'Sättigung',
+  savedColorsLabel: 'Gesicherte Farben',
+  spectrumLabel: 'Spektrum',
+  srgbLabel: 'sRGB',
+  systemColorsLabel: 'Systemfarben',
+  wideGamutLabel: 'Großer Farbraum',
+  yellowLabel: 'Gelb',
+};
+
+/** Every mode, labeled in German (the app's words, see `germanLabels`). */
+const germanModeLabels: Record<string, string> = {
+  cmyk: 'CMYK',
+  grid: 'Raster',
+  hsl: 'HSL',
+  named: 'Benannt',
+  rgb: 'RGB',
+  spectrum: 'Spektrum',
+};
+const germanModes: ModeEntry[] = modeSets.all.map(([value, label, view]) => [
+  value,
+  germanModeLabels[value] ?? label,
+  view,
+]);
+
+/**
  * A color's row: its well opening the picker, in a sheet (compact) or a
  * popover (regular); its modes (the system's, all, or its own), its
  * opacity and saved colors (or not).
  */
 const ColorRow: FunctionComponent<{
   defaultColor: string;
+  /** Its picker's words (see `ColorPicker.Root`'s `…Label` props). */
+  labels?: ColorPickerLabels;
   modes?: ModeEntry[] | ModeSet;
   opacity?: boolean;
   swatches?: boolean;
   title: string;
 }> = ({
   defaultColor,
+  labels,
   modes = 'system',
   opacity = true,
   swatches = true,
@@ -1609,6 +1703,7 @@ const ColorRow: FunctionComponent<{
           <Sheet.Root>
             <Sheet.Trigger render={well} />
             <ColorPicker.Root
+              {...labels}
               value={color}
               render={
                 <Sheet.Popup
@@ -1657,6 +1752,7 @@ const ColorRow: FunctionComponent<{
                 {/* (The picker the popup: its panel in the body, scrolling,
                     e.g. the named colors; as the docs' overview.) */}
                 <ColorPicker.Root
+                  {...labels}
                   value={color}
                   render={
                     <Popover.Popup style={{ width: 'min(402px, 100vw)' }} />
@@ -1744,6 +1840,12 @@ const ColorPickerContent: FunctionComponent = () => (
         defaultColor="#1F6FEB"
         modes={[...modeSets.system, brandMode]}
         title="Brand Colors (a Named Mode)"
+      />
+      <ColorRow
+        defaultColor="#AF52DE80"
+        labels={germanLabels}
+        modes={germanModes}
+        title="In German"
       />
     </Rows>
     <Showcase
@@ -1939,7 +2041,7 @@ const FormContent: FunctionComponent = () => {
         </Fieldset.Root>
 
         <List.Section>
-          <List.Block style={{ paddingInline: 0 }}>
+          <List.Block flush>
             <Button.Root
               fill
               size="large"

@@ -81,6 +81,27 @@
     :is(.uikit-card-symbol, .uikit-card-title, .uikit-card-value) {
       animation: 500ms uikit-card-fade-text;
     }
+
+    /* Motion reduced (see styles.css): lit as long, then off at once, not
+       fading back (still telling the press). */
+    :where([data-uikit-reduced-motion='true'])
+      &:not(:where([data-uikit-reduced-motion='false']) *) {
+      &,
+      &::before,
+      & :is(.uikit-card-symbol, .uikit-card-title, .uikit-card-value) {
+        animation-timing-function: step-end;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &:where([data-uikit-settings], [data-uikit-settings] *):not(:where([data-uikit-reduced-motion='false']) *) {
+        &,
+        &::before,
+        & :is(.uikit-card-symbol, .uikit-card-title, .uikit-card-value) {
+          animation-timing-function: step-end;
+        }
+      }
+    }
   }
 
   /* (Its edit layer (editing, see main.tsx): over its frame and its veil,
@@ -286,10 +307,10 @@
     color: var(--uikit-glass-content);
     font-size: var(--font-ui-subheadline-size);
     font-variation-settings: 'wght'
-      var(--font-ui-subheadline-weight-emphasized);
+      calc(var(--font-ui-subheadline-weight-emphasized) + var(--uikit-font-weight-boost, 0));
     font-weight: round(
       down,
-      var(--font-ui-subheadline-weight-emphasized),
+      calc(var(--font-ui-subheadline-weight-emphasized) + var(--uikit-font-weight-boost, 0)),
       100
     );
     grid-area: title;
@@ -319,8 +340,8 @@
       color: var(--uikit-glass-content);
       font-size: var(--font-ui-large-title-size);
       font-variation-settings: 'wght'
-        var(--font-ui-large-title-weight-emphasized, 700);
-      font-weight: 700;
+        calc(var(--font-ui-large-title-weight-emphasized, 700) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(700 + var(--uikit-font-weight-boost, 0)), 100);
       line-height: 1.1;
     }
   }
@@ -505,10 +526,10 @@
       color: var(--uikit-glass-content);
       font-size: var(--font-ui-subheadline-size);
       font-variation-settings: 'wght'
-        var(--font-ui-subheadline-weight-emphasized);
+        calc(var(--font-ui-subheadline-weight-emphasized) + var(--uikit-font-weight-boost, 0));
       font-weight: round(
         down,
-        var(--font-ui-subheadline-weight-emphasized),
+        calc(var(--font-ui-subheadline-weight-emphasized) + var(--uikit-font-weight-boost, 0)),
         100
       );
       grid-area: title;

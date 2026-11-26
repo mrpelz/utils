@@ -3,7 +3,13 @@ import './style.css';
 
 import { FunctionComponent, useMemo, useRef } from 'react';
 
-import { Button, Symbol, Toolbar, Tooltip } from '../../../components/index.js';
+import {
+  Button,
+  Stack,
+  Symbol,
+  Toolbar,
+  Tooltip,
+} from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -110,7 +116,14 @@ const InAToolbar: FunctionComponent = () => {
       state={[partState]}
       title="Tooltips in a toolbar"
     >
-      <div className="tooltip-demo-buttons">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        className="tooltip-demo-buttons"
+        justify="center"
+        spacing="medium"
+      >
         <div className="toolbar-demo-bar">
           <Tooltip.Provider {...partProps['Tooltip.Provider']}>
             <Toolbar.Root
@@ -208,7 +221,7 @@ const InAToolbar: FunctionComponent = () => {
             </Toolbar.Root>
           </Tooltip.Provider>
         </div>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -242,7 +255,14 @@ const HeldOpen: FunctionComponent = () => {
       state={[partState]}
       title="Tooltip held open"
     >
-      <div className="tooltip-demo-buttons">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        className="tooltip-demo-buttons"
+        justify="center"
+        spacing="medium"
+      >
         <span
           ref={pin}
           className="tooltip-demo-pin"
@@ -267,7 +287,7 @@ const HeldOpen: FunctionComponent = () => {
             </Tooltip.Positioner>
           </Tooltip.Portal>
         </Tooltip.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

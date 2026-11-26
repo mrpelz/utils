@@ -15,6 +15,7 @@ import {
   List,
   Navigation,
   type SettingsValues,
+  Stack,
   Symbol,
   Toolbar,
   useBackdropTone,
@@ -152,16 +153,20 @@ export const SinkSwipeAreas: FunctionComponent<{ isActive?: boolean }> = ({
 
 /**
  * The kitchen sink's settings: its provider's overrides (around the app,
- * see main.tsx; a key left out, the system's), set on its Settings page.
+ * see main.tsx; a key left out, the system's), set on its Settings page;
+ * and the system's (as the browser reports them: read outside its
+ * provider, within the guide's own, which overrides nothing).
  */
 export type SinkSettings = readonly [
   settings: Partial<SettingsValues>,
   setSettings: (next: Partial<SettingsValues>) => void,
+  system: SettingsValues | undefined,
 ];
 
 export const SinkSettingsContext = createContext<SinkSettings>([
   {},
   () => undefined,
+  undefined,
 ]);
 
 /**
@@ -181,11 +186,15 @@ export const Showcase: FunctionComponent<{
         <List.Title>{title}</List.Title>
       </List.Header>
     )}
-    <div
-      className={`kitchen-sink-stage ${isStacked ? 'kitchen-sink-stacked' : 'kitchen-sink-showcase'}`}
+    {/* (Stacked, one below another; else side by side, wrapping.) */}
+    <Stack
+      className="kitchen-sink-stage"
+      {...(isStacked
+        ? {}
+        : { align: 'center', axis: 'horizontal', wrap: true })}
     >
       {children}
-    </div>
+    </Stack>
     {footer === undefined ? null : <List.Footer>{footer}</List.Footer>}
   </List.Section>
 );

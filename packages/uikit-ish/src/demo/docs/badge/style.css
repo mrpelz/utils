@@ -2,18 +2,8 @@
 
 /* The badge's places, one below the other, as wide as a phone. */
 .badge-demo-stage {
-  display: grid;
   width: min(402px, 100%);
-  gap: 32px;
   padding-block: 16px;
-  place-items: center center;
-}
-
-/* The badges on a symbol and a corner, side by side. */
-.badge-demo-row {
-  display: flex;
-  align-items: center;
-  gap: 32px;
 }
 
 /* A list as wide as a phone's (the stage shrinks to its content). */

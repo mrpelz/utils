@@ -48,7 +48,7 @@
     height: 22px;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
+    font-size: var(--font-ui-body-size);
     translate: 0 -50%;
   }
 
@@ -61,7 +61,7 @@
     height: 22px;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
+    font-size: var(--font-ui-body-size);
     translate: 0 -50%;
   }
 
@@ -88,8 +88,8 @@
     align-items: center;
     justify-content: center;
     font-size: var(--uikit-menu-icon-size);
-    font-variation-settings: 'wght' 400;
-    font-weight: round(down, 400, 100);
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     grid-column: 1;
     grid-row: 1 / span 2;
     line-height: var(--uikit-menu-icon-line-height);
@@ -99,8 +99,8 @@
   .uikit-menu-label {
     padding: var(--uikit-menu-item-padding-block) 0;
     font-size: var(--uikit-menu-label-size);
-    font-variation-settings: 'wght' 400;
-    font-weight: round(down, 400, 100);
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     grid-column: 2;
     grid-row: 1;
     letter-spacing: var(--uikit-menu-label-letter-spacing);
@@ -112,9 +112,9 @@
     padding-bottom: var(--uikit-menu-item-padding-block);
     margin-top: calc(2px - var(--uikit-menu-item-padding-block));
     color: var(--uikit-glass-content-secondary);
-    font-size: 13px;
-    font-variation-settings: 'wght' 400;
-    font-weight: round(down, 400, 100);
+    font-size: var(--font-ui-footnote-size);
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     grid-column: 2;
     grid-row: 2;
     line-height: var(--uikit-menu-subtitle-line-height);
@@ -126,13 +126,13 @@
     color: var(--uikit-glass-content-secondary);
     font-family: inherit;
     font-feature-settings: 'ss15';
-    font-size: 15px;
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-size: var(--font-ui-subheadline-size);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     gap: 1px;
     grid-column: 3;
     grid-row: 1 / span 2;
-    line-height: 20px;
+    line-height: var(--font-ui-subheadline-line-height);
     margin-inline-start: 4px;
 
     & > span {
@@ -149,10 +149,10 @@
     padding: var(--uikit-menu-title-padding);
     color: light-dark(rgb(0 0 0 / 25%), rgb(255 255 255 / 25%));
     font-size: var(--uikit-menu-title-size);
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: -0.08px;
-    line-height: 15px;
+    line-height: calc(var(--font-ui-footnote-line-height) - 3px);
     mix-blend-mode: var(--uikit-glass-content-blend);
   }
 
@@ -290,19 +290,21 @@
       --uikit-menu-item-padding-block: 10px;
       --uikit-menu-icon-size: var(--font-ui-body-size);
       --uikit-menu-icon-line-height: var(--font-ui-body-line-height);
-      --uikit-menu-label-size: 17px;
-      --uikit-menu-label-line-height: 20px;
+      --uikit-menu-label-size: var(--font-ui-body-size);
+      --uikit-menu-label-line-height: calc(
+        var(--font-ui-body-line-height) - 2px
+      );
       --uikit-menu-label-letter-spacing: -0.43px;
-      --uikit-menu-subtitle-line-height: 18px;
+      --uikit-menu-subtitle-line-height: var(--font-ui-footnote-line-height);
       --uikit-menu-separator-height: 21px;
       --uikit-menu-separator-height-section: 21px;
       --uikit-menu-separator-height-quick-actions: 21px;
       --uikit-menu-pill: 20px;
       --uikit-menu-title-padding: 4px 8px 10px;
-      --uikit-menu-title-size: 13px;
+      --uikit-menu-title-size: var(--font-ui-footnote-size);
       --uikit-menu-quick-padding: 6px 4px;
       --uikit-menu-quick-gap: 4px;
-      --uikit-menu-quick-symbol-line-height: 22px;
+      --uikit-menu-quick-symbol-line-height: var(--font-ui-body-line-height);
       --uikit-menu-chevron-open-rotation: 90deg;
     }
 
@@ -312,19 +314,25 @@
       --uikit-menu-item-padding-block: 9px;
       --uikit-menu-icon-size: var(--font-ui-subheadline-size);
       --uikit-menu-icon-line-height: var(--font-ui-subheadline-line-height);
-      --uikit-menu-label-size: 15px;
-      --uikit-menu-label-line-height: 18px;
+      --uikit-menu-label-size: var(--font-ui-subheadline-size);
+      --uikit-menu-label-line-height: calc(
+        var(--font-ui-subheadline-line-height) - 2px
+      );
       --uikit-menu-label-letter-spacing: 0.2px;
-      --uikit-menu-subtitle-line-height: 16px;
+      --uikit-menu-subtitle-line-height: calc(
+        var(--font-ui-footnote-line-height) - 2px
+      );
       --uikit-menu-separator-height: 16px;
       --uikit-menu-separator-height-section: 17px;
       --uikit-menu-separator-height-quick-actions: 21px;
       --uikit-menu-pill: 18px;
       --uikit-menu-title-padding: 5px 8px 7px;
-      --uikit-menu-title-size: 12px;
+      --uikit-menu-title-size: var(--font-ui-caption1-size);
       --uikit-menu-quick-padding: 9px 4px 6px;
       --uikit-menu-quick-gap: 1px;
-      --uikit-menu-quick-symbol-line-height: 19px;
+      --uikit-menu-quick-symbol-line-height: calc(
+        var(--font-ui-subheadline-line-height) - 1px
+      );
       --uikit-menu-chevron-open-rotation: 0deg;
     }
 
@@ -443,11 +451,11 @@
       overflow: hidden;
       max-width: 100%;
       padding: 0;
-      font-size: 12px;
-      font-variation-settings: 'wght' 510;
-      font-weight: round(down, 510, 100);
+      font-size: var(--font-ui-caption1-size);
+      font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: normal;
-      line-height: 18px;
+      line-height: calc(var(--font-ui-caption1-line-height) + 2px);
       text-overflow: ellipsis;
       white-space: nowrap;
     }

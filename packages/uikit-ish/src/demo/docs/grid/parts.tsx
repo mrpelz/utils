@@ -7,6 +7,7 @@ import {
   type GridReorderChange,
   GridReorderHandle,
   type GridSize,
+  Stack,
   useGridItem,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -288,7 +289,10 @@ const RootPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Root"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         <Grid.Root
           key={defaultsKey(props, ...Object.values(partProps))}
           {...props}
@@ -297,7 +301,7 @@ const RootPart: FunctionComponent = () => {
         >
           {order.map((device) => deviceItem(device, partProps, { handle }))}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -351,7 +355,10 @@ const SectionPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Section"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -385,7 +392,7 @@ const SectionPart: FunctionComponent = () => {
             )}
           </Grid.Section>
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -431,7 +438,10 @@ const HeaderPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Header"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -452,7 +462,7 @@ const HeaderPart: FunctionComponent = () => {
             {kitchen.map((device) => deviceItem(device, partProps))}
           </Grid.Section>
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -504,7 +514,10 @@ const DropGroupPart: FunctionComponent = () => {
       state={[partState]}
       title="Grid.DropGroup"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -535,7 +548,7 @@ const DropGroupPart: FunctionComponent = () => {
             </Grid.DropGroup>
           </Grid.Section>
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -594,7 +607,10 @@ const ItemPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Item"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -619,7 +635,7 @@ const ItemPart: FunctionComponent = () => {
             ),
           )}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -663,7 +679,10 @@ const SpacerPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Spacer"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -689,7 +708,7 @@ const SpacerPart: FunctionComponent = () => {
           ) : null}
           {afterPart.map((device) => deviceItem(device, partProps))}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -731,7 +750,10 @@ const BreakPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Break"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -748,7 +770,7 @@ const BreakPart: FunctionComponent = () => {
           </Grid.Break>
           {afterPart.map((device) => deviceItem(device, partProps))}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -791,7 +813,10 @@ const SpawnPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Spawn"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -816,7 +841,7 @@ const SpawnPart: FunctionComponent = () => {
             }}
           />
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -868,7 +893,10 @@ const ResizeHandlePart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.ResizeHandle"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -896,7 +924,7 @@ const ResizeHandlePart: FunctionComponent = () => {
             ),
           )}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -945,10 +973,17 @@ const CornerButtonPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.CornerButton"
     >
-      <div className="grid-demo-content">
-        <div className="grid-demo-actions">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
+        <Stack
+          wrap
+          axis="horizontal"
+          spacing="small"
+        >
           {editButton(editing, setEditing, partProps, addLog)}
-        </div>
+        </Stack>
         <Grid.Root
           {...partProps['Grid.Root']}
           editing={editing}
@@ -977,7 +1012,7 @@ const CornerButtonPart: FunctionComponent = () => {
             ),
           )}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -1034,8 +1069,15 @@ const RemoveButtonPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.RemoveButton"
     >
-      <div className="grid-demo-content">
-        <div className="grid-demo-actions">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
+        <Stack
+          wrap
+          axis="horizontal"
+          spacing="small"
+        >
           {editButton(editing, setEditing, partProps, addLog)}
           <Button.Root
             {...partProps['Button.Root']}
@@ -1047,7 +1089,7 @@ const RemoveButtonPart: FunctionComponent = () => {
           >
             <Button.Label {...partProps['Button.Label']}>Reset</Button.Label>
           </Button.Root>
-        </div>
+        </Stack>
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
@@ -1079,7 +1121,7 @@ const RemoveButtonPart: FunctionComponent = () => {
             ),
           )}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -1134,10 +1176,17 @@ const AreaPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.Area"
     >
-      <div className="grid-demo-content">
-        <div className="grid-demo-actions">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
+        <Stack
+          wrap
+          axis="horizontal"
+          spacing="small"
+        >
           {editButton(editing, setEditing, partProps, addLog)}
-        </div>
+        </Stack>
         <Grid.Root
           key={defaultsKey(props, ...Object.values(partProps))}
           {...partProps['Grid.Root']}
@@ -1187,7 +1236,7 @@ const AreaPart: FunctionComponent = () => {
             ),
           )}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -1241,10 +1290,17 @@ const AreaButtonPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Grid.AreaButton"
     >
-      <div className="grid-demo-content">
-        <div className="grid-demo-actions">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
+        <Stack
+          wrap
+          axis="horizontal"
+          spacing="small"
+        >
           {editButton(editing, setEditing, partProps, addLog)}
-        </div>
+        </Stack>
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
           {...partProps['Grid.Root']}
@@ -1294,7 +1350,7 @@ const AreaButtonPart: FunctionComponent = () => {
             ),
           )}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -1397,7 +1453,10 @@ const CreateReorderHandlePart: FunctionComponent = () => {
       state={[partState]}
       title="Grid.createReorderHandle"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -1429,7 +1488,7 @@ const CreateReorderHandlePart: FunctionComponent = () => {
             );
           })}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -1483,7 +1542,10 @@ const UseGridItemPart: FunctionComponent = () => {
       state={[partState]}
       title="useGridItem"
     >
-      <div className="grid-demo-content">
+      <Stack
+        inset
+        className="grid-demo-content"
+      >
         {editButton(editing, setEditing, partProps, addLog)}
         <Grid.Root
           key={defaultsKey(...Object.values(partProps))}
@@ -1504,7 +1566,7 @@ const UseGridItemPart: FunctionComponent = () => {
             </Grid.Item>
           ))}
         </Grid.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

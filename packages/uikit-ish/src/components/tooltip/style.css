@@ -20,8 +20,8 @@
     color: var(--uikit-glass-content);
     font-size: var(--font-ui-subheadline-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
-    font-weight: round(down, var(--font-ui-subheadline-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-subheadline-tracking);
     line-height: var(--font-ui-subheadline-line-height);
     pointer-events: none;

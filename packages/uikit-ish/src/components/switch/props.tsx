@@ -14,7 +14,10 @@ export type SwitchRootProps = BaseSwitch.Root.Props & {
    * input): the knob in the middle. Toggling still flips `checked`.
    */
   indeterminate?: boolean;
-  /** Shows “I” and “O” on the track (on/off labels). */
+  /**
+   * Shows “I” and “O” on the track (on/off labels).
+   * @default the settings' `differentiateWithoutColor` (see `Settings`)
+   */
   onOffLabels?: boolean;
   /**
    * The track's color while on, and the pressed knob's glow.

@@ -14,7 +14,7 @@ import {
   toGamut,
 } from 'colorjs.io/fn';
 
-import type { Rgba } from './props.js';
+import type { ColorPickerLabels, Rgba } from './props.js';
 
 // The picker's colors in CSS's color syntaxes (Color.js, its functional API:
 // only these spaces bundled): parsed (a color input's value, see
@@ -166,7 +166,20 @@ const code = (color: PlainColorObject, format: Format): ColorCode => {
  * A color's codes, by group: hex (without its alpha, with it), sRGB's CSS
  * functions, the perceptual ones, the wide gamut's.
  */
-export const codeGroups = (color: Rgba, hex: string): readonly CodeGroup[] => {
+export const codeGroups = (
+  color: Rgba,
+  hex: string,
+  labels: Required<
+    Pick<
+      ColorPickerLabels,
+      | 'hexLabel'
+      | 'hexWithAlphaLabel'
+      | 'perceptualLabel'
+      | 'srgbLabel'
+      | 'wideGamutLabel'
+    >
+  >,
+): readonly CodeGroup[] => {
   const plain = fromRgba(color);
   const alphaHex = Math.round(color.a * 255)
     .toString(16)
@@ -176,19 +189,19 @@ export const codeGroups = (color: Rgba, hex: string): readonly CodeGroup[] => {
 
   return [
     [
-      'Hex',
+      labels.hexLabel,
       [
-        { code: hex, label: 'Hex', subtitle: hex, well: hex },
+        { code: hex, label: labels.hexLabel, subtitle: hex, well: hex },
         {
           code: withAlpha,
-          label: 'Hex with alpha',
+          label: labels.hexWithAlphaLabel,
           subtitle: withAlpha,
           well: withAlpha,
         },
       ],
     ],
     [
-      'sRGB',
+      labels.srgbLabel,
       [
         code(plain, formats.rgb),
         code(plain, formats.hsl),
@@ -196,7 +209,7 @@ export const codeGroups = (color: Rgba, hex: string): readonly CodeGroup[] => {
       ],
     ],
     [
-      'Perceptual',
+      labels.perceptualLabel,
       [
         code(plain, formats.oklch),
         code(plain, formats.oklab),
@@ -204,6 +217,6 @@ export const codeGroups = (color: Rgba, hex: string): readonly CodeGroup[] => {
         code(plain, formats.lch),
       ],
     ],
-    ['Wide gamut', [code(plain, formats.p3)]],
+    [labels.wideGamutLabel, [code(plain, formats.p3)]],
   ];
 };

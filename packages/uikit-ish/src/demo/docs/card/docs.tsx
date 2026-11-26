@@ -8,6 +8,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
@@ -222,7 +223,9 @@ export const cardValueRows: readonly PropRow[] = [
   [
     'locale',
     'Intl.LocalesArgument',
-    'the document’s language',
+    <>
+      from <a href={publicUrl('settings')}>Settings</a>
+    </>,
     'The locale the number is formatted for.',
   ],
   [

@@ -11,7 +11,7 @@ import {
   useState,
 } from 'react';
 
-import { useSettings } from '../settings/main.js';
+import { useLocale, useSettings } from '../settings/main.js';
 import { cn, withStyle } from '../utils/main.js';
 import {
   colorAt,
@@ -379,7 +379,7 @@ export const Channel = forwardRef<HTMLDivElement, CardChannelProps>(
       format = percentFormat,
       getAriaValueText,
       label,
-      locale,
+      locale: ownLocale,
       max = 100,
       min = 0,
       onValueChange,
@@ -391,6 +391,7 @@ export const Channel = forwardRef<HTMLDivElement, CardChannelProps>(
     },
     ref,
   ) => {
+    const locale = useLocale(ownLocale);
     const [current, setCurrent] = useControlled(value, defaultValue ?? min);
     const share = shareOf(current, min, max);
     const scale = colors && colors.length >= 2 ? colors : undefined;

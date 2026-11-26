@@ -2,7 +2,7 @@ import './style.css';
 
 import { FunctionComponent, useMemo, useState } from 'react';
 
-import { PageControl } from '../../../components/index.js';
+import { PageControl, Stack } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -127,7 +127,11 @@ const OverPagedContent: FunctionComponent = () => {
       state={[partState]}
       title="Page control over paged content"
     >
-      <div className="page-control-demo-paged">
+      <Stack
+        align="center"
+        className="page-control-demo-paged"
+        spacing="medium"
+      >
         <div
           ref={pagesRef}
           className="page-control-demo-pages"
@@ -164,7 +168,7 @@ const OverPagedContent: FunctionComponent = () => {
             });
           }}
         />
-      </div>
+      </Stack>
     </Component>
   );
 };

@@ -15,6 +15,7 @@ import {
   useState,
 } from 'react';
 
+import { useLocale } from '../settings/main.js';
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
 import type {
   ActivityIndicatorDisplay,
@@ -97,7 +98,16 @@ const RootContext = createContext<((isMomentary: boolean) => void) | undefined>(
 /** A progress bar, its parts Base UI's. */
 const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
   (
-    { className, style, synchronized = true, tabIndex, tint, value, ...props },
+    {
+      className,
+      locale,
+      style,
+      synchronized = true,
+      tabIndex,
+      tint,
+      value,
+      ...props
+    },
     forwardedRef,
   ) => {
     const [isMomentary, setIsMomentary] = useState(false);
@@ -110,6 +120,7 @@ const Root = forwardRef<HTMLDivElement, ProgressRootProps>(
       <RootContext.Provider value={setIsMomentary}>
         <BaseProgress.Root
           ref={ref}
+          locale={useLocale(locale)}
           style={withStyle({ '--uikit-progress-tint': tint }, style)}
           tabIndex={tabIndex ?? (isMomentary ? 0 : undefined)}
           value={value}

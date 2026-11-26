@@ -24,9 +24,6 @@
     overflow-anchor: none;
     transition: padding-inline-end 300ms cubic-bezier(0.32, 0.72, 0, 1);
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      transition: none;
-    }
 
     &[data-dense] {
       grid-auto-flow: row dense;
@@ -56,9 +53,6 @@
     grid-template-columns: repeat(var(--uikit-grid-columns), minmax(0, 1fr));
     transition: padding-inline-end 300ms cubic-bezier(0.32, 0.72, 0, 1);
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      transition: none;
-    }
 
     &:has(> .uikit-grid-header) {
       grid-template-rows: auto;
@@ -694,9 +688,6 @@
       width 300ms cubic-bezier(0.32, 0.72, 0, 1),
       height 300ms cubic-bezier(0.32, 0.72, 0, 1);
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      transition: none;
-    }
   }
 
   /* (A tile's in its area: its place there changing with its size, as
@@ -708,9 +699,6 @@
       inset-block-start 300ms cubic-bezier(0.32, 0.72, 0, 1),
       inset-inline-start 300ms cubic-bezier(0.32, 0.72, 0, 1);
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      transition: none;
-    }
   }
 
   /* (A full width's: through the end-of-line column.) */
@@ -831,9 +819,6 @@
       scale: -1 -1;
     }
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      transition: none;
-    }
   }
 
   /* (A full width's, still one: its shape as it'd be (see main.tsx,
@@ -1296,6 +1281,18 @@
     .uikit-grid-corner-button:not([data-grid-hidden])
     > .uikit-grid-corner-icon {
     animation: 120ms 200ms backwards uikit-grid-corner-appear;
+
+    /* Motion reduced (see styles.css): there at once, as its tile. */
+    :where([data-uikit-reduced-motion='true'])
+      &:not(:where([data-uikit-reduced-motion='false']) *) {
+      animation: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &:where([data-uikit-settings], [data-uikit-settings] *):not(:where([data-uikit-reduced-motion='false']) *) {
+        animation: none;
+      }
+    }
   }
 
   /* (A tile's own corner button there while editing (its `whileEditing`,

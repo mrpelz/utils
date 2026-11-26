@@ -9,6 +9,7 @@ import {
   List,
   Navigation,
   Page,
+  Stack,
   Switch,
   Symbol,
   Toolbar,
@@ -690,7 +691,10 @@ const DrillView: FunctionComponent = () => {
                       {...partProps['Viewport.Padding']}
                       edge="block-start"
                     />
-                    <div className="card-demo-content">
+                    <Stack
+                      inset
+                      className="card-demo-content"
+                    >
                       <Grid.Root {...partProps['Grid.Root']}>
                         <Grid.Item
                           {...partProps['Grid.Item']}
@@ -714,7 +718,7 @@ const DrillView: FunctionComponent = () => {
                           {lockCard({ parts })}
                         </Grid.Item>
                       </Grid.Root>
-                    </div>
+                    </Stack>
                     <Viewport.Padding
                       {...partProps['Viewport.Padding']}
                       edge="block-end"

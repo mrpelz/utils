@@ -25,14 +25,6 @@
     margin-inline: var(--uikit-list-inset, 16px);
   }
 
-  /* Things side by side, wrapping. */
-  .kitchen-sink-showcase {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px;
-  }
-
   /* A bar spanning a row: room below it. */
   .kitchen-sink-row-bar {
     padding-block-end: 12px;
@@ -105,8 +97,16 @@
     );
     place-items: center;
 
-    @container style(--uikit-settings-reduced-motion: 1) {
+    /* Motion reduced (see the library's styles.css). */
+    :where([data-uikit-reduced-motion='true'])
+      &:not(:where([data-uikit-reduced-motion='false']) *) {
       animation: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &:not(:where([data-uikit-reduced-motion='false']) *) {
+        animation: none;
+      }
     }
   }
 
@@ -217,12 +217,6 @@
     display: grid;
     padding: 0 16px 8px;
   }
-
-  /* Things one below another (e.g. bars). */
-  .kitchen-sink-stacked {
-    display: grid;
-    gap: 20px;
-  }
 }
 
 /* Swipeable pages filling a screen (the docs' paged content's, see
@@ -312,9 +306,6 @@
   }
 
   .kitchen-sink-cards-alone-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
     padding-block: 12px;
 
     > :first-child {

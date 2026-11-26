@@ -10,6 +10,7 @@ import {
   type GridSizeChangeDetails,
   Menu,
   Page,
+  Stack,
   useGridItem,
   Viewport,
 } from '../../../components/index.js';
@@ -189,8 +190,15 @@ const Rooms: FunctionComponent = () => {
             {...partProps['Viewport.Padding']}
             edge="block-start"
           />
-          <div className="grid-demo-content">
-            <div className="grid-demo-actions">
+          <Stack
+            inset
+            className="grid-demo-content"
+          >
+            <Stack
+              wrap
+              axis="horizontal"
+              spacing="small"
+            >
               <Button.Root
                 {...partProps['Button.Root']}
                 variant="bordered"
@@ -203,7 +211,7 @@ const Rooms: FunctionComponent = () => {
                   {editing ? 'Done' : 'Edit'}
                 </Button.Label>
               </Button.Root>
-            </div>
+            </Stack>
             <Grid.Root
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
@@ -243,7 +251,7 @@ const Rooms: FunctionComponent = () => {
                 </Grid.Section>
               ))}
             </Grid.Root>
-          </div>
+          </Stack>
           <Viewport.Padding
             {...partProps['Viewport.Padding']}
             edge="block-end"
@@ -530,8 +538,15 @@ const Holes: FunctionComponent = () => {
             {...partProps['Viewport.Padding']}
             edge="block-start"
           />
-          <div className="grid-demo-content">
-            <div className="grid-demo-actions">
+          <Stack
+            inset
+            className="grid-demo-content"
+          >
+            <Stack
+              wrap
+              axis="horizontal"
+              spacing="small"
+            >
               <Button.Root
                 {...partProps['Button.Root']}
                 variant="bordered"
@@ -545,7 +560,7 @@ const Holes: FunctionComponent = () => {
                   {draft ? 'Done' : 'Edit'}
                 </Button.Label>
               </Button.Root>
-            </div>
+            </Stack>
             <Grid.Root
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
@@ -608,7 +623,7 @@ const Holes: FunctionComponent = () => {
                 );
               })}
             </Grid.Root>
-          </div>
+          </Stack>
           <Viewport.Padding
             {...partProps['Viewport.Padding']}
             edge="block-end"
@@ -768,8 +783,15 @@ const Adding: FunctionComponent = () => {
             {...partProps['Viewport.Padding']}
             edge="block-start"
           />
-          <div className="grid-demo-content">
-            <div className="grid-demo-actions">
+          <Stack
+            inset
+            className="grid-demo-content"
+          >
+            <Stack
+              wrap
+              axis="horizontal"
+              spacing="small"
+            >
               <Button.Root
                 {...partProps['Button.Root']}
                 variant="bordered"
@@ -794,7 +816,7 @@ const Adding: FunctionComponent = () => {
                   Reset
                 </Button.Label>
               </Button.Root>
-            </div>
+            </Stack>
             <Grid.Root
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
@@ -847,7 +869,7 @@ const Adding: FunctionComponent = () => {
                 </Menu.Portal>
               </Menu.Root>
             </Grid.Root>
-          </div>
+          </Stack>
           <Viewport.Padding
             {...partProps['Viewport.Padding']}
             edge="block-end"
@@ -1026,8 +1048,15 @@ const Room: FunctionComponent = () => {
             {...partProps['Viewport.Padding']}
             edge="block-start"
           />
-          <div className="grid-demo-content">
-            <div className="grid-demo-actions">
+          <Stack
+            inset
+            className="grid-demo-content"
+          >
+            <Stack
+              wrap
+              axis="horizontal"
+              spacing="small"
+            >
               <Button.Root
                 {...partProps['Button.Root']}
                 variant="bordered"
@@ -1050,7 +1079,7 @@ const Room: FunctionComponent = () => {
                   {editing ? 'Done' : 'Edit'}
                 </Button.Label>
               </Button.Root>
-            </div>
+            </Stack>
             <Grid.Root
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
@@ -1101,7 +1130,7 @@ const Room: FunctionComponent = () => {
                 </Grid.Item>
               ))}
             </Grid.Root>
-          </div>
+          </Stack>
           <Viewport.Padding
             {...partProps['Viewport.Padding']}
             edge="block-end"
@@ -1280,7 +1309,10 @@ const Expanding: FunctionComponent = () => {
             {...partProps['Viewport.Padding']}
             edge="block-start"
           />
-          <div className="grid-demo-content">
+          <Stack
+            inset
+            className="grid-demo-content"
+          >
             <Grid.Root
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
@@ -1317,7 +1349,7 @@ const Expanding: FunctionComponent = () => {
                 },
               )}
             </Grid.Root>
-          </div>
+          </Stack>
           <Viewport.Padding
             {...partProps['Viewport.Padding']}
             edge="block-end"
@@ -1463,7 +1495,10 @@ const Opening: FunctionComponent = () => {
             {...partProps['Viewport.Padding']}
             edge="block-start"
           />
-          <div className="grid-demo-content">
+          <Stack
+            inset
+            className="grid-demo-content"
+          >
             <Grid.Root
               key={defaultsKey(...Object.values(partProps))}
               {...partProps['Grid.Root']}
@@ -1492,7 +1527,7 @@ const Opening: FunctionComponent = () => {
                 <div className="grid-demo-tile">Blinds</div>
               </Grid.Item>
             </Grid.Root>
-          </div>
+          </Stack>
           <Viewport.Padding
             {...partProps['Viewport.Padding']}
             edge="block-end"

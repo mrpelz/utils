@@ -3,7 +3,7 @@ import './style.css';
 import { RadioGroup as BaseRadioGroup } from '@base-ui/react/radio-group';
 import { FunctionComponent, useMemo } from 'react';
 
-import { Segmented, Viewport } from '../../../components/index.js';
+import { Segmented, Stack, Viewport } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
@@ -70,7 +70,10 @@ const LiveView: FunctionComponent = () => {
       title="Segmented"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
-        <div className="segmented-demo-content">
+        <Stack
+          inset
+          className="segmented-demo-content"
+        >
           <Segmented.Root
             key={elementKey}
             aria-label="Period"
@@ -91,7 +94,7 @@ const LiveView: FunctionComponent = () => {
             ))}
             <Segmented.Highlight {...partProps['Segmented.Highlight']} />
           </Segmented.Root>
-        </div>
+        </Stack>
       </Viewport.Content>
     </Component>
   );

@@ -94,6 +94,7 @@ export const propOptionsBelow = {
 export const propOptionsBlock = {
   ...commonPropOptions,
   strong: [true, false, undefined] as const,
+  flush: [undefined, true] as const,
 };
 
 export const propOptionsCheckbox = {

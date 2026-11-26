@@ -88,8 +88,84 @@ export type RangeValue = {
   value?: DateRange | null;
 };
 
+/**
+ * The calendar's built-in words, for assistive technology (see
+ * `datePickerLabels` for their defaults).
+ */
+export type DatePickerCalendarLabels = {
+  /**
+   * The month roll's name.
+   * @default `datePickerLabels.monthLabel`
+   */
+  monthLabel?: string;
+  /**
+   * The next month's button.
+   * @default `datePickerLabels.nextMonthLabel`
+   */
+  nextMonthLabel?: string;
+  /**
+   * The previous month's button.
+   * @default `datePickerLabels.previousMonthLabel`
+   */
+  previousMonthLabel?: string;
+  /**
+   * The year roll's name.
+   * @default `datePickerLabels.yearLabel`
+   */
+  yearLabel?: string;
+};
+
+/**
+ * The time roll's built-in words, for assistive technology (see
+ * `datePickerLabels` for their defaults).
+ */
+export type DatePickerTimeLabels = {
+  /**
+   * The AM/PM column's name.
+   * @default `datePickerLabels.dayPeriodLabel`
+   */
+  dayPeriodLabel?: string;
+  /**
+   * The hours column's name.
+   * @default `datePickerLabels.hoursLabel`
+   */
+  hoursLabel?: string;
+  /**
+   * The minutes column's name.
+   * @default `datePickerLabels.minutesLabel`
+   */
+  minutesLabel?: string;
+};
+
+/**
+ * The picker's own built-in words, besides its calendar's and its time
+ * roll's (see `datePickerLabels` for their defaults).
+ */
+export type DatePickerOwnLabels = {
+  /**
+   * The date's button and popup, with a time (`mode`: `dateAndTime`).
+   * @default `datePickerLabels.dateAndTimeLabel`
+   */
+  dateAndTimeLabel?: string;
+  /**
+   * The date's button and popup.
+   * @default `datePickerLabels.dateLabel`
+   */
+  dateLabel?: string;
+  /**
+   * The time's button, popup and row.
+   * @default `datePickerLabels.timeLabel`
+   */
+  timeLabel?: string;
+};
+
+/** Every built-in word of a picker (see `datePickerLabels`). */
+export type DatePickerLabels = DatePickerCalendarLabels &
+  DatePickerOwnLabels &
+  DatePickerTimeLabels;
+
 /** Props of the calendar (also of `DatePicker.Root`'s). */
-export type CalendarProps = {
+export type CalendarProps = DatePickerCalendarLabels & {
   /**
    * The week's first day (0: Sunday … 6: Saturday).
    * @default the locale's
@@ -124,7 +200,10 @@ export type CalendarProps = {
    * `max`), grayed out as those (programmatic highlights still show).
    */
   isDateDisabled?: (date: Date) => boolean;
-  /** Locale of names, numerals, the hour cycle and the week's first day. */
+  /**
+   * Locale of names, numerals, the hour cycle and the week's first day.
+   * @default the settings' (see `Settings`)
+   */
   locale?: string;
   /** The latest selectable day (and, with a time, time). */
   max?: Date;
@@ -190,69 +269,74 @@ export type DatePickerOpen = 'date' | 'time';
 /** The time's hour cycle: 12 hours (with AM/PM) or 24. */
 export type HourCycle = 'h12' | 'h23';
 
-export type DatePickerProps = CalendarProps & {
-  /**
-   * The collapsed buttons' shape (`roundedRectangle`: 6px corners).
-   * @default 'capsule'
-   */
-  buttonShape?: 'capsule' | 'roundedRectangle';
-  /** The initially open popover (uncontrolled). */
-  defaultOpen?: DatePickerOpen | null;
-  /** Disables all of it. */
-  disabled?: boolean;
-  /**
-   * Its pickers' handle (see `DatePicker.createHandle`): the compact
-   * style's buttons toggle them (no popovers), shown in place by a
-   * `DatePicker.Expandable` given it (e.g. after the picker's list row).
-   */
-  handle?: DatePickerHandle;
-  /**
-   * 12 or 24 hours.
-   * @default the locale's
-   */
-  hourCycle?: HourCycle;
-  /**
-   * Date, time, or both; a `range` is of dates only.
-   * @default 'date'
-   */
-  mode?: DatePickerMode;
-  /**
-   * Called when the compact style's picker opens or closes (its buttons,
-   * or, in a popover, pressing outside it, Escape, …), and why.
-   */
-  onOpenChange?: (
-    open: DatePickerOpen | null,
-    eventDetails: DatePickerOpenChangeEventDetails,
-  ) => void;
-  /** The open picker of the compact style (controlled). */
-  open?: DatePickerOpen | null;
-  /**
-   * Collapsed buttons opening a popover (`compact`), or the calendar in
-   * place (`inline`).
-   * @default 'compact'
-   */
-  pickerStyle?: DatePickerStyle;
-  /**
-   * The compact style's buttons open their pickers in popovers (default);
-   * without, they only toggle `open`, for the app to show them (e.g. in an
-   * expandable list row: `DatePicker.Calendar`, `DatePicker.TimeRoll`).
-   */
-  popover?: boolean;
-  /**
-   * How the compact style's popover aligns to its buttons (in a list row,
-   * which they end, aligned with their end: `end`).
-   * @default 'center'
-   */
-  popoverAlign?: PopoverAlign;
-};
+export type DatePickerProps = CalendarProps &
+  DatePickerOwnLabels &
+  DatePickerTimeLabels & {
+    /**
+     * The collapsed buttons' shape (`roundedRectangle`: 6px corners).
+     * @default 'capsule'
+     */
+    buttonShape?: 'capsule' | 'roundedRectangle';
+    /** The initially open popover (uncontrolled). */
+    defaultOpen?: DatePickerOpen | null;
+    /** Disables all of it. */
+    disabled?: boolean;
+    /**
+     * Its pickers' handle (see `DatePicker.createHandle`): the compact
+     * style's buttons toggle them (no popovers), shown in place by a
+     * `DatePicker.Expandable` given it (e.g. after the picker's list row).
+     */
+    handle?: DatePickerHandle;
+    /**
+     * 12 or 24 hours.
+     * @default the locale's
+     */
+    hourCycle?: HourCycle;
+    /**
+     * Date, time, or both; a `range` is of dates only.
+     * @default 'date'
+     */
+    mode?: DatePickerMode;
+    /**
+     * Called when the compact style's picker opens or closes (its buttons,
+     * or, in a popover, pressing outside it, Escape, …), and why.
+     */
+    onOpenChange?: (
+      open: DatePickerOpen | null,
+      eventDetails: DatePickerOpenChangeEventDetails,
+    ) => void;
+    /** The open picker of the compact style (controlled). */
+    open?: DatePickerOpen | null;
+    /**
+     * Collapsed buttons opening a popover (`compact`), or the calendar in
+     * place (`inline`).
+     * @default 'compact'
+     */
+    pickerStyle?: DatePickerStyle;
+    /**
+     * The compact style's buttons open their pickers in popovers (default);
+     * without, they only toggle `open`, for the app to show them (e.g. in an
+     * expandable list row: `DatePicker.Calendar`, `DatePicker.TimeRoll`).
+     */
+    popover?: boolean;
+    /**
+     * How the compact style's popover aligns to its buttons (in a list row,
+     * which they end, aligned with their end: `end`).
+     * @default 'center'
+     */
+    popoverAlign?: PopoverAlign;
+  };
 
-export type TimeRollProps = {
+export type TimeRollProps = DatePickerTimeLabels & {
   /**
    * 12 or 24 hours.
    * @default the locale's
    */
   hourCycle?: HourCycle;
-  /** Locale of numerals, the hour cycle and the day period. */
+  /**
+   * Locale of numerals, the hour cycle and the day period.
+   * @default the settings' (see `Settings`)
+   */
   locale?: string;
   /**
    * The latest selectable time: later hours, minutes

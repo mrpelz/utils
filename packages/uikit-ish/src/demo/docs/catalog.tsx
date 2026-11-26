@@ -365,6 +365,14 @@ import {
 import { SliderDemo } from './slider/main.js';
 import { SliderOverview, sliderOverviewDemos } from './slider/overview.js';
 import { SliderParts, sliderPartsDemos } from './slider/parts.js';
+import { StackArchitecture } from './stack/architecture.js';
+import {
+  StackComposition,
+  stackCompositionDemos,
+} from './stack/composition.js';
+import { StackDemo } from './stack/main.js';
+import { StackOverview, stackOverviewDemos } from './stack/overview.js';
+import { StackParts, stackPartsDemos } from './stack/parts.js';
 import { StepperArchitecture } from './stepper/architecture.js';
 import {
   StepperComposition,
@@ -653,6 +661,23 @@ export const catalog: readonly CatalogEntry[] = [
     summary:
       'Columns side by side (a sidebar, a list, a detail), sized, resizable or flexible, with one that can float.',
     title: 'Layout',
+  },
+  {
+    category: 'structure',
+    demos: [
+      StackDemo,
+      ...stackOverviewDemos,
+      ...stackPartsDemos,
+      ...stackCompositionDemos,
+    ],
+    Architecture: StackArchitecture,
+    id: 'stack',
+    Composition: StackComposition,
+    Overview: StackOverview,
+    Parts: StackParts,
+    summary:
+      'Components one below another or side by side, with a step of the spacing scale between them, and optionally the content margin at its sides.',
+    title: 'Stack',
   },
   {
     category: 'structure',

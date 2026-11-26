@@ -8,87 +8,87 @@
     margin: 0;
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-body-weight);
-    font-weight: round(down, var(--font-ui-body-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
 
     &[data-text-style='callout'] {
       font-size: var(--font-ui-callout-size);
-      font-variation-settings: 'wght' var(--font-ui-callout-weight);
-      font-weight: round(down, var(--font-ui-callout-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-callout-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-callout-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-callout-tracking);
       line-height: var(--font-ui-callout-line-height);
     }
 
     &[data-text-style='caption1'] {
       font-size: var(--font-ui-caption1-size);
-      font-variation-settings: 'wght' var(--font-ui-caption1-weight);
-      font-weight: round(down, var(--font-ui-caption1-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-caption1-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-caption1-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-caption1-tracking);
       line-height: var(--font-ui-caption1-line-height);
     }
 
     &[data-text-style='caption2'] {
       font-size: var(--font-ui-caption2-size);
-      font-variation-settings: 'wght' var(--font-ui-caption2-weight);
-      font-weight: round(down, var(--font-ui-caption2-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-caption2-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-caption2-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-caption2-tracking);
       line-height: var(--font-ui-caption2-line-height);
     }
 
     &[data-text-style='footnote'] {
       font-size: var(--font-ui-footnote-size);
-      font-variation-settings: 'wght' var(--font-ui-footnote-weight);
-      font-weight: round(down, var(--font-ui-footnote-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-footnote-tracking);
       line-height: var(--font-ui-footnote-line-height);
     }
 
     &[data-text-style='headline'] {
       font-size: var(--font-ui-headline-size);
-      font-variation-settings: 'wght' var(--font-ui-headline-weight);
-      font-weight: round(down, var(--font-ui-headline-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-headline-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-headline-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-headline-tracking);
       line-height: var(--font-ui-headline-line-height);
     }
 
     &[data-text-style='largeTitle'] {
       font-size: var(--font-ui-large-title-size);
-      font-variation-settings: 'wght' var(--font-ui-large-title-weight);
-      font-weight: round(down, var(--font-ui-large-title-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-large-title-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-large-title-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-large-title-tracking);
       line-height: var(--font-ui-large-title-line-height);
     }
 
     &[data-text-style='subheadline'] {
       font-size: var(--font-ui-subheadline-size);
-      font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
-      font-weight: round(down, var(--font-ui-subheadline-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-subheadline-tracking);
       line-height: var(--font-ui-subheadline-line-height);
     }
 
     &[data-text-style='title1'] {
       font-size: var(--font-ui-title1-size);
-      font-variation-settings: 'wght' var(--font-ui-title1-weight);
-      font-weight: round(down, var(--font-ui-title1-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-title1-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-title1-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-title1-tracking);
       line-height: var(--font-ui-title1-line-height);
     }
 
     &[data-text-style='title2'] {
       font-size: var(--font-ui-title2-size);
-      font-variation-settings: 'wght' var(--font-ui-title2-weight);
-      font-weight: round(down, var(--font-ui-title2-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-title2-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-title2-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-title2-tracking);
       line-height: var(--font-ui-title2-line-height);
     }
 
     &[data-text-style='title3'] {
       font-size: var(--font-ui-title3-size);
-      font-variation-settings: 'wght' var(--font-ui-title3-weight);
-      font-weight: round(down, var(--font-ui-title3-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-title3-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-title3-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-title3-tracking);
       line-height: var(--font-ui-title3-line-height);
     }
@@ -96,8 +96,8 @@
     &[data-emphasized] {
       --uikit-typography-emphasized: var(--font-ui-body-weight-emphasized);
 
-      font-variation-settings: 'wght' var(--uikit-typography-emphasized);
-      font-weight: round(down, var(--uikit-typography-emphasized), 100);
+      font-variation-settings: 'wght' calc(var(--uikit-typography-emphasized) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--uikit-typography-emphasized) + var(--uikit-font-weight-boost, 0)), 100);
     }
 
     &[data-text-style='callout'][data-emphasized] {
@@ -162,438 +162,6 @@
 
     &[data-color='quaternary'] {
       color: var(--color-ui-quaternary-label);
-    }
-
-    &[data-text-size='xSmall'] {
-      --font-ui-large-title-size: 31px;
-      --font-ui-large-title-line-height: 38px;
-      --font-ui-large-title-tracking: 0.37px;
-      --font-ui-title1-size: 25px;
-      --font-ui-title1-line-height: 31px;
-      --font-ui-title1-tracking: 0.15px;
-      --font-ui-title2-size: 19px;
-      --font-ui-title2-line-height: 23px;
-      --font-ui-title2-tracking: -0.45px;
-      --font-ui-title3-size: 17px;
-      --font-ui-title3-line-height: 22px;
-      --font-ui-title3-tracking: -0.43px;
-      --font-ui-headline-size: 14px;
-      --font-ui-headline-line-height: 19px;
-      --font-ui-headline-tracking: -0.15px;
-      --font-ui-body-size: 14px;
-      --font-ui-body-line-height: 19px;
-      --font-ui-body-tracking: -0.15px;
-      --font-ui-callout-size: 13px;
-      --font-ui-callout-line-height: 18px;
-      --font-ui-callout-tracking: -0.08px;
-      --font-ui-subheadline-size: 12px;
-      --font-ui-subheadline-line-height: 16px;
-      --font-ui-subheadline-tracking: 0px;
-      --font-ui-footnote-size: 12px;
-      --font-ui-footnote-line-height: 16px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 11px;
-      --font-ui-caption1-line-height: 13px;
-      --font-ui-caption1-tracking: 0.06px;
-      --font-ui-caption2-size: 11px;
-      --font-ui-caption2-line-height: 13px;
-      --font-ui-caption2-tracking: 0.06px;
-    }
-
-    &[data-text-size='small'] {
-      --font-ui-large-title-size: 32px;
-      --font-ui-large-title-line-height: 39px;
-      --font-ui-large-title-tracking: 0.41px;
-      --font-ui-title1-size: 26px;
-      --font-ui-title1-line-height: 32px;
-      --font-ui-title1-tracking: 0.22px;
-      --font-ui-title2-size: 20px;
-      --font-ui-title2-line-height: 24px;
-      --font-ui-title2-tracking: -0.45px;
-      --font-ui-title3-size: 18px;
-      --font-ui-title3-line-height: 23px;
-      --font-ui-title3-tracking: -0.44px;
-      --font-ui-headline-size: 15px;
-      --font-ui-headline-line-height: 20px;
-      --font-ui-headline-tracking: -0.23px;
-      --font-ui-body-size: 15px;
-      --font-ui-body-line-height: 20px;
-      --font-ui-body-tracking: -0.23px;
-      --font-ui-callout-size: 14px;
-      --font-ui-callout-line-height: 19px;
-      --font-ui-callout-tracking: -0.15px;
-      --font-ui-subheadline-size: 13px;
-      --font-ui-subheadline-line-height: 18px;
-      --font-ui-subheadline-tracking: -0.08px;
-      --font-ui-footnote-size: 12px;
-      --font-ui-footnote-line-height: 16px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 11px;
-      --font-ui-caption1-line-height: 13px;
-      --font-ui-caption1-tracking: 0.06px;
-      --font-ui-caption2-size: 11px;
-      --font-ui-caption2-line-height: 13px;
-      --font-ui-caption2-tracking: 0.06px;
-    }
-
-    &[data-text-size='medium'] {
-      --font-ui-large-title-size: 33px;
-      --font-ui-large-title-line-height: 40px;
-      --font-ui-large-title-tracking: 0.4px;
-      --font-ui-title1-size: 27px;
-      --font-ui-title1-line-height: 33px;
-      --font-ui-title1-tracking: 0.29px;
-      --font-ui-title2-size: 21px;
-      --font-ui-title2-line-height: 28px;
-      --font-ui-title2-tracking: -0.36px;
-      --font-ui-title3-size: 19px;
-      --font-ui-title3-line-height: 24px;
-      --font-ui-title3-tracking: -0.45px;
-      --font-ui-headline-size: 16px;
-      --font-ui-headline-line-height: 21px;
-      --font-ui-headline-tracking: -0.31px;
-      --font-ui-body-size: 16px;
-      --font-ui-body-line-height: 21px;
-      --font-ui-body-tracking: -0.31px;
-      --font-ui-callout-size: 15px;
-      --font-ui-callout-line-height: 20px;
-      --font-ui-callout-tracking: -0.23px;
-      --font-ui-subheadline-size: 14px;
-      --font-ui-subheadline-line-height: 19px;
-      --font-ui-subheadline-tracking: -0.15px;
-      --font-ui-footnote-size: 12px;
-      --font-ui-footnote-line-height: 16px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 11px;
-      --font-ui-caption1-line-height: 13px;
-      --font-ui-caption1-tracking: 0.06px;
-      --font-ui-caption2-size: 11px;
-      --font-ui-caption2-line-height: 13px;
-      --font-ui-caption2-tracking: 0.06px;
-    }
-
-    &[data-text-size='large'] {
-      --font-ui-large-title-size: 34px;
-      --font-ui-large-title-line-height: 41px;
-      --font-ui-large-title-tracking: 0.4px;
-      --font-ui-title1-size: 28px;
-      --font-ui-title1-line-height: 34px;
-      --font-ui-title1-tracking: 0.38px;
-      --font-ui-title2-size: 22px;
-      --font-ui-title2-line-height: 28px;
-      --font-ui-title2-tracking: -0.26px;
-      --font-ui-title3-size: 20px;
-      --font-ui-title3-line-height: 25px;
-      --font-ui-title3-tracking: -0.45px;
-      --font-ui-headline-size: 17px;
-      --font-ui-headline-line-height: 22px;
-      --font-ui-headline-tracking: -0.43px;
-      --font-ui-body-size: 17px;
-      --font-ui-body-line-height: 22px;
-      --font-ui-body-tracking: -0.43px;
-      --font-ui-callout-size: 16px;
-      --font-ui-callout-line-height: 21px;
-      --font-ui-callout-tracking: -0.31px;
-      --font-ui-subheadline-size: 15px;
-      --font-ui-subheadline-line-height: 20px;
-      --font-ui-subheadline-tracking: -0.23px;
-      --font-ui-footnote-size: 13px;
-      --font-ui-footnote-line-height: 18px;
-      --font-ui-footnote-tracking: -0.08px;
-      --font-ui-caption1-size: 12px;
-      --font-ui-caption1-line-height: 16px;
-      --font-ui-caption1-tracking: 0px;
-      --font-ui-caption2-size: 11px;
-      --font-ui-caption2-line-height: 13px;
-      --font-ui-caption2-tracking: 0.06px;
-    }
-
-    &[data-text-size='xLarge'] {
-      --font-ui-large-title-size: 36px;
-      --font-ui-large-title-line-height: 43px;
-      --font-ui-large-title-tracking: 0.37px;
-      --font-ui-title1-size: 30px;
-      --font-ui-title1-line-height: 36px;
-      --font-ui-title1-tracking: 0.4px;
-      --font-ui-title2-size: 24px;
-      --font-ui-title2-line-height: 30px;
-      --font-ui-title2-tracking: 0.07px;
-      --font-ui-title3-size: 22px;
-      --font-ui-title3-line-height: 28px;
-      --font-ui-title3-tracking: 0px;
-      --font-ui-headline-size: 19px;
-      --font-ui-headline-line-height: 24px;
-      --font-ui-headline-tracking: -0.45px;
-      --font-ui-body-size: 19px;
-      --font-ui-body-line-height: 24px;
-      --font-ui-body-tracking: -0.45px;
-      --font-ui-callout-size: 18px;
-      --font-ui-callout-line-height: 23px;
-      --font-ui-callout-tracking: -0.44px;
-      --font-ui-subheadline-size: 17px;
-      --font-ui-subheadline-line-height: 22px;
-      --font-ui-subheadline-tracking: -0.43px;
-      --font-ui-footnote-size: 15px;
-      --font-ui-footnote-line-height: 20px;
-      --font-ui-footnote-tracking: -0.23px;
-      --font-ui-caption1-size: 14px;
-      --font-ui-caption1-line-height: 19px;
-      --font-ui-caption1-tracking: -0.15px;
-      --font-ui-caption2-size: 13px;
-      --font-ui-caption2-line-height: 18px;
-      --font-ui-caption2-tracking: -0.08px;
-    }
-
-    &[data-text-size='xxLarge'] {
-      --font-ui-large-title-size: 38px;
-      --font-ui-large-title-line-height: 46px;
-      --font-ui-large-title-tracking: 0.37px;
-      --font-ui-title1-size: 32px;
-      --font-ui-title1-line-height: 39px;
-      --font-ui-title1-tracking: 0.41px;
-      --font-ui-title2-size: 26px;
-      --font-ui-title2-line-height: 32px;
-      --font-ui-title2-tracking: 0.22px;
-      --font-ui-title3-size: 24px;
-      --font-ui-title3-line-height: 30px;
-      --font-ui-title3-tracking: 0.07px;
-      --font-ui-headline-size: 21px;
-      --font-ui-headline-line-height: 26px;
-      --font-ui-headline-tracking: -0.36px;
-      --font-ui-body-size: 21px;
-      --font-ui-body-line-height: 26px;
-      --font-ui-body-tracking: -0.36px;
-      --font-ui-callout-size: 20px;
-      --font-ui-callout-line-height: 24px;
-      --font-ui-callout-tracking: -0.45px;
-      --font-ui-subheadline-size: 19px;
-      --font-ui-subheadline-line-height: 24px;
-      --font-ui-subheadline-tracking: -0.45px;
-      --font-ui-footnote-size: 17px;
-      --font-ui-footnote-line-height: 22px;
-      --font-ui-footnote-tracking: -0.43px;
-      --font-ui-caption1-size: 16px;
-      --font-ui-caption1-line-height: 21px;
-      --font-ui-caption1-tracking: -0.31px;
-      --font-ui-caption2-size: 15px;
-      --font-ui-caption2-line-height: 20px;
-      --font-ui-caption2-tracking: -0.23px;
-    }
-
-    &[data-text-size='xxxLarge'] {
-      --font-ui-large-title-size: 40px;
-      --font-ui-large-title-line-height: 48px;
-      --font-ui-large-title-tracking: 0.37px;
-      --font-ui-title1-size: 34px;
-      --font-ui-title1-line-height: 41px;
-      --font-ui-title1-tracking: 0.4px;
-      --font-ui-title2-size: 28px;
-      --font-ui-title2-line-height: 34px;
-      --font-ui-title2-tracking: 0.38px;
-      --font-ui-title3-size: 26px;
-      --font-ui-title3-line-height: 32px;
-      --font-ui-title3-tracking: 0.22px;
-      --font-ui-headline-size: 23px;
-      --font-ui-headline-line-height: 29px;
-      --font-ui-headline-tracking: -0.1px;
-      --font-ui-body-size: 23px;
-      --font-ui-body-line-height: 29px;
-      --font-ui-body-tracking: -0.1px;
-      --font-ui-callout-size: 22px;
-      --font-ui-callout-line-height: 28px;
-      --font-ui-callout-tracking: -0.26px;
-      --font-ui-subheadline-size: 21px;
-      --font-ui-subheadline-line-height: 28px;
-      --font-ui-subheadline-tracking: -0.36px;
-      --font-ui-footnote-size: 19px;
-      --font-ui-footnote-line-height: 24px;
-      --font-ui-footnote-tracking: -0.45px;
-      --font-ui-caption1-size: 18px;
-      --font-ui-caption1-line-height: 23px;
-      --font-ui-caption1-tracking: -0.44px;
-      --font-ui-caption2-size: 17px;
-      --font-ui-caption2-line-height: 22px;
-      --font-ui-caption2-tracking: -0.43px;
-    }
-
-    &[data-text-size='ax1'] {
-      --font-ui-large-title-size: 44px;
-      --font-ui-large-title-line-height: 52px;
-      --font-ui-large-title-tracking: 0px;
-      --font-ui-title1-size: 38px;
-      --font-ui-title1-line-height: 46px;
-      --font-ui-title1-tracking: 0px;
-      --font-ui-title2-size: 34px;
-      --font-ui-title2-line-height: 41px;
-      --font-ui-title2-tracking: 0px;
-      --font-ui-title3-size: 31px;
-      --font-ui-title3-line-height: 38px;
-      --font-ui-title3-tracking: 0px;
-      --font-ui-headline-size: 28px;
-      --font-ui-headline-line-height: 34px;
-      --font-ui-headline-tracking: 0px;
-      --font-ui-body-size: 28px;
-      --font-ui-body-line-height: 34px;
-      --font-ui-body-tracking: 0px;
-      --font-ui-callout-size: 26px;
-      --font-ui-callout-line-height: 32px;
-      --font-ui-callout-tracking: 0px;
-      --font-ui-subheadline-size: 25px;
-      --font-ui-subheadline-line-height: 31px;
-      --font-ui-subheadline-tracking: 0px;
-      --font-ui-footnote-size: 23px;
-      --font-ui-footnote-line-height: 29px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 22px;
-      --font-ui-caption1-line-height: 28px;
-      --font-ui-caption1-tracking: 0px;
-      --font-ui-caption2-size: 20px;
-      --font-ui-caption2-line-height: 25px;
-      --font-ui-caption2-tracking: 0px;
-    }
-
-    &[data-text-size='ax2'] {
-      --font-ui-large-title-size: 48px;
-      --font-ui-large-title-line-height: 57px;
-      --font-ui-large-title-tracking: 0px;
-      --font-ui-title1-size: 43px;
-      --font-ui-title1-line-height: 51px;
-      --font-ui-title1-tracking: 0px;
-      --font-ui-title2-size: 43px;
-      --font-ui-title2-line-height: 51px;
-      --font-ui-title2-tracking: 0px;
-      --font-ui-title3-size: 37px;
-      --font-ui-title3-line-height: 44px;
-      --font-ui-title3-tracking: 0px;
-      --font-ui-headline-size: 33px;
-      --font-ui-headline-line-height: 40px;
-      --font-ui-headline-tracking: 0px;
-      --font-ui-body-size: 33px;
-      --font-ui-body-line-height: 40px;
-      --font-ui-body-tracking: 0px;
-      --font-ui-callout-size: 32px;
-      --font-ui-callout-line-height: 39px;
-      --font-ui-callout-tracking: 0px;
-      --font-ui-subheadline-size: 30px;
-      --font-ui-subheadline-line-height: 37px;
-      --font-ui-subheadline-tracking: 0px;
-      --font-ui-footnote-size: 27px;
-      --font-ui-footnote-line-height: 33px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 26px;
-      --font-ui-caption1-line-height: 32px;
-      --font-ui-caption1-tracking: 0px;
-      --font-ui-caption2-size: 24px;
-      --font-ui-caption2-line-height: 30px;
-      --font-ui-caption2-tracking: 0px;
-    }
-
-    &[data-text-size='ax3'] {
-      --font-ui-large-title-size: 52px;
-      --font-ui-large-title-line-height: 61px;
-      --font-ui-large-title-tracking: 0px;
-      --font-ui-title1-size: 48px;
-      --font-ui-title1-line-height: 57px;
-      --font-ui-title1-tracking: 0px;
-      --font-ui-title2-size: 44px;
-      --font-ui-title2-line-height: 52px;
-      --font-ui-title2-tracking: 0px;
-      --font-ui-title3-size: 43px;
-      --font-ui-title3-line-height: 51px;
-      --font-ui-title3-tracking: 0px;
-      --font-ui-headline-size: 40px;
-      --font-ui-headline-line-height: 48px;
-      --font-ui-headline-tracking: 0px;
-      --font-ui-body-size: 40px;
-      --font-ui-body-line-height: 48px;
-      --font-ui-body-tracking: 0px;
-      --font-ui-callout-size: 38px;
-      --font-ui-callout-line-height: 46px;
-      --font-ui-callout-tracking: 0px;
-      --font-ui-subheadline-size: 36px;
-      --font-ui-subheadline-line-height: 43px;
-      --font-ui-subheadline-tracking: 0px;
-      --font-ui-footnote-size: 33px;
-      --font-ui-footnote-line-height: 40px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 32px;
-      --font-ui-caption1-line-height: 39px;
-      --font-ui-caption1-tracking: 0px;
-      --font-ui-caption2-size: 29px;
-      --font-ui-caption2-line-height: 35px;
-      --font-ui-caption2-tracking: 0px;
-    }
-
-    &[data-text-size='ax4'] {
-      --font-ui-large-title-size: 56px;
-      --font-ui-large-title-line-height: 66px;
-      --font-ui-large-title-tracking: 0px;
-      --font-ui-title1-size: 53px;
-      --font-ui-title1-line-height: 62px;
-      --font-ui-title1-tracking: 0px;
-      --font-ui-title2-size: 50px;
-      --font-ui-title2-line-height: 59px;
-      --font-ui-title2-tracking: 0px;
-      --font-ui-title3-size: 43px;
-      --font-ui-title3-line-height: 51px;
-      --font-ui-title3-tracking: 0px;
-      --font-ui-headline-size: 47px;
-      --font-ui-headline-line-height: 56px;
-      --font-ui-headline-tracking: 0px;
-      --font-ui-body-size: 47px;
-      --font-ui-body-line-height: 56px;
-      --font-ui-body-tracking: 0px;
-      --font-ui-callout-size: 44px;
-      --font-ui-callout-line-height: 52px;
-      --font-ui-callout-tracking: 0px;
-      --font-ui-subheadline-size: 42px;
-      --font-ui-subheadline-line-height: 50px;
-      --font-ui-subheadline-tracking: 0px;
-      --font-ui-footnote-size: 38px;
-      --font-ui-footnote-line-height: 46px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 37px;
-      --font-ui-caption1-line-height: 44px;
-      --font-ui-caption1-tracking: 0px;
-      --font-ui-caption2-size: 34px;
-      --font-ui-caption2-line-height: 41px;
-      --font-ui-caption2-tracking: 0px;
-    }
-
-    &[data-text-size='ax5'] {
-      --font-ui-large-title-size: 60px;
-      --font-ui-large-title-line-height: 70px;
-      --font-ui-large-title-tracking: 0px;
-      --font-ui-title1-size: 58px;
-      --font-ui-title1-line-height: 68px;
-      --font-ui-title1-tracking: 0px;
-      --font-ui-title2-size: 56px;
-      --font-ui-title2-line-height: 66px;
-      --font-ui-title2-tracking: 0px;
-      --font-ui-title3-size: 55px;
-      --font-ui-title3-line-height: 65px;
-      --font-ui-title3-tracking: 0px;
-      --font-ui-headline-size: 53px;
-      --font-ui-headline-line-height: 62px;
-      --font-ui-headline-tracking: 0px;
-      --font-ui-body-size: 53px;
-      --font-ui-body-line-height: 62px;
-      --font-ui-body-tracking: 0px;
-      --font-ui-callout-size: 51px;
-      --font-ui-callout-line-height: 60px;
-      --font-ui-callout-tracking: 0px;
-      --font-ui-subheadline-size: 49px;
-      --font-ui-subheadline-line-height: 58px;
-      --font-ui-subheadline-tracking: 0px;
-      --font-ui-footnote-size: 44px;
-      --font-ui-footnote-line-height: 52px;
-      --font-ui-footnote-tracking: 0px;
-      --font-ui-caption1-size: 43px;
-      --font-ui-caption1-line-height: 51px;
-      --font-ui-caption1-tracking: 0px;
-      --font-ui-caption2-size: 40px;
-      --font-ui-caption2-line-height: 48px;
-      --font-ui-caption2-tracking: 0px;
     }
   }
 }

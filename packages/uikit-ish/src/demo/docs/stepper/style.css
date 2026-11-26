@@ -2,12 +2,9 @@
 
 /* The value next to the stepper (as apps show it, the stepper doesn't). */
 .stepper-demo-row {
-  display: flex;
-  align-items: center;
   color: var(--color-ui-label);
   font-size: var(--font-ui-body-size);
   font-variant-numeric: tabular-nums;
-  gap: 16px;
   line-height: var(--font-ui-body-line-height);
 
   /* Wide enough for its longest value (“200%”), so the demo doesn't

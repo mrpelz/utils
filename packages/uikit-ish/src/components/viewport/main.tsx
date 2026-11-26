@@ -17,9 +17,11 @@ import {
 import { type WheelEventState, WheelGestures } from 'wheel-gestures';
 
 import { useGlassMode } from '../glass/main.js';
+import { useIsInSettingsProvider, useSettings } from '../settings/main.js';
 import {
   cn,
   type PortalContainer,
+  smoothScrollOf,
   useForwardedRef,
   usePortalContainer,
   withStyle,
@@ -365,6 +367,24 @@ const standaloneAttribute = 'data-uikit-viewport-standalone';
 let windowHolds = 0;
 
 /**
+ * The root's contrast (see style.css: the window's background):
+ * its window holds' providers' (resolved: theirs, or the system's), the
+ * last held's; none outside a provider (the system's apply within one
+ * only, see Settings).
+ */
+const rootContrastAttribute = 'data-uikit-root-contrast';
+const rootContrasts = new Map<object, string>();
+const writeRootContrast = () => {
+  const root = document.documentElement;
+  const value = rootContrasts.values().toArray().at(-1);
+  if (value !== undefined) {
+    root.setAttribute(rootContrastAttribute, value);
+    return;
+  }
+  root.removeAttribute(rootContrastAttribute);
+};
+
+/**
  * The window held as an app's while mounted, unless in a screen (its
  * portal container, e.g. a device's frame): the root marked (its
  * background beneath the layers, see style.css); in an iOS Home Screen app
@@ -390,6 +410,20 @@ const useWindowHold = (screen: PortalContainer | null | undefined) => {
       root.removeAttribute(standaloneAttribute);
     };
   }, [screen]);
+
+  // (Its provider's contrast on the root, while it holds the window.)
+  const { contrast } = useSettings();
+  const isInProvider = useIsInSettingsProvider();
+  useLayoutEffect(() => {
+    if (elementOf(screen) || !isInProvider) return undefined;
+    const hold = {};
+    rootContrasts.set(hold, contrast);
+    writeRootContrast();
+    return () => {
+      rootContrasts.delete(hold);
+      writeRootContrast();
+    };
+  }, [contrast, isInProvider, screen]);
 };
 
 /** A screen's marker: an app's (its background, see style.css). */
@@ -456,7 +490,7 @@ const Provider: FunctionComponent<ViewportProviderProps> = ({
       const target =
         currentLayer(null) ?? scroller?.current ?? latestFilling.current;
       if (!target || target === document.scrollingElement) return;
-      target.scrollTo({ behavior: 'smooth', top: 0 });
+      target.scrollTo({ behavior: smoothScrollOf(target), top: 0 });
     },
     // (The window's: no screen given; not its ref read while rendering.)
     scrollsToTop &&

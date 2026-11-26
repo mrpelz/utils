@@ -54,8 +54,8 @@
     color: var(--color-ui-label);
     font-family: inherit;
     font-size: var(--font-ui-headline-size);
-    font-variation-settings: 'wght' 590;
-    font-weight: round(down, 590, 100);
+    font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
     line-height: var(--font-ui-headline-line-height);
     place-items: center;
     -webkit-tap-highlight-color: transparent;

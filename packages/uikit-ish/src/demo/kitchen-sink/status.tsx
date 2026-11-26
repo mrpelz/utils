@@ -9,6 +9,7 @@ import {
   List,
   Progress,
   type ProgressPlacement,
+  Stack,
   Symbol,
   Toolbar,
 } from '../../components/index.js';
@@ -79,10 +80,18 @@ const Displays: FunctionComponent = () => {
 
   return (
     <>
-      <div className="kitchen-sink-showcase">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+      >
         <ActivityIndicator display={display}>Loading</ActivityIndicator>
-      </div>
-      <div className="kitchen-sink-showcase">
+      </Stack>
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+      >
         {displays.map((value) => (
           <Button.Root
             key={value}
@@ -93,7 +102,7 @@ const Displays: FunctionComponent = () => {
             <Button.Label>{value}</Button.Label>
           </Button.Root>
         ))}
-      </div>
+      </Stack>
     </>
   );
 };

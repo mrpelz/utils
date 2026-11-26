@@ -2,7 +2,11 @@ import './style.css';
 
 import { FunctionComponent, useMemo } from 'react';
 
-import { ActivityIndicator, Progress } from '../../../components/index.js';
+import {
+  ActivityIndicator,
+  Progress,
+  Stack,
+} from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import {
   usePartControls,
@@ -62,7 +66,11 @@ const RootPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Progress.Root"
     >
-      <div className="progress-demo-stage">
+      <Stack
+        align="center"
+        className="progress-demo-stage"
+        spacing="xLarge"
+      >
         <Progress.Root
           key={elementKey}
           {...props}
@@ -75,7 +83,7 @@ const RootPart: FunctionComponent = () => {
             <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -113,7 +121,11 @@ const TrackPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Progress.Track"
     >
-      <div className="progress-demo-stage">
+      <Stack
+        align="center"
+        className="progress-demo-stage"
+        spacing="xLarge"
+      >
         <Progress.Root
           {...partProps['Progress.Root']}
           aria-label="Downloading"
@@ -123,7 +135,7 @@ const TrackPart: FunctionComponent = () => {
             <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -161,7 +173,11 @@ const IndicatorPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Progress.Indicator"
     >
-      <div className="progress-demo-stage">
+      <Stack
+        align="center"
+        className="progress-demo-stage"
+        spacing="xLarge"
+      >
         <Progress.Root
           {...partProps['Progress.Root']}
           aria-label="Downloading"
@@ -171,7 +187,7 @@ const IndicatorPart: FunctionComponent = () => {
             <Progress.Indicator {...props} />
           </Progress.Track>
         </Progress.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -210,7 +226,11 @@ const LabelPart: FunctionComponent = () => {
       state={[state, partState]}
       title="Progress.Label"
     >
-      <div className="progress-demo-stage">
+      <Stack
+        align="center"
+        className="progress-demo-stage"
+        spacing="xLarge"
+      >
         <Progress.Root
           {...partProps['Progress.Root']}
           value={40}
@@ -220,7 +240,7 @@ const LabelPart: FunctionComponent = () => {
             <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -259,7 +279,11 @@ const ValuePart: FunctionComponent = () => {
       state={[state, partState]}
       title="Progress.Value"
     >
-      <div className="progress-demo-stage">
+      <Stack
+        align="center"
+        className="progress-demo-stage"
+        spacing="xLarge"
+      >
         <Progress.Root
           {...partProps['Progress.Root']}
           aria-label="Downloading"
@@ -270,7 +294,7 @@ const ValuePart: FunctionComponent = () => {
             <Progress.Indicator {...partProps['Progress.Indicator']} />
           </Progress.Track>
         </Progress.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

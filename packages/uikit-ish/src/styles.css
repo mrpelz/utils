@@ -18,28 +18,6 @@
     --uikit-safe-area-inset-left: env(safe-area-inset-left, 0px);
 
     /*
-     * Settings (see components/settings/main.tsx): each the system's (its
-     * media query's, see below; without one, the default), unless a
-     * provider overrides it (on its element, inherited: the nearest
-     * provider's wins; a portal's, where it was opened). 0 or 1; text size
-     * a keyword (Typography's).
-     */
-    --uikit-settings-contrast-system: 0;
-    --uikit-settings-differentiate-without-color-system: 0;
-    --uikit-settings-reduced-motion-system: 0;
-    --uikit-settings-reduced-transparency-system: 0;
-    --uikit-settings-text-size-system: large;
-    --uikit-settings-contrast: var(--uikit-settings-contrast-system);
-    --uikit-settings-differentiate-without-color: var(
-      --uikit-settings-differentiate-without-color-system
-    );
-    --uikit-settings-reduced-motion: var(--uikit-settings-reduced-motion-system);
-    --uikit-settings-reduced-transparency: var(
-      --uikit-settings-reduced-transparency-system
-    );
-    --uikit-settings-text-size: var(--uikit-settings-text-size-system);
-
-    /*
      * Grayscale antialiasing (Framework7 components/app/app.less)
      */
     -webkit-font-smoothing: antialiased;
@@ -122,24 +100,6 @@
      *   for switch and slider tracks: 120 120 120
      */
     --color-ui-label: light-dark(rgb(0 0 0), rgb(255 255 255));
-    --color-ui-secondary-label: light-dark(
-      rgb(60 60 67 / 60%),
-      rgb(235 235 245 / 60%)
-    );
-    --color-ui-tertiary-label: light-dark(
-      rgb(60 60 67 / 30%),
-      rgb(235 235 245 / 30%)
-    );
-    --color-ui-quaternary-label: light-dark(
-      rgb(60 60 67 / 18%),
-      rgb(235 235 245 / 16%)
-    );
-    --color-ui-placeholder-text: light-dark(
-      rgb(60 60 67 / 30%),
-      rgb(235 235 245 / 30%)
-    );
-    --color-ui-separator: light-dark(rgb(60 60 67 / 29%), rgb(84 84 88 / 60%));
-    --color-ui-opaque-separator: light-dark(rgb(198 198 200), rgb(56 56 58));
 
     /* A segmented control's selected segment. */
     --color-ui-segmented-selection: light-dark(
@@ -147,22 +107,6 @@
       rgb(108 108 113)
     );
     --color-ui-link: light-dark(rgb(0 122 255), rgb(9 132 255));
-    --color-ui-system-fill: light-dark(
-      rgb(120 120 120 / 20%),
-      rgb(120 120 128 / 36%)
-    );
-    --color-ui-secondary-system-fill: light-dark(
-      rgb(120 120 128 / 16%),
-      rgb(120 120 128 / 32%)
-    );
-    --color-ui-tertiary-system-fill: light-dark(
-      rgb(118 118 128 / 12%),
-      rgb(118 118 128 / 24%)
-    );
-    --color-ui-quaternary-system-fill: light-dark(
-      rgb(116 116 128 / 8%),
-      rgb(118 118 128 / 18%)
-    );
     --color-ui-system-background: light-dark(rgb(255 255 255), rgb(0 0 0));
     --color-ui-secondary-system-background: light-dark(
       rgb(242 242 247),
@@ -171,14 +115,6 @@
     --color-ui-tertiary-system-background: light-dark(
       rgb(255 255 255),
       rgb(44 44 46)
-    );
-    --color-ui-system-grouped-background: light-dark(
-      rgb(242 242 247),
-      rgb(0 0 0)
-    );
-    --color-ui-secondary-system-grouped-background: light-dark(
-      rgb(255 255 255),
-      rgb(28 28 30)
     );
     --color-ui-tertiary-system-grouped-background: light-dark(
       rgb(242 242 247),
@@ -354,18 +290,6 @@
     --glass-ui-lens-shadow: var(--glass-ui-bright-lens-shadow);
 
     /*
-     * List separators, blended with the list's background (unlike the
-     * separator color, rgb(60 60 67 / 29%)): #E6E6E6 plus-darker (as multiply), #1A1A1A plus-lighter,
-     * drawn as their unblended equivalent (black at 10%: exact; white at
-     * 11%: exact on dark rows, #1C1C1E): WebKit blends rows on a layer of
-     * their own (e.g. while swiped) with nothing, as the glass above.
-     */
-    --color-ui-list-separator: light-dark(
-      rgb(0 0 0 / 10%),
-      rgb(255 255 255 / 11%)
-    );
-
-    /*
      * Section titles of plain lists, opaque
      *
      * Source: Framework7 components/contacts-list/contacts-list-vars.less
@@ -383,12 +307,11 @@
   }
 
   /*
-   * The system colors, and with more contrast (Settings' contrast): the
-   * system's on the root (its media query); within a provider or a portal
-   * overriding it (see Settings), its own (a style query on its custom
-   * property), on what's directly within it (a provider's properties are
-   * on its own element, and a style query asks the parent). The app tint
-   * too, resolved alike (see below).
+   * The system colors (and the semantic ones changing with more contrast),
+   * standard: on the root, and again directly within every provider or
+   * portal (see Settings), so a provider's standard contrast holds within
+   * more; with more contrast, see below. The app tint too, resolved alike
+   * (see below).
    */
   :where(:root, [data-uikit-settings] > *) {
     /*
@@ -423,10 +346,79 @@
     --color-ui-system-purple: light-dark(rgb(203 48 224), rgb(219 52 242));
     --color-ui-system-pink: light-dark(rgb(255 45 85), rgb(255 55 95));
     --color-ui-system-brown: light-dark(rgb(172 127 94), rgb(183 138 102));
+
+    /*
+     * Semantic colors with more contrast
+     *
+     * Secondary labels, separators, fills and grouped backgrounds: stronger
+     * with more contrast (see below). Set here, not with the other semantic
+     * colors, so they're set again within every provider or portal.
+     */
+    --color-ui-secondary-label: light-dark(
+      rgb(60 60 67 / 60%),
+      rgb(235 235 245 / 60%)
+    );
+    --color-ui-tertiary-label: light-dark(
+      rgb(60 60 67 / 30%),
+      rgb(235 235 245 / 30%)
+    );
+    --color-ui-quaternary-label: light-dark(
+      rgb(60 60 67 / 18%),
+      rgb(235 235 245 / 16%)
+    );
+    --color-ui-placeholder-text: light-dark(
+      rgb(60 60 67 / 30%),
+      rgb(235 235 245 / 30%)
+    );
+    --color-ui-separator: light-dark(rgb(60 60 67 / 29%), rgb(84 84 88 / 60%));
+    --color-ui-opaque-separator: light-dark(rgb(198 198 200), rgb(56 56 58));
+    --color-ui-system-fill: light-dark(
+      rgb(120 120 120 / 20%),
+      rgb(120 120 128 / 36%)
+    );
+    --color-ui-secondary-system-fill: light-dark(
+      rgb(120 120 128 / 16%),
+      rgb(120 120 128 / 32%)
+    );
+    --color-ui-tertiary-system-fill: light-dark(
+      rgb(118 118 128 / 12%),
+      rgb(118 118 128 / 24%)
+    );
+    --color-ui-quaternary-system-fill: light-dark(
+      rgb(116 116 128 / 8%),
+      rgb(118 118 128 / 18%)
+    );
+    --color-ui-system-grouped-background: light-dark(
+      rgb(242 242 247),
+      rgb(0 0 0)
+    );
+    --color-ui-secondary-system-grouped-background: light-dark(
+      rgb(255 255 255),
+      rgb(28 28 30)
+    );
+
+    /*
+     * List separators, blended with the list's background (unlike the
+     * separator color, rgb(60 60 67 / 29%)): #E6E6E6 plus-darker (as
+     * multiply), #1A1A1A plus-lighter, drawn as their unblended equivalent
+     * (black at 10%: exact; white at 11%: exact on dark rows, #1C1C1E):
+     * WebKit blends rows on a layer of their own (e.g. while swiped) with
+     * nothing, as the glass.
+     */
+    --color-ui-list-separator: light-dark(
+      rgb(0 0 0 / 10%),
+      rgb(255 255 255 / 11%)
+    );
   }
 
-  @media (prefers-contrast: more) {
-    :root {
+  /* With more contrast: the system's (its media query; within providers
+     not overriding it, only: none outside one), or a provider's (its
+     attribute, and its portals', see Settings; not a style query: those
+     don't apply on iOS, see the guide's iOS Quirks). (The window's background follows its viewport's provider's
+     alone, see Viewport: not the root's tokens, which everything outside
+     a provider inherits.) */
+  @media (prefers-contrast: more), (forced-colors: active) {
+    :where([data-uikit-settings]:not([data-uikit-contrast]) > *) {
       --color-ui-primary: var(
         --uikit-tint-more-contrast,
         var(--uikit-tint, var(--color-ui-system-blue))
@@ -449,34 +441,134 @@
       --color-ui-system-purple: light-dark(rgb(176 47 194), rgb(234 141 255));
       --color-ui-system-pink: light-dark(rgb(231 18 77), rgb(255 138 196));
       --color-ui-system-brown: light-dark(rgb(149 109 81), rgb(219 166 121));
+
+      /* Measured on a phone with Increase Contrast (labels, cells, list
+         separators, the switch's track); the rest raised alike (the
+         quaternary label, placeholder text, the separators' and the fills'
+         by half again: they're backgrounds of buttons and fields). */
+      --color-ui-secondary-label: light-dark(
+        rgb(60 60 67 / 80%),
+        rgb(235 235 245 / 70%)
+      );
+      --color-ui-tertiary-label: light-dark(
+        rgb(60 60 67 / 70%),
+        rgb(235 235 245 / 56%)
+      );
+      --color-ui-quaternary-label: light-dark(
+        rgb(60 60 67 / 42%),
+        rgb(235 235 245 / 30%)
+      );
+      --color-ui-placeholder-text: light-dark(
+        rgb(60 60 67 / 70%),
+        rgb(235 235 245 / 56%)
+      );
+      --color-ui-separator: light-dark(
+        rgb(60 60 67 / 29%),
+        rgb(84 84 88 / 87%)
+      );
+      --color-ui-opaque-separator: light-dark(rgb(198 198 200), rgb(70 70 72));
+      --color-ui-system-fill: light-dark(rgb(118 118 123), rgb(145 145 151));
+      --color-ui-secondary-system-fill: light-dark(
+        rgb(120 120 128 / 24%),
+        rgb(120 120 128 / 48%)
+      );
+      --color-ui-tertiary-system-fill: light-dark(
+        rgb(118 118 128 / 18%),
+        rgb(118 118 128 / 36%)
+      );
+      --color-ui-quaternary-system-fill: light-dark(
+        rgb(116 116 128 / 12%),
+        rgb(118 118 128 / 27%)
+      );
+      --color-ui-system-grouped-background: light-dark(
+        rgb(235 235 240),
+        rgb(0 0 0)
+      );
+      --color-ui-secondary-system-grouped-background: light-dark(
+        rgb(255 255 255),
+        rgb(36 36 37)
+      );
+      --color-ui-list-separator: light-dark(
+        rgb(0 0 0 / 10%),
+        rgb(255 255 255 / 16%)
+      );
     }
   }
 
-  @container style(--uikit-settings-contrast: 1) {
-    :where([data-uikit-settings] > *) {
-      --color-ui-primary: var(
-        --uikit-tint-more-contrast,
-        var(--uikit-tint, var(--color-ui-system-blue))
-      );
-      --color-ui-system-gray: light-dark(rgb(108 108 112), rgb(174 174 178));
-      --color-ui-system-gray2: light-dark(rgb(142 142 147), rgb(124 124 128));
-      --color-ui-system-gray3: light-dark(rgb(174 174 178), rgb(84 84 86));
-      --color-ui-system-gray4: light-dark(rgb(188 188 192), rgb(68 68 70));
-      --color-ui-system-gray5: light-dark(rgb(216 216 220), rgb(54 54 56));
-      --color-ui-system-gray6: light-dark(rgb(235 235 240), rgb(36 36 38));
-      --color-ui-system-red: light-dark(rgb(233 21 45), rgb(255 97 101));
-      --color-ui-system-orange: light-dark(rgb(197 83 0), rgb(255 160 86));
-      --color-ui-system-yellow: light-dark(rgb(161 106 0), rgb(254 223 67));
-      --color-ui-system-green: light-dark(rgb(0 137 50), rgb(74 217 104));
-      --color-ui-system-mint: light-dark(rgb(0 133 117), rgb(84 223 203));
-      --color-ui-system-teal: light-dark(rgb(0 129 152), rgb(59 221 236));
-      --color-ui-system-cyan: light-dark(rgb(0 126 174), rgb(109 217 255));
-      --color-ui-system-blue: light-dark(rgb(30 110 244), rgb(92 184 255));
-      --color-ui-system-indigo: light-dark(rgb(86 74 222), rgb(167 170 255));
-      --color-ui-system-purple: light-dark(rgb(176 47 194), rgb(234 141 255));
-      --color-ui-system-pink: light-dark(rgb(231 18 77), rgb(255 138 196));
-      --color-ui-system-brown: light-dark(rgb(149 109 81), rgb(219 166 121));
-    }
+  :where([data-uikit-contrast='more'] > *) {
+    --color-ui-primary: var(
+      --uikit-tint-more-contrast,
+      var(--uikit-tint, var(--color-ui-system-blue))
+    );
+    --color-ui-system-gray: light-dark(rgb(108 108 112), rgb(174 174 178));
+    --color-ui-system-gray2: light-dark(rgb(142 142 147), rgb(124 124 128));
+    --color-ui-system-gray3: light-dark(rgb(174 174 178), rgb(84 84 86));
+    --color-ui-system-gray4: light-dark(rgb(188 188 192), rgb(68 68 70));
+    --color-ui-system-gray5: light-dark(rgb(216 216 220), rgb(54 54 56));
+    --color-ui-system-gray6: light-dark(rgb(235 235 240), rgb(36 36 38));
+    --color-ui-system-red: light-dark(rgb(233 21 45), rgb(255 97 101));
+    --color-ui-system-orange: light-dark(rgb(197 83 0), rgb(255 160 86));
+    --color-ui-system-yellow: light-dark(rgb(161 106 0), rgb(254 223 67));
+    --color-ui-system-green: light-dark(rgb(0 137 50), rgb(74 217 104));
+    --color-ui-system-mint: light-dark(rgb(0 133 117), rgb(84 223 203));
+    --color-ui-system-teal: light-dark(rgb(0 129 152), rgb(59 221 236));
+    --color-ui-system-cyan: light-dark(rgb(0 126 174), rgb(109 217 255));
+    --color-ui-system-blue: light-dark(rgb(30 110 244), rgb(92 184 255));
+    --color-ui-system-indigo: light-dark(rgb(86 74 222), rgb(167 170 255));
+    --color-ui-system-purple: light-dark(rgb(176 47 194), rgb(234 141 255));
+    --color-ui-system-pink: light-dark(rgb(231 18 77), rgb(255 138 196));
+    --color-ui-system-brown: light-dark(rgb(149 109 81), rgb(219 166 121));
+
+    /* Measured on a phone with Increase Contrast (labels, cells, list
+       separators, the switch's track); the rest raised alike (the
+       quaternary label, placeholder text, the separators' and the fills'
+       by half again: they're backgrounds of buttons and fields). */
+    --color-ui-secondary-label: light-dark(
+      rgb(60 60 67 / 80%),
+      rgb(235 235 245 / 70%)
+    );
+    --color-ui-tertiary-label: light-dark(
+      rgb(60 60 67 / 70%),
+      rgb(235 235 245 / 56%)
+    );
+    --color-ui-quaternary-label: light-dark(
+      rgb(60 60 67 / 42%),
+      rgb(235 235 245 / 30%)
+    );
+    --color-ui-placeholder-text: light-dark(
+      rgb(60 60 67 / 70%),
+      rgb(235 235 245 / 56%)
+    );
+    --color-ui-separator: light-dark(
+      rgb(60 60 67 / 29%),
+      rgb(84 84 88 / 87%)
+    );
+    --color-ui-opaque-separator: light-dark(rgb(198 198 200), rgb(70 70 72));
+    --color-ui-system-fill: light-dark(rgb(118 118 123), rgb(145 145 151));
+    --color-ui-secondary-system-fill: light-dark(
+      rgb(120 120 128 / 24%),
+      rgb(120 120 128 / 48%)
+    );
+    --color-ui-tertiary-system-fill: light-dark(
+      rgb(118 118 128 / 18%),
+      rgb(118 118 128 / 36%)
+    );
+    --color-ui-quaternary-system-fill: light-dark(
+      rgb(116 116 128 / 12%),
+      rgb(118 118 128 / 27%)
+    );
+    --color-ui-system-grouped-background: light-dark(
+      rgb(235 235 240),
+      rgb(0 0 0)
+    );
+    --color-ui-secondary-system-grouped-background: light-dark(
+      rgb(255 255 255),
+      rgb(36 36 37)
+    );
+    --color-ui-list-separator: light-dark(
+      rgb(0 0 0 / 10%),
+      rgb(255 255 255 / 16%)
+    );
   }
 
   /* A color scheme forced (see `useColorScheme`): on the root element, or
@@ -500,23 +592,97 @@
     }
   }
 
-  /* Settings: the system's (see above). */
-  @media (prefers-contrast: more), (forced-colors: active) {
-    :root {
-      --uikit-settings-contrast-system: 1;
-    }
+  /* Links in the library's text parts (an app's prose: Typography, a
+     list's text, block and footer, an alert's description, a field's
+     description): in the link color (its light and dark variant), not
+     underlined; underlined while state is told without color alone (see
+     Settings; its attribute, as below). Only there, not every link: the
+     library's layer comes after an app's own (e.g. the guide's), so a
+     global rule would override its links. No specificity: a component's
+     own links within (a button, a row's title) keep their look. */
+  :where(
+      .uikit-typography,
+      .uikit-list-text,
+      .uikit-list-block,
+      .uikit-list-footer,
+      .uikit-alert-description,
+      .uikit-text-field-description
+    )
+    :where(a:any-link) {
+    color: var(--color-ui-link);
+    text-decoration: none;
+  }
+
+  :where([data-uikit-differentiate-without-color='true'])
+    :where(
+      .uikit-typography,
+      .uikit-list-text,
+      .uikit-list-block,
+      .uikit-list-footer,
+      .uikit-alert-description,
+      .uikit-text-field-description
+    )
+    :where(a:any-link):not(
+      :where([data-uikit-differentiate-without-color='false']) *
+    ) {
+    text-decoration: underline;
+  }
+
+  /* Motion reduced (see Settings): no transitions anywhere, everything
+     changing at once (scripts' animations and scrolls too, see
+     `reducedMotionOf`); what a finger drags still follows it. Overridden
+     by a provider: by the attribute it sets (and its portals), the
+     nearest `false` within a `true` winning (a `true` again within that,
+     not); else the system's, by its media query, within a provider only
+     (none outside one). Attributes, not style queries: those don't apply
+     on iOS (the guide's iOS Quirks page). Any other rule following a
+     setting: the same two selectors (e.g. Sheet's slide). */
+  [data-uikit-reduced-motion='true']
+    :not(
+      [data-uikit-reduced-motion='false'],
+      [data-uikit-reduced-motion='false'] *
+    ),
+  [data-uikit-reduced-motion='true']
+    :not(
+      [data-uikit-reduced-motion='false'],
+      [data-uikit-reduced-motion='false'] *
+    )::before,
+  [data-uikit-reduced-motion='true']
+    :not(
+      [data-uikit-reduced-motion='false'],
+      [data-uikit-reduced-motion='false'] *
+    )::after {
+    transition: none !important;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :root {
-      --uikit-settings-reduced-motion-system: 1;
+    :where([data-uikit-settings], [data-uikit-settings] *):not(
+        [data-uikit-reduced-motion='false'],
+        [data-uikit-reduced-motion='false'] *
+      ),
+    :where([data-uikit-settings], [data-uikit-settings] *):not(
+        [data-uikit-reduced-motion='false'],
+        [data-uikit-reduced-motion='false'] *
+      )::before,
+    :where([data-uikit-settings], [data-uikit-settings] *):not(
+        [data-uikit-reduced-motion='false'],
+        [data-uikit-reduced-motion='false'] *
+      )::after {
+      transition: none !important;
     }
   }
 
-  @media (prefers-reduced-transparency: reduce) {
-    :root {
-      --uikit-settings-reduced-transparency-system: 1;
-    }
+  /* Bold text (see Settings): every weight one step heavier (Regular to
+     Semibold, as a system's, measured), as each weight adds the boost
+     (`calc(W + var(--uikit-font-weight-boost, 0))`). The nearest
+     provider's (its attribute, and its portals'; written by the provider,
+     as no media query has it), a `false` within a `true` too. */
+  :where([data-uikit-bold-text='true']) {
+    --uikit-font-weight-boost: 190;
+  }
+
+  :where([data-uikit-bold-text='false']) {
+    --uikit-font-weight-boost: 0;
   }
 }
 

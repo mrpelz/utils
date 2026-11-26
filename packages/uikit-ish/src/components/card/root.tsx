@@ -26,7 +26,7 @@ import {
   useGridItem,
   useGridItemLayout,
 } from '../grid/main.js';
-import { ColorSchemeScope } from '../settings/main.js';
+import { ColorSchemeScope, useLocale } from '../settings/main.js';
 import { Switch } from '../switch/main.js';
 import { Symbol } from '../symbol/main.js';
 import { cn, useForwardedRef, withStyle } from '../utils/main.js';
@@ -43,7 +43,7 @@ import type {
   CardTrendProps,
   CardValueProps,
 } from './props.js';
-import { CardContext, documentLocale } from './shared.js';
+import { CardContext } from './shared.js';
 
 // A card's own parts (see main.tsx): its root, its symbol, its switch,
 // its title, value and subtitle, a trend, its corner buttons.
@@ -450,8 +450,12 @@ const Title = forwardRef<HTMLSpanElement, CardTitleProps>(
  * without a number, what's given instead (e.g. a state).
  */
 const Value = forwardRef<HTMLSpanElement, CardValueProps>(
-  ({ children, className, format, locale, render, value, ...props }, ref) =>
-    useRender({
+  (
+    { children, className, format, locale: ownLocale, render, value, ...props },
+    ref,
+  ) => {
+    const locale = useLocale(ownLocale);
+    return useRender({
       defaultTagName: 'span',
       props: {
         ...props,
@@ -462,9 +466,7 @@ const Value = forwardRef<HTMLSpanElement, CardValueProps>(
             children
           ) : (
             <>
-              {new Intl.NumberFormat(locale ?? documentLocale(), format).format(
-                value,
-              )}
+              {new Intl.NumberFormat(locale, format).format(value)}
               {children}
             </>
           ),
@@ -473,7 +475,8 @@ const Value = forwardRef<HTMLSpanElement, CardValueProps>(
       },
       ref,
       render,
-    }),
+    });
+  },
 );
 
 /**

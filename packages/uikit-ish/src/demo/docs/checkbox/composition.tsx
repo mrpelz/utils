@@ -11,6 +11,7 @@ import {
   List,
   Radio,
   RadioGroup,
+  Stack,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -423,7 +424,8 @@ const InAForm: FunctionComponent = () => {
     >
       <Form
         {...partProps.Form}
-        className="checkbox-demo-group"
+
+        render={<Stack />}
         onFormSubmit={(values: Record<string, unknown>) =>
           addLog(`submitted: ${JSON.stringify(values)}`)
         }
@@ -435,20 +437,24 @@ const InAForm: FunctionComponent = () => {
           <RadioGroup
             {...partProps.RadioGroup}
             aria-label="Contact by"
-            className="checkbox-demo-group"
+
             defaultValue="email"
+            render={<Stack />}
           >
             {contacts.map(([value, label]) => (
-              <label
+              <Stack
                 key={value}
-                className="checkbox-demo-option"
+                align="center"
+                axis="horizontal"
+                render={<label />}
+                spacing="medium"
               >
                 <Radio.Root
                   {...partProps['Radio.Root']}
                   value={value}
                 />
                 {label}
-              </label>
+              </Stack>
             ))}
           </RadioGroup>
         </Field.Root>
@@ -456,10 +462,15 @@ const InAForm: FunctionComponent = () => {
           {...partProps['Field.Root']}
           name="newsletter"
         >
-          <label className="checkbox-demo-option">
+          <Stack
+            align="center"
+            axis="horizontal"
+            render={<label />}
+            spacing="medium"
+          >
             <Checkbox.Root {...partProps['Checkbox.Root']} />
             Newsletter
-          </label>
+          </Stack>
         </Field.Root>
         <Button.Root
           {...partProps['Button.Root']}

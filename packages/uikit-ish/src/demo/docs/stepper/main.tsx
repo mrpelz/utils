@@ -3,7 +3,7 @@ import './style.css';
 import { NumberField as BaseNumberField } from '@base-ui/react/number-field';
 import { FunctionComponent, useMemo, useState } from 'react';
 
-import { Stepper } from '../../../components/index.js';
+import { Stack, Stepper } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
@@ -77,7 +77,11 @@ export const StepperDemo: FunctionComponent = () => {
         stateIncrement,
       ]}
     >
-      <div className="stepper-demo-row">
+      <Stack
+        align="center"
+        axis="horizontal"
+        className="stepper-demo-row"
+      >
         <output>{value}</output>
         <Stepper.Root
           key={elementKey}
@@ -96,7 +100,7 @@ export const StepperDemo: FunctionComponent = () => {
             <Stepper.Increment {...propsIncrement} />
           </Stepper.Group>
         </Stepper.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

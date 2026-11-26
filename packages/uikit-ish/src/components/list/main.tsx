@@ -35,6 +35,7 @@ import {
 } from '../checkbox/main.js';
 import {
   cn,
+  reducedMotionOf,
   useForwardedRef,
   usePointerDrag,
   useSecondaryClick,
@@ -121,6 +122,8 @@ import { dragToSelect } from './select.js';
 import { createSwipeActionsHandle } from './swipe-actions-handle.js';
 
 export {
+  listReorderAnnouncement,
+  type ListReorderAnnouncement,
   type ListReorderChange,
   type ListReorderEventDetails,
   ListReorderHandle,
@@ -1231,6 +1234,12 @@ const useExpandedRow = (
     if (isOpen) settle();
     const to = isOpen ? box(item) : closed;
     item.inert = !isOpen;
+
+    // (Motion reduced: open or closed at once.)
+    if (reducedMotionOf(item).matches) {
+      settle();
+      return undefined;
+    }
 
     item.style.overflow = 'clip';
     const animation = item.animate(
@@ -2873,10 +2882,11 @@ const Footer = forwardRef<HTMLElement, PartProps<'div'>>(
 
 // Framework7 “Content Block” (`block.less`): text aligned with the rows'.
 const Block = forwardRef<HTMLElement, ListBlockProps>(
-  ({ className, render, strong, ...props }, ref) =>
+  ({ className, flush, render, strong, ...props }, ref) =>
     useRender({
       defaultTagName: 'div',
       props: {
+        'data-flush': flush ? '' : undefined,
         'data-list-part': 'block',
         'data-strong': strong ? '' : undefined,
         className: cn('uikit-list-block', className),

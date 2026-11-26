@@ -6,27 +6,14 @@
   background-color: transparent;
 }
 
-/* A grid on a page: clear of the screen's sides; a button above it. */
+/* A grid on a page (a Stack, inset: clear of the screen's sides; a button
+   above it): room at its ends. */
 .card-demo-content {
-  display: grid;
-  padding: 16px;
-  gap: 16px;
-}
-
-/* The buttons above a grid, at its end. */
-.card-demo-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: end;
-  gap: 8px;
+  padding-block: 16px;
 }
 
 /* Cards on their own (no grid): boxes of their own sizes, in a row. */
 .card-demo-alone {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-
   > * {
     width: 150px;
     height: 150px;

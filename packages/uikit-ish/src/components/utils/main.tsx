@@ -3,6 +3,7 @@ import './style.css';
 
 import type { Popover as BasePopover } from '@base-ui/react/popover';
 import {
+  type Context,
   createContext,
   CSSProperties,
   forwardRef,
@@ -549,22 +550,32 @@ if (typeof window !== 'undefined') {
 
 /**
  * Whether motion is reduced for an element, as its stylesheets see it (as
- * a `MediaQueryList`'s `matches`, read anew each time): the settings' (a
- * `Settings.Provider`'s override, else the system's, see Settings), by its
- * inherited `--uikit-settings-reduced-motion`. Not the media query itself,
- * which no provider can override.
+ * a `MediaQueryList`'s `matches`, read anew each time): the nearest
+ * provider's override (its `data-uikit-reduced-motion`, or its portal's),
+ * else, within a provider, the system's (its media query); outside one,
+ * not (see Settings).
  */
 export const reducedMotionOf = (
   element: Element,
 ): { readonly matches: boolean } => ({
   get matches() {
+    const overridden = element.closest<HTMLElement>(
+      '[data-uikit-reduced-motion]',
+    );
+    if (overridden) return overridden.dataset.uikitReducedMotion === 'true';
     return (
-      getComputedStyle(element)
-        .getPropertyValue('--uikit-settings-reduced-motion')
-        .trim() === '1'
+      element.closest('[data-uikit-settings]') !== null &&
+      matchMedia('(prefers-reduced-motion: reduce)').matches
     );
   },
 });
+
+/**
+ * How a script's scroll of an element goes (also a drag's, let go):
+ * smoothly, or, motion reduced, at once.
+ */
+export const smoothScrollOf = (element: Element): ScrollBehavior =>
+  reducedMotionOf(element).matches ? 'instant' : 'smooth';
 
 /**
  * Whether a focus now is the keyboard's (a key pressed last, not a
@@ -1041,4 +1052,61 @@ export const fillIn = (backdrop: HTMLElement): void => {
     backdrop.style.removeProperty(`--uikit-cut-out-${name}`);
   }
   delete backdrop.dataset.cutOut;
+};
+
+/**
+ * A component's built-in words (e.g. its `…Label` props; its `defaults`,
+ * English): a context (its root's words, for its parts within) and a
+ * hook giving a part's words: its own (given in its props), else its
+ * root's, else the defaults.
+ */
+export const createLabels = <Labels extends Record<string, unknown>>(
+  defaults: Required<Labels>,
+): {
+  LabelsContext: Context<Required<Labels>>;
+  /** Props without the words (e.g. for an element's). */
+  omitLabels: <Props extends Partial<Labels>>(
+    props: Props,
+  ) => Omit<Props, keyof Labels>;
+  useLabels: (props: Partial<Labels>) => Required<Labels>;
+} => {
+  const keys = Object.keys(defaults) as (keyof Labels)[];
+  const LabelsContext = createContext<Required<Labels>>(defaults);
+  const merged = (inherited: Required<Labels>, own: readonly unknown[]) => {
+    const labels = { ...inherited };
+    for (const [index, key] of keys.entries()) {
+      const value = own[index];
+      if (value !== undefined) {
+        labels[key] = value as Required<Labels>[keyof Labels];
+      }
+    }
+    return labels;
+  };
+  const useLabels = (props: Partial<Labels>) => {
+    const inherited = useContext(LabelsContext);
+    const own = keys.map((key) => props[key]);
+    // Kept while its root's and its own words are (each the same: by their
+    // values, not the props object), changed with them (as React has a
+    // previous render's information kept).
+    const [last, setLast] = useState(() => ({
+      inherited,
+      labels: merged(inherited, own),
+      own,
+    }));
+    if (
+      last.inherited === inherited &&
+      own.every((value, index) => Object.is(value, last.own[index]))
+    ) {
+      return last.labels;
+    }
+    const next = { inherited, labels: merged(inherited, own), own };
+    setLast(next);
+    return next.labels;
+  };
+  const omitLabels = <Props extends Partial<Labels>>(props: Props) => {
+    const rest: Partial<Props> = { ...props };
+    for (const key of keys) delete rest[key];
+    return rest as Omit<Props, keyof Labels>;
+  };
+  return { LabelsContext, omitLabels, useLabels };
 };

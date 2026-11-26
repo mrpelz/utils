@@ -21,7 +21,6 @@
 
 /* A bar above the keyboard: a message field. */
 
-
 /* An anchor's sample content (a bar, or a sidebar), labelled. */
 
 /* An anchor's surface: its background reaching the screen's edge (its
@@ -109,11 +108,8 @@
 
 /* The input guards' fields (see parts.tsx): a phone's width, stacked. */
 .viewport-demo-fields {
-  display: flex;
   width: 402px;
   max-width: 100%;
-  flex-direction: column;
-  gap: 12px;
 }
 
 /* (Down to the bottom of a screen, where the keyboard would cover them.) */

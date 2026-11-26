@@ -31,6 +31,7 @@ import {
   colorPickerCodeRows,
   colorPickerEyedropperRows,
   colorPickerGridRows,
+  colorPickerLabelsRows,
   colorPickerModeRows,
   colorPickerModesRows,
   colorPickerNamedColorRows,
@@ -70,6 +71,21 @@ parseColor('#007AFF80'); // { r: 0, g: 122, b: 255, a: 0.502 }`;
 
 const formatColorCode = `formatColor({ r: 0, g: 122, b: 255, a: 1 }); // '#007AFF'
 formatColor({ r: 0, g: 122, b: 255, a: 0.5 }); // '#007AFF80'`;
+
+const colorPickerLabelsCode = `// Words in German (the others stay English).
+<ColorPicker.Root
+  hueLabel="Farbton"
+  opacityLabel="Deckkraft"
+  channelValueLabel={(channel) => \`Wert für \${channel}\`}
+>
+  …
+</ColorPicker.Root>;
+
+// A part's own words win over its picker's.
+<ColorPicker.Swatches deleteColorLabel="Entfernen" />;
+
+// A default, read.
+colorPickerLabels.flattenColorTitleLabel; // 'Flatten Color?'`;
 
 const defaultSavedColorsCode = `// The defaults, and the app's own after them.
 <ColorPicker.Swatches defaultSavedColors={[...defaultSavedColors, '#5856D6']} />`;
@@ -1078,6 +1094,14 @@ export const ColorPickerParts: FunctionComponent = () => (
           part="defaultSavedColors"
         />
       </li>
+      <li>
+        Built-in words:{' '}
+        <PartLink
+          component="color-picker"
+          part="colorPickerLabels"
+        />{' '}
+        (the English defaults of its <code>…Label</code> props)
+      </li>
     </ul>
 
     <Heading
@@ -1760,6 +1784,43 @@ export const ColorPickerParts: FunctionComponent = () => (
     <CodeView code={defaultSavedColorsCode} />
     <h3>Value</h3>
     <PropsTable rows={defaultSavedColorsRows} />
+
+    <Heading
+      id="colorpickerlabels"
+      level={2}
+    >
+      <code>colorPickerLabels</code>
+    </Heading>
+    <ul>
+      <li>
+        The picker’s built-in words, in English: the defaults of the{' '}
+        <code>…Label</code> props of <PartLink part="ColorPicker.Root" /> (all
+        of them, for its parts within). The parts with words inside them take
+        their own, which win over the picker’s:{' '}
+        <PartLink part="ColorPicker.Sliders" />,{' '}
+        <PartLink part="ColorPicker.Opacity" />,{' '}
+        <PartLink part="ColorPicker.Swatches" />,{' '}
+        <PartLink part="ColorPicker.Code" />,{' '}
+        <PartLink part="ColorPicker.CodeCopy" /> and{' '}
+        <PartLink part="ColorPicker.Named" />. A part that is a single element
+        takes the picker’s word as its name, and its own <code>aria-label</code>{' '}
+        wins.
+      </li>
+      <li>
+        Some are shown (a channel’s title, the swatches’ menu and action sheet,
+        the copy menu), and the others are read by assistive technology. The
+        library has no translations, so for another language, give your own.{' '}
+        <code>channelValueLabel</code> is a function, because a channel’s field
+        is named after its channel.
+      </li>
+      <li>
+        <PartLink part="ColorPicker.Well" /> usually sits outside a picker, so
+        it has its own name (<code>aria-label</code>, “Color” by default).
+      </li>
+    </ul>
+    <CodeView code={colorPickerLabelsCode} />
+    <h3>Keys</h3>
+    <PropsTable rows={colorPickerLabelsRows} />
   </>
 );
 

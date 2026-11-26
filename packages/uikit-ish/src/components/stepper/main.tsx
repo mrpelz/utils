@@ -9,6 +9,7 @@ import {
   ReactNode,
 } from 'react';
 
+import { useLocale } from '../settings/main.js';
 import { cn } from '../utils/main.js';
 import type { FocusHandler, HalfProps } from './props.js';
 
@@ -130,8 +131,21 @@ const Increment = forwardRef<
   </BaseNumberField.Increment>
 ));
 
+/** Base UI's root, its locale the settings' unless given. */
+const Root = forwardRef<
+  HTMLDivElement,
+  Omit<BaseNumberField.Root.Props, 'ref'>
+>(({ locale, ...props }, ref) => (
+  <BaseNumberField.Root
+    ref={ref}
+    locale={useLocale(locale)}
+    {...props}
+  />
+));
+
 export const Stepper = {
   ...BaseNumberField,
+  Root,
   Group,
   Input,
   Decrement,

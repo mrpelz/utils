@@ -59,8 +59,8 @@
     color: var(--color-ui-label);
     font-family: inherit;
     font-size: 14px;
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: -0.08px;
     line-height: 18px;
     text-align: center;
@@ -111,8 +111,8 @@
     }
 
     &[data-checked] {
-      font-variation-settings: 'wght' 590;
-      font-weight: round(down, 590, 100);
+      font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
 
       --uikit-symbol-emphasis: 1;
     }
@@ -138,8 +138,8 @@
 
   .uikit-segmented-label-reserve {
     overflow: hidden;
-    font-variation-settings: 'wght' 590;
-    font-weight: round(down, 590, 100);
+    font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
     grid-area: 1 / 1;
     text-overflow: ellipsis;
     visibility: hidden;

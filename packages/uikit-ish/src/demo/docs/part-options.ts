@@ -289,6 +289,7 @@ import {
   propOptionsTicks as propOptionsTicksSlider,
   propOptionsValue as propOptionsValueSlider,
 } from './slider/props.js';
+import { propOptionsStack } from './stack/props.js';
 import {
   getPropOptionsGuideRoot as getPropOptionsGuideRootStepper,
   propOptionsGroup as propOptionsGroupStepper,
@@ -638,6 +639,7 @@ export const partOptions: Record<string, PartOptions> = {
   'Slider.Symbol': getPropOptionsMinSymbolSlider,
   'Slider.Thumb': getPropOptionsGuideThumbSlider,
   'Slider.Ticks': propOptionsTicksSlider,
+  Stack: propOptionsStack,
   'Slider.Track': commonPropOptions,
   'Slider.Value': propOptionsValueSlider,
   'Stepper.Decrement': propOptionsHalfStepper,

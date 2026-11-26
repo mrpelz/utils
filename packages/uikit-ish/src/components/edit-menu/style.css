@@ -117,8 +117,8 @@
     padding: 0 16px;
     color: var(--uikit-glass-content);
     font-size: 14px;
-    font-variation-settings: 'wght' 400;
-    font-weight: round(down, 400, 100);
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: -0.15px;
     line-height: 18px;
     mix-blend-mode: var(--uikit-glass-content-blend);

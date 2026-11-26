@@ -61,32 +61,253 @@ export type PanelState = {
   ) => void;
 };
 
-export type ColorPickerRootProps = Omit<
-  useRender.ComponentProps<'div'>,
-  'defaultValue' | 'onChange'
-> & {
+/**
+ * The sliders’ built-in words: their titles, and their names for assistive technology (see
+ * `colorPickerLabels` for their defaults).
+ */
+export type ColorPickerSlidersLabels = {
   /**
-   * The initial mode (uncontrolled): its `Mode`'s and `View`'s `value`.
-   * @default the first `Mode`
+   * The black channel’s title and slider.
+   * @default `colorPickerLabels.blackLabel`
    */
-  defaultMode?: string;
-  /** The initial color (uncontrolled; a hex string). */
-  defaultValue?: string;
-  /** The mode (controlled): its `Mode`'s and `View`'s `value`. */
-  mode?: string;
-  /** Called with the mode chosen (its segmented control's details). */
-  onModeChange?: (
-    mode: string,
-    eventDetails: BaseRadioGroup.ChangeEventDetails,
-  ) => void;
-  /** Called with the picked color (a hex string), and why. */
-  onValueChange?: (
-    value: string,
-    eventDetails: ColorPickerChangeEventDetails,
-  ) => void;
-  /** The color (controlled; a hex string). */
-  value?: string;
+  blackLabel?: string;
+  /**
+   * The blue channel’s title and slider.
+   * @default `colorPickerLabels.blueLabel`
+   */
+  blueLabel?: string;
+  /**
+   * A channel’s field, by its name (e.g. “Red value”).
+   * @default `colorPickerLabels.channelValueLabel`
+   */
+  channelValueLabel?: (channel: string) => string;
+  /**
+   * The cyan channel’s title and slider.
+   * @default `colorPickerLabels.cyanLabel`
+   */
+  cyanLabel?: string;
+  /**
+   * The green channel’s title and slider.
+   * @default `colorPickerLabels.greenLabel`
+   */
+  greenLabel?: string;
+  /**
+   * The hue channel’s title and slider.
+   * @default `colorPickerLabels.hueLabel`
+   */
+  hueLabel?: string;
+  /**
+   * The lightness channel’s title and slider.
+   * @default `colorPickerLabels.lightnessLabel`
+   */
+  lightnessLabel?: string;
+  /**
+   * The magenta channel’s title and slider.
+   * @default `colorPickerLabels.magentaLabel`
+   */
+  magentaLabel?: string;
+  /**
+   * The red channel’s title and slider.
+   * @default `colorPickerLabels.redLabel`
+   */
+  redLabel?: string;
+  /**
+   * The saturation channel’s title and slider.
+   * @default `colorPickerLabels.saturationLabel`
+   */
+  saturationLabel?: string;
+  /**
+   * The yellow channel’s title and slider.
+   * @default `colorPickerLabels.yellowLabel`
+   */
+  yellowLabel?: string;
 };
+
+/**
+ * The opacity’s built-in words (see
+ * `colorPickerLabels` for their defaults).
+ */
+export type ColorPickerOpacityLabels = {
+  /**
+   * The opacity’s title and slider.
+   * @default `colorPickerLabels.opacityLabel`
+   */
+  opacityLabel?: string;
+  /**
+   * The opacity’s field.
+   * @default `colorPickerLabels.opacityValueLabel`
+   */
+  opacityValueLabel?: string;
+};
+
+/**
+ * The swatches’ built-in words (see
+ * `colorPickerLabels` for their defaults).
+ */
+export type ColorPickerSwatchesLabels = {
+  /**
+   * The add button.
+   * @default `colorPickerLabels.addColorLabel`
+   */
+  addColorLabel?: string;
+  /**
+   * A saved color’s menu item, deleting it.
+   * @default `colorPickerLabels.deleteColorLabel`
+   */
+  deleteColorLabel?: string;
+  /**
+   * The color’s button, translucent (see `flattenOnPress`).
+   * @default `colorPickerLabels.flattenColorLabel`
+   */
+  flattenColorLabel?: string;
+  /**
+   * Its action sheet’s title.
+   * @default `colorPickerLabels.flattenColorTitleLabel`
+   */
+  flattenColorTitleLabel?: string;
+  /**
+   * Its action sheet’s action, flattening the color on black.
+   * @default `colorPickerLabels.flattenOnBlackLabel`
+   */
+  flattenOnBlackLabel?: string;
+  /**
+   * Its action sheet’s action, flattening the color on white.
+   * @default `colorPickerLabels.flattenOnWhiteLabel`
+   */
+  flattenOnWhiteLabel?: string;
+  /**
+   * Its action sheet’s action, making the color opaque.
+   * @default `colorPickerLabels.removeTransparencyLabel`
+   */
+  removeTransparencyLabel?: string;
+  /**
+   * The saved colors’ group.
+   * @default `colorPickerLabels.savedColorsLabel`
+   */
+  savedColorsLabel?: string;
+};
+
+/**
+ * The code’s built-in words (see
+ * `colorPickerLabels` for their defaults).
+ */
+export type ColorPickerCodeLabels = {
+  /**
+   * The code’s title and field (and the copy menu’s hex code).
+   * @default `colorPickerLabels.hexLabel`
+   */
+  hexLabel?: string;
+};
+
+/**
+ * The copy menu’s built-in words (its hex code’s `hexLabel` shared with the code’s) (see
+ * `colorPickerLabels` for their defaults).
+ */
+export type ColorPickerCodeCopyLabels = {
+  /**
+   * The copy menu’s hex code with alpha.
+   * @default `colorPickerLabels.hexWithAlphaLabel`
+   */
+  hexWithAlphaLabel?: string;
+  /**
+   * The copy menu’s perceptual codes (a submenu).
+   * @default `colorPickerLabels.perceptualLabel`
+   */
+  perceptualLabel?: string;
+  /**
+   * The copy menu’s sRGB codes (a submenu).
+   * @default `colorPickerLabels.srgbLabel`
+   */
+  srgbLabel?: string;
+  /**
+   * The copy menu’s wide-gamut codes (a submenu).
+   * @default `colorPickerLabels.wideGamutLabel`
+   */
+  wideGamutLabel?: string;
+};
+
+/**
+ * The named colors’ built-in words (see
+ * `colorPickerLabels` for their defaults).
+ */
+export type ColorPickerNamedLabels = {
+  /**
+   * The index of first letters.
+   * @default `colorPickerLabels.indexLabel`
+   */
+  indexLabel?: string;
+};
+
+/**
+ * The names of the parts that are a single element, for assistive technology (their `aria-label`s win) (see
+ * `colorPickerLabels` for their defaults).
+ */
+export type ColorPickerOwnLabels = {
+  /**
+   * The copy button (`CodeCopy`; its `aria-label` wins).
+   * @default `colorPickerLabels.copyColorCodeLabel`
+   */
+  copyColorCodeLabel?: string;
+  /**
+   * The eyedropper’s button (`Eyedropper`; its `aria-label` wins).
+   * @default `colorPickerLabels.eyedropperLabel`
+   */
+  eyedropperLabel?: string;
+  /**
+   * The grid (`Grid`; its `aria-label` wins).
+   * @default `colorPickerLabels.gridLabel`
+   */
+  gridLabel?: string;
+  /**
+   * The modes’ control (`Modes`; its `aria-label` wins).
+   * @default `colorPickerLabels.modesLabel`
+   */
+  modesLabel?: string;
+  /**
+   * The spectrum (`Spectrum`; its `aria-label` wins).
+   * @default `colorPickerLabels.spectrumLabel`
+   */
+  spectrumLabel?: string;
+  /**
+   * The system colors’ button (`SystemColors`; its `aria-label` wins).
+   * @default `colorPickerLabels.systemColorsLabel`
+   */
+  systemColorsLabel?: string;
+};
+
+/** Every built-in word of a picker (see `colorPickerLabels`). */
+export type ColorPickerLabels = ColorPickerCodeCopyLabels &
+  ColorPickerCodeLabels &
+  ColorPickerNamedLabels &
+  ColorPickerOpacityLabels &
+  ColorPickerOwnLabels &
+  ColorPickerSlidersLabels &
+  ColorPickerSwatchesLabels;
+
+export type ColorPickerRootProps = ColorPickerLabels &
+  Omit<useRender.ComponentProps<'div'>, 'defaultValue' | 'onChange'> & {
+    /**
+     * The initial mode (uncontrolled): its `Mode`'s and `View`'s `value`.
+     * @default the first `Mode`
+     */
+    defaultMode?: string;
+    /** The initial color (uncontrolled; a hex string). */
+    defaultValue?: string;
+    /** The mode (controlled): its `Mode`'s and `View`'s `value`. */
+    mode?: string;
+    /** Called with the mode chosen (its segmented control's details). */
+    onModeChange?: (
+      mode: string,
+      eventDetails: BaseRadioGroup.ChangeEventDetails,
+    ) => void;
+    /** Called with the picked color (a hex string), and why. */
+    onValueChange?: (
+      value: string,
+      eventDetails: ColorPickerChangeEventDetails,
+    ) => void;
+    /** The color (controlled; a hex string). */
+    value?: string;
+  };
 
 export type ColorPickerPanelProps = ComponentProps<'div'>;
 
@@ -118,40 +339,42 @@ export type ColorPickerSlidersModel = 'cmyk' | 'hsl' | 'rgb';
  */
 export type ColorPickerSlidersRange = 'byte' | 'percentage';
 
-export type ColorPickerSlidersProps = ComponentProps<'div'> & {
-  /**
-   * Its color model: its channels' sliders.
-   * @default 'rgb'
-   */
-  model?: ColorPickerSlidersModel;
-  /**
-   * Red, green and blue's range (`model` `rgb`; the others' are fixed).
-   * @default 'byte'
-   */
-  range?: ColorPickerSlidersRange;
-};
+export type ColorPickerSlidersProps = ColorPickerSlidersLabels &
+  ComponentProps<'div'> & {
+    /**
+     * Its color model: its channels' sliders.
+     * @default 'rgb'
+     */
+    model?: ColorPickerSlidersModel;
+    /**
+     * Red, green and blue's range (`model` `rgb`; the others' are fixed).
+     * @default 'byte'
+     */
+    range?: ColorPickerSlidersRange;
+  };
 
-export type ColorPickerSwatchesProps = ComponentProps<'div'> & {
-  /**
-   * The initial saved colors (uncontrolled).
-   * @default ten colors (see `defaultSavedColors`)
-   */
-  defaultSavedColors?: string[];
-  /**
-   * Whether pressing the color, while it's translucent, offers to make it
-   * opaque (an action sheet, “Flatten Color?”): its transparency removed,
-   * or the color flattened on white or on black.
-   * @default true
-   */
-  flattenOnPress?: boolean;
-  /** Called with the saved colors, as one is added or deleted, and why. */
-  onSavedColorsChange?: (
-    colors: string[],
-    eventDetails: ColorPickerSavedColorsChangeEventDetails,
-  ) => void;
-  /** The saved colors (controlled). */
-  savedColors?: string[];
-};
+export type ColorPickerSwatchesProps = ColorPickerSwatchesLabels &
+  ComponentProps<'div'> & {
+    /**
+     * The initial saved colors (uncontrolled).
+     * @default ten colors (see `defaultSavedColors`)
+     */
+    defaultSavedColors?: string[];
+    /**
+     * Whether pressing the color, while it's translucent, offers to make it
+     * opaque (an action sheet, “Flatten Color?”): its transparency removed,
+     * or the color flattened on white or on black.
+     * @default true
+     */
+    flattenOnPress?: boolean;
+    /** Called with the saved colors, as one is added or deleted, and why. */
+    onSavedColorsChange?: (
+      colors: string[],
+      eventDetails: ColorPickerSavedColorsChangeEventDetails,
+    ) => void;
+    /** The saved colors (controlled). */
+    savedColors?: string[];
+  };
 
 export type EyeDropperApi = { open: () => Promise<{ sRGBHex: string }> };
 
@@ -179,9 +402,14 @@ export type ColorPickerSystemColorsProps = Omit<
   render?: ReactElement<Record<string, unknown>>;
 };
 
-export type ColorPickerCodeProps = ComponentProps<'div'>;
+export type ColorPickerCodeProps = ColorPickerCodeLabels &
+  ComponentProps<'div'>;
 
-export type ColorPickerNamedProps = ComponentProps<'div'>;
+export type ColorPickerOpacityProps = ColorPickerOpacityLabels &
+  ComponentProps<'div'>;
+
+export type ColorPickerNamedProps = ColorPickerNamedLabels &
+  ComponentProps<'div'>;
 
 export type ColorPickerNamedColorProps = Omit<ListItemProps, 'color'> & {
   /** Its label (e.g. its name). @default its `color` */
@@ -193,18 +421,17 @@ export type ColorPickerNamedColorProps = Omit<ListItemProps, 'color'> & {
 /** A row's index entry (see `Named`): its first letter, its element. */
 export type NamedIndexEntry = { element: HTMLElement; label: string };
 
-export type ColorPickerCodeCopyProps = Omit<
-  ButtonRootProps,
-  'onClick' | 'ref' | 'render'
-> & {
-  /** Called with a code copied (to the clipboard), and the event. */
-  onCodeCopy?: (code: string, event: Event) => void;
-  /**
-   * What it renders (e.g. a `Button.Root`, sized as the code's field).
-   * @default a `Button.Root`
-   */
-  render?: ReactElement<Record<string, unknown>>;
-};
+export type ColorPickerCodeCopyProps = ColorPickerCodeCopyLabels &
+  Pick<ColorPickerCodeLabels, 'hexLabel'> &
+  Omit<ButtonRootProps, 'onClick' | 'ref' | 'render'> & {
+    /** Called with a code copied (to the clipboard), and the event. */
+    onCodeCopy?: (code: string, event: Event) => void;
+    /**
+     * What it renders (e.g. a `Button.Root`, sized as the code's field).
+     * @default a `Button.Root`
+     */
+    render?: ReactElement<Record<string, unknown>>;
+  };
 
 export type ColorWellProps = ComponentProps<'button'> & {
   /** Its color (a hex string; without one: the hues only). */

@@ -126,74 +126,79 @@ const AnchorOnLoad: FunctionComponent = () => {
   return null;
 };
 
+// The guide's settings: the system's (the library applies them within a
+// provider only, see Settings), for its own pages (its colors, e.g. with
+// more contrast) and every page's demos (their stages' providers within).
 export const Demo: FunctionComponent = () => (
   <LocationProvider>
     <OptionsProvider>
       <ErrorBoundary>
         <TouchActive />
         <AnchorOnLoad />
-        <Router onRouteChange={onRouteChange}>
-          <Route
-            component={IndexPage}
-            path={publicUrl('/')}
-          />
-          <Route
-            component={AllDemosPage}
-            path={publicUrl('/all')}
-          />
-          <Route
-            component={KitchenSinkPage}
-            path={publicUrl('/kitchen-sink')}
-          />
-          <Route
-            component={TokensPage}
-            path={publicUrl('/tokens')}
-          />
-          <Route
-            component={IosQuirksPage}
-            path={publicUrl('/ios-quirks')}
-          />
-          <Route
-            component={GettingStartedPage}
-            path={publicUrl('/getting-started')}
-          />
-          <Route
-            component={BackstoryAndFaqPage}
-            path={publicUrl('/backstory-and-faq')}
-          />
-          <Route
-            component={GlossaryPage}
-            path={publicUrl('/glossary')}
-          />
-          <Route
-            component={OverviewPage}
-            path={publicUrl('/:id')}
-          />
-          <Route
-            component={PartsPage}
-            path={publicUrl('/:id/parts')}
-          />
-          <Route
-            component={CompositionPage}
-            path={publicUrl('/:id/composition')}
-          />
-          <Route
-            component={ArchitecturePage}
-            path={publicUrl('/:id/architecture')}
-          />
-          <Route
-            component={ArchitectureSubPage}
-            path={publicUrl('/:id/architecture/:page')}
-          />
-          <Route
-            component={ComponentDemosPage}
-            path={publicUrl('/:id/all')}
-          />
-          <Route
-            default
-            component={NotFound}
-          />
-        </Router>
+        <components.Settings.Provider>
+          <Router onRouteChange={onRouteChange}>
+            <Route
+              component={IndexPage}
+              path={publicUrl('/')}
+            />
+            <Route
+              component={AllDemosPage}
+              path={publicUrl('/all')}
+            />
+            <Route
+              component={KitchenSinkPage}
+              path={publicUrl('/kitchen-sink')}
+            />
+            <Route
+              component={TokensPage}
+              path={publicUrl('/tokens')}
+            />
+            <Route
+              component={IosQuirksPage}
+              path={publicUrl('/ios-quirks')}
+            />
+            <Route
+              component={GettingStartedPage}
+              path={publicUrl('/getting-started')}
+            />
+            <Route
+              component={BackstoryAndFaqPage}
+              path={publicUrl('/backstory-and-faq')}
+            />
+            <Route
+              component={GlossaryPage}
+              path={publicUrl('/glossary')}
+            />
+            <Route
+              component={OverviewPage}
+              path={publicUrl('/:id')}
+            />
+            <Route
+              component={PartsPage}
+              path={publicUrl('/:id/parts')}
+            />
+            <Route
+              component={CompositionPage}
+              path={publicUrl('/:id/composition')}
+            />
+            <Route
+              component={ArchitecturePage}
+              path={publicUrl('/:id/architecture')}
+            />
+            <Route
+              component={ArchitectureSubPage}
+              path={publicUrl('/:id/architecture/:page')}
+            />
+            <Route
+              component={ComponentDemosPage}
+              path={publicUrl('/:id/all')}
+            />
+            <Route
+              default
+              component={NotFound}
+            />
+          </Router>
+        </components.Settings.Provider>
       </ErrorBoundary>
     </OptionsProvider>
   </LocationProvider>

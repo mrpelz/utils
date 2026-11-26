@@ -12,6 +12,7 @@ import {
   useRef,
 } from 'react';
 
+import { useSettings } from '../settings/main.js';
 import { cn, delayLens, usePointerDrag, withStyle } from '../utils/main.js';
 import type { Drag, SwitchRootProps } from './props.js';
 
@@ -86,11 +87,14 @@ const Root = forwardRef<HTMLSpanElement, Omit<SwitchRootProps, 'ref'>>(
       children,
       indeterminate = false,
       inputRef,
-      onOffLabels = false,
+      onOffLabels: ownOnOffLabels,
       ...props
     },
     ref,
   ) => {
+    // (Its own, else the settings': state told without color alone.)
+    const { differentiateWithoutColor } = useSettings();
+    const onOffLabels = ownOnOffLabels ?? differentiateWithoutColor;
     const suppressClickRef = useRef(false);
 
     // The hidden input is indeterminate, too (as a checkbox's).

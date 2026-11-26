@@ -65,8 +65,8 @@
     background-color: var(--uikit-card-well);
     box-shadow: var(--uikit-card-well-shadow);
     font-size: var(--font-ui-footnote-size, 13px);
-    font-variation-settings: 'wght' 590;
-    font-weight: 600;
+    font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(600 + var(--uikit-font-weight-boost, 0)), 100);
 
     .uikit-card-channel[data-scale] > & {
       background-image: linear-gradient(
@@ -106,9 +106,6 @@
       --uikit-card-channel-ends: 36px;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      transition-duration: 0s;
-    }
   }
 
   .uikit-card-channel-label,
@@ -127,17 +124,12 @@
         color 160ms;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .uikit-card-channel-well[data-placed] > & {
-        transition: none;
-      }
-    }
   }
 
   .uikit-card-channel-value {
     font-variant-numeric: tabular-nums;
     font-variation-settings: normal;
-    font-weight: 500;
+    font-weight: round(down, calc(500 + var(--uikit-font-weight-boost, 0)), 100);
   }
 
   /* (Its control 4px in from its well's edges: its thumb so far in at
@@ -350,9 +342,6 @@
       transition-property: translate, width, height;
       transition-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
 
-      @media (prefers-reduced-motion: reduce) {
-        transition-duration: 0s;
-      }
     }
   }
 
@@ -373,8 +362,8 @@
     border-radius: calc(var(--uikit-grid-item-radius, 24px) - 9px);
     color: var(--uikit-glass-content);
     font-size: 13px;
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     gap: 4px;
     outline: none;
     -webkit-tap-highlight-color: transparent;
@@ -390,8 +379,8 @@
     }
 
     &[data-checked] {
-      font-variation-settings: 'wght' 590;
-      font-weight: round(down, 590, 100);
+      font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
     }
 
     &:focus-visible {
@@ -577,7 +566,7 @@
     overflow: hidden;
     min-width: 0;
     color: var(--uikit-glass-content);
-    font-weight: 500;
+    font-weight: round(down, calc(500 + var(--uikit-font-weight-boost, 0)), 100);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -625,9 +614,6 @@
       color: color-mix(in srgb, var(--uikit-glass-content) 75%, transparent);
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      transition-duration: 0s;
-    }
   }
 
   /* A card's subtitle (`Card.Subtitle`): small, in its secondary
@@ -758,7 +744,7 @@
 
   .uikit-card-stage[data-current] {
     color: var(--uikit-glass-content);
-    font-weight: 600;
+    font-weight: round(down, calc(600 + var(--uikit-font-weight-boost, 0)), 100);
 
     &::before {
       background-color: var(

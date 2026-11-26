@@ -284,7 +284,12 @@ const Layer: FunctionComponent<{
     portalContainer === undefined &&
     isIos27();
   useMeasure(layer, line, scroller, edge);
-  useBacking(layer, scroller, effect?.effect === 'hard', isUnderStatusBar);
+  // (Transparency reduced, the system's or a provider's: a soft one hard,
+  // the bars solid, as their glass, see Glass.)
+  const { reducedTransparency } = useSettings();
+  const kind =
+    reducedTransparency && effect?.effect === 'soft' ? 'hard' : effect?.effect;
+  useBacking(layer, scroller, kind === 'hard', isUnderStatusBar);
 
   if (!effect) return null;
 
@@ -294,7 +299,7 @@ const Layer: FunctionComponent<{
       aria-hidden="true"
       className="uikit-viewport-edge-effect"
       data-edge={edge}
-      data-edge-effect={effect.effect}
+      data-edge-effect={kind}
       data-edge-tinted={effect.tint ? '' : undefined}
       data-keyboard={effect.keyboard}
       data-viewport-part="edge-effect"

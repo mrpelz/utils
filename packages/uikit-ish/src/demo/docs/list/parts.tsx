@@ -4378,7 +4378,11 @@ export const ListParts: FunctionComponent = () => (
         </PartLink>
         .
       </li>
-      <li>Sections are 35px apart.</li>
+      <li>
+        Sections are 35px apart. Groups and blocks that follow each other in one
+        section are 16px apart (<code>--uikit-list-group-spacing</code>; in a
+        plain list, 0).
+      </li>
     </ul>
     <SectionPart />
     <h3>Props</h3>
@@ -4799,6 +4803,10 @@ export const ListParts: FunctionComponent = () => (
       </li>
       <li>
         <code>strong</code> puts it on the rows’ background.
+      </li>
+      <li>
+        <code>flush</code> lines its content up with the groups’ edges instead
+        of the rows’ text, for example a full-width button.
       </li>
     </ul>
     <BlockPart />

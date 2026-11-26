@@ -119,8 +119,8 @@
     color: var(--color-ui-secondary-label);
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-body-weight-emphasized);
-    font-weight: round(down, var(--font-ui-body-weight-emphasized), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-body-weight-emphasized) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-body-weight-emphasized) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
     text-align: center;
@@ -133,8 +133,8 @@
     font-size: var(--font-ui-body-size);
     font-style: normal;
     font-variant-numeric: tabular-nums;
-    font-variation-settings: 'wght' var(--font-ui-body-weight);
-    font-weight: round(down, var(--font-ui-body-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
     justify-items: end;
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
@@ -156,8 +156,8 @@
     color: var(--color-ui-label);
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-body-weight);
-    font-weight: round(down, var(--font-ui-body-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
   }

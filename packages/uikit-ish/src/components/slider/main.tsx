@@ -16,6 +16,7 @@ import {
   useState,
 } from 'react';
 
+import { useLocale } from '../settings/main.js';
 import { cn, Reserve, useTouchHold, withStyle } from '../utils/main.js';
 import type {
   RootContextValue,
@@ -90,7 +91,9 @@ const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
     },
     ref,
   ) => {
-    const { format, locale, max, min, orientation, step } = props;
+    const { format, max, min, orientation, step } = props;
+    // (Its own, else the settings', for Base UI's formatting too.)
+    const locale = useLocale(props.locale);
     // (Its value now, for its ticks: given, or its own as it changes.)
     const [ownValue, setOwnValue] = useState(props.defaultValue);
     const value = props.value ?? ownValue;
@@ -128,6 +131,7 @@ const Root = forwardRef<HTMLDivElement, Omit<SliderRootProps, 'ref'>>(
           {...holdHandlers}
           {...props}
           className={cn('uikit-slider-root', className)}
+          locale={locale}
           onValueChange={(next, details) => {
             setOwnValue(next);
             onValueChange?.(next, details);

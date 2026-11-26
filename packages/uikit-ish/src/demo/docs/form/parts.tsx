@@ -163,7 +163,7 @@ const FormPart: FunctionComponent = () => {
           <List.Section {...partProps['List.Section']}>
             <List.Block
               {...partProps['List.Block']}
-              style={{ paddingInline: 0 }}
+              flush
             >
               <Button.Root
                 {...partProps['Button.Root']}
@@ -270,7 +270,7 @@ const FieldsetRootPart: FunctionComponent = () => {
           <List.Section {...partProps['List.Section']}>
             <List.Block
               {...partProps['List.Block']}
-              style={{ paddingInline: 0 }}
+              flush
             >
               <Button.Root
                 {...partProps['Button.Root']}
@@ -465,7 +465,7 @@ const FieldPart: FunctionComponent = () => {
           <List.Section {...partProps['List.Section']}>
             <List.Block
               {...partProps['List.Block']}
-              style={{ paddingInline: 0 }}
+              flush
             >
               <Button.Root
                 {...partProps['Button.Root']}

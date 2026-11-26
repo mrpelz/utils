@@ -1,3 +1,4 @@
+import './sizes.css';
 import './style.css';
 
 import { useRender } from '@base-ui/react/use-render';

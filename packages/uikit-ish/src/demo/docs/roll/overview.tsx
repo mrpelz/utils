@@ -2,7 +2,7 @@ import './style.css';
 
 import { FunctionComponent, useMemo, useState } from 'react';
 
-import { Roll, type RollValue } from '../../../components/index.js';
+import { Roll, type RollValue, Stack } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
@@ -60,7 +60,11 @@ const LiveView: FunctionComponent = () => {
       state={[state, partState]}
       title="Roll"
     >
-      <div className="roll-demo-stack">
+      <Stack
+        align="center"
+        className="roll-demo-stack"
+        spacing="small"
+      >
         <output className="roll-demo-value">{fruit}</output>
         <Roll.Root {...partProps['Roll.Root']}>
           <Roll.Column
@@ -81,7 +85,7 @@ const LiveView: FunctionComponent = () => {
             ))}
           </Roll.Column>
         </Roll.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

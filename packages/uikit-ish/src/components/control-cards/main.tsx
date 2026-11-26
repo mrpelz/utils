@@ -28,6 +28,7 @@ import {
 } from '../card/shared.js';
 import { useGridItem } from '../grid/main.js';
 import { forwardClick } from '../list/main.js';
+import { useLocale } from '../settings/main.js';
 import { Symbol, type SymbolIcon } from '../symbol/main.js';
 import { cn, withStyle } from '../utils/main.js';
 import type {
@@ -221,10 +222,12 @@ const Value = forwardRef<HTMLDivElement, ControlCardValueProps>(
     >
       <Card.Symbol>{symbolOf({ emphasizedIcon, icon })}</Card.Symbol>
       <Card.Title>{label}</Card.Title>
-      <Card.Value>
-        {typeof value === 'number'
-          ? formatted(value, { format, locale })
-          : value}
+      <Card.Value
+        format={format}
+        locale={locale}
+        value={typeof value === 'number' ? value : undefined}
+      >
+        {typeof value === 'number' ? null : value}
         {trend === undefined ? null : <Card.Trend angle={trend} />}
       </Card.Value>
       {children}
@@ -507,6 +510,7 @@ const Light = forwardRef<HTMLDivElement, ControlCardLightProps>(
       defaultChecked,
       onCheckedChange,
     );
+    const resolvedLocale = useLocale(locale);
     const isLarge = useIsLarge();
     const [light, setLight] = useState<CardLight>({
       brightness: 1,
@@ -524,7 +528,10 @@ const Light = forwardRef<HTMLDivElement, ControlCardLightProps>(
       [isLarge, onLightChange],
     );
     const color = isOn ? light.color : undefined;
-    const formattedValue = formatted(light.brightness, { format, locale });
+    const formattedValue = formatted(light.brightness, {
+      format,
+      locale: resolvedLocale,
+    });
     return (
       <Card.Root
         ref={ref}

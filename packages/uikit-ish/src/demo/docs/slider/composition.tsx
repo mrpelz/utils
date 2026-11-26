@@ -10,6 +10,7 @@ import {
   forwardClick,
   List,
   Slider,
+  Stack,
   Switch,
   Symbol,
 } from '../../../components/index.js';
@@ -424,7 +425,13 @@ const InAForm: FunctionComponent = () => {
     >
       <Form
         {...partProps.Form}
-        className="slider-demo-form"
+
+        render={
+          <Stack
+            align="start"
+            className="slider-demo-form"
+          />
+        }
         onFormSubmit={(values: Record<string, unknown>) =>
           addLog(`submitted: ${JSON.stringify(values)}`)
         }
@@ -556,7 +563,10 @@ const Media: FunctionComponent = () => {
       state={[partState]}
       title="Sliders in a player"
     >
-      <div className="slider-demo-player">
+      <Stack
+        className="slider-demo-player"
+        spacing="small"
+      >
         <Slider.Root
           {...partProps['Slider.Root']}
           max={duration}
@@ -602,7 +612,12 @@ const Media: FunctionComponent = () => {
             }
           </Slider.Value>
         </Slider.Root>
-        <div className="slider-demo-transport">
+        <Stack
+          align="center"
+          axis="horizontal"
+          justify="center"
+          spacing="xLarge"
+        >
           <Button.Root
             {...partProps['Button.Root']}
             aria-label="Back 15 seconds"
@@ -651,7 +666,7 @@ const Media: FunctionComponent = () => {
               />
             </Button.Icon>
           </Button.Root>
-        </div>
+        </Stack>
         <Slider.Root
           {...partProps['Slider.Root']}
           defaultValue={50}
@@ -687,7 +702,7 @@ const Media: FunctionComponent = () => {
             />
           </Slider.Symbol>
         </Slider.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

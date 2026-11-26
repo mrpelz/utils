@@ -8,6 +8,7 @@ import {
   Fieldset,
   Form,
   List,
+  Stack,
   Stepper,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
@@ -275,7 +276,11 @@ const WithItsValueShown: FunctionComponent = () => {
       state={[partState]}
       title="Stepper with its value shown"
     >
-      <div className="stepper-demo-row">
+      <Stack
+        align="center"
+        axis="horizontal"
+        className="stepper-demo-row"
+      >
         <output>
           {zoom === null
             ? '–'
@@ -304,7 +309,7 @@ const WithItsValueShown: FunctionComponent = () => {
             <Stepper.Increment {...partProps['Stepper.Increment']} />
           </Stepper.Group>
         </Stepper.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -418,7 +423,7 @@ const InForms: FunctionComponent = () => {
           <List.Section {...partProps['List.Section']}>
             <List.Block
               {...partProps['List.Block']}
-              style={{ paddingInline: 0 }}
+              flush
             >
               <Button.Root
                 {...partProps['Button.Root']}

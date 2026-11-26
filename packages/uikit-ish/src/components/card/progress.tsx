@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import { colorSchemeStyle } from '../glass/main.js';
+import { useLocale } from '../settings/main.js';
 import { cn, withStyle } from '../utils/main.js';
 import type {
   CardFormat,
@@ -70,11 +71,12 @@ export const Progress = ({
   children,
   format = percentFormat,
   getAriaValueText,
-  locale,
+  locale: ownLocale,
   max = 100,
   min = 0,
   value,
 }: CardProgressProps): ReactNode => {
+  const locale = useLocale(ownLocale);
   const context = useMemo(
     () => ({ format, getAriaValueText, locale, max, min, value }),
     [format, getAriaValueText, locale, max, min, value],

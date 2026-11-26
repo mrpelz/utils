@@ -9,6 +9,7 @@ import {
   Roll,
   type RollChangeEventDetails,
   type RollValue,
+  Stack,
 } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -251,7 +252,11 @@ const ATime: FunctionComponent = () => {
       state={[partState]}
       title="Roll as a time"
     >
-      <div className="roll-demo-stack">
+      <Stack
+        align="center"
+        className="roll-demo-stack"
+        spacing="small"
+      >
         <output className="roll-demo-value">
           {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </output>
@@ -311,7 +316,7 @@ const ATime: FunctionComponent = () => {
             ))}
           </Roll.Column>
         </Roll.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -359,7 +364,11 @@ const CarryingTheHour: FunctionComponent = () => {
       state={[partState]}
       title="Roll carrying the hour"
     >
-      <div className="roll-demo-stack">
+      <Stack
+        align="center"
+        className="roll-demo-stack"
+        spacing="small"
+      >
         <output className="roll-demo-value">
           {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </output>
@@ -430,7 +439,7 @@ const CarryingTheHour: FunctionComponent = () => {
             ))}
           </Roll.Column>
         </Roll.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -476,7 +485,11 @@ const ResettingTheMinutes: FunctionComponent = () => {
       state={[partState]}
       title="Roll resetting the minutes"
     >
-      <div className="roll-demo-stack">
+      <Stack
+        align="center"
+        className="roll-demo-stack"
+        spacing="small"
+      >
         <output className="roll-demo-value">
           {String(hour).padStart(2, '0')}:{String(minute).padStart(2, '0')}
         </output>
@@ -536,7 +549,7 @@ const ResettingTheMinutes: FunctionComponent = () => {
             ))}
           </Roll.Column>
         </Roll.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -575,7 +588,11 @@ const DependentColumns: FunctionComponent = () => {
       state={[partState]}
       title="Roll with dependent columns"
     >
-      <div className="roll-demo-stack">
+      <Stack
+        align="center"
+        className="roll-demo-stack"
+        spacing="small"
+      >
         <output className="roll-demo-value">
           {months[Number(month)]} {day}
         </output>
@@ -619,7 +636,7 @@ const DependentColumns: FunctionComponent = () => {
             ))}
           </Roll.Column>
         </Roll.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

@@ -21,7 +21,7 @@
     color: var(--uikit-badge-text-color, #fff);
     font-size: var(--uikit-badge-font-size, 16px);
     font-variant-numeric: tabular-nums;
-    font-weight: var(--uikit-badge-weight, 400);
+    font-weight: round(down, calc(var(--uikit-badge-weight, 400) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: 0;
     line-height: var(--uikit-badge-line-height, 19px);
     pointer-events: none;

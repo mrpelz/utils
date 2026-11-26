@@ -45,11 +45,11 @@
 
   .uikit-activity-view-title {
     color: var(--color-ui-label);
-    font-size: 15px;
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-size: var(--font-ui-subheadline-size);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: -0.23px;
-    line-height: 20px;
+    line-height: var(--font-ui-subheadline-line-height);
 
     & + [data-activity-view-part='subtitle'] {
       margin-block-start: -11px;
@@ -60,8 +60,8 @@
     color: var(--color-ui-secondary-label);
     font-size: var(--font-ui-footnote-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-footnote-weight);
-    font-weight: round(down, var(--font-ui-footnote-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-footnote-tracking);
     line-height: var(--font-ui-footnote-line-height);
   }
@@ -70,8 +70,8 @@
     color: var(--color-ui-secondary-label);
     font-size: var(--font-ui-footnote-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-footnote-weight);
-    font-weight: round(down, var(--font-ui-footnote-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-footnote-tracking);
     line-height: var(--font-ui-footnote-line-height);
   }
@@ -90,10 +90,10 @@
     display: -webkit-box;
     overflow: hidden;
     -webkit-box-orient: vertical;
-    font-size: 12px;
+    font-size: var(--font-ui-caption1-size);
     letter-spacing: 0.06px;
     -webkit-line-clamp: 2;
-    line-height: 15px;
+    line-height: calc(var(--font-ui-caption1-line-height) - 1px);
 
     /* With a count (a group's): on one line, truncated. */
     [data-activity-view-part='item']:has(> [data-activity-view-part='count'])
@@ -107,9 +107,9 @@
 
   .uikit-activity-view-count {
     color: var(--color-ui-secondary-label);
-    font-size: 12px;
+    font-size: var(--font-ui-caption1-size);
     letter-spacing: 0.06px;
-    line-height: 15px;
+    line-height: calc(var(--font-ui-caption1-line-height) - 1px);
     margin-block-start: -5px;
   }
 
@@ -154,8 +154,8 @@
       border-radius: 50%;
       background-color: var(--color-ui-tertiary-system-fill);
       font-size: 25px;
-      font-variation-settings: 'wght' 300;
-      font-weight: round(down, 300, 100);
+      font-variation-settings: 'wght' calc(300 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(300 + var(--uikit-font-weight-boost, 0)), 100);
       place-items: center;
     }
 
@@ -169,11 +169,11 @@
       -webkit-box-orient: vertical;
       font-size: var(--font-ui-footnote-size);
       font-style: normal;
-      font-variation-settings: 'wght' var(--font-ui-footnote-weight);
-      font-weight: round(down, var(--font-ui-footnote-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-footnote-tracking);
       -webkit-line-clamp: 2;
-      line-height: 15px;
+      line-height: calc(var(--font-ui-footnote-line-height) - 3px);
     }
   }
 }

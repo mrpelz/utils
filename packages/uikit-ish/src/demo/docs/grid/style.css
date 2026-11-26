@@ -19,7 +19,6 @@
   text-align: center;
 }
 
-
 /* A tile's size, below its name. */
 .grid-demo-size {
   color: var(--color-ui-secondary-label);
@@ -28,11 +27,10 @@
   font-weight: 400;
 }
 
-/* A grid on a page: clear of the screen's sides; a button above it. */
+/* A grid on a page (a Stack, inset: clear of the screen's sides; a button
+   above it): room at its ends. */
 .grid-demo-content {
-  display: grid;
-  padding: 16px;
-  gap: 16px;
+  padding-block: 16px;
 }
 
 /* A section's title (in its header). */
@@ -43,9 +41,3 @@
   font-weight: 700;
 }
 
-/* The buttons above a grid, in a row. */
-.grid-demo-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}

@@ -7,6 +7,7 @@ import {
   Badge,
   Button,
   List,
+  Stack,
   Symbol,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -82,8 +83,16 @@ const LiveView: FunctionComponent = () => {
       state={[state, partState]}
       title="Badge"
     >
-      <div className="badge-demo-stage">
-        <div className="badge-demo-row">
+      <Stack
+        align="center"
+        className="badge-demo-stage"
+        spacing="xLarge"
+      >
+        <Stack
+          align="center"
+          axis="horizontal"
+          spacing="xLarge"
+        >
           <Button.Root
             {...partProps['Button.Root']}
             shape="circle"
@@ -114,7 +123,7 @@ const LiveView: FunctionComponent = () => {
             </Avatar.Fallback>
             <Badge {...props} />
           </Avatar.Root>
-        </div>
+        </Stack>
         <List.Root
           {...partProps['List.Root']}
           className="badge-demo-list"
@@ -137,7 +146,7 @@ const LiveView: FunctionComponent = () => {
             </List.Group>
           </List.Section>
         </List.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

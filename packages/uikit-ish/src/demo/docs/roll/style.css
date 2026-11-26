@@ -2,10 +2,7 @@
 
 /* A roll, and its value (the app's) above it. */
 .roll-demo-stack {
-  display: grid;
   color: var(--color-ui-label);
-  gap: 8px;
-  justify-items: center;
 }
 
 /* The value: its digits as wide as each other, so it doesn't shift as the

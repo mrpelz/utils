@@ -6,6 +6,7 @@ import { FunctionComponent, useMemo } from 'react';
 import {
   ActionSheet,
   Button,
+  Stack,
   useCreateActionSheetHandle,
   Viewport,
 } from '../../../components/index.js';
@@ -906,7 +907,13 @@ const UseCreateActionSheetHandlePart: FunctionComponent = () => {
       title="useCreateActionSheetHandle"
     >
       <Viewport.Content {...partProps['Viewport.Content']}>
-        <div className="action-sheet-demo-triggers">
+        <Stack
+          wrap
+          align="center"
+          axis="horizontal"
+          justify="center"
+          spacing="medium"
+        >
           <ActionSheet.Trigger
             {...partProps['ActionSheet.Trigger']}
             handle={deleteSheet}
@@ -935,7 +942,7 @@ const UseCreateActionSheetHandlePart: FunctionComponent = () => {
           >
             <Button.Label {...partProps['Button.Label']}>Video</Button.Label>
           </ActionSheet.Trigger>
-        </div>
+        </Stack>
         <ActionSheet.Root
           {...partProps['ActionSheet.Root']}
           handle={deleteSheet}

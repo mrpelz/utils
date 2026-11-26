@@ -9,6 +9,7 @@ import {
   useState,
 } from 'react';
 
+import type { SettingsValues } from '../../../components/index.js';
 import { ColorScheme } from '../../../components/utils/main.js';
 import { publicUrl } from '../public-url.js';
 
@@ -24,8 +25,21 @@ export type StageType = 'phone' | 'tablet';
  * `useCreateStateUrl`); not kept otherwise.
  */
 export type Settings = {
+  /**
+   * The library's settings, overridden on its stage (its provider's, see
+   * component.tsx's `stageOverrides`; left out, the system's), as
+   * `colorScheme`; also `contrast` … `textSize` below.
+   */
+  boldText?: boolean;
   /** Forced on its stage (see `colorSchemeAttribute`). */
   colorScheme?: ColorScheme;
+  /**
+   * The library's settings, overridden on its stage (its provider's, see
+   * component.tsx's `stageOverrides`; left out, the system's), as
+   * `colorScheme`; also `locale` … `textSize` below.
+   */
+  contrast?: SettingsValues['contrast'];
+  differentiateWithoutColor?: boolean;
   /** An app's background behind it (simple demos). */
   hasBackdrop: boolean;
   /** Its device's safe area insets, hatched (see shared/style.css). */
@@ -37,6 +51,12 @@ export type Settings = {
   isExpanded: boolean;
   /** As wide as the stage (simple demos). */
   isStretched: boolean;
+  languages?: readonly string[];
+  locale?: string;
+  reducedMotion?: boolean;
+  reducedTransparency?: boolean;
+  region?: string;
+  textSize?: SettingsValues['textSize'];
 };
 
 type TOptionsContext = {

@@ -8,6 +8,7 @@ import {
   Navigation,
   Page,
   Sheet,
+  Stack,
   Symbol,
   TextField,
   Toolbar,
@@ -1470,7 +1471,7 @@ const OpeningAtAStop: FunctionComponent = () => {
           key={`${elementKey}`}
           {...props}
         >
-          <div className="sheet-demo-links">
+          <Stack spacing="medium">
             <Sheet.Trigger
               {...partProps['Sheet.Trigger']}
               render={
@@ -1504,7 +1505,7 @@ const OpeningAtAStop: FunctionComponent = () => {
                 </Button.Label>
               </Sheet.Trigger>
             ))}
-          </div>
+          </Stack>
           {placePopup(addLog, undefined, undefined, partProps)}
         </Sheet.Root>
       </Viewport.Content>
@@ -1576,7 +1577,7 @@ const WithoutAHeaderStop: FunctionComponent = () => {
           {...partProps['Sheet.Root']}
           defaultSnapPoint="peek"
         >
-          <div className="sheet-demo-links">
+          <Stack spacing="medium">
             <Sheet.Trigger
               {...partProps['Sheet.Trigger']}
               render={
@@ -1591,7 +1592,7 @@ const WithoutAHeaderStop: FunctionComponent = () => {
                 Show Place
               </Button.Label>
             </Sheet.Trigger>
-          </div>
+          </Stack>
           {placePopup(addLog, false, false, partProps)}
         </Sheet.Root>
       </Viewport.Content>

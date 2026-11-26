@@ -6,8 +6,8 @@
       font-size: var(--font-ui-body-size);
       font-style: normal;
       font-variant-numeric: tabular-nums;
-      font-variation-settings: 'wght' var(--font-ui-body-weight);
-      font-weight: round(down, var(--font-ui-body-weight), 100);
+      font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-body-tracking);
       line-height: var(--font-ui-body-line-height);
       -webkit-tap-highlight-color: transparent;
@@ -42,8 +42,8 @@
     margin: 0;
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' 590;
-    font-weight: round(down, 590, 100);
+    font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
   }
@@ -139,8 +139,8 @@
     min-height: 20px;
     color: var(--color-ui-tertiary-label);
     font-size: 13px;
-    font-variation-settings: 'wght' 590;
-    font-weight: round(down, 590, 100);
+    font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
     grid-template-columns: repeat(7, minmax(0, 1fr));
     line-height: 18px;
     padding-inline: 16px;
@@ -223,8 +223,8 @@
     justify-content: space-between;
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-body-weight);
-    font-weight: round(down, var(--font-ui-body-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
     gap: 16px;
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
@@ -273,8 +273,8 @@
     font-size: var(--font-ui-title3-size);
     font-style: normal;
     font-variant-numeric: tabular-nums;
-    font-variation-settings: 'wght' var(--font-ui-title3-weight);
-    font-weight: round(down, var(--font-ui-title3-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-title3-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-title3-weight) + var(--uikit-font-weight-boost, 0)), 100);
     isolation: isolate;
     letter-spacing: var(--font-ui-title3-tracking);
     line-height: var(--font-ui-title3-line-height);
@@ -304,13 +304,21 @@
 
     &[aria-current='date'] {
       color: var(--color-ui-primary);
+
+      /* State told without color alone (see Settings; its attribute, see
+         styles.css): bold too. */
+      :where([data-uikit-differentiate-without-color='true'])
+        &:not(:where([data-uikit-differentiate-without-color='false']) *) {
+        font-variation-settings: 'wght' calc(590 + var(--uikit-font-weight-boost, 0));
+        font-weight: round(down, calc(600 + var(--uikit-font-weight-boost, 0)), 100);
+      }
     }
 
     &[aria-pressed='true'] {
       color: var(--color-ui-primary);
       font-size: 24px;
-      font-variation-settings: 'wght' 510;
-      font-weight: round(down, 510, 100);
+      font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
 
       &::before {
         background-color: color-mix(
@@ -328,8 +336,8 @@
         transparent
       );
       font-size: var(--font-ui-title3-size);
-      font-variation-settings: 'wght' 400;
-      font-weight: round(down, 400, 100);
+      font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
 
       &::before {
         background: none;
@@ -426,8 +434,8 @@
     color: var(--color-ui-secondary-label);
     font-size: var(--font-ui-footnote-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-footnote-weight);
-    font-weight: round(down, var(--font-ui-footnote-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-footnote-tracking);
     line-height: var(--font-ui-footnote-line-height);
 

@@ -89,8 +89,8 @@
     margin: 0;
     font-size: var(--font-ui-headline-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-headline-weight);
-    font-weight: round(down, var(--font-ui-headline-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-headline-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-headline-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-headline-tracking);
     line-height: var(--font-ui-headline-line-height);
   }
@@ -100,8 +100,8 @@
     margin: 0;
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-body-weight);
-    font-weight: round(down, var(--font-ui-body-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
   }
@@ -125,8 +125,8 @@
     font-family: inherit;
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
     outline-offset: 2px;
@@ -170,7 +170,9 @@
 
   .uikit-alert-field {
     min-width: 0;
-    height: 52px;
+
+    /* (52px at the default text size, with it: its line and padding.) */
+    min-height: calc(var(--font-ui-body-line-height) - 2px + 32px);
     box-sizing: border-box;
     padding: 0 16px;
     border: 0;
@@ -184,10 +186,10 @@
     font-family: inherit;
     font-size: var(--font-ui-body-size);
     font-style: normal;
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
-    line-height: 20px;
+    line-height: calc(var(--font-ui-body-line-height) - 2px);
     outline: none;
 
     &:last-child {

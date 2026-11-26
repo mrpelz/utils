@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   List,
+  Stack,
   Symbol,
   Toolbar,
 } from '../../../components/index.js';
@@ -209,7 +210,11 @@ const OnAnAvatar: FunctionComponent = () => {
       state={[partState]}
       title="Badge on an avatar"
     >
-      <div className="badge-demo-row">
+      <Stack
+        align="center"
+        axis="horizontal"
+        spacing="xLarge"
+      >
         <Avatar.Root
           {...partProps['Avatar.Root']}
           aria-label="Jane Doe, 3 unread"
@@ -231,7 +236,7 @@ const OnAnAvatar: FunctionComponent = () => {
             tint="var(--color-ui-system-blue)"
           />
         </Avatar.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

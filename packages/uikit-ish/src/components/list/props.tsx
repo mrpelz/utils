@@ -432,6 +432,11 @@ export type ListHeaderProps = PartProps<'div'> & {
 
 export type ListBlockProps = PartProps<'div'> & {
   /**
+   * Its content at the groups' edges (no inline padding), not the rows'
+   * text: e.g. a full-width button below a form's groups.
+   */
+  flush?: boolean;
+  /**
    * On the rows' background (Framework7 `.block-strong`): inset and outlined
    * as the list's groups are (its style's, `Root` `outline`).
    */

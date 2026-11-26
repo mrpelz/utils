@@ -1,6 +1,6 @@
 import { FunctionComponent, useMemo } from 'react';
 
-import { Alert, Button, Symbol } from '../../../components/index.js';
+import { Alert, Button, Stack, Symbol } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -148,7 +148,11 @@ const SymbolAndLabel: FunctionComponent = () => {
       state={[partState]}
       title="Symbols and labels"
     >
-      <div className="button-demo-row">
+      <Stack
+        align="center"
+        axis="horizontal"
+        spacing="medium"
+      >
         <Button.Root
           {...partProps['Button.Root']}
           variant="bordered"
@@ -188,7 +192,7 @@ const SymbolAndLabel: FunctionComponent = () => {
             />
           </Button.Icon>
         </Button.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -222,8 +226,11 @@ const Pairs: FunctionComponent = () => {
       state={[partState]}
       title="A primary and a secondary action"
     >
-      <div className="button-demo-panel">
-        <div className="button-demo-stack">
+      <Stack
+        className="button-demo-panel"
+        spacing="xLarge"
+      >
+        <Stack spacing="small">
           <Button.Root
             {...partProps['Button.Root']}
             fill
@@ -241,8 +248,12 @@ const Pairs: FunctionComponent = () => {
           >
             <Button.Label {...partProps['Button.Label']}>Not Now</Button.Label>
           </Button.Root>
-        </div>
-        <div className="button-demo-row">
+        </Stack>
+        <Stack
+          align="center"
+          axis="horizontal"
+          spacing="medium"
+        >
           <Button.Root
             {...partProps['Button.Root']}
             fill
@@ -261,8 +272,8 @@ const Pairs: FunctionComponent = () => {
           >
             <Button.Label {...partProps['Button.Label']}>Save</Button.Label>
           </Button.Root>
-        </div>
-      </div>
+        </Stack>
+      </Stack>
     </Component>
   );
 };
@@ -413,7 +424,10 @@ const GlassOverContent: FunctionComponent = () => {
             />
           </Button.Icon>
         </Button.Root>
-        <div className="button-demo-controls">
+        <Stack
+          axis="horizontal"
+          spacing="medium"
+        >
           <Button.Root
             {...partProps['Button.Root']}
             context="adaptive"
@@ -442,7 +456,7 @@ const GlassOverContent: FunctionComponent = () => {
             </Button.Icon>
             <Button.Label {...partProps['Button.Label']}>Shuffle</Button.Label>
           </Button.Root>
-        </div>
+        </Stack>
       </div>
     </Component>
   );

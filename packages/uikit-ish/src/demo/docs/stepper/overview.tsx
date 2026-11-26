@@ -2,7 +2,7 @@ import './style.css';
 
 import { FunctionComponent, useMemo, useState } from 'react';
 
-import { Stepper } from '../../../components/index.js';
+import { Stack, Stepper } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import {
@@ -62,7 +62,11 @@ const LiveView: FunctionComponent = () => {
       state={[state, partState]}
       title="Stepper"
     >
-      <div className="stepper-demo-row">
+      <Stack
+        align="center"
+        axis="horizontal"
+        className="stepper-demo-row"
+      >
         <output>{value ?? '–'}</output>
         <Stepper.Root
           {...props}
@@ -81,7 +85,7 @@ const LiveView: FunctionComponent = () => {
             <Stepper.Increment {...partProps['Stepper.Increment']} />
           </Stepper.Group>
         </Stepper.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

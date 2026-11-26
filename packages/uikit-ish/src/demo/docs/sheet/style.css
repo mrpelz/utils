@@ -6,10 +6,3 @@
   overflow: hidden;
 }
 
-/* Deep-linking: its triggers, one under another. */
-.sheet-demo-links {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 12px;
-}

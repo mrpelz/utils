@@ -1,9 +1,6 @@
 /* Paged content (see composition.tsx): a page per screen width, snapping. */
 .page-control-demo-paged {
-  display: grid;
   width: min(402px, 100%);
-  gap: 12px;
-  justify-items: center;
 }
 
 .page-control-demo-pages {

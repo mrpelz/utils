@@ -59,10 +59,10 @@
     font-size: var(--font-ui-large-title-size);
     font-style: normal;
     font-variation-settings: 'wght'
-      var(--font-ui-large-title-weight-emphasized);
+      calc(var(--font-ui-large-title-weight-emphasized) + var(--uikit-font-weight-boost, 0));
     font-weight: round(
       down,
-      var(--font-ui-large-title-weight-emphasized),
+      calc(var(--font-ui-large-title-weight-emphasized) + var(--uikit-font-weight-boost, 0)),
       100
     );
     letter-spacing: var(--font-ui-large-title-tracking);
@@ -75,11 +75,11 @@
           calc(var(--uikit-header-large-title-fade, 1) * 100%),
         transparent
       );
-      font-size: 15px;
-      font-variation-settings: 'wght' 510;
-      font-weight: round(down, 510, 100);
+      font-size: var(--font-ui-subheadline-size);
+      font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: -0.25px;
-      line-height: 20px;
+      line-height: var(--font-ui-subheadline-line-height);
     }
   }
 }

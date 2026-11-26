@@ -357,12 +357,45 @@
   /*
    * Opaque glass (Settings' reduced transparency or more contrast, the
    * system's or a provider's): the materials, without blur, at full
-   * opacity, on the elements reading them (a context's, medium glass's),
-   * so a style query asks what's around each.
+   * opacity, on the elements reading them (a context's, medium glass's).
+   * A provider's by its attributes (and its portals', see Settings), the
+   * nearest standard one within winning; else the system's, by its media
+   * queries, within a provider only (none outside one). Not style queries:
+   * those don't apply on iOS (see the guide's iOS Quirks).
    */
-  @container style(--uikit-settings-reduced-transparency: 1) or style(--uikit-settings-contrast: 1) {
-    [data-glass-context],
-    .uikit-glass-medium {
+  :where([data-uikit-reduced-transparency='true'])
+    :is([data-glass-context], .uikit-glass-medium):not(:where([data-uikit-reduced-transparency='false']) *),
+  :where([data-uikit-contrast='more'])
+    :is([data-glass-context], .uikit-glass-medium):not(:where([data-uikit-contrast='standard']) *) {
+    --glass-ui-bright-blur: transparent;
+    --glass-ui-bright-fill: rgb(247 247 247);
+    --glass-ui-bright-fill-filter: none;
+    --glass-ui-bright-fill-brightness: 1;
+    --glass-ui-dim-blur: transparent;
+    --glass-ui-dim-fill: rgb(28 28 30);
+    --glass-ui-dim-fill-filter: none;
+    --glass-ui-dim-fill-brightness: 1;
+    --glass-ui-medium-light-background: rgb(246 246 246);
+    --glass-ui-medium-dark-background: rgb(30 30 30);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :is([data-glass-context], .uikit-glass-medium):where([data-uikit-settings], [data-uikit-settings] *):not(:where([data-uikit-reduced-transparency='false']) *) {
+      --glass-ui-bright-blur: transparent;
+      --glass-ui-bright-fill: rgb(247 247 247);
+      --glass-ui-bright-fill-filter: none;
+      --glass-ui-bright-fill-brightness: 1;
+      --glass-ui-dim-blur: transparent;
+      --glass-ui-dim-fill: rgb(28 28 30);
+      --glass-ui-dim-fill-filter: none;
+      --glass-ui-dim-fill-brightness: 1;
+      --glass-ui-medium-light-background: rgb(246 246 246);
+      --glass-ui-medium-dark-background: rgb(30 30 30);
+    }
+  }
+
+  @media (prefers-contrast: more), (forced-colors: active) {
+    :is([data-glass-context], .uikit-glass-medium):where([data-uikit-settings], [data-uikit-settings] *):not(:where([data-uikit-contrast='standard']) *) {
       --glass-ui-bright-blur: transparent;
       --glass-ui-bright-fill: rgb(247 247 247);
       --glass-ui-bright-fill-filter: none;

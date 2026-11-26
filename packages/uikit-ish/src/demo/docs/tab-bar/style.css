@@ -5,10 +5,3 @@
   flex: 1;
 }
 
-/* The parts' panels, above their bar. */
-.tab-bar-demo-panels {
-  display: grid;
-  gap: 16px;
-  justify-items: center;
-}
-

@@ -2,7 +2,11 @@ import './style.css';
 
 import { FunctionComponent, useMemo } from 'react';
 
-import { ActivityIndicator, Progress } from '../../../components/index.js';
+import {
+  ActivityIndicator,
+  Progress,
+  Stack,
+} from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import {
   usePartControls,
@@ -63,7 +67,11 @@ const LiveView: FunctionComponent = () => {
       state={[stateRoot, stateValue, partState]}
       title="Progress"
     >
-      <div className="progress-demo-stage">
+      <Stack
+        align="center"
+        className="progress-demo-stage"
+        spacing="xLarge"
+      >
         <Progress.Root {...propsRoot}>
           <Progress.Label {...partProps['Progress.Label']}>
             Downloading
@@ -76,7 +84,7 @@ const LiveView: FunctionComponent = () => {
         <ActivityIndicator {...partProps.ActivityIndicator}>
           Loading
         </ActivityIndicator>
-      </div>
+      </Stack>
     </Component>
   );
 };

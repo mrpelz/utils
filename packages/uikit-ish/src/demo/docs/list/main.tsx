@@ -2895,7 +2895,7 @@ export const ListSegmentedDemo: FunctionComponent = () => {
           {/* Aligned with the groups' edges, not the rows' text. */}
           <List.Block
             {...partProps['List.Block']}
-            style={{ marginBlockEnd: 16, paddingInline: 0 }}
+            flush
           >
             <Segmented.Root
               {...partProps['Segmented.Root']}

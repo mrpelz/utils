@@ -8,6 +8,7 @@ import {
   type GridReorderHandle,
   type GridSize,
   Page,
+  Stack,
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -153,8 +154,16 @@ export const cardsStage = (
           .join(' ')}
       >
         <Viewport.Padding edge="block-start" />
-        <div className="card-demo-content">
-          <div className="card-demo-actions">
+        <Stack
+          inset
+          className="card-demo-content"
+        >
+          <Stack
+            wrap
+            axis="horizontal"
+            justify="end"
+            spacing="small"
+          >
             <Button.Root
               {...partProps['Button.Root']}
               variant="bordered"
@@ -164,7 +173,7 @@ export const cardsStage = (
                 {stage.editing ? 'Done' : 'Edit'}
               </Button.Label>
             </Button.Root>
-          </div>
+          </Stack>
           <Grid.Root
             {...partProps['Grid.Root']}
             editing={stage.editing}
@@ -229,7 +238,7 @@ export const cardsStage = (
               },
             )}
           </Grid.Root>
-        </div>
+        </Stack>
         <Viewport.Padding edge="block-end" />
       </Page.Root>
     </Viewport.Content>

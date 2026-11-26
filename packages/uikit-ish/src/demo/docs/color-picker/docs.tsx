@@ -1,3 +1,4 @@
+import { colorPickerLabels } from '../../../components/index.js';
 import {
   code,
   elementRows,
@@ -10,6 +11,156 @@ import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props, for the parts page (all) and the overview (its key
 // ones).
+
+/** Who reads a built-in word: everyone (it's shown), or assistive technology. */
+type LabelReader = 'assistive' | 'shown';
+
+const readers: Record<LabelReader, string> = {
+  assistive: 'Read by assistive technology',
+  shown: 'Shown, and read by assistive technology',
+};
+
+/**
+ * A built-in word's row: its prop, its default (read from the library's
+ * `colorPickerLabels`), what it names, who reads it.
+ */
+const labelRow = (
+  name: Exclude<keyof typeof colorPickerLabels, 'channelValueLabel'>,
+  description: string,
+  reader: LabelReader = 'assistive',
+): PropRow => [
+  name,
+  'string',
+  code(colorPickerLabels[name]),
+  `${description} ${readers[reader]}; give your own in another language.`,
+];
+
+/** The sliders' built-in words. */
+const slidersLabelRows: readonly PropRow[] = [
+  labelRow('redLabel', 'The red channel’s title and slider.', 'shown'),
+  labelRow('greenLabel', 'The green channel’s title and slider.', 'shown'),
+  labelRow('blueLabel', 'The blue channel’s title and slider.', 'shown'),
+  labelRow('hueLabel', 'The hue channel’s title and slider.', 'shown'),
+  labelRow(
+    'saturationLabel',
+    'The saturation channel’s title and slider.',
+    'shown',
+  ),
+  labelRow(
+    'lightnessLabel',
+    'The lightness channel’s title and slider.',
+    'shown',
+  ),
+  labelRow('cyanLabel', 'The cyan channel’s title and slider.', 'shown'),
+  labelRow('magentaLabel', 'The magenta channel’s title and slider.', 'shown'),
+  labelRow('yellowLabel', 'The yellow channel’s title and slider.', 'shown'),
+  labelRow('blackLabel', 'The black channel’s title and slider.', 'shown'),
+  [
+    'channelValueLabel',
+    '(channel: string) => string',
+    'its channel’s word, then “value”',
+    'A channel’s field, named from its channel’s word (for example “Red value”). Read by assistive technology; give your own in another language.',
+  ],
+];
+
+/** The opacity's built-in words. */
+const opacityLabelRows: readonly PropRow[] = [
+  labelRow('opacityLabel', 'The opacity’s title and slider.', 'shown'),
+  labelRow('opacityValueLabel', 'The opacity’s field.'),
+];
+
+/** The swatches' built-in words. */
+const swatchesLabelRows: readonly PropRow[] = [
+  labelRow('savedColorsLabel', 'The saved colors’ group.'),
+  labelRow('addColorLabel', 'The add button.'),
+  labelRow(
+    'deleteColorLabel',
+    'A saved color’s menu item, which deletes it.',
+    'shown',
+  ),
+  labelRow(
+    'flattenColorLabel',
+    'The color’s button while it’s translucent (see flattenOnPress).',
+  ),
+  labelRow('flattenColorTitleLabel', 'The title of its action sheet.', 'shown'),
+  labelRow(
+    'removeTransparencyLabel',
+    'The action sheet’s action that makes the color opaque.',
+    'shown',
+  ),
+  labelRow(
+    'flattenOnWhiteLabel',
+    'The action sheet’s action that flattens the color on white.',
+    'shown',
+  ),
+  labelRow(
+    'flattenOnBlackLabel',
+    'The action sheet’s action that flattens the color on black.',
+    'shown',
+  ),
+];
+
+/** The code's built-in word (also the copy menu's hex code). */
+const codeLabelRows: readonly PropRow[] = [
+  labelRow(
+    'hexLabel',
+    'The code’s title and field, and the copy menu’s hex code.',
+    'shown',
+  ),
+];
+
+/** The copy menu's built-in words, besides its hex code's. */
+const copyMenuLabelRows: readonly PropRow[] = [
+  labelRow(
+    'hexWithAlphaLabel',
+    'The copy menu’s hex code with alpha.',
+    'shown',
+  ),
+  labelRow('srgbLabel', 'The copy menu’s submenu of sRGB codes.', 'shown'),
+  labelRow(
+    'perceptualLabel',
+    'The copy menu’s submenu of perceptual codes.',
+    'shown',
+  ),
+  labelRow(
+    'wideGamutLabel',
+    'The copy menu’s submenu of wide-gamut codes.',
+    'shown',
+  ),
+];
+
+/** The copy menu's built-in words. */
+const codeCopyLabelRows: readonly PropRow[] = [
+  labelRow('hexLabel', 'The copy menu’s hex code.', 'shown'),
+  ...copyMenuLabelRows,
+];
+
+/** The named colors' built-in word. */
+const namedLabelRows: readonly PropRow[] = [
+  labelRow('indexLabel', 'The index of first letters.'),
+];
+
+/**
+ * The names of the parts that are one element (each part's own
+ * `aria-label` wins).
+ */
+const ownLabelRows: readonly PropRow[] = [
+  labelRow('modesLabel', 'The modes’ control (its own aria-label wins).'),
+  labelRow('gridLabel', 'The grid (its own aria-label wins).'),
+  labelRow('spectrumLabel', 'The spectrum (its own aria-label wins).'),
+  labelRow(
+    'eyedropperLabel',
+    'The eyedropper’s button (its own aria-label wins).',
+  ),
+  labelRow(
+    'systemColorsLabel',
+    'The system colors’ button (its own aria-label wins).',
+  ),
+  labelRow(
+    'copyColorCodeLabel',
+    'The code’s copy button (its own aria-label wins).',
+  ),
+];
 
 export const colorPickerRootRows: readonly PropRow[] = [
   [
@@ -111,7 +262,25 @@ export const colorPickerRootRows: readonly PropRow[] = [
       <code>#rrggbb</code>), and a value’s alpha is dropped as it changes.
     </>,
   ],
+  ...ownLabelRows,
+  ...slidersLabelRows,
+  ...opacityLabelRows,
+  ...swatchesLabelRows,
+  ...codeLabelRows,
+  ...copyMenuLabelRows,
+  ...namedLabelRows,
   ...renderRows('div', 'HTMLDivElement'),
+];
+
+/** `colorPickerLabels`: its keys (every built-in word), their defaults. */
+export const colorPickerLabelsRows: readonly PropRow[] = [
+  ...ownLabelRows,
+  ...slidersLabelRows,
+  ...opacityLabelRows,
+  ...swatchesLabelRows,
+  ...codeLabelRows,
+  ...copyMenuLabelRows,
+  ...namedLabelRows,
 ];
 
 export const colorPickerPanelRows: readonly PropRow[] = [
@@ -170,8 +339,9 @@ export const colorPickerModesRows: readonly PropRow[] = [
         component="segmented"
         part="Segmented.Root"
       />
-      ’s props, except its value (which is the panel’s <code>mode</code>). It’s
-      named “Mode” by default (<code>aria-label</code>).
+      ’s props, except its value (which is the panel’s <code>mode</code>). Its
+      name (<code>aria-label</code>) defaults to its picker’s{' '}
+      <code>modesLabel</code>.
     </>,
   ],
 ];
@@ -301,10 +471,12 @@ export const colorPickerSlidersRows: readonly PropRow[] = [
       ).
     </>,
   ],
+  ...slidersLabelRows,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
 export const colorPickerOpacityRows: readonly PropRow[] = [
+  ...opacityLabelRows,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
@@ -344,6 +516,7 @@ export const colorPickerSwatchesRows: readonly PropRow[] = [
       deleted (from its menu), and why (<code>add</code>, <code>delete</code>).
     </>,
   ],
+  ...swatchesLabelRows,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
@@ -395,6 +568,7 @@ export const colorPickerCodeRows: readonly PropRow[] = [
       ).
     </>,
   ],
+  ...codeLabelRows,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 
@@ -423,6 +597,7 @@ export const colorPickerCodeCopyRows: readonly PropRow[] = [
     undefined,
     'Called with the code copied to the clipboard, and the event.',
   ],
+  ...codeCopyLabelRows,
   [
     '…',
     'ButtonRootProps',
@@ -473,6 +648,12 @@ export const colorPickerWellRows: readonly PropRow[] = [
     'Its color (a hex string). Without one, it shows only the hues.',
   ],
   ['size', union('small', 'large'), code('small'), 'Its size: 28px or 36px.'],
+  [
+    'aria-label',
+    'string',
+    code('Color'),
+    'Its name, read by assistive technology. It usually sits outside a picker, so it has its own; give one in another language, or the color’s purpose (for example “Tint”).',
+  ],
   ...elementRows('button', 'HTMLButtonElement'),
 ];
 
@@ -541,6 +722,7 @@ export const colorPickerNamedRows: readonly PropRow[] = [
       ’.
     </>,
   ],
+  ...namedLabelRows,
   ...elementRows('div', 'HTMLDivElement'),
 ];
 

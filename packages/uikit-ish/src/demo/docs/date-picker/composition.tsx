@@ -401,7 +401,7 @@ const InAForm: FunctionComponent = () => {
             <List.Section {...partProps['List.Section']}>
               <List.Block
                 {...partProps['List.Block']}
-                style={{ paddingInline: 0 }}
+                flush
               >
                 <Button.Root
                   {...partProps['Button.Root']}

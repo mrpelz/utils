@@ -132,10 +132,10 @@ export const TypographyArchitecture: FunctionComponent = () => (
         setting, through the color tokens.
       </li>
       <li>
-        Settings also publishes a text size (
-        <code>--uikit-settings-text-size</code>), but nothing reads it yet. For
-        now, a text size is set per element, with <code>textSize</code>, and
-        applies to what’s inside that element.
+        A provider’s text size (see <a href={publicUrl('settings')}>Settings</a>
+        , the system’s or its own) sets the same tokens for everything inside
+        it, as <code>textSize</code> does for what’s inside a Typography. The
+        nearest one wins.
       </li>
       <li>
         <strong>Out:</strong> the same tokens every component’s text uses. A

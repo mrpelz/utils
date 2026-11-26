@@ -7,6 +7,7 @@ import {
   forwardClick,
   List,
   Popover,
+  Stack,
   Switch,
   Symbol,
   Toolbar,
@@ -2481,7 +2482,13 @@ const CreateHandlePart: FunctionComponent = () => {
       state={[partState]}
       title="Popover.createHandle"
     >
-      <div className="popover-demo-triggers">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        justify="center"
+        spacing="medium"
+      >
         <Popover.Trigger
           {...partProps['Popover.Trigger']}
           handle={displayPopover}
@@ -2507,7 +2514,7 @@ const CreateHandlePart: FunctionComponent = () => {
             Open Imperatively
           </Button.Label>
         </Button.Root>
-      </div>
+      </Stack>
       <Popover.Root
         {...partProps['Popover.Root']}
         handle={displayPopover}
@@ -2685,7 +2692,13 @@ const UseCreatePopoverHandlePart: FunctionComponent = () => {
       state={[partState]}
       title="useCreatePopoverHandle"
     >
-      <div className="popover-demo-triggers">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        justify="center"
+        spacing="medium"
+      >
         <Popover.Trigger
           {...partProps['Popover.Trigger']}
           handle={optionsPopover}
@@ -2718,7 +2731,7 @@ const UseCreatePopoverHandlePart: FunctionComponent = () => {
             Filter Options
           </Button.Label>
         </Popover.Trigger>
-      </div>
+      </Stack>
       <Popover.Root
         {...partProps['Popover.Root']}
         handle={optionsPopover}

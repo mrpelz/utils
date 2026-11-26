@@ -2,7 +2,12 @@ import './style.css';
 
 import { FunctionComponent, useMemo } from 'react';
 
-import { Checkbox, Radio, RadioGroup } from '../../../components/index.js';
+import {
+  Checkbox,
+  Radio,
+  RadioGroup,
+  Stack,
+} from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePropControl } from '../../tooling/frame/prop-control.js';
@@ -78,20 +83,35 @@ export const CheckboxRadioDemo: FunctionComponent = () => {
         aria-label="Contact by"
         {...propsGroup}
       >
-        <div className="checkbox-demo-group">
-          <label className="checkbox-demo-option">
+        <Stack>
+          <Stack
+            align="center"
+            axis="horizontal"
+            render={<label />}
+            spacing="medium"
+          >
             <Radio.Root {...propsRadio} />
             Email
-          </label>
-          <label className="checkbox-demo-option">
+          </Stack>
+          <Stack
+            align="center"
+            axis="horizontal"
+            render={<label />}
+            spacing="medium"
+          >
             <Radio.Root value="phone" />
             Phone
-          </label>
-          <label className="checkbox-demo-option">
+          </Stack>
+          <Stack
+            align="center"
+            axis="horizontal"
+            render={<label />}
+            spacing="medium"
+          >
             <Radio.Root value="mail" />
             Mail
-          </label>
-        </div>
+          </Stack>
+        </Stack>
       </RadioGroup>
     </Component>
   );

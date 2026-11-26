@@ -47,8 +47,8 @@
     color: var(--color-ui-secondary-label);
     font-size: var(--font-ui-subheadline-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-subheadline-weight);
-    font-weight: round(down, var(--font-ui-subheadline-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-subheadline-tracking);
     line-height: var(--font-ui-subheadline-line-height);
 
@@ -70,10 +70,10 @@
     color: var(--color-ui-label);
     font-family: inherit;
     font-size: var(--font-ui-body-size);
-    font-variation-settings: 'wght' 510;
-    font-weight: round(down, 510, 100);
+    font-variation-settings: 'wght' calc(510 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-body-tracking);
-    line-height: 20px;
+    line-height: calc(var(--font-ui-body-line-height) - 2px);
     outline: none;
 
     &::placeholder {
@@ -134,21 +134,38 @@
     color: var(--color-ui-secondary-label);
     font-size: var(--font-ui-caption1-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-caption1-weight);
-    font-weight: round(down, var(--font-ui-caption1-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-caption1-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-caption1-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-caption1-tracking);
     line-height: var(--font-ui-caption1-line-height);
   }
 
   .uikit-text-field-error {
+    --uikit-text-field-error-symbol: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M10 1.5A8.5 8.5 0 0 1 10 18.5A8.5 8.5 0 0 1 10 1.5ZM10 3A7 7 0 0 0 10 17A7 7 0 0 0 10 3ZM9.25 5.75A0.75 0.75 0 0 1 10.75 5.75L10.75 11.25A0.75 0.75 0 0 1 9.25 11.25ZM10 12.75A1.1 1.1 0 0 1 10 14.95A1.1 1.1 0 0 1 10 12.75Z'/%3E%3C/svg%3E");
+
     margin: 0;
     color: var(--color-ui-system-red);
     font-size: var(--font-ui-caption1-size);
     font-style: normal;
-    font-variation-settings: 'wght' var(--font-ui-caption1-weight);
-    font-weight: round(down, var(--font-ui-caption1-weight), 100);
+    font-variation-settings: 'wght' calc(var(--font-ui-caption1-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--font-ui-caption1-weight) + var(--uikit-font-weight-boost, 0)), 100);
     letter-spacing: var(--font-ui-caption1-tracking);
     line-height: var(--font-ui-caption1-line-height);
+
+    /* State told without color alone (see Settings; its attribute, see
+       styles.css): an exclamation mark in a circle before it, in its
+       color, at its text's size. */
+    :where([data-uikit-differentiate-without-color='true'])
+      &:not(:where([data-uikit-differentiate-without-color='false']) *)::before {
+      display: inline-block;
+      width: 1.1em;
+      height: 1.1em;
+      background-color: currentcolor;
+      content: '';
+      margin-inline-end: 0.3em;
+      mask: var(--uikit-text-field-error-symbol) center / contain no-repeat;
+      vertical-align: -0.2em;
+    }
   }
 
   .uikit-text-field-clear {
@@ -214,17 +231,11 @@
       transition: opacity var(--glass-ui-lens-duration, 300ms) ease-out;
     }
 
-    @container style(--uikit-settings-reduced-motion: 1) {
-      &,
-      & > .uikit-text-field-frame-glass {
-        transition: none;
-      }
-    }
 
     & > input {
       flex: 1 1 auto;
-      font-variation-settings: 'wght' 400;
-      font-weight: round(down, 400, 100);
+      font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     }
 
     /* As a list row (inset grouped, see List): its background, height,

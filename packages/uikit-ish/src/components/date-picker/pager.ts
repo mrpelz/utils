@@ -6,6 +6,8 @@ import {
   useState,
 } from 'react';
 
+import { smoothScrollOf } from '../utils/main.js';
+
 // A calendar's months, side by side in a strip scrolling sideways (see
 // `useMonthPager`), a window of them: the shown month between a year's on
 // either side (`span`), snapping to one each, natively (a finger, a
@@ -144,7 +146,10 @@ const useMonthDrag = (
           ? (towards > 0 ? Math.ceil : Math.floor)(offset)
           : Math.round(offset);
       const page = Math.min(Math.max(flicked, 0), pages.children.length - 1);
-      pages.scrollTo({ behavior: 'smooth', left: page * width * direction });
+      pages.scrollTo({
+        behavior: smoothScrollOf(pages),
+        left: page * width * direction,
+      });
       pages.addEventListener('scrollend', done);
       timer = setTimeout(done, settleLatest);
     };
@@ -254,7 +259,10 @@ export const useMonthPager = ({
       pages.scrollTo({ behavior: 'instant', left: page * width * direction });
     }
     if (goneTo !== -1) {
-      pages.scrollTo({ behavior: 'smooth', left: goneTo * width * direction });
+      pages.scrollTo({
+        behavior: smoothScrollOf(pages),
+        left: goneTo * width * direction,
+      });
     }
   }, [goneTo, page, pagesRef]);
 

@@ -3,6 +3,7 @@ import { FunctionComponent, useMemo, useState } from 'react';
 
 import {
   collapsedSelection,
+  Stack,
   Symbol,
   TabBar,
 } from '../../../components/index.js';
@@ -843,8 +844,10 @@ const PanelPart: FunctionComponent = () => {
     >
       <TabBar.Root
         key={elementKey}
+
         {...partProps['TabBar.Root']}
-        className="tab-bar-demo-panels"
+
+        render={<Stack align="center" />}
         value={value}
         onValueChange={onValueChange}
       >

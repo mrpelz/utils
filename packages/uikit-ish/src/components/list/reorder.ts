@@ -65,7 +65,55 @@ export type ListReorderEventDetails = {
   reason: ListReorderReason;
 };
 
+/**
+ * A reordering, as told to assistive technology (see `ListReorderOptions`'
+ * `getAnnouncement`).
+ */
+export type ListReorderAnnouncement = {
+  /** Grabbed rows moved on (by keyboard), or dropped. */
+  action: 'dropped' | 'moved';
+  /** The rows' titles (their `List.Title`s; none: `undefined`). */
+  items: readonly (string | undefined)[];
+  /**
+   * Where they went: after a row, before one (its title, if it has one),
+   * or into an empty group. None: not yet anywhere.
+   */
+  position?:
+    | { relation: 'after' | 'before'; title: string | undefined }
+    | { relation: 'empty' };
+  /** The title of the section they went to, if it has one. */
+  section?: string;
+};
+
+/**
+ * A reordering's announcement (English, the default of `getAnnouncement`):
+ * e.g. “Moved Milk after Eggs, Groceries”, “Dropped 3 rows into empty
+ * group”.
+ */
+export const listReorderAnnouncement = ({
+  action,
+  items,
+  position,
+  section,
+}: ListReorderAnnouncement): string => {
+  const verb = action === 'dropped' ? 'Dropped' : 'Moved';
+  const what =
+    items.length === 1 ? (items[0] ?? 'row') : `${String(items.length)} rows`;
+  if (!position) return `${verb} ${what}`;
+  const where =
+    position.relation === 'empty'
+      ? 'into empty group'
+      : `${position.relation} ${position.title ?? 'row'}`;
+  return [`${verb} ${what} ${where}`, section].filter(Boolean).join(', ');
+};
+
 export type ListReorderOptions = {
+  /**
+   * What's announced to assistive technology as rows are moved and
+   * dropped (e.g. in another language).
+   * @default `listReorderAnnouncement` (English)
+   */
+  getAnnouncement?: (announcement: ListReorderAnnouncement) => string;
   /** Called when rows are moved to a target; the app reorders them. */
   onReorder?: (
     change: ListReorderChange,
@@ -488,21 +536,29 @@ const changeOf = (
 
 // E.g. “Moved Mars after Venus, Inner Planets”.
 const describe = (
-  verb: string,
+  action: ListReorderAnnouncement['action'],
   items: readonly HTMLElement[],
   gap: Gap | undefined,
 ) => {
-  const what =
-    items.length === 1
-      ? (titleOf(items[0]) ?? 'row')
-      : `${String(items.length)} rows`;
-  if (!gap) return `${verb} ${what}`;
-  let where = 'into empty group';
-  if (gap.after) where = `after ${titleOf(gap.after) ?? 'row'}`;
-  else if (gap.before) where = `before ${titleOf(gap.before) ?? 'row'}`;
-  return [`${verb} ${what} ${where}`, sectionTitleOf(gap.container)]
-    .filter(Boolean)
-    .join(', ');
+  const announcement: ListReorderAnnouncement = {
+    action,
+    items: items.map((item) => titleOf(item)),
+  };
+  if (gap) {
+    if (gap.after) {
+      announcement.position = { relation: 'after', title: titleOf(gap.after) };
+    } else if (gap.before) {
+      announcement.position = {
+        relation: 'before',
+        title: titleOf(gap.before),
+      };
+    } else {
+      announcement.position = { relation: 'empty' };
+    }
+    announcement.section = sectionTitleOf(gap.container);
+  }
+  const get = gap?.handle.options.getAnnouncement ?? listReorderAnnouncement;
+  return get(announcement);
 };
 
 // The handles all the rows have, by the first's order.
@@ -795,7 +851,7 @@ const createSession = (layout: Layout, initial: Mode): Session => {
           [gap.container, ...items.map((item) => item.parentElement)],
           styled,
         );
-        announce(describe('Dropped', items, gap));
+        announce(describe('dropped', items, gap));
         gap.handle.options.onReorder?.(changeOf(items, gap), {
           event,
           reason,
@@ -869,7 +925,7 @@ const createSession = (layout: Layout, initial: Mode): Session => {
       if (!next) return;
       open(next);
       mode = { from: tops(), kind: 'settle', start: performance.now() };
-      announce(describe('Moved', items, next));
+      announce(describe('moved', items, next));
     },
     target: () => current,
   };
@@ -975,7 +1031,7 @@ export const reorderByKey = (
 
   event.preventDefault();
   const change = changeOf([item], gap);
-  announce(describe('Moved', [item], gap));
+  announce(describe('moved', [item], gap));
   gap.handle.options.onReorder?.(change, { event, reason: 'keyboard' });
   const name = change.items[0]?.name;
   if (name !== undefined) refocus(item, gap.handle, name);

@@ -12,11 +12,21 @@ const inherited = new MappedProp(inherit, '[inherit]');
 // Each setting: left out ([inherit]), reset (undefined: the system's, or
 // the default), or overridden.
 export const propOptionsProvider = {
+  boldText: [inherited, undefined, false, true] as const,
   colorScheme: [inherited, undefined, 'light', 'dark'] as const,
   contrast: [inherited, undefined, 'standard', 'more'] as const,
   differentiateWithoutColor: [inherited, undefined, false, true] as const,
+  languages: [
+    inherited,
+    undefined,
+    ['en-GB', 'de'],
+    ['en-US', 'de'],
+    ['ja'],
+  ] as const,
+  locale: [inherited, undefined, 'de', 'en-GB', 'ja'] as const,
   reducedMotion: [inherited, undefined, false, true] as const,
   reducedTransparency: [inherited, undefined, false, true] as const,
+  region: [inherited, undefined, 'US', 'DE', 'JP'] as const,
   textSize: [
     inherited,
     undefined,

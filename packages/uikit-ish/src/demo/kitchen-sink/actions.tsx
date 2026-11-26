@@ -16,6 +16,7 @@ import {
   Menu,
   Popover,
   Sheet,
+  Stack,
   Symbol,
   Toolbar,
   useSelectionAnchor,
@@ -200,7 +201,12 @@ const ButtonContent: FunctionComponent = () => (
       <List.Header>
         <List.Title>Glass on a Picture</List.Title>
       </List.Header>
-      <div className="kitchen-sink-picture kitchen-sink-showcase">
+      <Stack
+        wrap
+        align="center"
+        axis="horizontal"
+        className="kitchen-sink-picture"
+      >
         {(['bright', 'dim', 'adaptive'] as const).map((context) => (
           <Button.Root
             key={context}
@@ -229,7 +235,7 @@ const ButtonContent: FunctionComponent = () => (
         >
           <Button.Label>Prominent</Button.Label>
         </Button.Root>
-      </div>
+      </Stack>
     </List.Section>
   </List.Root>
 );

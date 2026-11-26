@@ -5,6 +5,7 @@ import {
   Fieldset,
   Form,
   List,
+  Stack,
   Symbol,
   TextField,
 } from '../../../components/index.js';
@@ -385,7 +386,10 @@ const SearchWithClear: FunctionComponent = () => {
       state={[partState]}
       title="A search field"
     >
-      <div className="text-field-demo-search">
+      <Stack
+        className="text-field-demo-search"
+        spacing="small"
+      >
         <TextField.Root {...partProps['TextField.Root']}>
           <TextField.Frame {...partProps['TextField.Frame']}>
             <Symbol
@@ -424,7 +428,7 @@ const SearchWithClear: FunctionComponent = () => {
             ) : null}
           </List.Section>
         </List.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

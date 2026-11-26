@@ -555,6 +555,12 @@ export const listBlockRows: readonly PropRow[] = [
     code('false'),
     'Puts it on the rows’ background, inset and outlined like the list’s groups (by its style and its root’s outline).',
   ],
+  [
+    'flush',
+    'boolean',
+    code('false'),
+    'Lines its content up with the groups’ edges instead of the rows’ text (no inline padding), for example a full-width button below a form’s groups.',
+  ],
   ...renderRows('div', 'HTMLElement'),
 ];
 
@@ -1044,6 +1050,21 @@ export const forwardClickRows: readonly PropRow[] = [
 
 /** `List.createReorderHandle(options)`, `useCreateReorderHandle(options)`. */
 export const listReorderHandleRows: readonly PropRow[] = [
+  [
+    'options.getAnnouncement',
+    '(announcement: ListReorderAnnouncement) => string',
+    code('listReorderAnnouncement'),
+    <>
+      What’s announced to assistive technology as rows are moved and dropped,
+      for example in another language. <code>announcement.action</code> is{' '}
+      <code>moved</code> or <code>dropped</code>; <code>items</code> holds the
+      rows’ titles; <code>position</code> says where they went (after or before
+      a row, with its title, or into an empty group); <code>section</code> is
+      the section’s title. The default, in English, is exported as{' '}
+      <code>listReorderAnnouncement</code>, for example “Moved Milk after Eggs,
+      Groceries”.
+    </>,
+  ],
   [
     'options.onReorder',
     '(change: ListReorderChange, eventDetails) => void',

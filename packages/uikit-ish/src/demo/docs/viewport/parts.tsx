@@ -14,6 +14,7 @@ import {
   Button,
   type ElementGeometry,
   List,
+  Stack,
   Symbol,
   type SymbolIcon,
   TextField,
@@ -2150,12 +2151,13 @@ const UseInputZoomPreventionPart: FunctionComponent = () => {
       state={[state]}
       title="useInputZoomPrevention"
     >
-      <div
+      <Stack
         className="viewport-demo-fields"
+        spacing="medium"
         onFocusCapture={logGuarded(addLog)}
       >
         {guardFields}
-      </div>
+      </Stack>
     </Component>
   );
 };
@@ -2188,13 +2190,15 @@ const UseFocusShiftPreventionPart: FunctionComponent = () => {
       state={[state]}
       title="useFocusShiftPrevention"
     >
-      <div
+      <Stack
         ref={frame}
         className="viewport-demo-fields viewport-demo-fields-tall"
+        justify="end"
+        spacing="medium"
         onFocusCapture={logGuarded(addLog)}
       >
         {guardFields}
-      </div>
+      </Stack>
     </Component>
   );
 };

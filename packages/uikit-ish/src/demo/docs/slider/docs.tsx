@@ -6,6 +6,7 @@ import {
   union,
 } from '../../tooling/guide/props-table.js';
 import { PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 
 // Every part's props (Base UI's with its descriptions), for the parts page
 // (all) and the overview (its key ones).
@@ -153,7 +154,9 @@ export const sliderRootRows: readonly PropRow[] = [
   [
     'locale',
     'Intl.LocalesArgument',
-    'the user’s runtime locale',
+    <>
+      from <a href={publicUrl('settings')}>Settings</a>
+    </>,
     <>
       The locale used by <code>Intl.NumberFormat</code> when formatting the
       value.

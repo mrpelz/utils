@@ -1,0 +1,68 @@
+/* Stack (see main.tsx). */
+@layer uikit-ish {
+  /* The spacing scale (an app's, set anywhere, e.g. on :root; else these):
+     small 8px, medium 12px, large 16px, xLarge 32px. */
+  .uikit-stack {
+    --uikit-stack-spacing: var(--uikit-spacing-large, 16px);
+
+    display: flex;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-direction: column;
+    gap: var(--uikit-stack-spacing);
+
+    &[data-axis='horizontal'] {
+      flex-direction: row;
+    }
+
+    &[data-spacing='small'] {
+      --uikit-stack-spacing: var(--uikit-spacing-small, 8px);
+    }
+
+    &[data-spacing='medium'] {
+      --uikit-stack-spacing: var(--uikit-spacing-medium, 12px);
+    }
+
+    &[data-spacing='xLarge'] {
+      --uikit-stack-spacing: var(--uikit-spacing-x-large, 32px);
+    }
+
+    &[data-wrap] {
+      flex-wrap: wrap;
+    }
+
+    /* (The content margin at its sides, as `Viewport.Padding`'s at the
+       ends.) */
+    &[data-inset] {
+      padding-inline: var(--uikit-content-margin-inline, 16px);
+    }
+
+    &[data-align='start'] {
+      align-items: flex-start;
+    }
+
+    &[data-align='center'] {
+      align-items: center;
+    }
+
+    &[data-align='end'] {
+      align-items: flex-end;
+    }
+
+    &[data-align='baseline'] {
+      align-items: baseline;
+    }
+
+    &[data-justify='center'] {
+      justify-content: center;
+    }
+
+    &[data-justify='end'] {
+      justify-content: flex-end;
+    }
+
+    &[data-justify='spaceBetween'] {
+      justify-content: space-between;
+    }
+  }
+}

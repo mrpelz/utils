@@ -4,6 +4,7 @@ import {
   FunctionComponent,
   ReactNode,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -16,6 +17,7 @@ import {
   List,
   Navigation,
   Page,
+  refreshSettings,
   Settings,
   type SettingsValues,
   Sidebar,
@@ -23,6 +25,7 @@ import {
   Toolbar,
   useFocusShiftPrevention,
   useInputZoomPrevention,
+  useSettings,
   useSizeClass,
   Viewport,
 } from '../../components/index.js';
@@ -351,9 +354,22 @@ const App: FunctionComponent = () => {
   const isCompact = useSizeClass() === 'compact';
   // Its settings, overriding the system's (set on its Settings page).
   const [settings, setSettings] = useState<Partial<SettingsValues>>({});
+  // The system's (outside its provider: the guide's, overriding nothing),
+  // shown on its Settings page.
+  const system = useSettings();
+  // Back in the foreground: the time zone and the text size read again
+  // (they send no event; see Settings' `refreshSettings`).
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refreshSettings();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () =>
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
   const settingsState = useMemo(
-    () => [settings, setSettings] as const,
-    [settings],
+    () => [settings, setSettings, system] as const,
+    [settings, system],
   );
   // The open component's stack, bottom to top (compact, empty: the index).
   const [stack, setStack] = useState<readonly string[]>(

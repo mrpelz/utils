@@ -7,6 +7,7 @@ import {
   Grid,
   type GridSize,
   Page,
+  Stack,
   Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
@@ -116,8 +117,15 @@ export const GridDemo: FunctionComponent = () => {
             {...partProps['Viewport.Padding']}
             edge="block-start"
           />
-          <div className="grid-demo-content">
-            <div className="grid-demo-actions">
+          <Stack
+            inset
+            className="grid-demo-content"
+          >
+            <Stack
+              wrap
+              axis="horizontal"
+              spacing="small"
+            >
               <Button.Root
                 {...partProps['Button.Root']}
                 variant="bordered"
@@ -130,7 +138,7 @@ export const GridDemo: FunctionComponent = () => {
                   {editing ? 'Done' : 'Edit'}
                 </Button.Label>
               </Button.Root>
-            </div>
+            </Stack>
             <Grid.Root
               key={defaultsKey(props, ...Object.values(partProps))}
               {...props}
@@ -164,7 +172,7 @@ export const GridDemo: FunctionComponent = () => {
                 </Grid.Section>
               ))}
             </Grid.Root>
-          </div>
+          </Stack>
           <Viewport.Padding
             {...partProps['Viewport.Padding']}
             edge="block-end"

@@ -21,8 +21,8 @@
     --uikit-button-radius: 1000px;
     --uikit-button-size: 34px;
     --uikit-button-icon-font-size: var(--font-ui-subheadline-size);
-    --uikit-button-font-weight: 400;
-    --uikit-button-icon-font-weight: 400;
+    --uikit-button-font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
+    --uikit-button-icon-font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     --uikit-button-icon-line-height: var(--font-ui-subheadline-line-height);
     --uikit-glass-outset: 0px;
 
@@ -42,8 +42,8 @@
     color: var(--uikit-button-color);
     font-family: inherit;
     font-size: var(--font-ui-subheadline-size);
-    font-variation-settings: 'wght' var(--uikit-button-font-weight);
-    font-weight: round(down, var(--uikit-button-font-weight), 100);
+    font-variation-settings: 'wght' calc(var(--uikit-button-font-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--uikit-button-font-weight) + var(--uikit-font-weight-boost, 0)), 100);
     gap: 4px;
     letter-spacing: var(--font-ui-subheadline-tracking);
     line-height: var(--font-ui-subheadline-line-height);
@@ -131,17 +131,17 @@
       --uikit-button-color: var(--uikit-glass-content);
       --uikit-button-color-disabled: var(--uikit-glass-content-disabled);
       --uikit-button-blend: var(--uikit-glass-content-blend);
-      --uikit-button-icon-font-size: 19px;
-      --uikit-button-font-weight: 510;
-      --uikit-button-icon-font-weight: 590;
-      --uikit-button-icon-line-height: 22px;
+      --uikit-button-icon-font-size: calc(var(--font-ui-body-size) * 19 / 17);
+      --uikit-button-font-weight: round(down, calc(510 + var(--uikit-font-weight-boost, 0)), 100);
+      --uikit-button-icon-font-weight: round(down, calc(590 + var(--uikit-font-weight-boost, 0)), 100);
+      --uikit-button-icon-line-height: var(--font-ui-body-line-height);
 
       padding: 6px 20px;
       font-feature-settings: 'ss16';
-      font-size: 17px;
+      font-size: var(--font-ui-body-size);
       gap: 4px;
       letter-spacing: 0;
-      line-height: 20px;
+      line-height: calc(var(--font-ui-body-line-height) - 2px);
 
       &::before {
         position: absolute;
@@ -296,8 +296,8 @@
     align-items: center;
     justify-content: center;
     font-size: var(--uikit-button-icon-font-size);
-    font-variation-settings: 'wght' var(--uikit-button-icon-font-weight);
-    font-weight: round(down, var(--uikit-button-icon-font-weight), 100);
+    font-variation-settings: 'wght' calc(var(--uikit-button-icon-font-weight) + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(var(--uikit-button-icon-font-weight) + var(--uikit-font-weight-boost, 0)), 100);
     line-height: var(--uikit-button-icon-line-height);
   }
 

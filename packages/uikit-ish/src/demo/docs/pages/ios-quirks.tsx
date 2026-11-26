@@ -13,6 +13,21 @@ import { PageShell } from './shell.js';
 // iOS's quirks that shape the library (each found on a device), why they
 // happen as far as we know, and what an app and the library do about them.
 
+const reducedMotionCode = `/* A provider's override (and its portals'), the nearest false within a
+   true winning; else the system's, inside a provider only. */
+:where([data-uikit-reduced-motion='true'])
+  .spinner:not(:where([data-uikit-reduced-motion='false']) *) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner:where([data-uikit-settings] *):not(
+      :where([data-uikit-reduced-motion='false']) *
+    ) {
+    animation: none;
+  }
+}`;
+
 const sections: readonly Section[] = [
   ['the-status-bar-blur', 'The status bar blur (iOS 27)'],
   ['moving-values-and-memory', 'Moving values and memory'],
@@ -21,6 +36,8 @@ const sections: readonly Section[] = [
   ['the-keyboard', 'The keyboard'],
   ['native-scrolling-and-touch', 'Native scrolling and touch'],
   ['layers-under-a-scroll', 'Layers changing under a scroll'],
+  ['style-queries-dont-apply', 'Style queries don’t apply'],
+  ['one-language-and-no-region', 'One language, and no region'],
   ['mouse-events-after-a-long-press', 'Mouse events after a touch'],
   ['pressed-buttons-and-focus', 'Pressed buttons don’t take focus (Safari)'],
   ['status-bar-taps', 'Status bar taps'],
@@ -906,6 +923,99 @@ export const IosQuirksPage: FunctionComponent = () => (
       </li>
     </ul>
     <CodeView code={fadeCode} />
+
+    <Heading
+      id="style-queries-dont-apply"
+      level={2}
+    >
+      Style queries don’t apply
+    </Heading>
+    <p>
+      On iOS, rules inside a style query on a custom property, such as{' '}
+      <code>@container style(--reduced-motion: 1)</code>, don’t take effect. The
+      property itself is there and has the right value, and script reads it
+      fine. Only the rules that depend on it are ignored. Chrome applies them,
+      so it only shows on the device.
+    </p>
+
+    <Heading
+      id="style-queries-what-you-see"
+      level={3}
+    >
+      What you see
+    </Heading>
+    <p>
+      With Reduce Motion turned on in a{' '}
+      <PartLink
+        component="settings"
+        part="Settings.Provider"
+      />
+      , sheets, action sheets, popovers and drawers kept sliding and zooming in,
+      though a style query turned their transitions off. Navigation and
+      expanding list rows did stop moving, because they read the setting in
+      script.
+    </p>
+
+    <Heading
+      id="style-queries-what-the-library-does"
+      level={3}
+    >
+      What the library does
+    </Heading>
+    <p>
+      The library’s stylesheets don’t use style queries at all. A provider that
+      overrides contrast, Reduce Motion or Reduce Transparency also marks its
+      element, and the portals opened inside it, with an attribute:{' '}
+      <code>data-uikit-contrast</code>, <code>data-uikit-reduced-motion</code>{' '}
+      or <code>data-uikit-reduced-transparency</code>. The stylesheets follow
+      those attributes, and the system’s settings by their own media queries.
+      That works on iOS.
+    </p>
+    <p>
+      An attribute can’t tell which provider is nearest the way an inherited
+      value can. So a provider that turns a setting off inside one that turns it
+      on wins, but one that turns it on again inside that doesn’t. Colors that
+      change with contrast don’t have this limit: they’re set again directly
+      inside every provider and inherited from there.
+    </p>
+
+    <Heading
+      id="style-queries-if-you-write-your-own"
+      level={3}
+    >
+      If you write your own
+    </Heading>
+    <p>
+      Don’t make a stylesheet depend on a style query. Use the attribute the
+      library sets, together with the media query, the same way the library’s
+      own stylesheets do:
+    </p>
+    <CodeView code={reducedMotionCode} />
+
+    <Heading
+      id="one-language-and-no-region"
+      level={2}
+    >
+      One language, and no region
+    </Heading>
+    <p>
+      Safari tells a page only the first of the user’s preferred languages (
+      <code>navigator.languages</code> holds just <code>en-US</code>, with
+      English and German set up), and nothing of their region: <code>Intl</code>
+      ’s defaults stay those of the language (a 12-hour clock, weeks starting on
+      Sunday, US dates and numbers), with the region set to Germany. The time
+      zone is the only hint at the region.
+    </p>
+    <p>
+      So the library guesses the region from the time zone (see{' '}
+      <PartLink
+        component="settings"
+        part="Settings.Provider"
+      />
+      ’s <code>region</code>), and an app that knows more (for example its own
+      language choice) gives its <code>languages</code> and <code>region</code>{' '}
+      itself.
+    </p>
 
     <Heading
       id="mouse-events-after-a-long-press"

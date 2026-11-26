@@ -10,6 +10,7 @@ import {
   List,
   Popover,
   Sheet,
+  Stack,
   Symbol,
   Toolbar,
   useSizeClass,
@@ -828,7 +829,11 @@ const AppHeldSavedColors: FunctionComponent = () => {
       state={[partState]}
       title="Color picker with app-held saved colors"
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24 }}>
+      <Stack
+        wrap
+        axis="horizontal"
+        spacing="xLarge"
+      >
         <ColorPicker.Root
           {...partProps['ColorPicker.Root']}
           defaultValue="#AF52DE"
@@ -873,7 +878,7 @@ const AppHeldSavedColors: FunctionComponent = () => {
             })}
           </ColorPicker.Panel>
         </ColorPicker.Root>
-      </div>
+      </Stack>
     </Component>
   );
 };

@@ -20,7 +20,12 @@ import {
   useState,
 } from 'react';
 
-import { cn, useForwardedRef, withStyle } from '../utils/main.js';
+import {
+  cn,
+  reducedMotionOf,
+  useForwardedRef,
+  withStyle,
+} from '../utils/main.js';
 import {
   useAnchorSize,
   useChildViewportScope,
@@ -200,9 +205,15 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       frameRef.current = undefined;
     };
 
-    // Animates the progress, then calls `done` (once it's there).
+    // Animates the progress, then calls `done` (once it's there). Motion
+    // reduced (see Settings): there at once, done.
     const animate = (from: number, to: number, done: () => void) => {
       stop();
+      if (ref.current && reducedMotionOf(ref.current).matches) {
+        setProgress(to, false);
+        done();
+        return;
+      }
       setProgress(from, false);
       ref.current?.getBoundingClientRect();
       frameRef.current = requestAnimationFrame(() => {
