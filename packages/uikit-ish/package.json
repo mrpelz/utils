@@ -21,12 +21,13 @@
     },
     "eslint": "10.12.0",
     "serialize-javascript": "7.1.2",
-    "stylelint": "17.16.0",
+    "stylelint": "18.1.0",
     "stylelint-order": "8.1.2"
   },
   "dependencies": {
     "@base-ui/react": "1.9.0",
     "colorjs.io": "0.7.1",
+    "webpack-cli": "7.3.1",
     "wheel-gestures": "2.3.0"
   },
   "devDependencies": {

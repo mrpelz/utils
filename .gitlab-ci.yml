@@ -3,7 +3,12 @@ include:
     ref: main
     file:
       - "/gitlab/.gitlab-ci.yml"
+      - "/gitlab/.dom.gitlab-ci.yml"
       - "/gitlab/.monorepo.gitlab-ci.yml"
+
+check_stylelint:
+  script:
+    - make -s -C "packages/uikit-ish" include_sub_packages="false" check_stylelint
 
 transform_prod:
   script:

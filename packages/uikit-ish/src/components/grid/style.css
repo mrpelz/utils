@@ -269,18 +269,18 @@
       var(--uikit-grid-room-width) var(--uikit-grid-room-height),
       100% 100%;
     pointer-events: none;
+  }
 
-    /* (Mirrored: its places from the right, each corner's image where
-       that corner is.) */
-    &:dir(rtl) {
-      mask-position:
-        right var(--uikit-grid-room-x-end) top var(--uikit-grid-room-y),
-        right var(--uikit-grid-room-x) top var(--uikit-grid-room-y),
-        right var(--uikit-grid-room-x-end) top var(--uikit-grid-room-y-end),
-        right var(--uikit-grid-room-x) top var(--uikit-grid-room-y-end),
-        right var(--uikit-grid-room-x) top var(--uikit-grid-room-y),
-        0 0;
-    }
+  /* (Mirrored: its places from the right, each corner's image where
+     that corner is.) */
+  .uikit-grid-root[data-editing] .uikit-grid-item[data-grid-room]:dir(rtl)::before {
+    mask-position:
+      right var(--uikit-grid-room-x-end) top var(--uikit-grid-room-y),
+      right var(--uikit-grid-room-x) top var(--uikit-grid-room-y),
+      right var(--uikit-grid-room-x-end) top var(--uikit-grid-room-y-end),
+      right var(--uikit-grid-room-x) top var(--uikit-grid-room-y-end),
+      right var(--uikit-grid-room-x) top var(--uikit-grid-room-y),
+      0 0;
   }
 
   /* Editing, an area bigger than its tile: its edge (as its hatching,

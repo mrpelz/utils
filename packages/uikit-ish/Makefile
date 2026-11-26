@@ -16,14 +16,18 @@ SSG_DIR := demo/__ssg__
 MITM_SLUG := $(shell echo "$(PKG_NAME)/$(GIT_BRANCH)" | sed -r -e 's#@##g' -e 's#/#-#g' 2>/dev/null)
 MITM_URL := https://$(MITM_SLUG).localhost
 
+WEBPACK := WEBPACK_CLI_FORCE_LOAD_ESM_CONFIG=true npm exec -- webpack-cli
+
 .PHONY: .PHONY \
 	check_browser \
 	transform_build_demo \
 	transform_build_demo_csr \
 	transform_build_demo_ssg \
 	transform_icons \
+	util_claude \
 	util_clear_demo \
 	util_mitmproxy \
+	util_mitmproxy_0 \
 	watch_dev_proxy \
 	watch_screens
 
@@ -65,6 +69,9 @@ transform_prod_demo: \
 	util_clear_demo \
 	transform_build_demo
 
+util_claude:
+	claude --resume 39433362-8325-4994-aad6-34aa81e3db0e --remote-control
+
 util_clear_demo:
 	rm -rf demo/{*,.*}
 
@@ -80,9 +87,6 @@ util_mitmproxy:
 
 util_mitmproxy_0:
 	mitmweb --no-web-open-browser --set block_global=false --set termlog_verbosity=warn --set web_password="$(MITM_SLUG)" --mode "reverse:http://localhost:3000@4443";
-
-util_claude:
-	claude --resume 39433362-8325-4994-aad6-34aa81e3db0e --remote-control
 
 watch_build:
 	tsc --project tsconfig.build.json --watch
