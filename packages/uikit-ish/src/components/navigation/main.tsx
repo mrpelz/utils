@@ -124,9 +124,20 @@ type SwipeHandlers = Pick<
  * set, animated, and done (at rest).
  */
 type StackContext = {
-  animate: (from: number, to: number, done: () => void) => void;
+  /**
+   * Animates its progress (see `Root`); `isReleased`, as a swipe's release
+   * (see `released`), animated with motion reduced too.
+   */
+  animate: (
+    from: number,
+    to: number,
+    done: () => void,
+    isReleased?: boolean,
+  ) => void;
   /** The progress now (also mid-transition), 0 at rest. */
   progress: () => number;
+  /** Whether a swipe's release is moving it (see `Root`), until at rest. */
+  released: () => boolean;
   rest: () => void;
   setKeys: (keys: string[]) => void;
   /** Whether its top page is instant (see `Page`): not swiped back. */
@@ -178,14 +189,25 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     >(undefined);
     // A swipe going on (its handlers kept, see `swipeHandlers`).
     const [isSwiping, setIsSwiping] = useState(false);
+    // A swipe's release moving it (on, or back), until at rest: the
+    // finger's motion finished as usual, motion reduced or not (see
+    // `animate`); a back button's, an app's, at once.
+    const releasedRef = useRef(false);
 
-    // The progress (and its transition), on the root.
+    // The progress (and its transition), on the root. Animated, over
+    // motion reduced's `transition: none` (see styles.css): only ever asked
+    // for as it should move (see `animate`: motion reduced, a swipe's
+    // release alone).
     const setProgress = (progress: number, isAnimated: boolean) => {
       const { current: root } = ref;
       if (!root) return;
-      root.style.transition = isAnimated
-        ? `--uikit-navigation-progress ${String(duration)}ms ${easing}`
-        : 'none';
+      root.style.setProperty(
+        'transition',
+        isAnimated
+          ? `--uikit-navigation-progress ${String(duration)}ms ${easing}`
+          : 'none',
+        isAnimated ? 'important' : '',
+      );
       root.style.setProperty('--uikit-navigation-progress', String(progress));
       // (Its width as a length: moved by it, persistent items stay put, see
       // `Persistent`.)
@@ -206,10 +228,17 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     };
 
     // Animates the progress, then calls `done` (once it's there). Motion
-    // reduced (see Settings): there at once, done.
-    const animate = (from: number, to: number, done: () => void) => {
+    // reduced (see Settings): there at once, done; but as a swipe's release
+    // (`isReleased`), what the finger moved finishing as usual.
+    const animate = (
+      from: number,
+      to: number,
+      done: () => void,
+      isReleased = false,
+    ) => {
       stop();
-      if (ref.current && reducedMotionOf(ref.current).matches) {
+      releasedRef.current = isReleased;
+      if (!isReleased && ref.current && reducedMotionOf(ref.current).matches) {
         setProgress(to, false);
         done();
         return;
@@ -236,6 +265,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
     };
 
     const rest = () => {
+      releasedRef.current = false;
       const { current: root } = ref;
       root?.style.removeProperty('transition');
       root?.style.removeProperty('--uikit-navigation-progress');
@@ -303,14 +333,19 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
       ) {
         // Popped: on, the app's pop taking over (see `changeKeys`, from
         // where it is); not popped by the app after all, back.
-        animate(swipe.progress, 1, () => {
-          if (top === undefined || !keysRef.current.includes(top)) return;
-          animate(1, shownAt(from), rest);
-        });
+        animate(
+          swipe.progress,
+          1,
+          () => {
+            if (top === undefined || !keysRef.current.includes(top)) return;
+            animate(1, shownAt(from), rest, true);
+          },
+          true,
+        );
         onBack?.({ event, reason: 'swipe' });
         return;
       }
-      animate(swipe.progress, shownAt(from), rest);
+      animate(swipe.progress, shownAt(from), rest, true);
     };
 
     const back =
@@ -370,6 +405,7 @@ const Root = forwardRef<HTMLDivElement, NavigationRootProps>(
           stack: {
             animate,
             progress: currentProgress,
+            released: () => releasedRef.current,
             rest,
             setKeys,
             setTopInstant,
@@ -410,7 +446,8 @@ const changeKeys = (
 
   if (isPrefix(keys, previous.keys)) {
     if (running?.top === oldTop) {
-      // Its push reversed (or its swipe popped), from where it is.
+      // Its push reversed (or its swipe popped), from where it is (a
+      // swipe's release going on, as one, see `Root`).
       stack.setTransition({
         departing: running.departing,
         from: running.from,
@@ -418,7 +455,7 @@ const changeKeys = (
         top: oldTop,
         under: newTop,
       });
-      stack.animate(stack.progress(), 1, stack.rest);
+      stack.animate(stack.progress(), 1, stack.rest, stack.released());
       return;
     }
     if (running && !keys.includes(running.top)) {

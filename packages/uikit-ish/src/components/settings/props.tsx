@@ -45,8 +45,9 @@ export type SettingsValues = {
   locale: string;
   /**
    * Motion reduced: everything that would animate changes at once (no
-   * slides, zooms or fades); what a finger drags still follows it (system:
-   * `prefers-reduced-motion: reduce`).
+   * slides, zooms or fades); what a finger drags still follows it, and a
+   * page swiped back (`Navigation`) finishes its slide as it's let go
+   * (system: `prefers-reduced-motion: reduce`).
    */
   reducedMotion: boolean;
   /**

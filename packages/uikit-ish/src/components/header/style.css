@@ -65,8 +65,14 @@
       calc(var(--font-ui-large-title-weight-emphasized) + var(--uikit-font-weight-boost, 0)),
       100
     );
+
+    /* Never past the screen's side (at the larger text sizes, one long
+       word wider than it): wrapped between words, else within one,
+       hyphenated in its language (`lang`, e.g. a settings provider's). */
+    hyphens: auto;
     letter-spacing: var(--font-ui-large-title-tracking);
     line-height: var(--font-ui-large-title-line-height);
+    overflow-wrap: break-word;
 
     & > [data-toolbar-part='subtitle'] {
       color: color-mix(

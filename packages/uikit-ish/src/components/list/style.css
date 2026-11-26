@@ -468,6 +468,7 @@
     font-style: normal;
     font-variation-settings: 'wght' calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0));
     font-weight: round(down, calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0)), 100);
+    hyphens: auto;
     letter-spacing: var(--font-ui-subheadline-tracking);
     line-height: var(--font-ui-subheadline-line-height);
     overflow-wrap: break-word;
@@ -485,6 +486,7 @@
     font-style: normal;
     font-variation-settings: 'wght' calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0));
     font-weight: round(down, calc(var(--font-ui-subheadline-weight) + var(--uikit-font-weight-boost, 0)), 100);
+    hyphens: auto;
     letter-spacing: var(--font-ui-subheadline-tracking);
     -webkit-line-clamp: var(--uikit-list-text-lines, 2);
     line-height: var(--font-ui-subheadline-line-height);
@@ -499,6 +501,7 @@
     font-size: var(--font-ui-subheadline-size);
     font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
     font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
+    hyphens: auto;
     letter-spacing: -0.45px;
     line-height: var(--font-ui-subheadline-line-height);
     overflow-wrap: break-word;
@@ -1004,6 +1007,7 @@
     font-style: normal;
     font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
     font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
+    hyphens: auto;
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
     overflow-wrap: break-word;
@@ -1198,6 +1202,7 @@
     font-style: normal;
     font-variation-settings: 'wght' calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0));
     font-weight: round(down, calc(var(--font-ui-body-weight) + var(--uikit-font-weight-boost, 0)), 100);
+    hyphens: auto;
     letter-spacing: var(--font-ui-body-tracking);
     line-height: var(--font-ui-body-line-height);
     overflow-wrap: break-word;

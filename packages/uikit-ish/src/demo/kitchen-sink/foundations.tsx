@@ -87,7 +87,7 @@ const choices: readonly Choice[] = [
   },
   {
     key: 'reducedMotion',
-    note: 'Everything that would animate changes at once. What you drag with your finger still follows it.',
+    note: 'Everything that would animate changes at once. What you drag with your finger still follows it, and a page you swipe back finishes its slide when you let go.',
     options: onOff,
     title: 'Reduce Motion',
   },

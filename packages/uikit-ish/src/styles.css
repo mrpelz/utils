@@ -630,7 +630,8 @@
 
   /* Motion reduced (see Settings): no transitions anywhere, everything
      changing at once (scripts' animations and scrolls too, see
-     `reducedMotionOf`); what a finger drags still follows it. Overridden
+     `reducedMotionOf`); what a finger drags still follows it (a page
+     swiped back finishing its slide as it's let go, see Navigation). Overridden
      by a provider: by the attribute it sets (and its portals), the
      nearest `false` within a `true` winning (a `true` again within that,
      not); else the system's, by its media query, within a provider only

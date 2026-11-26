@@ -64,7 +64,7 @@ const rows: readonly (readonly [
       )}{' '}
       in script
     </>,
-    'Everything that would animate changes at once: pushes and pops, rows opening, sheets, tiles moving, month pages, scrolls started in script. What a finger drags still follows it.',
+    'Everything that would animate changes at once: pushes and pops, rows opening, sheets, tiles moving, month pages, scrolls started in script. What a finger drags still follows it, and a page swiped back finishes its slide when let go.',
   ],
   [
     'reducedTransparency',

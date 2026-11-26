@@ -104,7 +104,9 @@ const settingRows: readonly PropRow[] = [
       Reduces motion: everything that would animate changes at once. Pages,
       sheets, drawers, menus and alerts appear and go without moving or fading,
       and scrolls a component starts jump. What you drag with your finger still
-      follows it.
+      follows it, and a page you swipe back in a{' '}
+      <a href={publicUrl('navigation')}>Navigation</a> finishes its slide when
+      you let go.
     </>,
   ],
   [

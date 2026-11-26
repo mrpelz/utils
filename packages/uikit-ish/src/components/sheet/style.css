@@ -256,6 +256,42 @@
       }
     }
 
+    /* Not snapping: a scroller all the same, by a pixel across its swipe
+       (sideways; swiped sideways, up and down), as Base UI only gates a
+       swipe by what scrolls along it. iOS's WebKit draws a backdrop filter
+       moved by a transform (opening, closing: the glass of the buttons on
+       it) from a stale backdrop (darker, its rim weaker) unless it's in a
+       scroller that scrolls (by touch: `overflow: hidden` isn't one). Never
+       bounced, its bars hidden. (Snapping, it's one anyway: see below.) */
+    &:not([data-snap]) {
+      overflow: auto hidden;
+      overscroll-behavior: none;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+
+      &::after {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        content: '';
+        inset-block-start: 0;
+        inset-inline-start: 100%;
+        pointer-events: none;
+      }
+
+      &:is([data-swipe-direction='left'], [data-swipe-direction='right']) {
+        overflow: hidden auto;
+
+        &::after {
+          inset-block-start: 100%;
+          inset-inline-start: 0;
+        }
+      }
+    }
+
     /* Snapping by its groups (see snap.ts): a scroller (its bars hidden)
        snapping to its stops' markers, from the bottom: a medium one's up to
        the screen but 64px (as high as it may be), its look its panel's
