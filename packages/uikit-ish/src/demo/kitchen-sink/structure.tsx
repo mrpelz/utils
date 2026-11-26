@@ -1,6 +1,6 @@
 import '../docs/page-control/style.css';
 
-import { FunctionComponent, ReactNode, useRef, useState } from 'react';
+import { FunctionComponent, ReactNode, useState } from 'react';
 
 import {
   Accordion,
@@ -14,6 +14,7 @@ import {
   List,
   Page,
   PageControl,
+  Pager,
   Segmented,
   Sidebar,
   Stack,
@@ -37,10 +38,14 @@ import {
   sfForwardFill,
   sfGearshapeFill,
   sfHeartFill,
+  sfLocationFill,
   sfMagnifyingglass,
+  sfMap,
+  sfMinus,
   sfPersonFill,
   sfPhoto,
   sfPlayFill,
+  sfPlus,
   sfSquareAndArrowUp,
   sfSquareAndPencil,
   sfTrash,
@@ -58,7 +63,7 @@ import {
   usePush,
 } from './shared.js';
 
-// Structure & Navigation: Toolbar, Tab Bar, Page Control, Collapsible,
+// Structure & Navigation: Toolbar, Tab Bar, Page Control, Pager, Collapsible,
 // Accordion, Drawer, Layout, Sidebar, Navigation, Page, Header, Viewport.
 
 /** A toolbar's symbol button. */
@@ -135,12 +140,103 @@ const ToolbarApp: FunctionComponent = () => (
   </>
 );
 
+/**
+ * A vertical toolbar (a page of its own: see `isBare`): a map's controls
+ * in a column at the trailing edge, over the map (a page filled by it,
+ * not scrolling), back at its top.
+ */
+const ToolbarVerticalApp: FunctionComponent = () => (
+  <>
+    <Page.Root fill>
+      <div
+        aria-hidden="true"
+        className="demo-picture"
+      />
+    </Page.Root>
+    <Viewport.Anchor edge="inline-end">
+      <Toolbar.Root orientation="vertical">
+        <Toolbar.Leading>
+          <BackButton />
+          <Toolbar.Group>
+            {iconButton('Map', sfMap)}
+            {iconButton('Location', sfLocationFill)}
+          </Toolbar.Group>
+        </Toolbar.Leading>
+        <Toolbar.Trailing>
+          <Toolbar.Group>
+            {iconButton('Zoom In', sfPlus)}
+            {iconButton('Zoom Out', sfMinus)}
+          </Toolbar.Group>
+        </Toolbar.Trailing>
+      </Toolbar.Root>
+    </Viewport.Anchor>
+  </>
+);
+
+/**
+ * Capsules hanging from a bar (a page of its own: see `isBare`): places
+ * scrolling under a top bar, its controls in a stack below its trailing
+ * side, the bar keeping its height (the capsules over the rows).
+ */
+const ToolbarHangingApp: FunctionComponent = () => (
+  <Page.Root>
+    <Header.Root>
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Leading>
+            <BackButton />
+          </Toolbar.Leading>
+          <Toolbar.Title>
+            <span>Places</span>
+          </Toolbar.Title>
+          <Toolbar.Trailing>
+            {iconButton('Search', sfMagnifyingglass)}
+            <Toolbar.Stack>
+              <Toolbar.Group>
+                {iconButton('Map', sfMap)}
+                {iconButton('Location', sfLocationFill)}
+              </Toolbar.Group>
+              <Toolbar.Group>
+                {iconButton('Zoom In', sfPlus)}
+                {iconButton('Zoom Out', sfMinus)}
+              </Toolbar.Group>
+            </Toolbar.Stack>
+          </Toolbar.Trailing>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+      <Viewport.Padding edge="block-start" />
+    </Header.Root>
+    <List.Root>
+      <List.Section>
+        <List.Group>
+          {Array.from({ length: 30 }, (_, index) => (
+            <Row
+              key={index}
+              subtitle="Scrolling under the bar and its capsules"
+              title={`Place ${String(index + 1)}`}
+            />
+          ))}
+        </List.Group>
+      </List.Section>
+    </List.Root>
+    <Viewport.Padding edge="block-end" />
+  </Page.Root>
+);
+
 const ToolbarContent: FunctionComponent = () => (
   <List.Root>
     <Rows>
       <DrillRow
         pageKey="toolbar/app"
         title="In an App (Anchored, at the Top and the Bottom)"
+      />
+      <DrillRow
+        pageKey="toolbar/vertical"
+        title="Vertical (Anchored at the Side)"
+      />
+      <DrillRow
+        pageKey="toolbar/hanging"
+        title="Capsules Hanging from the Bar"
       />
     </Rows>
     <Showcase
@@ -675,38 +771,31 @@ const TabBarApp: FunctionComponent = () => {
 
 /**
  * A page control in its usual place (a page of its own: see `isBare`):
- * swipeable pages filling the screen (snapping natively), the control in
- * the toolbar at the bottom, following the swipe and moving it (as the
- * docs' paged content).
+ * swipeable pages filling the screen (a `Pager`), the control in the
+ * toolbar at the bottom, following the swipe and moving it.
  */
 const PageControlApp: FunctionComponent = () => {
   const [page, setPage] = useState(0);
-  const pagesRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
       <Page.Root fill>
-        <div
-          ref={pagesRef}
+        <Pager.Root
+          aria-label="Onboarding"
           className="page-control-demo-pages kitchen-sink-pages"
-          onScroll={({ currentTarget }) =>
-            setPage(
-              Math.round(
-                Math.abs(currentTarget.scrollLeft) / currentTarget.clientWidth,
-              ),
-            )
-          }
+          value={page}
+          onValueChange={(next: number) => setPage(next)}
         >
           {steps.map(([title, text]) => (
-            <section
+            <Pager.Page
               key={title}
               className="page-control-demo-page"
             >
               <h3>{title}</h3>
               <p>{text}</p>
-            </section>
+            </Pager.Page>
           ))}
-        </div>
+        </Pager.Root>
       </Page.Root>
       <Viewport.BlockStart>
         <Toolbar.Root placement="block-start">
@@ -725,18 +814,113 @@ const PageControlApp: FunctionComponent = () => {
             aria-label="Onboarding"
             count={steps.length}
             value={page}
-            onValueChange={(next: number) =>
-              pagesRef.current?.children[next]?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest',
-                inline: 'start',
-              })
-            }
+            onValueChange={(next: number) => setPage(next)}
           />
           <Toolbar.Spacer />
         </Toolbar.Root>
       </Viewport.BlockEnd>
     </>
+  );
+};
+
+/**
+ * A vertical pager (a page of its own: see `isBare`): stories filling the
+ * screen, swiped up and down, a column of dots at the trailing edge.
+ */
+const PagerVerticalApp: FunctionComponent = () => {
+  const [page, setPage] = useState(0);
+
+  return (
+    <>
+      <Page.Root fill>
+        <Pager.Root
+          aria-label="Stories"
+          className="page-control-demo-pages kitchen-sink-pages"
+          orientation="vertical"
+          value={page}
+          onValueChange={(next: number) => setPage(next)}
+        >
+          {steps.map(([title, text]) => (
+            <Pager.Page
+              key={title}
+              className="page-control-demo-page"
+            >
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </Pager.Page>
+          ))}
+        </Pager.Root>
+      </Page.Root>
+      <Viewport.Anchor edge="inline-end">
+        <Toolbar.Root orientation="vertical">
+          <Toolbar.Spacer />
+          <PageControl
+            aria-label="Stories"
+            count={steps.length}
+            orientation="vertical"
+            value={page}
+            onValueChange={(next: number) => setPage(next)}
+          />
+        </Toolbar.Root>
+      </Viewport.Anchor>
+      <Viewport.BlockStart>
+        <Toolbar.Root placement="block-start">
+          <Toolbar.Leading>
+            <BackButton />
+          </Toolbar.Leading>
+          <Toolbar.Title>
+            <span>Stories</span>
+          </Toolbar.Title>
+        </Toolbar.Root>
+      </Viewport.BlockStart>
+    </>
+  );
+};
+
+const PagerContent: FunctionComponent = () => {
+  const [page, setPage] = useState(0);
+
+  return (
+    <List.Root>
+      <Rows>
+        <DrillRow
+          pageKey="page-control/app"
+          title="Horizontal (Filling the Screen)"
+        />
+        <DrillRow
+          pageKey="pager/vertical"
+          title="Vertical (Filling the Screen)"
+        />
+      </Rows>
+      <Showcase
+        isStacked
+        title={`Inside a Page: Page ${String(page + 1)}`}
+      >
+        <Pager.Root
+          aria-label="Onboarding"
+          className="page-control-demo-pages kitchen-sink-inline-pager"
+          value={page}
+          onValueChange={(next: number) => setPage(next)}
+        >
+          {steps.map(([title, text]) => (
+            <Pager.Page
+              key={title}
+              className="page-control-demo-page"
+            >
+              <h3>{title}</h3>
+              <p>{text}</p>
+            </Pager.Page>
+          ))}
+        </Pager.Root>
+        <PageControl
+          aria-label="Onboarding"
+          count={steps.length}
+          value={page}
+          variant="plain"
+          onValueChange={(next: number) => setPage(next)}
+        />
+      </Showcase>
+    </List.Root>
   );
 };
 
@@ -1615,6 +1799,12 @@ export const structurePages: SinkPages = {
   },
   page: { Content: PageContent, title: 'Page' },
   'page-control': { Content: PageControlContent, title: 'Page Control' },
+  pager: { Content: PagerContent, title: 'Pager' },
+  'pager/vertical': {
+    Content: PagerVerticalApp,
+    isBare: true,
+    title: 'Vertical',
+  },
   'page/grouped': backgroundPage('grouped', 'Grouped'),
   'page/plain': backgroundPage('plain', 'Plain'),
   sidebar: { Content: SidebarContent, title: 'Sidebar' },
@@ -1627,4 +1817,14 @@ export const structurePages: SinkPages = {
     title: 'In an App',
   },
   toolbar: { Content: ToolbarContent, title: 'Toolbar' },
+  'toolbar/hanging': {
+    Content: ToolbarHangingApp,
+    isBare: true,
+    title: 'Hanging',
+  },
+  'toolbar/vertical': {
+    Content: ToolbarVerticalApp,
+    isBare: true,
+    title: 'Vertical',
+  },
 };

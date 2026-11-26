@@ -132,6 +132,11 @@ export const propOptionsSpacer = {
   style: commonPropOptions.style,
 };
 
+export const propOptionsStack = {
+  ...commonPropOptions,
+  orientation: [undefined, 'vertical', 'horizontal'] as const,
+};
+
 export const propOptionsTitle = {
   ...commonPropOptions,
   alignStart: [undefined, false, true] as const,

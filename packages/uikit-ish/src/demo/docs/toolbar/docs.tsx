@@ -81,7 +81,16 @@ export const toolbarRootRows: readonly PropRow[] = [
     'orientation',
     union('horizontal', 'vertical'),
     code(union('horizontal')),
-    'The orientation of the toolbar. It sets the arrow keys; the bar is laid out in a row either way.',
+    <>
+      The orientation of the toolbar: a row, or a column (for example in a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Anchor"
+      />{' '}
+      at a side), its capsules a bottom bar’s, standing up, filling its
+      container’s height. It also sets the arrow keys. A title doesn’t belong in
+      a column.
+    </>,
   ],
   ...baseUiRows('div', 'HTMLDivElement'),
 ];
@@ -104,6 +113,41 @@ export const toolbarSpacerRows: readonly PropRow[] = elementRows(
   'div',
   'HTMLDivElement',
 );
+
+export const toolbarStackRows: readonly PropRow[] = [
+  [
+    'orientation',
+    union('horizontal', 'vertical'),
+    'across its bar’s',
+    <>
+      Its capsules’ direction. Across its bar (the default: a column in a row, a
+      row in a column), it hangs out of the bar: its first capsule in the bar’s
+      line, the others beyond it on the open side (down from a top bar, up from
+      a bottom bar, into the screen from a side), without changing the bar’s
+      size. Its capsules turn with it. Along its bar, it’s a plain row (or
+      column) of capsules.
+    </>,
+  ],
+  [
+    'children',
+    'ReactNode',
+    undefined,
+    <>
+      Its capsules:{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Group"
+      />
+      s or single{' '}
+      <PartLink
+        component="toolbar"
+        part="Toolbar.Button"
+      />
+      s, the bar’s gap apart.
+    </>,
+  ],
+  ...renderRows('div', 'HTMLDivElement'),
+];
 
 export const toolbarGroupRows: readonly PropRow[] = [
   [

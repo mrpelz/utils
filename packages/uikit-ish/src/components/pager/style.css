@@ -1,0 +1,42 @@
+/* Pager (see main.tsx). */
+@layer uikit-ish {
+  /* A strip of pages, as wide as its container (as high, vertical: it
+     needs a height), scrolling along its axis, snapping a page at a time;
+     its scrolls kept to itself (not chained to a page's), its bars hidden. */
+  .uikit-pager-root {
+    display: flex;
+    overflow: auto hidden;
+    min-width: 0;
+    box-sizing: border-box;
+    inline-size: 100%;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    &[data-orientation='vertical'] {
+      overflow: hidden auto;
+      flex-direction: column;
+      block-size: 100%;
+      overscroll-behavior: auto contain;
+      scroll-snap-type: y mandatory;
+    }
+  }
+
+  /* A page: as large as its pager, snapping at its start, one a fling. */
+  .uikit-pager-page {
+    min-width: 0;
+    box-sizing: border-box;
+    flex: none;
+    inline-size: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+
+    :where(.uikit-pager-root[data-orientation='vertical']) > & {
+      block-size: 100%;
+    }
+  }
+}

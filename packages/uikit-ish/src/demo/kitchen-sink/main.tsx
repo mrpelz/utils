@@ -98,12 +98,14 @@ const sections = (Object.keys(categories) as Category[])
   .filter(([, entries]) => entries.length > 0);
 
 //  set first route in hash to ease testing
-const hashId =
+const hashIds =
   typeof window === 'undefined' || location.hash.length <= 1
     ? undefined
-    : location.hash.slice(1);
+    : location.hash.slice(1).split(',');
 
-const firstId = hashId ?? sections[0]?.[1][0]?.id ?? '';
+const firstSection = sections[0]?.[1][0]?.id;
+
+const initialStack = hashIds ?? (firstSection ? [firstSection] : []);
 
 /**
  * Whether it runs as an app of its own (added to the Home Screen, or
@@ -373,7 +375,7 @@ const App: FunctionComponent = () => {
   );
   // The open component's stack, bottom to top (compact, empty: the index).
   const [stack, setStack] = useState<readonly string[]>(
-    hashId ? [firstId] : [],
+    hashIds ? initialStack : [],
   );
   // (Regular: its layout's root, for the swipe area at the screen's edge.)
   const [layoutRoot, setLayoutRoot] = useState<HTMLDivElement | null>(null);
@@ -383,8 +385,19 @@ const App: FunctionComponent = () => {
     () => [isSidebarOpen, setIsSidebarOpen] as const,
     [isSidebarOpen],
   );
+
   // (Regular: a component always open, the first at first.)
-  const shown = isCompact || stack.length > 0 ? stack : [firstId];
+  const shown = useMemo(
+    () => (isCompact || stack.length > 0 ? stack : initialStack),
+    [isCompact, stack],
+  );
+
+  useEffect(() => {
+    const url = new URL(location.href);
+    url.hash = shown.join(',');
+
+    history.replaceState(undefined, '', url);
+  }, [shown]);
 
   const open = (id: string) => setStack([id]);
   const push = (key: string) => setStack([...shown, key]);

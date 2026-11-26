@@ -2,12 +2,11 @@ import './style.css';
 
 import { FunctionComponent, useMemo, useState } from 'react';
 
-import { PageControl, Stack } from '../../../components/index.js';
+import { PageControl, Pager, Stack } from '../../../components/index.js';
 import { CodeView } from '../../tooling/frame/code-view.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
 import { usePartControls } from '../../tooling/frame/prop-control.js';
-import { useLabelledRef } from '../../tooling/frame/render-code.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import {
   Contents,
@@ -43,35 +42,18 @@ const pagedCode = `const steps = [
   …
 ];
 const [page, setPage] = useState(0);
-const pagesRef = useRef<HTMLDivElement>(null);
 
-<div
-  ref={pagesRef}
-  className="pages" // scroll-snap, a page per width
-  onScroll={({ currentTarget }) =>
-    setPage(
-      Math.round(
-        Math.abs(currentTarget.scrollLeft) / currentTarget.clientWidth,
-      ),
-    )
-  }
->
+<Pager.Root aria-label="Onboarding" value={page} onValueChange={setPage}>
   {steps.map(([title, text]) => (
-    <section key={title}>…</section>
+    <Pager.Page key={title}>…</Pager.Page>
   ))}
-</div>
+</Pager.Root>
 <PageControl
   aria-label="Onboarding"
   count={steps.length}
   value={page}
   variant="plain"
-  onValueChange={(next) =>
-    pagesRef.current?.children[next]?.scrollIntoView({
-      behavior: 'smooth',
-      block: 'nearest',
-      inline: 'start',
-    })
-  }
+  onValueChange={setPage}
 />`;
 
 const tooltipCode = `<PageControl
@@ -95,7 +77,6 @@ const OverPagedContent: FunctionComponent = () => {
   const id = 'page-control-composition-paged';
   const [log, addLog] = useLog();
   const [page, setPage] = useState(0);
-  const pagesRef = useLabelledRef<HTMLDivElement>('pagesRef', 'HTMLDivElement');
 
   const [partControls, partProps, partState] = usePartControls(
     useMemo(
@@ -109,6 +90,8 @@ const OverPagedContent: FunctionComponent = () => {
               'value',
               'variant',
             ],
+            'Pager.Page': [],
+            'Pager.Root': ['aria-label', 'onValueChange', 'value'],
           },
           addLog,
         ),
@@ -132,27 +115,24 @@ const OverPagedContent: FunctionComponent = () => {
         className="page-control-demo-paged"
         spacing="medium"
       >
-        <div
-          ref={pagesRef}
+        <Pager.Root
+          {...partProps['Pager.Root']}
+          aria-label="Onboarding"
           className="page-control-demo-pages"
-          onScroll={({ currentTarget }) =>
-            setPage(
-              Math.round(
-                Math.abs(currentTarget.scrollLeft) / currentTarget.clientWidth,
-              ),
-            )
-          }
+          value={page}
+          onValueChange={(next: number) => setPage(next)}
         >
           {steps.map(([title, text]) => (
-            <section
+            <Pager.Page
               key={title}
+              {...partProps['Pager.Page']}
               className="page-control-demo-page"
             >
               <h3>{title}</h3>
               <p>{text}</p>
-            </section>
+            </Pager.Page>
           ))}
-        </div>
+        </Pager.Root>
         <PageControl
           {...partProps.PageControl}
           aria-label="Onboarding"
@@ -161,11 +141,7 @@ const OverPagedContent: FunctionComponent = () => {
           variant="plain"
           onValueChange={(next: number, { reason }) => {
             addLog(`page: ${String(next)} (${reason})`);
-            pagesRef.current?.children[next]?.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'start',
-            });
+            setPage(next);
           }}
         />
       </Stack>
@@ -270,11 +246,12 @@ export const PageControlComposition: FunctionComponent = () => (
     <ul>
       <li>
         Its plain variant sits below pages that swipe, such as onboarding
-        screens: a scroller that snaps one page per width.
+        screens, in a <a href={publicUrl('pager')}>Pager</a>.
       </li>
       <li>
-        The scroller sets the page (<code>onScroll</code>). The dots scroll to
-        their page (<code>onValueChange</code>) after a press, a drag or a key.
+        Both share one page (<code>value</code>, <code>onValueChange</code>):
+        the dots follow the swipe, and the pager scrolls to the page the dots
+        pick after a press, a drag or a key.
       </li>
       <li>
         The pages swipe on their own, because the dots are a small target.
@@ -285,11 +262,17 @@ export const PageControlComposition: FunctionComponent = () => (
           component="page-control"
           part="PageControl"
         />
-        ), which can be pressed, dragged or keyed (<code>onValueChange</code>).
+        ), which can be pressed, dragged or keyed (<code>onValueChange</code>),
+        and the pages that snap (
+        <PartLink
+          component="pager"
+          part="Pager.Root"
+        />
+        ).
       </li>
       <li>
-        <strong>Demo:</strong> the page (the app’s state), the snapping scroller
-        that sets it, and scrolling to the page the dots pick.
+        <strong>Demo:</strong> the page (the app’s state), and the frame around
+        the pages.
       </li>
     </ul>
     <CodeView code={pagedCode} />

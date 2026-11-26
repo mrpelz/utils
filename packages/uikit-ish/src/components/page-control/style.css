@@ -51,6 +51,16 @@
     &[data-current] > span {
       background-color: var(--uikit-glass-content);
     }
+
+    /* Vertical (see the root): shrinking along its column. */
+    :where(.uikit-page-control-root[data-orientation='vertical']) > & {
+      transition: height 200ms;
+
+      &[data-size='4'] {
+        width: 8px;
+        height: 6px;
+      }
+    }
   }
 
   .uikit-page-control-root {
@@ -110,6 +120,32 @@
       & > [data-page-control-part='tooltip'] {
         opacity: 1;
         scale: 1;
+      }
+    }
+
+    /* Vertical (`orientation`): its dots in a column, 48px wide (plain:
+       24px), 24px from its ends (plain: 12px); dragged up and down (the
+       page scrolls sideways); its tooltip 8px before it (at its leading
+       side). */
+    &[data-orientation='vertical'] {
+      min-width: 48px;
+      min-height: 0;
+      flex-direction: column;
+      padding: 24px 0;
+      touch-action: pan-x;
+      vertical-align: top;
+
+      &[data-variant='plain'] {
+        min-width: 24px;
+        padding: 12px 0;
+      }
+
+      & > [data-page-control-part='tooltip'] {
+        top: 50%;
+        bottom: auto;
+        left: auto;
+        inset-inline-end: calc(100% + 8px);
+        translate: 0 -50%;
       }
     }
   }

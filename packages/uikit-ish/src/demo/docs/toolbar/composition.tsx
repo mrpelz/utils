@@ -29,8 +29,11 @@ import {
   sfEllipsis,
   sfFolder,
   sfListBullet,
+  sfLocationFill,
   sfMagnifyingglass,
   sfMap,
+  sfMinus,
+  sfPlus,
   sfSquareAndArrowUp,
   sfSquareAndPencil,
   sfTrash,
@@ -737,12 +740,236 @@ const Pages: FunctionComponent = () => {
   );
 };
 
+const verticalCode = `<Viewport.Content>
+  <Page.Root fill>…{/* the map */}</Page.Root>
+</Viewport.Content>
+<Viewport.Anchor edge="inline-end">
+  <Toolbar.Root orientation="vertical">
+    <Toolbar.Leading>
+      <Toolbar.Group>
+        <Toolbar.Button aria-label="Map" shape="circle">…</Toolbar.Button>
+        <Toolbar.Button aria-label="Location" shape="circle">…</Toolbar.Button>
+      </Toolbar.Group>
+    </Toolbar.Leading>
+    <Toolbar.Trailing>
+      <Toolbar.Group>
+        <Toolbar.Button aria-label="Zoom In" shape="circle">…</Toolbar.Button>
+        <Toolbar.Button aria-label="Zoom Out" shape="circle">…</Toolbar.Button>
+      </Toolbar.Group>
+    </Toolbar.Trailing>
+  </Toolbar.Root>
+</Viewport.Anchor>`;
+
+/** A map's controls, in a vertical bar at the trailing edge. */
+const Vertical: FunctionComponent = () => {
+  const id = 'toolbar-composition-vertical';
+  const [log, addLog] = useLog();
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Group': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': ['orientation'],
+            'Toolbar.Trailing': [],
+            'Viewport.Anchor': ['edge'],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  const button = (label: string, icon: typeof sfMap) => (
+    <Toolbar.Button
+      key={label}
+      {...partProps['Toolbar.Button']}
+      aria-label={label}
+      shape="circle"
+      onClick={() => addLog(`${label} clicked`)}
+    >
+      <Button.Icon {...partProps['Button.Icon']}>
+        <Symbol
+          {...partProps.Symbol}
+          icon={icon}
+        />
+      </Button.Icon>
+    </Toolbar.Button>
+  );
+
+  return (
+    <Component
+      isInline
+      controls={[partControls]}
+      id={id}
+      log={log}
+      stage="phone"
+      state={[partState]}
+      title="Vertical toolbar"
+    >
+      <>
+        <Viewport.Content>
+          <Page.Root fill>
+            <div
+              aria-hidden="true"
+              className="demo-picture"
+            />
+          </Page.Root>
+        </Viewport.Content>
+        <Viewport.Anchor
+          {...partProps['Viewport.Anchor']}
+          edge="inline-end"
+        >
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            orientation="vertical"
+          >
+            <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+              <Toolbar.Group {...partProps['Toolbar.Group']}>
+                {button('Map', sfMap)}
+                {button('Location', sfLocationFill)}
+              </Toolbar.Group>
+            </Toolbar.Leading>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+              <Toolbar.Group {...partProps['Toolbar.Group']}>
+                {button('Zoom In', sfPlus)}
+                {button('Zoom Out', sfMinus)}
+              </Toolbar.Group>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.Anchor>
+      </>
+    </Component>
+  );
+};
+
+const hangingCode = `<Viewport.BlockEnd>
+  <Toolbar.Root>
+    <Toolbar.Leading>
+      <Toolbar.Group>…{/* places, search */}</Toolbar.Group>
+    </Toolbar.Leading>
+    <Toolbar.Title>
+      <span>San Francisco</span>
+    </Toolbar.Title>
+    <Toolbar.Trailing>
+      <Toolbar.Button aria-label="Share" shape="circle">…</Toolbar.Button>
+      <Toolbar.Stack>
+        <Toolbar.Group>…{/* zoom */}</Toolbar.Group>
+        <Toolbar.Group>…{/* map, location */}</Toolbar.Group>
+      </Toolbar.Stack>
+    </Toolbar.Trailing>
+  </Toolbar.Root>
+</Viewport.BlockEnd>`;
+
+/** A map's bottom bar, its controls in capsules hanging up from it. */
+const Hanging: FunctionComponent = () => {
+  const id = 'toolbar-composition-hanging';
+  const [log, addLog] = useLog();
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps(
+          {
+            Symbol: ['icon'],
+            'Button.Icon': [],
+            'Toolbar.Button': ['aria-label', 'onClick', 'shape'],
+            'Toolbar.Group': [],
+            'Toolbar.Leading': [],
+            'Toolbar.Root': [],
+            'Toolbar.Stack': [],
+            'Toolbar.Title': [],
+            'Toolbar.Trailing': [],
+            'Viewport.BlockEnd': [],
+          },
+          addLog,
+        ),
+      [addLog],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  const button = (label: string, icon: typeof sfMap) => (
+    <Toolbar.Button
+      key={label}
+      {...partProps['Toolbar.Button']}
+      aria-label={label}
+      shape="circle"
+      onClick={() => addLog(`${label} clicked`)}
+    >
+      <Button.Icon {...partProps['Button.Icon']}>
+        <Symbol
+          {...partProps.Symbol}
+          icon={icon}
+        />
+      </Button.Icon>
+    </Toolbar.Button>
+  );
+
+  return (
+    <Component
+      isInline
+      controls={[partControls]}
+      id={id}
+      log={log}
+      stage="phone"
+      state={[partState]}
+      title="Capsules hanging from the bar"
+    >
+      <>
+        <Viewport.Content>
+          <Page.Root fill>
+            <div
+              aria-hidden="true"
+              className="demo-picture"
+            />
+          </Page.Root>
+        </Viewport.Content>
+        <Viewport.BlockEnd {...partProps['Viewport.BlockEnd']}>
+          <Toolbar.Root {...partProps['Toolbar.Root']}>
+            <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+              <Toolbar.Group {...partProps['Toolbar.Group']}>
+                {button('Places', sfListBullet)}
+                {button('Search', sfMagnifyingglass)}
+              </Toolbar.Group>
+            </Toolbar.Leading>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
+              <span>San Francisco</span>
+            </Toolbar.Title>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+              {button('Share', sfSquareAndArrowUp)}
+              <Toolbar.Stack {...partProps['Toolbar.Stack']}>
+                <Toolbar.Group {...partProps['Toolbar.Group']}>
+                  {button('Zoom In', sfPlus)}
+                  {button('Zoom Out', sfMinus)}
+                </Toolbar.Group>
+                <Toolbar.Group {...partProps['Toolbar.Group']}>
+                  {button('Map', sfMap)}
+                  {button('Location', sfLocationFill)}
+                </Toolbar.Group>
+              </Toolbar.Stack>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockEnd>
+      </>
+    </Component>
+  );
+};
+
 /** The page's sections (its headings' ids), listed at its top. */
 const sections: readonly Section[] = [
   ['a-navigation-bar', 'A navigation bar'],
   ['edit-mode', 'Edit mode'],
   ['a-search-field', 'A search field'],
   ['controls-between-the-capsules', 'Controls between the capsules'],
+  ['vertical', 'Vertical'],
+  ['capsules-hanging-from-the-bar', 'Capsules hanging from the bar'],
 ];
 
 /** `/toolbar/composition`: toolbars with pages, lists, fields, controls. */
@@ -965,8 +1192,100 @@ export const ToolbarComposition: FunctionComponent = () => (
     </ul>
     <CodeView code={pagesCode} />
     <Pages />
+
+    <Heading
+      id="vertical"
+      level={2}
+    >
+      Vertical
+    </Heading>
+    <ul>
+      <li>
+        A column of controls at a side of the screen, such as a map’s: its
+        layers and your location at the top, zooming at the bottom.
+      </li>
+      <li>
+        It sits in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />{' '}
+        at the side (<code>edge=&quot;inline-end&quot;</code>), clear of the
+        safe area, and fills its height: its leading side at the top, its
+        trailing side at the bottom.
+      </li>
+      <li>
+        Its capsules are a bottom bar’s, standing up. A title doesn’t belong in
+        it, because a title is a line of text.
+      </li>
+      <li>
+        For a column of page dots beside a vertical{' '}
+        <a href={publicUrl('pager')}>Pager</a>, see{' '}
+        <a href={publicUrl('pager/composition#vertical')}>its vertical demo</a>.
+      </li>
+      <li>
+        <strong>Library:</strong> the vertical bar (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Root"
+        />{' '}
+        with <code>orientation=&quot;vertical&quot;</code>), its capsules, and
+        the anchor.
+      </li>
+      <li>
+        <strong>Demo:</strong> the map (a picture behind it).
+      </li>
+    </ul>
+    <CodeView code={verticalCode} />
+    <Vertical />
+
+    <Heading
+      id="capsules-hanging-from-the-bar"
+      level={2}
+    >
+      Capsules hanging from the bar
+    </Heading>
+    <ul>
+      <li>
+        A column of capsules in a row bar, such as a map’s controls: a{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Stack"
+        />{' '}
+        in the bar’s trailing side, beside a button.
+      </li>
+      <li>
+        It hangs out of the bar: its first capsule in the bar’s line, the others
+        above it (from a bottom bar; from a top bar, below). The bar keeps its
+        height, so content scrolls under only the bar.
+      </li>
+      <li>
+        Its capsules stand up, their buttons in a column. In a vertical bar, a
+        stack is a row instead, hanging into the screen.
+      </li>
+      <li>
+        <strong>Library:</strong> the stack (
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Stack"
+        />
+        ), its capsules, and the bar around it.
+      </li>
+      <li>
+        <strong>Demo:</strong> the map (a picture behind it).
+      </li>
+    </ul>
+    <CodeView code={hangingCode} />
+    <Hanging />
   </>
 );
 
 /** Its live views, also on the component's page of demos (and `/all`). */
-export const toolbarCompositionDemos = [NavigationBar, EditMode, Search, Pages];
+export const toolbarCompositionDemos = [
+  NavigationBar,
+  EditMode,
+  Search,
+  Pages,
+  Vertical,
+  Hanging,
+];

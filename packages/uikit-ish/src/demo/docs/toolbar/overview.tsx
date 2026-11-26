@@ -405,7 +405,22 @@ export const ToolbarOverview: FunctionComponent = () => (
         At the bottom (the default): 48px capsules with 36px buttons, 12px
         apart, padded 4px 16px 2px, above the bottom safe area inset (which its
         anchor keeps clear). At the top: 44px capsules, 10px apart, in a 54px
-        bar.
+        bar. Without a safe area inset, a bar keeps 8px from the screen’s edge.
+      </li>
+      <li>
+        Vertical (<code>orientation</code>), it’s a column at a side of the
+        screen, in a{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Anchor"
+        />
+        , with its capsules standing up. A{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Stack"
+        />{' '}
+        stacks capsules across the bar, hanging out of it without changing its
+        size.
       </li>
       <li>
         <PartLink

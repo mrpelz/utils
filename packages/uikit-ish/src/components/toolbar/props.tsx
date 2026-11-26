@@ -14,13 +14,29 @@ export type ToolbarRootProps = Omit<BaseToolbar.Root.Props, 'ref'> & {
    */
   context?: GlassContextValue;
   /**
+   * Its direction (Base UI's, also for its arrow keys): a row, or a column
+   * (e.g. in a `Viewport.Anchor` at a side), its capsules a bottom bar's;
+   * not for a title.
+   * @default 'horizontal'
+   */
+  orientation?: 'horizontal' | 'vertical';
+  /**
    * Where the bar is: at the bottom, or at the top (a navigation bar).
+   * Vertical, at the bottom's size.
    * @default 'block-end'
    */
   placement?: Placement;
 };
 
 export type ToolbarSideProps = useRender.ComponentProps<'div'>;
+
+export type ToolbarStackProps = useRender.ComponentProps<'div'> & {
+  /**
+   * Its capsules' direction.
+   * @default across its bar's: a column in a row, a row in a column
+   */
+  orientation?: 'horizontal' | 'vertical';
+};
 
 export type ToolbarGroupProps = Omit<BaseToolbar.Group.Props, 'ref'> & {
   /**

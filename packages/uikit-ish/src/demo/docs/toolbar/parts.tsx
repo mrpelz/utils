@@ -2,9 +2,11 @@ import { FunctionComponent, useMemo } from 'react';
 
 import {
   Button,
+  Page,
   Symbol,
   Toolbar,
   ToolbarButtonProps,
+  Viewport,
 } from '../../../components/index.js';
 import { Component } from '../../tooling/frame/component.js';
 import { useLog } from '../../tooling/frame/log.js';
@@ -20,6 +22,12 @@ import {
   sfEllipsis,
   sfFlag,
   sfFolder,
+  sfListBullet,
+  sfLocationFill,
+  sfMagnifyingglass,
+  sfMap,
+  sfMinus,
+  sfPlus,
   sfSquareAndArrowUp,
   sfTrash,
 } from '../../tooling/icons.js';
@@ -34,6 +42,7 @@ import {
   toolbarRootRows,
   toolbarSeparatorRows,
   toolbarSpacerRows,
+  toolbarStackRows,
   toolbarSubtitleRows,
   toolbarTitleRows,
   toolbarTrailingRows,
@@ -47,6 +56,7 @@ import {
   propOptionsSeparator,
   propOptionsSide,
   propOptionsSpacer,
+  propOptionsStack,
   propOptionsSubtitle,
   propOptionsTitle,
 } from './props.js';
@@ -309,6 +319,107 @@ const TrailingPart: FunctionComponent = () => {
           </Toolbar.Trailing>
         </Toolbar.Root>
       </div>
+    </Component>
+  );
+};
+
+/**
+ * `Toolbar.Stack`, outlined: a map's top bar, its controls in two capsules
+ * hanging below its trailing side.
+ */
+const StackPart: FunctionComponent = () => {
+  const id = 'toolbar-parts-stack';
+  const [external] = useProvidedState(id);
+  const [control, props, state] = usePropControl(propOptionsStack, {
+    external,
+    isOpen: true,
+    emphasize: 'outline',
+    title: 'Toolbar.Stack',
+  });
+
+  const [partControls, partProps, partState] = usePartControls(
+    useMemo(
+      () =>
+        partPropMaps({
+          Symbol: ['icon'],
+          'Button.Icon': [],
+          'Toolbar.Button': ['aria-label', 'shape'],
+          'Toolbar.Group': [],
+          'Toolbar.Leading': [],
+          'Toolbar.Root': ['placement'],
+          'Toolbar.Title': [],
+          'Toolbar.Trailing': [],
+          'Viewport.BlockStart': [],
+        }),
+      [],
+    ),
+    { provided: useProvidedState(id) },
+  );
+
+  const button = (label: string, icon: typeof sfMap) => (
+    <Toolbar.Button
+      key={label}
+      {...partProps['Toolbar.Button']}
+      aria-label={label}
+      shape="circle"
+    >
+      <Button.Icon {...partProps['Button.Icon']}>
+        <Symbol
+          {...partProps.Symbol}
+          icon={icon}
+        />
+      </Button.Icon>
+    </Toolbar.Button>
+  );
+
+  return (
+    <Component
+      isInline
+      controls={[control, partControls]}
+      id={id}
+      stage="phone"
+      state={[state, partState]}
+      title="Toolbar.Stack"
+    >
+      <>
+        <Viewport.Content>
+          <Page.Root fill>
+            <div
+              aria-hidden="true"
+              className="demo-picture"
+            />
+          </Page.Root>
+        </Viewport.Content>
+        <Viewport.BlockStart {...partProps['Viewport.BlockStart']}>
+          <Toolbar.Root
+            {...partProps['Toolbar.Root']}
+            placement="block-start"
+          >
+            <Toolbar.Leading {...partProps['Toolbar.Leading']}>
+              <Toolbar.Group {...partProps['Toolbar.Group']}>
+                {button('Places', sfListBullet)}
+                {button('Search', sfMagnifyingglass)}
+              </Toolbar.Group>
+            </Toolbar.Leading>
+            <Toolbar.Title {...partProps['Toolbar.Title']}>
+              <span>Map</span>
+            </Toolbar.Title>
+            <Toolbar.Trailing {...partProps['Toolbar.Trailing']}>
+              {button('Share', sfSquareAndArrowUp)}
+              <Toolbar.Stack {...props}>
+                <Toolbar.Group {...partProps['Toolbar.Group']}>
+                  {button('Map', sfMap)}
+                  {button('Location', sfLocationFill)}
+                </Toolbar.Group>
+                <Toolbar.Group {...partProps['Toolbar.Group']}>
+                  {button('Zoom In', sfPlus)}
+                  {button('Zoom Out', sfMinus)}
+                </Toolbar.Group>
+              </Toolbar.Stack>
+            </Toolbar.Trailing>
+          </Toolbar.Root>
+        </Viewport.BlockStart>
+      </>
     </Component>
   );
 };
@@ -1006,6 +1117,11 @@ export const ToolbarParts: FunctionComponent = () => (
                 ,{' '}
                 <PartLink
                   component="toolbar"
+                  part="Toolbar.Stack"
+                />{' '}
+                (capsules across the bar, hanging out of it),{' '}
+                <PartLink
+                  component="toolbar"
                   part="Toolbar.Separator"
                 />{' '}
                 and{' '}
@@ -1035,7 +1151,7 @@ export const ToolbarParts: FunctionComponent = () => (
           part="Toolbar.Root"
         />
         , a <code>toolbar</code>): a row with its parts 12px apart (10px at the
-        top).
+        top), or a column (<code>orientation</code>) at a side of the screen.
       </li>
       <li>
         A{' '}
@@ -1135,6 +1251,40 @@ export const ToolbarParts: FunctionComponent = () => (
     <SpacerPart />
     <h3>Props</h3>
     <PropsTable rows={toolbarSpacerRows} />
+
+    <Heading
+      id="toolbar-stack"
+      level={2}
+    >
+      <code>Toolbar.Stack</code>
+    </Heading>
+    <ul>
+      <li>
+        Capsules across the bar: a column in a row bar, a row in a column bar,
+        the bar’s gap apart. Its capsules turn with it, so their buttons stand
+        in a column in a row bar.
+      </li>
+      <li>
+        It hangs out of the bar. Its first capsule sits in the bar’s line, and
+        the others go beyond it on the open side: down from a top bar, up from a
+        bottom bar, into the screen from a side. The bar keeps its size, so
+        content scrolls under only the bar.
+      </li>
+      <li>
+        It goes where a capsule would, for example in{' '}
+        <PartLink
+          component="toolbar"
+          part="Toolbar.Trailing"
+        />{' '}
+        beside a button.
+      </li>
+      <li>
+        Renders a <code>div</code>.
+      </li>
+    </ul>
+    <StackPart />
+    <h3>Props</h3>
+    <PropsTable rows={toolbarStackRows} />
 
     <Heading
       id="toolbar-group"
@@ -1336,6 +1486,7 @@ export const toolbarPartsDemos = [
   LeadingPart,
   TrailingPart,
   SpacerPart,
+  StackPart,
   GroupPart,
   ButtonPart,
   TitlePart,

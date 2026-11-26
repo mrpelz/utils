@@ -19,6 +19,7 @@ import type {
   ToolbarGroupProps,
   ToolbarRootProps,
   ToolbarSideProps,
+  ToolbarStackProps,
   ToolbarTitleProps,
 } from './props.js';
 
@@ -27,6 +28,7 @@ export type {
   ToolbarGroupProps,
   ToolbarRootProps,
   ToolbarSideProps,
+  ToolbarStackProps,
   ToolbarTitleProps,
 } from './props.js';
 
@@ -127,6 +129,27 @@ const Spacer = forwardRef<HTMLDivElement, ComponentProps<'div'>>(
       {...props}
     />
   ),
+);
+
+/**
+ * Capsules across the bar (a column in a row, a row in a column), hanging
+ * out of it: its first capsule in the bar's line, the others beyond it,
+ * on its open side (down from a top bar, up from a bottom bar; at a side,
+ * into the screen), the bar's height (width) unchanged.
+ */
+const Stack = forwardRef<HTMLElement, ToolbarStackProps>(
+  ({ className, orientation, render, ...props }, ref) =>
+    useRender({
+      defaultTagName: 'div',
+      props: {
+        'data-orientation': orientation,
+        'data-toolbar-part': 'stack',
+        className: cn('uikit-toolbar-stack', className),
+        ...props,
+      },
+      ref,
+      render,
+    }),
 );
 
 // Whether a button is in a capsule of several (see `ToolbarButton`).
@@ -295,6 +318,7 @@ export const Toolbar = {
   Leading,
   Trailing,
   Spacer,
+  Stack,
   Group,
   Button: ToolbarButton,
   Title,

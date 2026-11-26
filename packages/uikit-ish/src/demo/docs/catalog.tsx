@@ -293,6 +293,14 @@ import {
   PageControlParts,
   pageControlPartsDemos,
 } from './page-control/parts.js';
+import { PagerArchitecture } from './pager/architecture.js';
+import {
+  PagerComposition,
+  pagerCompositionDemos,
+} from './pager/composition.js';
+import { PagerDemo } from './pager/main.js';
+import { PagerOverview, pagerOverviewDemos } from './pager/overview.js';
+import { PagerParts, pagerPartsDemos } from './pager/parts.js';
 import { PopoverArchitecture } from './popover/architecture.js';
 import {
   PopoverComposition,
@@ -873,8 +881,25 @@ export const catalog: readonly CatalogEntry[] = [
     Overview: PageControlOverview,
     Parts: PageControlParts,
     summary:
-      'Dots for a row of pages, with the current one highlighted. A press next to it, or scrubbing across, goes to the previous or next page.',
+      'Dots for pages in a row or a column, with the current one highlighted. A press next to it, or scrubbing across, goes to the previous or next page.',
     title: 'Page Control',
+  },
+  {
+    category: 'structure',
+    demos: [
+      PagerDemo,
+      ...pagerOverviewDemos,
+      ...pagerPartsDemos,
+      ...pagerCompositionDemos,
+    ],
+    Architecture: PagerArchitecture,
+    id: 'pager',
+    Composition: PagerComposition,
+    Overview: PagerOverview,
+    Parts: PagerParts,
+    summary:
+      'Pages as large as it is, side by side or one below another, swiped through one at a time, snapping natively. Its page follows the swipe, for page control dots.',
+    title: 'Pager',
   },
   {
     baseUiId: 'dialog',

@@ -1,0 +1,45 @@
+/* Pager's demos (see content.tsx). Unlayered: over the library's layer
+   (the demos' comes before it), e.g. the pages' padding. */
+
+/* Inline pagers: as wide as a phone at most, rounded, on a secondary
+   background; a vertical one as high as a page of text. */
+.pager-demo-frame {
+  overflow: hidden;
+  width: min(402px, 100%);
+  height: 240px;
+  border-radius: 24px;
+  background-color: var(--color-ui-secondary-system-background);
+}
+
+.pager-demo-frame > .uikit-pager-root[data-orientation='horizontal'] {
+  height: 100%;
+}
+
+/* A page: its title and its line, centered. */
+.pager-demo-page {
+  display: grid;
+  min-height: 100%;
+  align-content: center;
+  padding: 24px;
+  text-align: center;
+
+  & h3 {
+    margin: 0 0 8px;
+  }
+
+  & p {
+    margin: 0;
+    color: var(--color-ui-secondary-label);
+  }
+}
+
+/* Filling a stage (see composition.tsx): its pages' text clear of the
+   safe area insets (the status bar, the home indicator). */
+.pager-demo-fill {
+  height: 100%;
+}
+
+.pager-demo-fill .pager-demo-page {
+  padding-block: calc(24px + var(--uikit-safe-area-inset-top, 0px))
+    calc(24px + var(--uikit-safe-area-inset-bottom, 0px));
+}

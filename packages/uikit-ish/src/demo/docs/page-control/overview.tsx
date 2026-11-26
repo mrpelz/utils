@@ -54,7 +54,9 @@ export const PageControlOverview: FunctionComponent = () => (
   <>
     <Contents sections={sections} />
     <ul className="demo-lead">
-      <li>Dots for a row of pages, with the current one highlighted.</li>
+      <li>
+        Dots for pages in a row or a column, with the current one highlighted.
+      </li>
       <li>It moves to the previous or next page, or scrubs across them.</li>
     </ul>
     <LiveView />
@@ -179,6 +181,13 @@ export const PageControlOverview: FunctionComponent = () => (
       <li>
         With <code>momentaryTooltip</code>, the current page shows above it
         while it’s hovered, pressed or focused by keyboard.
+      </li>
+      <li>
+        With <code>orientation=&quot;vertical&quot;</code>, its dots stand in a
+        column, the first at the top, for example beside a vertical{' '}
+        <a href={publicUrl('pager')}>Pager</a>. It’s pressed above or below the
+        current dot, dragged up and down, and its tooltip shows at its leading
+        side.
       </li>
     </ul>
   </>

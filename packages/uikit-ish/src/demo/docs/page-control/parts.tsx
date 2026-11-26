@@ -7,6 +7,7 @@ import { usePropControl } from '../../tooling/frame/prop-control.js';
 import { useProvidedState } from '../../tooling/frame/state.js';
 import { PropsTable } from '../../tooling/guide/props-table.js';
 import { Heading, PartLink } from '../../tooling/guide/sections.js';
+import { publicUrl } from '../../tooling/public-url.js';
 import { pageControlRows } from './docs.js';
 import { getPropOptionsRoot } from './props.js';
 
@@ -78,6 +79,10 @@ export const PageControlParts: FunctionComponent = () => (
       </li>
       <li>
         It can be <code>disabled</code>.
+      </li>
+      <li>
+        Its direction: <code>orientation</code> (a row, or a column beside a
+        vertical <a href={publicUrl('pager')}>Pager</a>).
       </li>
       <li>
         Its look: <code>variant</code> (glass or plain), <code>context</code>{' '}

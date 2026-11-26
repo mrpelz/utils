@@ -474,13 +474,27 @@
        keyboard's own bar: the glass extends 4px beyond), collapsed too. */
     --uikit-tab-bar-side: 32px;
 
-    /* (None below: the safe area inset, kept clear by its anchor, see Viewport.) */
+    /* (None below: the safe area inset, kept clear by its anchor, see
+       Viewport.) */
     padding: 16px var(--uikit-tab-bar-side) 0;
     gap: var(--uikit-tab-bar-group-gap, 16px);
     interpolate-size: allow-keywords;
     touch-action: none;
     transition-duration: var(--glass-ui-lens-duration);
     transition-property: padding, gap;
+
+    /* At the screen's bottom (in its anchor) without a safe area inset
+       (e.g. in a desktop browser): its glass 8px from the edge, as an
+       island's, not flush with it (the glass 4px beyond its groups, see
+       Glass: they 12px from it). Collapsed too, see below. */
+    --uikit-tab-bar-floor: max(
+      0px,
+      12px - var(--uikit-viewport-safe-bottom, 0px)
+    );
+
+    :where(.uikit-viewport-anchor[data-edge='block-end']) > & {
+      padding-bottom: var(--uikit-tab-bar-floor);
+    }
 
     /* (Any keyboard height: 20px, collapsed without its inset; as the
        padding transitions.) */
@@ -648,6 +662,15 @@
             )
         )
         var(--uikit-tab-bar-collapsed-inset);
+
+      /* (At the screen's bottom without a safe area inset: its glass no
+         nearer the edge than expanded, see above.) */
+      :where(.uikit-viewport-anchor[data-edge='block-end']) > & {
+        padding-bottom: max(
+          var(--uikit-tab-bar-collapsed-inset),
+          var(--uikit-tab-bar-floor)
+        );
+      }
 
       && > div > [data-tab-bar-part='tabs'] > [role='tab'] {
         --uikit-tab-bar-label-size: var(--font-ui-subheadline-size);

@@ -143,13 +143,26 @@ export const ToolbarArchitecture: FunctionComponent = () => (
         <PartLink part="Toolbar.Spacer" /> takes free space between parts.
       </li>
       <li>
+        <PartLink part="Toolbar.Stack" /> turns its capsules across the bar and
+        takes one capsule’s size in it. The rest overflows on the bar’s open
+        side (the stylesheet aligns a bottom bar’s to its end, so it grows up),
+        so the bar keeps its size.
+      </li>
+      <li>
+        Vertical (<code>orientation</code>, Base UI’s, which also sets the arrow
+        keys), the bar is a flexbox column filling its anchor’s height, and its
+        capsules stand up.
+      </li>
+      <li>
         The bottom bar doesn’t pad for the home indicator. Its anchor handles
         the safe area inset, whether that’s a{' '}
         <PartLink
           component="viewport"
           part="Viewport.BlockEnd"
         />{' '}
-        or a sheet’s.
+        or a sheet’s. Without a safe area inset (for example in a desktop
+        browser), a bar directly in an anchor keeps 8px from the screen’s edge
+        instead of sitting flush with it.
       </li>
     </ul>
 

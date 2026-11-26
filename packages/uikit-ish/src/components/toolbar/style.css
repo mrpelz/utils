@@ -22,6 +22,17 @@
     flex: 1 1 0;
   }
 
+  /* Its sides in a vertical bar (see the root): its top's capsules, and
+     its bottom's. */
+  .uikit-toolbar-leading,
+  .uikit-toolbar-trailing {
+    .uikit-toolbar-root[data-orientation='vertical'] > & {
+      min-width: 0;
+      min-height: max-content;
+      flex-direction: column;
+    }
+  }
+
   .uikit-toolbar-subtitle {
     color: var(--color-ui-secondary-label);
     font-size: 12px;
@@ -53,6 +64,13 @@
       /* (The safe area inset kept clear by its anchor, see Viewport; 2px of its
          own.) */
       padding: 4px 16px 2px;
+
+      /* At the screen's bottom (in its anchor) without a safe area inset
+         (e.g. in a desktop browser): 8px from the edge, as an island's, not
+         flush with it. */
+      :where(.uikit-viewport-anchor[data-edge='block-end']) > & {
+        padding-bottom: max(2px, 8px - var(--uikit-viewport-safe-bottom, 0px));
+      }
     }
 
     &[data-placement='block-start'] {
@@ -63,6 +81,37 @@
 
       min-height: 54px;
       padding: 0 16px 10px;
+
+      /* At the screen's top (in its anchor) without a safe area inset
+         (e.g. in a desktop browser): 8px from the edge, as at the bottom,
+         not flush with it. */
+      :where(.uikit-viewport-anchor[data-edge='block-start']) > & {
+        padding-top: max(0px, 8px - var(--uikit-viewport-safe-top, 0px));
+      }
+    }
+
+    /* Vertical (`orientation`, e.g. in a `Viewport.Anchor` at a side): a
+       column as high as its container (its anchor), its capsules a bottom
+       bar's (48px wide); 16px from its sides (as a bottom bar from the
+       screen's), 4px from its top, 2px from its bottom (the safe area
+       insets kept clear by its anchor; at the screen's top or bottom
+       without one, 8px from it, as the bars there). No title: a title is a
+       line of text. */
+    &[data-orientation='vertical'] {
+      --uikit-toolbar-group-height: 48px;
+      --uikit-toolbar-group-padding: 6px;
+      --uikit-toolbar-gap: 12px;
+      --uikit-toolbar-text-padding: 6px;
+
+      min-height: 0;
+      flex-direction: column;
+      padding: 4px 16px 2px;
+      block-size: 100%;
+
+      :where(.uikit-viewport-anchor:is([data-edge='inline-start'], [data-edge='inline-end'])) > & {
+        padding-top: max(4px, 8px - var(--uikit-viewport-safe-top, 0px));
+        padding-bottom: max(2px, 8px - var(--uikit-viewport-safe-bottom, 0px));
+      }
     }
 
     /* A centered title stays centered without a side: an empty one stands
@@ -81,6 +130,48 @@
       &:not(:has(> .uikit-toolbar-leading))::after {
         order: -1;
       }
+    }
+  }
+
+  /* A stack (see main.tsx): capsules across the bar, hanging out of it.
+     In the bar's layout, one capsule's size across it (the bar's height,
+     or width, unchanged); the rest overflowing on its open side (a top
+     bar's bottom, a bottom bar's top; at a side, toward the screen), its
+     capsules the bar's gap apart. Along the bar instead (`orientation` the
+     bar's), a plain row (column) of capsules. */
+  .uikit-toolbar-stack {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--uikit-toolbar-gap);
+
+    /* In a row: a column, hanging down (a top bar), or up (a bottom bar:
+       its overflow at its start). */
+    :where(.uikit-toolbar-root:not([data-orientation='vertical'])) &:not([data-orientation='horizontal']) {
+      flex-direction: column;
+      justify-content: flex-start;
+      block-size: var(--uikit-toolbar-group-height);
+    }
+
+    :where(.uikit-toolbar-root[data-placement='block-end']:not([data-orientation='vertical'])) &:not([data-orientation='horizontal']) {
+      justify-content: unsafe flex-end;
+    }
+
+    /* In a column: a row, hanging toward the screen (at the trailing side,
+       its overflow at its start). */
+    :where(.uikit-toolbar-root[data-orientation='vertical']) &:not([data-orientation='vertical']) {
+      flex-direction: row;
+      justify-content: flex-start;
+      inline-size: var(--uikit-toolbar-group-height);
+    }
+
+    :where(.uikit-viewport-anchor[data-edge='inline-end'] > .uikit-toolbar-root[data-orientation='vertical']) &:not([data-orientation='vertical']) {
+      justify-content: unsafe flex-end;
+    }
+
+    /* Along its bar: a plain column in a column. */
+    :where(.uikit-toolbar-root[data-orientation='vertical']) &[data-orientation='vertical'] {
+      flex-direction: column;
     }
   }
 
@@ -114,6 +205,24 @@
       --uikit-glass-pressed: 1;
       --uikit-glass-scale: 1.05;
       --uikit-toolbar-content-scale: 1.05;
+    }
+
+    /* In a vertical bar: its buttons in a column, 6px from its ends. */
+    &[data-orientation='vertical'] {
+      flex-direction: column;
+      padding: var(--uikit-toolbar-group-padding) 0;
+    }
+
+    /* In a stack across its bar (see the stack): standing up in a row's
+       (its buttons in a column), lying down in a column's (in a row). */
+    :where(.uikit-toolbar-root:not([data-orientation='vertical']) .uikit-toolbar-stack:not([data-orientation='horizontal'])) > &[data-orientation] {
+      flex-direction: column;
+      padding: var(--uikit-toolbar-group-padding) 0;
+    }
+
+    :where(.uikit-toolbar-root[data-orientation='vertical'] .uikit-toolbar-stack:not([data-orientation='vertical'])) > &[data-orientation] {
+      flex-direction: row;
+      padding: 0 var(--uikit-toolbar-group-padding);
     }
   }
 

@@ -42,6 +42,12 @@ export type PageControlProps = Omit<
     page: number,
     eventDetails: PageControlChangeEventDetails,
   ) => void;
+  /**
+   * Its direction: its dots in a row, or in a column (e.g. beside a
+   * vertical `Pager`), the first at the top.
+   * @default 'horizontal'
+   */
+  orientation?: 'horizontal' | 'vertical';
   /** The current page (controlled; from 0). */
   value?: number;
   /**

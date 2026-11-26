@@ -233,6 +233,11 @@
   }
 }
 
+/* A pager inside a page (see PagerContent): framed, a page of text high. */
+.page-control-demo-pages.kitchen-sink-inline-pager {
+  height: 220px;
+}
+
 /* The live tile's gradient, turning (see .kitchen-sink-live). */
 @property --kitchen-sink-live-angle {
   inherits: false;

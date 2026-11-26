@@ -47,6 +47,18 @@ export const pageControlRows: readonly PropRow[] = [
     'Ignores presses, drags and keys, and leaves the tab order.',
   ],
   [
+    'orientation',
+    union('horizontal', 'vertical'),
+    code('horizontal'),
+    <>
+      Its dots in a row, or in a column with the first at the top (for example
+      beside a vertical <a href={publicUrl('pager')}>Pager</a>). In a column,
+      it’s pressed above or below the current dot, dragged up and down, and Up
+      and Down go to the previous and next pages. Its tooltip shows beside it,
+      at its leading side.
+    </>,
+  ],
+  [
     'variant',
     union('glass', 'plain'),
     code('glass'),

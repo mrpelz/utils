@@ -51,6 +51,10 @@ export type {
 // - Optionally, the current page (“3 of 8”) in a tooltip (see `Tooltip`)
 //   8px above it while it's hovered, pressed or focused by keyboard
 //   (`momentaryTooltip`).
+// - Vertical (`orientation`): its dots in a column, the first at the top,
+//   pressed above or below the current one, dragged up and down, Up and
+//   Down its previous and next pages; its tooltip 8px before it (at its
+//   leading side).
 
 /** Pages shown as full dots at most (more: a window of `windowSize`). */
 const fullDots = 7;
@@ -112,6 +116,7 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       onPointerMove,
       onPointerUp,
       onValueChange,
+      orientation = 'horizontal',
       value: valueProp,
       variant = 'glass',
       ...props
@@ -138,14 +143,18 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       onValueChange?.(next, eventDetails);
     };
 
-    // Scrubbing: from where it was pressed, a page per dot (16px: a dot and
-    // its gap) passed; once it's moved, its click doesn't page.
+    // Scrubbing: from where it was pressed (along it, `at`), a page per dot
+    // (16px: a dot and its gap) passed; once it's moved, its click doesn't
+    // page.
     const scrub = useRef<
-      { isScrubbed: boolean; page: number; x: number } | undefined
+      { at: number; isScrubbed: boolean; page: number } | undefined
     >(undefined);
     const scrubbed = useRef(false);
 
-    // A press before or after the current dot (in reading order).
+    const isVertical = orientation === 'vertical';
+
+    // A press before or after the current dot (in reading order; vertical,
+    // above or below it).
     const handleClick = (event: MouseEvent<HTMLDivElement>) => {
       onClick?.(event);
       if (scrubbed.current) {
@@ -154,10 +163,13 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       }
       const current = event.currentTarget.querySelector('[data-current]');
       if (!current) return;
-      const { left, width } = current.getBoundingClientRect();
+      const { height, left, top, width } = current.getBoundingClientRect();
       const isRightToLeft =
+        !isVertical &&
         getComputedStyle(event.currentTarget).direction === 'rtl';
-      const isAfter = event.clientX > left + width / 2;
+      const isAfter = isVertical
+        ? event.clientY > top + height / 2
+        : event.clientX > left + width / 2;
       go(value + (isAfter === isRightToLeft ? -1 : 1), {
         event,
         reason: 'track-press',
@@ -168,11 +180,12 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       onKeyDown?.(event);
       const isRightToLeft =
         getComputedStyle(event.currentTarget).direction === 'rtl';
+      // (Vertical: Down to the next page, below; a slider's otherwise.)
       const moves: Record<string, number> = {
-        ArrowDown: value - 1,
+        ArrowDown: value + (isVertical ? 1 : -1),
         ArrowLeft: value + (isRightToLeft ? 1 : -1),
         ArrowRight: value + (isRightToLeft ? -1 : 1),
-        ArrowUp: value + 1,
+        ArrowUp: value + (isVertical ? -1 : 1),
         End: pages - 1,
         Home: 0,
       };
@@ -188,7 +201,11 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       setIsPressed(true);
       scrubbed.current = false;
       if (disabled || event.button !== 0) return;
-      scrub.current = { page: value, isScrubbed: false, x: event.clientX };
+      scrub.current = {
+        page: value,
+        isScrubbed: false,
+        at: isVertical ? event.clientY : event.clientX,
+      };
       event.currentTarget.setPointerCapture(event.pointerId);
     };
     const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -196,11 +213,14 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
       const from = scrub.current;
       if (!from) return;
       const isRightToLeft =
+        !isVertical &&
         getComputedStyle(event.currentTarget).direction === 'rtl';
-      const dx = (event.clientX - from.x) * (isRightToLeft ? -1 : 1);
-      if (!from.isScrubbed && Math.abs(dx) < 4) return;
+      const moved =
+        ((isVertical ? event.clientY : event.clientX) - from.at) *
+        (isRightToLeft ? -1 : 1);
+      if (!from.isScrubbed && Math.abs(moved) < 4) return;
       from.isScrubbed = true;
-      go(from.page + Math.round(dx / 16), { event, reason: 'drag' });
+      go(from.page + Math.round(moved / 16), { event, reason: 'drag' });
     };
     const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
       onPointerUp?.(event);
@@ -226,11 +246,13 @@ export const PageControl = forwardRef<HTMLDivElement, PageControlProps>(
         ref={ref}
         aria-disabled={disabled || undefined}
         aria-label={ariaLabel}
+        aria-orientation={orientation}
         aria-valuemax={pages}
         aria-valuemin={1}
         aria-valuenow={value + 1}
         aria-valuetext={valueText}
         data-glass-context={resolved ?? inherited ?? 'auto'}
+        data-orientation={orientation}
         data-pressed={isPressed ? '' : undefined}
         data-variant={variant}
         role="slider"

@@ -16,6 +16,7 @@ export const getPropOptionsRoot = (addLog: AddLog) => ({
   value: [undefined, 0, 1, 4] as const,
   disabled: [undefined, false, true] as const,
   variant: [undefined, 'glass', 'plain'] as const,
+  orientation: [undefined, 'horizontal', 'vertical'] as const,
   context: [undefined, 'bright', 'dim', 'adaptive'] as const,
   momentaryTooltip: [undefined, false, true] as const,
   format: [

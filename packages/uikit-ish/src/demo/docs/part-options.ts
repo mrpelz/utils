@@ -235,6 +235,10 @@ import {
 import { propOptionsGuideRoot as propOptionsGuideRootPage } from './page/props.js';
 import { getPropOptionsRoot as getPropOptionsRootPageControl } from './page-control/props.js';
 import {
+  getPropOptionsRoot as getPropOptionsRootPager,
+  propOptionsPage as propOptionsPagePager,
+} from './pager/props.js';
+import {
   getPropOptionsGuideRoot as getPropOptionsGuideRootPopover,
   propOptionsArrow as propOptionsArrowPopover,
   propOptionsClose as propOptionsClosePopover,
@@ -329,6 +333,7 @@ import {
   propOptionsSeparator as propOptionsSeparatorToolbar,
   propOptionsSide as propOptionsSideToolbar,
   propOptionsSpacer as propOptionsSpacerToolbar,
+  propOptionsStack as propOptionsStackToolbar,
   propOptionsSubtitle as propOptionsSubtitleToolbar,
   propOptionsTitle as propOptionsTitleToolbar,
 } from './toolbar/props.js';
@@ -589,6 +594,8 @@ export const partOptions: Record<string, PartOptions> = {
   'Navigation.SwipeArea': propOptionsGuideSwipeAreaNavigation,
   'Page.Root': propOptionsGuideRootPage,
   PageControl: getPropOptionsRootPageControl,
+  'Pager.Page': propOptionsPagePager,
+  'Pager.Root': getPropOptionsRootPager,
   'Popover.Arrow': propOptionsArrowPopover,
   'Popover.Backdrop': propOptionsPartPopover,
   'Popover.Body': propOptionsScrollContentPopover,
@@ -674,6 +681,7 @@ export const partOptions: Record<string, PartOptions> = {
   'Toolbar.Root': propOptionsRootToolbar,
   'Toolbar.Separator': propOptionsSeparatorToolbar,
   'Toolbar.Spacer': propOptionsSpacerToolbar,
+  'Toolbar.Stack': propOptionsStackToolbar,
   'Toolbar.Subtitle': propOptionsSubtitleToolbar,
   'Toolbar.Title': propOptionsTitleToolbar,
   'Toolbar.Trailing': propOptionsSideToolbar,

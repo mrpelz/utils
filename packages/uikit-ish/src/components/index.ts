@@ -290,6 +290,7 @@ export {
   type ToolbarGroupProps,
   type ToolbarRootProps,
   type ToolbarSideProps,
+  type ToolbarStackProps,
   type ToolbarTitleProps,
 } from './toolbar/main.js';
 
@@ -485,6 +486,14 @@ export {
   type ViewportScrollOptions,
   type VisualViewportState,
 } from './viewport/main.js';
+
+export {
+  Pager,
+  type PagerChangeEventDetails,
+  type PagerOrientation,
+  type PagerPageProps,
+  type PagerRootProps,
+} from './pager/main.js';
 
 export {
   Stack,
