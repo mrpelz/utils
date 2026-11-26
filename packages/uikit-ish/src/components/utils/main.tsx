@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-ternary */
 import './style.css';
 
 import type { Popover as BasePopover } from '@base-ui/react/popover';
@@ -493,7 +492,7 @@ export const withSecondaryClick = <Props extends SecondaryClickProps>(
       ref={ref}
       {...useSecondaryClick(props)}
     />
-  )) as FunctionComponent<Props>;
+  )) as unknown as FunctionComponent<Props>;
 };
 
 // What a popup's first tabbable element can be (roughly: enabled, in the

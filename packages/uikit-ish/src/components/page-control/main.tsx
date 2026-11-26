@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-ternary */
 import '../tooltip/style.css';
 import '../glass/style.css';
 import './style.css';

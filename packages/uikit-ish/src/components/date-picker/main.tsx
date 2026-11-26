@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-ternary */
 import '../button/style.css';
 import '../popover/style.css';
 import '../roll/style.css';

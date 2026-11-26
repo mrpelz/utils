@@ -62,7 +62,7 @@ export const SegmentedDemo: FunctionComponent = () => {
     { external: externalHighlight, title: 'Segmented.Highlight' },
   );
 
-  const count = Number(content.count);
+  const count = content.count;
 
   return (
     <Component

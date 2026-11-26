@@ -738,7 +738,7 @@ const transitionsProgress = (transitions: CSSTransition[]) => {
     if (!(end > latest)) continue;
 
     latest = end;
-    const delay = Number(timing?.delay ?? 0);
+    const delay = timing?.delay ?? 0;
     const duration = Number(timing?.duration);
     const time = Number(transition.currentTime);
     progress =

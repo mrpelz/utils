@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-ternary */
 import './style.css';
 
 import { useRender } from '@base-ui/react/use-render';

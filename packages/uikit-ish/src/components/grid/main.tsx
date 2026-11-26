@@ -2792,10 +2792,9 @@ const ResizeHandle = forwardRef<HTMLButtonElement, GridResizeHandleProps>(
       // in the grid may show itself while one's resized, see Card.)
       if (!current.isDragging) markResizing(current.cell, true);
       current.isDragging = true;
-      const { reach } = current;
       // (Its area's end-of-line column a full width (see `onPointerDown`);
       // past its bottom only, its next size up.)
-      const { canFull } = current;
+      const { canFull, reach } = current;
       const span = draggedSpan(
         current,
         at,

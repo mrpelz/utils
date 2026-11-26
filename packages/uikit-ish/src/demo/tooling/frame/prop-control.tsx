@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-ternary */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // A demo's prop controls (see `usePropControl`): their state, the

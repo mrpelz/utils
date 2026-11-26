@@ -36,7 +36,6 @@ export const gammaCorrect = (
 ): number => {
   if (input === 0) return 0;
 
-  // eslint-disable-next-line unicorn/prefer-ternary
   if (input === range) return range;
 
   return maxmin(Math.round((input / range) ** gamma * range), range);
