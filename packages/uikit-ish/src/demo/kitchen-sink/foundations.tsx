@@ -62,7 +62,7 @@ const choices: readonly Choice[] = [
   },
   {
     key: 'textSize',
-    note: 'System: the system’s, where the browser tells it (Safari), else Large. Text in lists, menus, alerts, fields and buttons grows with it, and rows with their text; bar titles grow up to Extra Extra Large; toolbars, tab bars, switches, sliders and calendars keep their size. Typography’s own textSize wins.',
+    note: 'System: the system’s, where the browser tells it (Safari), else Large. Text in lists, menus, alerts, fields and buttons grows with it, and rows with their text; bar titles grow up to Extra Extra Large; tab bars, toolbars, segmented controls, steppers, rolls, cards and a calendar’s days keep their size. Typography’s own textSize wins.',
     options: [
       ['xSmall', 'Extra Small'],
       ['small', 'Small'],

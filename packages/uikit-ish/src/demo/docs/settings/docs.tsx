@@ -151,10 +151,11 @@ const settingRows: readonly PropRow[] = [
       />
       ’s <code>textSize</code>, which wins inside it). Text in lists, menus,
       alerts, fields and buttons grows with it, and list rows grow with their
-      text. Bar titles grow up to xxLarge and never shrink below large.
-      Toolbars, tab bars, switches, sliders, steppers, segmented controls,
-      calendars and cards keep their size. The system’s size has no event, so
-      it’s read when it’s first used and again by{' '}
+      text. Bar titles grow up to xxLarge and never shrink below large. Parts
+      whose text sits in a fixed shape keep their size: tab bars, toolbars,
+      segmented controls, switches, steppers, rolls, cards and a calendar’s days
+      (see the table on the overview). The system’s size has no event, so it’s
+      read when it’s first used and again by{' '}
       <PartLink
         component="settings"
         part="refreshSettings"

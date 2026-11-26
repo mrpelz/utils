@@ -29,4 +29,22 @@
       text-align: start;
     }
   }
+
+  /* Which components follow which setting (see honoring.tsx): the
+     setting's name narrow, the others wide enough to read (scrolling
+     sideways in their frame, as a props table). */
+  .settings-honoring-table {
+    & td:first-child {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    & td:nth-child(2) {
+      min-width: 12rem;
+    }
+
+    & td:nth-child(3) {
+      min-width: 16rem;
+    }
+  }
 }

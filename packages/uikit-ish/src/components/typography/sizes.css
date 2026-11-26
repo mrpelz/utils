@@ -114,7 +114,23 @@
     --font-ui-caption2-tracking: 0.06px;
   }
 
-  :where([data-uikit-text-size='large'], .uikit-typography[data-text-size='large']) {
+  /* Large, also pinned (the default's tokens, whatever the text size around
+     them): parts whose text sits in a fixed geometry, kept at their size
+     (a calendar's header and days, a card, a roll, a tab bar, a stepper, a
+     sidebar's toolbar, an activity indicator;
+     their own text, e.g. a Typography's own `textSize`, as it is). */
+  :where(
+      [data-uikit-text-size='large'],
+      .uikit-typography[data-text-size='large'],
+      .uikit-date-picker-header,
+      .uikit-date-picker-body,
+      .uikit-card-root,
+      .uikit-roll-root,
+      .uikit-tab-bar-root,
+      .uikit-stepper-group,
+      .uikit-sidebar-toolbar,
+      .uikit-progress-activity-indicator
+    ) {
     --font-ui-large-title-size: 34px;
     --font-ui-large-title-line-height: 41px;
     --font-ui-large-title-tracking: 0.4px;

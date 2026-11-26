@@ -28,6 +28,7 @@ import {
 import { publicUrl } from '../../tooling/public-url.js';
 import { partPropMaps } from '../part-options.js';
 import { settingsProviderRows } from './docs.js';
+import { SettingsHonoringTable } from './honoring.js';
 import { given, propOptionsProvider, propOptionsTint, tints } from './props.js';
 import { SettingsReport, SettingsTable } from './report.js';
 
@@ -286,6 +287,7 @@ const sections: readonly Section[] = [
   ['key-props', 'Key props'],
   ['behavior', 'Behavior'],
   ['languages-and-formats', 'Languages and formats'],
+  ['which-components-follow-it', 'Which components follow it'],
   ['your-apps-tint', 'Your app’s tint'],
 ];
 
@@ -434,6 +436,25 @@ export const SettingsOverview: FunctionComponent = () => (
       </li>
     </ul>
     <CodeView code={languagesCode} />
+
+    <Heading
+      id="which-components-follow-it"
+      level={2}
+    >
+      Which components follow it
+    </Heading>
+    <ul>
+      <li>
+        Each setting, the components that follow it, and how. Your own
+        components can follow them too: through the tokens in CSS, and{' '}
+        <PartLink
+          component="settings"
+          part="useSettings"
+        />{' '}
+        in script.
+      </li>
+    </ul>
+    <SettingsHonoringTable />
 
     <Heading
       id="your-apps-tint"
