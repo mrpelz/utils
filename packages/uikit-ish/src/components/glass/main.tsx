@@ -52,19 +52,17 @@ export type {
  * The glass context to draw with: the given one, or (`adaptive`) the tone of
  * what's behind the element (see `useBackdropTone`), held for `dwell` ms
  * before it flips (large surfaces); none given, `undefined` (by the color
- * scheme). Reduced transparency or more contrast (opaque glass), never
- * sampled.
+ * scheme). Transparency reduced (opaque glass), never sampled.
  */
 export const useGlassContext = (
   ref: { current: Element | null },
   context: GlassContextValue | undefined,
   dwell = 0,
 ): GlassContext | undefined => {
-  const { contrast, reducedTransparency } = useSettings();
+  const { reducedTransparency } = useSettings();
   const sampled = useBackdropTone(ref, {
     dwell,
-    enabled:
-      context === 'adaptive' && !reducedTransparency && contrast !== 'more',
+    enabled: context === 'adaptive' && reducedTransparency === false,
   });
   return context === 'adaptive' ? sampled : context;
 };

@@ -27,6 +27,7 @@ import {
   TintProbe,
   useCardTitleId,
   useFillScheme,
+  useGivenTint,
 } from './shared.js';
 
 // A card's progress (`Card.Progress`, as Base UI's `Progress.Root`): its
@@ -135,11 +136,12 @@ export const ProgressBar = forwardRef<HTMLDivElement, CardProgressBarProps>(
       className,
       render,
       style,
-      tint,
+      tint: tintProp,
       ...props
     },
     ref,
   ) => {
+    const tint = useGivenTint(tintProp);
     const { format, getAriaValueText, locale, max, min, value } =
       useProgressContext('ProgressBar');
     const titleId = useCardTitleId();

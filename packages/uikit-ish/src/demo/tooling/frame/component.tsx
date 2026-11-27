@@ -470,7 +470,7 @@ const settingChoices: readonly (readonly [
   ],
   ['boldText', 'Bold Text', onOff],
   ['reducedMotion', 'Reduce Motion', onOff],
-  ['reducedTransparency', 'Reduce Transparency', onOff],
+  ['reducedTransparency', 'Reduce Transparency', [...onOff, 'solidHeaders']],
   ['differentiateWithoutColor', 'Differentiate Without Color', onOff],
   ['languages', 'Languages', ['en-GB,de', 'en-US,de', 'de-DE,en', 'ja']],
   ['locale', 'Locale', ['en-US', 'en-GB', 'de-DE', 'fr-FR', 'ja-JP', 'ar-EG']],

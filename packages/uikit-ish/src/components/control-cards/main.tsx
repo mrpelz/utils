@@ -24,6 +24,7 @@ import {
   formatted,
   percentFormat,
   useControlled,
+  useGivenTint,
   useIsLarge,
 } from '../card/shared.js';
 import { useGridItem } from '../grid/main.js';
@@ -407,23 +408,26 @@ const ProgressCard = forwardRef<HTMLDivElement, ControlCardProgressProps>(
       ...props
     },
     ref,
-  ) => (
-    <Card.Root
-      ref={ref}
-      active={active}
-      {...props}
-      className={cn('uikit-control-cards-progress', className)}
-      data-control-cards-part="progress"
-      style={withStyle({ '--uikit-card-progress-tint': tint }, style)}
-    >
-      {/* (In its tint, as its fill: the app's, by default.) */}
-      <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
-        {symbolOf({ emphasizedIcon, icon })}
-      </Card.Symbol>
-      <Card.Title>{label}</Card.Title>
-      {children}
-    </Card.Root>
-  ),
+  ) => {
+    const givenTint = useGivenTint(tint);
+    return (
+      <Card.Root
+        ref={ref}
+        active={active}
+        {...props}
+        className={cn('uikit-control-cards-progress', className)}
+        data-control-cards-part="progress"
+        style={withStyle({ '--uikit-card-progress-tint': givenTint }, style)}
+      >
+        {/* (In its tint, as its fill: the app's, by default.) */}
+        <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
+          {symbolOf({ emphasizedIcon, icon })}
+        </Card.Symbol>
+        <Card.Title>{label}</Card.Title>
+        {children}
+      </Card.Root>
+    );
+  },
 );
 
 /**
@@ -447,23 +451,26 @@ const StagesCard = forwardRef<HTMLDivElement, ControlCardStagesProps>(
       ...props
     },
     ref,
-  ) => (
-    <Card.Root
-      ref={ref}
-      active={active}
-      {...props}
-      className={cn('uikit-control-cards-stages', className)}
-      data-control-cards-part="stages"
-      style={withStyle({ '--uikit-card-stages-tint': tint }, style)}
-    >
-      {/* (In its tint, as its stages: the app's, by default.) */}
-      <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
-        {symbolOf({ emphasizedIcon, icon })}
-      </Card.Symbol>
-      <Card.Title>{label}</Card.Title>
-      {children}
-    </Card.Root>
-  ),
+  ) => {
+    const givenTint = useGivenTint(tint);
+    return (
+      <Card.Root
+        ref={ref}
+        active={active}
+        {...props}
+        className={cn('uikit-control-cards-stages', className)}
+        data-control-cards-part="stages"
+        style={withStyle({ '--uikit-card-stages-tint': givenTint }, style)}
+      >
+        {/* (In its tint, as its stages: the app's, by default.) */}
+        <Card.Symbol tint={tint ?? 'var(--color-ui-primary)'}>
+          {symbolOf({ emphasizedIcon, icon })}
+        </Card.Symbol>
+        <Card.Title>{label}</Card.Title>
+        {children}
+      </Card.Root>
+    );
+  },
 );
 
 /**

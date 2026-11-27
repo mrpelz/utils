@@ -73,6 +73,7 @@ export {
   type SettingsContrast,
   type SettingsPortalProps,
   type SettingsProviderProps,
+  type SettingsReducedTransparency,
   type SettingsValues,
   useLanguage,
   useSettings,

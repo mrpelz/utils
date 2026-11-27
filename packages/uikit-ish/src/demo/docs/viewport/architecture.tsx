@@ -518,6 +518,10 @@ export const ViewportEdgeEffectsArchitecture: FunctionComponent = () => (
       <li>
         A hard backing is the scroller’s own background, read from it whenever
         it changes, so it matches the page. When the scroller has none, it’s the
+        surface around it, which the surface declares in{' '}
+        <code>--uikit-viewport-edge-surface</code>: a large sheet its
+        background, medium glass (a popover, an island, a medium sheet) its
+        glass, which is opaque with transparency reduced. Without one, it’s the
         system background.
       </li>
       <li>

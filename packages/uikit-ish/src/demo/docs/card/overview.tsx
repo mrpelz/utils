@@ -201,6 +201,15 @@ export const CardOverview: FunctionComponent = () => (
         In edit mode, a card is inert: it can’t be focused or pressed, and the
         grid’s controls are what’s reached.
       </li>
+      <li>
+        It follows the <a href={publicUrl('settings')}>Settings</a>: Bold Text
+        makes all its text heavier, and More Contrast makes its wells, ticks,
+        rims and secondary text stronger. A color you give a part (
+        <code>tint</code>) has no more-contrast version of its own: set{' '}
+        <code>--uikit-card-tint-more-contrast</code> on the card (or above it),
+        and with More Contrast its parts use that instead. A light’s own color
+        stays as it is.
+      </li>
     </ul>
 
     <Heading

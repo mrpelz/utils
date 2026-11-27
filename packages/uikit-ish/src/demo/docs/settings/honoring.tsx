@@ -45,7 +45,7 @@ const rows: readonly (readonly [
       Every component;{' '}
       {components(['glass', 'Glass'], ['viewport', 'Viewport'])} especially
     </>,
-    'The color tokens (labels, separators, fills, grouped backgrounds, the system colors, your tint) switch to their more-contrast values. Glass turns opaque; the window’s background follows.',
+    'The color tokens (labels, separators, fills, grouped backgrounds, the system colors, your tint) switch to their more-contrast values, and so does the content on glass, which keeps its blur. Cards’ wells, ticks, rims and secondary text get stronger; a color you give a card’s part becomes your --uikit-card-tint-more-contrast, if you set one, and a light’s own color stays. The window’s background follows.',
   ],
   [
     'reducedMotion',
@@ -72,7 +72,7 @@ const rows: readonly (readonly [
       {components(['glass', 'Glass'], ['viewport', 'Viewport'])}, and everything
       on glass (bars, menus, popovers, sheets, alerts, buttons)
     </>,
-    'Glass turns opaque, and edges under bars turn solid instead of blurring what scrolls beneath.',
+    'Glass turns opaque. With solidHeaders, edges under bars turn solid too, instead of blurring what scrolls beneath.',
   ],
   [
     'differentiateWithoutColor',

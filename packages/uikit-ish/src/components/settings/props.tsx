@@ -6,6 +6,13 @@ import type { ColorScheme } from '../utils/main.js';
 /** Contrast: the standard one, or increased. */
 export type SettingsContrast = 'more' | 'standard';
 
+/**
+ * Transparency: as is (`false`), reduced (`true`: materials opaque), or
+ * reduced with solid headers (`'solidHeaders'`: the edges under bars
+ * solid, too, not blurring what scrolls beneath).
+ */
+export type SettingsReducedTransparency = boolean | 'solidHeaders';
+
 /** The settings, resolved (see `useSettings`). */
 export type SettingsValues = {
   /**
@@ -51,10 +58,12 @@ export type SettingsValues = {
    */
   reducedMotion: boolean;
   /**
-   * Transparency reduced: materials opaque (system:
-   * `prefers-reduced-transparency: reduce`).
+   * Transparency reduced: materials opaque (`true`; the system's,
+   * `prefers-reduced-transparency: reduce`, too); with solid headers
+   * (`'solidHeaders'`), the edges under bars solid as well, not blurring
+   * what scrolls beneath.
    */
-  reducedTransparency: boolean;
+  reducedTransparency: SettingsReducedTransparency;
   /**
    * The region (ISO 3166-1, e.g. `DE`), for the locale's conventions: the
    * first day of the week, the hour cycle, how numbers are written.
@@ -84,7 +93,7 @@ export type SettingsPortalProps = {
   'data-uikit-contrast'?: SettingsContrast;
   'data-uikit-differentiate-without-color'?: 'false' | 'true';
   'data-uikit-reduced-motion'?: 'false' | 'true';
-  'data-uikit-reduced-transparency'?: 'false' | 'true';
+  'data-uikit-reduced-transparency'?: 'false' | 'solid-headers' | 'true';
   'data-uikit-settings'?: '';
   'data-uikit-text-size'?: TextSize;
   lang?: string;

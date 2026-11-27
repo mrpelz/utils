@@ -108,8 +108,9 @@ const edgeEffectRow: PropRow = [
     <code>soft</code> is a blur that fades out away from the edge.{' '}
     <code>hard</code> is a solid backing with a dividing line. The backing isn’t
     tinted: it takes the scroller’s own background color, following it as it
-    changes, so it matches the page (the system background if the scroller has
-    none).
+    changes, so it matches the page. When the scroller has none, it takes its
+    surface’s (<code>--uikit-viewport-edge-surface</code>: a sheet’s, or medium
+    glass’s, such as a popover’s or an island’s), else the system background.
     <br />
     The effect is drawn by the scroller beneath (a{' '}
     <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}

@@ -492,6 +492,28 @@
         rgb(0 0 0 / 10%),
         rgb(255 255 255 / 16%)
       );
+
+      /* Glass keeping its blur (not opaque, see Glass), what's on it
+         stronger: its content black or white, its secondary and disabled
+         content a step further from the glass, its dark rim brighter. */
+      --glass-ui-bright-content: #000;
+      --glass-ui-bright-content-disabled: #b3b3b3;
+      --glass-ui-dim-content: #fff;
+      --glass-ui-dim-content-disabled: #4d4d4d;
+      --glass-ui-medium-light-content: #000;
+      --glass-ui-medium-light-content-secondary: #6e6e6e;
+      --glass-ui-medium-light-content-disabled: #8e8e8e;
+      --glass-ui-medium-dark-content-secondary: #c7c7c7;
+      --glass-ui-medium-dark-content-disabled: #6e6e6e;
+      --glass-ui-panel-rim: light-dark(rgb(255 255 255), rgb(255 255 255 / 35%));
+      --glass-ui-panel-dim-shadow:
+        inset 0 0 0 1px rgb(255 255 255 / 35%), 0 0 25px rgb(0 0 0 / 30%);
+      --glass-ui-bright-shadow:
+        inset -1px -1px 0 -0.5px rgb(255 255 255),
+        inset 1px 1px 0 -0.5px rgb(255 255 255),
+        inset 0 0 0 0.5px rgb(0 0 0 / 25%),
+        inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px rgb(0 0 0 / 10%),
+        0 4px 18px rgb(0 0 0 / 14%);
     }
   }
 
@@ -569,7 +591,30 @@
       rgb(0 0 0 / 10%),
       rgb(255 255 255 / 16%)
     );
+
+    /* Glass keeping its blur (not opaque, see Glass), what's on it
+       stronger: its content black or white, its secondary and disabled
+       content a step further from the glass, its dark rim brighter. */
+    --glass-ui-bright-content: #000;
+    --glass-ui-bright-content-disabled: #b3b3b3;
+    --glass-ui-dim-content: #fff;
+    --glass-ui-dim-content-disabled: #4d4d4d;
+    --glass-ui-medium-light-content: #000;
+    --glass-ui-medium-light-content-secondary: #6e6e6e;
+    --glass-ui-medium-light-content-disabled: #8e8e8e;
+    --glass-ui-medium-dark-content-secondary: #c7c7c7;
+    --glass-ui-medium-dark-content-disabled: #6e6e6e;
+    --glass-ui-panel-rim: light-dark(rgb(255 255 255), rgb(255 255 255 / 35%));
+    --glass-ui-panel-dim-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 35%), 0 0 25px rgb(0 0 0 / 30%);
+    --glass-ui-bright-shadow:
+      inset -1px -1px 0 -0.5px rgb(255 255 255),
+      inset 1px 1px 0 -0.5px rgb(255 255 255),
+      inset 0 0 0 0.5px rgb(0 0 0 / 25%),
+      inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px rgb(0 0 0 / 10%),
+      0 4px 18px rgb(0 0 0 / 14%);
   }
+
 
   /* A color scheme forced (see `useColorScheme`): on the root element, or
      on any element, for what's within it. (Forced within one forced

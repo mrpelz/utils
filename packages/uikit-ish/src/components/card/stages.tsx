@@ -4,7 +4,7 @@ import { iconOf, polyline } from '../grid/icons.js';
 import { Symbol } from '../symbol/main.js';
 import { cn, withStyle } from '../utils/main.js';
 import type { CardStageListProps, CardStageProps } from './props.js';
-import { useCardTitleId } from './shared.js';
+import { useCardTitleId, useGivenTint } from './shared.js';
 
 // A card's stages (`Card.StageList` of `Card.Stage`s): a run in order (e.g.
 // a washer's program), shown, not chosen.
@@ -30,6 +30,7 @@ const StagesContext = createContext<{ value: string | undefined } | undefined>(
 export const StageList = forwardRef<HTMLOListElement, CardStageListProps>(
   ({ children, className, style, tint, value, ...props }, ref) => {
     const titleId = useCardTitleId();
+    const givenTint = useGivenTint(tint);
     return (
       <ol
         ref={ref}
@@ -40,7 +41,7 @@ export const StageList = forwardRef<HTMLOListElement, CardStageListProps>(
         className={cn('uikit-card-stage-list', className)}
         data-card-part="stage-list"
         data-current={value === undefined ? undefined : ''}
-        style={withStyle({ '--uikit-card-stages-tint': tint }, style)}
+        style={withStyle({ '--uikit-card-stages-tint': givenTint }, style)}
       >
         <StagesContext.Provider value={{ value }}>
           {children}

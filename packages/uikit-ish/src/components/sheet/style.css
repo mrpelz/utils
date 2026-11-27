@@ -202,6 +202,10 @@
     &[data-detent='large'] {
       --uikit-sheet-background: var(--color-ui-system-background);
 
+      /* (Its scrollers' solid edges backed by it, grouped too; medium, its
+         glass's, see Glass.) */
+      --uikit-viewport-edge-surface: var(--uikit-sheet-background);
+
       border-radius: 38px 38px 0 0;
       background-color: var(--uikit-sheet-background);
       box-shadow: 0 15px 75px rgb(0 0 0 / 18%);

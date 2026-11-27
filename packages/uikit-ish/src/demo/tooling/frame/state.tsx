@@ -54,7 +54,7 @@ export type Settings = {
   languages?: readonly string[];
   locale?: string;
   reducedMotion?: boolean;
-  reducedTransparency?: boolean;
+  reducedTransparency?: SettingsValues['reducedTransparency'];
   region?: string;
   textSize?: SettingsValues['textSize'];
 };

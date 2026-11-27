@@ -25,7 +25,13 @@ export const propOptionsProvider = {
   ] as const,
   locale: [inherited, undefined, 'de', 'en-GB', 'ja'] as const,
   reducedMotion: [inherited, undefined, false, true] as const,
-  reducedTransparency: [inherited, undefined, false, true] as const,
+  reducedTransparency: [
+    inherited,
+    undefined,
+    false,
+    true,
+    'solidHeaders',
+  ] as const,
   region: [inherited, undefined, 'US', 'DE', 'JP'] as const,
   textSize: [
     inherited,

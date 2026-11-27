@@ -476,6 +476,12 @@ export const SettingsOverview: FunctionComponent = () => (
         library uses that one, and without it, your tint as it is.
       </li>
       <li>
+        A color you give one of a <a href={publicUrl('card')}>Card</a>’s parts
+        (its <code>tint</code>) works the same way: set{' '}
+        <code>--uikit-card-tint-more-contrast</code> on the card (or above it)
+        for its more-contrast version.
+      </li>
+      <li>
         Give both as colors. <code>light-dark()</code> works, so one value can
         cover both color schemes. A palette color such as{' '}
         <code>var(--color-ui-system-pink)</code> resolves where you set it, so

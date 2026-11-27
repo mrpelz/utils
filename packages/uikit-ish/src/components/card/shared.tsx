@@ -83,6 +83,20 @@ export const formattedShare = (
   formatted(format?.style === 'percent' ? share : value, { format, locale });
 
 /**
+ * A tint given to a card's part, as it's drawn: with more contrast (see
+ * Settings), the app's variant for it (`--uikit-card-tint-more-contrast`,
+ * set on the card or above it), if any; else as given. None given, none:
+ * its default, a system color, follows more contrast itself. (A light's
+ * own color, its channels', as it is.)
+ */
+export const useGivenTint = (tint: string | undefined): string | undefined => {
+  const { contrast } = useSettings();
+  return tint === undefined || contrast !== 'more'
+    ? tint
+    : `var(--uikit-card-tint-more-contrast, ${tint})`;
+};
+
+/**
  * Whether its card shows its large layout: its tile at least 2x2 (a full
  * width's: wide), however it got there (expanded, resized), or open above
  * the page.

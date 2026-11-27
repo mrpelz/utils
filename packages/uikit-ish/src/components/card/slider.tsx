@@ -6,7 +6,12 @@ import { cn } from '../utils/main.js';
 import { pressProps } from './press.js';
 import type { CardOrientation, CardSliderProps } from './props.js';
 import { CardBlendScope, useCardOrientation } from './root.js';
-import { TintProbe, useControlled, useFillScheme } from './shared.js';
+import {
+  TintProbe,
+  useControlled,
+  useFillScheme,
+  useGivenTint,
+} from './shared.js';
 
 // A slider filling its card (`Card.Slider`): its fill the card's
 // background, what's over it drawn again in the fill's colors.
@@ -96,12 +101,13 @@ export const CardSlider = forwardRef<HTMLDivElement, CardSliderProps>(
       onPress,
       onValueChange,
       step,
-      tint,
+      tint: tintProp,
       value,
       ...props
     },
     ref,
   ) => {
+    const tint = useGivenTint(tintProp);
     const orientation: CardOrientation = useCardOrientation();
     const [current, setCurrent] = useControlled(value, defaultValue ?? min);
     // (Its fill's color scheme; the layer in it registered with its card,

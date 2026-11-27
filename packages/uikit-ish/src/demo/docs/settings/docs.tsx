@@ -39,7 +39,7 @@ const settingRows: readonly PropRow[] = [
       the system’s (<code>prefers-contrast: more</code>,{' '}
       <code>forced-colors: active</code>)
     </>,
-    'The contrast: standard, or increased. More contrast darkens secondary text, separators, fills and grouped backgrounds (lightens them in dark mode), uses the system colors’ more-contrast variants and your app’s --uikit-tint-more-contrast, if you set one, and makes materials opaque, as reduced transparency does.',
+    'The contrast: standard, or increased. More contrast darkens secondary text, separators, fills and grouped backgrounds (lightens them in dark mode), uses the system colors’ more-contrast variants and your app’s --uikit-tint-more-contrast, if you set one, and strengthens the content on glass. Glass keeps its blur: that’s Reduce Transparency’s.',
   ],
   [
     'differentiateWithoutColor',
@@ -111,11 +111,16 @@ const settingRows: readonly PropRow[] = [
   ],
   [
     'reducedTransparency',
-    'boolean',
+    `boolean | ${union('solidHeaders')}`,
     <>
-      the system’s (<code>prefers-reduced-transparency: reduce</code>)
+      the system’s (<code>prefers-reduced-transparency: reduce</code>, as{' '}
+      <code>true</code>)
     </>,
-    'Reduces transparency: glass becomes opaque, and the edge under bars turns solid instead of blurring what scrolls beneath. Dimming behind sheets, alerts and drawers stays.',
+    <>
+      Reduces transparency: glass becomes opaque. With <code>solidHeaders</code>
+      , the edges under bars turn solid too, instead of blurring what scrolls
+      beneath. Dimming behind sheets, alerts and drawers stays.
+    </>,
   ],
   [
     'region',
@@ -223,7 +228,7 @@ export const settingsPortalPropsRows: readonly PropRow[] = [
   ],
   [
     'data-uikit-reduced-transparency',
-    union('true', 'false'),
+    union('true', 'false', 'solid-headers'),
     undefined,
     'Reduce Transparency, if a provider sets it.',
   ],

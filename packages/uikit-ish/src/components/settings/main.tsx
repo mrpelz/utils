@@ -24,6 +24,7 @@ import { regionOfTimeZone } from './region.js';
 export type {
   SettingsContrast,
   SettingsPortalProps,
+  SettingsReducedTransparency,
   SettingsProviderProps,
   SettingsValues,
 } from './props.js';
@@ -386,9 +387,10 @@ const attributesOf = (values: Partial<SettingsValues>) => ({
     values.differentiateWithoutColor,
   ),
   'data-uikit-reduced-motion': booleanAttribute(values.reducedMotion),
-  'data-uikit-reduced-transparency': booleanAttribute(
-    values.reducedTransparency,
-  ),
+  'data-uikit-reduced-transparency':
+    values.reducedTransparency === 'solidHeaders'
+      ? 'solid-headers'
+      : booleanAttribute(values.reducedTransparency),
   'data-uikit-text-size': values.textSize,
 });
 

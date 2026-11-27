@@ -344,17 +344,23 @@
     }
 
     /* Hard: a solid backing (the tint; else its scroller's own background,
-       matching the page, see edge-effect.tsx; else the system background),
-       a line at its inner side; tinted, or on iOS 27 the status bar's color
-       the page's no more (`data-edge-solid`, see edge-effect.tsx), at rest
-       too. */
+       matching the page, see edge-effect.tsx; else its surface's, painting
+       behind a scroller painting nothing, `--uikit-viewport-edge-surface`:
+       a sheet's, medium glass's, see Sheet and Glass; else the system
+       background), and a line at its inner side (see below). Its backing
+       at rest too, tinted, or on iOS 27 the status bar's color the page's
+       no more (`data-edge-solid`, see edge-effect.tsx); its line, only the
+       latter. */
     &[data-edge-effect='hard'] {
       &::before {
         background-color: var(
           --uikit-viewport-edge-tint,
           var(
             --uikit-viewport-edge-backing,
-            var(--color-ui-system-background)
+            var(
+              --uikit-viewport-edge-surface,
+              var(--color-ui-system-background)
+            )
           )
         );
         transition: background-color 300ms;
@@ -365,16 +371,43 @@
         opacity: 1;
       }
 
+      /* Its line, at its inner side: as content scrolls under it, also
+         tinted (its tint at rest, e.g. a page's own background behind what's
+         stuck to its bar, without a line); dividing the bars from a page
+         in another color (`data-edge-solid`), at rest too. */
       &::after {
-        content: none;
+        background-color: var(--color-ui-separator);
+        opacity: var(--uikit-viewport-edge-progress, 0);
+        transition: none;
       }
 
-      &[data-edge='block-start']::before {
-        border-bottom: 1px solid var(--color-ui-separator);
+      &[data-edge-solid]::after {
+        opacity: 1;
       }
 
-      &[data-edge='block-end']::before {
-        border-top: 1px solid var(--color-ui-separator);
+      &[data-edge='block-start']::after {
+        top: auto;
+        height: 1px;
+      }
+
+      &[data-edge='block-end']::after {
+        bottom: auto;
+        height: 1px;
+      }
+
+      /* On medium glass (a sheet's, a popover's, an island's: its rim 1px
+         inside its edge, see Glass): 1px in from its sides and its outer
+         end, the rim still showing above and beside it. */
+      :where(.uikit-glass-medium) &[data-edge='block-start']::before {
+        inset: 1px 1px 0;
+      }
+
+      :where(.uikit-glass-medium) &[data-edge='block-end']::before {
+        inset: 0 1px 1px;
+      }
+
+      :where(.uikit-glass-medium) &::after {
+        inset-inline: 1px;
       }
     }
 

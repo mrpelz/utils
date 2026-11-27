@@ -93,7 +93,8 @@ const choices: readonly Choice[] = [
   },
   {
     key: 'reducedTransparency',
-    options: onOff,
+    note: 'On: glass turns opaque. Including solid headers: the edges under bars turn solid too, instead of blurring what scrolls beneath. System: on, without solid headers.',
+    options: [...onOff, ['solidHeaders', 'On, Including Solid Headers']],
     title: 'Reduce Transparency',
   },
   {

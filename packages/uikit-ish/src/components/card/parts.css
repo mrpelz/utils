@@ -193,8 +193,8 @@
     > .uikit-card-value {
     color: var(--uikit-glass-content-secondary);
     font-size: var(--font-ui-subheadline-size);
-    font-variation-settings: normal;
-    font-weight: normal;
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     line-height: var(--font-ui-subheadline-line-height);
   }
 
@@ -235,8 +235,8 @@
     > .uikit-card-value {
       color: var(--uikit-glass-content-secondary);
       font-size: var(--font-ui-subheadline-size);
-      font-variation-settings: normal;
-      font-weight: normal;
+      font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
       line-height: var(--font-ui-subheadline-line-height);
     }
   }
@@ -489,8 +489,8 @@
   .uikit-card-segmented-subtitle {
     color: var(--uikit-glass-content-secondary);
     font-size: var(--font-ui-footnote-size);
-    font-variation-settings: normal;
-    font-weight: normal;
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     line-height: var(--font-ui-footnote-line-height);
 
     :is([data-layout='tall'], [data-layout='upright'][data-narrow]) & {
@@ -541,6 +541,14 @@
      color scheme (see the parts). By its clip, not its layout: nothing laid
      out anew as it changes. */
   .uikit-card-progress-bar {
+    /* (Its tint, resolved here: in the card's color scheme, not its
+       fill's own (see below; a system color's `light-dark()` pair
+       otherwise its other scheme's there).) */
+    --uikit-card-progress-color: var(
+      --uikit-card-progress-tint,
+      var(--color-ui-primary)
+    );
+
     position: relative;
     overflow: clip;
     height: 36px;
@@ -575,6 +583,8 @@
     flex: none;
     color: var(--uikit-glass-content-secondary);
     font-size: var(--font-ui-footnote-size, 13px);
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     margin-inline-start: auto;
     white-space: nowrap;
   }
@@ -587,10 +597,7 @@
 
   .uikit-card-progress-fill {
     position: absolute;
-    background-color: var(
-      --uikit-card-progress-tint,
-      var(--color-ui-primary)
-    );
+    background-color: var(--uikit-card-progress-color);
     clip-path: inset(
       0 calc(100% - var(--uikit-card-progress, 0%)) 0 0
     );
@@ -604,14 +611,18 @@
     }
 
     > .uikit-card-tint-probe {
-      color: var(--uikit-card-progress-tint, var(--color-ui-primary));
+      color: var(--uikit-card-progress-color);
     }
 
     /* (Its detail quieter as its label is drawn on it (see
        `textSchemeOn`), not in the glass's secondary color: a gray,
        meant for the glass, not for a colored fill.) */
     .uikit-card-progress-detail {
-      color: color-mix(in srgb, var(--uikit-glass-content) 75%, transparent);
+      color: color-mix(
+        in srgb,
+        var(--uikit-glass-content) var(--uikit-card-fill-secondary, 75%),
+        transparent
+      );
     }
 
   }
@@ -623,6 +634,8 @@
     min-width: 0;
     color: var(--uikit-glass-content-secondary);
     font-size: var(--font-ui-subheadline-size);
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     grid-area: subtitle;
     line-height: var(--font-ui-subheadline-line-height);
     text-overflow: ellipsis;
@@ -718,6 +731,8 @@
   .uikit-card-stage-label {
     overflow: hidden;
     max-width: 100%;
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -766,4 +781,14 @@
         );
     }
   }
+}
+
+/* A progress bar's tint as a color (see `.uikit-card-progress-bar`):
+   computed where it's set, so its fill, in a color scheme of its own,
+   inherits the color, not a `light-dark()` pair to resolve again. Not
+   transitioned (see the guide's iOS Quirks). */
+@property --uikit-card-progress-color {
+  inherits: true;
+  initial-value: transparent;
+  syntax: '<color>';
 }

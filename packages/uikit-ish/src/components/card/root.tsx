@@ -43,7 +43,7 @@ import type {
   CardTrendProps,
   CardValueProps,
 } from './props.js';
-import { CardContext } from './shared.js';
+import { CardContext, useGivenTint } from './shared.js';
 
 // A card's own parts (see main.tsx): its root, its symbol, its switch,
 // its title, value and subtitle, a trend, its corner buttons.
@@ -363,6 +363,7 @@ const CardSymbol = forwardRef<HTMLSpanElement, CardSymbolProps>(
     ref,
   ) => {
     const blendLayer = useContext(CardBlendScope)?.layer ?? null;
+    const givenTint = useGivenTint(tint);
     const symbol = useRender({
       defaultTagName: 'span',
       props: {
@@ -371,7 +372,7 @@ const CardSymbol = forwardRef<HTMLSpanElement, CardSymbolProps>(
         className: cn('uikit-card-symbol', className),
         'data-active': active ? '' : undefined,
         'data-card-part': 'symbol',
-        style: withStyle({ '--uikit-card-symbol-tint': tint }, style),
+        style: withStyle({ '--uikit-card-symbol-tint': givenTint }, style),
       },
       ref,
       render,
@@ -404,17 +405,20 @@ const CardSymbol = forwardRef<HTMLSpanElement, CardSymbolProps>(
  * `useGridItemLayout`).
  */
 const CardSwitch = forwardRef<HTMLSpanElement, CardSwitchProps>(
-  ({ className, style, tint, ...props }, ref) => (
-    <Switch.Root
-      ref={ref}
-      {...props}
-      className={cn('uikit-card-switch', className)}
-      data-card-part="switch"
-      style={withStyle({ '--uikit-card-switch-tint': tint }, style)}
-    >
-      <Switch.Thumb />
-    </Switch.Root>
-  ),
+  ({ className, style, tint, ...props }, ref) => {
+    const givenTint = useGivenTint(tint);
+    return (
+      <Switch.Root
+        ref={ref}
+        {...props}
+        className={cn('uikit-card-switch', className)}
+        data-card-part="switch"
+        style={withStyle({ '--uikit-card-switch-tint': givenTint }, style)}
+      >
+        <Switch.Thumb />
+      </Switch.Root>
+    );
+  },
 );
 
 /**

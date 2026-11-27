@@ -284,11 +284,14 @@ const Layer: FunctionComponent<{
     portalContainer === undefined &&
     isIos27();
   useMeasure(layer, line, scroller, edge);
-  // (Transparency reduced, the system's or a provider's: a soft one hard,
-  // the bars solid, as their glass, see Glass.)
+  // (Transparency reduced with solid headers, a provider's: a soft one
+  // hard, the bars solid, as their glass, see Glass. Reduced alone, as
+  // the system's, soft still.)
   const { reducedTransparency } = useSettings();
   const kind =
-    reducedTransparency && effect?.effect === 'soft' ? 'hard' : effect?.effect;
+    reducedTransparency === 'solidHeaders' && effect?.effect === 'soft'
+      ? 'hard'
+      : effect?.effect;
   useBacking(layer, scroller, kind === 'hard', isUnderStatusBar);
 
   if (!effect) return null;

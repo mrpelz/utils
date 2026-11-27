@@ -18,10 +18,15 @@
        app's own, e.g. a bar), recessed: a translucent tint of its text's
        color, shaded at its top, a hairline rim, lit at its bottom edge; by
        its text's color, right on its glass in both schemes and bright.) */
-    --uikit-card-well: color-mix(in srgb, currentcolor 7%, transparent);
+    --uikit-card-well: color-mix(
+      in srgb,
+      currentcolor var(--uikit-card-well-fill, 7%),
+      transparent
+    );
     --uikit-card-well-shadow:
       inset 0 1px 3px rgb(0 0 0 / 14%),
-      inset 0 0 0 0.5px color-mix(in srgb, currentcolor 12%, transparent),
+      inset 0 0 0 0.5px
+        color-mix(in srgb, currentcolor var(--uikit-card-well-rim, 12%), transparent),
       inset 0 -0.5px 0 rgb(255 255 255 / 35%);
 
     /* (Its layout's padding, also its slider's label's and value's copies'
@@ -58,6 +63,32 @@
     &[data-pressable] {
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
+    }
+  }
+
+  /* More contrast (see Settings; a provider's attribute, else the
+     system's media query, within a provider only): its wells denser, its
+     ticks darker, on, its secondary text and its hairline stronger, its
+     progress's detail on its fill too. (Its
+     colors given, a light's or an app's tint, as they are.) */
+  :where([data-uikit-contrast='more'])
+    .uikit-card-root:not(:where([data-uikit-contrast='standard']) *) {
+    --uikit-card-well-fill: 14%;
+    --uikit-card-well-rim: 24%;
+    --uikit-card-tick-shade: 22%;
+    --uikit-card-on-secondary: 75%;
+    --uikit-card-on-rim: 20%;
+    --uikit-card-fill-secondary: 92%;
+  }
+
+  @media (prefers-contrast: more), (forced-colors: active) {
+    .uikit-card-root:where([data-uikit-settings] *):not(:where([data-uikit-contrast='standard']) *) {
+      --uikit-card-well-fill: 14%;
+      --uikit-card-well-rim: 24%;
+      --uikit-card-tick-shade: 22%;
+      --uikit-card-on-secondary: 75%;
+      --uikit-card-on-rim: 20%;
+      --uikit-card-fill-secondary: 92%;
     }
   }
 
@@ -328,6 +359,8 @@
     color: var(--uikit-glass-content-secondary);
     font-size: var(--font-ui-subheadline-size);
     font-variant-numeric: tabular-nums;
+    font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+    font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
     grid-area: value;
     line-height: var(--font-ui-subheadline-line-height);
     text-overflow: ellipsis;
@@ -357,8 +390,8 @@
     > .uikit-card-value {
       color: var(--uikit-glass-content-secondary);
       font-size: var(--font-ui-subheadline-size);
-      font-variation-settings: normal;
-      font-weight: normal;
+      font-variation-settings: 'wght' calc(400 + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(400 + var(--uikit-font-weight-boost, 0)), 100);
       line-height: var(--font-ui-subheadline-line-height);
     }
   }
@@ -473,7 +506,10 @@
     /* (On its glass, faint (decoration): as its border is, dark; a
        hairline's shade, light. Its ticks', and its fill's end's while its
        switch is off, see below.) */
-    --uikit-card-tick: light-dark(rgb(0 0 0 / 10%), var(--glass-ui-panel-rim));
+    --uikit-card-tick: light-dark(
+      rgb(0 0 0 / var(--uikit-card-tick-shade, 10%)),
+      var(--glass-ui-panel-rim)
+    );
 
     .uikit-slider-ticks {
       z-index: -1;
@@ -674,7 +710,7 @@
       var(--glass-ui-medium-dark-content)
     );
     --uikit-glass-content-secondary: light-dark(
-      rgb(0 0 0 / 55%),
+      rgb(0 0 0 / var(--uikit-card-on-secondary, 55%)),
       var(--glass-ui-medium-dark-content-secondary)
     );
 
@@ -683,15 +719,17 @@
        page's.) */
     &[data-editing] {
       --uikit-glass-content: #000;
-      --uikit-glass-content-secondary: rgb(0 0 0 / 55%);
+      --uikit-glass-content-secondary: rgb(
+        0 0 0 / var(--uikit-card-on-secondary, 55%)
+      );
     }
 
     /* (Opaque, lifted: apart from light glass, in the light scheme, the
        backdrop not showing through it.) */
     --uikit-glass-background: var(--uikit-card-on-background, #fff);
     --uikit-glass-shadow:
-      inset 0 0 0 0.5px rgb(0 0 0 / 8%), 0 2px 6px rgb(0 0 0 / 12%),
-      0 8px 28px rgb(0 0 0 / 20%);
+      inset 0 0 0 0.5px rgb(0 0 0 / var(--uikit-card-on-rim, 8%)),
+      0 2px 6px rgb(0 0 0 / 12%), 0 8px 28px rgb(0 0 0 / 20%);
     --uikit-card-rim: 0.5px;
 
     /* (Its symbol on: in its tint, its `Symbol`'s emphasized icon (e.g.
