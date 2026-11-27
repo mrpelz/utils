@@ -348,9 +348,7 @@
        behind a scroller painting nothing, `--uikit-viewport-edge-surface`:
        a sheet's, medium glass's, see Sheet and Glass; else the system
        background), and a line at its inner side (see below). Its backing
-       at rest too, tinted, or on iOS 27 the status bar's color the page's
-       no more (`data-edge-solid`, see edge-effect.tsx); its line, only the
-       latter. */
+       at rest too, tinted. */
     &[data-edge-effect='hard'] {
       &::before {
         background-color: var(
@@ -366,23 +364,17 @@
         transition: background-color 300ms;
       }
 
-      &[data-edge-tinted]::before,
-      &[data-edge-solid]::before {
+      &[data-edge-tinted]::before {
         opacity: 1;
       }
 
       /* Its line, at its inner side: as content scrolls under it, also
          tinted (its tint at rest, e.g. a page's own background behind what's
-         stuck to its bar, without a line); dividing the bars from a page
-         in another color (`data-edge-solid`), at rest too. */
+         stuck to its bar, without a line). */
       &::after {
         background-color: var(--color-ui-separator);
         opacity: var(--uikit-viewport-edge-progress, 0);
         transition: none;
-      }
-
-      &[data-edge-solid]::after {
-        opacity: 1;
       }
 
       &[data-edge='block-start']::after {

@@ -73,8 +73,12 @@ type Entry = {
   effect?: ViewportEdgeEffect;
   handle: ViewportAnchorHandle | undefined;
   keyboard?: ViewportAnchorProps['keyboard'];
-  /** An anchor, or an open overscroll area (adding to them, see above). */
-  kind: 'anchor' | 'overscroll';
+  /**
+   * An anchor, or an open overscroll area (adding to them, see above); or
+   * a background (`Viewport.Background`, its edge and size unused: shown
+   * in its scope, see `useBackgroundRegistration`).
+   */
+  kind: 'anchor' | 'background' | 'overscroll';
   /** Its border box's (the safe area inset it keeps clear too), for its effect. */
   outer?: number;
   size: number;
@@ -572,3 +576,36 @@ export const Padding = forwardRef<HTMLDivElement, ViewportPaddingProps>(
     );
   },
 );
+
+/**
+ * A background (`Viewport.Background`) registered in its scope while it's
+ * mounted: e.g. a navigation's page's, its own (not its stack's other
+ * pages', also while it's leaving, or hidden under another), or the
+ * window's, every page's within it (see `useIsBackgroundShown`).
+ */
+export const useBackgroundRegistration = (): void => {
+  const store = useStore();
+  useLayoutEffect(
+    () =>
+      store.add({
+        edge: 'block-start',
+        handle: undefined,
+        kind: 'background',
+        size: 0,
+      }),
+    [store],
+  );
+};
+
+/**
+ * Whether a background's registered in its scope, or in one it's within
+ * (see `useBackgroundRegistration`): not a sheet's, a scope of its own.
+ */
+export const useIsBackgroundShown = (): boolean => {
+  const store = useStore();
+  return useSyncExternalStore(
+    store.subscribe,
+    () => store.entries().some(({ kind }) => kind === 'background'),
+    () => false,
+  );
+};

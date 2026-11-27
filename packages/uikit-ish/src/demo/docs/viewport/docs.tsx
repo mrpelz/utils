@@ -130,10 +130,15 @@ const edgeEffectRow: PropRow = [
     applies when <code>isIos27</code> is set (the app’s head starts the page
     below the status bar, see{' '}
     <a href={publicUrl('ios-quirks#the-status-bar-blur')}>iOS Quirks</a>), and
-    not inside a sheet, popover, island or portal container. Its untinted
-    backing then has the status bar’s color, which iOS reads once from the page
-    as the app loads. If the page’s background changes later, the backing stays
-    solid even at rest.
+    not inside a sheet, popover, island or portal container. It stays{' '}
+    <code>soft</code> while its page shows a{' '}
+    <PartLink
+      component="viewport"
+      part="Viewport.Background"
+    />
+    , such as a picture filling the screen. That counts a background in the same
+    navigation page, or one around all pages, but not another page’s, even while
+    that page slides away or stays hidden underneath.
     <br />
     How much content shows through: a <code>soft</code> effect is solid under
     half of it and fades out past that. A veil (

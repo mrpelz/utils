@@ -131,9 +131,8 @@ export type ViewportAnchorProps = ComponentProps<'div'> & {
    * under it (and under what's stuck to it, see `useViewportEdgeElement`).
    * On iOS 27 (`isIos27`, the app below the status bar), at the screen's
    * top (not in a sheet, popover or island, nor a portal container): `hard`
-   * by default, beneath the system's status bar, its backing, untinted, the
-   * status bar's color (the page's as the app loaded), solid at rest once
-   * the page's is another.
+   * by default, beneath the system's status bar; `soft` still while its
+   * page shows a `Viewport.Background` (in its scope, or one it's within).
    * @default 'soft'
    */
   edgeEffect?: ViewportEdgeEffect;

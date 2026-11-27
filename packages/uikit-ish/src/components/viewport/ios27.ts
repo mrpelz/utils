@@ -4,14 +4,16 @@ import { createContext } from 'react';
 // (`apple-mobile-web-app-status-bar-style` `black-translucent`) gets a blur
 // at its top, reaching down over its top bar's buttons and title, which no
 // element of the page's prevents. Started below the status bar instead
-// (`default`: the system's own opaque bar, in the page's background color
-// as it loaded), nothing of it is under the status bar. The app's head
+// (`default`: the system's own opaque bar, in the page's background color,
+// following it), nothing of it is under the status bar. The app's head
 // decides (an inline script, before Safari reads the meta tag: by Safari's
 // version, `Version/27`, the OS's frozen in the user agent since iOS 26),
 // setting the style and marking the document (`data-ios27`), read here.
 // Marked, a bar at the screen's top defaults to a hard edge effect, beneath
-// the system's bar (see `Anchor`), its backing the status bar's color (see
-// edge-effect.tsx).
+// the system's bar (see `Anchor`), its backing as any hard one's (iOS
+// following the page's color in the status bar as it changes); not while
+// its page shows a background (`Viewport.Background` in its scope or one
+// it's within, e.g. a picture filling the screen): soft, as elsewhere.
 
 /** The document's mark, set by the app's head (see above). */
 export const ios27Attribute = 'data-ios27';

@@ -42,6 +42,8 @@ import {
   Padding,
   useAnchorRegistration,
   useAnchorSize,
+  useBackgroundRegistration,
+  useIsBackgroundShown,
   useOverscrollRoom,
   usePushedAnchorSize,
 } from './padding.js';
@@ -1276,14 +1278,17 @@ const Anchor = forwardRef<HTMLDivElement, ViewportAnchorProps>(
     const ref = useForwardedRef(forwardedRef);
     // (Unset: soft; on iOS 27, at the screen's top, hard, beneath the
     // system's status bar, see ios27.ts: not in a popup inset from it, nor
-    // in a portal container, e.g. a device's frame.)
+    // in a portal container, e.g. a device's frame, nor while its page
+    // shows a background, see `useIsBackgroundShown`.)
     const isInset = useContext(ViewportInsetContext);
     const portalContainer = usePortalContainer(undefined);
+    const isBackgroundShown = useIsBackgroundShown();
     const edgeEffect =
       ownEdgeEffect ??
       (edge === 'block-start' &&
       !isInset &&
       portalContainer === undefined &&
+      !isBackgroundShown &&
       isIos27()
         ? 'hard'
         : 'soft');
@@ -1680,17 +1685,22 @@ const KeyboardAccessory = forwardRef<
  * not scrolling, not moved by the keyboard. Its children layered, each
  * filling it (images and videos covering it): e.g. a picture, a map or a
  * video, showing where nothing in front paints (e.g. beside a layout's
- * floating column, or between its columns).
+ * floating column, or between its columns). On iOS 27, its page's top bars
+ * (its scope's, see `useBackgroundRegistration`) soft by default while
+ * it's shown (see ios27.ts).
  */
 const Background = forwardRef<HTMLDivElement, ViewportBackgroundProps>(
-  ({ className, ...props }, ref) => (
-    <div
-      ref={ref}
-      {...props}
-      className={cn('uikit-viewport-background', className)}
-      data-viewport-part="background"
-    />
-  ),
+  ({ className, ...props }, ref) => {
+    useBackgroundRegistration();
+    return (
+      <div
+        ref={ref}
+        {...props}
+        className={cn('uikit-viewport-background', className)}
+        data-viewport-part="background"
+      />
+    );
+  },
 );
 
 export const Viewport = {

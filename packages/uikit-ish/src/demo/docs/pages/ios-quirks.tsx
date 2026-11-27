@@ -198,11 +198,9 @@ export const IosQuirksPage: FunctionComponent = () => (
     </Heading>
     <p>
       With <code>default</code>, the system draws an opaque status bar and the
-      page starts below it. iOS takes the bar’s color from the page once, as the
-      app loads: the background of the element at the top, not the document
-      root’s. If the background changes later, or another page shows with a
-      different one, the status bar keeps its first color until the app is
-      loaded again.
+      page starts below it. iOS picks the bar’s color from the page, not from
+      the document root, and keeps following it while the app runs: when another
+      page shows with a different background, the status bar takes it on.
     </p>
 
     <Heading
@@ -229,18 +227,19 @@ export const IosQuirksPage: FunctionComponent = () => (
       <a href={publicUrl('popover')}>Popover</a> or an{' '}
       <a href={publicUrl('island')}>Island</a> aren’t at the screen’s top and
       keep their own, as does anything in a portal container (like a device
-      frame on this site). An <code>edgeEffect</code> you set always wins.
+      frame on this site). While a page shows a{' '}
+      <PartLink
+        component="viewport"
+        part="Viewport.Background"
+      />
+      , such as a picture filling the screen, that page’s bars keep the soft
+      effect. Other pages aren’t affected by it. An <code>edgeEffect</code> you
+      set always wins.
     </p>
     <p>
-      The bar’s backing, when it isn’t tinted, uses the status bar’s color: the
-      background behind the first page as it loaded (its own, or the nearest
-      ancestor’s that paints one), so the two bars meet as one. While the page’s
-      background still matches, the bar appears as content scrolls under it,
-      with its line. Once the page’s background differs (it changed, another
-      page is shown, or the color scheme switched), the bar stays solid at rest
-      too, with its line dividing the bars from the page, the way a tinted bar
-      does (<code>edgeTint</code>, see{' '}
-      <a href={publicUrl('viewport')}>Viewport</a>).
+      The bar’s backing is the same as any hard edge effect’s: the page’s own
+      background, so it meets the status bar, which follows the page. It appears
+      as content scrolls under it, with its line.
     </p>
 
     <Heading

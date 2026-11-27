@@ -526,7 +526,7 @@ export const ViewportEdgeEffectsArchitecture: FunctionComponent = () => (
       </li>
       <li>
         On iOS 27, a bar at the top of the screen defaults to a hard effect,
-        with the status bar’s color as its backing (see{' '}
+        unless its page shows a background (see{' '}
         <a href={publicUrl('viewport/architecture/status-bar')}>Status bar</a>).
       </li>
     </ul>
@@ -825,9 +825,21 @@ export const ViewportStatusBarArchitecture: FunctionComponent = () => (
       </li>
       <li>
         When the document is marked, a bar at the top of the screen defaults to
-        a hard edge effect. Its backing is the status bar’s color, which is the
-        page’s background as it loaded, since iOS reads it once. That way, the
-        two bars meet.
+        a hard edge effect, backed like any other hard one. The status bar
+        follows the page’s color by itself.
+      </li>
+      <li>
+        A{' '}
+        <PartLink
+          component="viewport"
+          part="Viewport.Background"
+        />{' '}
+        registers in its anchor scope, as anchors do (
+        <code>useBackgroundRegistration</code>). A bar whose scope, or a scope
+        it’s within, holds one keeps its soft effect over the picture. Each
+        navigation page has a scope of its own, so a page leaving, or hidden
+        under another, doesn’t change the bars of the page shown. A sheet’s
+        scope is its own too, and its bars aren’t at the screen’s top anyway.
       </li>
       <li>
         Bars in a popup inset from the top, or in a portal container, aren’t at
