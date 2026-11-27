@@ -106,6 +106,10 @@
     --uikit-popover-highlight: light-dark(rgb(255 255 255 / 60%), transparent);
     --uikit-popover-glow: light-dark(rgb(0 0 0 / 20%), rgb(0 0 0 / 15%));
 
+    /* Its corners, for its body's edge effects (fixed to it, not clipped
+       by it, see Viewport). */
+    --uikit-viewport-edge-radius: 13px;
+
     position: relative;
 
     /* Its header over its body, within the viewport (Base UI's room for
@@ -115,7 +119,7 @@
     max-width: var(--available-width);
     max-height: var(--available-height);
     flex-direction: column;
-    border-radius: 13px;
+    border-radius: var(--uikit-viewport-edge-radius);
     background-color: transparent;
     box-shadow: none;
     color: var(--uikit-glass-content);

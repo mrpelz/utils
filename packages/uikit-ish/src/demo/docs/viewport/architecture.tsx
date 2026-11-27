@@ -525,6 +525,13 @@ export const ViewportEdgeEffectsArchitecture: FunctionComponent = () => (
         system background.
       </li>
       <li>
+        The effect is fixed to its surface, which doesn’t always clip it. A
+        popover can’t, since its glass and arrow reach outside its box. So a
+        surface like that declares its corners in{' '}
+        <code>--uikit-viewport-edge-radius</code>, and the backing rounds its
+        outer corners to match, 1px smaller on glass, inside its rim.
+      </li>
+      <li>
         On iOS 27, a bar at the top of the screen defaults to a hard effect,
         unless its page shows a background (see{' '}
         <a href={publicUrl('viewport/architecture/status-bar')}>Status bar</a>).

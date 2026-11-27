@@ -368,6 +368,18 @@
         opacity: 1;
       }
 
+      /* Its outer corners its surface's (`--uikit-viewport-edge-radius`,
+         e.g. a popover's: its layer, fixed to it, not clipped by it). */
+      &[data-edge='block-start']::before {
+        border-start-end-radius: var(--uikit-viewport-edge-radius, 0);
+        border-start-start-radius: var(--uikit-viewport-edge-radius, 0);
+      }
+
+      &[data-edge='block-end']::before {
+        border-end-end-radius: var(--uikit-viewport-edge-radius, 0);
+        border-end-start-radius: var(--uikit-viewport-edge-radius, 0);
+      }
+
       /* Its line, at its inner side: as content scrolls under it, also
          tinted (its tint at rest, e.g. a page's own background behind what's
          stuck to its bar, without a line). */
@@ -389,12 +401,29 @@
 
       /* On medium glass (a sheet's, a popover's, an island's: its rim 1px
          inside its edge, see Glass): 1px in from its sides and its outer
-         end, the rim still showing above and beside it. */
+         end, the rim still showing above and beside it; its corners within
+         the rim's. */
       :where(.uikit-glass-medium) &[data-edge='block-start']::before {
+        border-start-end-radius: max(
+          0px,
+          var(--uikit-viewport-edge-radius, 0px) - 1px
+        );
+        border-start-start-radius: max(
+          0px,
+          var(--uikit-viewport-edge-radius, 0px) - 1px
+        );
         inset: 1px 1px 0;
       }
 
       :where(.uikit-glass-medium) &[data-edge='block-end']::before {
+        border-end-end-radius: max(
+          0px,
+          var(--uikit-viewport-edge-radius, 0px) - 1px
+        );
+        border-end-start-radius: max(
+          0px,
+          var(--uikit-viewport-edge-radius, 0px) - 1px
+        );
         inset: 0 1px 1px;
       }
 

@@ -110,7 +110,10 @@ const edgeEffectRow: PropRow = [
     tinted: it takes the scroller’s own background color, following it as it
     changes, so it matches the page. When the scroller has none, it takes its
     surface’s (<code>--uikit-viewport-edge-surface</code>: a sheet’s, or medium
-    glass’s, such as a popover’s or an island’s), else the system background.
+    glass’s, such as a popover’s or an island’s), else the system background. A
+    surface that doesn’t clip its content gives its corners in{' '}
+    <code>--uikit-viewport-edge-radius</code>, so the backing follows them (a{' '}
+    <a href={publicUrl('popover')}>Popover</a> does).
     <br />
     The effect is drawn by the scroller beneath (a{' '}
     <a href={publicUrl('page')}>Page</a>, a sheet’s content, the{' '}
