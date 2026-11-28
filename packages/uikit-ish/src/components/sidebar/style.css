@@ -77,6 +77,16 @@
       );
     overscroll-behavior: contain;
 
+    /* Its shadows outside fading as its column's overlaid (an opened grid
+       item over it, see Glass): quickly, gone before the item reaches it
+       (cut out from its first frame, next to it); back as the backdrop
+       fades. */
+    transition: box-shadow 300ms;
+
+    :where([data-overlaid]) & {
+      transition-duration: 100ms;
+    }
+
     &[data-regular] {
       margin-block-end: 8px;
       margin-inline: 8px;

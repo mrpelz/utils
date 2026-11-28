@@ -222,6 +222,20 @@
       0 4px 18px rgb(0 0 0 / 14%);
 
     /*
+     * The panel's and the bright glass's edges without their shadows
+     * outside (transparent, for a transition): e.g. a sidebar cut out,
+     * clipped at its column's edge (see Sidebar)
+     */
+    --glass-ui-panel-dim-shadow-inset:
+      inset 0 0 0 1px rgb(255 255 255 / 15%), 0 0 25px transparent;
+    --glass-ui-bright-shadow-inset:
+      inset -1px -1px 0 -0.5px rgb(255 255 255),
+      inset 1px 1px 0 -0.5px rgb(255 255 255),
+      inset 0 0 0 0.5px rgb(0 0 0 / 12%),
+      inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px transparent,
+      0 4px 18px transparent;
+
+    /*
      * The “Medium” glass material (menus, edit menus), by color scheme, for
      * the content on it:
      * - content, content-secondary (subtitles, shortcuts), content-disabled
@@ -514,6 +528,14 @@
         inset 0 0 0 0.5px rgb(0 0 0 / 25%),
         inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px rgb(0 0 0 / 10%),
         0 4px 18px rgb(0 0 0 / 14%);
+      --glass-ui-panel-dim-shadow-inset:
+        inset 0 0 0 1px rgb(255 255 255 / 35%), 0 0 25px transparent;
+      --glass-ui-bright-shadow-inset:
+        inset -1px -1px 0 -0.5px rgb(255 255 255),
+        inset 1px 1px 0 -0.5px rgb(255 255 255),
+        inset 0 0 0 0.5px rgb(0 0 0 / 25%),
+        inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px transparent,
+        0 4px 18px transparent;
     }
   }
 
@@ -613,6 +635,14 @@
       inset 0 0 0 0.5px rgb(0 0 0 / 25%),
       inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px rgb(0 0 0 / 10%),
       0 4px 18px rgb(0 0 0 / 14%);
+    --glass-ui-panel-dim-shadow-inset:
+      inset 0 0 0 1px rgb(255 255 255 / 35%), 0 0 25px transparent;
+    --glass-ui-bright-shadow-inset:
+      inset -1px -1px 0 -0.5px rgb(255 255 255),
+      inset 1px 1px 0 -0.5px rgb(255 255 255),
+      inset 0 0 0 0.5px rgb(0 0 0 / 25%),
+      inset 0 0 8px 0 rgb(255 255 255 / 60%), 0 1px 3px transparent,
+      0 4px 18px transparent;
   }
 
 

@@ -18,8 +18,8 @@ import type { GridOpenChangeReason } from './props.js';
 // An item opened above the page (see `Grid.Item`'s `open`): its tile's
 // body lifted out of the grid (its stand-in keeping its place, nothing
 // below reflowing), in the middle of the screen (its portal container's:
-// a device's screen in a page of demos, else the window; beside a sidebar,
-// see `roomOf`) at its open size, above the page dimmed (a contextual
+// a device's screen in a page of demos, else the window; over a sidebar
+// too, see `coversOf`) at its open size, above the page dimmed (a contextual
 // menu's backdrop, the same); the live body, never remounted (what's in
 // it keeps its state). Placed as it opens, again as the screen or its
 // place changes; getting there (and back, still lifted, closing) as any
@@ -135,25 +135,6 @@ const coversOf = (element: HTMLElement) =>
       !column.contains(element) && !Object.hasOwn(column.dataset, 'closed'),
   );
 
-/**
- * The room it's centered in: its screen, less what covers it at either
- * side (see `coversOf`, e.g. a sidebar): opened beside it, not under it
- * (its cutout there would make it its glass's backdrop root, its blur
- * seeing nothing behind it); all of the screen, if that's too narrow.
- */
-const roomOf = (screen: DOMRect, covers: readonly HTMLElement[]): Box => {
-  let { left, right } = screen;
-  for (const cover of covers) {
-    const rect = cover.getBoundingClientRect();
-    if (rect.right <= left || rect.left >= right) continue;
-    if (rect.left <= left + 1) left = Math.max(left, rect.right);
-    else if (rect.right >= right - 1) right = Math.min(right, rect.left);
-  }
-  return right - left < screen.width / 2
-    ? screen
-    : { height: screen.height, left, top: screen.top, width: right - left };
-};
-
 /** Whether two boxes overlap. */
 const isOverlapping = (a: Box, b: DOMRect) =>
   a.left < b.right &&
@@ -230,7 +211,7 @@ export const useOverlay = ({
     latest.current = { onClose, size };
   });
 
-  // (Placed: open, its room's middle (see `roomOf`); closing, its place
+  // (Placed: open, its screen's middle; closing, its place
   // (its stand-in's); again as the screen or its place changes. The
   // backdrop's cutout, the underlay's clip where it's drawn, each frame
   // while it's moving.)
@@ -246,33 +227,38 @@ export const useOverlay = ({
     const set = (name: string, value: number) =>
       style.setProperty(`--uikit-grid-open-${name}`, `${String(value)}px`);
     const covers = coversOf(element);
+    // (Open: where it's going, see `locate`.)
+    let target: Box | undefined;
     const cut = () => {
       const box = boxOf(element.getBoundingClientRect());
       const radius = radiusOf(element);
       underlay.style.clipPath = clipOf(underlay, box, radius, false);
-      // (What covers it cut out only where it overlaps it: too wide for the
-      // room beside it.)
+      // (What covers it cut out only where it overlaps it; marked
+      // overlaid (`data-overlaid`) already as it opens, where it's going
+      // overlapping it, until it's no longer cut out closing: its glass's
+      // shadows outside, clipped at its edge, faded beforehand, see Glass.)
       for (const layer of [backdrop, ...covers]) {
-        if (
-          layer === backdrop ||
-          isOverlapping(box, layer.getBoundingClientRect())
-        ) {
+        const rect = layer.getBoundingClientRect();
+        const isCut = layer === backdrop || isOverlapping(box, rect);
+        if (isCut) {
           cutOut(layer, box, radius);
           layer.style.clipPath = clipOf(layer, box, radius, true);
         } else {
           fillIn(layer);
           layer.style.removeProperty('clip-path');
         }
+        if (layer === backdrop) continue;
+        const isOverlaid =
+          isCut || (target !== undefined && isOverlapping(target, rect));
+        layer.toggleAttribute('data-overlaid', isOverlaid);
       }
     };
     const locate = () => {
       const home = place.getBoundingClientRect();
-      const box = isOpen
-        ? targetOf(
-            roomOf(backdrop.getBoundingClientRect(), covers),
-            latest.current.size,
-          )
-        : boxOf(home);
+      target = isOpen
+        ? targetOf(boxOf(backdrop.getBoundingClientRect()), latest.current.size)
+        : undefined;
+      const box = target ?? boxOf(home);
       set('left', place.offsetLeft);
       set('top', place.offsetTop);
       set('width', box.width);
@@ -317,6 +303,7 @@ export const useOverlay = ({
       for (const layer of [backdrop, ...covers]) {
         fillIn(layer);
         layer.style.removeProperty('clip-path');
+        delete layer.dataset.overlaid;
       }
     };
   }, [body, isOpen, isShown, standIn]);

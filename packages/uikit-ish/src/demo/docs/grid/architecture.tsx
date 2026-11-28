@@ -730,8 +730,19 @@ export const GridMotionArchitecture: FunctionComponent = () => (
         ancestors’ stacking contexts keep it below the backdrop.
       </li>
       <li>
-        A floating column that covers the body, such as a sidebar, is cut out
-        too. The body opens beside such a column instead of under it.
+        The body opens in the middle of the whole screen, over a floating column
+        such as a sidebar. That column is cut out too, where the body overlaps
+        it.
+      </li>
+      <li>
+        A column the body will overlap is marked <code>data-overlaid</code> as
+        soon as the item opens, and stays marked until it’s no longer cut out on
+        the way back. Glass in it drops its shadow while it’s marked, because
+        the cut would clip that shadow (see{' '}
+        <a href={publicUrl('sidebar/architecture#its-glass-and-colors')}>
+          Sidebar
+        </a>
+        ).
       </li>
       <li>
         An opaque underlay under the body, in the grid, keeps bright things

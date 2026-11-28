@@ -145,6 +145,18 @@ export const SidebarArchitecture: FunctionComponent = () => (
         scheme is set on the panel and passed to its content. So the rows, the
         toolbar and the search field follow the panel, not the page.
       </li>
+      <li>
+        When an opened{' '}
+        <PartLink
+          component="grid"
+          part="Grid.Item"
+        />{' '}
+        overlaps the sidebar, its column is cut out and marked{' '}
+        <code>data-overlaid</code>. The cut would clip the panel’s shadow at the
+        column’s edge, so the panel drops its shadow while marked: quickly, in
+        100ms, before the item gets there, and back over 300ms as the backdrop
+        fades.
+      </li>
     </ul>
 
     <Heading

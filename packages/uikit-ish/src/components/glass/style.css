@@ -494,6 +494,28 @@
       --uikit-glass-shadow: var(--glass-ui-panel-dim-shadow);
     }
   }
+
+  /*
+   * In a layer overlaid (`data-overlaid`: e.g. a floating column a grid's
+   * opened item overlaps, cut out where it is, see Grid): its shadows
+   * outside, clipped at the layer's edge, none (transparent, see Sidebar's
+   * transition), from before it's cut out until after.
+   */
+  .uikit-glass-medium.uikit-glass-panel:where([data-overlaid] *) {
+    --uikit-glass-shadow: var(--glass-ui-bright-shadow-inset);
+
+    @media (prefers-color-scheme: dark) {
+      --uikit-glass-shadow: var(--glass-ui-panel-dim-shadow-inset);
+    }
+
+    &:where([data-color-scheme='light'], [data-color-scheme='light'] *) {
+      --uikit-glass-shadow: var(--glass-ui-bright-shadow-inset);
+    }
+
+    &:where([data-color-scheme='dark'], [data-color-scheme='dark'] *) {
+      --uikit-glass-shadow: var(--glass-ui-panel-dim-shadow-inset);
+    }
+  }
 }
 
 @layer uikit-ish {

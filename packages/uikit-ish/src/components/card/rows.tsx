@@ -325,7 +325,8 @@ export const Rows = ({
       {/* (Its last row's action, also a corner button over it, not drawn
           (its row draws its symbol there): a corner button's large hit
           area; for pointers only, the row's button for keys and assistive
-          technology.) */}
+          technology; never focused, pressed (hidden from them, focus
+          there would be too).) */}
       {action?.onPress ? (
         <CornerButton
           aria-hidden
@@ -333,6 +334,7 @@ export const Rows = ({
           icon={actionIcons[action.kind] ?? gridIcons.open}
           tabIndex={-1}
           onClick={action.onPress}
+          onMouseDown={(event) => event.preventDefault()}
         />
       ) : null}
     </>
