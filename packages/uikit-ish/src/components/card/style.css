@@ -380,6 +380,28 @@
     }
   }
 
+  /* Open at its content's height (its item's open size's rows `+`, see
+     Grid's `GridOpenSize`): its frame a container of its width only (one
+     of its size has no height of its own to give its tile), its height
+     queries never applying: large, by its width alone, see above. */
+  .uikit-grid-item-body[data-grid-open-size$='x+']
+    > .uikit-card-root
+    > .uikit-card-frame {
+    container-type: inline-size;
+    content-visibility: visible;
+  }
+
+  @container uikit-card (width >= 180px) {
+    :where(.uikit-grid-item-body[data-grid-open-size$='x+']) .uikit-card-value {
+      color: var(--uikit-glass-content);
+      font-size: var(--font-ui-large-title-size);
+      font-variation-settings: 'wght'
+        calc(var(--font-ui-large-title-weight-emphasized, 700) + var(--uikit-font-weight-boost, 0));
+      font-weight: round(down, calc(700 + var(--uikit-font-weight-boost, 0)), 100);
+      line-height: 1.1;
+    }
+  }
+
   /* (With a list in it (see below): its symbol's slot as wide as its rows'
      symbols', its value small, whatever its size.) */
   .uikit-card-layout:has(> .uikit-list-root) {

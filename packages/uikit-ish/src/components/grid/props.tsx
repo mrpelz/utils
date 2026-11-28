@@ -14,6 +14,16 @@ import type { GridReorderHandle } from './handle.js';
 export type GridSize = `${number}x${number}` | `*x${number}`;
 
 /**
+ * A size open above the page (`Grid.Item`'s `openSize`): columns by rows,
+ * each a number (in the grid's units), `*` (columns: as wide as the grid;
+ * rows: its `maxTileRows`), or `+` (its content's own size, not in the
+ * grid's units: its width the widest its content lays out, its height
+ * its content's at that width; following it as it changes; never smaller
+ * than the item's smallest supported size). Each fitted to the screen.
+ */
+export type GridOpenSize = `${number | '*' | '+'}x${number | '*' | '+'}`;
+
+/**
  * Where a tile sits in its area (see `GridItemProps.area`): in its middle
  * (truly, off the unit lines if need be), or a corner of it on the area's.
  */
@@ -289,11 +299,11 @@ export type GridItemProps = ComponentProps<'div'> &
     /** Its name while it's open (a dialog's), e.g. its card's title. */
     openLabel?: string;
     /**
-     * Its size open (see `open`): in the grid's units, fitted to the
-     * screen.
+     * Its size open (see `open`): in the grid's units, or its content's
+     * (see `GridOpenSize`), fitted to the screen.
      * @default '4x3'
      */
-    openSize?: GridSize;
+    openSize?: GridOpenSize;
     /** Its size (controlled): as the user chose it, stored by the app. */
     size?: GridSize;
     /**
@@ -515,7 +525,7 @@ export type GridItemState = {
    * Its size open above the page (its `openSize`; smaller there if the
    * screen is).
    */
-  openSize: GridSize;
+  openSize: GridOpenSize;
   /**
    * Asks for another size (its `onSizeChange`, or its own), with what it
    * takes in (none by default).

@@ -15,6 +15,7 @@ import {
   cardSizes,
   ControlCards,
   type GlassContextValue,
+  type GridOpenSize,
   type GridSize,
   type SymbolIcon,
   useGridItem,
@@ -60,7 +61,7 @@ export type Tile = {
   kind: keyof typeof cardSizes;
   name: string;
   /** Its size opened above the page (see `CameraCard`). */
-  openSize?: GridSize;
+  openSize?: GridOpenSize;
   size: GridSize;
   /** Its own sizes, instead of its kind's (see `cardSizes`). */
   sizes?: readonly GridSize[];

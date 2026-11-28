@@ -53,11 +53,15 @@ export const useSegmentedLayout = (
 ): readonly [SegmentedLayout, boolean] => {
   const item = useGridItem();
   if (!item) return [orientation === 'vertical' ? 'upright' : 'row', false];
+  // (Open at its content's size (`+`): as wide as it lays out, wide; as
+  // tall, not tall (its height its content's, laid out first). As tall as
+  // the grid's tiles (`*`): tall.)
   const [columns = '1', rows = '1'] = (
     item.open ? item.openSize : item.size
   ).split('x');
-  const isWide = columns === '*' || Number(columns) >= 2;
-  return [layoutOf(orientation, isWide, Number(rows) >= 2), !isWide];
+  const isWide = columns === '*' || columns === '+' || Number(columns) >= 2;
+  const isTall = rows === '*' || Number(rows) >= 2;
+  return [layoutOf(orientation, isWide, isTall), !isWide];
 };
 
 /** A segmented card's thumb, placed on an option's box (see below). */

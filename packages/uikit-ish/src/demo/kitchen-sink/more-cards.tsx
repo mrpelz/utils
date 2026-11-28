@@ -1050,7 +1050,7 @@ export const moreTiles: readonly Tile[] = [
     card: RoomCard,
     kind: 'summaryDisplay',
     name: 'Living Room',
-    openSize: '4x3',
+    openSize: '4x+',
     size: '2x2',
   },
   {

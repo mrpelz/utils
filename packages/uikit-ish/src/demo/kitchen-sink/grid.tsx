@@ -5,6 +5,7 @@ import {
   Grid,
   type GridBreakRows,
   gridIcons,
+  type GridOpenSize,
   type GridPlacement,
   type GridReorderChange,
   type GridSize,
@@ -284,19 +285,87 @@ const areaTiles: readonly Expanding[] = [
 ];
 
 /** A tile that opens above the page: its size and its open size. */
-const openingTiles: readonly { open: GridSize; size: GridSize }[] = [
+const openingTiles: readonly { open: GridOpenSize; size: GridSize }[] = [
   { open: '2x2', size: '1x1' },
   { open: '4x3', size: '2x1' },
   { open: '3x4', size: '1x2' },
   { open: '6x4', size: '2x2' },
   { open: '4x2', size: '*x1' },
+  { open: '2x*', size: '1x1' },
+  { open: '*x*', size: '2x1' },
 ];
+
+/**
+ * A tile that opens at its content's size (`+`, see `GridOpenSize`): its
+ * size and its open size.
+ */
+const contentTiles: readonly { open: GridOpenSize; size: GridSize }[] = [
+  { open: '3x+', size: '1x1' },
+  { open: '+x2', size: '1x1' },
+  { open: '+x+', size: '2x1' },
+];
+
+/**
+ * A tile with content of its own size (as `Tile`, not contained): lines
+ * added and removed, made wider and narrower while it's open, its open
+ * size following them.
+ */
+const ContentTile: FunctionComponent<{ label: string }> = ({ label }) => {
+  const item = useGridItem();
+  const [lines, setLines] = useState(2);
+  const [width, setWidth] = useState(0);
+  const text = ['Line', ...Array.from({ length: width }, () => 'and more')];
+  return (
+    <div className="kitchen-sink-grid-tile kitchen-sink-grid-content-tile">
+      <span>{label}</span>
+      <span className="kitchen-sink-grid-tile-size">
+        {item?.open ? `open, ${item.openSize} (${item.size})` : item?.size}
+      </span>
+      {Array.from({ length: lines }, (_, index) => (
+        <span
+          key={index}
+          className="kitchen-sink-grid-tile-size"
+        >
+          {text.join(' ')} {index + 1}
+        </span>
+      ))}
+      {item?.open ? (
+        <span className="kitchen-sink-grid-content-tile-actions">
+          <Button.Root
+            disabled={false}
+            onClick={() => setLines((count) => count + 1)}
+          >
+            <Button.Label>Add Line</Button.Label>
+          </Button.Root>
+          <Button.Root
+            disabled={lines === 0}
+            onClick={() => setLines((count) => Math.max(0, count - 1))}
+          >
+            <Button.Label>Remove Line</Button.Label>
+          </Button.Root>
+          <Button.Root
+            disabled={false}
+            onClick={() => setWidth((count) => count + 1)}
+          >
+            <Button.Label>Wider</Button.Label>
+          </Button.Root>
+          <Button.Root
+            disabled={width === 0}
+            onClick={() => setWidth((count) => Math.max(0, count - 1))}
+          >
+            <Button.Label>Narrower</Button.Label>
+          </Button.Root>
+        </span>
+      ) : null}
+    </div>
+  );
+};
 
 /** A tile's name by its sizes (unique on the page: its buttons' names too). */
 const nameOf = (
   verb: string,
   from: GridSize,
-  to: GridSize,
+  to: GridOpenSize,
   area?: Expanding['area'],
 ) => `${verb} ${from} to ${to}${area ? ` in ${area[0]}, ${area[1]}` : ''}`;
 
@@ -375,6 +444,27 @@ const ChangingTiles: FunctionComponent = () => {
                 label={name}
                 place={place}
               />
+              <OpenButtons label={name} />
+            </Grid.Item>
+          );
+        })}
+      </Grid.Section>
+      <Grid.Section>
+        <SectionHeader
+          hint="These tiles open at their content's size along a +: as wide as it lays out, as tall as it is at that width, at least their smallest size and at most the screen. Add or remove lines, or make them wider or narrower, while one is open; it follows them."
+          title="Opening at Their Content's Size"
+        />
+        {contentTiles.map(({ open, size }) => {
+          const name = nameOf('Opens', size, open);
+          return (
+            <Grid.Item
+              key={name}
+              defaultSize={size}
+              openLabel={name}
+              openSize={open}
+              supportedSizes={[size]}
+            >
+              <ContentTile label={name} />
               <OpenButtons label={name} />
             </Grid.Item>
           );

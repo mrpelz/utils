@@ -72,6 +72,7 @@ import type {
   GridItemProps,
   GridItemState,
   GridOpenChangeReason,
+  GridOpenSize,
   GridPlacement,
   GridRemoveButtonProps,
   GridReorderPart,
@@ -127,6 +128,7 @@ export type {
   GridRemoveButtonProps,
   GridResizeHandleProps,
   GridRootProps,
+  GridOpenSize,
   GridSectionProps,
   GridSize,
   GridSizeChangeDetails,
@@ -1649,6 +1651,35 @@ const useExpansion = ({
 };
 
 /**
+ * An open size in pixels (see `GridOpenSize`): a span's (`*`: the grid's
+ * columns, its `maxTileRows`), or its content's (`+`), at least its
+ * smallest supported size (`floor`).
+ */
+const openPixelsOf = (
+  size: GridOpenSize,
+  floor: GridSize | undefined,
+  {
+    columns,
+    gap,
+    maxTileRows,
+    unit,
+  }: Pick<GridContextValue, 'columns' | 'gap' | 'maxTileRows' | 'unit'>,
+) => {
+  const pixelsOf = (span: number) => span * unit + (span - 1) * gap;
+  const valueOf = (value: string, full: number) =>
+    value === '+'
+      ? ('content' as const)
+      : pixelsOf(value === '*' ? full : Number(value));
+  const [width = '1', height = '1'] = size.split('x');
+  const [floorColumns, floorRows] = spanOf(floor ?? '1x1', columns);
+  return {
+    floor: [pixelsOf(floorColumns), pixelsOf(floorRows)] as const,
+    height: valueOf(height, maxTileRows),
+    width: valueOf(width, columns),
+  };
+};
+
+/**
  * An item: a cell spanning its area (its effective size without one, see
  * the top), its tile (its body) in it, what's in it filling that (e.g. a
  * `Card`, a `ResizeHandle`), its sizes read with `useGridItem`; room
@@ -1712,7 +1743,7 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
     const body = useRef<HTMLDivElement>(null);
     // (Open above the page (see overlay.tsx): never while editing, which
     // closes it.)
-    const { columns, gap, unit } = useContext(GridContext);
+    const { columns, gap, maxTileRows, unit } = useContext(GridContext);
     const [ownOpen, setOwnOpen] = useState(defaultOpen);
     // (Editing started: closed (its own state too, as it renders).)
     const [wasEditing, setWasEditing] = useState(cellState.editing);
@@ -1739,23 +1770,30 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
       [],
     );
     const standIn = useRef<HTMLSpanElement>(null);
-    const [openColumns, openRows] = spanOf(openSize, columns);
+    // (Its reshape's, below: for its overlay, set after.)
+    const retarget = useRef<(() => void) | undefined>(undefined);
     const { backdrop, phase, settle, underlay } = useOverlay({
       body,
       isOpen,
       onClose: (reason) => changeOpen(false, reason),
-      size: [
-        openColumns * unit + (openColumns - 1) * gap,
-        openRows * unit + (openRows - 1) * gap,
-      ],
+      retarget,
+      size: openPixelsOf(openSize, cellState.supportedSizes[0], {
+        columns,
+        gap,
+        maxTileRows,
+        unit,
+      }),
       standIn,
     });
     // (Its tile getting to a new box, what's in it told: after its overlay
     // placed it, see reshape.ts.)
-    const [onShapeChange, layoutRegistry] = useReshape({
+    const [onShapeChange, layoutRegistry, retargetReshape] = useReshape({
       body,
       cell: ref,
       onSettled: settle,
+    });
+    useLayoutEffect(() => {
+      retarget.current = retargetReshape;
     });
     const state = useMemo(
       (): CellState => ({
@@ -1834,6 +1872,7 @@ const Item = forwardRef<HTMLDivElement, GridItemProps>(
                     className="uikit-grid-item-body"
                     data-grid-movable-body={flagOf(isPlaceable)}
                     data-grid-open={phase}
+                    data-grid-open-size={phase ? openSize : undefined}
                     data-grid-part="body"
                     data-size={cellState.size}
                     role={isOpen ? 'dialog' : undefined}

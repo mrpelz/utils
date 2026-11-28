@@ -272,10 +272,10 @@ export const Row = ({
 /**
  * A card's rows (e.g. a room's, a device's details): a glass list (inset
  * grouped, see Card) of its `Row`s in a well at its bottom, as many as fit
- * whole. Rows left out, its last row counts them (`getMoreLabel`),
- * expanding its tile (its grid item's `expandedSize`) or opening it (an
- * item with an `openSize`); expanded, it makes it small again
- * (`lessLabel`). Its last row's action is also a corner button over it, for
+ * whole (open at its content's height, all). Rows left out, its last row
+ * counts them (`getMoreLabel`), expanding its tile (its grid item's
+ * `expandedSize`) or opening it (an item with an `openSize`); expanded,
+ * it makes it small again (`lessLabel`). Its last row's action is also a corner button over it, for
  * its large hit area. None, nothing.
  */
 export const Rows = ({
@@ -288,7 +288,12 @@ export const Rows = ({
   const rows = Children.toArray(children).filter((child) =>
     isValidElement(child),
   ) as ReactElement<CardRowProps>[];
-  const [list, fit, listElement] = useRowsThatFit();
+  const [list, fitting, listElement] = useRowsThatFit();
+  // (Open at its content's height (`+`, see Grid's `GridOpenSize`): its
+  // height its rows', all of them, none left out to fit.)
+  const item = useGridItem();
+  const isContentTall = item?.open === true && item.openSize.endsWith('x+');
+  const fit = isContentTall ? rows.length : fitting;
   const action = useRowsAction(rows.length > fit);
   // (Its last row the action's, if any: one row less.)
   const shown = action ? rows.slice(0, fit - 1) : rows.slice(0, fit);

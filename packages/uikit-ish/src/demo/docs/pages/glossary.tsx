@@ -1032,10 +1032,11 @@ export const GlossaryPage: FunctionComponent = () => (
       </Term>
       <Term term="Opening above the page">
         A tile lifted out of its grid to the middle of the screen, at its item’s{' '}
-        <code>openSize</code>, over the page dimmed (an item’s <code>open</code>
-        ). Its place stays empty, nothing reflows, and it’s a modal dialog until
-        it’s closed by its own button, a press beside it, Escape, or{' '}
-        <See term="Edit mode" /> starting.
+        <code>openSize</code> (in the grid’s units, or its content’s own size
+        along a <code>+</code>), over the page dimmed (an item’s{' '}
+        <code>open</code>). Its place stays empty, nothing reflows, and it’s a
+        modal dialog until it’s closed by its own button, a press beside it,
+        Escape, or <See term="Edit mode" /> starting.
       </Term>
       <Term term="Switchable card">
         A <Docs to="card">Card</Docs> for something that’s on or off, such as a

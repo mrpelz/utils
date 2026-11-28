@@ -672,6 +672,16 @@ export const GridMotionArchitecture: FunctionComponent = () => (
         such as a card’s frame, can lay out at the new size from the start.
       </li>
       <li>
+        The new box is read with the animations inside the tile set aside, such
+        as a card’s last row growing, so it’s the box they’ll leave it at. A
+        reshape that’s replaced leaves no size of its own behind.
+      </li>
+      <li>
+        Until it starts, a reshape can be pointed at the box the tile has now (
+        <code>retarget</code>), still from where it was. An item opening at its
+        content’s size uses that (see below).
+      </li>
+      <li>
         This doesn’t happen while editing, where tiles are outlined and then
         resized at once. It doesn’t happen with reduced motion either.
       </li>
@@ -723,6 +733,33 @@ export const GridMotionArchitecture: FunctionComponent = () => (
         <a href={publicUrl('contextual-menu')}>Contextual Menu</a>’s backdrop.
         It’s the live body, never remounted, so its content keeps its state.
         Getting there and back is a reshape.
+      </li>
+      <li>
+        Along a <code>+</code> in its open size, the body’s CSS sizes it to its
+        content: <code>max-content</code> wide or <code>auto</code> tall,
+        between the item’s smallest supported size and the screen less its
+        margins. The overlay reads that size to center it.
+      </li>
+      <li>
+        It reads the size again a frame later, before the reshape starts. What’s
+        in the body may render again after the open commit. Preact, for example,
+        renders a context’s consumers later, such as a card’s rows. If the size
+        changed, the body is centered anew and the reshape retargeted.
+      </li>
+      <li>
+        While it’s open, a resize observer on the body follows its content as it
+        changes, outside a reshape. It centers the body again and moves the
+        cutouts with it.
+      </li>
+      <li>
+        A{' '}
+        <PartLink
+          component="card"
+          part="Card.Root"
+        />{' '}
+        open at a <code>+</code> height makes its frame a container of its width
+        only. A container of its size has no height of its own to give, so the
+        card would open at its smallest size.
       </li>
       <li>
         The backdrop is cut out where the body is, by a mask and a clip path, on

@@ -398,6 +398,30 @@
     font-weight: 400;
   }
 
+  /* A tile of its content's own size (see `ContentTile`): as a tile, not
+     contained (its lines' widest its width open at `+`), its text at its
+     largest (no container to scale it by). */
+  .kitchen-sink-grid-tile.kitchen-sink-grid-content-tile {
+    container-type: normal;
+
+    > * {
+      font-size: 17px;
+    }
+
+    > .kitchen-sink-grid-tile-size {
+      font-size: 14px;
+    }
+  }
+
+  .kitchen-sink-grid-content-tile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    font-weight: 400;
+    gap: 8px;
+    padding-block-start: 8px;
+  }
+
   .kitchen-sink-grid-header-actions {
     display: flex;
     flex: none;

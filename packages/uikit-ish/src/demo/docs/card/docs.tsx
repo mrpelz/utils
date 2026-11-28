@@ -674,7 +674,9 @@ export const cardRowsRows: readonly PropRow[] = [
         part="Grid.Item"
       />
       ’s expandedSize) or opening it (an item with an openSize); expanded, it
-      makes it small again.
+      makes it small again. Open at its content’s height (an openSize with rows{' '}
+      <code>+</code>), it shows all of them, and the card is as tall as they
+      are.
     </>,
   ],
   [

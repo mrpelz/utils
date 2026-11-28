@@ -112,6 +112,31 @@ const reshapeId = 'uikit-grid-reshape';
 
 const px = (value: number) => `${String(value)}px`;
 
+/**
+ * Read with the animations in an element (scripts', not its CSS's: e.g. a
+ * card's last row's height, moving with its tile) set aside meanwhile, not
+ * given up: its layout as they'll leave it.
+ */
+export const withoutAnimations = <Value>(
+  element: HTMLElement,
+  read: () => Value,
+): Value => {
+  const held = element
+    .getAnimations({ subtree: true })
+    .filter(
+      (animation) =>
+        !(animation instanceof CSSAnimation) &&
+        !(animation instanceof CSSTransition),
+    )
+    .map((animation) => [animation, animation.effect] as const);
+  for (const [animation] of held) animation.effect = null;
+  try {
+    return read();
+  } finally {
+    for (const [animation, effect] of held) animation.effect = effect;
+  }
+};
+
 const sizeVariables = ['--uikit-grid-tile-width', '--uikit-grid-tile-height'];
 
 /**
@@ -150,7 +175,9 @@ const reshape = (
   for (const each of [body, cell]) {
     for (const animation of each.getAnimations()) animation.cancel();
   }
-  const to = body.getBoundingClientRect();
+  // (Its box now, not the one a reshape it replaces was getting to.)
+  for (const name of sizeVariables) body.style.removeProperty(name);
+  const to = withoutAnimations(body, () => body.getBoundingClientRect());
   body.style.setProperty(sizeVariables[0] ?? '', px(to.width));
   body.style.setProperty(sizeVariables[1] ?? '', px(to.height));
   body.dataset.gridReshaping = '';
@@ -213,6 +240,7 @@ export const useReshape = ({
 }): readonly [
   onChange: (previous: Shape, next: Shape) => void,
   registry: Registry,
+  retarget: () => void,
 ] => {
   const [registry] = useState<Registry>(() => new Set());
   // (A change on its way to the DOM: drawn getting there, or not.)
@@ -263,6 +291,40 @@ export const useReshape = ({
 
   // (Its change in the DOM: drawn from where it was, what's in it told.)
   const generation = useRef(0);
+  // (The change it's getting to, while it is: for `retarget`.)
+  const active = useRef<
+    { change: GridItemLayoutChange; from: DOMRectReadOnly } | undefined
+  >(undefined);
+  const run = (
+    element: HTMLElement,
+    item: HTMLElement,
+    held: { change: GridItemLayoutChange; from: DOMRectReadOnly },
+  ) => {
+    generation.current += 1;
+    const current = generation.current;
+    active.current = held;
+    const [to, sizing] = reshape(element, item, held.from);
+    sizing.addEventListener('finish', () => {
+      if (current !== generation.current) return;
+      active.current = undefined;
+      settle(element, item);
+      latest.current();
+    });
+    sizing.addEventListener('cancel', () => {
+      if (current !== generation.current) return;
+      active.current = undefined;
+      settle(element, item);
+    });
+    const change = {
+      ...held.change,
+      elapsed: () => {
+        const time = sizing.currentTime;
+        return typeof time === 'number' ? time : reflowDuration;
+      },
+      to,
+    };
+    return change;
+  };
   useLayoutEffect(() => {
     const held = pending.current;
     pending.current = undefined;
@@ -273,27 +335,21 @@ export const useReshape = ({
       latest.current();
       return;
     }
-    generation.current += 1;
-    const current = generation.current;
-    const [to, sizing] = reshape(element, item, held.from);
-    sizing.addEventListener('finish', () => {
-      if (current !== generation.current) return;
-      settle(element, item);
-      latest.current();
-    });
-    sizing.addEventListener('cancel', () => {
-      if (current === generation.current) settle(element, item);
-    });
-    const change = {
-      ...held.change,
-      elapsed: () => {
-        const time = sizing.currentTime;
-        return typeof time === 'number' ? time : reflowDuration;
-      },
-      to,
-    };
+    const change = run(element, item, held);
     for (const handlers of registry) handlers.current.onAfterChange?.(change);
   });
 
-  return [onChange, registry] as const;
+  // (Its box laid out anew before it's drawn getting there (e.g. what's
+  // in it rendered again later, as Preact renders a context's consumers,
+  // its size its content's, see overlay.tsx): drawn from where it was to
+  // the box it has now instead.)
+  const retarget = () => {
+    const held = active.current;
+    const element = body.current;
+    const item = cell.current;
+    if (!held || !element || !item) return;
+    run(element, item, held);
+  };
+
+  return [onChange, registry, retarget] as const;
 };

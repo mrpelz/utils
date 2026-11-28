@@ -260,9 +260,9 @@ export const gridItemRows: readonly PropRow[] = [
   ],
   [
     'openSize',
-    'GridSize',
+    'GridOpenSize',
     code(union('4x3')),
-    'Its size while it’s open, in the grid’s units, fitted to the screen with a margin. Given, it opens (see useGridItem’s canOpen), for example from a card’s last row of rows.',
+    'Its size while it’s open, columns by rows, fitted to the screen with a margin. Each is a number of the grid’s units, * (the grid’s columns, or its maxTileRows) or + (its content’s own size: as wide as it lays out, as tall as it is at that width, following it while it’s open, and never smaller than the item’s smallest supported size). Given, it opens (see useGridItem’s canOpen), for example from a card’s last row of rows.',
   ],
   [
     'openLabel',
@@ -765,7 +765,7 @@ export const gridUseGridItemRows: readonly PropRow[] = [
   ],
   [
     'openSize',
-    'GridSize',
+    'GridOpenSize',
     undefined,
     'Its size open above the page (its item’s openSize). On a screen too small for it, it’s shown smaller.',
   ],

@@ -14,6 +14,7 @@ import { createPortal } from 'react-dom';
 import { cutOut, fillIn, usePortalContainer } from '../utils/main.js';
 import type { PortalContainer } from '../utils/props.js';
 import type { GridOpenChangeReason } from './props.js';
+import { withoutAnimations } from './reshape.js';
 
 // An item opened above the page (see `Grid.Item`'s `open`): its tile's
 // body lifted out of the grid (its stand-in keeping its place, nothing
@@ -40,6 +41,30 @@ import type { GridOpenChangeReason } from './props.js';
 //   reason). A dialog, labeled (`openLabel`).
 // - Its backdrop fading in and out as the menu's (its starting and ending
 //   styles, as Base UI's).
+
+/** The size a reshape's getting to, on its tile (see reshape.ts). */
+const tileVariables = ['--uikit-grid-tile-width', '--uikit-grid-tile-height'];
+
+/**
+ * A body's size, its reshape set aside meanwhile, not given up: the
+ * animations in it, and the size it's getting to, what's in it laid out
+ * at (see reshape.ts): its content's own, as it'll be.
+ */
+const measureAside = (element: HTMLElement): readonly [number, number] => {
+  const { style } = element;
+  const tile = tileVariables.map(
+    (name) => [name, style.getPropertyValue(name)] as const,
+  );
+  for (const [name] of tile) style.removeProperty(name);
+  const size = withoutAnimations(
+    element,
+    () => [element.offsetWidth, element.offsetHeight] as const,
+  );
+  for (const [name, value] of tile) {
+    if (value !== '') style.setProperty(name, value);
+  }
+  return size;
+};
 
 /** Its margin from the screen's edges, open. */
 const margin = 16;
@@ -178,14 +203,27 @@ export const useOverlay = ({
   body,
   isOpen,
   onClose,
+  retarget,
   size,
   standIn,
 }: {
   body: RefObject<HTMLDivElement | null>;
   isOpen: boolean;
   onClose: (reason: GridOpenChangeReason) => void;
-  /** Its open size, in pixels. */
-  size: readonly [number, number];
+  /**
+   * Its reshape drawn to the box it has now (see reshape.ts): its content's
+   * size measured again (see `sizeOf`).
+   */
+  retarget: RefObject<(() => void) | undefined>;
+  /**
+   * Its open size, in pixels, or its content's (`content`, see
+   * `GridOpenSize`); `floor`, the least a content's is (px).
+   */
+  size: {
+    floor: readonly [number, number];
+    height: number | 'content';
+    width: number | 'content';
+  };
   /** Its stand-in (see `Item`): rendered while it's shown. */
   standIn: RefObject<HTMLSpanElement | null>;
 }): {
@@ -224,8 +262,15 @@ export const useOverlay = ({
       return undefined;
     }
     const { style } = element;
-    const set = (name: string, value: number) =>
-      style.setProperty(`--uikit-grid-open-${name}`, `${String(value)}px`);
+    const set = (name: string, value: number | string) =>
+      style.setProperty(
+        `--uikit-grid-open-${name}`,
+        typeof value === 'number' ? `${String(value)}px` : value,
+      );
+    const unset = (name: string) =>
+      style.removeProperty(`--uikit-grid-open-${name}`);
+    // (Its content's size, last measured (see `locate`).)
+    let measured: readonly [number, number] | undefined;
     const covers = coversOf(element);
     // (Open: where it's going, see `locate`.)
     let target: Box | undefined;
@@ -253,21 +298,88 @@ export const useOverlay = ({
         layer.toggleAttribute('data-overlaid', isOverlaid);
       }
     };
-    const locate = () => {
+    // (Its content's size, open (`+`, see `GridOpenSize`): left to its
+    // CSS (`max-content`, `auto`; at least its floor, at most the screen,
+    // less its margins), read off it, so it's centered: as it opens (its
+    // animations from before given up, as its reshape does next), and as
+    // it changes, not while it's reshaping (drawn at its animated size,
+    // as last measured).)
+    const sizeOf = (screen: Box, mode: 'again' | 'opening' | 'placed') => {
+      const { floor, height, width } = latest.current.size;
+      const most = [screen.width - 2 * margin, screen.height - 2 * margin];
+      const dimensions = [
+        ['width', width, 'max-content'],
+        ['height', height, 'auto'],
+      ] as const;
+      for (const [index, [name, value, content]] of dimensions.entries()) {
+        const limit = most[index] ?? 0;
+        if (value === 'content') {
+          set(name, content);
+          set(`min-${name}`, Math.min(floor[index] ?? 0, limit));
+          set(`max-${name}`, limit);
+        } else {
+          set(name, Math.min(value, limit));
+          unset(`min-${name}`);
+          unset(`max-${name}`);
+        }
+      }
+      if (width !== 'content' && height !== 'content') {
+        return [
+          Math.min(width, most[0] ?? 0),
+          Math.min(height, most[1] ?? 0),
+        ] as const;
+      }
+      const isReshaping = Object.hasOwn(element.dataset, 'gridReshaping');
+      if (mode === 'opening') {
+        for (const animation of element.getAnimations()) animation.cancel();
+      } else if (mode === 'placed' && isReshaping && measured) {
+        return measured;
+      }
+      measured = measureAside(element);
+      return measured;
+    };
+    const locate = (mode: 'again' | 'opening' | 'placed' = 'placed') => {
       const home = place.getBoundingClientRect();
-      target = isOpen
-        ? targetOf(boxOf(backdrop.getBoundingClientRect()), latest.current.size)
-        : undefined;
+      if (isOpen) {
+        const screen = boxOf(backdrop.getBoundingClientRect());
+        target = targetOf(screen, sizeOf(screen, mode));
+      } else {
+        target = undefined;
+        set('width', home.width);
+        set('height', home.height);
+        for (const name of ['width', 'height']) {
+          unset(`min-${name}`);
+          unset(`max-${name}`);
+        }
+      }
       const box = target ?? boxOf(home);
       set('left', place.offsetLeft);
       set('top', place.offsetTop);
-      set('width', box.width);
-      set('height', box.height);
       set('x', box.left - home.left);
       set('y', box.top - home.top);
     };
-    locate();
+    locate('opening');
     cut();
+    // (Its content's size, open: measured again a frame on, before its
+    // reshape's drawn (see reshape.ts): what's in it may render again
+    // after it opened (Preact renders a context's consumers later, e.g. a
+    // card's rows, all of them open); drawn there instead, if it's
+    // another.)
+    const isContentSized =
+      latest.current.size.width === 'content' ||
+      latest.current.size.height === 'content';
+    let again = 0;
+    if (isOpen && isContentSized) {
+      again = requestAnimationFrame(() => {
+        const before = measured;
+        locate('again');
+        if (before?.[0] === measured?.[0] && before?.[1] === measured?.[1]) {
+          return;
+        }
+        retarget.current?.();
+        cut();
+      });
+    }
     // (Moving (see reshape.ts): cut where it's drawn, each frame, until
     // it's there.)
     let frame = requestAnimationFrame(function follow() {
@@ -293,11 +405,14 @@ export const useOverlay = ({
     };
     const observer = new ResizeObserver(draw);
     observer.observe(backdrop);
+    // (Its content's size, open: as it changes, see `sizeOf`.)
+    if (isOpen && isContentSized) observer.observe(element);
     // (Its place scrolled (it's in the page, lifted): placed anew.)
 
     addEventListener('scroll', draw, { capture: true, passive: true });
     return () => {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(again);
       observer.disconnect();
       removeEventListener('scroll', draw, { capture: true });
       for (const layer of [backdrop, ...covers]) {
@@ -306,13 +421,24 @@ export const useOverlay = ({
         delete layer.dataset.overlaid;
       }
     };
-  }, [body, isOpen, isShown, standIn]);
+  }, [body, isOpen, isShown, retarget, standIn]);
 
   // (Back in the grid: its values gone.)
   useLayoutEffect(() => {
     const element = body.current;
     if (isShown || !element) return;
-    for (const name of ['left', 'top', 'width', 'height', 'x', 'y']) {
+    for (const name of [
+      'left',
+      'top',
+      'width',
+      'height',
+      'min-width',
+      'min-height',
+      'max-width',
+      'max-height',
+      'x',
+      'y',
+    ]) {
       element.style.removeProperty(`--uikit-grid-open-${name}`);
     }
   }, [body, isShown]);

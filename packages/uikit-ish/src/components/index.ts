@@ -331,6 +331,7 @@ export {
   type GridRemoveButtonProps,
   type GridResizeHandleProps,
   type GridRootProps,
+  type GridOpenSize,
   type GridSectionProps,
   type GridSize,
   type GridSizeChangeDetails,

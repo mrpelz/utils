@@ -1180,14 +1180,19 @@
   /* Open above the page (see overlay.tsx): its tile's body out of the grid
      (from its stand-in's place, `--uikit-grid-open-left`/`-top`), in the
      screen's middle (`--uikit-grid-open-x`/`-y`) at its open size
-     (`--uikit-grid-open-width`/`-height`), above the backdrop; closing,
+     (`--uikit-grid-open-width`/`-height`; its content's, between
+     `--uikit-grid-open-min-…` and `-max-…`), above the backdrop; closing,
      still lifted, back at its place. Getting there and back as any tile
      gets to a new box (see reshape.ts, below). */
   .uikit-grid-root .uikit-grid-item > .uikit-grid-item-body[data-grid-open] {
     position: absolute;
     z-index: 1001;
     width: var(--uikit-grid-open-width, auto);
+    min-width: var(--uikit-grid-open-min-width, 0);
+    max-width: var(--uikit-grid-open-max-width, none);
     height: var(--uikit-grid-open-height, auto);
+    min-height: var(--uikit-grid-open-min-height, 0);
+    max-height: var(--uikit-grid-open-max-height, none);
     border-radius: var(--uikit-grid-item-radius, 24px);
     margin: 0;
     grid-area: auto;

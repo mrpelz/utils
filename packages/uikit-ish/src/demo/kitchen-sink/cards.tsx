@@ -731,14 +731,14 @@ const roomsInitial: Readonly<Record<string, readonly Tile[]>> = {
       card: () => <SummaryCard name="Kitchen" />,
       kind: 'summaryDisplay',
       name: 'Kitchen',
-      openSize: '4x3',
+      openSize: '4x+',
       size: '2x2',
     },
     {
       card: () => <SummaryCard name="Bedroom" />,
       kind: 'summaryDisplay',
       name: 'Bedroom',
-      openSize: '4x3',
+      openSize: '4x+',
       size: '2x1',
     },
     {
