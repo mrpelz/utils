@@ -93,6 +93,7 @@
     font-size: var(--font-ui-caption1-size);
     letter-spacing: 0.06px;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     line-height: calc(var(--font-ui-caption1-line-height) - 1px);
 
     /* With a count (a group's): on one line, truncated. */
@@ -173,6 +174,7 @@
       font-weight: round(down, calc(var(--font-ui-footnote-weight) + var(--uikit-font-weight-boost, 0)), 100);
       letter-spacing: var(--font-ui-footnote-tracking);
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       line-height: calc(var(--font-ui-footnote-line-height) - 3px);
     }
   }

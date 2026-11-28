@@ -23,12 +23,14 @@ import {
   Sidebar,
   Symbol,
   Toolbar,
+  useCurrentScroller,
   useFocusShiftPrevention,
   useInputZoomPrevention,
   useSettings,
   useSizeClass,
   Viewport,
 } from '../../components/index.js';
+import { smoothScrollOf } from '../../components/utils/main.js';
 import { catalog, categories, type Category } from '../docs/catalog.js';
 import {
   sfArrowBackward,
@@ -348,37 +350,22 @@ const StackPage: FunctionComponent<{
 const titleOf = (key: string | undefined) =>
   key === undefined ? undefined : (pages[key]?.title ?? title);
 
-const App: FunctionComponent = () => {
-  // iOS: its fields neither zooming the page in, nor shifting it as they're
-  // focused (an app's guards, document-wide; see Viewport).
-  useInputZoomPrevention();
-  useFocusShiftPrevention();
+const AppInner: FunctionComponent = () => {
   const isCompact = useSizeClass() === 'compact';
-  // Its settings, overriding the system's (set on its Settings page).
-  const [settings, setSettings] = useState<Partial<SettingsValues>>({});
-  // The system's (outside its provider: the guide's, overriding nothing),
-  // shown on its Settings page.
-  const system = useSettings();
-  // Back in the foreground: the time zone and the text size read again
-  // (they send no event; see Settings' `refreshSettings`).
-  useEffect(() => {
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') refreshSettings();
-    };
-    document.addEventListener('visibilitychange', onVisibilityChange);
-    return () =>
-      document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, []);
-  const settingsState = useMemo(
-    () => [settings, setSettings, system] as const,
-    [settings, system],
-  );
+
+  // current page scroller
+  const scroller = useCurrentScroller();
+  const scrollToTop = () =>
+    scroller?.scrollTo({ behavior: smoothScrollOf(scroller), top: 0 });
+
   // The open component's stack, bottom to top (compact, empty: the index).
   const [stack, setStack] = useState<readonly string[]>(
     hashIds ? initialStack : [],
   );
+
   // (Regular: its layout's root, for the swipe area at the screen's edge.)
   const [layoutRoot, setLayoutRoot] = useState<HTMLDivElement | null>(null);
+
   // (Regular: the sidebar shown, see `SidebarOpenContext`.)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const sidebarState = useMemo(
@@ -403,6 +390,9 @@ const App: FunctionComponent = () => {
   const push = (key: string) => setStack([...shown, key]);
   const pop = () => setStack(shown.slice(0, -1));
 
+  const openOrScrollToTop = (id: string) =>
+    stack.length === 1 && stack.at(0) === id ? scrollToTop() : open(id);
+
   // In a browser (not an app of its own), its columns' top inset (see
   // style.css).
   const browserInset = isStandalone()
@@ -411,6 +401,7 @@ const App: FunctionComponent = () => {
 
   // (Compact: the index the stack's root.)
   const keys = isCompact ? ['index', ...shown] : shown;
+
   const stackView = (
     <LayoutRootContext.Provider value={isCompact ? null : layoutRoot}>
       <SidebarOpenContext.Provider value={isCompact ? undefined : sidebarState}>
@@ -454,36 +445,69 @@ const App: FunctionComponent = () => {
   );
 
   return (
+    <Viewport.Content>
+      {isCompact ? (
+        stackView
+      ) : (
+        <Layout.Root ref={setLayoutRoot}>
+          <Layout.Column
+            floating
+            aria-label="Components"
+            className={browserInset}
+            defaultSize={300}
+            open={isSidebarOpen}
+          >
+            <Sections
+              selected={shown[0]}
+              onHide={() => setIsSidebarOpen(false)}
+              onSelect={openOrScrollToTop}
+            />
+          </Layout.Column>
+          <Layout.Column
+            clearFloating
+            className={browserInset}
+          >
+            {stackView}
+          </Layout.Column>
+        </Layout.Root>
+      )}
+    </Viewport.Content>
+  );
+};
+
+const App: FunctionComponent = () => {
+  // iOS: its fields neither zooming the page in, nor shifting it as they're
+  // focused (an app's guards, document-wide; see Viewport).
+  useInputZoomPrevention();
+  useFocusShiftPrevention();
+
+  // Its settings, overriding the system's (set on its Settings page).
+  const [settings, setSettings] = useState<Partial<SettingsValues>>({});
+  // The system's (outside its provider: the guide's, overriding nothing),
+  // shown on its Settings page.
+  const system = useSettings();
+
+  // Back in the foreground: the time zone and the text size read again
+  // (they send no event; see Settings' `refreshSettings`).
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') refreshSettings();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () =>
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
+
+  const settingsState = useMemo(
+    () => [settings, setSettings, system] as const,
+    [settings, system],
+  );
+
+  return (
     <SinkSettingsContext.Provider value={settingsState}>
       <Settings.Provider {...settings}>
         <Viewport.Provider>
-          <Viewport.Content>
-            {isCompact ? (
-              stackView
-            ) : (
-              <Layout.Root ref={setLayoutRoot}>
-                <Layout.Column
-                  floating
-                  aria-label="Components"
-                  className={browserInset}
-                  defaultSize={300}
-                  open={isSidebarOpen}
-                >
-                  <Sections
-                    selected={shown[0]}
-                    onHide={() => setIsSidebarOpen(false)}
-                    onSelect={open}
-                  />
-                </Layout.Column>
-                <Layout.Column
-                  clearFloating
-                  className={browserInset}
-                >
-                  {stackView}
-                </Layout.Column>
-              </Layout.Root>
-            )}
-          </Viewport.Content>
+          <AppInner />
         </Viewport.Provider>
       </Settings.Provider>
     </SinkSettingsContext.Provider>

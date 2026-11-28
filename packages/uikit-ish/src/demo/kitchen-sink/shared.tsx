@@ -19,6 +19,7 @@ import {
   Symbol,
   Toolbar,
   useBackdropTone,
+  useSettings,
   type Viewport,
 } from '../../components/index.js';
 import {
@@ -303,7 +304,11 @@ export const AdaptiveBarTitle: FunctionComponent<{ children: ReactNode }> = ({
   children,
 }) => {
   const ref = useRef<HTMLElement>(null);
-  const tone = useBackdropTone(ref);
+  const { reducedTransparency } = useSettings();
+  const tone = useBackdropTone(ref, {
+    enabled: reducedTransparency !== 'solidHeaders',
+  });
+
   return (
     <Toolbar.Title
       ref={ref}

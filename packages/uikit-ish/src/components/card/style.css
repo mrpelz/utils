@@ -347,6 +347,7 @@
     grid-area: title;
     hyphens: auto;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     line-height: var(--font-ui-subheadline-line-height);
     overflow-wrap: anywhere;
   }
@@ -800,7 +801,7 @@
     min-height: 0;
     flex-direction: column;
     justify-content: flex-end;
-    margin: 10px -8px -6px;
+    margin: 5px -8px -6px;
 
     /* (Their content, and separators, ending 8px before the well's edge,
        as they start.) */
